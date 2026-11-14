@@ -17,7 +17,7 @@ from . import native_shared_evidence as evidence
 from . import native_shared_streams as live_streams
 from . import native_shared_observations as observed
 from . import native_shared_stage as stage
-from .native_shared_callback_capture import Admission
+from .native_shared_callback_capture import Admission, prefix_owner
 from .native_shared_callback_io import durable_new, _mkdir_durable, _replace_journal
 from .native_shared_capture import (
     _Reader,
@@ -246,7 +246,8 @@ def _load_live(selection_path, *, transcript_bytes=None, control_bytes=None, str
         raise ValueError('observed stream identities differ from initialized authority')
     streams, prefixes = _live_streams(base[2], stream_files=anchors,
         transcript_bytes=transcript_bytes, control_bytes=control_bytes)
-    return _loaded(base, streams, prefixes, _catalogs=_catalogs)
+    owner = None if _admission is None else prefix_owner(_admission)
+    return _loaded(base, streams, prefixes, _catalogs=_catalogs, _prefix_owner=owner)
 
 
 def _persist_observation(run, kind, payload):
