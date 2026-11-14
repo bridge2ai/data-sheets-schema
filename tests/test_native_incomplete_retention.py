@@ -13,6 +13,8 @@ from data_sheets_schema import native_shared_results as reader
 from data_sheets_schema import native_shared_results_orchestration as capture
 from data_sheets_schema import native_shared_gates as gates
 from data_sheets_schema.native_execution_engine import GATES, UNASSESSED
+from data_sheets_schema import native_shared_authority_wire as wire
+from tests.utils.native_execution_carrier_v2 import execution_body
 from tests.test_native_execution_registration_v2 import isolated_modules  # noqa: F401
 
 # Historical and v2 closures share bare aliases. Preserve the production
@@ -28,10 +30,10 @@ def case(root):
     composition = root / 'composition.json'; composition.write_bytes(composition_raw)
     for name in ('transcript.jsonl', 'control.jsonl', 'stderr.txt'):
         (attempt / name).write_bytes(b'')
-    value = {'kind': 'd4d_native_shared_execution_registration_v2', 'schema_version': 2,
+    value = execution_body(**{
         'working_directory': str(root), 'attempt_directory': str(attempt), 'evidence_directory': str(evidence),
         'attempt_id': 'failed-fixture', 'composition_sha256': c.sha(composition_raw),
-        'composition_raw_json': composition_raw.decode()}
+        'composition_raw_json': composition_raw.decode()})
     adapter = SimpleNamespace(value=value, spec=SimpleNamespace(_agentic_artifact_paths=paths),
                               state=SimpleNamespace(reg={}), policy={})
     return value, adapter, composition
@@ -40,7 +42,7 @@ def case(root):
 def publish(value, prepared):
     """Archive fixture using the actual projection and retention manifest code."""
     attempt, directory = Path(value['attempt_directory']), Path(value['evidence_directory'])
-    raw = c.canonical({'authority_version': 2, 'controller_sources_sha256': 'a' * 64, 'registration': value})
+    raw = c.canonical(wire.envelope(value))
     started = c.canonical({'attempt_id': value['attempt_id'], 'registration_sha256': c.sha(raw)})
     (attempt / 'registration.json').write_bytes(raw)
     (attempt / 'started.json').write_bytes(started)

@@ -1,0 +1,43 @@
+"""Build a synthetic registration and recheck it without dispatch or reservations."""
+from pathlib import Path
+import pytest
+from data_sheets_schema import native_shared_contract as c
+from data_sheets_schema import native_shared_registration_orchestration as registration
+from tests import test_native_shared_execution as fixture
+from tests.test_native_execution_registration_v2 import isolated_modules
+
+
+def test_dispatch_recheck_rejects_changed_environment(tmp_path, monkeypatch, isolated_modules):
+    monkeypatch.chdir(registration.authority.ROOT)
+    installed = tmp_path / 'SYNTHETIC-installed-metadata'
+    info = installed / 'h3_dispatch_synthetic-1.dist-info'
+    info.mkdir(parents=True)
+    (info / 'METADATA').write_text('Metadata-Version: 2.1\nName: h3-dispatch-synthetic\nVersion: 1\n')
+    record = info / 'RECORD'
+    record.write_text('h3_dispatch_synthetic-1.dist-info/METADATA,,\n'
+                      'h3_dispatch_synthetic-1.dist-info/RECORD,,\n')
+    monkeypatch.syspath_prepend(str(installed))
+    # The recheck needs the registered inputs only. The existing public-launch
+    # fixture's later review/capture/guard construction is outside this test.
+    monkeypatch.setattr(fixture, 'authority_for', lambda *args, **kwargs: {})
+    case = fixture.make_case(tmp_path / 'SYNTHETIC-environment-only')
+    body = case['value']
+    assert body['kind'] == 'd4d_native_shared_execution_registration_v3'
+    assert registration._recheck_verified(case['raw'], body) == body
+    preparation = c.strict_json(body['preparation_raw_json'].encode())['registration']
+    path = Path(preparation['environment_manifest']['path'])
+    original_manifest = path.read_bytes()
+    original_record = record.read_bytes()
+    try:
+        record.write_bytes(original_record + b'synthetic-new-data.txt,,\n')
+        with pytest.raises(ValueError, match='environment manifest is stale'):
+            registration._recheck_verified(case['raw'], body)
+        assert path.read_bytes() == original_manifest
+    finally:
+        record.write_bytes(original_record)
+    path.chmod(0o600)
+    path.write_bytes(path.read_bytes() + b'\n')
+    with pytest.raises(ValueError, match='environment manifest differs'):
+        registration._recheck_verified(case['raw'], body)
+    assert not Path(body['attempt_directory']).exists()
+    assert not Path(body['evidence_directory']).exists()

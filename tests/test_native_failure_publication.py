@@ -64,7 +64,7 @@ def test_successful_readback_still_requires_fresh_verification(tmp_path, monkeyp
     monkeypatch.setattr(contract.registration, 'verified', verify)
     from dataclasses import replace
     body = dict.fromkeys(engine.admission.EXECUTION_KEYS)
-    body.update(kind=engine.admission.EXECUTION_KIND, schema_version=2,
+    body.update(kind=engine.admission.EXECUTION_KIND, schema_version=3,
         execution=engine.admission.EXECUTION_SCOPE, execution_gates=list(engine.GATES),
         attempt_directory=str(tmp_path / 'attempt'), evidence_directory=str(tmp_path / 'evidence'))
     raw = c.canonical({'authority_version': 2, 'controller_sources_sha256': 'a' * 64,
@@ -206,7 +206,7 @@ def test_successful_readback_runtime_failure_is_not_downgraded(tmp_path, monkeyp
     attempt, evidence = tmp_path / 'attempt', tmp_path / 'evidence'
     attempt.mkdir(); evidence.mkdir()
     body = dict.fromkeys(engine.admission.EXECUTION_KEYS)
-    body.update(kind=engine.admission.EXECUTION_KIND, schema_version=2,
+    body.update(kind=engine.admission.EXECUTION_KIND, schema_version=3,
         execution=engine.admission.EXECUTION_SCOPE, execution_gates=list(engine.GATES),
         attempt_directory=str(attempt), evidence_directory=str(evidence),
         attempt_id='reader-unit', composition_sha256='a' * 64, runtime={})

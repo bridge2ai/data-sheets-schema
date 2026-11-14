@@ -19,8 +19,8 @@ from .native_execution_engine import GATES
 
 ROOT = Path(__file__).resolve().parents[2]
 AUTHORITY_VERSION = 2
-KIND = 'd4d_native_shared_execution_registration_v2'
-VERSION = 2
+KIND = 'd4d_native_shared_execution_registration_v3'
+VERSION = 3
 EXECUTION = 'requires_exact_independent_review_ci_permission_and_owner_launch_evidence'
 
 

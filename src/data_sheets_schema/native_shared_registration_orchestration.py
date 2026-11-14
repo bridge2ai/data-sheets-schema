@@ -84,9 +84,7 @@ def synthetic_registration(composition_path, system_path, **kwargs):
 
 def _observed_envelope(body):
     body = _require_runtime_observation(body)
-    with authority.loaded_dependencies(body['dependencies']) as controls:
-        value = controls['prepare_registration_v2'].envelope(body)
-        controls['prepare_registration_v2'].require_envelope(value)
+    value = execution_v2._envelope(body, body['dependencies'])
     if len(c.canonical(value)) > c.HARD_LIMITS['request_bytes']:
         raise ValueError('v2 shared execution exceeds its wire bound')
     return value
@@ -153,7 +151,7 @@ def _recheck_verified(raw, value):
     envelope = c.strict_json(raw, 'v2 authority envelope', execution_v2.MAX_WIRE_BYTES)
     if (type(envelope) is not dict
             or set(envelope) != {'authority_version', 'controller_sources_sha256', 'registration'}
-            or type(envelope['authority_version']) is not int or envelope['authority_version'] != VERSION
+            or type(envelope['authority_version']) is not int or envelope['authority_version'] != AUTHORITY_VERSION
             or type(envelope['controller_sources_sha256']) is not str
             or envelope['controller_sources_sha256'] != authority.neutral.composition.SOURCES_SHA256
             or type(envelope['registration']) is not dict
@@ -190,6 +188,10 @@ def _recheck_verified(raw, value):
         if body['preparation_sha256'] != c.sha(preparation_raw):
             raise ValueError('v2 preparation digest mismatch')
         preparation = captured_composition.captured_preparation_body(preparation_raw)
+        from . import native_environment_manifest
+        native_environment_manifest.verify(preparation['environment_manifest'])
+        if preparation['pinned_files'].get(preparation['environment_manifest']['path']) != preparation['environment_manifest']['sha256']:
+            raise ValueError('prepared environment manifest is not in the pinned file map')
         execution_v2._job_id(preparation['job_id'])
         if (preparation['job_id'] != body['job_id']
                 or preparation['dependencies'] != dependencies
