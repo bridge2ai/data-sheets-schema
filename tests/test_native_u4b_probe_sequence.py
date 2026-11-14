@@ -58,6 +58,21 @@ def test_real_observation_consumer_keeps_two_phase_dependency_acyclic(prepared):
     assert runtime_module.validate_prepared_runtime(final) == final
 
 
+def test_bound_failure_marker_blocks_saved_readers_before_loading(prepared, monkeypatch):
+    from data_sheets_schema import native_shared_permission_orchestration as permission
+    marker = prepared['root'] / 'bound-failure.json'
+    marker.symlink_to(prepared['root'] / 'missing-failure-target')
+    monkeypatch.setattr(permission.authority, 'dependency_identity',
+                        lambda: pytest.fail('failed evidence reached authority loading'))
+    with pytest.raises(ValueError, match='bound-failure.json'):
+        sequence.validate_bound_probe(prepared['runtime'],
+                                      prepared['root'] / 'permission/permission-probe.json')
+    with pytest.raises(ValueError, match='bound-failure.json'):
+        sequence.validate_observation(prepared['path'])
+    with pytest.raises(ValueError, match='bound-failure.json'):
+        permission.verify_saved_probe(b'{}', expected={'runtime': prepared['runtime']})
+
+
 @pytest.mark.parametrize('field', ['model', 'effort', 'provider', 'auth', 'environment',
                                   'executable', 'deadline_seconds', 'budget_guard_usd', 'keep_awake'])
 def test_final_runtime_cannot_change_other_provisional_fields(prepared, field):
@@ -395,6 +410,16 @@ def test_bound_phase_runs_genuine_saved_verifier_after_mocked_child_boundary(pre
     assert len(calls) == 1
     assert len(reads) >= 3 and set(reads) == {196_000_000}
     assert result['permission']['sha256'] == sequence.sha(output.read_bytes())
+    failure = prepared['root'] / 'bound-failure.json'
+    failure.write_text('{}')
+    with pytest.raises(ValueError, match='bound-failure.json'):
+        sequence.validate_bound_probe(prepared['runtime'], output)
+    with pytest.raises(ValueError, match='bound-failure.json'):
+        sequence.validate_observation(prepared['path'])
+    from data_sheets_schema import native_shared_permission_orchestration as permission
+    with pytest.raises(ValueError, match='bound-failure.json'):
+        permission.verify_saved_probe(output.read_bytes(), expected=expected)
+    failure.unlink()
     with pytest.raises(FileExistsError):
         sequence.produce_bound_probe(prepared['authorization'], expected)
     assert len(calls) == 1
@@ -437,7 +462,7 @@ def test_bound_phase_failure_is_spent_and_cannot_publish_completion(prepared, fi
         'error_type': 'ValueError', 'message': 'invented failed permission transcript',
         'authorization_sha256': sequence.sha(prepared['authorization']),
         'permission_directory_exists': False}
-    with pytest.raises(FileExistsError):
+    with pytest.raises(ValueError, match='bound-failure[.]json'):
         sequence.produce_bound_probe(prepared['authorization'], expected)
     assert failure_path.read_bytes() == failure_raw
     assert calls == [True]

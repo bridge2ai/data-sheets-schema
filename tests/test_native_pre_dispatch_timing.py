@@ -11,6 +11,38 @@ def rows(path):
     return [json.loads(line) for line in path.read_text().splitlines()]
 
 
+def test_normal_interpreter_exit_drains_handoff(tmp_path):
+    import subprocess
+    import sys
+    from pathlib import Path
+    peer = Path(__file__).resolve().parents[1] / 'scripts/adhoc/timing_exit_peer_20261114.py'
+    subprocess.run([sys.executable, str(peer), str(tmp_path)], check=True, timeout=10)
+    files = list(tmp_path.glob('host-pre-dispatch-*.jsonl'))
+    assert len(files) == 1
+    assert rows(files[0])[0]['boundary'] == 'last operation'
+
+
+def test_drop_count_survives_until_next_written_row(tmp_path):
+    before = timing._dropped_traces
+    with timing._writer_lock:
+        with timing.scope(b'dropped-count'):
+            timing.bind({'attempt_directory': str(tmp_path / 'attempt')})
+            timing.record('dropped')
+    with timing.scope(b'next-count') as trace:
+        timing.bind({'attempt_directory': str(tmp_path / 'attempt')})
+        timing.record('retained')
+    settled(trace)
+    assert rows(trace.path)[0]['dropped_traces_total'] == before + 1
+
+
+def test_exit_join_has_two_second_bound(monkeypatch):
+    from types import SimpleNamespace
+    calls = []
+    monkeypatch.setattr(timing, '_writer', SimpleNamespace(join=lambda **kw: calls.append(kw)))
+    timing._finish_writer()
+    assert calls == [{'timeout': 2}]
+
+
 def settled(trace):
     """Only tests wait, after the operation outcome, for retained diagnostics."""
     assert trace._persisted.wait(5)

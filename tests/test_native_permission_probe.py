@@ -21,11 +21,74 @@ from tests.test_native_generation_frontdoor import saved_case
 _REAL_POPEN = probe.subprocess.Popen
 
 
+def test_first_stop_in_cleanup_preserves_active_failure():
+    original = ValueError('original failure')
+    with pytest.raises(ValueError) as caught:
+        with probe._probe_signals():
+            try:
+                raise original
+            finally:
+                with probe._cleanup_signals():
+                    probe.signal.raise_signal(probe.signal.SIGTERM)
+    assert caught.value is original
+
+
+def test_first_stop_inside_close_active_request():
+    events = []
+    def shutdown(how):
+        probe.signal.raise_signal(probe.signal.SIGTERM)
+    server = object.__new__(provider._Server)
+    server.connection_lock = threading.Lock()
+    server.active_connection = SimpleNamespace(shutdown=shutdown,
+                                               close=lambda: events.append('closed'))
+    with pytest.raises(probe.ProbeStopped, match='signal 15'):
+        with probe._probe_signals():
+            server.close_active_request()
+            events.append('later trace')
+    assert events == ['closed']
+
+
+def test_first_stop_in_version_cleanup(tmp_path, monkeypatch):
+    monkeypatch.setattr(probe, '_identity', lambda _: None)
+    class Selector:
+        pending = True
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            return False
+        def register(self, *args):
+            pass
+        def get_map(self):
+            return {'stdout': True} if self.pending else {}
+        def select(self, timeout):
+            self.pending = False
+            return [(SimpleNamespace(fd=100, data='stdout'), None)]
+    process = SimpleNamespace(stdout=io.BytesIO(), stderr=io.BytesIO(),
+                              returncode=0, poll=lambda: 0)
+    process.stdout.fileno = lambda: 100
+    process.stderr.fileno = lambda: 101
+    monkeypatch.setattr(probe.selectors, 'DefaultSelector', Selector)
+    monkeypatch.setattr(probe.subprocess, 'Popen', lambda *a, **k: process)
+    monkeypatch.setattr(probe.os, 'set_blocking', lambda *a: None)
+    monkeypatch.setattr(probe.os, 'read', lambda *a: b'v\n')
+    monkeypatch.setattr(probe, '_terminate',
+                        lambda _: probe.signal.raise_signal(probe.signal.SIGTERM))
+    expected = {'runtime': {'executable': {'path': 'inert', 'version': 'v'}},
+                'permission_environment': {}}
+    later = []
+    with pytest.raises(probe.ProbeStopped, match='signal 15'):
+        with probe._probe_signals():
+            probe._version(expected, float('inf'), tmp_path)
+            later.append('later trace')
+    assert later == []
+    assert (tmp_path / 'version.stdout').read_bytes() == b'v\n'
+
+
 def test_permission_stop_unwinds_and_restores_handlers():
     before = {number: probe.signal.getsignal(number)
               for number in (probe.signal.SIGINT, probe.signal.SIGTERM)}
     cleaned = []
-    with pytest.raises(InterruptedError, match="permission probe stopped"):
+    with pytest.raises(probe.ProbeStopped, match="permission probe stopped"):
         with probe._probe_signals():
             try:
                 probe.signal.raise_signal(probe.signal.SIGTERM)
@@ -494,7 +557,7 @@ def test_shutdown_tail_times_out_on_inherited_open_pipe():
         os.close(write_fd)
 
 
-@pytest.mark.parametrize("mode", ["complete", "timeout", "control_start_error", "overflow", "sigterm"])
+@pytest.mark.parametrize("mode", ["complete", "timeout", "control_start_error", "overflow", "sigterm", "cleanup_sigterm"])
 def test_native_boundary_reaps_closes_and_retains_failed_evidence(tmp_path, monkeypatch, mode):
     class BudgetStop(Exception):
         pass
@@ -529,6 +592,8 @@ def test_native_boundary_reaps_closes_and_retains_failed_evidence(tmp_path, monk
         def finish(self):
             pass
         def close(self):
+            if mode == "cleanup_sigterm":
+                probe.signal.raise_signal(probe.signal.SIGTERM)
             self.control_shutdown_complete = True
     signals = []
     monkeypatch.setattr(probe, "_identity", lambda expected: {})
@@ -546,7 +611,7 @@ def test_native_boundary_reaps_closes_and_retains_failed_evidence(tmp_path, monk
         result = call()
         assert result["shutdown"]["child_reaped"]
     else:
-        with pytest.raises((ValueError, TimeoutError, InterruptedError)):
+        with pytest.raises((ValueError, TimeoutError, probe.ProbeStopped)):
             with probe._probe_signals():
                 call()
     assert process.poll() is not None and len(signals) == 2
