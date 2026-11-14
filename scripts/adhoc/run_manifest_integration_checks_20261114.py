@@ -34,6 +34,7 @@ STAGES = {
     'chain-canary': [BUILDER[2] + '::test_full_chain_canary'],
     'manifest': ['tests/test_native_environment_manifest.py', 'tests/test_native_environment_registration.py',
                  'tests/test_h3_resumed_report.py', 'tests/test_native_gate_stage_orchestrator.py'],
+    'manifest-boundaries': ['tests/test_native_environment_dependencies.py', 'tests/test_native_environment_dispatch.py'],
     'registration': ['tests/test_native_execution_registration_v2.py', 'tests/test_native_shared_registration.py'],
     'builder': BUILDER,
     'retention': ['tests/test_native_incomplete_retention.py'],
