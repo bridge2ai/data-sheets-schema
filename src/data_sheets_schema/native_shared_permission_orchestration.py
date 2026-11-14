@@ -34,7 +34,14 @@ def verify_saved_probe(raw_manifest: bytes, *, expected: dict) -> dict:
     from .native_subscription_guard import strict_json
     if is_prepared_runtime(expected.get('runtime')):
         basis = strict_json(expected['runtime']['limits_basis'])
-        _refuse_bound_failure(Path(basis['observation_probe']['path']).parent.parent)
+        # #6240: refuse a sequence that recorded a bound failure. A basis that
+        # names no observation probe has no sequence directory to inspect here;
+        # the prepared-runtime validators require and check that pin.
+        if 'observation_probe' in basis:
+            probe = basis['observation_probe']
+            if type(probe) is not dict or type(probe.get('path')) is not str:
+                raise ValueError('prepared runtime names a malformed observation probe')
+            _refuse_bound_failure(Path(probe['path']).parent.parent)
     dependencies = authority.dependency_identity()
     with loaded_permission_inputs(dependencies) as (controls, sources), \
             authority.loaded_verified_package_module('data_sheets_schema.native_shared_permissions',
