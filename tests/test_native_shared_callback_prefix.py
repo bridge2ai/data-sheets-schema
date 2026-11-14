@@ -186,3 +186,16 @@ def test_checkpoint_storage_does_not_retain_journal_prefix_copies(case):
             for item in value:
                 walk(item)
     walk(transaction.pending)
+
+
+def test_older_transaction_cannot_rewind_newer_checkpoint(advance):
+    owner = owner_api._PrefixOwner(guard_for(ModuleType('test_validator')))
+    older, _ = captured_run(advance, saved=False)
+    older._prefix = owner.begin(older)
+    capture._checked_observations(older)
+    newer, _ = captured_run(advance)
+    checked(owner, newer)
+    anchors = owner.records, owner.observations, owner.streams
+    with pytest.raises(ValueError, match='overlapping callback'):
+        older._prefix.commit()
+    assert anchors == (owner.records, owner.observations, owner.streams)

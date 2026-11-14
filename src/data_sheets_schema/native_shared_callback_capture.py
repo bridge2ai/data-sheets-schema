@@ -79,8 +79,10 @@ class _PrefixOwner:
         self.artifacts = {}
         self.semantic = {}
         self.observation_state = None
+        self.epoch = 0
 
     def begin(self, run):
+        epoch = self.epoch
         records = tuple(item.pin for item in run.history.records)
         observations = tuple(item.pin for item in run.observations)
         if (records[:len(self.records)] != self.records
@@ -96,13 +98,14 @@ class _PrefixOwner:
         if not reusable:
             self.semantic.clear()
             self.observation_state = None
-        return _PrefixTransaction(self, run, reusable)
+        return _PrefixTransaction(self, run, reusable, epoch=epoch)
 
 
 class _PrefixTransaction:
     """Uncommitted suffix; exceptions cannot publish partial semantic state."""
-    def __init__(self, owner, run, reusable):
+    def __init__(self, owner, run, reusable, *, epoch=None):
         self.owner, self.run, self.reusable = owner, run, reusable
+        self.epoch = owner.epoch if epoch is None else epoch
         self.pending = {}
         self.observation_state = owner.observation_state if reusable else None
 
@@ -122,6 +125,8 @@ class _PrefixTransaction:
 
     def commit(self):
         run, owner = self.run, self.owner
+        if owner.epoch != self.epoch:
+            raise ValueError('overlapping callback cannot replace a newer verified prefix')
         if self.reusable and not owner.guard.reusable():
             owner.semantic.clear()
             owner.observation_state = None
@@ -137,6 +142,7 @@ class _PrefixTransaction:
         if self.reusable:
             owner.semantic.update(self.pending)
             owner.observation_state = self.observation_state
+        owner.epoch += 1
 
 
 def prefix_owner(admission):

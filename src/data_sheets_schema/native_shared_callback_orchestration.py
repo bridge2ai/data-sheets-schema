@@ -5,9 +5,9 @@ use captured references, but may not open or close a source-loader scope.
 This is a source contract, not a sandbox against arbitrary Python reflection.
 """
 from contextlib import contextmanager, ExitStack
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields, is_dataclass
 from inspect import isbuiltin, isfunction, ismethod
-from types import ModuleType
+from types import MappingProxyType, ModuleType
 from pathlib import PurePath
 import sys
 from threading import current_thread, main_thread, RLock
@@ -115,7 +115,8 @@ class _ValidatorGuard:
                 grammar = hasattr(value, 'pattern') and hasattr(value, 'flags')
                 if (name.isupper() and (not name.startswith('_') or private_contract or private_limit or grammar)
                         and _binding_identity(value) is None and name != '_BYTES'):
-                    constants.append((module.__name__, name, _constant_value(value)))
+                    constants.append((module.__name__, name,
+                        _constant_value(value, self.references if retain else None)))
         return (_effective_bindings(self.modules, self.references if retain else None), tuple(constants),
             self.source_identities,
             self.admission_bytes, sys.executable, sys.version, sys.implementation.cache_tag)
@@ -132,17 +133,34 @@ class _ValidatorGuard:
         return same
 
 
-def _constant_value(value):
+def _constant_value(value, retained=None):
+    identity = _binding_identity(value)
+    if identity is not None or type(value) is object:
+        if retained is not None:
+            retained.append(value)
+        if isfunction(value):
+            if retained is not None:
+                retained.extend((value.__code__, value.__defaults__, value.__kwdefaults__))
+                retained.extend(cell.cell_contents for cell in value.__closure__ or ())
+            return (identity, id(value.__code__), id(value.__defaults__), id(value.__kwdefaults__),
+                _constant_value(value.__defaults__, retained),
+                _constant_value(value.__kwdefaults__, retained),
+                tuple(_environment_identity(cell.cell_contents) for cell in value.__closure__ or ()))
+        return ('identity', id(value), type(value))
     if value is None or type(value) in (str, bytes, int, float, bool):
-        return value
+        return type(value), value
     if isinstance(value, PurePath):
         return (type(value), str(value))
-    if type(value) is dict:
-        return ('dict', tuple(sorted((key, _constant_value(item)) for key, item in value.items())))
+    if type(value) in (dict, MappingProxyType):
+        return (type(value), tuple((_constant_value(key, retained), _constant_value(item, retained))
+            for key, item in sorted(value.items(), key=lambda pair: repr(pair[0]))))
     if type(value) in (tuple, list):
-        return (type(value).__name__, tuple(_constant_value(item) for item in value))
+        return (type(value).__name__, tuple(_constant_value(item, retained) for item in value))
     if type(value) in (set, frozenset):
-        return ('set', frozenset(_constant_value(item) for item in value))
+        return (type(value), frozenset(_constant_value(item, retained) for item in value))
+    if is_dataclass(value):
+        return (type(value), tuple((field.name, _constant_value(getattr(value, field.name), retained))
+                                  for field in fields(value)))
     # Compiled grammar patterns are immutable, but identity alone omits flags.
     if hasattr(value, 'pattern') and hasattr(value, 'flags'):
         return (type(value), value.pattern, value.flags)
