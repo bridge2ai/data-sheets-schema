@@ -45,24 +45,28 @@ def main():
             if child['file'] == 'native_control.py'
             and child['function'].endswith('._classify_frame')
             and child.get('event', {}).get('request_id') == request)
+        inner = sum(child['wall'] for child in children
+                    if child['function'] == 'CallbackAdapter._observe')
         callbacks.append({'request': request, 'observation': row['wall'],
                           'classification': classification,
+                          'lock_and_wrapper_upper_bound': max(0., row['wall'] - inner),
                           'queue': None if entered is None else row['start'] - entered,
                           **values})
     result = {'callbacks': callbacks, 'inclusive_function_totals': dict(totals),
               'scope': 'Nested wall totals overlap. Queue is intake to observe start. '
-                       'Observation lock waits are included, not separately resolved.'}
+                       'Lock bound is observe minus _observe: lock acquisition plus wrapper and '
+                       'instrumentation overhead, not a direct lock measurement.'}
     args.output.with_suffix('.json').write_text(json.dumps(result, indent=2))
     lines = [result['scope'], '', '| Function | Calls | Inclusive wall s | Thread CPU s |',
              '| --- | ---: | ---: | ---: |']
     for key, values in sorted(totals.items(), key=lambda item: -item[1][1]):
         lines.append(f'| {key} | {values[0]} | {values[1]:.6f} | {values[2]:.6f} |')
-    lines += ['', '| Callback | Queue s | Observe s | Classify s | Fresh verification s | Source checks s | History s | Hash s | Reads s |',
-              '| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |']
+    lines += ['', '| Callback | Queue s | Observe s | Classify s | Fresh verification s | Source checks s | History s | Hash s | Reads s | Lock + wrapper bound s |',
+              '| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |']
     for row in callbacks:
         values = ['unmeasured' if row[key] is None else f'{row[key]:.6f}' for key in
                   ('queue', 'observation', 'classification', 'fresh verification', 'source checks',
-                   'history verification', 'hashing', 'file reads')]
+                   'history verification', 'hashing', 'file reads', 'lock_and_wrapper_upper_bound')]
         lines.append('| ' + row['request'] + ' | ' + ' | '.join(values) + ' |')
     args.output.with_suffix('.md').write_text('\n'.join(lines) + '\n')
     print(json.dumps({'callbacks': len(callbacks), 'completed_spans': len(spans)}))
