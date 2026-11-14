@@ -143,6 +143,36 @@ def test_background_stage_helper_is_never_admitted():
     assert classified(selected,'Bash',{'command':selected.stage_command,'run_in_background':True})=='not_prescribed'
 
 
+@pytest.mark.parametrize('command', [
+    'cat ../stages/requests/000000.json',
+    "cat ../sta'ges'/requests/000000.json",
+    'cat ../stages/journal.json|head -n 1',
+    'grep pattern ../stages/observations/000000.json',
+    'cat /selected/sta"ges"/sealed/full.yaml',
+    'cat ./../stages/responses/000001.bin',
+])
+def test_relative_and_fragmented_stage_bash_cannot_bypass_overlay(command):
+    from data_sheets_schema import native_shared_policy as policy_api
+    from data_sheets_schema.native_shared_contract import canonical
+    selected = view()
+    commands = {name: '/selected/python -m neutral.' + name for name in policy_api.HELPERS}
+    commands['advance'] = selected.stage_command
+    policy = {'native_shared_generation_version': 1, 'attribution_composition_version': 2,
+        'python': '/selected/python', 'native_shared_helpers': commands,
+        'attribution_command': commands['draft'], 'post_final_recorder': {'command': commands['recorder']}}
+    selected = replace(selected, static_policy_sha256=sha(canonical(policy)))
+    payload = {'command': command}
+    assert effects.governs_stage_effect(selected, tool_name='Bash', tool_input=payload)
+    # The same entry point is used by live admission and saved callback replay.
+    assert policy_api.stage_overlay_governs(selected, tool_name='Bash', tool_input=payload, policy=policy)
+    assert classified(selected, 'Bash', payload) == 'not_prescribed'
+
+
+def test_relative_nonstage_lookup_keeps_inherited_routing():
+    assert not effects.governs_stage_effect(view(), tool_name='Bash',
+        tool_input={'command': 'cat ../stages-other/ordinary.txt'})
+
+
 def test_missing_protected_role_and_forged_current_path_refuse():
     selected=view()
     for altered in (replace(selected,protected_roles=selected.protected_roles[1:]),
