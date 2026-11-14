@@ -74,7 +74,7 @@ REVIEW_FILES = ('review-6208.json', 'review-followups.json', 'review-runner.json
                 'offline-power-fixture-review.json', 'review-report.json', 'review-report-f2.json',
                 'proposal-6217-implementation/review-6217-superseding.json',
                 'review-6217-f3-withdrawn-frozen.json',
-                'review-legacy-component-failures-v2.json')
+                'review-legacy-component-failures-v2.json', 'review-bytecode.json', 'review-report-f3.json')
 
 
 def git(*args):
@@ -517,7 +517,7 @@ def main():
     check_nested_pins(inventory)
     assert inventory['passed'] == sum(row['passed'] is True for row in inventory['cases'])
     assert inventory['failed'] == sum(row['passed'] is not True for row in inventory['cases'])
-    report_verification_path = SCRATCH / 'report-closure-pin-verification-after-discovery-fix/result.json'
+    report_verification_path = SCRATCH / 'report-closure-pin-verification-after-bytecode-pin-review/result.json'
     report_verification = read_json(report_verification_path)
     check_nested_pins(report_verification)
     assert report_verification['reporter'] == pin(Path(__file__).resolve())

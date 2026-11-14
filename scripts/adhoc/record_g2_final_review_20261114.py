@@ -459,7 +459,7 @@ def close_runner(evidence, details):
 def close_report(evidence, details):
     identity = 'G2-REVIEW-REPORT-F1'
     ledger(identity, 'review-report.json', evidence)
-    result = document(OUT / 'report-closure-pin-verification-after-discovery-fix/result.json', evidence)
+    result = document(OUT / 'report-closure-pin-verification-after-bytecode-pin-review/result.json', evidence)
     require(result['finding_id'] == identity and result['status'] == 'verified'
             and result['verified_entrypoint'] == 'review_ledger',
             'report closure-pin verification is incomplete')
@@ -481,7 +481,7 @@ def close_report(evidence, details):
 def close_report_discovery(evidence, details):
     identity = 'G2-REVIEW-REPORT-F2'
     ledger(identity, 'review-report-f2.json', evidence)
-    result = document(OUT / 'report-cohort-discovery-20261114/verification/result.json', evidence)
+    result = document(OUT / 'report-cohort-discovery-after-bytecode-pin-review/result.json', evidence)
     require(result['finding_id'] == identity and result['status'] == 'verified',
             'cohort discovery verification is incomplete')
     for name in ('reporter', 'closure', 'producer', 'ledger'):
@@ -497,6 +497,66 @@ def close_report_discovery(evidence, details):
             'cohort discovery counterexamples are incomplete or failing')
     details.append({'cases': len(rows), 'passed': len(rows), 'scope': result['scope']})
     return 'Both helpers bind saved output destinations to the containing directory, retain copied archives separately, and reject malformed identities. No observed false acceptance or project test result is claimed.'
+
+
+def close_bytecode(evidence, details):
+    identity = 'G2-REVIEW-BYTECODE-F1'
+    ledger(identity, 'review-bytecode.json', evidence)
+    result = document(OUT / 'bytecode-preservation-verification/result.json', evidence)
+    require(result['finding_id'] == identity and result['status'] == 'verified'
+            and result['verified_entrypoint'] == 'rename_and_verify',
+            'bytecode interruption verification is incomplete')
+    for name in ('helper', 'producer', 'reviewed_source', 'ledger'):
+        checked_pin(result[name], evidence)
+    require(Path(result['helper']['path']) == ROOT / 'scripts/adhoc/preserve_g2_source_bytecode_20261114.py'
+            and Path(result['ledger']['path']) == OUT / 'review-bytecode.json',
+            'bytecode proof does not name the current helper and original ledger')
+    require(result['helper']['sha256'] == result['reviewed_source']['sha256']
+            and result['helper']['bytes'] == result['reviewed_source']['bytes'],
+            'bytecode proof snapshot differs from the current helper')
+    expected = {'interruption_after_rename', 'interruption_before_rename', 'ambiguous_locations'}
+    rows = result['cases']
+    require(result['passed'] == 3 and result['failed'] == 0 and len(rows) == 3
+            and {row['case'] for row in rows} == expected
+            and all(row['passed'] is True for row in rows),
+            'bytecode interruption counterexamples are incomplete or failing')
+    for row in rows:
+        checked_pin(row['outcome'], evidence)
+        checked_pin(row['retained'], evidence)
+    original = result['original_counterexample']
+    require(original['false_negative_reproduced'] is True,
+            'original bytecode failure-ledger counterexample was not reproduced')
+    checked_pin(original['outcome'], evidence)
+    checked_pin(original['preserved'], evidence)
+    details.append({'cases': 3, 'passed': 3, 'entrypoint': 'rename_and_verify',
+                    'scope': 'Pure synthetic filesystem interruption proof; actual bytecode preservation is a separate action.'})
+    return 'Synthetic interruption checks verify fresh location evidence after rename, before rename and for ambiguous locations. Actual source bytecode preservation is not inferred; lead filing remains required.'
+
+
+def close_bytecode_pins(evidence, details):
+    identity = 'G2-REVIEW-REPORT-F3'
+    ledger(identity, 'review-report-f3.json', evidence)
+    result = document(OUT / 'bytecode-closure-pin-verification/result.json', evidence)
+    require(result['finding_id'] == identity and result['status'] == 'verified'
+            and result['verified_entrypoint'] == 'close_bytecode',
+            'bytecode closure-pin verification is incomplete')
+    for key in ('closure', 'producer', 'reviewed_source', 'ledger'):
+        checked_pin(result[key], evidence)
+    require(Path(result['closure']['path']) == ROOT / 'scripts/adhoc/record_g2_final_review_20261114.py'
+            and Path(result['ledger']['path']) == OUT / 'review-report-f3.json'
+            and result['closure']['sha256'] == result['reviewed_source']['sha256']
+            and result['closure']['bytes'] == result['reviewed_source']['bytes'],
+            'bytecode closure proof does not pin the current reviewed helper')
+    expected = {'valid_nested_bytecode_artifact', 'changed_nested_bytecode_artifact',
+                'missing_nested_bytecode_artifact'}
+    rows = result['cases']
+    require(result['passed'] == 3 and result['failed'] == 0 and len(rows) == 3
+            and {row['case'] for row in rows} == expected
+            and all(row['passed'] is True and row['nested_artifacts_checked'] == 8 for row in rows),
+            'bytecode closure-pin counterexamples are incomplete or failing')
+    details.append({'cases': 3, 'passed': 3, 'nested_artifacts_per_case': 8,
+                    'entrypoint': 'close_bytecode', 'scope': result['scope']})
+    return 'Actual close_bytecode accepts and exports all eight valid nested artifact pins and refuses each changed/missing artifact. Historical evidence remains unchanged; lead filing remains required.'
 
 
 def review_6224(head):
@@ -570,7 +630,9 @@ def main():
     for identity, action in (('G2-REVIEW-6217-F1', close_proposal),
                              ('G2-REVIEW-6217-F3', retain_withdrawal), ('G2-REVIEW-RUNNER-F1', close_runner),
                              ('G2-REVIEW-REPORT-F1', close_report),
-                             ('G2-REVIEW-REPORT-F2', close_report_discovery)):
+                             ('G2-REVIEW-REPORT-F2', close_report_discovery),
+                             ('G2-REVIEW-REPORT-F3', close_bytecode_pins),
+                             ('G2-REVIEW-BYTECODE-F1', close_bytecode)):
         row, details = close(identity, action)
         if identity == 'G2-REVIEW-6217-F3' and row['status'] == 'verified':
             row['status'] = 'withdrawn'
