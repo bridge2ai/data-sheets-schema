@@ -33,6 +33,10 @@ U4_EFFORT = 'high'
 U4_RECEIPT_INSTRUMENT = 4
 
 
+class ProbeStopped(BaseException):
+    """Operator stop that cannot be swallowed by ordinary I/O handlers."""
+
+
 @contextmanager
 def _probe_signals():
     """Turn the first stop into unwinding; subsequent stops cannot abort it."""
@@ -40,7 +44,7 @@ def _probe_signals():
     def stop(signum, frame):
         for number in previous:
             signal.signal(number, signal.SIG_IGN)
-        raise InterruptedError("permission probe stopped by signal " + str(signum))
+        raise ProbeStopped("permission probe stopped by signal " + str(signum))
     try:
         for number in (signal.SIGINT, signal.SIGTERM):
             previous[number] = signal.signal(number, stop)
@@ -52,13 +56,20 @@ def _probe_signals():
 
 @contextmanager
 def _cleanup_signals():
-    previous = {number: signal.signal(number, signal.SIG_IGN)
+    active_failure = sys.exc_info()[1]
+    latched = []
+    def latch(signum, frame):
+        if not latched:
+            latched.append(signum)
+    previous = {number: signal.signal(number, latch)
                 for number in (signal.SIGINT, signal.SIGTERM)}
     try:
         yield
     finally:
         for number, handler in previous.items():
             signal.signal(number, handler)
+        if latched and active_failure is None and sys.exc_info()[1] is None:
+            raise ProbeStopped("permission probe stopped by signal " + str(latched[0]))
 
 
 def require_u4_runtime(runtime):
