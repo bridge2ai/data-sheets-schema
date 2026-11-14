@@ -7,11 +7,12 @@ complete offline canary, audit/finalization and evaluation suites alongside the
 shards. Budget and native transport controls run once in the canary job, with
 the same 45-minute job limit and existing test deadlines, rather than sharing
 the time left after a full suite shard (#4466). Four more jobs each run one required long offline API case, with the same
-45-minute limit (#4517). Three run the SG2 root launches; twenty run native
-cases (three public-path launches and seventeen failures), with the same limit.
+45-minute limit (#4517). Three run the SG2 root launches; fifty-six run native
+cases (three public-path launches, seventeen failures and thirty-six capacity
+cases), with the same limit.
 Ordinary shards retain D75's 45-minute PR and 60-minute main/manual limits.
-There are 25 + 17 = 42 Python jobs on PRs (12 + 4 + 3 + 20 + 3)
-and 21 + 17 = 38 on main/manual runs (8 + 4 + 3 + 20 + 3),
+There are 78 Python jobs on PRs (12 + 4 + 3 + 56 + 3)
+and 74 on main/manual runs (8 + 4 + 3 + 56 + 3),
 plus the aggregate `test` job. The aggregate
 requires every applicable job to succeed; failure, cancellation or an unexpected
 skip in any offline lane also fails it. Package metadata still permits Python
@@ -169,12 +170,12 @@ new tests; coverage never depends on a timing entry.
 ## Required long API, SG2 and native cases
 
 The workflow opts into `--ci-lane=ordinary` for the existing shards and one of
-twenty-seven dedicated lanes for long offline API, SG2 and native cases. All jobs collect `tests`.
+sixty-three dedicated lanes for long offline API, SG2 and native cases. All jobs collect `tests`.
 `utils.pytest_shard.API_CASE_LANES` is the single exact node roster for dispatch,
 portable completed capture, regated report, and default-layout completion.
 `DEDICATED_CASE_LANES` combines that roster with `SG2_CASE_LANES` and
-`NATIVE_CASE_LANES` (three public-path and seventeen failure cases).
-`partition_lanes` requires all twenty-seven exact nodes once before returning singleton
+`NATIVE_CASE_LANES` (three public-path, seventeen failure and thirty-six capacity cases).
+`partition_lanes` requires all sixty-three exact nodes once before returning singleton
 case lanes and the complete ordinary complement. A missing, renamed or repeated dedicated
 target fails collection. Ordinary parameter IDs may collide: every occurrence
 is retained, with its original order and one owning shard, and coverage is
@@ -192,12 +193,12 @@ environment and bytecode prefix. They retain JUnit plus streamed text output in
 separate `tests-py3.12-api-<lane>`, `-sg2-<lane>` and `-native-<lane>` artifacts for 14 days, even when a failed test
 does not complete JUnit. A hard runner cancellation can still prevent upload.
 The aggregate requires the entire API, SG2 and native matrices to succeed on PR, main and
-manual events, as well as the existing jobs. PRs have 25 + 17 = 42 Python jobs
-(12 ordinary + 4 API + 3 SG2 + 20 native + 3 offline), plus the expected
-schema/example skip. Main/manual have 21 + 17 = 38 Python jobs
-(8 ordinary + 4 API + 3 SG2 + 20 native + 3 offline), plus the schema/example build.
-Across PR, manual and the separate large-files check this is 42 + 38 + 1 + 1
-= 82 required job successes and one expected skip, excluding aggregate checks
+manual events, as well as the existing jobs. PRs have 78 Python jobs
+(12 ordinary + 4 API + 3 SG2 + 56 native + 3 offline), plus the expected
+schema/example skip. Main/manual have 74 Python jobs
+(8 ordinary + 4 API + 3 SG2 + 56 native + 3 offline), plus the schema/example build.
+Across PR, manual and the separate large-files check this is 78 + 74 + 1 + 1
+= 154 required job successes and one expected skip, excluding aggregate checks
 and unrelated automation.
 
 ## Native cases (#6191, 2026-11-13)
@@ -206,11 +207,37 @@ and unrelated automation.
 `tests/test_native_shared_execution_failure.py` as `native-failure-01` through
 `native-failure-17`. Each builds the expensive native fixture.
 `NATIVE_CASE_LANES` puts the three public-path cases first, then these failure
-cases, in the existing `native-public-completion` matrix. Display names are
+cases and the capacity cases below, in the existing `native-public-completion` matrix. Display names are
 `Python 3.12 / native case <lane>` and match the v2 launch-evidence roster.
 The aggregate dependency list and its exhaustive truth-table size are unchanged.
 The failure file has no ordinary cases; its retained historical weight is ignored
 by ordinary partitioning. Isolation does not fix failures within those tests.
+
+Run 43536007079 (2026-11-14) has 100 ordinary-shard JUnit cases over 120 seconds.
+`NATIVE_CAPACITY_CASE_LANES` moves all 33 native runtime cases in that population
+to `native-capacity-01` through `native-capacity-33`. It also moves the three
+public retention cases from cancelled shard 6 to `native-retention-stable`,
+`native-retention-changing` and `native-retention-final-floor`. That shard has no
+completed JUnit, so those three are not counted as measured cases. Its public
+retention path was the reported timeout tail after module isolation made it run.
+
+The remaining 67 measured slow cases stay ordinary: native scanner fixtures
+have no runtime freshness window; the non-native cases' owning shards completed
+within the 45-minute budget. Keeping their files together preserves module
+fixture reuse. Their durations remain file scheduling hints, with no guarantee
+of future runner wall time. The inventory script
+`scripts/adhoc/audit_ci_capacity_20261114.py` records each case, shard, measured
+duration and disposition from the downloaded XML. Dedicated lane isolation
+adds runner jobs and setup overhead in exchange for removing competing workers.
+The aggregate job dependencies and all deadlines remain unchanged.
+
+The successful ordinary shards of that run (2, 3, 4, 5, 7, 9, 11 and 12) provide
+a partial timing refresh. Failed shards 1, 8 and 10, cancelled shard 6, and all
+dedicated cases are excluded. The unchanged updater consumes filtered XML;
+lossless compressed originals in `tests/fixtures/ci_timings/43536007079` allow
+the test contract to reconstruct the measured layer independently. The previous
+full map, all historical provenance and unmeasured file weights are retained.
+This is evidence from successful shards of an overall failed run.
 
 `NATIVE_PUBLIC_CASE_LANES` names three tests that each drive one complete
 synthetic native launch: capture, guard preparation, admission, reservation,
@@ -221,8 +248,8 @@ capture age less the 300-second margin) and starved their shard: shard 4 of run
 the lead's macOS host at load average 31, capture to reservation took 246 s and
 the whole test 512 s. Each case now runs in its own job and one process, like
 the API and SG2 cases. Their files' other tests stay in the ordinary shards;
-the files' timing weights still include the moved case until the next timing
-refresh.
+the partial timing refresh updates successful ordinary remainders. Files absent
+from its successful shards keep their previous estimates until remeasured.
 
 This change responds to the actual 45-minute PR shard timeout in run37452512623.
 All four cases passed concurrently in manual run37452622408; their per-test times
