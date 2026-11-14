@@ -21,6 +21,9 @@ from tests.test_native_synthetic_profiles import runtime as provisional_fixture
 from tests.utils.native_synthetic_evidence import runtime_for
 from tests.utils.native_u4b_fixtures import bundle_for
 from tests.test_native_canary_packet_builder import invoke
+from tests.test_native_execution_registration_v2 import isolated_modules  # noqa: F401
+
+pytestmark = pytest.mark.usefixtures('isolated_modules')
 
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('review_adapter',ROOT/'scripts/native_packet_review_inputs.py')
