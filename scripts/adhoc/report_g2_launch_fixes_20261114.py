@@ -1,0 +1,626 @@
+#!/usr/bin/env python3
+"""Produce the G2 answer-first handoff from saved verification, 2026-11-14.
+
+Inputs: sibling scratch-g2-20261114 command/outcome/JUnit/log records, baseline,
+reviews, proposals and final source audit; this committed source checkout.
+Outputs: codex-pr5968-launch-fixes-20261114 Markdown and JSON in the assigned
+report worktree. No tests, source imports, GitHub writes or H2 report changes.
+"""
+import ast
+from collections import Counter
+from datetime import datetime
+import hashlib
+import json
+from pathlib import Path
+import re
+import subprocess
+import sys
+import xml.etree.ElementTree as ET
+
+
+ROOT = Path(__file__).resolve().parents[2]
+SCRATCH = ROOT.parent / 'scratch-g2-20261114'
+REPORT = ROOT.parent / 'codex-development-efficiency-20261111/notes/development_efficiency_20261111/handoffs'
+STEM = 'codex-pr5968-launch-fixes-20261114'
+H2_HEAD = '64fa2b4b7ac2d1b0767e2d89a5ca4109c945229b'
+ISSUES = (6207, 6208, 6215, 6216, 6217, 6218, 6224, 6225)
+SOURCE_SCOPE = ('src', 'tests', 'notes/matched_cborg_2026-09-13', 'pyproject.toml',
+                'poetry.lock', 'conftest.py', '.github/workflows/main.yaml')
+REGRESSIONS = {
+    6208: {'tests/test_native_launch_sequence_signals.py': (
+        'test_signal_before_claim_preserves_journal_and_starts_no_child',
+        'test_signal_during_command_ownership_is_forwarded_once_then_synced',
+        'test_signal_delivery_failure_never_aborts_reap',
+        'test_wait_retries_interrupt_without_killing_child',
+        'test_spawn_failure_restores_both_previous_handlers',
+        'test_parent_signal_waits_for_slow_fake_cleanup_and_retains_record',
+        'test_signal_after_reap_before_returncode_never_forwards_recycled_pid',
+        'test_final_signal_cutoff_keeps_status_reason_and_list_consistent',
+        'test_copied_witness_failure_always_reaps_its_owned_process')},
+    6215: {'tests/test_native_sequence_start.py': (
+        'test_sequence_start_accepts_registration_above_quota_event_limit',
+        'test_sequence_start_rejects_registration_above_input_limit_before_lock')},
+    6216: {'tests/test_native_launch_sequence_paths.py': (
+        'test_packet_overlap_refuses_before_effects_and_corrected_packet_can_start',
+        'test_packet_prospective_case_alias_refuses_without_creating_either_spelling')},
+    6217: {'tests/test_native_publication_signals.py': (
+        'test_record_only_survives_first_and_repeated_signals_and_restores_handlers',
+        'test_preparation_first_signal_still_interrupts_then_cleanup_records',
+        'test_late_signal_revalidates_exact_failed_mode_once',
+        'test_signal_cutoff_does_not_turn_validation_refusal_into_success',
+        'test_signal_after_cutoff_keeps_the_original_successful_decision',
+        'test_public_first_signal_during_publication_keeps_exact_readback')},
+    6218: {'tests/test_native_attempt_deadline.py': (
+        'test_unplug_before_reservation_keeps_attempt_unspent',
+        'test_unplug_after_reservation_retains_reading_without_consuming_dispatch',
+        'test_slow_power_probe_cannot_age_an_already_checked_reservation_margin',
+        'test_dispatch_guard_refusal_precedes_stage_activation')},
+    6224: {'tests/test_native_launch_sequence_paths.py': (
+        'test_guard_overlap_refuses_before_packet_probe_claim_or_command',
+        'test_capture_output_overlap_refuses_before_any_output_effect',
+        'test_unregistered_disjoint_capture_root_refuses_without_writing',
+        'test_guard_prospective_alias_refuses_without_touching_reservations',
+        'test_capture_output_must_use_exact_registered_spelling',
+        'test_exact_registered_capture_state_is_the_allowed_overlap')},
+}
+FINDING_TESTS = {
+    'G2-REVIEW-6208-F1': ('test_final_signal_cutoff_keeps_status_reason_and_list_consistent',),
+    'G2-REVIEW-6208-F2': ('test_signal_after_reap_before_returncode_never_forwards_recycled_pid',),
+    'G2-REVIEW-6208-F3': ('test_copied_witness_failure_always_reaps_its_owned_process',),
+    'G2-REVIEW-6218-F1': ('test_dispatch_guard_refusal_precedes_stage_activation',),
+    'G2-REVIEW-6217-F2': REGRESSIONS[6217]['tests/test_native_publication_signals.py'],
+}
+REVIEW_FILES = ('review-6208.json', 'review-followups.json', 'review-runner.json',
+                'offline-power-fixture-review.json', 'review-report.json', 'review-report-f2.json',
+                'proposal-6217-implementation/review-6217-superseding.json',
+                'review-6217-f3-withdrawn-frozen.json',
+                'review-legacy-component-failures-v2.json')
+
+
+def git(*args):
+    return subprocess.check_output(['git', *args], cwd=ROOT)
+
+
+def sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+def pin(path):
+    path = Path(path)
+    assert path.is_file(), 'required evidence does not exist: ' + str(path)
+    raw = path.read_bytes()
+    return {'path': str(path), 'bytes': len(raw), 'sha256': sha(raw)}
+
+
+def read_json(path):
+    return json.loads(Path(path).read_bytes())
+
+
+def checked_pin(record):
+    actual = pin(record['path'])
+    assert actual['sha256'] == record['sha256'], record['path']
+    if 'bytes' in record:
+        assert actual['bytes'] == record['bytes'], record['path']
+    return actual
+
+
+def check_nested_pins(value):
+    if isinstance(value, dict):
+        if isinstance(value.get('path'), str) and isinstance(value.get('sha256'), str):
+            checked_pin(value)
+        for item in value.values():
+            check_nested_pins(item)
+    elif isinstance(value, list):
+        for item in value:
+            check_nested_pins(item)
+
+
+def counts(cases):
+    values = Counter(row['status'] for row in cases)
+    return {'total': len(cases), **{key: values[key] for key in ('passed', 'failed', 'error', 'skipped', 'unconfirmed')}}
+
+
+def pytest_summary(text):
+    summaries = [line.strip() for line in text.splitlines()
+                 if re.search(r'\b\d+ (?:passed|failed|errors?|skipped|xfailed|xpassed)\b', line)
+                 and re.search(r'\bin [\d.]+s\b', line)]
+    if not summaries:
+        return None
+    line = summaries[-1]
+    values = {('error' if key == 'errors' else key): int(value)
+              for value, key in re.findall(r'\b(\d+) (passed|failed|errors?|skipped|xfailed|xpassed)\b', line)}
+    return {'line': line, 'counts': values, 'completed_total': sum(values.values())}
+
+
+def junit(path):
+    tree = ET.parse(path)
+    cases = []
+    for node in tree.iter('testcase'):
+        status = 'passed'
+        detail = None
+        for candidate in ('error', 'failure', 'skipped'):
+            element = node.find(candidate)
+            if element is not None:
+                status = 'failed' if candidate == 'failure' else candidate
+                detail = {'message': element.get('message', ''), 'text': element.text or ''}
+                break
+        cases.append({'classname': node.get('classname', ''), 'name': node.get('name', ''),
+                      'seconds': node.get('time'), 'status': status, 'detail': detail})
+    suites = [{key: node.get(key) for key in ('name', 'timestamp', 'hostname', 'time', 'tests', 'failures', 'errors', 'skipped')}
+              for node in tree.iter('testsuite')]
+    return cases, suites
+
+
+def selected_paths(command):
+    result = []
+    for argument in command:
+        if not isinstance(argument, str):
+            continue
+        file_part = argument.split('::', 1)[0]
+        path = Path(file_part)
+        if path.is_absolute():
+            try:
+                relative = path.relative_to(ROOT).as_posix()
+            except ValueError:
+                continue
+        else:
+            relative = file_part.removeprefix('./')
+        if relative == 'tests' or relative.startswith('tests/'):
+            result.append({'path': relative, 'node': argument.split('::', 1)[1] if '::' in argument else None})
+    return result
+
+
+def source_equivalence(recorded, final):
+    if not recorded:
+        return {'passed': False, 'reason': 'command record has no source head'}
+    ancestry_command = ['git', 'merge-base', '--is-ancestor', recorded, final]
+    ancestry = subprocess.run(ancestry_command, cwd=ROOT, capture_output=True, check=False)
+    diff_command = ['git', 'diff', '--name-only', recorded, final, '--', *SOURCE_SCOPE]
+    different = subprocess.run(diff_command, cwd=ROOT, capture_output=True, check=False)
+    changed = different.stdout.decode().splitlines()
+    return {'passed': ancestry.returncode == different.returncode == 0 and not changed,
+            'recorded_head': recorded, 'final_head': final, 'scope': list(SOURCE_SCOPE),
+            'ancestry_command': ancestry_command, 'ancestry_returncode': ancestry.returncode,
+            'diff_command': diff_command, 'diff_returncode': different.returncode,
+            'changed': changed, 'stderr': ancestry.stderr.decode() + different.stderr.decode()}
+
+
+def classify_cohort(directory, command):
+    """Bind saved pytest outputs to their invocation, not an archive's name."""
+    row = {'directory': str(directory), 'classification': 'invalid'}
+    if not isinstance(command, dict):
+        return {**row, 'reason': 'command record is not an object'}
+    argv, cwd = command.get('command'), command.get('cwd')
+    if (not isinstance(argv, list) or not all(isinstance(arg, str) for arg in argv)
+            or not isinstance(cwd, str) or not Path(cwd).is_absolute()):
+        return {**row, 'reason': 'command argv or absolute cwd is missing/malformed'}
+    values = {}
+    for option in ('--basetemp', '--junitxml'):
+        matches = []
+        for index, argument in enumerate(argv):
+            if argument == option:
+                value = argv[index + 1] if index + 1 < len(argv) else ''
+                matches.append(value if value and not value.startswith('-') else '')
+            elif argument.startswith(option + '='):
+                matches.append(argument[len(option) + 1:])
+        if len(matches) != 1 or not matches[0]:
+            return {**row, 'reason': option + ' must have one nonempty destination'}
+        target = Path(matches[0])
+        values[option] = (target if target.is_absolute() else Path(cwd) / target).resolve()
+    base, junit_path = values['--basetemp'], values['--junitxml']
+    if base.name != 'cases' or junit_path.name != 'pytest.xml' or base.parent != junit_path.parent:
+        return {**row, 'reason': 'pytest output destinations do not identify one runner directory'}
+    recorded = base.parent
+    if recorded == directory.resolve():
+        return {**row, 'classification': 'cohort', 'recorded_directory': str(recorded),
+                'reason': 'Both saved pytest output destinations bind this directory.'}
+    return {**row, 'classification': 'archive', 'recorded_directory': str(recorded),
+            'reason': 'Saved pytest outputs target another directory; retained artifacts are not a separate invocation.'}
+
+
+def discover_cohorts(root):
+    rows = []
+    for directory in sorted(root.iterdir()):
+        if not directory.is_dir():
+            continue
+        evidence = [pin(directory / name) for name in ('command.json', 'outcome.json', 'pytest.xml', 'pytest.log')
+                    if (directory / name).is_file()]
+        if not evidence:
+            continue
+        try:
+            command = json.loads((directory / 'command.json').read_bytes())
+        except (OSError, ValueError) as error:
+            row = {'directory': str(directory), 'classification': 'invalid',
+                   'reason': 'Cannot read saved command: ' + str(error)}
+        else:
+            row = classify_cohort(directory, command)
+        rows.append({**row, 'evidence': evidence})
+    return rows
+
+
+def cohort_directories(discovery):
+    assert all(row['classification'] != 'invalid' for row in discovery), 'ambiguous cohort artifacts: inspect discovery command destinations'
+    return [Path(row['directory']) for row in discovery if row['classification'] == 'cohort']
+
+
+def load_cohort(directory, final, equivalence_cache):
+    row = {'name': directory.name, 'evidence': {}, 'cases': [], 'suites': [], 'problems': []}
+    for name, key in (('command.json', 'command'), ('outcome.json', 'outcome'),
+                      ('pytest.xml', 'junit'), ('pytest.log', 'log')):
+        path = directory / name
+        if path.is_file():
+            row['evidence'][key] = pin(path)
+            if key in ('command', 'outcome'):
+                row[key] = read_json(path)
+            elif key == 'junit':
+                try:
+                    row['cases'], row['suites'] = junit(path)
+                except (ET.ParseError, ValueError) as error:
+                    row['problems'].append('JUnit cannot be parsed: ' + str(error))
+            elif key == 'log':
+                log_text = path.read_text(errors='replace')
+                row['pytest_summary'] = pytest_summary(log_text)
+                row['log_reports_interruption'] = bool(re.search(r'KeyboardInterrupt|Interrupted:', log_text))
+        else:
+            row['problems'].append('missing ' + name)
+    row['junit_entry_counts'] = counts(row['cases'])
+    command = row.get('command', {})
+    recorded_head = command.get('head')
+    if recorded_head not in equivalence_cache:
+        equivalence_cache[recorded_head] = source_equivalence(recorded_head, final)
+    row['source_equivalence'] = equivalence_cache[recorded_head]
+    row['selected_paths'] = selected_paths(command.get('command', []))
+    pytest_arguments = command.get('command', [])[3:]
+    filters = ('-k', '-m', '--deselect', '--ignore', '--ignore-glob', '--last-failed', '--lf', '--collect-only')
+    row['selection_filtered'] = any(arg == flag or arg.startswith(flag + '=')
+                                    for arg in pytest_arguments for flag in filters)
+    if command and command.get('cwd') != str(ROOT):
+        row['problems'].append('command cwd differs from assigned checkout')
+    inventory = command.get('source_inventory', {})
+    if command and inventory.get('ignored_and_hidden_files_included') is not True:
+        row['problems'].append('missing ignored-inclusive runner source inventory')
+    outcome = row.get('outcome', {})
+    expected = {key: row['junit_entry_counts'][key] for key in ('total', 'failed', 'error', 'skipped')}
+    if outcome and outcome.get('counts') != expected:
+        row['problems'].append('saved outcome counts differ from JUnit cases')
+    row['returncode'] = outcome.get('returncode')
+    row['interrupted'] = row['returncode'] == 2 or row.get('log_reports_interruption', False)
+    summary = row.get('pytest_summary')
+    row['junit_entries_without_completed_log_outcome'] = (
+        row['junit_entry_counts']['total'] - summary['completed_total'] if summary else None)
+    if row['interrupted']:
+        row['problems'].append('pytest session interrupted; no clean completion proof')
+        for case in row['cases']:
+            if case['status'] == 'passed':
+                case['junit_status'] = 'passed'
+                case['status'] = 'unconfirmed'
+                case['status_reason'] = ('An interrupted session can emit empty JUnit entries for abandoned cases. '
+                                         'The log aggregate does not identify which individual entries completed.')
+    row['counts'] = counts(row['cases'])
+    row['complete'] = not row['problems'] and bool(row['cases'])
+    row['eligible'] = row['complete'] and row['returncode'] == 0 and row['source_equivalence']['passed']
+    starts = [suite['timestamp'] for suite in row['suites'] if suite.get('timestamp')]
+    row['junit_started_at'] = min(starts) if starts else None
+    # Saved JUnit start is preferred. For a still-incomplete invocation use its
+    # command-file time so it cannot silently disappear behind an earlier pass.
+    fallback = Path(row['evidence']['command']['path']).stat().st_mtime if 'command' in row['evidence'] else directory.stat().st_mtime
+    row['order_time'] = datetime.fromisoformat(row['junit_started_at']).timestamp() if starts else fallback
+    return row
+
+
+def selected(row, file, function=None, *, whole_file=False):
+    for selector in row['selected_paths']:
+        path, node = selector['path'], selector['node']
+        if whole_file and node is not None:
+            continue
+        if file == path:
+            if function is None or node is None or node.split('::')[-1].split('[', 1)[0] == function:
+                return True
+        elif node is None and file.startswith(path.rstrip('/') + '/'):
+            return True
+    return False
+
+
+def file_cases(row, file):
+    module = str(Path(file).with_suffix('')).replace('/', '.')
+    return [case for case in row['cases']
+            if case['classname'] == module or case['classname'].startswith(module + '.')]
+
+
+def expected_cases(file, function):
+    tree = ast.parse((ROOT / file).read_bytes(), filename=file)
+    node, = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == function]
+    count = 1
+    for decorator in node.decorator_list:
+        if (isinstance(decorator, ast.Call) and isinstance(decorator.func, ast.Attribute)
+                and decorator.func.attr == 'parametrize'):
+            values = decorator.args[1] if len(decorator.args) > 1 else next(
+                keyword.value for keyword in decorator.keywords if keyword.arg == 'argvalues')
+            assert isinstance(values, (ast.List, ast.Tuple)), 'explicit parameter census needed for ' + function
+            count *= len(values.elts)
+    return count
+
+
+def regression_proof(cohorts, file, function):
+    expected = expected_cases(file, function)
+    invocations = [row for row in cohorts if selected(row, file, function)]
+    cases = {}
+    for row in invocations:
+        for case in file_cases(row, file):
+            if case['name'].split('[', 1)[0] == function:
+                cases[(case['classname'], case['name'])] = {**case, 'cohort': row['name'],
+                    'cohort_complete': row['complete'], 'cohort_returncode': row['returncode'],
+                    'source_equivalent': row['source_equivalence']['passed'],
+                    'junit': row['evidence'].get('junit')}
+    records = list(cases.values())
+    newest = invocations[-1] if invocations else None
+    passed = bool(newest and newest['eligible'] and not newest['selection_filtered']) and len(records) == expected and all(
+        case['status'] == 'passed' and case['cohort_complete'] and case['cohort_returncode'] == 0
+        and case['source_equivalent'] for case in records)
+    return {'file': file, 'test': function, 'expected_cases_from_source': expected,
+            'source': pin(ROOT / file), 'counts': counts(records), 'passed': passed,
+            'cases': records, 'invocations': [row['name'] for row in invocations]}
+
+
+def file_proof(cohorts, file):
+    invocations = [row for row in cohorts if selected(row, file, whole_file=True)
+                   and not row['selection_filtered']]
+    row = invocations[-1] if invocations else None
+    cases = file_cases(row, file) if row else []
+    result = counts(cases)
+    passed = bool(row and row['eligible'] and result['passed'] > 0
+                  and result['failed'] == result['error'] == 0)
+    return {'file': file, 'source': pin(ROOT / file), 'passed': passed, 'counts': result,
+            'cohort': row['name'] if row else None, 'returncode': row['returncode'] if row else None,
+            'status': ('complete with skips' if passed and result['skipped'] else 'passed') if passed
+                      else ('session failed or incomplete' if row else 'no complete-file invocation'),
+            'invocations': [item['name'] for item in invocations],
+            'junit': row['evidence'].get('junit') if row else None}
+
+
+def commits():
+    result = []
+    for line in git('log', '--first-parent', '--reverse', '--format=%H%x00%s', H2_HEAD + '..HEAD').decode().splitlines():
+        commit, subject = line.split('\0', 1)
+        files = git('diff-tree', '--no-commit-id', '--name-only', '-r', commit).decode().splitlines()
+        result.append({'commit': commit, 'subject': subject, 'files': files,
+                       'issues': [issue for issue in ISSUES if re.search(r'(?<!\d)' + str(issue) + r'(?!\d)', subject)]})
+    return result
+
+
+def required_files(changed, tracked_tests):
+    modules = {Path(name).stem for name in changed if name.startswith('src/data_sheets_schema/') and name.endswith('.py')}
+    needed = {name for name in changed if name.startswith('tests/') and Path(name).name.startswith('test_') and name.endswith('.py')}
+    for name in tracked_tests:
+        text = (ROOT / name).read_text()
+        if any(re.search(r'(?<!\w)' + re.escape(module) + r'(?!\w)', text) for module in modules):
+            needed.add(name)
+    return sorted(needed)
+
+
+def audit_proof(path, head):
+    audit = read_json(path)
+    assert audit['head'] == head, 'final audit must describe current HEAD'
+    for row in audit['protected']:
+        assert pin(ROOT / row['path'])['sha256'] == row['sha256']
+    for manifest in audit['manifests']:
+        assert pin(ROOT / manifest['path'])['sha256'] == manifest['sha256']
+        for module in manifest['modules']:
+            assert pin(ROOT / module['path'])['sha256'] == module['actual_sha256']
+    for name, digest in audit['changed_file_hashes'].items():
+        assert pin(ROOT / name)['sha256'] == digest, name
+    return {'record': audit, 'evidence': pin(path),
+            'passed': all(row['unchanged'] for row in audit['protected']) and not audit['pin_proposal_required']
+                      and all(module['matches'] for manifest in audit['manifests'] for module in manifest['modules'])}
+
+
+def review_ledger(regressions, coverage):
+    sources, findings = [], []
+    for name in REVIEW_FILES:
+        path = SCRATCH / name
+        document = read_json(path)
+        check_nested_pins(document)
+        sources.append({'evidence': pin(path), 'record': document})
+        findings.extend(document.get('findings', [document] if 'finding_id' in document or 'id' in document else []))
+    closure_path = SCRATCH / 'final-review-closure.json'
+    closure = read_json(closure_path) if closure_path.is_file() else None
+    if closure is not None:
+        check_nested_pins(closure)
+    declared = {row.get('id', row.get('finding_id')): row for row in closure.get('findings', [])} if closure else {}
+    by_test = {row['test']: row for row in regressions}
+    result = []
+    for finding in findings:
+        identity = finding.get('id', finding.get('finding_id'))
+        proof = [by_test[name] for name in FINDING_TESTS.get(identity, ())]
+        if identity == 'G2-REVIEW-6218-F2':
+            proof = [coverage[name] for name in ('tests/test_native_u4b_a3_reservation.py', 'tests/test_native_u3k_freshness_order.py')]
+        if identity in ('G2-REVIEW-LEGACY-F1', 'G2-REVIEW-LEGACY-F2'):
+            proof = [coverage[finding['required_clean_full_file']]]
+        declaration = declared.get(identity)
+        declared_evidence = [checked_pin(item) for item in declaration.get('evidence', [])] if declaration else []
+        test_passed = all(row['passed'] for row in proof) if proof else None
+        closed = bool(declaration and declaration.get('status') in ('closed', 'corrected-and-verified', 'verified')
+                      and declared_evidence and (test_passed is True if proof else True))
+        withdrawn = identity == 'G2-REVIEW-6217-F3' and finding.get('status') == 'disputed; withdrawn by reviewer'
+        result.append({'finding': finding, 'id': identity, 'relevant_proof': proof,
+            'relevant_tests_passed': test_passed, 'closure_declaration': declaration,
+            'closure_evidence': declared_evidence, 'closed_by_verified_declaration': closed,
+            'reported_status': 'disputed/withdrawn after source check; no fix required; lead filing retained' if withdrawn
+                else 'required clean rerun verified; original failure and undetermined cause retained; lead filing retained'
+                    if closed and identity in ('G2-REVIEW-LEGACY-F1', 'G2-REVIEW-LEGACY-F2')
+                else 'verified correction; lead filing status retained' if closed
+                else 'open for lead closure' + ('; relevant regressions passed' if test_passed else '')})
+    return {'sources': sources, 'findings': result, 'closure': closure,
+            'closure_evidence': pin(closure_path) if closure else None}
+
+
+def clean_text(value):
+    return value.replace(chr(64), '[at]')
+
+
+def main():
+    assert REPORT.is_dir() and SCRATCH.is_dir()
+    baseline_path = SCRATCH / 'baseline/index.json'
+    baseline = read_json(baseline_path)
+    for record in baseline['issues'] + baseline['reviews']:
+        checked_pin(record)
+    for source in baseline['sources']:
+        checked_pin(source['snapshot'])
+    head = git('rev-parse', 'HEAD').decode().strip()
+    assert not git('status', '--porcelain', '--', *SOURCE_SCOPE), 'source and tests must be committed'
+    audit = audit_proof(SCRATCH / 'source-audit-final.json', head)
+    history = commits()
+    changed = git('diff', '--name-only', baseline['base'], head, '--', 'src', 'tests').decode().splitlines()
+    tracked_tests = [name for name in git('ls-files', 'tests').decode().splitlines()
+                     if Path(name).name.startswith('test_') and name.endswith('.py')]
+    required = required_files(changed, tracked_tests)
+    # A touched test remains required even if a later repair restored its bytes.
+    touched = {name for row in history if row['issues'] for name in row['files']}
+    required = sorted(set(required) | set(required_files(touched, tracked_tests)))
+    equivalent = {}
+    discovery = discover_cohorts(SCRATCH)
+    cohort_dirs = cohort_directories(discovery)
+    cohorts = sorted((load_cohort(path, head, equivalent) for path in cohort_dirs),
+                     key=lambda row: (row['order_time'], row['name']))
+    coverage = {name: file_proof(cohorts, name) for name in required}
+    regressions = {issue: [regression_proof(cohorts, file, function)
+        for file, names in files.items() for function in names] for issue, files in REGRESSIONS.items()}
+    proposals = {}
+    for issue, relative in ((6207, 'proposal-6207-after-6217/proposal.json'),
+                             (6225, 'issue-6225-proposal.json')):
+        path = SCRATCH / relative
+        proposals[issue] = {'record': read_json(path), 'evidence': pin(path)}
+        check_nested_pins(proposals[issue]['record'])
+    proposal = proposals[6207]['record']
+    assert proposal['applied'] is False and proposal['pin_rotation_applied'] is False
+    for key in ('patch', 'apply_check', 'test_plan', 'generator'):
+        checked_pin(proposal[key])
+    assert read_json(proposal['apply_check']['path'])['returncode'] == 0
+    proposal['head_equivalence'] = source_equivalence(proposal['head'], head)
+    proposal_review_path = SCRATCH / 'review-6207-after-6217.json'
+    proposal_review = read_json(proposal_review_path)
+    check_nested_pins(proposal_review)
+    assert proposal_review['proposal'] == proposals[6207]['evidence']
+    proposals[6207]['review'] = {'record': proposal_review, 'evidence': pin(proposal_review_path)}
+    for issue in (6225,):
+        assert proposals[issue]['record']['status'] == 'not fixed'
+        proposals[issue]['markdown'] = pin(SCRATCH / ('issue-' + str(issue) + '-proposal.md'))
+    historical_path = SCRATCH / 'issue-6217-proposal.json'
+    historical_6217 = {'record': read_json(historical_path), 'evidence': pin(historical_path),
+        'markdown': pin(SCRATCH / 'issue-6217-proposal.md'),
+        'disposition': 'Superseded: the assignment authorized the implementation; this is retained history, not the current issue status.',
+        'superseding_record': pin(SCRATCH / 'proposal-6217-implementation/review-6217-superseding.json')}
+    check_nested_pins(historical_6217['record'])
+    ledger = review_ledger([proof for proofs in regressions.values() for proof in proofs], coverage)
+    inventory_path = SCRATCH / 'runner-inventory-verification/result.json'
+    inventory = read_json(inventory_path)
+    check_nested_pins(inventory)
+    assert inventory['passed'] == sum(row['passed'] is True for row in inventory['cases'])
+    assert inventory['failed'] == sum(row['passed'] is not True for row in inventory['cases'])
+    report_verification_path = SCRATCH / 'report-closure-pin-verification-after-discovery-fix/result.json'
+    report_verification = read_json(report_verification_path)
+    check_nested_pins(report_verification)
+    assert report_verification['reporter'] == pin(Path(__file__).resolve())
+    interruption_path = SCRATCH / 'engine-admission-interruption-20261114/cleanup-1794630386052545000.json'
+    interruption = read_json(interruption_path)
+    check_nested_pins(interruption)
+    assert interruption['safe_to_release_source_freeze'] is True
+    issues = []
+    for issue in ISSUES:
+        linked = [row for row in history if issue in row['issues']]
+        repairs = [row for row in linked if any(name.startswith(('src/', 'tests/')) for name in row['files'])]
+        files = required_files({name for row in repairs for name in row['files']}, tracked_tests)
+        proofs = regressions.get(issue, [])
+        if issue in proposals:
+            status = 'not fixed'
+            reason = ('Unapplied controller-pin proposal; approval and validation required.' if issue == 6207
+                      else proposals[issue]['record']['decision_required'])
+        else:
+            passed = bool(repairs and proofs and files) and audit['passed'] and all(row['passed'] for row in proofs)
+            passed = passed and all(coverage[name]['passed'] for name in files)
+            status = 'fixed' if passed else 'not fixed'
+            reason = ('Required regressions and complete-file checks passed on equivalent source.' if passed
+                      else 'Implementation is recorded, but required saved verification is incomplete or failing.'
+                      if repairs else 'No applied repair commit with the required saved verification is recorded.')
+        issues.append({'issue': issue, 'status': status, 'reason': reason, 'commits': linked,
+                       'repair_commits': repairs, 'regressions': proofs, 'required_files': files,
+                       'file_proof': [coverage[name] for name in files], 'proposal': proposals.get(issue)})
+    data = {'answer': [{'issue': row['issue'], 'status': row['status'], 'reason': row['reason']} for row in issues],
+        'branch': git('branch', '--show-current').decode().strip(), 'head': head,
+        'issues': issues, 'cohorts': cohorts, 'cohort_artifact_discovery': discovery,
+        'required_file_coverage': list(coverage.values()),
+        'source_audit': audit, 'baseline': baseline, 'baseline_evidence': pin(baseline_path),
+        'commits_since_h2_handoff': history, 'g2_changed_source_and_tests': changed,
+        'review_ledger': ledger, 'report_producer': pin(Path(__file__).resolve()),
+        'superseded_6217_proposal': historical_6217,
+        'report_revision_verification': {'record': report_verification, 'evidence': pin(report_verification_path)},
+        'interrupted_cohort_cleanup': {'record': interruption, 'evidence': pin(interruption_path)},
+        'runner_inventory_verification': {'record': inventory, 'evidence': pin(inventory_path)},
+        'runner': pin(ROOT / 'scripts/adhoc/run_g2_checks_20261114.py'),
+        'environment': {'report_python': sys.version, 'platform': sys.platform,
+            'scope': 'Local macOS primary Python 3.13 evidence; no CI Python 3.12 or complete CI result is claimed.'},
+        'limitations': ['Source commits alone are never accepted as fix proof.',
+            'No provider, model, native binary, real host probe or production campaign is authorized by this report.',
+            'Skipped cases remain skipped; every named issue regression must pass individually.',
+            'Interrupted-session JUnit entries without a failure element are unconfirmed individually; the log completed-test aggregate is retained separately.',
+            'The completed H2 handoff is a separate immutable record and is not rewritten here.']}
+    lines = ['G2 launch fixes: ' + '; '.join(str(row['issue']) + ' ' + row['status'] for row in issues) + '.', '',
+             'Branch `' + data['branch'] + '`, HEAD `' + head + '`.', '']
+    for row in issues:
+        commit_text = ', '.join(item['commit'][:12] for item in row['commits']) or 'none recorded'
+        proof_cases = [case for proof in row['regressions'] for case in proof['cases']]
+        result = counts(proof_cases)
+        summary = ', '.join(str(result[key]) + ' ' + key for key in ('passed', 'failed', 'error', 'skipped', 'unconfirmed'))
+        verification = (' Required regression results: ' + summary + '.' if row['regressions']
+                        else ' No applied-fix test proof is claimed.')
+        lines.append('- ' + str(row['issue']) + ': ' + row['status'] + '. ' + row['reason']
+                     + ' Commits: ' + commit_text + '.' + verification)
+    lines += ['', 'Verification cohorts:', '']
+    for row in cohorts:
+        summary = ', '.join(str(row['counts'][key]) + ' ' + key for key in ('passed', 'failed', 'error', 'skipped', 'unconfirmed'))
+        lines.append('- ' + row['name'] + ': ' + summary + '; exit ' + str(row['returncode'])
+            + '; ' + ('interrupted and incomplete' if row['interrupted'] else 'complete' if row['complete'] else 'incomplete')
+            + '; source ' + ('equivalent' if row['source_equivalence']['passed'] else 'unverified or changed') + '.')
+        if row['interrupted']:
+            log_summary = row.get('pytest_summary')
+            lines.append('  JUnit contains ' + str(row['junit_entry_counts']['total']) + ' entries; '
+                         + ('pytest completed-test summary: `' + log_summary['line'] + '`; '
+                            + str(row['junit_entries_without_completed_log_outcome']) + ' entries have no corresponding completed outcome in that aggregate.'
+                            if log_summary else 'no completed-test summary was saved.')
+                         + ' Apparent JUnit passes are not individual completion proof.')
+        for case in row['cases']:
+            if case['status'] in ('failed', 'error'):
+                reason = ' '.join((case['detail']['message'] or case['detail']['text']).split())
+                lines.append('  - ' + case['name'] + ': ' + reason[:400])
+    lines += ['', 'Required complete-file checks:', '']
+    for row in coverage.values():
+        summary = ', '.join(str(row['counts'][key]) + ' ' + key for key in ('passed', 'failed', 'error', 'skipped', 'unconfirmed'))
+        lines.append('- `' + row['file'] + '`: ' + row['status'] + '; ' + summary
+                     + '; cohort ' + str(row['cohort']) + '; exit ' + str(row['returncode']) + '.')
+    lines += ['', 'Review findings:', '']
+    for row in ledger['findings']:
+        description = row['finding'].get('finding', '')
+        lines.append('- ' + row['id'] + ': ' + row['reported_status'] + '.'
+                     + (' ' + description if isinstance(description, str) and description else ''))
+    lines += ['', '6207 proposal: `' + proposals[6207]['evidence']['path'] + '`; no source or pin rotation applied. '
+        + proposal['remaining_limit'],
+        '6217 former decision proposal is superseded by the authorized implementation; retained history: `'
+        + historical_6217['evidence']['path'] + '`.',
+        '6225 decision proposal: `' + proposals[6225]['evidence']['path'] + '`.',
+        'Source/protected/pin audit: `' + audit['evidence']['path'] + '`; '
+        + ('passed.' if audit['passed'] else 'requires attention.'),
+        'Exact commands, JUnit pins, parameter counts, source comparisons and review evidence are retained in the JSON twin.',
+        'Local macOS Python 3.13 checks do not certify CI Python 3.12 or the full CI suite. Helper GitHub writes are prohibited; lead filing and publication remain separate.']
+    markdown = clean_text('\n'.join(lines) + '\n')
+    json_path, md_path = REPORT / (STEM + '.json'), REPORT / (STEM + '.md')
+    assert not json_path.exists() and not md_path.exists(), 'retain any earlier G2 handoff'
+    encoded = (json.dumps(data, indent=2) + '\n').replace(chr(64), '\\u0040')
+    assert chr(64) not in markdown and chr(64) not in encoded
+    json_path.write_text(encoded)
+    md_path.write_text(markdown)
+    assert json.loads(json_path.read_bytes()) == data and md_path.read_text() == markdown
+    print(json.dumps({'markdown': pin(md_path), 'json': pin(json_path)}))
+
+
+if __name__ == '__main__':
+    main()
