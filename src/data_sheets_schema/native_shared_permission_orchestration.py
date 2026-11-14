@@ -28,6 +28,9 @@ def loaded_permission_inputs(dependencies=None):
 
 
 def verify_saved_probe(raw_manifest: bytes, *, expected: dict) -> dict:
+    from .native_u4b_runtime import is_prepared_runtime, validate_prepared_runtime
+    if is_prepared_runtime(expected.get('runtime')):
+        validate_prepared_runtime(expected['runtime'])
     dependencies = authority.dependency_identity()
     with loaded_permission_inputs(dependencies) as (controls, sources), \
             authority.loaded_verified_package_module('data_sheets_schema.native_shared_permissions',

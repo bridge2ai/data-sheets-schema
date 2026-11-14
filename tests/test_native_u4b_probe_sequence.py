@@ -395,6 +395,16 @@ def test_bound_phase_runs_genuine_saved_verifier_after_mocked_child_boundary(pre
     assert len(calls) == 1
     assert len(reads) >= 3 and set(reads) == {196_000_000}
     assert result['permission']['sha256'] == sequence.sha(output.read_bytes())
+    failure = prepared['root'] / 'bound-failure.json'
+    failure.write_text('{}')
+    with pytest.raises(ValueError, match='bound-failure.json'):
+        sequence.validate_bound_probe(prepared['runtime'], output)
+    with pytest.raises(ValueError, match='bound-failure.json'):
+        sequence.validate_observation(prepared['path'])
+    from data_sheets_schema import native_shared_permission_orchestration as permission
+    with pytest.raises(ValueError, match='bound-failure.json'):
+        permission.verify_saved_probe(output.read_bytes(), expected=expected)
+    failure.unlink()
     with pytest.raises(FileExistsError):
         sequence.produce_bound_probe(prepared['authorization'], expected)
     assert len(calls) == 1
