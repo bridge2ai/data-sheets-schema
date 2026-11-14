@@ -73,3 +73,68 @@ def test_packet_prospective_case_alias_refuses_without_creating_either_spelling(
     paths['packet-directory'] = alias
     assert_refusal_without_effects(paths, tmp_path, monkeypatch)
     assert not alias.exists() and not target.exists()
+
+
+@pytest.mark.parametrize('reserved', ['attempt_directory', 'evidence_directory', 'capture_state_directory'])
+@pytest.mark.parametrize('relation', ['equal', 'ancestor', 'descendant'])
+def test_guard_overlap_refuses_before_packet_probe_claim_or_command(tmp_path, monkeypatch, reserved, relation):
+    paths = fixture.paths(tmp_path)
+    target = registered_directories(paths)[reserved]
+    paths['subscription-guard'] = {'equal': target, 'ancestor': target.parent,
+                                   'descendant': target / 'guard.json'}[relation]
+    assert_refusal_without_effects(paths, tmp_path, monkeypatch)
+    assert not paths['packet-directory'].exists()
+
+
+@pytest.mark.parametrize('reserved,relation', [
+    ('attempt_directory', 'equal'), ('attempt_directory', 'ancestor'), ('attempt_directory', 'descendant'),
+    ('evidence_directory', 'equal'), ('evidence_directory', 'ancestor'), ('evidence_directory', 'descendant'),
+    ('capture_state_directory', 'ancestor'), ('capture_state_directory', 'descendant'),
+])
+def test_capture_output_overlap_refuses_before_any_output_effect(tmp_path, monkeypatch, reserved, relation):
+    paths = fixture.paths(tmp_path)
+    target = registered_directories(paths)[reserved]
+    paths['output-directory'] = {'equal': target, 'ancestor': target.parent,
+                                 'descendant': target / 'capture-output'}[relation]
+    assert_refusal_without_effects(paths, tmp_path, monkeypatch)
+    assert not paths['packet-directory'].exists()
+
+
+def test_unregistered_disjoint_capture_root_refuses_without_writing(tmp_path, monkeypatch):
+    paths = fixture.paths(tmp_path)
+    wrong = tmp_path / 'unregistered-captures'
+    paths['output-directory'] = wrong
+    assert_refusal_without_effects(paths, tmp_path, monkeypatch)
+    assert not wrong.exists() and not paths['packet-directory'].exists()
+
+
+@pytest.mark.parametrize('registered,alias', [('Attempt', 'attempt'), ('caf\u00e9', 'cafe\u0301')])
+def test_guard_prospective_alias_refuses_without_touching_reservations(tmp_path, monkeypatch, registered, alias):
+    paths = fixture.paths(tmp_path, attempt_directory_name=registered)
+    paths['subscription-guard'] = tmp_path / alias
+    assert_refusal_without_effects(paths, tmp_path, monkeypatch)
+    assert not paths['subscription-guard'].exists()
+
+
+def test_capture_output_must_use_exact_registered_spelling(tmp_path, monkeypatch):
+    paths = fixture.paths(tmp_path)
+    paths['output-directory'] = tmp_path / 'WORD-STATE'
+    assert_refusal_without_effects(paths, tmp_path, monkeypatch)
+    assert not paths['packet-directory'].exists()
+
+
+def test_exact_registered_capture_state_is_the_allowed_overlap(tmp_path, monkeypatch):
+    paths = fixture.paths(tmp_path)
+    state = registered_directories(paths)['capture_state_directory']
+    assert paths['output-directory'] == state
+    before = fixture.capture_state_snapshot(paths)
+    calls = fixture.fake_commands(monkeypatch, paths)
+    assert fixture.run_sequence(fixture.argv(paths)) == 0
+    assert len(calls) == 3 and fixture.record(paths)['status'] == 'completed'
+    after = fixture.capture_state_snapshot(paths)
+    assert all(name in after and after[name] == raw for name, raw in before.items())
+    assert fixture.manifest(paths).is_file()
+    assert fixture.manifest(paths).is_relative_to(state / 'captures')
+    directories = registered_directories(paths)
+    assert not directories['attempt_directory'].exists()
+    assert not directories['evidence_directory'].exists()

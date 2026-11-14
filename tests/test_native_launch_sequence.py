@@ -58,7 +58,7 @@ def deny_real_commands(monkeypatch):
     monkeypatch.setattr(entry, 'exec', fixture_exec, raising=False)
 
 
-def paths(tmp_path, *, registration_padding=0):
+def paths(tmp_path, *, registration_padding=0, attempt_directory_name='NEVER-RESERVED-ATTEMPT'):
     base = tmp_path.resolve()
     result = {name: base / (name + '.json') for name in
               ('registration', 'review', 'launch-word', 'account-choice', 'ci')}
@@ -66,7 +66,7 @@ def paths(tmp_path, *, registration_padding=0):
         path.write_bytes(b'{}\n')
     digest=guard.sha(Path(seq.__file__).read_bytes())
     result['registration'].write_bytes(guard.canonical({'registration': {
-        'attempt_directory': str(base / 'NEVER-RESERVED-ATTEMPT'),
+        'attempt_directory': str(base / attempt_directory_name),
         'evidence_directory': str(base / 'NEVER-RESERVED-EVIDENCE'),
         'attempt_id': 'sequence-fixture',
         # The canary's registered pair (D143): native_run_limits refuses a
@@ -93,9 +93,38 @@ def paths(tmp_path, *, registration_padding=0):
     with words.locked(value, reg_raw, create=True) as journal:
         journal.activate(result['launch-word'].read_bytes(), result['review'].read_bytes(), value,
                          now=words._timestamp(word['authorized_at'], 'fixture word'))
-    result.update({'output-directory': base / 'captures', 'subscription-guard': base / 'guard.json',
+    result.update({'output-directory': base / 'word-state', 'subscription-guard': base / 'guard.json',
                    'packet-directory': base / 'packet'})
     return result
+
+
+def capture_state_snapshot(paths):
+    """Ignored/hidden entries included; distinguish an absent journal root."""
+    root = paths['output-directory']
+    if not os.path.lexists(root):
+        return None
+    return {str(path.relative_to(root)): None if path.is_dir() else path.read_bytes()
+            for path in root.rglob('*')}
+
+
+def assert_capture_state_preserved(paths, before, *, allow_start_events=False):
+    """Preserve prior journal bytes and every capture slot; allow only starts."""
+    after = capture_state_snapshot(paths)
+    if before is None:
+        assert after is None
+        return
+    assert after is not None
+    assert all(name in after and after[name] == raw for name, raw in before.items())
+    additions = after.keys() - before.keys()
+    if allow_start_events:
+        for name in additions:
+            assert len(Path(name).parts) == 2 and Path(name).parent == Path('events')
+            assert after[name] is not None and guard.strict_json(after[name])['type'] == 'sequence_start'
+    else:
+        assert additions == set()
+    capture_rows = lambda rows: {name: raw for name, raw in rows.items()
+                                 if name == 'captures' or name.startswith('captures/')}
+    assert capture_rows(after) == capture_rows(before)
 
 
 def argv(paths):
@@ -410,6 +439,7 @@ def test_own_script_bytes_saved_before_any_command_without_self_hash(tmp_path, m
 ])
 def test_delegated_start_requires_both_independent_windows(tmp_path, monkeypatch, direction, confirmation, accepted):
     p = paths(tmp_path)
+    capture_before = capture_state_snapshot(p)
     now = '2026-11-12T12:00:00Z'
     monkeypatch.setattr(seq, '_utc_now', lambda: now)
     calls = fake_commands(monkeypatch, p)
@@ -423,7 +453,7 @@ def test_delegated_start_requires_both_independent_windows(tmp_path, monkeypatch
     assert doc['started_at'] == now
     if not accepted:
         assert doc['steps'] == []
-        assert not p['output-directory'].exists()
+        assert_capture_state_preserved(p, capture_before)
 
 
 @pytest.mark.parametrize('timestamp', [

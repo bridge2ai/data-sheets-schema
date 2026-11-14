@@ -70,15 +70,23 @@ def _path(value):
     return path
 
 
-def _require_packet_separation(packet, registration_raw):
+def _require_output_separation(packet, guard_path, capture_root, registration_raw):
     """Read captured entry bytes before any packet creation or journal write."""
     from .native_path_identity import overlaps
     from .native_u4b_policy import registered_policy
     value = guard.strict_json(registration_raw)['registration']
     reservations = [_path(value[name]) for name in ('attempt_directory', 'evidence_directory')]
-    reservations.append(Path(registered_policy(value['runtime'])['capture_state_directory']))
-    if any(overlaps(packet, reserved) for reserved in reservations):
+    capture_state = Path(registered_policy(value['runtime'])['capture_state_directory'])
+    if any(overlaps(packet, reserved) for reserved in (*reservations, capture_state)):
         raise ValueError('sequence packet overlaps registered reservation or capture state')
+    if any(overlaps(guard_path, reserved) for reserved in (*reservations, capture_state)):
+        raise ValueError('sequence guard overlaps registered reservation or capture state')
+    # Capture intentionally writes inside its registered journal. Only this
+    # exact equality is allowed; a sibling, ancestor or descendant is not it.
+    if capture_root != capture_state:
+        raise ValueError('sequence capture output differs from registered capture state')
+    if any(overlaps(capture_root, reserved) for reserved in reservations):
+        raise ValueError('sequence capture output overlaps a registered reservation')
 
 
 def _new(path):
@@ -251,7 +259,8 @@ def _run_verified(argv, *, verified_script, entry_inputs):
             capture_root = _path(args.output_directory)
             guard_path = _path(args.subscription_guard)
             packet = _path(args.packet_directory)
-            _require_packet_separation(packet, entry_inputs[Path(args.registration)])
+            _require_output_separation(packet, guard_path, capture_root,
+                                       entry_inputs[Path(args.registration)])
             if packet.exists():
                 if not packet.is_dir() or packet.resolve(strict=True) != packet:
                     raise ValueError('packet must be a resolved directory')
