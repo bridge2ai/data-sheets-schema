@@ -212,6 +212,8 @@ def public_proof(cohorts, name, node):
     item['status'] = ('complete' if completed else str(result.get('first_stop') or result.get('state'))
                       if result else 'pytest failed before saved public result' if item['pytest_failures']
                       else 'no saved public result')
+    item['show_failure_summary'] = bool(item['failure_summary']) and not (
+        result and result.get('state') == 'failed' and result.get('first_stop'))
     item['passed'] = isolated and cohort['passed'] and cohort['counts']['total'] == 1 and completed
     return item
 
@@ -251,8 +253,11 @@ def file_proof(cohorts, path):
         if full_selected:
             cases = [case for case in cohort['cases'] if case['classname'] == classname
                      or case['classname'].startswith(classname + '.')]
+            assertions_passed = bool(cases) and all(case['status'] == 'passed' for case in cases)
+            returncode = cohort.get('outcome', {}).get('returncode')
             candidates.append({'cohort': cohort['name'], 'counts': counts(cases),
-                'passed': cohort['complete'] and bool(cases) and all(case['status'] == 'passed' for case in cases),
+                'assertions_passed': assertions_passed, 'outcome_returncode': returncode,
+                'passed': cohort['complete'] and returncode == 0 and assertions_passed,
                 'evidence_mtime_ns': cohort['evidence_mtime_ns']})
     if not candidates:
         return {'path': str(path), 'passed': False, 'status': 'no complete-file invocation recorded'}
@@ -265,6 +270,7 @@ def main():
     source_path = SCRATCH / 'source-audit-final.json'
     source = read_json(source_path)
     head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
+    branch = subprocess.check_output(['git', 'branch', '--show-current'], cwd=ROOT, text=True).strip()
     assert head == source['head'], 'Final source audit must name current HEAD.'
     for relative, digest in source.get('changed_file_hashes', {}).items():
         assert sha((ROOT / relative).read_bytes()) == digest, 'Source changed after audit: ' + relative
@@ -332,15 +338,27 @@ def main():
                         'scope': 'assigned repair' if mapped else 'integration, provenance or test-runner support'})
     review_path = SCRATCH / 'review.json'
     review = read_json(review_path)
+    budget_review_path = SCRATCH / 'budget-origin-review.json'
+    budget_review = read_json(budget_review_path)
+    callback_analysis_path = SCRATCH / 'correction/callback-stop-analysis.json'
+    callback_analysis = read_json(callback_analysis_path)
+    for callback in callback_analysis['answer']['stalled_callbacks']:
+        request_path = callback.get('request_file', {}).get('path')
+        callback['request_path_present_at_report'] = bool(request_path and Path(request_path).is_file())
+        if not callback['request_path_present_at_report']:
+            callback.pop('request_file', None)
     pin_changes = [entry for manifest in source['manifests'] for entry in manifest['modules'] if not entry['matches']]
     incomplete = [row['name'] for row in cohorts if not row['complete']]
     unavailable = [name for name in (*PUBLIC, 'native', 'audit', 'budget', 'focused', 'guards', 'failure', 'dependents')
                    if not any(row['name'] == name for row in cohorts)]
-    record = {'answer': issues, 'head': head, 'source_audit': source, 'source_audit_evidence': pin(source_path),
+    record = {'answer': issues, 'branch': branch, 'head': head, 'source_audit': source, 'source_audit_evidence': pin(source_path),
         'cohorts': cohorts, 'public_paths': public, 'required_file_coverage': coverage,
         'incomplete_cohorts': incomplete, 'required_cohorts_not_run': unavailable,
         'commits': commits, 'commit_map_evidence': pin(commits_path),
         'review': review, 'review_evidence': pin(review_path),
+        'budget_origin_review': budget_review, 'budget_origin_review_evidence': pin(budget_review_path),
+        'correction_callback_analysis': callback_analysis,
+        'correction_callback_analysis_evidence': pin(callback_analysis_path),
         'compatibility': compatibility, 'compatibility_evidence': pin(compatibility_path),
         'controller_pin_mismatches': pin_changes, 'report_producer': pin(Path(__file__).resolve()),
         'environment': {'report_interpreter': sys.version, 'platform': sys.platform,
@@ -356,6 +374,7 @@ def main():
     json_path.write_text(json_text)
     json_pin = pin(json_path)
     lines = ['; '.join(row['issue'] + ': ' + row['status'] for row in issues) + '.', '',
+        'Branch: `' + branch + '`. Final HEAD: `' + head + '`.', '',
         'Each status below comes from the saved verification evidence. Partial or missing verification remains explicit.', '']
     for row in issues:
         lines.append('- ' + row['issue'] + ' — ' + row['status'] + '. ' + row['reason'])
@@ -369,17 +388,31 @@ def main():
         spans = [span['seconds'] for entry in item['timing'] for span in entry['capture_to_reservation']]
         duration = ', '.join(format(value, '.9f') + ' s' for value in spans) if spans else 'unknown; no retained capture/reservation pair'
         lines.append('- ' + item['name'] + ': ' + item['status'] + '; capture to reservation: ' + duration + '.')
-        if item.get('failure_summary'):
+        if item.get('show_failure_summary'):
             lines.append('  - Pytest failure: ' + item['failure_summary'])
         for result in item['results']:
             lines.append('  - Result: `' + result['evidence']['path'] + '`.')
         for timing in item['timing']:
             lines.append('  - Sidecar: `' + timing['evidence']['path'] + '`.')
+    for callback in callback_analysis['answer']['stalled_callbacks']:
+        identity = (callback['request_id'] + ' (' + callback['callback_id']
+                    + '; tool ' + callback['tool_use_id'] + ')')
+        request = (' Read of `' + callback['request_file']['path'] + '`'
+                   if callback['request_path_present_at_report'] else '')
+        duration = format(callback['request_to_cleanup_entry']['seconds'], '.9f')
+        timeout = str(callback_analysis['registered_callback_timeout_seconds_from_initialize'])
+        remaining = format(callback_analysis['remaining_child_deadline_at_cleanup_entry']['seconds'], '.9f')
+        lines += ['', 'Correction remains a blocker for 6200: callback ' + identity + request
+            + ' has a request-to-cleanup interval of ' + duration + ' s; the saved initialization advertised '
+            + timeout + ' s, and ' + remaining + ' s remained before the recorded child deadline at cleanup entry. '
+            + 'These boundary intervals do not establish an internal cause. Lead diagnosis remains required without changing deadlines. '
+            + 'Evidence: `' + str(callback_analysis_path) + '`.']
     lines += ['', 'Saved verification cohorts:', '']
     for cohort in cohorts:
         result = cohort['counts']
         lines.append('- ' + cohort['name'] + ': ' + ', '.join(str(result[key]) + ' ' + key for key in ('passed', 'failed', 'error', 'skipped'))
-                     + '; ' + ('completed' if cohort['complete'] else 'incomplete') + '.')
+                     + '; ' + ('completed' if cohort['complete'] else 'incomplete')
+                     + '; recorded returncode: ' + str(cohort.get('outcome', {}).get('returncode', 'unavailable')) + '.')
         if 'junit' in cohort['evidence']:
             lines.append('  - JUnit: `' + cohort['evidence']['junit']['path'] + '`.')
         if 'command' in cohort['evidence']:
@@ -395,7 +428,13 @@ def main():
             lines.append('  - Missing saved artifacts: ' + ', '.join(cohort['missing_artifacts']) + '.')
     lines += ['', 'Required complete-file coverage:', '']
     for item in coverage:
-        lines.append('- `' + item['path'] + '`: ' + ('passed' if item['passed'] else 'not fully verified')
+        if item.get('outcome_returncode') is not None and item['outcome_returncode'] != 0:
+            label = 'session failed (returncode ' + str(item['outcome_returncode']) + ')'
+            if item.get('assertions_passed'):
+                label += '; recorded case assertions passed'
+        else:
+            label = 'passed' if item['passed'] else 'not fully verified'
+        lines.append('- `' + item['path'] + '`: ' + label
                      + ('; ' + item['cohort'] if item.get('cohort') else '') + '.')
     lines += ['', 'Missing required cohorts: ' + (', '.join(unavailable) or 'none') + '.',
         'Incomplete recorded cohorts: ' + (', '.join(incomplete) or 'none') + '.', '',
@@ -406,6 +445,8 @@ def main():
         '- Final source audit: `' + str(source_path) + '`.',
         '- Exact-definition compatibility proof: `' + str(compatibility_path) + '`.',
         '- Internal read-only review: `' + str(review_path) + '`; no findings; no tests were run by that review.',
+        '- H2-RESUME-HARNESS-F1: `' + str(budget_review_path) + '`; ' + budget_review['status'] + '. Lead filing remains needed because helper GitHub writes are prohibited.',
+        '- Supplemental budget retains an explicit local src PYTHONPATH override to select the assigned worktree with the primary interpreter. Native/audit retain their exact CI environment. Budget is not literal CI-environment equivalence.',
         '- ' + ('Controller pin mismatches require a review-only proposal; no rotation applied.' if pin_changes else 'Controller manifest entries match the final audit; no pin rotation applied.'),
         '- Local macOS Python 3.13 results do not establish CI Python 3.12 results or a full-suite pass.',
         '- Saved command HEADs and complete case details are preserved in the JSON twin; uncommitted test bytes are not independently identified by HEAD alone.',
