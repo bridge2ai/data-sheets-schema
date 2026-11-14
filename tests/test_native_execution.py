@@ -427,22 +427,36 @@ def test_observation_persistence_failure_always_releases_acquired_assertions(
         with monkeypatch.context() as legacy:
             # Restrict this module's API surface, not Python 3.13 stdlib sys.
             legacy.setattr(execute,'sys',LegacySys())
-            with pytest.raises(OSError) as caught:
-                execute.launch(case['raw'],**case['kwargs'])
-    assert caught.value is observation_error
+            # #6237: a directory-sync failure after the link leaves a readable,
+            # single-link observation, so without a cleanup-write failure the
+            # stopped attempt is published instead of being lost to a refused
+            # read. Every other variant still raises the original error.
+            published=after_link and not cleanup_write_fails
+            if published:
+                final=execute.launch(case['raw'],**case['kwargs'])
+            else:
+                with pytest.raises(OSError) as caught:
+                    execute.launch(case['raw'],**case['kwargs'])
+    attempt=case['root']/'native-attempt'
+    if published:
+        assert final['state']=='failed' and final['runtime_gates_passed'] is False
+        assert final['first_stop']=='launch or runtime failed: LegacyPersistenceError'
+    else:
+        assert caught.value is observation_error
     if after_link:
         assert observation_link_failed
-        assert (case['root']/'native-attempt/runtime-observation.json').is_file()
+        assert (attempt/'runtime-observation.json').is_file()
+        assert (attempt/'runtime-observation.json').stat().st_nlink==1
+        assert not list(attempt.glob('.runtime-observation.json.pending-*'))
     if probe_fails:assert caught.value.__context__ is auth_error
     assert [row[1] for row in events if row[0]=='release']==[3,2,1]
     assert guard.active==[] and len(guard.releases)==3
     if release_raises:assert guard.releases[0]['error_type']=='RuntimeError'
-    attempt=case['root']/'native-attempt'
     assert (attempt/'registration.json').read_bytes()==case['raw']
     assert (attempt/'started.json').is_file()
     assert not (attempt/'transcript.jsonl').exists()
-    assert not (case['root']/'native-evidence/final.json').exists()
-    assert not (case['root']/'native-evidence/published.json').exists()
+    assert (case['root']/'native-evidence/final.json').exists() is published
+    assert (case['root']/'native-evidence/published.json').exists() is published
     if cleanup_write_fails:
         assert caught.value.__notes__==['keep-awake cleanup evidence failed: OSError']
         assert not (attempt/'keep-awake.json').exists()
@@ -450,11 +464,13 @@ def test_observation_persistence_failure_always_releases_acquired_assertions(
         receipt=draft._json((attempt/'keep-awake.json').read_bytes())
         if after_link:
             assert receipt['passed'] is True and receipt['state']=='released'
-            assert caught.value.__notes__==['native lifecycle or publication failed after the original error: ValueError']
         else:
             assert receipt['passed'] is False and receipt['state']=='released_after_failure'
         assert receipt['releases']==guard.releases
-    with pytest.raises((ValueError,OSError)):execute.read_final(case['raw'])
+    if published:
+        assert execute.read_final(case['raw'])==final
+    else:
+        with pytest.raises((ValueError,OSError)):execute.read_final(case['raw'])
     with pytest.raises(ValueError,match='new|resume'):execute.launch(case['raw'],**case['kwargs'])
 
 
