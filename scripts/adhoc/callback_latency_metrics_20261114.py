@@ -46,8 +46,7 @@ def enter(code, offset):
         sys.monitoring.restart_events()
     if code.co_name not in TARGETS.get(name, ()):
         return sys.monitoring.DISABLE
-    sys.monitoring.set_local_events(TOOL, code,
-        sys.monitoring.events.PY_RETURN | sys.monitoring.events.PY_UNWIND)
+    sys.monitoring.set_local_events(TOOL, code, sys.monitoring.events.PY_RETURN)
     frame = sys._getframe(1)
     event = frame.f_locals.get('event', frame.f_locals.get('frame'))
     row = {'file': name, 'function': code.co_qualname, 'thread': threading.get_ident(),
@@ -59,6 +58,8 @@ def enter(code, offset):
 
 
 def leave(code, offset, value):
+    if not ACTIVE:
+        return
     stack = STACKS.get(threading.get_ident(), [])
     if not stack or stack[-1][0] is not code:
         return
@@ -78,7 +79,7 @@ def pytest_sessionstart(session):
     monitor.register_callback(TOOL, monitor.events.PY_START, enter)
     monitor.register_callback(TOOL, monitor.events.PY_RETURN, leave)
     monitor.register_callback(TOOL, monitor.events.PY_UNWIND, leave)
-    monitor.set_events(TOOL, monitor.events.PY_START)
+    monitor.set_events(TOOL, monitor.events.PY_START | monitor.events.PY_UNWIND)
 
 
 def pytest_sessionfinish(session, exitstatus):
