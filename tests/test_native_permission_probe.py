@@ -33,6 +33,21 @@ def test_first_stop_in_cleanup_preserves_active_failure():
     assert caught.value is original
 
 
+def test_latched_cleanup_stop_ignores_later_stops_while_unwinding():
+    events = []
+    with pytest.raises(probe.ProbeStopped, match='signal 15'):
+        with probe._probe_signals():
+            try:
+                with probe._cleanup_signals():
+                    probe.signal.raise_signal(probe.signal.SIGTERM)
+                    events.append('cleanup finished')
+                events.append('not reached')
+            finally:
+                probe.signal.raise_signal(probe.signal.SIGTERM)
+                events.append('evidence written while unwinding')
+    assert events == ['cleanup finished', 'evidence written while unwinding']
+
+
 def test_first_stop_inside_close_active_request():
     events = []
     def shutdown(how):

@@ -69,6 +69,11 @@ def _cleanup_signals():
         for number, handler in previous.items():
             signal.signal(number, handler)
         if latched and active_failure is None and sys.exc_info()[1] is None:
+            handler = previous[latched[0]]
+            if callable(handler):
+                # Replay the stop to the restored handler, so _probe_signals'
+                # stop also ignores every later stop while this one unwinds.
+                handler(latched[0], None)
             raise ProbeStopped("permission probe stopped by signal " + str(latched[0]))
 
 
