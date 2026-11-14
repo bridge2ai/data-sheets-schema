@@ -10,6 +10,7 @@ import difflib
 import hashlib
 import json
 from pathlib import Path
+import re
 import subprocess
 import xml.etree.ElementTree as ET
 
@@ -60,6 +61,7 @@ def callsites():
             '_recheck_verified': ('full', 'Launch/dispatch recheck cannot inherit light mode')},
         'src/data_sheets_schema/native_shared_capture_orchestration.py': {
             '_base': ('explicit caller mode, full default', 'Bounded context restored on every exit'),
+            '_load_live': ('explicit caller mode, full default', 'Forwards helper choice; parent fallback remains full'),
             '_load': ('full', 'Independent final/gate/recorded consumers'),
             'capture_stage': ('light', 'Advance helper, including publication recapture'),
             'selected_receipt_paths': ('light', 'Live receipt helper input reconstruction'),
@@ -81,6 +83,7 @@ def callsites():
 
 
 def audit():
+    git('merge-base', '--is-ancestor', BASE, 'HEAD')
     changed = git('diff', '--name-only', BASE, 'HEAD').decode().splitlines()
     assert not git('status', '--porcelain').strip(), 'commit the ruling before reporting its final head'
     preserved = {}
@@ -110,6 +113,7 @@ def audit():
     old = next(ast.literal_eval(value) for key, value in zip(node.keys, node.values)
                if key is not None and ast.literal_eval(key) == MANIFEST)
     new = sha((ROOT / MANIFEST).read_bytes())
+    assert old == sha(git('show', BASE + ':' + MANIFEST)), 'held pin must still match the pre-ruling source'
     assert old != new, 'the new scanner identity must remain a proposal for the lead'
     assert source.count(old) == 1
     proposal = ''.join(difflib.unified_diff(source.splitlines(keepends=True),
@@ -137,6 +141,8 @@ def results():
         plan = json.loads((directory / 'plan.json').read_bytes())
         counts = dict(passed=0, failed=0, errors=0, skipped=0)
         failures, junit_seconds = [], None
+        progress = re.findall(r'^\[gw\d+\].*?\b(PASSED|FAILED|ERROR|SKIPPED) (tests/[^\n]+)',
+                              (directory / 'pytest.log').read_text(), re.MULTILINE)
         xml = directory / 'pytest.xml'
         if xml.exists():
             tree = ET.parse(xml)
@@ -150,19 +156,33 @@ def results():
                                      'status': status, 'message': element.get('message', ''), 'detail': element.text})
         rows.append({'name': directory.name, 'path': str(directory), 'outcome': outcome, 'counts': counts,
                      'junit_seconds': junit_seconds, 'failures': failures, 'source_commit': plan['source_commit'],
-                     'workers': plan['workers']})
+                     'workers': plan['workers'], 'junit_present': xml.exists(), 'logged_progress': progress,
+                     'source_delta_to_head': git('diff', '--name-only', plan['source_commit'], 'HEAD').decode().splitlines(),
+                     'production_delta_to_head': git('diff', '--name-only', plan['source_commit'], 'HEAD',
+                         '--', 'src', SCAN, 'scripts/build_native_canary_packet.py',
+                         'scripts/adhoc/run_manifest_continuation_tests_20261114.py').decode().splitlines()})
     costs = [{'path': str(path), **json.loads(path.read_bytes())}
-             for path in sorted(SCRATCH.glob('cost-*/cases/**/manifest-cost.json'))]
+             for path in sorted({path.resolve() for path in SCRATCH.glob('cost-*/cases/**/manifest-cost.json')})]
     return rows, costs
 
 
 def markdown(data, cohorts, costs):
-    lines = ['Continuation — explicit manifest modes and process-local full verification reuse are implemented. '
+    current = [row for row in cohorts if row['name'] in (
+        'cost-mode-committed', 'cost-installed-canary', 'cost-builder-prefix',
+        'cost-live-boundaries', 'cost-concurrency-and-capture')]
+    held = [row['name'] for row in current if row['outcome']['returncode'] != 0]
+    lines = ['Continuation — explicit manifest modes and process-local full verification reuse are implemented; '
+             'integration acceptance is held. '
              'Existing helper verification calls use light mode. '
              'The scanner manifest identity is a review-only proposal, not an applied rotation. '
              'D128 remains the lead’s final-head step. The retained earlier timeout and freshness failures '
              'are historical results, not silently relabeled as passes.', '',
              f"Head: `{data['head']}`. Worktree: `{ROOT}`. Evidence: `{SCRATCH}`.", '',
+             'Current nonpassing cohorts: ' + ', '.join(held) + '. The builder prefix hit its unchanged '
+             '180-second subprocess limit. The additional live-boundary run reached its 3600-second '
+             'deadline: dependency loading logged a pass, but dispatch has no terminal result. Its '
+             'cleanup flag remains false after forced cleanup, even though no observed surviving PIDs '
+             'were reported. This is incomplete integration evidence, not acceptance. No timeout was relaxed.', '',
              'Full verification defaults to `mode="full"`. Its key includes the exact pin, interpreter '
              'identity/executable, prefix, import roots and process identity. Source-loaded module copies '
              'share the in-memory holder; a fork resets it before touching the inherited lock. File identities '
@@ -182,19 +202,28 @@ def markdown(data, cohorts, costs):
              'retain full mode. Scope decision for the lead: confirm this existing-check interpretation, or '
              'assign new wrappers for helper commands that currently have no manifest input/check. '
              'The latter would change command grammar; it is not implemented or claimed here.', '',
+             'The new checks do not establish complete-helper performance under the 600-second Bash limit. '
+             'Cached full checks still pay for a light census. The separate derivation-scope work remains '
+             'necessary to evaluate together with this change. The earlier full registration, builder, '
+             'retention and scanner matrices below predate this ruling; they are not current-head acceptance. '
+             'After the failed builder canary, no builder fan-out was run. The explicit dispatch-mode '
+             'unit test proves mode selection before effects; it does not replace the incomplete live test.', '',
              '| File | Line | Function | Mode | Why |', '| --- | ---: | --- | --- | --- |']
     for row in data['call_sites']:
         lines.append(f"| {row['file']} | {row['line']} | {row['function']} | {row['mode']} | {row['why']} |")
-    lines += ['', '| Cohort | Workers | Passed | Failed | Errors | Skipped | Parent seconds | JUnit seconds | Cleanup verified |',
-              '| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |']
+    lines += ['', '| Cohort | Workers | RC | Passed | Failed | Errors | Skipped | Parent seconds | JUnit seconds | Cleanup verified |',
+              '| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |']
     for row in cohorts:
         count, out = row['counts'], row['outcome']
-        lines.append(f"| {row['name']} | {row['workers']} | " + ' | '.join(str(count[key]) for key in ('passed', 'failed', 'errors', 'skipped'))
+        lines.append(f"| {row['name']} | {row['workers']} | {out['returncode']} | " + ' | '.join(str(count[key]) for key in ('passed', 'failed', 'errors', 'skipped'))
                      + f" | {out['seconds']:.2f} | {row['junit_seconds']} | {out['cleanup_verified']} |")
     lines += ['', 'All original cohort logs, JUnit, source heads, origin checks and cleanup records are retained. '
               'The early unit development cohorts predate the ruling commit; committed-source verification '
               'is identified by its recorded head in `cost-ruling-results.json`. Parent and JUnit clocks '
-              'are reported separately. No cross-environment speedup is inferred.', '',
+              'are reported separately. Counts are from completed JUnit files; zero counts on the interrupted '
+              'cohort do not mean zero executed tests. Its partial progress is saved in the results JSON. '
+              'No cross-environment speedup is inferred, and host load was not controlled. '
+              'Source deltas in the JSON distinguish later regression-test/report edits from production changes.', '',
               '| Cost artifact | Operation | CPU seconds | Wall seconds | Full regenerations |',
               '| --- | --- | ---: | ---: | ---: |']
     for result in costs:
@@ -221,13 +250,25 @@ def markdown(data, cohorts, costs):
               'after the census, with a passing negative canary. A second cache-admission race is covered '
               'by a negative test that mutates a payload immediately after generation; the failed result '
               'stays refused without another generation. No GitHub write was made.', '',
+              'Additional findings for the lead: the builder timeout and incomplete dispatch boundary remain '
+              'open. Review also tightened concurrent first-holder initialization; the added concurrency '
+              'test exercises two simultaneous full calls and requires one regeneration. Recommend evaluating '
+              'the remaining census cost together with the lead’s derivation-scope change before rerunning '
+              'the full acceptance matrix; keep the current timeouts and freshness checks intact.', '',
               'Commits:', '', '```', *data['commits'], '```', '',
               'Report provenance (all tables are generated from saved audit/results data):', '', '```bash',
               'python -S -P -B scripts/adhoc/report_manifest_cost_ruling_20261114.py --handoff', '```', '',
               'Recorded nonpassing cases:', '']
     for row in cohorts:
+        if row['outcome']['returncode'] != 0 and not row['failures']:
+            lines.append(f"- {row['name']}: return code {row['outcome']['returncode']}; "
+                         f"interrupted={row['outcome']['interrupted']}; completed JUnit={row['junit_present']}; "
+                         f"logged progress={row['logged_progress']}.")
         for failure in row['failures']:
-            lines.append(f"- {row['name']}: `{failure['case']}` — {failure['message']}")
+            message = failure['message']
+            timeout = re.search(r'timed out after [0-9.]+ seconds', message)
+            message = ('subprocess.TimeoutExpired: ' + timeout.group()) if timeout else message[:400]
+            lines.append(f"- {row['name']}: `{failure['case']}` — {message}")
     return '\n'.join(lines).replace('@', '&#64;') + '\n'
 
 
@@ -241,9 +282,15 @@ def main():
     paths += [Path(row['path']) for row in cohorts + costs]
     paths += [Path(row['pin']['path']) for row in costs]
     assert all(path.exists() for path in paths), 'named evidence/source path is missing'
+    for result in costs:
+        raw = Path(result['pin']['path']).read_bytes()
+        assert len(raw) == result['pin']['bytes'] and sha(raw) == result['pin']['sha256']
     save('cost-ruling-audit.json', data)
     save('cost-ruling-results.json', {'cohorts': cohorts, 'costs': costs})
-    report = markdown(data, cohorts, costs)
+    # Render from the saved data files, which are the table provenance.
+    saved_data = json.loads((SCRATCH / 'cost-ruling-audit.json').read_bytes())
+    saved_results = json.loads((SCRATCH / 'cost-ruling-results.json').read_bytes())
+    report = markdown(saved_data, saved_results['cohorts'], saved_results['costs'])
     (SCRATCH / 'cost-ruling.md').write_text(report)
     if args.handoff:
         assert costs, 'complete the installed-environment cost canary first'
@@ -254,7 +301,9 @@ def main():
         assert b'@' not in raw
         assert all(Path(result['path']).is_file() for result in costs)
         HANDOFF.write_bytes(raw)
-        verification = {'path': str(HANDOFF), 'sha256': sha(raw), 'bytes': len(raw),
+        stored = HANDOFF.read_bytes()
+        assert stored == raw and stored
+        verification = {'path': str(HANDOFF), 'sha256': sha(stored), 'bytes': len(stored),
                         'prior_sha256': sha(backup.read_bytes()), 'head': data['head']}
         save('cost-ruling-handoff-verification.json', verification)
         print(json.dumps(verification, indent=2))
