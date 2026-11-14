@@ -127,6 +127,32 @@ def test_full_regeneration_once_across_module_instances_and_live_rechecks(instal
     assert calls == [os.getpid()]
 
 
+def test_concurrent_full_calls_regenerate_once(installed, tmp_path, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    import sys
+    import threading
+    import time
+
+    pin = pin_document(tmp_path / 'manifest.json', m.generate())
+    monkeypatch.delattr(sys, m._PROCESS_STATE_NAME, raising=False)
+    generate, calls = m.generate, []
+    ready = threading.Barrier(3)
+    def count():
+        calls.append(threading.get_ident())
+        time.sleep(0.05)  # Let the other caller contend while regeneration runs.
+        return generate()
+    def check():
+        ready.wait(timeout=10)
+        return m.verify(pin, mode='full')
+    monkeypatch.setattr(m, 'generate', count)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        futures = [pool.submit(check) for _ in range(2)]
+        ready.wait(timeout=10)
+        values = [future.result(timeout=30) for future in futures]
+    assert values[0] == values[1]
+    assert len(calls) == 1
+
+
 def test_full_result_not_inherited_by_fork(installed, tmp_path, monkeypatch):
     pin = pin_document(tmp_path / 'manifest.json', m.generate())
     generate, calls = m.generate, []
