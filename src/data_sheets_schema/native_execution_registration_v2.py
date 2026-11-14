@@ -36,7 +36,6 @@ _COMMON_CHECKS = tuple('Python 3.12 / API case ' + name for name in (
     'Python 3.12 / SG2 case ' + name for name in ('sg2-none', 'sg2-conventional', 'sg2-explicit')) + tuple(
     # #6191 (2026-11-13): each complete synthetic native launch has its own job.
     'Python 3.12 / native case ' + name for name in (
-        'native-public-correction', 'native-public-variant', 'native-public-pending',
         'native-failure-01', 'native-failure-02', 'native-failure-03',
         'native-failure-04', 'native-failure-05', 'native-failure-06',
         'native-failure-07', 'native-failure-08', 'native-failure-09',
@@ -94,6 +93,8 @@ _COMMON_CHECKS = tuple('Python 3.12 / API case ' + name for name in (
     )) + (
     'Python 3.12 / offline canary controls', 'Python 3.12 / offline audit and finalization',
     'Python 3.12 / offline evaluation', 'test')
+_LONG_CHECKS = tuple('Python 3.12 / native case ' + name for name in (
+    'native-public-correction', 'native-public-variant', 'native-public-pending'))
 EXECUTION_GATES = ('terminal', 'shutdown', 'first_stop', 'live_attribution',
     'saved_attribution', 'phase_history', 'tool_history', 'schema', 'pair',
     'receipts', 'evidence', 'observation', 'accounting', 'runtime_authority', 'keep_awake')
@@ -123,7 +124,8 @@ def required_checks(event):
     pull = event == 'pull_request'
     # D147 (2026-11-13): twelve pull-request shards, eight on main and manual runs.
     return (tuple(f'Python 3.12 / shard {n}' for n in range(1, 13 if pull else 9))
-            + _COMMON_CHECKS + (('large-files',) if pull else ('schema-examples (3.12)',)))
+            + _COMMON_CHECKS + (('large-files',) if pull else
+                _LONG_CHECKS + ('schema-examples (3.12)',)))
 
 
 def _ci_git(*args, absent=False):
