@@ -280,7 +280,12 @@ def main():
     if fixture.get('denial'):
         source = selection.document()['inputs']['bundle']['path']
         command = 'cat "' + source + '"' if fixture['denial'] == 'not_prescribed' else shlex.join(['cat', source])
-        tool('Bash', {'command': command}, refusal=fixture['denial'])
+        denied_tool = fixture.get('denied_tool', 'Bash')
+        inputs = {'command': command} if denied_tool == 'Bash' else {
+            'file_path': str(Path(composition['instruction_path']).parent / 'never-accessed.txt')}
+        if denied_tool == 'Write':
+            inputs['content'] = 'must never be written'
+        tool(denied_tool, inputs, refusal=fixture['denial'])
 
     for role in ('bundle', 'chunk_manifest', 'source_manifest'):
         read(selection.document()['inputs'][role]['path'])

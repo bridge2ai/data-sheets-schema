@@ -144,6 +144,33 @@ class _CapturedReadonly:
         return _readonly(command, self.policy, self.snapshot, self.controls)
 
 
+class _CapturedFiles(inherited.CapturedFiles):
+    """Denied outside-policy literals are requests, never captured file identities."""
+    def __init__(self, snapshot, policy, controls, trace):
+        super().__init__(snapshot, policy, controls)
+        self.refused = set()
+        for identity in trace.denied_ids():
+            call = trace.calls[identity][2]
+            if call['name'] not in ('Read', 'Write'):
+                continue
+            payload = call['input']
+            target = Path(c.canonical_path(payload.get('file_path'), 'denied file request'))
+            # Only the outside-policy branch is independent of target metadata.
+            # All in-scope paths still require the ordinary captured classifier.
+            if target not in self.inputs and not any(folder in target.parents for folder in self.outputs):
+                self.refused.add((call['name'], c.canonical(payload)))
+
+    def classify(self, tool, payload):
+        if (tool, c.canonical(payload)) in self.refused:
+            return 'not_prescribed', 'a path outside the registered inputs and outputs'
+        return super().classify(tool, payload)
+
+    def matches(self, tool, original, callback):
+        if (tool, c.canonical(original)) in self.refused:
+            return c.canonical(original) == c.canonical(callback)
+        return super().matches(tool, original, callback)
+
+
 def _classify_saved(command, policy, snapshot, controls):
     """Classify one occurrence afresh, resolving paths only in captured bytes."""
     if command in policy['native_shared_helpers'].values():
@@ -235,7 +262,7 @@ def check_capture(prepared, *, controls):
         if python != policy['python'] or c.canonical(supplied) != c.canonical(policy):
             raise ValueError('saved classifier differs from exact selected policy')
         return _classify_saved(command, policy, prepared['snapshot'], controls)
-    files = inherited.CapturedFiles(prepared['snapshot'], policy, controls)
+    files = _CapturedFiles(prepared['snapshot'], policy, controls, run.trace())
     control = inherited._control_history(prepared['events'], prepared['records'], policy, classify, files, controls)
     lifecycle = inherited._control_lifecycle(prepared['events'], prepared['records'], controls)
     draft, final, recorder = inherited._saved_draft(
@@ -276,8 +303,15 @@ def check_capture(prepared, *, controls):
         problems.append('completed selected history lacks explicit denial accounting')
     else:
         raw_denials = terminals[0]['permission_denials']
-        denials = inherited.classify_denials(raw_denials, policy, classify, controls,
-            prepared['snapshot'].read(run.composition['instruction_path'], 'instruction').decode('utf-8'))
+        instruction = prepared['snapshot'].read(run.composition['instruction_path'], 'instruction').decode('utf-8')
+        for row in raw_denials:
+            if (type(row) is dict and row.get('tool_name') in ('Read', 'Write')
+                    and type(row.get('tool_input')) is dict):
+                classification, basis = files.classify(row['tool_name'], row['tool_input'])
+                denials.append({'tool': row['tool_name'], 'tool_use_id': row.get('tool_use_id'),
+                    'path': row['tool_input'].get('file_path'), 'classification': classification, 'basis': basis})
+            else:
+                denials.extend(inherited.classify_denials([row], policy, classify, controls, instruction))
         problems.extend(controls['run_native_canary'].denial_problems(denials))
         identities = []
         for row in raw_denials:

@@ -6,13 +6,16 @@ import pytest
 from tests.test_native_shared_execution import make_case, launch_case, authority, execute, c
 
 
-@pytest.mark.parametrize('classification', ['not_prescribed', 'prescribed', 'unclassifiable'])
-def test_denial_live_and_saved(tmp_path, monkeypatch, classification):
+@pytest.mark.parametrize(('denied_tool', 'classification'), [
+    ('Bash', 'not_prescribed'), ('Bash', 'prescribed'), ('Bash', 'unclassifiable'),
+    ('Read', 'not_prescribed'), ('Write', 'not_prescribed')])
+def test_denial_live_and_saved(tmp_path, monkeypatch, classification, denied_tool):
     monkeypatch.chdir(authority.ROOT)
     case = make_case(tmp_path / classification)
     composition = c.strict_json(case['value']['composition_raw_json'].encode())
     seeds = Path(composition['instruction_path']).parent / 'synthetic-seeds.json'
-    seeds.write_bytes(c.canonical({**c.strict_json(seeds.read_bytes()), 'denial': classification}))
+    seeds.write_bytes(c.canonical({**c.strict_json(seeds.read_bytes()), 'denial': classification,
+                                  'denied_tool': denied_tool}))
     result = launch_case(case, monkeypatch)
     if classification == 'not_prescribed':
         assert result['runtime_gates_passed'], result
@@ -24,3 +27,5 @@ def test_denial_live_and_saved(tmp_path, monkeypatch, classification):
         transcript = Path(case['value']['attempt_directory']) / 'transcript.jsonl'
         assert 'chunk_check' not in transcript.read_text()
     assert execute.read_final(case['raw']) == result
+    if denied_tool != 'Bash':
+        assert not (seeds.parent / 'never-accessed.txt').exists()
