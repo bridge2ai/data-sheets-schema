@@ -228,7 +228,21 @@ def main():
         if response.get('request_id') != request_id or response.get('response') != {}:
             raise RuntimeError('test peer callback denied')
         if name == 'Bash':
-            proc = subprocess.run(shlex.split(inputs['command']), capture_output=True, text=True, timeout=180)
+            import resource
+            import time
+            before_cpu = resource.getrusage(resource.RUSAGE_CHILDREN)
+            before_wall = time.monotonic()
+            proc = None
+            try:
+                proc = subprocess.run(shlex.split(inputs['command']), capture_output=True, text=True,
+                                      timeout=int(os.environ['BASH_DEFAULT_TIMEOUT_MS']) / 1000)
+            finally:
+                after_cpu = resource.getrusage(resource.RUSAGE_CHILDREN)
+                print(json.dumps({'helper_timing': {'command': inputs['command'],
+                    'wall_seconds': time.monotonic() - before_wall,
+                    'user_seconds': after_cpu.ru_utime - before_cpu.ru_utime,
+                    'system_seconds': after_cpu.ru_stime - before_cpu.ru_stime,
+                    'exit_code': None if proc is None else proc.returncode}}), file=sys.stderr, flush=True)
             code, text = proc.returncode, proc.stdout
             if proc.stderr: print(proc.stderr, file=sys.stderr, flush=True)
             metadata = {'exitCode': code, 'stdout': text}

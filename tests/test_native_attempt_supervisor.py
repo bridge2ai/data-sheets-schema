@@ -253,7 +253,7 @@ def test_readback_binds_generated_report_and_captured_metadata(completed, tmp_pa
 
 
 @pytest.mark.parametrize('boundary', ['directory_fsync', 'staging_unlink'])
-def test_actual_marker_publication_failure_keeps_unusable_two_link_evidence(tmp_path, monkeypatch, boundary):
+def test_actual_marker_publication_failure_retains_bytes_and_reports_cleanup(tmp_path, monkeypatch, boundary):
     import stat
     target = tmp_path/'published.json'
     ordinary_fsync, ordinary_unlink = os.fsync, os.unlink
@@ -268,9 +268,15 @@ def test_actual_marker_publication_failure_keeps_unusable_two_link_evidence(tmp_
     monkeypatch.setattr(os, 'fsync', fsync); monkeypatch.setattr(os, 'unlink', unlink)
     with pytest.raises(OSError, match='marker'):
         supervisor.durable_new(target, b'{"fixture":true}\n')
-    assert target.stat().st_nlink == 2 and list(tmp_path.glob('.published.json.pending-*'))
-    with pytest.raises(ValueError, match='single-link'):
-        supervisor._file(target, 'publication marker')
+    if boundary == 'directory_fsync':
+        assert target.stat().st_nlink == 1
+        assert not list(tmp_path.glob('.published.json.pending-*'))
+        assert supervisor._file(target, 'publication marker') == b'{"fixture":true}\n'
+    else:
+        # An unlink failure cannot promise removal of the redundant link.
+        assert target.stat().st_nlink == 2 and list(tmp_path.glob('.published.json.pending-*'))
+        with pytest.raises(ValueError, match='single-link'):
+            supervisor._file(target, 'publication marker')
 
 
 @pytest.mark.parametrize('mutation,gate', [

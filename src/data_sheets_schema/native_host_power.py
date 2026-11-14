@@ -1,6 +1,6 @@
 """Bounded local host observations, separate from registered acceptance documents.
 
-AC is required only at sequence/proof start. Clock divergence is suspension
+AC is required at sequence/proof start and native launch. Clock divergence is suspension
 evidence, not proof of its cause; local sleep events supply that attribution.
 No provider, network, native-model executable, or power-setting operation.
 """
@@ -83,12 +83,30 @@ def require_ac(reading):
         raise ValueError('host power must be positively observed as AC before sequence start')
 
 
+class DispatchPowerRefused(ValueError):
+    """A concrete refusal with normalized local evidence, never probe output."""
+    def __init__(self, reading):
+        self.reading = dict(reading)
+        super().__init__('host power must be positively observed as AC before native launch; reading='
+                         + json.dumps(self.reading, sort_keys=True, separators=(',', ':')))
+
+
 def dispatch_power():
-    """Read the power source last, without a subsequent slow lid query."""
+    """Read bounded power-source evidence without a subsequent slow lid query."""
     battery = _local(['/usr/bin/pmset', '-g', 'batt'], limit=16384)
-    reading = parse_power(battery['text'], '')
-    if reading['source'] != 'ac' or battery['status'] != 'read':
-        raise ValueError('host power must be positively observed as AC immediately before dispatch')
+    parsed = parse_power(battery['text'], '')
+    status = battery.get('status')
+    status = status if status in ('read', 'unknown') else 'unknown'
+    reason = battery.get('reason')
+    if reason not in (None, 'nonzero_exit', 'OSError', 'ValueError', 'TimeoutError', 'TimeoutExpired'):
+        reason = 'unrecognized_probe_reason'
+    code = battery.get('returncode')
+    code = code if type(code) is int and -(2 ** 31) <= code < 2 ** 31 else None
+    reading = {'source': parsed['source'], 'battery_percent': parsed['battery_percent'],
+        'observed_wall_ns': time.time_ns(), 'probe_status': status,
+        'probe_reason': reason, 'probe_returncode': code}
+    if reading['source'] != 'ac' or status != 'read' or code not in (None, 0):
+        raise DispatchPowerRefused(reading)
     return reading
 
 

@@ -319,3 +319,42 @@ class NeverEraseAMeasurement(unittest.TestCase):
             self.assertTrue(changed)
             self.assertEqual(rec["receipts"]["chunks"]["reviewed"], 28)
             self.assertEqual(rec["form"]["british_spellings"], 5)
+
+
+class BackfillNativeClaimRefusalTest(unittest.TestCase):
+    def test_backfill_receipts_refuses_native_record_without_authoritative_selection(self):
+        import tempfile
+        from data_sheets_schema.backfill_checks import compute
+        from data_sheets_schema.chunking import build_manifest, dump_manifest
+        from tests.test_receipt_completion_policy import declaration
+        from tests.test_receipts import BUNDLE, FULL, _receipt
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            core_dir = root / "claudecode_direct_core" / "L"
+            full_dir = root / "claudecode_direct" / "L"
+            core_dir.mkdir(parents=True)
+            full_dir.mkdir(parents=True)
+            bundle = root / "P.txt"
+            bundle.write_text(BUNDLE, encoding="utf-8")
+            md5 = hashlib.md5(bundle.read_bytes()).hexdigest()
+            manifest = root / "chunks.yaml"
+            manifest.write_text(dump_manifest(build_manifest(bundle)), encoding="utf-8")
+            (full_dir / "P_d4d.yaml").write_text(f"# Source bundle: {bundle}\n" + yaml.safe_dump(FULL), encoding="utf-8")
+            (core_dir / "P_coverage_receipt.yaml").write_text(yaml.safe_dump(_receipt(md5)), encoding="utf-8")
+            for spec in (None, {"native_shared_generation_version": 0}, declaration()):
+                record = {
+                    "run": {"project": "P", "method": "claudecode_direct", "label": "L"},
+                    "inputs": {"bundle_path": str(bundle), "bundle_md5": md5,
+                               "receipt_expected": True, "chunks": {"path": str(manifest)}},
+                    "native_shared_generation": {"protocol": "native_shared_generation_v1"},
+                }
+                if spec is not None:
+                    record["prompts"] = {"request": {"spec": spec}}
+                prov = core_dir / "P_provenance.yaml"
+                prov.write_text("# header\n" + yaml.safe_dump(record), encoding="utf-8")
+                computed = compute(prov, only={"receipts"})
+                self.assertTrue(computed["receipts"]["expected"])
+                self.assertFalse(computed["receipts"]["checked"])
+                self.assertIn("receipt policy selection refused", computed["receipts"]["reason"])
+

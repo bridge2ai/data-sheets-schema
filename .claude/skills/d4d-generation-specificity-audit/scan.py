@@ -13021,12 +13021,22 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
     # three-module source contract; a new callee cannot inherit the prior
     # two-module summary merely because its caller retains the same name.
     # Pin complete bodies, imports and constants, not just the receiving call.
-    'src/data_sheets_schema/native_shared_runtime_values.py': 'a0cffc3994ac38aa6879b3f710d1df40fd903f16093f7e35af841e59f2a027e3',
+    # Rotated by the lead, 2026-11-14 (#6235): against the prior pin
+    # (a0cffc39) the v2 environment adds exactly two required keys,
+    # BASH_DEFAULT_TIMEOUT_MS and BASH_MAX_TIMEOUT_MS at 600000, and the
+    # require_bash_timeouts validator. No loader or path logic changed.
+    'src/data_sheets_schema/native_shared_runtime_values.py': '11e2254b2bdc286ac448a52ac03c6e99b4936499d529855f39ca98be2705be87',
     # Rotated by the lead, 2026-11-14 (#6228, PR 5968 review): against the
     # prior pin (e8a24b22) only SYNTHETIC_PEER_SHA256 changed, because the
     # synthetic peer now emits the explicit permission mode and success that
     # the terminal gate requires. Identity data, not loader logic.
-    'src/data_sheets_schema/native_runtime_profiles.py': '44d32d357ad1d13811a943e2fc69a2a1e8f2acd80561e41372414d583315ccaa',
+    # Rotated again (#6235): against 44d32d35, SYNTHETIC_PEER_SHA256 (the
+    # peer now honours the registered Bash timeout) and one call to the
+    # shared require_bash_timeouts validator.
+    # Rotated again (#6094, #6233): against 58a71a05, only
+    # SYNTHETIC_DEADLINE_SECONDS 900 -> 2700 and its comment, the software-test
+    # attempt budget. No loader logic or production limit changed.
+    'src/data_sheets_schema/native_runtime_profiles.py': 'ea1cc11c939a7945e1282e889b07cc582d9a5153049ba60064c9d14a968cadb3',
     'src/data_sheets_schema/native_helper_cache.py': '0934f71630ab45e4670ffa0d14f90c1cfbb23a132a23ca8c6ccfcc0c58a52a95',
     # Controller pin rotation for the issue 6094 timing hooks (lead,
     # 2026-11-13; sources source_commit e648abe2a). Against the prior pins

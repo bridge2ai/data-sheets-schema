@@ -32,6 +32,7 @@ def test_load_a_replace_with_reviewed_b_refuses_before_execution(tmp_path,monkey
     a=b"raise AssertionError('unreviewed A executed')\n"
     b=b"raise AssertionError('B must not execute from disk reread')\n"
     p,script=setup_source(tmp_path,monkeypatch,b)
+    capture_before = fixture.capture_state_snapshot(p)
     script.write_bytes(a)
     read=wire.read_regular
     def replace_after_read(path,**kwargs):
@@ -44,7 +45,7 @@ def test_load_a_replace_with_reviewed_b_refuses_before_execution(tmp_path,monkey
     assert script.read_bytes()==b
     assert not p['packet-directory'].exists()
     assert not (tmp_path/'.native-sequence-starts').exists()
-    assert not p['output-directory'].exists()
+    fixture.assert_capture_state_preserved(p, capture_before)
 
 
 def test_verified_a_is_executed_and_retained_even_if_disk_becomes_b(tmp_path,monkeypatch):
@@ -84,6 +85,7 @@ def test_imported_body_refuses_even_with_reviewed_retained_bytes(tmp_path, monke
         p, _ = setup_source(tmp_path, monkeypatch, raw)
     else:
         p = fixture.paths(tmp_path)
+    capture_before = fixture.capture_state_snapshot(p)
     before = {str(path): path.read_bytes() for path in (tmp_path / 'word-state').rglob('*.json')}
     callbacks = []
     if injected:
@@ -96,7 +98,7 @@ def test_imported_body_refuses_even_with_reviewed_retained_bytes(tmp_path, monke
     with pytest.raises(ValueError, match='live verified entry namespace'):
         loaded_a._run_verified(fixture.argv(p), verified_script=raw, entry_inputs=inputs)
     assert not p['packet-directory'].exists()
-    assert not p['output-directory'].exists()
+    fixture.assert_capture_state_preserved(p, capture_before)
     assert callbacks == []
     assert before == {str(path): path.read_bytes() for path in (tmp_path / 'word-state').rglob('*.json')}
 

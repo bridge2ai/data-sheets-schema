@@ -459,3 +459,50 @@ def test_previous_history_acceptance_cannot_bypass_a_current_validator(case, mon
     monkeypatch.setattr(stage, validator, refuse)
     with pytest.raises(ValueError, match='current history validator refuses'):
         stage._history(selection, execution, history)
+
+
+def test_checked_stage_reconstruction_failure_reports_real_cause_not_missing_failed_record(case, monkeypatch):
+    invalid_raw = c.canonical({'rereceipt': [{'path': 'name', 'receipt': {'chunk': 'absent', 'snippet': 'No evidence.'}}]})
+    updated, transition = respond(case, invalid_raw)
+    assert transition.disposition == 'failed'
+    selection, execution, pool, failed_history = updated
+    rows, _ = stage._history(selection, execution, failed_history)
+    assert rows[-1]['record_type'] == 'failed'
+    rows[-1]['record_type'] = 'stage_checked'
+    rows[-1]['payload'] = {
+        'cursor': rows[-1]['payload']['cursor'],
+        'request_sha256': rows[-1]['payload']['request_sha256'],
+        'response_sha256': rows[-1]['payload']['response_sha256'],
+        'outputs': [],
+        'derived_response': None,
+    }
+    records = []
+    for item, row in zip(failed_history.records, rows):
+        row['previous_record_sha256'] = records[-1].pin.sha256 if records else None
+        records.append(artifact('record', item.pin.path, c.canonical(row)))
+    journal = artifact('journal', failed_history.journal.pin.path, stage.journal_bytes(
+        selection_sha256=selection.registration.pin.sha256,
+        execution_sha256=execution.execution.pin.sha256,
+        attempt_id=execution.attempt_id,
+        records=tuple(item.pin for item in records),
+    ))
+    tampered = replace(failed_history, records=tuple(records), journal=journal)
+    with pytest.raises(
+        ValueError,
+        match='native checked stage no longer reconstructs from its first consumed response: '
+              'native receipt answers are incomplete',
+    ) as exc_info:
+        stage.prepare_next(selection, execution, pool, tampered)
+    assert isinstance(exc_info.value.__cause__, stage._IncompleteReceipt)
+
+    complete_case, _ = full_roundtrip(case)
+    def refuse_derivation(*args, **kwargs):
+        raise ValueError('specific checked stage validator refuses')
+    monkeypatch.setattr(stage._Replay, '_derive_response', refuse_derivation)
+    with pytest.raises(
+        ValueError,
+        match='native checked stage no longer reconstructs from its first consumed response: '
+              'specific checked stage validator refuses',
+    ):
+        stage.prepare_next(*complete_case)
+

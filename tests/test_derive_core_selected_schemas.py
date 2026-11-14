@@ -188,3 +188,25 @@ def test_default_schema_keeps_transformation_receipt_opt_in(tmp_path):
     assert with_receipt['transformation_receipt']
     assert {key: value for key, value in with_receipt.items()
             if key != 'transformation_receipt'} == facts
+
+
+@pytest.mark.parametrize("phase4", [False, True])
+def test_cli_selected_shipped_schemas_record_repo_relative_core_identity(tmp_path, phase4):
+    from data_sheets_schema.resources import resource_path
+    full_schema = resource_path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml").resolve()
+    core_schema = resource_path(projection.CORE_SCHEMA_REL).resolve()
+    assert full_schema.is_absolute() and core_schema.is_absolute()
+    full = write_full(tmp_path, {"id": "https://example.org/native-derived", "name": "Native Derived"})
+    out = tmp_path / "core.yaml"
+    argv = ["derive", "core", "--full", str(full), "--out", str(out),
+            "--full-schema", str(full_schema), "--core-schema", str(core_schema)]
+    if phase4:
+        argv.append("--phase4-complete")
+    result = CliRunner().invoke(cli, argv)
+    assert result.exit_code == 0, result.output
+    text = out.read_text()
+    core = yaml.safe_load(text)
+    assert core["conforms_to_schema"] == projection.CORE_SCHEMA_REL
+    assert f"# Schema: {projection.CORE_SCHEMA_REL}\n" in text
+    assert str(ROOT) not in text
+

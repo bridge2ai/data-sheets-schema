@@ -508,7 +508,11 @@ def test_deadline_receipt_keeps_actual_unfinished_handler_and_original_stop_sour
     c.job['deadline_seconds']=HANG_SECONDS
     entered,released,done=threading.Event(),threading.Event(),threading.Event()
     clock=EventClock(entered,HANG_SECONDS)
-    monkeypatch.setattr(run_native_canary,'time',clock)
+    original_execute = native.execute_child
+    def timed_execute(*args, **kwargs):
+        with clock.bind_runner(run_native_canary):
+            return original_execute(*args, **kwargs)
+    monkeypatch.setattr(native, 'execute_child', timed_execute)
     observed=[]
     original=native.AuditProxy
     stopped_at=[]

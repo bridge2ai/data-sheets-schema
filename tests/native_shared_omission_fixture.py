@@ -240,6 +240,7 @@ def build_native_fixture(root: Path, *, registered_python: str) -> dict:
             'subscriptionType': 'historical-software-test', 'expected_api_key_source': 'none'},
         'environment': {'PATH': '/usr/bin:/bin', 'HOME': str(root / 'runtime-home'),
             'PYSTOW_HOME': str(root / 'native-attempt' / 'helper-cache'),
+            'BASH_DEFAULT_TIMEOUT_MS': '600000', 'BASH_MAX_TIMEOUT_MS': '600000',
             'CLAUDE_SECURESTORAGE_CONFIG_DIR': '', 'CLAUDE_CODE_DISABLE_1M_CONTEXT': '1'},
         'deadline_seconds': 120, 'budget_guard_usd': '1.0',
         'keep_awake': {'policy': 'not_applicable', 'host_platform': 'synthetic',

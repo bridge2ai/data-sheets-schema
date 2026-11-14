@@ -215,7 +215,7 @@ def _saved_authorizations(raw, value, started_raw, result, *, contract, file):
 
 
 def _admit_subscription_guard(guard, attempt, file, write):
-    """Consume exact saved admission before the caller may activate/spawn."""
+    """Consume exact saved admission before stage activation and spawn."""
     if guard is None:
         return
     if file(attempt/'subscription-guard.json', 'subscription guard') != guard.raw:
@@ -415,14 +415,22 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                                         authorization['raw']['launch_word'])
             yield current
 
+    from . import native_host_power as host_power
     # Hold the registration-wide word/limits lock through the first reservation
     # effect. A renewal cannot supersede the word between checking and mkdir.
     with pre_timing.step('reservation'), reservation_lease():
         controls.require_complete()
-        # Source recapture can be slow: measure the preparation margin only
-        # after it, immediately before the attempt identity is consumed.
-        launch_guard.before_reservation()
         _require_launch_profile(value['runtime'], expected_profile)
+        try:
+            power_reading = host_power.dispatch_power()
+        except host_power.DispatchPowerRefused as exc:
+            # Buffer only: the outer scope persists after refusal and lock release.
+            pre_timing.record('reservation_power', passed=False, **exc.reading)
+            raise
+        pre_timing.record('reservation_power', passed=True, **power_reading)
+        # Source recapture, profile verification and the bounded power probe can
+        # be slow. Recheck the margin after them, immediately before reservation.
+        launch_guard.before_reservation()
         attempt.mkdir(mode=0o700)  # Even a partial reservation consumes the identity.
         _sync_directory(attempt.parent)
         pre_timing.record('attempt_reserved')
@@ -452,48 +460,61 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
         nonlocal first_stop
         if first_stop is None:
             first_stop = str(message)
-    from . import native_host_power as host_power
     host_power.observe(attempt, 'start', host_power.start_run, attempt)
-    with _signals(signals):
+    with _signals(signals) as record_only_signals:
         proxy = controls['run_direct_canary'].NoProxy()
         guard = None
         try:
             try:
-                for directory in outputs:
-                    _mkdir_durable(directory)
-                _mkdir_durable(attempt/'cli_config')
-                if contract.kind == 'd4d_native_shared_attempt':
-                    from .native_helper_cache import create_for_attempt
-                    create_for_attempt(value)
-                _unchanged(value, registration_raw, authorization)
-                if value['runtime']['keep_awake']['policy'] == 'macos_iokit_ims_v1':
-                    guard = controls['run_direct_canary_awake'].KeepAwake()
-                    guard.__enter__()
-                    awake.update(state='acquired', acquisition=guard.snapshot())
-                else:
-                    awake.update(state='explicitly_not_applicable', passed=True)
-                observation = _probe_runtime(value)
-                durable_new(attempt/'runtime-observation.json', draft._encoded(observation))
-                def launch_check():
+                try:
+                    for directory in outputs:
+                        _mkdir_durable(directory)
+                    _mkdir_durable(attempt/'cli_config')
+                    if contract.kind == 'd4d_native_shared_attempt':
+                        from .native_helper_cache import create_for_attempt
+                        create_for_attempt(value)
                     _unchanged(value, registration_raw, authorization)
-                    _join_subscription_authority(launch_guard, registration_raw, value, authorization, current_launch=True)
-                    if (_file(attempt/'registration.json', 'consumed registration') != registration_raw
-                            or _file(attempt/'started.json', 'started identity') != started_raw
-                            or _file(attempt/'runtime-observation.json', 'runtime observation') != draft._encoded(observation)
-                            or proxy.closed or proxy.failed.is_set()):
-                        raise ValueError('native admission is closed or consumed identity changed')
-                    _admit_subscription_guard(launch_guard, attempt, _file, durable_new)
-                    contract.activate_before_dispatch(adapter, started_raw)
-                    _require_launch_profile(value['runtime'], expected_profile)
-                    host_power.dispatch_power()
-                observe = _guarded_observer(launch_guard, adapter, controls['run_native_canary'].BudgetStop)
-                status = _execute_child(controls, value['argv'], proxy=proxy,
-                    instruction=Path(selected['instruction_path']), attempt=attempt,
-                    cwd=value['working_directory'], env=value['environment'],
-                    deadline_seconds=value['runtime']['deadline_seconds'], verify_launch=launch_check,
-                    record_stop=stopped, command_policy=adapter.policy, phase_spec=contract.transport_phase_spec(adapter),
-                    command_classifier=_guarded_classifier(adapter, controls['run_native_canary'].BudgetStop),
-                    event_observer=observe)
+                    if value['runtime']['keep_awake']['policy'] == 'macos_iokit_ims_v1':
+                        guard = controls['run_direct_canary_awake'].KeepAwake()
+                        guard.__enter__()
+                        awake.update(state='acquired', acquisition=guard.snapshot())
+                    else:
+                        awake.update(state='explicitly_not_applicable', passed=True)
+                    observation = _probe_runtime(value)
+                    durable_new(attempt/'runtime-observation.json', draft._encoded(observation))
+                    def launch_check():
+                        _unchanged(value, registration_raw, authorization)
+                        _join_subscription_authority(launch_guard, registration_raw, value, authorization, current_launch=True)
+                        if (_file(attempt/'registration.json', 'consumed registration') != registration_raw
+                                or _file(attempt/'started.json', 'started identity') != started_raw
+                                or _file(attempt/'runtime-observation.json', 'runtime observation') != draft._encoded(observation)
+                                or proxy.closed or proxy.failed.is_set()):
+                            raise ValueError('native admission is closed or consumed identity changed')
+                        _require_launch_profile(value['runtime'], expected_profile)
+                        try:
+                            host_power.dispatch_power()
+                        except host_power.DispatchPowerRefused as exc:
+                            # The pre-reservation trace is sealed. The immutable final
+                            # result retains this bounded reading through the sticky stop.
+                            reason = 'dispatch power refused: ' + str(exc)
+                            stopped(reason)
+                            raise controls['run_native_canary'].BudgetStop(reason) from exc
+                        _admit_subscription_guard(launch_guard, attempt, _file, durable_new)
+                        # Keep one-use stage writes behind the consumed-guard checks.
+                        # A final check at actual Popen remains the separate 6207 gap.
+                        contract.activate_before_dispatch(adapter, started_raw)
+                    observe = _guarded_observer(launch_guard, adapter, controls['run_native_canary'].BudgetStop)
+                    status = _execute_child(controls, value['argv'], proxy=proxy,
+                        instruction=Path(selected['instruction_path']), attempt=attempt,
+                        cwd=value['working_directory'], env=value['environment'],
+                        deadline_seconds=value['runtime']['deadline_seconds'], verify_launch=launch_check,
+                        record_stop=stopped, command_policy=adapter.policy, phase_spec=contract.transport_phase_spec(adapter),
+                        command_classifier=_guarded_classifier(adapter, controls['run_native_canary'].BudgetStop),
+                        event_observer=observe)
+                finally:
+                    # Transport/preparation has ended. Even its failure-evidence
+                    # writes and all later cleanup must survive a first signal.
+                    record_only_signals()
             except BaseException as exc:
                 first_error = exc
                 # Native auth command failures may contain credentials in captured
@@ -565,11 +586,14 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                 if guard is not None:
                     if guard.active:
                         guard.close()
-                        awake.update(state='released_after_failure', passed=False)
-                    awake.update(releases=guard.releases, released_at=guard.released_at,
-                                 signals_received=list(signals))
+                        if not (attempt/'keep-awake.json').exists():
+                            awake.update(state='released_after_failure', passed=False)
                     try:
                         if not (attempt/'keep-awake.json').exists():
+                            # This object must still equal its consumed file. Later
+                            # signals belong to final first_stop, not a rewrite.
+                            awake.update(releases=guard.releases, released_at=guard.released_at,
+                                         signals_received=list(signals))
                             durable_new(attempt/'keep-awake.json', draft._encoded(awake))
                     except BaseException as cleanup_error:
                         original = pending_error if pending_error is not None else first_error
@@ -607,12 +631,13 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                 and all(row.get('checked') is True and row.get('passed') is True for row in results.values()))
             transcript_raw = (prepared['snapshot'].raw.get(str(attempt/'transcript.jsonl'))
                               if prepared is not None else None)
-            guard_snapshot, subscription_observation_verification, validation_failure = _publication_subscription(
+            (guard_snapshot, subscription_observation_verification, validation_failure,
+             publication_signals, publication_stop) = _publication_signal_cutoff(
                 launch_guard, registration_raw, value['runtime'], authorization, transcript_raw,
-                completed=completed)
-            if validation_failure is not None:
-                stopped('publication validation failed at ' + validation_failure['stage'] + ': '
-                        + validation_failure['reason'])
+                completed=completed, signals=signals, first_stop=first_stop)
+            if publication_stop is not None:
+                stopped(publication_stop)
+            if first_stop is not None:
                 results['first_stop'] = {'checked': True, 'passed': False, 'reason': first_stop}
                 completed = False
             final = {'kind': KIND, 'version': VERSION, 'attempt_id': value['attempt_id'],
@@ -669,6 +694,31 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                 raise first_error from publication_error
             raise
 
+
+
+def _publication_signal_cutoff(guard, registration_raw, runtime, authorization,
+                               transcript_raw, *, completed, signals, first_stop):
+    """Freeze signal disposition after validation, before final construction.
+
+    Signals after this one tuple snapshot remain record-only while the immutable
+    final/publication pair is assembled and saved; they do not revise its decision.
+    A late stop needs actual failed-mode verification, because read_final derives
+    that mode from runtime_gates_passed and compares the complete saved result.
+    """
+    snapshot, verification, failure = _publication_subscription(
+        guard, registration_raw, runtime, authorization, transcript_raw,
+        completed=completed)
+    received = tuple(signals)
+    if received and first_stop is None:
+        first_stop = 'launcher interrupted by signal ' + str(received[0])
+    if received and completed and failure is None:
+        snapshot, verification, failure = _publication_subscription(
+            guard, registration_raw, runtime, authorization, transcript_raw,
+            completed=False)
+    if failure is not None and first_stop is None:
+        first_stop = ('publication validation failed at ' + failure['stage'] + ': '
+                      + failure['reason'])
+    return snapshot, verification, failure, received, first_stop
 
 
 def _publication_subscription(guard, registration_raw, runtime, authorization, transcript_raw, *, completed):

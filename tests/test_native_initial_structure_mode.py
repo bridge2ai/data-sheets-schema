@@ -56,9 +56,15 @@ def test_cli_initial_json(declaration, monkeypatch, registered, mutation):
     root = Path(declaration['stage_root']).parent
     paths = {'full': root / 'full.yaml', 'receipt': root / 'receipt.yaml',
              'provenance': root / 'absent.yaml', 'core_dir': root}
-    monkeypatch.setattr(native_shared_capture, 'selected_receipt_paths', lambda _: paths)
+    from data_sheets_schema import native_execution_authority_v2 as authority
+    scopes = []
+    def selected_paths(_):
+        scopes.append(authority._LAUNCH_DERIVATIONS.memo)
+        return paths
+    monkeypatch.setattr(native_shared_capture, 'selected_receipt_paths', selected_paths)
     calls = []
     def supplied_assessment(*args, **kwargs):
+        assert authority._LAUNCH_DERIVATIONS.memo is scopes[-1]
         assert kwargs['receipt_render_spec'] is not None
         assert kwargs['native_selection_path'] is not None
         calls.append(kwargs)
@@ -68,6 +74,7 @@ def test_cli_initial_json(declaration, monkeypatch, registered, mutation):
             '--native-shared-selection', declaration['registration_path'], '--initial-structure']
     result = CliRunner().invoke(cli.receipts, args)
     assert result.exit_code == (0 if mutation is None else 1), result.output
+    assert not hasattr(authority._LAUNCH_DERIVATIONS, 'memo')
     assert len(calls) == 1
     output = json.loads(result.output)
     assert output['mode'] == 'initial_structure'

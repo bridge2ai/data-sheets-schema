@@ -13,14 +13,17 @@ import sys
 LABEL='DRAFT ONLY — NOT AUTHORIZED — NOT A RUNTIME OR PROBE AUTHORIZATION'
 
 
-def generate(source, binary, output):
+def generate(source, binary, output, *, project, source_manifest):
     source=Path(source); binary=Path(binary); output=Path(output)
     for path in (source,binary):
         if not path.is_absolute() or path.resolve(strict=True)!=path: raise ValueError('physical absolute input required')
     if not output.is_absolute() or output.resolve()!=output: raise ValueError('physical absolute output required')
-    output.mkdir(exist_ok=False)
     sys.dont_write_bytecode=True
     sys.path.insert(0,str(source/'src'))
+    from data_sheets_schema.registry import load_registry
+    if not load_registry(source_manifest).declares(project):
+        raise ValueError('project is not declared by the selected source manifest')
+    output.mkdir(exist_ok=False)
     from data_sheets_schema.native_shared_runtime_values import executable_identity
     binary_pin=executable_identity(str(binary))
     facts=[]
@@ -89,6 +92,8 @@ def generate(source, binary, output):
             ('PATH',owner+': colon-separated absolute paths','owner explicit PATH; no environment inherited','owner'),
             ('HOME',owner+': absolute account home','owner explicit registered home; not read for account state','owner'),
             ('PYSTOW_HOME',owner+': exact registered attempt directory / helper-cache','native_helper_cache.for_attempt; fresh per-attempt helper cache','owner'),
+            ('BASH_DEFAULT_TIMEOUT_MS','600000','registered native Bash helper timeout','source'),
+            ('BASH_MAX_TIMEOUT_MS','600000','registered native Bash helper maximum timeout','source'),
             ('CLAUDE_SECURESTORAGE_CONFIG_DIR',owner+': explicit value, possibly empty','owner registered secure-storage choice','owner'),
             ('CLAUDE_CODE_DISABLE_1M_CONTEXT','0','validate_provisional_runtime fixed 1M selection','source')]},
         'deadline_seconds':field('runtime.deadline_seconds',deadline,'native_run_limits.CANARY complete registered pair; owner approval still required','source/owner'),
@@ -110,7 +115,7 @@ def generate(source, binary, output):
     documents={
         'provisional-runtime.DRAFT.json':{'kind':'DRAFT_NOT_A_RUNTIME','scope':LABEL,'candidate_runtime':runtime},
         'authorization.DRAFT.json':{'kind':'DRAFT_NOT_AN_AUTHORIZATION','scope':LABEL,'candidate_authorization':authorization}}
-    packet={'scope':LABEL,'project':'CHORUS','arm':'BASELINE (input documents only)',
+    packet={'scope':LABEL,'project':project,'arm':'BASELINE (input documents only)',
         'installed_binary_read_only':binary_pin,'binary_filename_not_version_evidence':binary.name,
         'fields':fields,'source_facts':facts,'running_source_contract':{'review_kind':current_kind,'terms_kind':current_terms,'admission_terms':terms},
         'owner_actions':[
@@ -125,9 +130,9 @@ def generate(source, binary, output):
             'python -P -B -m data_sheets_schema.native_generation bound-permission-probe --authorization /ABS/authorization.json --expectation /ABS/expectation.json --account-choice /ABS/permission-account-choice.json',
             'python -P -B -m data_sheets_schema.native_generation validate-probe-sequence --runtime /ABS/final-runtime.json --probe /ABS/permission/permission-probe.json --account-choice /ABS/final-runtime-account-choice.json'],
         'execution_count':{'observation_native_processes':1,'bound_version_processes':1,'bound_trace_processes':1+len(stops),'successful_total':3+len(stops),'traces':['settled',*['stop-'+x for x in stops]],'readback_native_processes':0},
-        'provider_scope':{'observation':'One successful model request containing fixed prompt '+repr(prompt)+' and CLI-generated system/request metadata, captured by scripted loopback provider; no CHORUS input supplied by observation invocation.',
+        'provider_scope':{'observation':'One successful model request containing fixed prompt '+repr(prompt)+' and CLI-generated system/request metadata, captured by scripted loopback provider; no project input supplied by observation invocation.',
             'version':'--version uses disabled endpoint http://127.0.0.1:1 and inert key, no model request intended.',
-            'bound':'Seven scripted local-provider conversations, including returned tool results and selected source snippets; CHORUS/source bytes can reach the LOCAL scripted provider and retained traces. Do not call this content-free. No external model endpoint is configured; actual binary compliance remains unobserved.',
+            'bound':'Seven scripted local-provider conversations, including returned tool results and selected source snippets; selected source bytes can reach the LOCAL scripted provider and retained traces. Do not call this content-free. No external model endpoint is configured; actual binary compliance remains unobserved.',
             'account':'Isolated config and inert local key; no intended account subscription usage. These settings are not evidence of a real account or of absence of unsolicited binary networking.'},
         'saved_outputs':{'observation':['authorization.json','provisional-runtime.json','observation-claim.json','observation/invocation.json','observation/requests/','observation/native_request.json','observation/transcript.jsonl','observation/observation.json','observation/stdout.jsonl','observation/stderr.txt','observation/failure.json on failure'],
             'bound':['bound-claim.json','expectation.json','permission/version.stdout','permission/version.stderr','permission/captured/','permission/verification.json','permission/transport-provider.py','permission/producer-evidence.json','permission/permission-probe.json','sequence.json']},
@@ -143,6 +148,7 @@ def generate(source, binary, output):
     for name,value in documents.items():
         with (output/name).open('x') as stream: json.dump(value,stream,indent=2,ensure_ascii=False); stream.write('\n')
     lines=['# D117 owner packet — DRAFT, not authorization','',LABEL,'',
+           'Project: '+project,'',
            'The installed binary was read and hashed, never executed. Its updater filename is not an observed version. The durable copy has not been selected or created.','',
            '| Field | Draft value | Origin | Status |','|---|---|---|---|']
     for row in fields: lines.append('| '+row['field']+' | `'+json.dumps(row['draft_value'],ensure_ascii=False)+'` | '+row['origin']+' | '+row['status']+' |')
@@ -159,4 +165,5 @@ def generate(source, binary, output):
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--source-root',type=Path,required=True); p.add_argument('--binary',type=Path,required=True); p.add_argument('--output',type=Path,required=True)
-    a=p.parse_args(); generate(a.source_root,a.binary,a.output)
+    p.add_argument('--project',required=True); p.add_argument('--source-manifest',type=Path,required=True)
+    a=p.parse_args(); generate(a.source_root,a.binary,a.output,project=a.project,source_manifest=a.source_manifest)

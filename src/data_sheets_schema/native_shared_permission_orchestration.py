@@ -4,6 +4,7 @@ Only orchestration obtains A's loader and C's live projection. Ordinary entry
 points enter the same verified consumer module set as A's execution verifier.
 """
 from contextlib import contextmanager
+from pathlib import Path
 
 from . import native_execution_authority_v2 as authority
 from . import native_shared_controls_orchestration as control_loading
@@ -28,6 +29,19 @@ def loaded_permission_inputs(dependencies=None):
 
 
 def verify_saved_probe(raw_manifest: bytes, *, expected: dict) -> dict:
+    from .native_u4b_runtime import is_prepared_runtime
+    from .native_u4b_probe_sequence import _refuse_bound_failure
+    from .native_subscription_guard import strict_json
+    if is_prepared_runtime(expected.get('runtime')):
+        basis = strict_json(expected['runtime']['limits_basis'])
+        # #6240: refuse a sequence that recorded a bound failure. A basis that
+        # names no observation probe has no sequence directory to inspect here;
+        # the prepared-runtime validators require and check that pin.
+        if 'observation_probe' in basis:
+            probe = basis['observation_probe']
+            if type(probe) is not dict or type(probe.get('path')) is not str:
+                raise ValueError('prepared runtime names a malformed observation probe')
+            _refuse_bound_failure(Path(probe['path']).parent.parent)
     dependencies = authority.dependency_identity()
     with loaded_permission_inputs(dependencies) as (controls, sources), \
             authority.loaded_verified_package_module('data_sheets_schema.native_shared_permissions',

@@ -290,3 +290,54 @@ def test_real_cli_writes_selected_v4_and_pending_does_not_pass(disk, tmp_path, m
     assert after["receipts"]["instrument"] == receipts.RERECEIPTS_INSTRUMENT
     assert after["receipts"]["coverage_floor"]["state"] == "pending"
     assert strict_failure(canary.checks_from_record(after)["receipts"])
+
+
+@pytest.mark.parametrize("record", [
+    pytest.param({"native_shared_generation": {"protocol": "native_shared_generation_v1"}}, id="missing-prompts"),
+    pytest.param({"native_shared_generation": {"protocol": "native_shared_generation_v1"},
+                  "prompts": {"request": {"spec": None}}}, id="null-spec"),
+    pytest.param({"native_shared_generation": {"protocol": "native_shared_generation_v1"},
+                  "prompts": {"request": {"spec": {"native_shared_generation_version": 0}}}},
+                 id="neutral-axis-with-native-block"),
+    pytest.param({"native_shared_generation": {"protocol": "native_shared_generation_v1"},
+                  "prompts": {"request": {"spec": None}}, "__downgrade_api__": True},
+                 id="downgraded-api-spec-with-native-block"),
+    pytest.param({"receipts": {"native_receipt_stage": "final", "final_stage_complete": True}},
+                 id="native-receipt-outcome-without-prompts"),
+    pytest.param({"receipts": {"receipt_completion_policy": {
+                      "registration": {"sha256": "0" * 64, "raw_json": '{"kind":"d4d_native_shared_receipt_policy"}'}}},
+                  "prompts": {"request": {"spec": None}}, "__downgrade_api__": True},
+                 id="native-receipt-policy-block-with-api-spec"),
+    pytest.param({"prompts": {"request": {"spec": {"native_shared_generation_version": 0,
+                                                   "native_shared_runtime_declaration": {"kind": "x"}}}}},
+                 id="non-neutral-native-metadata-key"),
+    pytest.param({"prompts": {"request": {"spec": {"native_shared_max_draft_checks": 2}}}},
+                 id="native-draft-checks-without-version"),
+])
+def test_native_outcome_or_partial_native_spec_refuses_ordinary_fallback(disk, record):
+    rec = json.loads(json.dumps(record))
+    if rec.pop("__downgrade_api__", False):
+        rec["prompts"]["request"]["spec"] = declaration()
+    with pytest.raises(ValueError):
+        cp.select_policy(record=rec)
+    with pytest.raises(ValueError):
+        cp.select_policy(render_spec=declaration(), record=rec)
+    assessed = receipts.block_for(**disk, snapshot_record=rec)
+    assert assessed["expected"] is True
+    assert assessed["checked"] is False
+    assert "receipt policy selection refused" in assessed["reason"]
+    checked_rec = {**rec, "receipts": {
+        **(rec.get("receipts") or {}),
+        "expected": True, "checked": True, "passed": True,
+        "slots": {"receiptable": 1, "with_receipt": 1, "populated": 1, "exempt": 0},
+    }}
+    assert canary.checks_from_record(checked_rec)["receipts"]["checked"] is False
+
+
+def test_neutral_integer_zero_native_axis_remains_legacy_without_native_claim(disk):
+    rec = {"run": {"project": "P"}, "prompts": {"request": {"spec": {"native_shared_generation_version": 0}}}}
+    assert cp.select_policy(record=rec) is None
+    assessed = receipts.block_for(**disk, snapshot_record=rec)
+    assert assessed["checked"] is True
+    assert assessed["instrument"] == receipts.RECEIPTS_INSTRUMENT
+

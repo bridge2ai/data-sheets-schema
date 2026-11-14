@@ -39,6 +39,14 @@ class FirstReservationObserved(RuntimeError):
 def reservation_case(tmp_path, monkeypatch, *, remaining, change_at_admit=None,
                      source_check_seconds=0, deferred_selection=False,
                      mutate_values=None, tail_failure=None):
+    from data_sheets_schema import native_host_power as host_power
+    # The new pre-reservation check runs its real parser/refusal logic against
+    # invented AC output; this offline fixture must never run a host probe.
+    def invented_power(argv, *, limit, timeout=8):
+        assert argv == ['/usr/bin/pmset', '-g', 'batt'] and limit == 16384
+        return {'status': 'read', 'reason': None, 'returncode': 0,
+                'text': "Now drawing from 'AC Power'\n -InternalBattery-0 90%; charging;\n"}
+    monkeypatch.setattr(host_power, '_local', invented_power)
     arguments, value = component(tmp_path, monkeypatch,
         mode='second_mismatch' if change_at_admit == 'poison' else 'success')
     # The observation and production policy already bind this Darwin fixture.

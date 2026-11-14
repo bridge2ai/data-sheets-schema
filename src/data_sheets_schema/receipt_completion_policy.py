@@ -224,14 +224,69 @@ def native_render_declaration(capture):
             'raw_json': capture.receipt_policy.raw.decode('utf-8')}}
 
 
+_NATIVE_RECEIPT_BLOCK_KEYS = frozenset({
+    "native_receipt_stage",
+    "native_shared_receipt_policy",
+    "native_receipt_inputs",
+    "final_stage_complete",
+    "native_stage_completion_history_sha256",
+})
+
+
+def record_claims_native(record: dict) -> bool:
+    """Return True when provenance carries a native outcome or non-neutral native spec key.
+
+    A native marker never grants authority; it demands authoritative native
+    selection so callers cannot silently downgrade to ordinary receipt rules.
+    """
+    if not isinstance(record, dict):
+        return False
+    if "native_shared_generation" in record:
+        return True
+    receipts_block = record.get("receipts")
+    if isinstance(receipts_block, dict):
+        if _NATIVE_RECEIPT_BLOCK_KEYS.intersection(receipts_block):
+            return True
+        policy_block = receipts_block.get(BLOCK_KEY)
+        if isinstance(policy_block, dict):
+            from . import native_shared_contract as c, native_shared_selection as native
+            if policy_block.get("runtime_policy_sha256") == native.RECEIPT_POLICY_SHA256:
+                return True
+            reg = policy_block.get("registration")
+            if isinstance(reg, dict):
+                if reg.get("kind") == c.KINDS["receipt_policy"]:
+                    return True
+                raw_json = reg.get("raw_json")
+                if isinstance(raw_json, str):
+                    try:
+                        parsed = json.loads(raw_json)
+                    except ValueError:
+                        return True
+                    if isinstance(parsed, dict) and parsed.get("kind") == c.KINDS["receipt_policy"]:
+                        return True
+    prompts = record.get("prompts")
+    request = prompts.get("request") if isinstance(prompts, dict) else None
+    recorded_spec = request.get("spec") if isinstance(request, dict) else None
+    if isinstance(recorded_spec, dict):
+        native_keys = {key for key in recorded_spec
+                       if isinstance(key, str) and key.startswith("native_shared_")}
+        neutral_axis = (native_keys == {"native_shared_generation_version"}
+                        and type(recorded_spec["native_shared_generation_version"]) is int
+                        and recorded_spec["native_shared_generation_version"] == 0)
+        if native_keys and not neutral_axis:
+            return True
+    return False
+
+
 def _selection(spec):
     from data_sheets_schema.receipt_completion import policy_identity
     if not isinstance(spec, dict):
         raise ValueError("recorded render spec must be a mapping")
+    native_keys = {key for key in spec if isinstance(key, str) and key.startswith('native_shared_')}
     if 'native_shared_generation_version' in spec and type(spec['native_shared_generation_version']) is not int:
         raise ValueError('native receipt axis must be an integer')
     if (spec.get('native_shared_generation_version', 0) != 0
-            or (NATIVE_SPEC_KEYS - {'native_shared_generation_version'}).intersection(spec)):
+            or (native_keys and native_keys != {'native_shared_generation_version'})):
         return _native_selection(spec)
     if not SPEC_KEYS.intersection(spec):
         return None
@@ -278,11 +333,17 @@ def select_policy(render_spec: dict | None = None, record: dict | None = None) -
     if record is not None:
         if not isinstance(record, dict):
             raise ValueError("provenance record must be a mapping")
+        native_claim = record_claims_native(record)
         prompts = record.get("prompts")
         if isinstance(prompts, dict) and isinstance(prompts.get("request"), dict):
             recorded_spec = prompts["request"].get("spec")
         if recorded_spec is not None:
             recorded = _selection(recorded_spec)
+            if native_claim and (
+                recorded is None
+                or recorded["registration"].get("kind") != "d4d_native_shared_receipt_policy"
+            ):
+                raise ValueError("native recorded outcome lacks its authoritative selection")
             if render_spec is not None and selected != recorded:
                 raise ValueError("supplied receipt policy differs from the record declaration")
             if render_spec is not None and any(key in recorded_spec or key in render_spec
@@ -290,6 +351,8 @@ def select_policy(render_spec: dict | None = None, record: dict | None = None) -
                 if any(render_spec.get(key) != recorded_spec.get(key) for key in NATIVE_SPEC_KEYS):
                     raise ValueError('supplied native receipt selection differs from the record declaration')
             selected = recorded
+        elif native_claim:
+            raise ValueError("native recorded outcome lacks its authoritative selection")
         runtime = record.get("receipt_completion")
         if runtime is not None:
             if selected is None or not isinstance(runtime, dict) or runtime.get("registration") != selected["identity"]:

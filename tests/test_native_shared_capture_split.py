@@ -38,6 +38,8 @@ def test_live_capture_forwards_projection_and_refuses_before_effects(monkeypatch
     def refuse(value, *, classifier_projection):
         assert value is raw
         assert classifier_projection is scope_identity
+        if entry == "_base":
+            assert getattr(authority.authority._LAUNCH_DERIVATIONS, "memo", None) is not None
         calls.append("verification refused")
         raise ExpectedRefusal("deliberate A refusal before C effects")
 
@@ -72,3 +74,11 @@ def test_live_capture_forwards_projection_and_refuses_before_effects(monkeypatch
     with pytest.raises(ExpectedRefusal, match="deliberate A refusal"):
         invoke()
     assert calls == ["scope opened", "verification refused", "scope closed"]
+    if entry == "_base":
+        assert getattr(authority.authority._LAUNCH_DERIVATIONS, "memo", None) is None
+        # A second helper call must reconstruct and refuse again, with no
+        # retained derivation scope or earlier verification result.
+        with pytest.raises(ExpectedRefusal, match="deliberate A refusal"):
+            invoke()
+        assert calls == ["scope opened", "verification refused", "scope closed"] * 2
+        assert getattr(authority.authority._LAUNCH_DERIVATIONS, "memo", None) is None

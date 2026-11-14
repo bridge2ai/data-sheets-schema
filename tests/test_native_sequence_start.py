@@ -39,6 +39,7 @@ def test_different_packet_retry_needs_new_direction(tmp_path, monkeypatch):
 
 def test_owner_start_records_are_repeatable(tmp_path):
     p=fixtures.paths(tmp_path)
+    capture_before = fixtures.capture_state_snapshot(p)
     args=dict(launch_word_raw=p['launch-word'].read_bytes(), direction=None,confirmation=None,
               packet=p['packet-directory'],started_at='2026-11-12T12:00:00Z')
     a=Path(start.claim(p['registration'].read_bytes(),**args))
@@ -47,7 +48,57 @@ def test_owner_start_records_are_repeatable(tmp_path):
     first, second = (words.strict_json(path.read_bytes()) for path in (a, b))
     assert first['direction_identity'] is second['direction_identity'] is None
     assert second['previous_sha256'] == words.sha(a.read_bytes())
-    assert not p['output-directory'].exists()
+    fixtures.assert_capture_state_preserved(p, capture_before, allow_start_events=True)
+
+
+def test_sequence_start_accepts_registration_above_quota_event_limit(tmp_path):
+    p = fixtures.paths(tmp_path, registration_padding=65536)
+    capture_before = fixtures.capture_state_snapshot(p)
+    registration_raw = p['registration'].read_bytes()
+    assert 65536 < len(registration_raw) <= 32 * 1024 * 1024
+    # The shared parser must retain its smaller default for quota evidence.
+    with pytest.raises(ValueError, match='not bounded JSON bytes'):
+        words.strict_json(registration_raw)
+    word = words.strict_json(p['launch-word'].read_bytes())
+    review = words.strict_json(p['review'].read_bytes())
+    assert word['registration_sha256'] == review['registration_sha256'] == words.sha(registration_raw)
+    root = tmp_path / 'word-state'
+    before = {path.relative_to(root): path.read_bytes() for path in root.rglob('*') if path.is_file()}
+
+    event_path = Path(start.claim(registration_raw,
+        launch_word_raw=p['launch-word'].read_bytes(), direction=None, confirmation=None,
+        packet=p['packet-directory'], started_at='2026-11-12T12:00:00Z'))
+
+    event = words.strict_json(event_path.read_bytes())
+    assert event['type'] == 'sequence_start'
+    assert event['registration_sha256'] == words.sha(registration_raw)
+    assert event['previous_sha256'] == words.sha(before[Path('events/000001.json')])
+    after = {path.relative_to(root): path.read_bytes() for path in root.rglob('*') if path.is_file()}
+    assert after.keys() - before.keys() == {event_path.relative_to(root)}
+    assert all(after[name] == raw for name, raw in before.items())
+    fixtures.assert_capture_state_preserved(p, capture_before, allow_start_events=True)
+    assert not (tmp_path / 'NEVER-RESERVED-ATTEMPT').exists()
+
+
+def test_sequence_start_rejects_registration_above_input_limit_before_lock(tmp_path, monkeypatch):
+    p = fixtures.paths(tmp_path)
+    capture_before = fixtures.capture_state_snapshot(p)
+    registration_raw = p['registration'].read_bytes()
+    registration_raw += b' ' * (32 * 1024 * 1024 + 1 - len(registration_raw))
+    root = tmp_path / 'word-state'
+    before = {path.relative_to(root): path.read_bytes() for path in root.rglob('*') if path.is_file()}
+    def forbidden_lock(*args, **kwargs):
+        pytest.fail('oversized registration reached the journal lock')
+    monkeypatch.setattr(words, 'locked', forbidden_lock)
+
+    with pytest.raises(ValueError, match='not bounded JSON bytes'):
+        start.claim(registration_raw,
+            launch_word_raw=p['launch-word'].read_bytes(), direction=None, confirmation=None,
+            packet=p['packet-directory'], started_at='2026-11-12T12:00:00Z')
+
+    assert {path.relative_to(root): path.read_bytes() for path in root.rglob('*') if path.is_file()} == before
+    fixtures.assert_capture_state_preserved(p, capture_before)
+    assert not (tmp_path / 'NEVER-RESERVED-ATTEMPT').exists()
 
 
 def test_direction_claim_refuses_symlink_state(tmp_path):
@@ -63,6 +114,7 @@ def test_direction_claim_refuses_symlink_state(tmp_path):
 
 def test_claim_latency_cannot_cross_delegated_start_limit(tmp_path,monkeypatch):
     p=fixtures.paths(tmp_path)
+    capture_before = fixtures.capture_state_snapshot(p)
     moments=iter(['2026-11-12T12:00:00Z','2026-11-12T12:00:00Z',
                   '2026-11-12T12:00:01Z','2026-11-12T12:00:01Z'])
     monkeypatch.setattr(seq,'_utc_now',lambda:next(moments))
@@ -71,7 +123,7 @@ def test_claim_latency_cannot_cross_delegated_start_limit(tmp_path,monkeypatch):
         '--host-confirmed-at','2026-11-12T11:30:00Z'])==1
     saved=fixtures.record(p)
     assert Path(saved['start_claim']).is_file() and saved['steps']==[]
-    assert not p['output-directory'].exists()
+    fixtures.assert_capture_state_preserved(p, capture_before, allow_start_events=True)
 
 
 @pytest.mark.parametrize('missing', ['journal', 'empty_journal', 'authority', 'word', 'unreadable'])
@@ -89,11 +141,13 @@ def test_missing_or_replaced_word_state_refuses_before_capture(tmp_path, monkeyp
         (root / 'events').mkdir()
     else:
         monkeypatch.setattr(words, '_read', lambda path: (_ for _ in ()).throw(PermissionError('fixture unreadable journal')))
+    capture_before = fixtures.capture_state_snapshot(p)
     calls = fixtures.fake_commands(monkeypatch, p)
     monkeypatch.setattr(seq, '_utc_now', lambda: '2026-11-12T12:00:00Z')
     assert fixtures.run_sequence([*fixtures.argv(p), '--direction-recorded-at', '2026-11-12T11:59:00Z',
                                   '--host-confirmed-at', '2026-11-12T11:59:00Z']) == 1
-    assert calls == [] and not p['output-directory'].exists()
+    assert calls == []
+    fixtures.assert_capture_state_preserved(p, capture_before)
     assert not (tmp_path / '.native-sequence-starts').exists()
 
 
@@ -115,12 +169,12 @@ def test_start_event_is_synced_before_first_child(tmp_path, monkeypatch):
     monkeypatch.setattr(os, 'fsync', sync)
     monkeypatch.setattr(words, '_new', new)
     calls = fixtures.fake_commands(monkeypatch, p)
-    fake = seq.subprocess.run
+    fake = seq.subprocess.Popen
     def child(*args, **kwargs):
         assert len(completed) == 1
         assert words.strict_json(completed[0].read_bytes())['type'] == 'sequence_start'
         return fake(*args, **kwargs)
-    monkeypatch.setattr(seq.subprocess, 'run', child)
+    monkeypatch.setattr(seq.subprocess, 'Popen', child)
     assert fixtures.run_sequence(fixtures.argv(p)) == 0
     assert len(calls) == 3
 

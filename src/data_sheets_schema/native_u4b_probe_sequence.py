@@ -245,6 +245,7 @@ def validate_observation(path, *, expected_pin=None, final_runtime=None,
     manifest = strict_json(raw)
     _closed(manifest, OBSERVATION_KEYS, 'observation manifest')
     directory = _path(manifest['directory'])
+    _refuse_bound_failure(directory)
     if path != directory / 'observation/observation.json':
         raise ValueError('observation cannot name the bound probe or another manifest path')
     authorization_raw = _read_pin(manifest['authorization'], directory / 'authorization.json', limit=16384)
@@ -447,6 +448,12 @@ def produce_bound_probe(authorization_raw, expected, directory=None):
 
 
 
+def _refuse_bound_failure(directory):
+    failure = Path(directory) / 'bound-failure.json'
+    if failure.exists() or failure.is_symlink():
+        raise ValueError('bound probe evidence carries ' + str(failure))
+
+
 def validate_bound_probe(runtime, permission_probe_path):
     """Recheck the acyclic completion plus the actual saved permission consumer."""
     from . import native_shared_permission_orchestration as permission
@@ -457,6 +464,7 @@ def validate_bound_probe(runtime, permission_probe_path):
         expected_pin=basis['observation_probe'], final_runtime=runtime,
         transcript_path=basis['probe']['path'], request_path=basis['request']['path'])
     root = _path(observed['sequence_directory'])
+    _refuse_bound_failure(root)
     path = _path(str(permission_probe_path))
     if path != root / 'permission/permission-probe.json':
         raise ValueError('bound permission cannot be its own observation or another sequence')

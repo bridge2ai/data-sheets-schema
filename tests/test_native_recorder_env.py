@@ -33,7 +33,7 @@ def test_native26_model_line_and_controller_environment(native_spec, tmp_path):
     assert line in native_spec.instruction
     config = tmp_path / 'attempt' / 'config'
     runtime = {'environment': {'HOME': str(tmp_path / 'home'),
-        'PYSTOW_HOME': str(config.parent / 'helper-cache')}}
+        'BASH_DEFAULT_TIMEOUT_MS': '600000', 'BASH_MAX_TIMEOUT_MS': '600000', 'PYSTOW_HOME': str(config.parent / 'helper-cache')}}
     env = registration.environment(runtime, {'instruction_path': str(tmp_path / 'instruction')}, native_spec, config)
     assert json.loads(env['D4D_RENDER_SPEC']) == native_spec.render_spec()
     captured = native_spec._native_shared_runtime_capture
