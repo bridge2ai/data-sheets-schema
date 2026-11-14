@@ -14,6 +14,7 @@ from collections import Counter
 from datetime import datetime, timezone
 import hashlib
 import json
+import runpy
 from pathlib import Path
 import subprocess
 import xml.etree.ElementTree as ET
@@ -24,6 +25,7 @@ SOURCE_SCOPE = ('src', 'tests', 'notes/matched_cborg_2026-09-13', 'pyproject.tom
                 'poetry.lock', 'conftest.py', '.github/workflows/main.yaml')
 REVIEWED_6224 = '748ea6be5be5fdfa1174b1e0b58071bd129e1b5a'
 APPLIED_6217 = '2070a2116ceb5b1f5dd9a870c803ee3311d298b9'
+CORRECTED_6217_TEST = '21367471df2e7d2f761153e1b91b218a705c62c6'
 PUBLICATION_FILE = 'tests/test_native_publication_signals.py'
 PUBLICATION_TESTS = (
     'test_record_only_survives_first_and_repeated_signals_and_restores_handlers',
@@ -187,6 +189,27 @@ def classify_cohort(directory, command):
             'reason': 'Saved pytest outputs target another directory; retained artifacts are not a separate invocation.'}
 
 
+def classify_auxiliary(directory, markers, raw):
+    expected = ROOT.parent / 'scratch-g2-20261114/source-bytecode'
+    if directory != expected or markers != ['outcome.json']:
+        return None
+    if hashlib.sha256(raw).hexdigest() != 'd0e2a91ea573e1995d78c47aca8b7915907c6c2a5019797dfed21b62a3f4795a':
+        return None
+    value = json.loads(raw)
+    if (value.get('status') != 'preserved-and-verified' or value.get('after_inventory') != []
+            or any(value.get(name) is not True for name in (
+                'source_unchanged', 'head_unchanged', 'one_file_canary_and_full_scope'))
+            or any(value.get(name) is not False for name in ('content_deleted', 'directories_removed'))
+            or value['plan']['path'] != str(expected / 'plan.json')
+            or value['preserved']['path'] != str(expected / 'propose_g2_dispatch_boundary_6207_20261114.cpython-313.pyc')
+            or value['preserved']['bytes'] != 30228
+            or value['preserved']['sha256'] != '3f2edc32a7f813ff3795ad0b384af2b93df0526b3cd5f16f217c1dc4589602a7'):
+        return None
+    return {'directory': str(directory), 'classification': 'auxiliary',
+            'reason': 'Exact pinned completed one-file bytecode preservation; not a pytest invocation.',
+            'related_artifacts': [value['plan'], value['preserved']]}
+
+
 def discover_cohorts(root):
     rows = []
     for directory in sorted(root.iterdir()):
@@ -195,6 +218,20 @@ def discover_cohorts(root):
         evidence = [pin(directory / name) for name in ('command.json', 'outcome.json', 'pytest.xml', 'pytest.log')
                     if (directory / name).is_file()]
         if not evidence:
+            continue
+        markers = [Path(item['path']).name for item in evidence]
+        auxiliary = classify_auxiliary(directory, markers, (directory / 'outcome.json').read_bytes()) if markers == ['outcome.json'] else None
+        if auxiliary is not None:
+            try:
+                for related in auxiliary['related_artifacts']:
+                    actual = pin(Path(related['path']))
+                    if actual != related:
+                        raise ValueError('auxiliary provenance pin differs: ' + related['path'])
+                    evidence.append(actual)
+            except (OSError, ValueError) as error:
+                auxiliary = {'directory': str(directory), 'classification': 'invalid',
+                             'reason': 'Auxiliary provenance unavailable or changed: ' + str(error)}
+            rows.append({**auxiliary, 'evidence': evidence})
             continue
         try:
             command = json.loads((directory / 'command.json').read_bytes())
@@ -333,11 +370,20 @@ def close_legacy_rerun(identity, directories, head, evidence, details):
     require(command['cwd'] == str(ROOT)
             and command['source_inventory']['ignored_and_hidden_files_included'] is True,
             'legacy rerun lacks the assigned checkout/source inventory')
+    reuse_details = []
     for label, recorded in (('collection', collection['head']), ('rerun', command['head'])):
         require(isinstance(recorded, str) and len(recorded) == 40
-                and git('merge-base', '--is-ancestor', recorded, head).returncode == 0
-                and git('diff', '--exit-code', recorded, head, '--', *SOURCE_SCOPE).returncode == 0,
-                label + ' source is not equivalent to final source')
+                and git('merge-base', '--is-ancestor', recorded, head).returncode == 0,
+                label + ' source is not an ancestor of final source')
+        if git('diff', '--exit-code', recorded, head, '--', *SOURCE_SCOPE).returncode != 0:
+            helper = ROOT / 'scripts/adhoc/g2_legacy_leaf_reuse_6217_f4_20261114.py'
+            evidence.append(pin(helper))
+            reuse = runpy.run_path(str(helper))['validate_reuse'](
+                ROOT, OUT, recorded, head, file, directory)
+            require(reuse['passed'] is True, label + ' lacks the exact approved legacy149 reuse proof')
+            for artifact in reuse['evidence']:
+                checked_pin(artifact, evidence)
+            reuse_details.append({'label': label, 'recorded_head': recorded, **reuse})
     require(git('diff', '--exit-code', 'HEAD', '--', *SOURCE_SCOPE).returncode == 0,
             'tracked source changed after HEAD')
     rows = cases(directory / 'pytest.xml')
@@ -356,6 +402,8 @@ def close_legacy_rerun(identity, directories, head, evidence, details):
     require(bool(formerly_failed) and formerly_failed <= actual,
             'one or more original failed/error nodes are absent from the clean rerun')
     details.append({'file': file, 'cohort': directory.name, 'all_cases_passed': len(chosen),
+        'original_recorded_head': command['head'], 'collection_recorded_head': collection['head'],
+        'narrow_f4_reuse': reuse_details,
         'expected_from_pytest_collection': len(expected),
         'original_failed_nodes_now_passed': [{'classname': cls, 'name': name}
                                             for cls, name in sorted(formerly_failed)],
@@ -391,11 +439,26 @@ def close_proposal(evidence, details):
     return 'Historical proposal correction verified: existing first_stop/gate suffice; a new field is optional. Its implementation deferral was subsequently superseded under F2; this F1 closure makes no current production-status claim.'
 
 
-def close_publication_repair(directories, head, evidence, details):
+def publication_binding(head, evidence):
     value = ledger('G2-REVIEW-6217-F2',
                    'proposal-6217-implementation/review-6217-superseding.json', evidence)
     require(git('merge-base', '--is-ancestor', APPLIED_6217, head).returncode == 0,
             '6217 implementation commit is not in current source history')
+    correction = ledger('G2-REVIEW-6217-F4', 'review-6217-f4-confirmed.json', evidence)
+    require(correction['correction_commit'] == CORRECTED_6217_TEST
+            and correction['production_commit'] == APPLIED_6217
+            and git('merge-base', '--is-ancestor', CORRECTED_6217_TEST, head).returncode == 0,
+            '6217 oracle correction is not the reviewed commit')
+    for key in ('original_review', 'before_closure', 'corrected_test', 'patch', 'producer'):
+        checked_pin(correction[key], evidence)
+    checked_pin(correction['pytest_failure_attribution']['traceback'], evidence)
+    for artifact in correction['interrupted_cohort']['artifacts']:
+        checked_pin(artifact, evidence)
+    checked_pin(correction['interrupted_cohort']['cleanup'], evidence)
+    require(git('diff', '--name-only', APPLIED_6217, CORRECTED_6217_TEST, '--', *SOURCE_SCOPE).stdout.decode().splitlines()
+            == [PUBLICATION_FILE], '6217 correction includes an unreviewed source-scope change')
+    require(git('diff', '--exit-code', CORRECTED_6217_TEST, head, '--', *SOURCE_SCOPE).returncode == 0,
+            'source changed after the reviewed 6217 oracle correction')
     checked_pin(value['original_proposal_preserved'], evidence)
     candidate_root = OUT / 'proposal-6217-implementation/candidate'
     for candidate in value['candidates']:
@@ -403,17 +466,36 @@ def close_publication_repair(directories, head, evidence, details):
         relative = Path(candidate['path']).relative_to(candidate_root).as_posix()
         current = pin(ROOT / relative)
         committed = git('show', APPLIED_6217 + ':' + relative)
-        require(committed.returncode == 0
-                and hashlib.sha256(committed.stdout).hexdigest() == candidate['sha256']
-                and current['sha256'] == candidate['sha256'],
-                'current/committed 6217 implementation differs from reviewed candidate: ' + relative)
+        require(committed.returncode == 0 and hashlib.sha256(committed.stdout).hexdigest() == candidate['sha256'],
+                'original committed 6217 implementation differs from reviewed candidate: ' + relative)
+        if relative == PUBLICATION_FILE:
+            corrected = git('show', CORRECTED_6217_TEST + ':' + relative)
+            require(corrected.returncode == 0
+                    and hashlib.sha256(corrected.stdout).hexdigest() == correction['corrected_test']['sha256']
+                    and current['sha256'] == correction['corrected_test']['sha256'],
+                    'current publication test differs from committed corrected oracle')
+        else:
+            require(current['sha256'] == candidate['sha256'],
+                    'current 6217 production differs from reviewed implementation: ' + relative)
         evidence.append(current)
-    details.append({'issue': 6217, 'applied_commit': APPLIED_6217,
-                    'historical_candidate_ledger_preserved': True})
+    return {'issue': 6217, 'applied_commit': APPLIED_6217,
+            'test_correction_commit': CORRECTED_6217_TEST, 'production_unchanged': True,
+            'historical_candidate_ledger_preserved': True}
+
+
+def close_publication_repair(directories, head, evidence, details):
+    details.append(publication_binding(head, evidence))
     details.append(test_proof(PUBLICATION_FILE, None, directories, head, evidence))
     for function in PUBLICATION_TESTS:
         details.append(test_proof(PUBLICATION_FILE, function, directories, head, evidence))
-    return 'Authorized 6217 implementation is committed and matches the reviewed candidate; every publication-signal regression and the complete file passed on equivalent current source. Historical deferral is superseded.'
+    return '6217 production remains the reviewed 2070 implementation; the publication oracle is the committed 21367471 correction. Every publication regression and the full file passed on equivalent current source; historical deferral is superseded.'
+
+
+def close_publication_oracle(directories, head, evidence, details):
+    details.append(publication_binding(head, evidence))
+    details.append(test_proof(PUBLICATION_FILE, None, directories, head, evidence))
+    details.append(test_proof(PUBLICATION_FILE, PUBLICATION_TESTS[-1], directories, head, evidence))
+    return 'Confirmed line157 oracle defect is corrected using established publication bytes. Fresh public-signal regressions and the complete publication file passed; original traceback/interrupted evidence remain retained and no runtime-hang cause is claimed.'
 
 
 def retain_withdrawal(evidence, details):
@@ -459,7 +541,7 @@ def close_runner(evidence, details):
 def close_report(evidence, details):
     identity = 'G2-REVIEW-REPORT-F1'
     ledger(identity, 'review-report.json', evidence)
-    result = document(OUT / 'report-closure-pin-verification-after-bytecode-pin-review/result.json', evidence)
+    result = document(OUT / 'report-closure-pin-verification-after-f4-reuse-auxiliary/result.json', evidence)
     require(result['finding_id'] == identity and result['status'] == 'verified'
             and result['verified_entrypoint'] == 'review_ledger',
             'report closure-pin verification is incomplete')
@@ -481,7 +563,7 @@ def close_report(evidence, details):
 def close_report_discovery(evidence, details):
     identity = 'G2-REVIEW-REPORT-F2'
     ledger(identity, 'review-report-f2.json', evidence)
-    result = document(OUT / 'report-cohort-discovery-after-bytecode-pin-review/result.json', evidence)
+    result = document(OUT / 'report-cohort-discovery-after-f4-reuse-auxiliary/result.json', evidence)
     require(result['finding_id'] == identity and result['status'] == 'verified',
             'cohort discovery verification is incomplete')
     for name in ('reporter', 'closure', 'producer', 'ledger'):
@@ -497,6 +579,27 @@ def close_report_discovery(evidence, details):
             'cohort discovery counterexamples are incomplete or failing')
     details.append({'cases': len(rows), 'passed': len(rows), 'scope': result['scope']})
     return 'Both helpers bind saved output destinations to the containing directory, retain copied archives separately, and reject malformed identities. No observed false acceptance or project test result is claimed.'
+
+
+def close_auxiliary_discovery(evidence, details):
+    identity = 'G2-REVIEW-REPORT-F4'
+    ledger(identity, 'review-report-f4.json', evidence)
+    result = document(OUT / 'report-auxiliary-discovery-verification/result.json', evidence)
+    require(result['finding_id'] == identity and result['status'] == 'verified',
+            'auxiliary discovery verification is incomplete')
+    for key in ('reporter', 'closure', 'producer', 'ledger', 'auxiliary_outcome'):
+        checked_pin(result[key], evidence)
+    for artifact in result['reviewed_sources']:
+        checked_pin(artifact, evidence)
+    expected = {'known_auxiliary_retained', 'unknown_outcome_only_invalid', 'changed_known_hash_invalid',
+                'known_with_junit_invalid', 'known_with_log_invalid', 'known_with_command_invalid',
+                'changed_provenance_invalid', 'missing_provenance_invalid'}
+    rows = result['cases']
+    require(result['passed'] == 8 and result['failed'] == 0 and len(rows) == 8
+            and {row['case'] for row in rows} == expected and all(row['passed'] is True for row in rows),
+            'auxiliary discovery counterexamples are incomplete or failing')
+    details.append({'cases': 8, 'passed': 8, 'scope': result['scope']})
+    return 'Only the exact pinned completed bytecode outcome is retained as auxiliary; it never becomes a test cohort. Unknown outcomes, pytest markers without valid commands, and changed/missing provenance refuse verification.'
 
 
 def close_bytecode(evidence, details):
@@ -536,7 +639,7 @@ def close_bytecode(evidence, details):
 def close_bytecode_pins(evidence, details):
     identity = 'G2-REVIEW-REPORT-F3'
     ledger(identity, 'review-report-f3.json', evidence)
-    result = document(OUT / 'bytecode-closure-pin-verification/result.json', evidence)
+    result = document(OUT / 'bytecode-closure-pin-verification-after-f4-reuse-auxiliary/result.json', evidence)
     require(result['finding_id'] == identity and result['status'] == 'verified'
             and result['verified_entrypoint'] == 'close_bytecode',
             'bytecode closure-pin verification is incomplete')
@@ -615,6 +718,34 @@ def superseded_cohort():
         'reason': 'Pre-6217 validation was superseded. Clean JUnit entries from this interrupted run do not prove completed tests or complete-file coverage.'}
 
 
+def proposal_applicability(review, proposal, head):
+    evidence = []
+    for artifact in review['current_sources']:
+        checked_pin(artifact, evidence)
+    proposal_head = proposal['head']
+    scope = tuple(name for name in SOURCE_SCOPE if name != 'tests')
+    require(proposal_head == review['reviewed_proposal_head']
+            and git('merge-base', '--is-ancestor', proposal_head, head).returncode == 0
+            and git('diff', '--exit-code', proposal_head, head, '--', *scope).returncode == 0,
+            '6207 proposal production/controller/config source is no longer equivalent')
+    changed = git('diff', '--name-only', proposal_head, head, '--', 'tests').stdout.decode().splitlines()
+    require(changed == [PUBLICATION_FILE]
+            and git('merge-base', '--is-ancestor', CORRECTED_6217_TEST, head).returncode == 0
+            and git('diff', '--exit-code', CORRECTED_6217_TEST, head, '--', *SOURCE_SCOPE).returncode == 0,
+            '6207 proposal has test drift beyond the reviewed F4 leaf correction')
+    correction = ledger('G2-REVIEW-6217-F4', 'review-6217-f4-confirmed.json', evidence)
+    checked_pin(correction['corrected_test'], evidence)
+    current = pin(ROOT / PUBLICATION_FILE)
+    require(current['sha256'] == correction['corrected_test']['sha256'],
+            '6207 applicability does not match corrected F4 test bytes')
+    evidence.append(current)
+    return {'passed': True, 'proposal_head_retained': proposal_head, 'current_head': head,
+        'production_scope_unchanged': list(scope), 'current_sources_checked': evidence,
+        'reviewed_test_drift': {'path': PUBLICATION_FILE, 'commit': CORRECTED_6217_TEST,
+                                'finding_id': 'G2-REVIEW-6217-F4'},
+        'scope': 'Unapplied proposal applicability only; no test-proof allowance, patch application or pin rotation.'}
+
+
 def main():
     head_result = git('rev-parse', 'HEAD')
     require(head_result.returncode == 0, 'cannot identify final HEAD')
@@ -632,6 +763,7 @@ def main():
                              ('G2-REVIEW-REPORT-F1', close_report),
                              ('G2-REVIEW-REPORT-F2', close_report_discovery),
                              ('G2-REVIEW-REPORT-F3', close_bytecode_pins),
+                             ('G2-REVIEW-REPORT-F4', close_auxiliary_discovery),
                              ('G2-REVIEW-BYTECODE-F1', close_bytecode)):
         row, details = close(identity, action)
         if identity == 'G2-REVIEW-6217-F3' and row['status'] == 'verified':
@@ -640,6 +772,11 @@ def main():
         proofs[identity] = details
     identity = 'G2-REVIEW-6217-F2'
     row, details = close(identity, lambda evidence, details: close_publication_repair(
+        directories, head, evidence, details))
+    findings.append(row)
+    proofs[identity] = details
+    identity = 'G2-REVIEW-6217-F4'
+    row, details = close(identity, lambda evidence, details: close_publication_oracle(
         directories, head, evidence, details))
     findings.append(row)
     proofs[identity] = details
@@ -668,16 +805,13 @@ def main():
     proposal_6207 = json.loads(Path(review_6207['proposal']['path']).read_bytes())
     require(all(proposal_6207[name] is False for name in ('applied', 'pin_rotation_applied', 'tests_run')),
             '6207 proposal must remain unapplied and untested')
-    proposal_head = proposal_6207['head']
-    require(proposal_head == review_6207['reviewed_proposal_head']
-            and git('merge-base', '--is-ancestor', proposal_head, head).returncode == 0
-            and git('diff', '--exit-code', proposal_head, head, '--', *SOURCE_SCOPE).returncode == 0,
-            '6207 refreshed proposal is not based on equivalent current source')
+    applicability = proposal_applicability(review_6207, proposal_6207, head)
     obsolete = superseded_cohort()
     write_new(review_path, review_6224(head))
     result = {'head': head, 'recorded_at': datetime.now(timezone.utc).isoformat(),
         'findings': findings, 'verification_details': proofs, 'cohort_artifact_discovery': discovery,
         'review_6207': pin(review_6207_path),
+        'review_6207_applicability': applicability,
         'historical_review_6207': pin(OUT / 'review-6207-final.json'),
         'superseded_cohort': obsolete,
         'review_6224': pin(review_path), 'producer': pin(Path(__file__).resolve()),

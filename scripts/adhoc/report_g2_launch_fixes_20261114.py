@@ -69,12 +69,13 @@ FINDING_TESTS = {
     'G2-REVIEW-6208-F3': ('test_copied_witness_failure_always_reaps_its_owned_process',),
     'G2-REVIEW-6218-F1': ('test_dispatch_guard_refusal_precedes_stage_activation',),
     'G2-REVIEW-6217-F2': REGRESSIONS[6217]['tests/test_native_publication_signals.py'],
+    'G2-REVIEW-6217-F4': ('test_public_first_signal_during_publication_keeps_exact_readback',),
 }
 REVIEW_FILES = ('review-6208.json', 'review-followups.json', 'review-runner.json',
-                'offline-power-fixture-review.json', 'review-report.json', 'review-report-f2.json',
+                'offline-power-fixture-review.json', 'review-report.json', 'review-report-f2.json', 'review-report-f4.json',
                 'proposal-6217-implementation/review-6217-superseding.json',
                 'review-6217-f3-withdrawn-frozen.json',
-                'review-legacy-component-failures-v2.json', 'review-bytecode.json', 'review-report-f3.json')
+                'review-legacy-component-failures-v2.json', 'review-bytecode.json', 'review-report-f3.json', 'review-6217-f4-confirmed.json')
 
 
 def git(*args):
@@ -218,6 +219,27 @@ def classify_cohort(directory, command):
             'reason': 'Saved pytest outputs target another directory; retained artifacts are not a separate invocation.'}
 
 
+def classify_auxiliary(directory, markers, raw):
+    expected = ROOT.parent / 'scratch-g2-20261114/source-bytecode'
+    if directory != expected or markers != ['outcome.json']:
+        return None
+    if hashlib.sha256(raw).hexdigest() != 'd0e2a91ea573e1995d78c47aca8b7915907c6c2a5019797dfed21b62a3f4795a':
+        return None
+    value = json.loads(raw)
+    if (value.get('status') != 'preserved-and-verified' or value.get('after_inventory') != []
+            or any(value.get(name) is not True for name in (
+                'source_unchanged', 'head_unchanged', 'one_file_canary_and_full_scope'))
+            or any(value.get(name) is not False for name in ('content_deleted', 'directories_removed'))
+            or value['plan']['path'] != str(expected / 'plan.json')
+            or value['preserved']['path'] != str(expected / 'propose_g2_dispatch_boundary_6207_20261114.cpython-313.pyc')
+            or value['preserved']['bytes'] != 30228
+            or value['preserved']['sha256'] != '3f2edc32a7f813ff3795ad0b384af2b93df0526b3cd5f16f217c1dc4589602a7'):
+        return None
+    return {'directory': str(directory), 'classification': 'auxiliary',
+            'reason': 'Exact pinned completed one-file bytecode preservation; not a pytest invocation.',
+            'related_artifacts': [value['plan'], value['preserved']]}
+
+
 def discover_cohorts(root):
     rows = []
     for directory in sorted(root.iterdir()):
@@ -226,6 +248,20 @@ def discover_cohorts(root):
         evidence = [pin(directory / name) for name in ('command.json', 'outcome.json', 'pytest.xml', 'pytest.log')
                     if (directory / name).is_file()]
         if not evidence:
+            continue
+        markers = [Path(item['path']).name for item in evidence]
+        auxiliary = classify_auxiliary(directory, markers, (directory / 'outcome.json').read_bytes()) if markers == ['outcome.json'] else None
+        if auxiliary is not None:
+            try:
+                for related in auxiliary['related_artifacts']:
+                    actual = pin(Path(related['path']))
+                    if actual != related:
+                        raise ValueError('auxiliary provenance pin differs: ' + related['path'])
+                    evidence.append(actual)
+            except (OSError, ValueError) as error:
+                auxiliary = {'directory': str(directory), 'classification': 'invalid',
+                             'reason': 'Auxiliary provenance unavailable or changed: ' + str(error)}
+            rows.append({**auxiliary, 'evidence': evidence})
             continue
         try:
             command = json.loads((directory / 'command.json').read_bytes())
@@ -268,7 +304,22 @@ def load_cohort(directory, final, equivalence_cache):
     recorded_head = command.get('head')
     if recorded_head not in equivalence_cache:
         equivalence_cache[recorded_head] = source_equivalence(recorded_head, final)
-    row['source_equivalence'] = equivalence_cache[recorded_head]
+    row['source_equivalence'] = dict(equivalence_cache[recorded_head])
+    # This overlay belongs only to the exact retained invocation. Never put it
+    # in the head-keyed cache or grant it to another cohort at the same HEAD.
+    if directory == SCRATCH / 'legacy-full-serial' and not row['source_equivalence']['passed']:
+        import runpy
+        helper = ROOT / 'scripts/adhoc/g2_legacy_leaf_reuse_6217_f4_20261114.py'
+        try:
+            validate = runpy.run_path(str(helper))['validate_reuse']
+            proofs = [validate(ROOT, SCRATCH, recorded_head, final, file, directory) for file in (
+                'tests/test_native_execution.py', 'tests/test_native_receipt_origin_reporting.py')]
+        except (ValueError, OSError, subprocess.CalledProcessError) as error:
+            row['source_equivalence']['reuse_refused'] = str(error)
+        else:
+            row['source_equivalence'].update(passed=True, strict_source_equality=False,
+                basis='Exact legacy149 invocation reused across the reviewed F4 leaf-test correction only.',
+                legacy_reuse=proofs)
     row['selected_paths'] = selected_paths(command.get('command', []))
     pytest_arguments = command.get('command', [])[3:]
     filters = ('-k', '-m', '--deselect', '--ignore', '--ignore-glob', '--last-failed', '--lf', '--collect-only')
@@ -432,6 +483,8 @@ def review_ledger(regressions, coverage):
     for finding in findings:
         identity = finding.get('id', finding.get('finding_id'))
         proof = [by_test[name] for name in FINDING_TESTS.get(identity, ())]
+        if identity == 'G2-REVIEW-6217-F4':
+            proof.append(coverage['tests/test_native_publication_signals.py'])
         if identity == 'G2-REVIEW-6218-F2':
             proof = [coverage[name] for name in ('tests/test_native_u4b_a3_reservation.py', 'tests/test_native_u3k_freshness_order.py')]
         if identity in ('G2-REVIEW-LEGACY-F1', 'G2-REVIEW-LEGACY-F2'):
@@ -502,6 +555,24 @@ def main():
     check_nested_pins(proposal_review)
     assert proposal_review['proposal'] == proposals[6207]['evidence']
     proposals[6207]['review'] = {'record': proposal_review, 'evidence': pin(proposal_review_path)}
+    # Proposal applicability is a source/patch check, never test acceptance.
+    import runpy
+    reuse_helper = ROOT / 'scripts/adhoc/g2_legacy_leaf_reuse_6217_f4_20261114.py'
+    leaf_scope = runpy.run_path(str(reuse_helper))['scope_proof'](head)
+    assert proposal['head'] == '2070a2116ceb5b1f5dd9a870c803ee3311d298b9'
+    production_scope = tuple(name for name in SOURCE_SCOPE if name != 'tests')
+    assert not git('diff', '--name-only', proposal['head'], head, '--', *production_scope)
+    current_sources = [checked_pin(row) for row in proposal_review['current_sources']]
+    apply_command = ['git', 'apply', '--check', proposal['patch']['path']]
+    apply_result = subprocess.run(apply_command, cwd=ROOT, capture_output=True, check=False)
+    assert apply_result.returncode == 0, apply_result.stderr.decode()
+    proposals[6207]['current_applicability'] = {
+        'passed': True, 'proposal_head': proposal['head'], 'current_head': head,
+        'production_scope': list(production_scope), 'current_sources': current_sources,
+        'reviewed_leaf_test_drift': leaf_scope, 'scope_validator': pin(reuse_helper),
+        'apply_check': {'command': apply_command, 'returncode': apply_result.returncode,
+                        'stdout': apply_result.stdout.decode(), 'stderr': apply_result.stderr.decode()},
+        'basis': 'Exact proposal base bytes and production scope remain unchanged; the F4 leaf-test drift is recorded separately. No proposed code or test was executed.'}
     for issue in (6225,):
         assert proposals[issue]['record']['status'] == 'not fixed'
         proposals[issue]['markdown'] = pin(SCRATCH / ('issue-' + str(issue) + '-proposal.md'))
@@ -517,7 +588,7 @@ def main():
     check_nested_pins(inventory)
     assert inventory['passed'] == sum(row['passed'] is True for row in inventory['cases'])
     assert inventory['failed'] == sum(row['passed'] is not True for row in inventory['cases'])
-    report_verification_path = SCRATCH / 'report-closure-pin-verification-after-bytecode-pin-review/result.json'
+    report_verification_path = SCRATCH / 'report-closure-pin-verification-after-f4-reuse-auxiliary/result.json'
     report_verification = read_json(report_verification_path)
     check_nested_pins(report_verification)
     assert report_verification['reporter'] == pin(Path(__file__).resolve())
@@ -525,6 +596,13 @@ def main():
     interruption = read_json(interruption_path)
     check_nested_pins(interruption)
     assert interruption['safe_to_release_source_freeze'] is True
+    oracle_cleanup_path = SCRATCH / 'final-regressions-interruption-6217-oracle/cleanup-1794637161740208000.json'
+    oracle_cleanup = read_json(oracle_cleanup_path)
+    check_nested_pins(oracle_cleanup)
+    assert oracle_cleanup['status'] == 'cleanup-confirmed' and oracle_cleanup['safe_to_release_source_freeze'] is True
+    assert all(row['original_reaped'] is True for row in (
+        oracle_cleanup['coordinator'], oracle_cleanup['runner'], *oracle_cleanup['workers'],
+        *oracle_cleanup['observed_descendants']))
     issues = []
     for issue in ISSUES:
         linked = [row for row in history if issue in row['issues']]
@@ -555,6 +633,7 @@ def main():
         'superseded_6217_proposal': historical_6217,
         'report_revision_verification': {'record': report_verification, 'evidence': pin(report_verification_path)},
         'interrupted_cohort_cleanup': {'record': interruption, 'evidence': pin(interruption_path)},
+        'publication_oracle_interruption': {'record': oracle_cleanup, 'evidence': pin(oracle_cleanup_path)},
         'runner_inventory_verification': {'record': inventory, 'evidence': pin(inventory_path)},
         'runner': pin(ROOT / 'scripts/adhoc/run_g2_checks_20261114.py'),
         'environment': {'report_python': sys.version, 'platform': sys.platform,
@@ -581,6 +660,8 @@ def main():
         lines.append('- ' + row['name'] + ': ' + summary + '; exit ' + str(row['returncode'])
             + '; ' + ('interrupted and incomplete' if row['interrupted'] else 'complete' if row['complete'] else 'incomplete')
             + '; source ' + ('equivalent' if row['source_equivalence']['passed'] else 'unverified or changed') + '.')
+        if row['source_equivalence'].get('legacy_reuse'):
+            lines.append('  Reused exact legacy149 evidence from HEAD 2070a2116 across only the reviewed publication-test oracle correction 21367471; all shared source, fixtures and selected nodes remain unchanged.')
         if row['interrupted']:
             log_summary = row.get('pytest_summary')
             lines.append('  JUnit contains ' + str(row['junit_entry_counts']['total']) + ' entries; '
