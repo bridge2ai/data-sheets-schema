@@ -77,6 +77,16 @@ def read_json(path):
     return json.loads(path.read_bytes())
 
 
+def verified_bytecode(path):
+    value = read_json(path)
+    assert value['status'] == 'complete' and value['entries']
+    for entry in value['entries']:
+        assert entry['state'] == 'preserved'
+        actual = pin(entry['destination'])
+        assert actual['bytes'] == entry['bytes'] and actual['sha256'] == entry['sha256']
+    return value
+
+
 def counts(cases):
     result = {'total': len(cases)}
     for key in ('passed', 'failed', 'error', 'skipped'):
@@ -345,6 +355,10 @@ def main():
     budget_review = read_json(budget_review_path)
     proof_review_path = SCRATCH / 'report-proof-review.json'
     proof_review = read_json(proof_review_path)
+    bytecode_path = SCRATCH / 'source-bytecode-ledger.json'
+    bytecode = verified_bytecode(bytecode_path)
+    bytecode_review_path = SCRATCH / 'bytecode-review.json'
+    bytecode_review = read_json(bytecode_review_path)
     callback_analysis_path = SCRATCH / 'correction/callback-stop-analysis.json'
     callback_analysis = read_json(callback_analysis_path)
     static_diagnosis_path = SCRATCH / 'callback-static-diagnosis.json'
@@ -364,6 +378,8 @@ def main():
         'commits': commits, 'commit_map_evidence': pin(commits_path),
         'review': review, 'review_evidence': pin(review_path),
         'report_proof_review': proof_review, 'report_proof_review_evidence': pin(proof_review_path),
+        'bytecode_preservation': bytecode, 'bytecode_preservation_evidence': pin(bytecode_path),
+        'bytecode_review': bytecode_review, 'bytecode_review_evidence': pin(bytecode_review_path),
         'budget_origin_review': budget_review, 'budget_origin_review_evidence': pin(budget_review_path),
         'correction_callback_analysis': callback_analysis,
         'correction_callback_analysis_evidence': pin(callback_analysis_path),
@@ -461,6 +477,8 @@ def main():
         '- H2-RESUME-HARNESS-F1: `' + str(budget_review_path) + '`; ' + budget_review['status'] + '. Lead filing remains needed because helper GitHub writes are prohibited.',
         '- H2-RESUME-REPORT-F1: `' + str(proof_review_path) + '`; corrected and verified with a failed-session counterexample. Lead filing remains needed because helper GitHub writes are prohibited.',
         '- Supplemental budget retains an explicit local src PYTHONPATH override to select the assigned worktree with the primary interpreter. Native/audit retain their exact CI environment. Budget is not literal CI-environment equivalence.',
+        '- Source-tree bytecode was observed after native-lane launch, consistent with known issue 3865. The files were preserved in scratch with a single-file canary and hash verification: `' + str(bytecode_path) + '`.',
+        '- H2-RESUME-BYTECODE-F1 and F2: `' + str(bytecode_review_path) + '`; preservation recovery and complete-ledger verification were corrected before relocation. Lead filing remains needed because helper GitHub writes are prohibited.',
         '- ' + ('Controller pin mismatches require a review-only proposal; no rotation applied.' if pin_changes else 'Controller manifest entries match the final audit; no pin rotation applied.'),
         '- Local macOS Python 3.13 results do not establish CI Python 3.12 results or a full-suite pass.',
         '- Saved command HEADs and complete case details are preserved in the JSON twin; uncommitted test bytes are not independently identified by HEAD alone.',
