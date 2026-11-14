@@ -18,7 +18,7 @@ for relative in ('src/data_sheets_schema/native_shared_controls.py',
     assert original.count(old) == 1
     proposed = original.replace(old, new)
     patch.extend(unified_diff(original.splitlines(keepends=True), proposed.splitlines(keepends=True),
-                              fromfile='a/' + relative, tofile='b/' + relative))
+                              fromfile='a/' + relative, tofile='b/' + relative, n=0))
 output.parent.mkdir(parents=True, exist_ok=True)
 output.write_text(''.join(patch))
 assert output.stat().st_size
