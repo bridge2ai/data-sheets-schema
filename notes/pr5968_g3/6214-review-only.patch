@@ -1,0 +1,22 @@
+--- a/src/data_sheets_schema/native_shared_controls.py
++++ b/src/data_sheets_schema/native_shared_controls.py
+@@ -133,7 +133,7 @@
+                        for word in (grammar._simple_command(part)[0] or ())) else None)
+             if problem:
+                 return 'not_prescribed', (f'a registered read-only lookup, spelled so the runtime refuses it: '
+-                                          f'{problem}. This refusal does not disqualify the attempt; quote each '
++                                          f'{problem}. This refusal disqualifies the attempt; in a new attempt, quote each '
+                                           'argument with single quotes and name literal paths, or use the Read '
+                                           'tool')
+         return 'prescribed', 'a registered read-only lookup of this job\'s inputs or outputs'
+--- a/src/data_sheets_schema/native_shared_results_orchestration.py
++++ b/src/data_sheets_schema/native_shared_results_orchestration.py
+@@ -161,7 +161,7 @@
+     if problem:
+         return ('not_prescribed',
+             'a registered read-only lookup, spelled so the runtime refuses it: '
+-            + problem + '. This refusal does not disqualify the attempt; quote each '
++            + problem + '. This refusal disqualifies the attempt; in a new attempt, quote each '
+             'argument with single quotes and name literal paths, or use the Read tool')
+     return ('prescribed', "a registered read-only lookup of this job's inputs or outputs")
+ 
