@@ -198,11 +198,15 @@ def timing_evidence(directory):
 
 
 def public_proof(cohorts, name, node):
-    cohort = next((row for row in cohorts if row['name'] == name), None)
+    candidates = [row for row in cohorts if [arg for arg in row.get('command', {}).get('command', [])
+                                            if arg.startswith('tests/')] == [node]]
+    cohort = max(candidates, key=lambda row: row['evidence_mtime_ns']) if candidates else None
     item = {'name': name, 'node': node, 'passed': False, 'status': 'not run', 'counts': counts([]),
             'results': [], 'timing': []}
     if cohort is None:
         return item
+    item['cohort'] = cohort['name']
+    item['earlier_invocations'] = [row['name'] for row in candidates if row is not cohort]
     item['counts'] = cohort['counts']
     item['pytest_failures'] = [case for case in cohort['cases'] if case['status'] in ('failed', 'error')]
     messages = [' '.join(case.get('message', '').split()) for case in item['pytest_failures']]
@@ -215,7 +219,7 @@ def public_proof(cohorts, name, node):
     selectors = [arg for arg in command if arg.startswith('tests/')]
     isolated = selectors == [node] and not any(arg == '-n' or arg.startswith('-n=') or arg.startswith('--numprocesses') for arg in command)
     item['isolated_command'] = isolated
-    case_root = SCRATCH / name / 'cases'
+    case_root = SCRATCH / cohort['name'] / 'cases'
     if case_root.is_dir():
         for path in sorted(case_root.rglob('actual-result.json')):
             item['results'].append({'evidence': pin(path), 'result': read_json(path)})
@@ -229,6 +233,16 @@ def public_proof(cohorts, name, node):
         result and result.get('state') == 'failed' and result.get('first_stop'))
     item['passed'] = isolated and cohort['passed'] and cohort['counts']['total'] == 1 and completed
     return item
+
+
+def require_isolation_binding(public, cohorts, isolation):
+    assert isolation['status'] == 'corrected-by-serial-rerun'
+    selected, = [row for row in public if row['name'] == 'correction']
+    assert selected['cohort'] == isolation['required_rerun_cohort']
+    cohort, = [row for row in cohorts if row['name'] == selected['cohort']]
+    expected = isolation['rerun_interval']['evidence']
+    assert cohort['evidence']['junit'] == expected
+    assert pin(expected['path']) == expected
 
 
 def lane_proof(cohorts, name):
@@ -362,10 +376,19 @@ def main():
     queue_control_path = SCRATCH / 'acceptance-queue-control.json'
     queue_control = read_json(queue_control_path)
     assert queue_control['state'] == 'queue_retired_after_focused_saved'
+    isolation_path = SCRATCH / 'public-isolation-review.json'
+    isolation = read_json(isolation_path)
+    require_isolation_binding(public, cohorts, isolation)
+    isolation_binding_path = SCRATCH / 'public-isolation-binding-review.json'
+    isolation_binding = read_json(isolation_binding_path)
     callback_analysis_path = SCRATCH / 'correction/callback-stop-analysis.json'
     callback_analysis = read_json(callback_analysis_path)
     static_diagnosis_path = SCRATCH / 'callback-static-diagnosis.json'
     static_diagnosis = read_json(static_diagnosis_path)
+    g3b_path = SCRATCH / 'g3b-hang-comparison.json'
+    g3b = read_json(g3b_path)
+    binding_source = pin(SCRATCH / 'isolation-binding-reviewed-report-source.txt')
+    assert binding_source['sha256'] == isolation_binding['producer']['sha256']
     for callback in callback_analysis['answer']['stalled_callbacks']:
         request_path = callback.get('request_file', {}).get('path')
         callback['request_path_present_at_report'] = bool(request_path and Path(request_path).is_file())
@@ -384,11 +407,16 @@ def main():
         'bytecode_preservation': bytecode, 'bytecode_preservation_evidence': pin(bytecode_path),
         'bytecode_review': bytecode_review, 'bytecode_review_evidence': pin(bytecode_review_path),
         'acceptance_queue_control': queue_control, 'acceptance_queue_control_evidence': pin(queue_control_path),
+        'public_isolation_review': isolation, 'public_isolation_review_evidence': pin(isolation_path),
+        'public_isolation_binding_review': isolation_binding,
+        'public_isolation_binding_review_evidence': pin(isolation_binding_path),
         'budget_origin_review': budget_review, 'budget_origin_review_evidence': pin(budget_review_path),
         'correction_callback_analysis': callback_analysis,
         'correction_callback_analysis_evidence': pin(callback_analysis_path),
         'callback_static_diagnosis': static_diagnosis,
         'callback_static_diagnosis_evidence': pin(static_diagnosis_path),
+        'g3b_comparison': g3b, 'g3b_comparison_evidence': pin(g3b_path),
+        'isolation_binding_reviewed_report_source': binding_source,
         'compatibility': compatibility, 'compatibility_evidence': pin(compatibility_path),
         'controller_pin_mismatches': pin_changes, 'report_producer': pin(Path(__file__).resolve()),
         'environment': {'report_interpreter': sys.version, 'platform': sys.platform,
@@ -418,6 +446,8 @@ def main():
         spans = [span['seconds'] for entry in item['timing'] for span in entry['capture_to_reservation']]
         duration = ', '.join(format(value, '.9f') + ' s' for value in spans) if spans else 'unknown; no retained capture/reservation pair'
         lines.append('- ' + item['name'] + ': ' + item['status'] + '; capture to reservation: ' + duration + '.')
+        lines.append('  - Selected invocation: ' + item.get('cohort', 'none')
+                     + '; earlier retained invocations: ' + (', '.join(item.get('earlier_invocations', [])) or 'none') + '.')
         if item.get('show_failure_summary'):
             lines.append('  - Pytest failure: ' + item['failure_summary'])
         for result in item['results']:
@@ -432,7 +462,7 @@ def main():
         duration = format(callback['request_to_cleanup_entry']['seconds'], '.9f')
         timeout = str(callback_analysis['registered_callback_timeout_seconds_from_initialize'])
         remaining = format(callback_analysis['remaining_child_deadline_at_cleanup_entry']['seconds'], '.9f')
-        lines += ['', 'Correction remains a blocker for 6200: callback ' + identity + request
+        lines += ['', 'Original correction failure (retained separately from the latest isolated invocation): callback ' + identity + request
             + ' has a request-to-cleanup interval of ' + duration + ' s; the saved initialization advertised '
             + timeout + ' s, and ' + remaining + ' s remained before the recorded child deadline at cleanup entry. '
             + 'The response window includes queued ordered history work; the pending Read does not prove that its observer or classifier began. '
@@ -440,6 +470,11 @@ def main():
             + 'Lead design/performance diagnosis remains required without weakening checks, deadlines or response windows. '
             + 'Evidence: `' + str(callback_analysis_path) + '`.']
     lines += ['', 'Static callback-path diagnosis: `' + str(static_diagnosis_path) + '`.']
+    lines += ['', 'Lead G3b hang question: ' + g3b['answer'],
+        'Completed denial-case stops: ' + '; '.join(row['first_stop'] for row in g3b['completed_cases']) + '.',
+        g3b['interpretation'],
+        'Evidence: `' + str(g3b_path) + '`. The inventory includes ignored and hidden files; directory aliases are not followed.',
+        'The report source reviewed for H2-RESUME-REPORT-F2 is retained at `' + binding_source['path'] + '`; its hash matches the review record.']
     lines += ['', 'Saved verification cohorts:', '']
     for cohort in cohorts:
         result = cohort['counts']
@@ -480,6 +515,8 @@ def main():
         '- Internal read-only review: `' + str(review_path) + '`; no findings; no tests were run by that review.',
         '- H2-RESUME-HARNESS-F1: `' + str(budget_review_path) + '`; ' + budget_review['status'] + '. Lead filing remains needed because helper GitHub writes are prohibited.',
         '- H2-RESUME-REPORT-F1: `' + str(proof_review_path) + '`; corrected and verified with a failed-session counterexample. Lead filing remains needed because helper GitHub writes are prohibited.',
+        '- H2-RESUME-ISOLATION-F1: `' + str(isolation_path) + '`; the original correction setup overlapped preload. A later standalone rerun closes that isolation gap; both outcomes are retained, with no causal attribution to the overlap. Lead filing remains needed because helper GitHub writes are prohibited.',
+        '- H2-RESUME-REPORT-F2: `' + str(isolation_binding_path) + '`; the selected correction invocation and JUnit bytes are bound to the isolation review. Lead filing remains needed because helper GitHub writes are prohibited.',
         '- Supplemental budget retains an explicit local src PYTHONPATH override to select the assigned worktree with the primary interpreter. Native/audit retain their exact CI environment. Budget is not literal CI-environment equivalence.',
         '- Source-tree bytecode was observed after native-lane launch, consistent with known issue 3865. The files were preserved in scratch with a single-file canary and hash verification: `' + str(bytecode_path) + '`.',
         '- H2-RESUME-BYTECODE-F1 and F2: `' + str(bytecode_review_path) + '`; preservation recovery and complete-ledger verification were corrected before relocation. Lead filing remains needed because helper GitHub writes are prohibited.',
