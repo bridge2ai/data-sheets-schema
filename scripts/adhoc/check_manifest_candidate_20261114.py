@@ -104,7 +104,7 @@ def cohorts():
 
 def cohort_out(name):
     # The existing isolated runner admits only direct children of SCRATCH.
-    return SCRATCH / ('candidate-integration-' + name)
+    return SCRATCH / ('candidate-integration-final-' + name)
 
 
 def cohort(name):
@@ -117,7 +117,7 @@ def cohort(name):
                str(ROOT / 'scripts/adhoc/run_manifest_continuation_tests_20261114.py'),
                '--tree', str(ROOT), '--out', str(cohort_out(name)), '--workers', '1',
                '--timeout-seconds', '1200', *cohorts()[name]]
-    save(OUT / (name + '-launch.json'), {'command': command, 'head': commit})
+    save(OUT / (name + '-final-launch.json'), {'command': command, 'head': commit})
     result = subprocess.run(command, cwd=ROOT)
     assert frozen() == commit, 'source changed during cohort'
     return result.returncode
@@ -159,14 +159,17 @@ def audit():
                      'src/data_sheets_schema/native_execution_authority_v2.py',
                      'src/data_sheets_schema/native_shared_authority_wire.py',
                      'src/data_sheets_schema/native_shared_capture_orchestration.py',
-                     'src/data_sheets_schema/native_controller_sources.json',
+                     'src/data_sheets_schema/native_controller_sources_v1.json',
                      'src/data_sheets_schema/native_controller_sources_v2.json',
                      'tests/fixtures/native_d128_approved.json'):
-        values = {label: sha(git('show', revision + ':' + relative).stdout)
+        values = {label: (sha(git('show', revision + ':' + relative).stdout)
+                         if git('ls-tree', '--name-only', revision, '--', relative).stdout else None)
                   for label, revision in (('accepted', BEFORE), ('candidate', CANDIDATE), ('merged', commit))}
         identities.append({'path': relative, **values})
         if relative in PROTECTED or relative.endswith('native_d128_approved.json') or 'native_controller_sources' in relative:
             assert len(set(values.values())) == 1, relative
+    for path in CI_ONLY:
+        assert (ROOT / path.split('::')[0]).is_file(), path
     for parent in (BEFORE, CANDIDATE):
         (OUT / ('scanner-diff-' + parent[:9] + '.patch')).write_bytes(
             git('diff', parent, commit, '--', SKILL + '/scan.py').stdout)
@@ -250,7 +253,7 @@ def report():
         '|---|---:|---:|---:|---:|---:|---|']
     for row in results:
         lines.append(f"| {row['name']} | {row['passed']} | {row['failed']} | {row['skipped']} | {row['returncode']} | {row['seconds']:.3f} | {row['cleanup_verified']} |")
-    lines += ['', 'The first canary invocation was refused before test startup because the existing runner requires outputs to be direct children of the assigned scratch root. The helper was corrected and committed before the real canary and every subsequent cohort. The refused invocation is retained in canary-invocation.json.', '',
+    lines += ['', 'The first canary invocation was refused before test startup because the existing runner requires outputs to be direct children of the assigned scratch root. The helper was corrected and committed before the real canary. A subsequent report-only audit exposed the candidate having no manifest module and a misspelled v1 controller filename; those provenance checks were corrected before the final cohorts above. Earlier successful canary and manifest results remain in their original sibling evidence directories. The refused invocation is retained in canary-invocation.json.', '',
               'The canary used the same launcher, isolated dependency environment, network/native denial, output hierarchy and one-worker mode as the later cohorts. Its nonempty JUnit and verified cleanup were checked before subsequent cohorts. It proves that path and persistence for one synthetic unit; it does not prove live census timing or full registration.', '',
               '## Merge resolution and preserved boundaries', '']
     for row in resolutions:
