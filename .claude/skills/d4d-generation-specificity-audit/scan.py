@@ -13018,7 +13018,11 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
     # two-module summary merely because its caller retains the same name.
     # Pin complete bodies, imports and constants, not just the receiving call.
     'src/data_sheets_schema/native_shared_runtime_values.py': 'a0cffc3994ac38aa6879b3f710d1df40fd903f16093f7e35af841e59f2a027e3',
-    'src/data_sheets_schema/native_runtime_profiles.py': 'e8a24b22475f4529aa372dfa67681fdab74dc73d1ac401f9420454e1bafed672',
+    # Rotated by the lead, 2026-11-14 (#6228, PR 5968 review): against the
+    # prior pin (e8a24b22) only SYNTHETIC_PEER_SHA256 changed, because the
+    # synthetic peer now emits the explicit permission mode and success that
+    # the terminal gate requires. Identity data, not loader logic.
+    'src/data_sheets_schema/native_runtime_profiles.py': '44d32d357ad1d13811a943e2fc69a2a1e8f2acd80561e41372414d583315ccaa',
     'src/data_sheets_schema/native_helper_cache.py': '0934f71630ab45e4670ffa0d14f90c1cfbb23a132a23ca8c6ccfcc0c58a52a95',
     # Controller pin rotation for the issue 6094 timing hooks (lead,
     # 2026-11-13; sources source_commit e648abe2a). Against the prior pins
