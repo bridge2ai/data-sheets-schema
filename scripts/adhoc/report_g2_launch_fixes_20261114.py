@@ -75,7 +75,8 @@ REVIEW_FILES = ('review-6208.json', 'review-followups.json', 'review-runner.json
                 'offline-power-fixture-review.json', 'review-report.json', 'review-report-f2.json', 'review-report-f4.json',
                 'proposal-6217-implementation/review-6217-superseding.json',
                 'review-6217-f3-withdrawn-frozen.json',
-                'review-legacy-component-failures-v2.json', 'review-bytecode.json', 'review-report-f3.json', 'review-6217-f4-confirmed.json')
+                'review-legacy-component-failures-v2.json', 'review-bytecode.json', 'review-report-f3.json', 'review-6217-f4-confirmed.json',
+                'scheduled-runner-review-20261114/correction.json')
 
 
 def git(*args):
@@ -501,6 +502,10 @@ def review_ledger(regressions, coverage):
             'reported_status': 'disputed/withdrawn after source check; no fix required; lead filing retained' if withdrawn
                 else 'required clean rerun verified; original failure and undetermined cause retained; lead filing retained'
                     if closed and identity in ('G2-REVIEW-LEGACY-F1', 'G2-REVIEW-LEGACY-F2')
+                else 'scheduled canary verified; static correction retained; lead filing required'
+                    if closed and identity == 'G2-REVIEW-SCHEDULED-RUNNER-F1'
+                else 'static correction retained; scheduled canary runtime verification pending; lead filing required'
+                    if identity == 'G2-REVIEW-SCHEDULED-RUNNER-F1'
                 else 'verified correction; lead filing status retained' if closed
                 else 'open for lead closure' + ('; relevant regressions passed' if test_passed else '')})
     return {'sources': sources, 'findings': result, 'closure': closure,
@@ -588,7 +593,7 @@ def main():
     check_nested_pins(inventory)
     assert inventory['passed'] == sum(row['passed'] is True for row in inventory['cases'])
     assert inventory['failed'] == sum(row['passed'] is not True for row in inventory['cases'])
-    report_verification_path = SCRATCH / 'report-closure-pin-verification-after-f4-reuse-auxiliary/result.json'
+    report_verification_path = SCRATCH / 'report-closure-pin-verification-after-scheduled-runner/result.json'
     report_verification = read_json(report_verification_path)
     check_nested_pins(report_verification)
     assert report_verification['reporter'] == pin(Path(__file__).resolve())

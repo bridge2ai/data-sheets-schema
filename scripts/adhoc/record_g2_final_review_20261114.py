@@ -538,10 +538,69 @@ def close_runner(evidence, details):
     return 'All eleven inventory/selector harness cases passed; retained runner and original finding pins match. This is not project pytest proof.'
 
 
+def close_scheduled_runner(evidence, details):
+    identity = 'G2-REVIEW-SCHEDULED-RUNNER-F1'
+    ledger(identity, 'review-scheduled-runner.json', evidence)
+    correction = document(OUT / 'scheduled-runner-review-20261114/correction.json', evidence)
+    require(correction['finding_id'] == identity and correction['runtime_verified'] is False,
+            'original static scheduled-runner correction record changed')
+    for key in ('original_review', 'before_helper', 'corrected_snapshot', 'current_driver',
+                'base_runner', 'patch', 'producer'):
+        checked_pin(correction[key], evidence)
+    require(Path(correction['current_driver']['path']) == ROOT / 'scripts/adhoc/run_g2_scheduled_checks_20261114.py'
+            and Path(correction['base_runner']['path']) == ROOT / 'scripts/adhoc/run_g2_checks_20261114.py',
+            'scheduled-runner correction names different drivers')
+    before = Path(correction['before_helper']['path']).read_text()
+    after = Path(correction['corrected_snapshot']['path']).read_text()
+    old = "    subprocess.check_call(['git', 'diff', '--exit-code', 'HEAD', '--', 'src', 'tests', *inventory['selected_paths']], cwd=ROOT)\n"
+    new = "    subprocess.check_call(['git', 'diff', '--exit-code', 'HEAD', '--', *SOURCE_SCOPE, *inventory['selected_paths']], cwd=ROOT)\n"
+    require(before.count(old) == 1 and before.replace(old, new) == after
+            and correction['corrected_snapshot']['sha256'] == correction['current_driver']['sha256'],
+            'scheduled-runner differs from the reviewed one-line scope correction')
+    details.append({'static_correction_verified': True, 'runtime_proof_separate': True,
+                    'historical_static_record_runtime_verified': False})
+    directory = OUT / 'scheduled-canary'
+    command = document(directory / 'command.json', evidence)
+    outcome = document(directory / 'outcome.json', evidence)
+    evidence.extend(pin(directory / name) for name in ('pytest.xml', 'pytest.log'))
+    node = 'tests/test_native_sequence_start.py::test_sequence_start_accepts_registration_above_quota_event_limit'
+    schedule = ['-n', '4', '--dist', 'load', '--maxschedchunk=1']
+    argv = [str(ROOT.parent.parent / 'data-sheets-schema/.venv/bin/python'), '-m', 'pytest', '-q', '-p',
+            'no:cacheprovider', node, *schedule, '--basetemp=' + str(directory / 'cases'),
+            '--junitxml=' + str(directory / 'pytest.xml')]
+    require(command['command'] == argv and command['cwd'] == str(ROOT)
+            and command['producer'] == correction['current_driver']
+            and command['base_runner'] == correction['base_runner']
+            and command['canary'] is True and command['scheduling'] == schedule,
+            'scheduled canary does not match the exact reviewed driver, node and scheduling')
+    require(command['environment'] == {'PYTHONPATH': str(ROOT / 'src'), 'PYTHONDONTWRITEBYTECODE': '1',
+            'PYTHONPYCACHEPREFIX': str(directory / 'pycache'), 'TMPDIR': str(directory)}
+            and command['source_inventory']['ignored_and_hidden_files_included'] is True
+            and command['source_inventory']['selected_paths'] == [node.partition('::')[0]],
+            'scheduled canary environment or source inventory differs')
+    head = git('rev-parse', 'HEAD').stdout.decode().strip()
+    require(git('merge-base', '--is-ancestor', command['head'], head).returncode == 0
+            and git('diff', '--exit-code', command['head'], head, '--', *SOURCE_SCOPE).returncode == 0
+            and git('diff', '--exit-code', 'HEAD', '--', *SOURCE_SCOPE).returncode == 0,
+            'scheduled canary source is not equivalent to clean current source')
+    expected = {'classname': 'tests.test_native_sequence_start',
+                'name': node.partition('::')[2], 'status': 'passed'}
+    require(outcome['returncode'] == 0 and outcome['counts'] == {'total': 1, 'failed': 0, 'error': 0, 'skipped': 0}
+            and cases(directory / 'pytest.xml') == [expected],
+            'scheduled canary lacks its one clean passing JUnit case')
+    artifact = next((path for path in sorted((directory / 'cases').rglob('*'))
+                     if path.is_file() and path.stat().st_size), None)
+    require(artifact is not None, 'scheduled canary persisted no nonempty case artifact')
+    evidence.append(pin(artifact))
+    details.append({'runtime_verified': True, 'cohort': 'scheduled-canary', 'node': node,
+                    'recorded_head': command['head'], 'workers': 4, 'scheduling': schedule})
+    return 'Scheduled-runner scope correction is statically verified and its exact four-worker scheduled canary passed with a nonempty case artifact. This is one-canary proof, not completed batch coverage; lead filing remains required.'
+
+
 def close_report(evidence, details):
     identity = 'G2-REVIEW-REPORT-F1'
     ledger(identity, 'review-report.json', evidence)
-    result = document(OUT / 'report-closure-pin-verification-after-f4-reuse-auxiliary/result.json', evidence)
+    result = document(OUT / 'report-closure-pin-verification-after-scheduled-runner/result.json', evidence)
     require(result['finding_id'] == identity and result['status'] == 'verified'
             and result['verified_entrypoint'] == 'review_ledger',
             'report closure-pin verification is incomplete')
@@ -563,7 +622,7 @@ def close_report(evidence, details):
 def close_report_discovery(evidence, details):
     identity = 'G2-REVIEW-REPORT-F2'
     ledger(identity, 'review-report-f2.json', evidence)
-    result = document(OUT / 'report-cohort-discovery-after-f4-reuse-auxiliary/result.json', evidence)
+    result = document(OUT / 'report-cohort-discovery-after-scheduled-runner/result.json', evidence)
     require(result['finding_id'] == identity and result['status'] == 'verified',
             'cohort discovery verification is incomplete')
     for name in ('reporter', 'closure', 'producer', 'ledger'):
@@ -584,7 +643,7 @@ def close_report_discovery(evidence, details):
 def close_auxiliary_discovery(evidence, details):
     identity = 'G2-REVIEW-REPORT-F4'
     ledger(identity, 'review-report-f4.json', evidence)
-    result = document(OUT / 'report-auxiliary-discovery-verification/result.json', evidence)
+    result = document(OUT / 'report-auxiliary-discovery-verification-after-scheduled-runner/result.json', evidence)
     require(result['finding_id'] == identity and result['status'] == 'verified',
             'auxiliary discovery verification is incomplete')
     for key in ('reporter', 'closure', 'producer', 'ledger', 'auxiliary_outcome'):
@@ -639,7 +698,7 @@ def close_bytecode(evidence, details):
 def close_bytecode_pins(evidence, details):
     identity = 'G2-REVIEW-REPORT-F3'
     ledger(identity, 'review-report-f3.json', evidence)
-    result = document(OUT / 'bytecode-closure-pin-verification-after-f4-reuse-auxiliary/result.json', evidence)
+    result = document(OUT / 'bytecode-closure-pin-verification-after-scheduled-runner/result.json', evidence)
     require(result['finding_id'] == identity and result['status'] == 'verified'
             and result['verified_entrypoint'] == 'close_bytecode',
             'bytecode closure-pin verification is incomplete')
@@ -764,6 +823,7 @@ def main():
                              ('G2-REVIEW-REPORT-F2', close_report_discovery),
                              ('G2-REVIEW-REPORT-F3', close_bytecode_pins),
                              ('G2-REVIEW-REPORT-F4', close_auxiliary_discovery),
+                             ('G2-REVIEW-SCHEDULED-RUNNER-F1', close_scheduled_runner),
                              ('G2-REVIEW-BYTECODE-F1', close_bytecode)):
         row, details = close(identity, action)
         if identity == 'G2-REVIEW-6217-F3' and row['status'] == 'verified':
