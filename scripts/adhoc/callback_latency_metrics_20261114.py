@@ -31,13 +31,23 @@ ROWS = []
 STACKS = {}
 INTAKES = {}
 TOOL = 3
+ACTIVE = False
 
 
 def enter(code, offset):
+    global ACTIVE
     name = code.co_filename.rsplit('/', 1)[-1]
+    if not ACTIVE:
+        if name != 'native_control.py' or code.co_name != '_start_work':
+            return sys.monitoring.DISABLE
+        ACTIVE = True
+        # Re-enable previously seen callback code only when transport starts.
+        # Global event masks remain fixed across the public test's guard.
+        sys.monitoring.restart_events()
     if code.co_name not in TARGETS.get(name, ()):
         return sys.monitoring.DISABLE
-    sys.monitoring.set_local_events(TOOL, code, sys.monitoring.events.PY_RETURN)
+    sys.monitoring.set_local_events(TOOL, code,
+        sys.monitoring.events.PY_RETURN | sys.monitoring.events.PY_UNWIND)
     frame = sys._getframe(1)
     event = frame.f_locals.get('event', frame.f_locals.get('frame'))
     row = {'file': name, 'function': code.co_qualname, 'thread': threading.get_ident(),
@@ -68,7 +78,7 @@ def pytest_sessionstart(session):
     monitor.register_callback(TOOL, monitor.events.PY_START, enter)
     monitor.register_callback(TOOL, monitor.events.PY_RETURN, leave)
     monitor.register_callback(TOOL, monitor.events.PY_UNWIND, leave)
-    monitor.set_events(TOOL, monitor.events.PY_START | monitor.events.PY_UNWIND)
+    monitor.set_events(TOOL, monitor.events.PY_START)
 
 
 def pytest_sessionfinish(session, exitstatus):
