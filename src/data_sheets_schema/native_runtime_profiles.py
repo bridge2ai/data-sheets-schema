@@ -19,7 +19,7 @@ SYNTHETIC_RETURNED = 'synthetic-native-returned-model'
 SYNTHETIC_PROVIDER = 'scripted-local'
 SYNTHETIC_DEADLINE_SECONDS = 900
 SYNTHETIC_BUDGET = '1.0'
-SYNTHETIC_PEER_SHA256 = '4df10672988dab267d03c05467ea6244d10ddb9ff193d8b4dde757d5a562a46b'
+SYNTHETIC_PEER_SHA256 = 'd397632c533be6bbbeccdfbdefa7895d928811541c273836f6c568c4da115441'
 _KINDS = {'d4d_native_u4b_runtime_basis', 'd4d_native_u4b_provisional_runtime_basis'}
 _AUTH = {'loggedIn': False, 'authMethod': SYNTHETIC_PROFILE,
          'apiProvider': SYNTHETIC_PROVIDER, 'subscriptionType': SYNTHETIC_PROFILE,
@@ -112,6 +112,7 @@ def require_synthetic_declarations(runtime):
             or any(not Path(x).is_absolute() for x in env['PATH'].split(os.pathsep))):
         raise ValueError('synthetic environment must select isolated home/storage and explicit context')
     from .native_helper_cache import declared_path
+    v.require_bash_timeouts(env)
     declared_path(env)
     awake = runtime['keep_awake']
     v._closed(awake, {'policy', 'host_platform', 'basis'}, 'synthetic keep-awake')

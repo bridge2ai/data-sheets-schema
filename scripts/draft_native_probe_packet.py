@@ -89,6 +89,8 @@ def generate(source, binary, output):
             ('PATH',owner+': colon-separated absolute paths','owner explicit PATH; no environment inherited','owner'),
             ('HOME',owner+': absolute account home','owner explicit registered home; not read for account state','owner'),
             ('PYSTOW_HOME',owner+': exact registered attempt directory / helper-cache','native_helper_cache.for_attempt; fresh per-attempt helper cache','owner'),
+            ('BASH_DEFAULT_TIMEOUT_MS','600000','registered native Bash helper timeout','source'),
+            ('BASH_MAX_TIMEOUT_MS','600000','registered native Bash helper maximum timeout','source'),
             ('CLAUDE_SECURESTORAGE_CONFIG_DIR',owner+': explicit value, possibly empty','owner registered secure-storage choice','owner'),
             ('CLAUDE_CODE_DISABLE_1M_CONTEXT','0','validate_provisional_runtime fixed 1M selection','source')]},
         'deadline_seconds':field('runtime.deadline_seconds',deadline,'native_run_limits.CANARY complete registered pair; owner approval still required','source/owner'),

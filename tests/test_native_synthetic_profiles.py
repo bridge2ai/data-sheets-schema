@@ -48,14 +48,14 @@ def runtime(tmp_path):
             'apiProvider': profiles.SYNTHETIC_PROVIDER, 'subscriptionType': profiles.SYNTHETIC_PROFILE,
             'expected_api_key_source': 'none'},
         'environment': {'PATH': '/usr/bin:/bin', 'HOME': str(home),
-            'PYSTOW_HOME': str(root / 'attempt' / 'helper-cache'),
+            'BASH_DEFAULT_TIMEOUT_MS': '600000', 'BASH_MAX_TIMEOUT_MS': '600000', 'PYSTOW_HOME': str(root / 'attempt' / 'helper-cache'),
             'CLAUDE_SECURESTORAGE_CONFIG_DIR': '', 'CLAUDE_CODE_DISABLE_1M_CONTEXT': '0'},
         'deadline_seconds': 900, 'budget_guard_usd': '1.0',
         'keep_awake': {'policy': 'not_applicable', 'host_platform': sys.platform,
             'basis': 'Ordinary Python software test; no native acceptance'}}
 
 
-def test_explicit_synthetic_profile_is_distinct_and_preserves_900_180(runtime):
+def test_explicit_synthetic_profile_is_distinct_and_registers_bash_timeout(runtime):
     original = deepcopy(runtime)
     assert profiles.require_synthetic(runtime) == original
     assert values.validate_runtime_v2(runtime) == original
@@ -66,10 +66,25 @@ def test_explicit_synthetic_profile_is_distinct_and_preserves_900_180(runtime):
     assert runtime['deadline_seconds'] == 900
     raw = Path(runtime['executable']['path']).read_bytes()
     assert raw.split(b'\n', 1)[0] == ('#!' + sys.executable + ' -P').encode()
-    assert b'timeout=180)' in raw
+    assert b"timeout=int(os.environ['BASH_DEFAULT_TIMEOUT_MS']) / 1000" in raw
     assert hashlib.sha256(raw.split(b'\n', 1)[1]).hexdigest() == profiles.SYNTHETIC_PEER_SHA256
     with pytest.raises(ValueError, match='first-party'):
         values.validate_runtime(runtime)
+
+
+@pytest.mark.parametrize('key', ['BASH_DEFAULT_TIMEOUT_MS', 'BASH_MAX_TIMEOUT_MS'])
+@pytest.mark.parametrize('replacement', [None, '120000', '600001', 600000])
+def test_registered_bash_timeout_is_required_exactly(runtime, key, replacement):
+    if replacement is None:
+        runtime['environment'].pop(key)
+    else:
+        runtime['environment'][key] = replacement
+    with pytest.raises(ValueError):
+        values.validate_runtime_v2(runtime)
+    runtime['limits_basis'] = 'historical declaration'
+    runtime['auth'].update(loggedIn=True, authMethod='claude.ai', apiProvider='firstParty')
+    with pytest.raises(ValueError):
+        values.validate_runtime_v2(runtime)
 
 
 @pytest.mark.parametrize('shebang', ['missing_safe_path', 'foreign_interpreter', 'extra_options'])
@@ -226,6 +241,8 @@ def test_legacy_production_validation_and_profile_bytes_unchanged(runtime):
     old['budget_guard_usd'] = '90'
     current = deepcopy(old)
     old['environment'].pop('PYSTOW_HOME')
+    old['environment'].pop('BASH_DEFAULT_TIMEOUT_MS')
+    old['environment'].pop('BASH_MAX_TIMEOUT_MS')
     before = values._encoded(old)
     assert profiles.profile_name(old) == profiles.PRODUCTION_PROFILE
     assert profiles.require_production(old) is old

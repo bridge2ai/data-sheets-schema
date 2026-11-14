@@ -277,6 +277,8 @@ def scripted_boundaries(monkeypatch, prepared, *, requests=1, failure=None):
         assert invocation['argv'][invocation['argv'].index('--model') + 1] == aliases.REQUESTED
         assert invocation['environment']['ANTHROPIC_BASE_URL'] == 'http://127.0.0.1:18455'
         assert invocation['environment']['ANTHROPIC_API_KEY'] == 'd4d-local-permission-probe-token'
+        assert invocation['environment']['BASH_DEFAULT_TIMEOUT_MS'] == '600000'
+        assert invocation['environment']['BASH_MAX_TIMEOUT_MS'] == '600000'
         assert invocation['argv'][-1] == sequence.PROMPT
         assert invocation['argv'][invocation['argv'].index('--tools') + 1] == ''
         observed.append('child')
