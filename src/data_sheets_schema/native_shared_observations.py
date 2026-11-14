@@ -239,60 +239,6 @@ class Trace:
     def pending(self):
         return tuple(identity for identity in self.calls if identity not in self.results)
 
-    def denial(self, identity):
-        """Join a refused result to its actual callback; errors alone are not denials."""
-        if identity not in self.results:
-            return None
-        line, _, result = self.results[identity]
-        decision = self.decisions.get(identity)
-        refused = decision is not None and decision[1]['classification'] == 'not_prescribed'
-        text = result.get('content')
-        runtime_refusal = (type(text) is str and
-            (text.startswith('Outside the registered tool policy') or
-             text.startswith('Permission to use ') and 'denied' in text))
-        if not refused and not runtime_refusal:
-            return None
-        metadata = self.frames[line].get('tool_use_result', {})
-        if (result.get('is_error') is not True or type(text) is not str or not text
-                or type(metadata) is not dict or metadata.get('error') is not None
-                or any(metadata.get(k) for k in ('interrupted', 'backgroundTaskId',
-                    'background_task_id', 'persistedOutputPath'))):
-            raise ValueError('denied tool has a successful, pending or unsupported result')
-        exits = [metadata[k] for k in ('exitCode', 'exit_code') if k in metadata]
-        if (any(type(code) is not int or code == 0 for code in exits)
-                or len(set(exits)) > 1 or 'stdout' in metadata and metadata['stdout'] != text):
-            raise ValueError('denied tool has contradictory exit metadata')
-        call = self.calls[identity][2]
-        return {'tool_use_id': identity, 'tool': call['name'],
-            'classification': decision[1]['classification'] if decision else 'unclassifiable',
-            'basis': decision[1]['basis'] if decision else 'denial lacks a classified callback'}
-
-    def denied_ids(self):
-        return {identity for identity in self.results if self.denial(identity) is not None}
-
-    def terminal_denials(self):
-        """Classify newly reported terminal refusals without trusting unmatched records."""
-        if self.terminal is None:
-            return {}
-        rows = self.frames[self.terminal].get('permission_denials')
-        if type(rows) is not list:
-            return {'terminal': {'classification': 'unclassifiable', 'tool': 'unknown tool',
-                                 'basis': 'terminal lacks explicit denial accounting'}}
-        classified = {}
-        for index, row in enumerate(rows):
-            identity = row.get('tool_use_id') if type(row) is dict else None
-            call = self.calls.get(identity) if type(identity) is str else None
-            decision = self.decisions.get(identity) if call else None
-            valid = (call is not None and decision is not None and identity not in classified
-                and row.get('tool_name') == call[2]['name']
-                and _same(row.get('tool_input'), call[2]['input'])
-                and identity in self.results and self.results[identity][2].get('is_error') is True)
-            key = identity if valid else 'invalid-terminal-' + str(index)
-            classified[key] = {'classification': decision[1]['classification'] if valid else 'unclassifiable',
-                'tool': call[2]['name'] if valid else 'unknown tool',
-                'basis': decision[1]['basis'] if valid else 'terminal denial lacks a unique matching refused call'}
-        return classified
-
     def current_advance(self,identity,command):
         admitted=self.admitted(identity)
         inputs=c.strict_json(admitted.input_json,'advance input',c.HARD_LIMITS['request_bytes'])
