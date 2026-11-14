@@ -142,6 +142,27 @@ def command_text(result, empty):
     return result['stdout'].strip() or empty
 
 
+def coverage_preflight():
+    rows = []
+    for role in ('reference', 'AI_READI', 'CM4AI', 'VOICE', 'VOICE_PEDIATRIC'):
+        path = S / 'coverage' / (CURRENT + '-' + role + '.stdout.json')
+        body = read(path)
+        if pin(body['output']['path']) != body['output']:
+            raise ValueError('coverage preflight artifact changed')
+        rows.append(dict(role=role, summary=pin(path), **body))
+    comparisons = []
+    for role in ('AI_READI', 'CM4AI', 'VOICE', 'VOICE_PEDIATRIC'):
+        path = S / 'coverage' / (CURRENT + '-reference-vs-' + role + '.stdout.json')
+        body = read(path)
+        if pin(body['output']['path']) != body['output']:
+            raise ValueError('cross-field preflight artifact changed')
+        comparisons.append(dict(role=role, summary=pin(path), **body))
+    return dict(coverage=rows, comparisons=comparisons,
+                readers=[pin(G / 'scripts/adhoc' / name) for name in
+                         ('h3_gate_leaf_coverage_20261113.py', 'h3_gate_cross_fields_20261113.py')],
+                scope='Data-only field coverage/comparison; no validators or gate workers; not full-matrix acceptance.')
+
+
 def table(headers, rows):
     return '\n'.join(['| ' + ' | '.join(headers) + ' |', '| ' + ' | '.join(['---'] * len(headers)) + ' |'] +
                      ['| ' + ' | '.join(str(x).replace('|', '\\|') for x in row) + ' |' for row in rows])
@@ -196,6 +217,7 @@ def main():
                  cohorts={name: cohort(name) for name in ('final-format-04', 'final-format-05', 'final-format-06', CURRENT)},
                  saved_manifest_tests=tests, manifest_test_report=pin(bytecode),
                  saved_gate_tests=gate_tests,
+                 coverage_preflight=coverage_preflight(),
                  resume_tests=resume_tests, review_findings=read(N / 'scripts/adhoc/h3_resumed_report_review_findings_20261113.json'),
                  resume_attempt_evidence=[pin(path) for path in sorted(S.glob('*.log'))] +
                      [pin(path) for path in sorted(S.glob('*-readback.json'))] +
@@ -272,6 +294,14 @@ def main():
                   'Resume-tooling tests (overlapping selections, not summed):', '',
                   table(['Cohort', 'Tests', 'Failures', 'Errors', 'Skipped'],
                         [[r['name'], *[r['counts'][k] for k in ('tests', 'failures', 'errors', 'skipped')]] for r in resume_tests]), '',
+                  'Fresh data-only coverage preflight, separate from full-matrix acceptance:', '',
+                  table(['Packet', 'Leaves', 'Containers', 'Keys', 'Decoded carriers', 'Complete', 'Gaps', 'Unknown'],
+                        [[r['role'], *[r['counts'][k] for k in ('leaves', 'containers', 'keys', 'decoded_carriers')], r['complete'], r['gaps'], r['unknown']]
+                         for r in value['coverage_preflight']['coverage']]), '',
+                  table(['Reference comparison', 'Field differences', 'Unknown'],
+                        [[r['role'], r['differences'], r['unknown']] for r in value['coverage_preflight']['comparisons']]), '',
+                  'The preflight does not establish production validation, tuple/floor validity or registration equivalence. '
+                  'Its readers and exact output pins are retained in the JSON twin.', '',
                   'Local review findings for the lead to file under the no-GitHub-write assignment:', '',
                   table(['Finding', 'Priority', 'Problem', 'Disposition'],
                         [[r['id'], r['priority'], r['finding'], r['disposition']] for r in value['review_findings']['findings']]), '',
