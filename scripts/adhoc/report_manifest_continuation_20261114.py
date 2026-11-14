@@ -168,21 +168,36 @@ def cohorts(scratch):
                                   'status': status, 'message': child.get('message', ''),
                                   'detail': child.text or ''})
         results[directory.name] = {'path': str(directory), 'counts': counts, 'outcome': outcome,
+                                   'junit_available': xml.exists(),
                                    'nonpassing': cases,
                                    'source_commit': json.loads((directory / 'plan.json').read_bytes())['source_commit']}
     return results
 
 
 def markdown(data, results, scratch):
+    final = {stage: results.get('final-' + stage) for stage in STAGES}
+    pending = [stage for stage, row in final.items()
+               if row is None or not row['junit_available'] or not row['outcome']['cleanup_verified']]
+    unexpected = [case for row in final.values() if row for case in row['nonpassing']
+                  if case['status'] != 'skipped' and not case['case'].startswith('tests.test_native_d128_scanner_comparison::')]
+    verdict = ('Required verification is still incomplete.' if pending else
+               'Required verification has additional failures; see the case ledger.' if unexpected else
+               'All required stages completed; only the inherited D128 approval hold remains.')
     lines = ['Continuation — the accepted merge remains the base (2 resolved conflicts). '
              'The v3 CLI/preparer structural proof and its separate identity update are committed. '
              'The isolated prefix canary now persists the manifest and reaches the intended dependency stop. '
-             'D128 approval remains the lead’s final-head step. The stage results below are the acceptance evidence.', '',
+             + verdict + ' D128 approval remains the lead’s final-head step. '
+             'The stage results below are the acceptance evidence.', '',
              f"Branch: `codex/native-manifest-integration-20261114`. Head: `{data['head']}`. "
              f'Worktree: `{ROOT}`. Evidence: `{scratch}`.', '',
-             'The interpreter is Python 3.13.12 in each named cohort’s `venv`, created from the primary '
-             'interpreter with no pip installation. Its bootstrap adds the assigned source checkout and '
-             'the physical dependency site without executing that site’s editable `.pth` files. '
+             'The interpreter is Python 3.13.12 in each named cohort’s `venv`. The final cohorts use '
+             'the declared-dependencies environment: the full installed RECORD payloads of the project’s '
+             'declared runtime dependency closure plus pytest, xdist, packaging and psutil, copied at '
+             'their primary installed versions without downloads or hard links. The plan, one-package '
+             'copy canary and complete hash ledger are retained beside the cohorts. The manifest '
+             'still performs its complete fresh payload and unowned-file census over the actual environment. '
+             'The bootstrap adds the assigned source checkout and physical dependency site without '
+             'executing dependency `.pth` files. '
              'Parent and ordinary child origin witnesses, OS network denial and observed-descendant '
              'cleanup are recorded per cohort. The primary environment was not modified. '
              'These are offline synthetic checks, not production registration or launch approval.', '',
@@ -190,11 +205,17 @@ def markdown(data, results, scratch):
              '| --- | ---: | ---: | ---: | ---: | ---: | --- |']
     for name, row in results.items():
         c, out = row['counts'], row['outcome']
-        lines.append(f"| {name} | {c['passed']} | {c['failed']} | {c['errors']} | {c['skipped']} | "
+        shown = [str(c[k]) if row['junit_available'] else 'unrecorded' for k in ('passed', 'failed', 'errors', 'skipped')]
+        lines.append(f"| {name} | " + ' | '.join(shown) + ' | '
                      f"{out['seconds']:.2f} | {out['cleanup_verified']} |")
     lines += ['', 'Every stage retains its exact command and environment in `plan.json` and '
               '`pytest-command.json`, with `pytest.log`, `pytest.xml`, origin witnesses and `outcome.json`. '
               'All cohort results, including failed attempts, are retained in `continuation-results.json`.', '',
+              'The initial broad-environment boundary cohort was deliberately interrupted after the '
+              'helper-preservation case passed and while dispatch fixture construction was active. '
+              'Its quiet-window lock was absent; retained artifacts showed progress. This partial run '
+              'is not acceptance evidence and is not counted as zero failures. The final environment '
+              'was separately canary-tested before rerunning the complete six-stage roster.', '',
               'The real prefix first exposed an audit-barrier defect: `os.fdopen` was rejected after '
               'exclusive manifest creation. The fix permits wrapping only the exact physical, single-link, '
               'read-only manifest inode under the new output directory. Other descriptors and descriptor '
@@ -229,7 +250,7 @@ def markdown(data, results, scratch):
               'the continuation runner. All five gate-package commits remain outside this branch.', '',
               'Continuation commits, newest first:', '', '```', *data['commits'], '```', '',
               'Reproduction (from the assigned worktree; choose a new output cohort each time):', '', '```bash',
-              '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -S -P -B scripts/adhoc/run_manifest_continuation_tests_20261114.py \\',
+              f'{scratch}/declared-dependencies/bin/python -S -P -B scripts/adhoc/run_manifest_continuation_tests_20261114.py \\',
               f'  --tree {ROOT} \\', f'  --out {scratch}/NEW-COHORT --workers 4 --timeout-seconds 14400 --stage STAGE',
               '```', '', 'STAGE is manifest, manifest-boundaries, registration, builder, retention or scanner. '
               'The runner uses the original explicit test-file roster. No assertion, production refusal, '
@@ -256,7 +277,7 @@ def main():
     report = markdown(data, results, scratch)
     (scratch / 'continuation.md').write_text(report)
     if args.handoff:
-        assert all(stage in results for stage in STAGES), 'all six stages must finish before handoff'
+        assert all('final-' + stage in results for stage in STAGES), 'all six final stages must finish before handoff'
         original = scratch / 'accepted-base-handoff.md'
         if not original.exists():
             original.write_bytes(args.handoff.read_bytes())
