@@ -102,17 +102,22 @@ def cohorts():
     }
 
 
+def cohort_out(name):
+    # The existing isolated runner admits only direct children of SCRATCH.
+    return SCRATCH / ('candidate-integration-' + name)
+
+
 def cohort(name):
     commit = frozen()
     if name != 'canary':
-        proof = load(OUT / 'canary/outcome.json')
+        proof = load(cohort_out('canary') / 'outcome.json')
         assert proof['returncode'] == 0 and proof['cleanup_verified']
-        assert (OUT / 'canary/pytest.xml').stat().st_size > 0
+        assert (cohort_out('canary') / 'pytest.xml').stat().st_size > 0
     command = [str(SCRATCH / 'declared-dependencies/bin/python'), '-S', '-P', '-B',
                str(ROOT / 'scripts/adhoc/run_manifest_continuation_tests_20261114.py'),
-               '--tree', str(ROOT), '--out', str(OUT / name), '--workers', '1',
+               '--tree', str(ROOT), '--out', str(cohort_out(name)), '--workers', '1',
                '--timeout-seconds', '1200', *cohorts()[name]]
-    save(OUT / (name + '-invocation.json'), {'command': command, 'head': commit})
+    save(OUT / (name + '-launch.json'), {'command': command, 'head': commit})
     result = subprocess.run(command, cwd=ROOT)
     assert frozen() == commit, 'source changed during cohort'
     return result.returncode
@@ -219,10 +224,10 @@ def report():
     assert audit_data['head'] == comparison['head'] == commit
     results = []
     for name in cohorts():
-        outcome = load(OUT / name / 'outcome.json')
-        plan = load(OUT / name / 'plan.json')
+        outcome = load(cohort_out(name) / 'outcome.json')
+        plan = load(cohort_out(name) / 'plan.json')
         assert plan['source_commit'] == commit
-        suites = ET.parse(OUT / name / 'pytest.xml').getroot()
+        suites = ET.parse(cohort_out(name) / 'pytest.xml').getroot()
         cases = list(suites.iter('testcase'))
         failures = [{'node': case.get('classname') + '.' + case.get('name'),
                      'message': element.get('message'), 'detail': element.text}
@@ -231,7 +236,7 @@ def report():
         results.append({'name': name, 'tests': len(cases), 'passed': len(cases) - len(failures) - skipped,
                         'failed': len(failures), 'skipped': skipped, 'failures': failures,
                         'returncode': outcome['returncode'], 'seconds': outcome['seconds'],
-                        'cleanup_verified': outcome['cleanup_verified']})
+                        'cleanup_verified': outcome['cleanup_verified'], 'output': str(cohort_out(name))})
     save(OUT / 'results.json', results)
     resolutions = load(OUT / 'resolutions.json')
     source = 'src/data_sheets_schema/native_environment_manifest.py'
@@ -245,7 +250,8 @@ def report():
         '|---|---:|---:|---:|---:|---:|---|']
     for row in results:
         lines.append(f"| {row['name']} | {row['passed']} | {row['failed']} | {row['skipped']} | {row['returncode']} | {row['seconds']:.3f} | {row['cleanup_verified']} |")
-    lines += ['', 'The canary used the same launcher, isolated dependency environment, network/native denial, output hierarchy and one-worker mode as the later cohorts. Its nonempty JUnit and verified cleanup were checked before subsequent cohorts. It proves that path and persistence for one synthetic unit; it does not prove live census timing or full registration.', '',
+    lines += ['', 'The first canary invocation was refused before test startup because the existing runner requires outputs to be direct children of the assigned scratch root. The helper was corrected and committed before the real canary and every subsequent cohort. The refused invocation is retained in canary-invocation.json.', '',
+              'The canary used the same launcher, isolated dependency environment, network/native denial, output hierarchy and one-worker mode as the later cohorts. Its nonempty JUnit and verified cleanup were checked before subsequent cohorts. It proves that path and persistence for one synthetic unit; it does not prove live census timing or full registration.', '',
               '## Merge resolution and preserved boundaries', '']
     for row in resolutions:
         lines.append(f"- `{row['path']}`: {row['conflict_hunks']} conflict hunks. {row['resolution']}")
