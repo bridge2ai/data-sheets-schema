@@ -154,7 +154,7 @@ def test_v3_cli_manifest_argument_is_exact(tmp_path, before, after):
 @pytest.mark.parametrize('before,after', [
     ("'environment_manifest': environment_pin,", "'manifest': environment_pin,"),
     ('environment_pin = _environment_pin(environment_manifest_path, pins)', 'environment_pin = {}'),
-    ('    native_environment_manifest.verify(environment_pin)\n', ''),
+    ('    native_environment_manifest.verify(environment_pin, mode=native_environment_manifest.preparation_mode())\n', ''),
 ])
 def test_v3_preparer_manifest_field_and_fresh_checks_are_exact(tmp_path, producer, before, after):
     root = copied_route(tmp_path)

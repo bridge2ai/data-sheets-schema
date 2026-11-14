@@ -13189,7 +13189,7 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
             "    body = {'kind': PREPARATION_KIND, 'schema_version': VERSION, 'execution': PREPARATION_SCOPE, 'environment_manifest': environment_pin,", 1).replace(
             '    return _envelope(body, dependencies)',
             '    from . import native_environment_manifest\n'
-            '    native_environment_manifest.verify(environment_pin)\n'
+            '    native_environment_manifest.verify(environment_pin, mode=native_environment_manifest.preparation_mode())\n'
             '    return _envelope(body, dependencies)', 1)
     if v3:
         exact(prepare, with_manifest(integrated_prepare),
@@ -13291,7 +13291,7 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
         helpers['verify_preparer'] = helpers['verify_preparer'].replace(
             '    from .native_runtime_profiles import profile_name, SYNTHETIC_PROFILE',
             "    from . import native_environment_manifest\n"
-            "    native_environment_manifest.verify(body['environment_manifest'])\n"
+            "    native_environment_manifest.verify(body['environment_manifest'], mode=native_environment_manifest.preparation_mode())\n"
             '    from .native_runtime_profiles import profile_name, SYNTHETIC_PROFILE', 1).replace(
             "max_draft_checks=body['max_draft_checks'])",
             "max_draft_checks=body['max_draft_checks'], environment_manifest_path=body['environment_manifest']['path'])", 1)
@@ -13300,7 +13300,7 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
     from . import native_environment_manifest
     artifact = _read(path, 'environment_manifest', c.HARD_LIMITS['input_bytes'])
     pin = _file_pin(artifact)
-    native_environment_manifest.verify(pin)
+    native_environment_manifest.verify(pin, mode=native_environment_manifest.preparation_mode())
     if pin['path'] in pins:
         raise ValueError('environment manifest must be a separate pinned artifact')
     pins[pin['path']] = pin['sha256']
@@ -13351,7 +13351,8 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
         fixed_calls['read_regular'] = {'read_regular'}
     if v3:
         fixed_calls.update(wire={'wire.require_envelope', 'wire.envelope'},
-                           native_environment_manifest={'native_environment_manifest.verify'})
+                           native_environment_manifest={'native_environment_manifest.verify',
+                                                        'native_environment_manifest.preparation_mode'})
     fixed_values = {'authority.ROOT', 'authority.neutral.composition.SOURCES_SHA256',
                     'c.CONDITION', 'c.RENDERER', 'c.RUNTIME',
                     "c.HARD_LIMITS['request_bytes']", "c.HARD_LIMITS['input_bytes']"}

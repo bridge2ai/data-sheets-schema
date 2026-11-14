@@ -1,6 +1,7 @@
 """Pinned helper loading must not enlarge the importable environment."""
 import importlib
 import sys
+import stat
 
 from data_sheets_schema import native_environment_manifest as manifest
 from data_sheets_schema import native_execution_authority_v2 as authority
@@ -34,5 +35,6 @@ def test_loaded_dependency_scope_preserves_manifest_and_pinned_imports(tmp_path,
         assert changed != before_manifest
         assert [row for row in changed['unowned_files'] if row['root'] == str(foreign)] == [
             {'root': str(foreign), 'path': 'SYNTHETIC_unowned.py',
-             'bytes': len(b'SYNTHETIC = True\n'), 'sha256': manifest.c.sha(b'SYNTHETIC = True\n')}]
+             'bytes': len(b'SYNTHETIC = True\n'), 'sha256': manifest.c.sha(b'SYNTHETIC = True\n'),
+             'stat': {'type': stat.S_IFREG, 'bytes': len(b'SYNTHETIC = True\n')}}]
     assert sys.path == before_path

@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import base64
 import csv
+from contextlib import contextmanager
+from contextvars import ContextVar
 import hashlib
 import io
 from importlib import metadata
@@ -21,13 +23,15 @@ import re
 import stat
 import sys
 import sysconfig
+import threading
 
 from . import native_shared_contract as c
 from .native_shared_evidence import read_regular
 
 KIND = 'd4d_native_environment_manifest'
-# Lead addendum: no production registration used the earlier metadata-only
-# shape. Refine version 1 in place; saved synthetic older shapes stay historical.
+# Lead addenda: no production registration used the earlier shapes. Refine v1
+# in place with RECORD-entry and unowned lstat baselines for the 2026-11-14
+# light-check ruling. Earlier synthetic manifests must be regenerated.
 VERSION = 1
 MAX_BYTES = 8_000_000
 MAX_RECORD_BYTES = 32_000_000
@@ -41,6 +45,64 @@ UNVERIFIED_KINDS = frozenset(('record', 'bytecode', 'other'))
 EXCLUDED_REASONS = frozenset(('first_party_source_pins', 'standard_library_interpreter_identity'))
 ROOT = Path(__file__).resolve().parents[2]
 _NAME = re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*')
+_STAT_TYPES = frozenset((0, stat.S_IFREG, stat.S_IFLNK, stat.S_IFDIR,
+                         stat.S_IFIFO, stat.S_IFSOCK, stat.S_IFCHR, stat.S_IFBLK))
+_PROCESS_STATE_NAME = '_d4d_environment_manifest_verification_v1'
+
+
+def _process_state():
+    # Source-attested imports may instantiate this module more than once. Keep
+    # only this interpreter process's memo on sys, not in a reloaded module or
+    # on disk. A fork must replace the holder before touching its inherited lock.
+    state = getattr(sys, _PROCESS_STATE_NAME, None)
+    if state is None or state['pid'] != os.getpid():
+        state = {'pid': os.getpid(), 'lock': threading.RLock(), 'full': {},
+                 'mode': ContextVar('d4d_environment_preparation_mode', default='full')}
+        if getattr(sys, _PROCESS_STATE_NAME, None) is None:
+            # Concurrent first callers share the winning holder too.
+            state = sys.__dict__.setdefault(_PROCESS_STATE_NAME, state)
+        elif getattr(sys, _PROCESS_STATE_NAME)['pid'] != os.getpid():
+            setattr(sys, _PROCESS_STATE_NAME, state)
+        else:
+            state = getattr(sys, _PROCESS_STATE_NAME)
+    return state
+
+
+def preparation_mode():
+    """Full unless an explicit helper reconstruction scope selects light."""
+    return _process_state()['mode'].get()
+
+
+@contextmanager
+def verification_scope(*, mode):
+    """Select reconstruction cost only; explicit verify(mode='full') wins."""
+    if mode not in ('full', 'light'):
+        raise ValueError('unknown environment verification mode')
+    variable = _process_state()['mode']
+    token = variable.set(mode)
+    try:
+        yield
+    finally:
+        variable.reset(token)
+
+
+def _stat_shape(value):
+    c.exact(value, {'type', 'bytes'}, 'installed lstat identity')
+    if (type(value['type']) is not int or value['type'] not in _STAT_TYPES
+            or type(value['bytes']) is not int or not 0 <= value['bytes'] <= max(MAX_PAYLOAD_BYTES, MAX_RECORD_BYTES)
+            or (value['type'] == 0 and value['bytes'] != 0)):
+        raise ValueError('invalid installed lstat size or type')
+    return value
+
+
+def _lstat(path):
+    try:
+        info = Path(path).lstat()
+    except FileNotFoundError:
+        # Unhashed RECORD entries have always been explicitly unverified and
+        # may be absent. Pin that absence too; a later addition is a change.
+        return {'type': 0, 'bytes': 0}, None
+    return _stat_shape({'type': stat.S_IFMT(info.st_mode), 'bytes': info.st_size}), _file_identity(info)
 
 
 def _name(value):
@@ -71,7 +133,7 @@ def validate(value):
         raise ValueError('environment requires a bounded nonempty distribution inventory')
     names = []
     for row in rows:
-        c.exact(row, {'name', 'version', 'record_sha256', 'verified_files', 'unverified_files'},
+        c.exact(row, {'name', 'version', 'record_sha256', 'verified_files', 'unverified_files', 'file_stats'},
                 'environment distribution')
         if row['name'] != _name(row['name']):
             raise ValueError('environment distribution name is not normalized')
@@ -110,6 +172,16 @@ def validate(value):
                 or len(entries) != len(set(entries))
                 or len(entries) + verified['count'] > MAX_IMPORT_ENTRIES):
             raise ValueError('unverified installed file inventory is ambiguous or oversized')
+        stats = row['file_stats']
+        if type(stats) is not dict or len(stats) != verified['count'] + len(entries):
+            raise ValueError('installed lstat inventory differs from RECORD entries')
+        if not set(entries) <= stats.keys():
+            raise ValueError('unverified installed entries lack lstat identities')
+        for path, item in stats.items():
+            _record_name(path)
+            if path.endswith('.pyc'):
+                raise ValueError('pyc bytecode is excluded from the environment manifest')
+            _stat_shape(item)
         names.append(row['name'])
     if names != sorted(set(names)):
         raise ValueError('environment distributions must be sorted and unique')
@@ -130,7 +202,10 @@ def validate(value):
         raise ValueError('unowned files require a bounded inventory')
     keys, total_bytes = [], 0
     for item in unowned:
-        c.exact(item, {'root', 'path', 'bytes', 'sha256'}, 'unowned file')
+        c.exact(item, {'root', 'path', 'bytes', 'sha256', 'stat'}, 'unowned file')
+        _stat_shape(item['stat'])
+        if item['stat']['type'] not in (stat.S_IFREG, stat.S_IFLNK):
+            raise ValueError('unowned file lacks regular or symlink lstat identity')
         root = c.canonical_path(_record_name(item['root']), 'unowned import root')
         path = _record_name(item['path'])
         if path.endswith('.pyc'):
@@ -302,7 +377,7 @@ def _own_record_entry(target, record):
     raise ValueError('own distribution metadata cannot own unrelated package files: ' + str(target))
 
 
-def _capture_distribution(distribution, *, verify_payloads=True):
+def _capture_distribution(distribution, *, verify_payloads=True, light=False):
     # Keep Name and Version from one metadata read, and derive ownership only
     # from the exact RECORD bytes whose digest is registered.
     message = distribution.metadata
@@ -318,19 +393,29 @@ def _capture_distribution(distribution, *, verify_payloads=True):
     if len(records) != 1:
         raise ValueError('distribution has missing or ambiguous installed RECORD: ' + name)
     path = Path(distribution.locate_file(records[0])).resolve(strict=True)
+    record_identity = _file_identity(path.lstat())
     raw = read_regular(str(path), 'distribution_record', max_bytes=MAX_RECORD_BYTES).captured.raw
     if not raw:
         raise ValueError('distribution has empty installed RECORD: ' + name)
     direct_url = path.parent / 'direct_url.json'
     installation = None
     if direct_url.exists():
-        installation = read_regular(str(direct_url), 'distribution_direct_url', max_bytes=1_000_000).captured.raw
+        if light:
+            # Metadata parsing still rejects editable installs, but light mode
+            # hashes only the manifest and RECORD bytes, never other payloads.
+            with direct_url.open('rb') as stream:
+                installation = stream.read(1_000_001)
+            if len(installation) > 1_000_000:
+                raise ValueError('distribution direct URL exceeds its byte bound')
+        else:
+            installation = read_regular(str(direct_url), 'distribution_direct_url', max_bytes=1_000_000).captured.raw
         origin = c.strict_json(installation, 'distribution direct URL', 1_000_000)
         if type(origin) is not dict or type(origin.get('dir_info', {})) is not dict:
             raise ValueError('malformed distribution installation metadata: ' + name)
         if not own and origin.get('dir_info', {}).get('editable', False) is not False:
             raise ValueError('editable or development third-party distribution holds: ' + name)
     owned, spellings, payloads, unverified, claims = set(), set(), [], {}, []
+    file_stats, stat_identities = {}, {}
     verified_bytes = verified_count = 0
     for row in csv.reader(io.StringIO(raw.decode('utf-8'), newline=''), strict=True):
         if len(row) != 3:
@@ -353,6 +438,8 @@ def _capture_distribution(distribution, *, verify_payloads=True):
         claims.append((str(target), row[1]))
         if len(owned) > MAX_IMPORT_ENTRIES:
             raise ValueError('distribution RECORD exceeds its entry count bound')
+        original = Path(distribution.locate_file(entry))
+        file_stats[entry], stat_identities[str(original)] = _lstat(original)
         if row[1]:
             # A generate call hashes each payload once. Its second capture
             # rereads metadata/RECORD and the final pass checks every original
@@ -364,6 +451,12 @@ def _capture_distribution(distribution, *, verify_payloads=True):
             else:
                 _record_hash(row[1])
                 size = _record_size(row[2])
+                if light:
+                    physical = original.resolve(strict=True)
+                    observed, identity = _lstat(physical)
+                    if observed != {'type': stat.S_IFREG, 'bytes': size}:
+                        raise ValueError('installed payload size or type differs from RECORD: ' + str(original))
+                    stat_identities[str(physical)] = identity
             verified_count += 1
             verified_bytes += size
             if verified_bytes > MAX_VERIFIED_BYTES:
@@ -377,22 +470,27 @@ def _capture_distribution(distribution, *, verify_payloads=True):
         raise ValueError('distribution RECORD must identify itself: ' + name)
     if 'record' not in unverified:
         raise ValueError('distribution RECORD must name itself without a recursive hash: ' + name)
+    if _file_identity(path.lstat()) != record_identity:
+        raise ValueError('distribution RECORD changed during environment census: ' + name)
+    stat_identities[str(path)] = record_identity
     return {'row': {'name': name, 'version': version, 'record_sha256': c.sha(raw),
                 'verified_files': {'count': verified_count, 'bytes': verified_bytes},
+                'file_stats': file_stats,
                 'unverified_files': [{'kind': kind, 'count': len(entries), 'paths': sorted(entries)}
                                      for kind, entries in sorted(unverified.items())]},
             'record_path': str(path), 'metadata': tuple(message.items()),
             'owned': tuple(sorted(str(item) for item in owned)), 'owned_spellings': tuple(sorted(spellings)),
             'installation': installation,
-            'payloads': payloads, 'claims': tuple(sorted(claims)), 'own_project': own}
+            'payloads': payloads, 'claims': tuple(sorted(claims)), 'own_project': own,
+            'stat_identities': stat_identities}
 
 
-def _capture_environment(paths, *, verify_payloads=True):
+def _capture_environment(paths, *, verify_payloads=True, light=False):
     captures = []
     owners = {}
     total_files = total_bytes = 0
     for distribution in metadata.distributions(path=paths):
-        captured = _capture_distribution(distribution, verify_payloads=verify_payloads)
+        captured = _capture_distribution(distribution, verify_payloads=verify_payloads, light=light)
         captures.append(captured)
         for path, declared_hash in captured['claims']:
             if path in owners and owners[path] != declared_hash:
@@ -453,7 +551,7 @@ def _owned_files(captures):
     return {Path(path) for capture in captures for path in capture['owned']}
 
 
-def _require_owned_import_roots(paths, captures):
+def _require_owned_import_roots(paths, captures, *, light_unowned=None):
     """Inventory every unowned file within the explicitly declared scope.
 
     The lead's scope ruling excludes exact first-party and standard-library
@@ -506,13 +604,27 @@ def _require_owned_import_roots(paths, captures):
         # treating its target's ownership as its own would hide new imports.
         if physical in owned and (not path.is_symlink() or path in owned_spellings):
             continue
-        captured = _capture_unowned_file(path)
+        if light_unowned is None:
+            captured = _capture_unowned_file(path)
+        else:
+            expected = light_unowned.get((str(root), path.relative_to(root).as_posix()))
+            if expected is None:
+                raise ValueError('environment manifest is stale: unowned file inventory differs')
+            observed, identity = _lstat(physical)
+            alias, alias_identity = _lstat(path)
+            if (observed != {'type': stat.S_IFREG, 'bytes': expected['bytes']}
+                    or alias != expected['stat']):
+                raise ValueError('environment manifest is stale: unowned file lstat size or type differs')
+            captured = {'path': str(path), 'physical': str(physical), 'identity': identity,
+                        'alias_identity': alias_identity, 'bytes': observed['bytes'],
+                        'sha256': expected['sha256']}
         payloads.append(captured)
         total_bytes += captured['bytes']
         if total_bytes > MAX_VERIFIED_BYTES:
             raise ValueError('unowned inventory exceeds its aggregate byte bound')
         unowned.append({'root': str(root), 'path': path.relative_to(root).as_posix(),
-                        'bytes': captured['bytes'], 'sha256': captured['sha256']})
+                        'bytes': captured['bytes'], 'sha256': captured['sha256'],
+                        'stat': _lstat(path)[0]})
     _require_stable_directories(snapshots)
     return {'directories': snapshots, 'payloads': payloads,
             'unowned_files': sorted(unowned, key=lambda item: (item['root'], item['path'])),
@@ -536,7 +648,7 @@ def generate():
         # initial full content verification is reused, never a previous call.
         if (_import_paths() != paths or _interpreter_identity() != identity
                 or _metadata_snapshot(_capture_environment(paths, verify_payloads=False)) != _metadata_snapshot(captures)):
-            raise ValueError('interpreter or distribution metadata changed during environment census')
+            raise ValueError('interpreter, distribution metadata or payload changed during environment census')
         _require_stable_directories(census['directories'])
         _require_stable_payloads([*captures, census])
         value = {'kind': KIND, 'version': VERSION, 'interpreter': identity,
@@ -547,8 +659,55 @@ def generate():
         raise ValueError('environment metadata is missing, ambiguous or unreadable') from exc
 
 
-def verify(pin):
-    """Read a pinned manifest and compare it with the current environment."""
+def _light_live(value):
+    """Re-read RECORD hashes and lstat the complete included inventory.
+
+    Same-size payload edits are intentionally outside this mode's guarantee.
+    Full mode owns payload hashing; no light result becomes a full result.
+    """
+    try:
+        paths, identity = _import_paths(), _interpreter_identity()
+        captures = _capture_environment(paths, verify_payloads=False, light=True)
+        expected = {(row['root'], row['path']): row for row in value['unowned_files']}
+        census = _require_owned_import_roots(paths, captures, light_unowned=expected)
+        current = {'kind': KIND, 'version': VERSION, 'interpreter': identity,
+                   'distributions': [row['row'] for row in captures if not row['own_project']],
+                   'unowned_files': census['unowned_files'], 'excluded_roots': census['excluded_roots']}
+        if (_import_paths() != paths or _interpreter_identity() != identity
+                or c.canonical(current) != c.canonical(value)):
+            raise ValueError('environment manifest is stale for the current interpreter environment')
+        _require_stable_directories(census['directories'])
+        _require_stable_payloads([census])
+        fingerprints = {path: pin for row in captures for path, pin in row['stat_identities'].items()}
+        for row in census['payloads']:
+            fingerprints[row['path']] = row['alias_identity']
+            fingerprints[row['physical']] = row['identity']
+        # Stat identities are only a process-local full-cache invalidation key,
+        # never serialized as environment authority or used to hash payloads.
+        for path, expected_stat in fingerprints.items():
+            if _lstat(path)[1] != expected_stat:
+                raise ValueError('installed metadata or payload changed during environment census (light)')
+        return tuple(sorted(fingerprints.items()))
+    except (OSError, UnicodeError, TypeError, AttributeError, csv.Error) as exc:
+        raise ValueError('environment metadata or payload is missing, ambiguous or unreadable') from exc
+
+
+def _verification_key(pin):
+    executable = Path(sys.executable).resolve(strict=True)
+    return (str(ROOT), tuple(sorted(pin.items())), c.canonical(_interpreter_identity()),
+            str(executable), _file_identity(executable.lstat()), sys.prefix, sys.base_prefix,
+            tuple(_import_paths()))
+
+
+def verify(pin, *, mode='full'):
+    """Check current pin bytes, then full regeneration or explicit light census.
+
+    A full result is reused only in this process for the same pin/interpreter.
+    Every reuse still performs the light live census and checks the original
+    full result's file identities; a changed payload refuses without rehashing.
+    """
+    if mode not in ('full', 'light'):
+        raise ValueError('unknown environment verification mode')
     c.file_pin(pin, 'environment manifest pin')
     captured = read_regular(pin['path'], 'environment_manifest', max_bytes=MAX_BYTES).captured
     if {'path': captured.pin.path, 'bytes': captured.pin.bytes,
@@ -557,8 +716,34 @@ def verify(pin):
     value = validate(c.strict_json(captured.raw, 'environment manifest', MAX_BYTES))
     if captured.raw != c.canonical(value):
         raise ValueError('environment manifest must use canonical bytes')
-    if captured.raw != c.canonical(generate()):
-        raise ValueError('environment manifest is stale for the current interpreter environment')
+    if mode == 'light':
+        _light_live(value)
+        return value
+    state = _process_state()
+    key = _verification_key(pin)
+    with state['lock']:
+        memo = state['full'].get(key)
+        if memo is None:
+            if len(state['full']) >= 64:
+                raise ValueError('process environment verification pin bound exceeded')
+            # Store refusals too: fixing a failed environment requires a new
+            # process or pin, not repeated expensive regeneration of this key.
+            try:
+                fingerprints = _light_live(value)
+                if captured.raw != c.canonical(generate()):
+                    raise ValueError('environment manifest is stale for the current interpreter environment')
+                if _light_live(value) != fingerprints:
+                    raise ValueError('installed payload changed during process full verification')
+            except ValueError as exc:
+                state['full'][key] = (str(exc), None)
+                raise
+            state['full'][key] = (None, fingerprints)
+        else:
+            error, fingerprints = memo
+            if error is not None:
+                raise ValueError(error)
+            if _light_live(value) != fingerprints:
+                raise ValueError('environment manifest is stale: installed payload changed since process full verification')
     return value
 
 
@@ -574,5 +759,5 @@ def write(path):
         stream.flush()
         os.fsync(stream.fileno())
     pin = {'path': path, 'bytes': len(raw), 'sha256': c.sha(raw)}
-    verify(pin)
+    verify(pin, mode='full')
     return pin

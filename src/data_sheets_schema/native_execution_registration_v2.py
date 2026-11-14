@@ -268,7 +268,7 @@ def _environment_pin(path, pins):
     from . import native_environment_manifest
     artifact = _read(path, 'environment_manifest', c.HARD_LIMITS['input_bytes'])
     pin = _file_pin(artifact)
-    native_environment_manifest.verify(pin)
+    native_environment_manifest.verify(pin, mode=native_environment_manifest.preparation_mode())
     if pin['path'] in pins:
         raise ValueError('environment manifest must be a separate pinned artifact')
     pins[pin['path']] = pin['sha256']
@@ -344,7 +344,7 @@ def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks,
             or authority.dependency_identity() != dependencies):
         raise ValueError('v2 preparation authority changed during capture')
     from . import native_environment_manifest
-    native_environment_manifest.verify(environment_pin)
+    native_environment_manifest.verify(environment_pin, mode=native_environment_manifest.preparation_mode())
     return _envelope(body, dependencies)
 
 
@@ -433,7 +433,7 @@ def _prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks
             or authority.dependency_identity() != dependencies):
         raise ValueError('v2 preparation authority changed during capture')
     from . import native_environment_manifest
-    native_environment_manifest.verify(environment_pin)
+    native_environment_manifest.verify(environment_pin, mode=native_environment_manifest.preparation_mode())
     return _envelope(body, dependencies)
 
 
@@ -453,7 +453,7 @@ def verify_preparer(raw, *, job_id):
     c.file_pin(body['selection'], 'selection pin')
     c.file_pin(body['runtime'], 'runtime pin')
     from . import native_environment_manifest
-    native_environment_manifest.verify(body['environment_manifest'])
+    native_environment_manifest.verify(body['environment_manifest'], mode=native_environment_manifest.preparation_mode())
     from .native_runtime_profiles import profile_name, SYNTHETIC_PROFILE
     runtime = c.strict_json(_read(body['runtime']['path'], 'runtime declaration',
                                  c.HARD_LIMITS['input_bytes']).raw, 'runtime declaration')

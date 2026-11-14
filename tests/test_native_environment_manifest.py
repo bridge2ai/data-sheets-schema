@@ -3,6 +3,7 @@ from email.message import Message
 import base64
 import hashlib
 import json
+import stat
 from pathlib import Path
 
 import pytest
@@ -120,7 +121,8 @@ def test_closed_manifest_refuses_pyc_entries_in_any_inventory(installed, invento
     value = m.generate()
     if inventory == 'unowned':
         value['unowned_files'] = [{'root': str(installed.root), 'path': 'excluded.pyc',
-                                  'bytes': 0, 'sha256': hashlib.sha256(b'').hexdigest()}]
+                                  'bytes': 0, 'sha256': hashlib.sha256(b'').hexdigest(),
+                                  'stat': {'type': stat.S_IFREG, 'bytes': 0}}]
     else:
         group = {'kind': inventory, 'count': 1, 'paths': ['excluded.pyc']}
         if inventory == 'record':
@@ -494,8 +496,8 @@ def test_standard_cache_without_source_is_excluded(installed):
 def test_record_changes_during_census_refuse_registered_pin(installed, tmp_path, monkeypatch):
     pin = m.write(tmp_path / 'manifest.json')
     census = m._require_owned_import_roots
-    def change_record(paths, captures):
-        snapshots = census(paths, captures)
+    def change_record(paths, captures, **kwargs):
+        snapshots = census(paths, captures, **kwargs)
         record = installed.locate_file(installed.files[0])
         record.write_bytes(record.read_bytes() + b'changed-during-census.py,,\n')
         return snapshots
@@ -571,7 +573,8 @@ def test_unowned_bootstrap_and_data_are_pinned_without_importing(installed, tmp_
         (installed.root / relative).write_bytes(raw)
     value = m.generate()
     assert value['unowned_files'] == [
-        {'root': str(installed.root), 'path': relative, 'bytes': len(raw), 'sha256': c.sha(raw)}
+        {'root': str(installed.root), 'path': relative, 'bytes': len(raw), 'sha256': c.sha(raw),
+         'stat': {'type': stat.S_IFREG, 'bytes': len(raw)}}
         for relative, raw in sorted(payloads.items())]
     assert value['excluded_roots'] == []
     pin = m.write(tmp_path / 'manifest.json')
@@ -609,7 +612,8 @@ def test_nested_import_roots_have_one_deepest_root_representation(installed, mon
     monkeypatch.setattr(m.sys, 'path', [str(nested), str(installed.root), str(nested)])
     first = m.generate()
     assert first['unowned_files'] == [{'root': str(nested), 'path': 'data.txt',
-        'bytes': len(b'SYNTHETIC nested data'), 'sha256': c.sha(b'SYNTHETIC nested data')}]
+        'bytes': len(b'SYNTHETIC nested data'), 'sha256': c.sha(b'SYNTHETIC nested data'),
+        'stat': {'type': stat.S_IFREG, 'bytes': len(b'SYNTHETIC nested data')}}]
     monkeypatch.setattr(m.sys, 'path', [str(installed.root), str(nested)])
     assert m.generate() == first
 

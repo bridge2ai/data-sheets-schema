@@ -189,7 +189,7 @@ def _recheck_verified(raw, value):
             raise ValueError('v2 preparation digest mismatch')
         preparation = captured_composition.captured_preparation_body(preparation_raw)
         from . import native_environment_manifest
-        native_environment_manifest.verify(preparation['environment_manifest'])
+        native_environment_manifest.verify(preparation['environment_manifest'], mode='full')
         if preparation['pinned_files'].get(preparation['environment_manifest']['path']) != preparation['environment_manifest']['sha256']:
             raise ValueError('prepared environment manifest is not in the pinned file map')
         execution_v2._job_id(preparation['job_id'])
