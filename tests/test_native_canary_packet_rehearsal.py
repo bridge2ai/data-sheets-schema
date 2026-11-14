@@ -1,7 +1,7 @@
 """G13 explicitly synthetic saved-input rehearsal, never launch authority.
 
-No executable peer runs and no reservation is made. The protected constructor
-refusal is observed unchanged. Separate CLI spies prove routing only, with the
+No executable peer runs and no reservation is made. Preparation is verified
+through the current constructor. Separate CLI spies prove routing only, with the
 unavailable registration/metadata/runtime front-door gates explicitly isolated.
 They are not end-to-end admission or a workaround for production validation.
 """
@@ -41,15 +41,21 @@ def synthetic(tmp_path, monkeypatch):
     return runtime,path
 
 
-def test_synthetic_preparation_stops_at_unchanged_protected_constructor(synthetic,tmp_path):
+def test_synthetic_preparation_roundtrips_without_production_authority(synthetic,tmp_path):
     from data_sheets_schema import native_execution_registration_v2 as execution
     runtime,path=synthetic
     out=tmp_path/'packet'
     result=invoke(out)
     assert result.returncode==2,result.stdout+result.stderr
-    with pytest.raises(TypeError, match="unexpected keyword argument 'native_shared_generation_version'") as refusal:
-        execution.prepare_synthetic(out/'selection.json',path,job_id='synthetic-rehearsal',run_date='2026-11-12',max_draft_checks=1)
-    (tmp_path/'protected-refusal.json').write_text(json.dumps({'scope':LABEL,'producer':'native_execution_registration_v2.prepare_synthetic','refusal':str(refusal.value),'reservation_performed':False},indent=2)+'\n')
+    prepared=execution.prepare_synthetic(out/'selection.json',path,job_id='synthetic-rehearsal',run_date='2026-11-12',max_draft_checks=1)
+    raw=c.canonical(prepared)
+    body=execution.verify_preparer(raw,job_id='synthetic-rehearsal')
+    assert body==prepared['registration']
+    assert body['kind']==execution.PREPARATION_KIND
+    assert body['schema_version']==execution.VERSION
+    assert body['runtime']['path']==str(path)
+    assert body['runtime']['sha256']==c.sha(path.read_bytes())
+    (tmp_path/'synthetic-preparation.json').write_bytes(raw)
     # The ordinary production entry rejects these bytes before constructing RunSpec.
     with pytest.raises(ValueError,match='production|synthetic'):
         execution.prepare(out/'selection.json',path,job_id='synthetic-rehearsal',run_date='2026-11-12',max_draft_checks=1)
@@ -61,13 +67,21 @@ def documents(synthetic,tmp_path):
     runtime,path=synthetic
     from data_sheets_schema import native_subscription_guard as wire
     value={'attempt_id':'SYNTHETIC-REHEARSAL-NOT-AUTHORITY','runtime':runtime,
-        'dependencies':{'base':{'source_commit':'a'*40}},'permission_probe_sha256':'2'*64,
+        'dependencies':{'base':{'source_commit':'a'*40,
+            'package_sources':{adapter.source_contract()['sequence_source']:
+                c.sha((ROOT/adapter.source_contract()['sequence_source']).read_bytes())}}},'permission_probe_sha256':'2'*64,
         'scope':LABEL,'selection':{'render_spec':{'scope':LABEL}}}
     registration=c.canonical({'authority_version':2,'controller_sources_sha256':'f'*64,'registration':value})
     now=datetime.now(timezone.utc).isoformat().replace('+00:00','Z')
     review,word=bundle_for(registration,tmp_path/'synthetic-capture',now=now)
+    contract=adapter.source_contract()
+    current=c.strict_json(review)
+    current.update(kind=contract['bundle_kind'],version=contract['bundle_version'],
+        sequence_script_sha256=value['dependencies']['base']['package_sources'][contract['sequence_source']])
+    current['owner_statement'].update(kind=contract['terms_kind'],version=contract['terms_version'],account_quiet=True)
+    review=c.canonical(current)
     ci=c.canonical({'scope':LABEL,'kind':'SYNTHETIC-CI-NOT-EVIDENCE','checks':{},'status':'not_run'})
-    coded=c.strict_json(word); coded['ci_sha256']=c.sha(ci); word=c.canonical(coded)
+    coded=c.strict_json(word); coded['ci_sha256']=c.sha(ci); coded['review_sha256']=c.sha(review); word=c.canonical(coded)
     adapter.validate_supplied(registration,review,word)
     choice=c.canonical({'kind':'d4d_native_u4_owner_choice','version':1,'decisions':['D105','D106'],
         'account_label':'LBL work Claude Max','effort':'high','receipt_instrument':4,
@@ -92,6 +106,20 @@ def test_review_adapter_checks_real_byte_binding(documents):
     from data_sheets_schema import native_shared_registration_orchestration as registration
     with pytest.raises((ValueError,TypeError)):
         registration.verified(data['registration'])
+
+
+def test_review_adapter_still_refuses_historical_bundle(documents):
+    from data_sheets_schema import native_launch_review as review_api
+    _,data,_=documents
+    historical=c.strict_json(data['review'])
+    historical.update(kind=review_api.KIND,version=2)
+    historical.pop('sequence_script_sha256')
+    historical['owner_statement'].update(kind=review_api.TERMS_KIND,version=1)
+    historical['owner_statement'].pop('account_quiet')
+    raw=c.canonical(historical)
+    word=c.strict_json(data['launch-word']); word['review_sha256']=c.sha(raw)
+    with pytest.raises(ValueError,match='historical review bundles are readback only'):
+        adapter.validate_supplied(data['registration'],raw,c.canonical(word))
 
 
 @pytest.mark.parametrize('command', ['capture-subscription-event','prepare-subscription-guard-v2','launch'])

@@ -19,6 +19,10 @@ def test_probe_drafts_are_not_runtime_or_authorization(tmp_path):
     runtime=json.loads((out/'provisional-runtime.DRAFT.json').read_bytes())
     auth=(out/'authorization.DRAFT.json').read_bytes()
     packet=json.loads((out/'probe-packet.DRAFT.json').read_bytes())
+    candidate=runtime['candidate_runtime']
+    from data_sheets_schema.native_run_limits import CANARY, require_registered_pair
+    assert require_registered_pair(candidate)==CANARY==('90',21600)
+    assert candidate['environment']['PYSTOW_HOME'].startswith('OWNER_INPUT_REQUIRED:')
     with pytest.raises(ValueError): sequence.validate_provisional_runtime(runtime)
     with pytest.raises(ValueError): sequence.authorization(auth,runtime)
     nested=json.loads(auth)['candidate_authorization']

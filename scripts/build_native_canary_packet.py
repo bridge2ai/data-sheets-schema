@@ -19,6 +19,18 @@ from pathlib import Path
 import sys
 
 
+# Lead ruling under NP1 item (ap), 2026-11-13; common to the canary and stratum.
+# These are declared operating bounds, not the source's permissive ceilings.
+STRATUM_BOUNDS = {
+    'max_workers': 64, 'max_populated_paths': 32768, 'max_paths_per_worker': 8192,
+    'max_submissions': 128, 'max_history_records': 1024,
+    'max_inventory_bytes': 2000000, 'max_input_bytes': 4000000,
+    'max_authority_bytes': 16000000, 'max_evidence_bytes': 256000000,
+    'max_history_bytes': 48000000, 'max_request_bytes': 32000000,
+    'max_response_bytes': 4000000,
+}
+
+
 class OfflineViolation(RuntimeError):
     pass
 
@@ -136,7 +148,7 @@ def build(args):
                     ('source_manifest', 'bundle', 'chunk_manifest', 'context')}, **schemas,
                    'profile': {'name': profile.name, 'basis': 'explicit caller; source manifest agrees',
                                'vocabulary': None if profile.pin_path is None else pin(profile.pin_path.absolute())}},
-        'receipt_policy': pin(receipt_path, receipt_raw), 'bounds': dict(c.BOUND_CEILINGS),
+        'receipt_policy': pin(receipt_path, receipt_raw), 'bounds': dict(STRATUM_BOUNDS),
         'stage_root': str(args.stage_root)}
     raw = c.canonical(doc)
     c.parse_selection(raw)

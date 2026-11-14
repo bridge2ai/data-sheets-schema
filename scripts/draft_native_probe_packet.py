@@ -52,7 +52,7 @@ def generate(source, binary, output):
     requested=constant('native_model_aliases','REQUESTED'); returned=constant('native_model_aliases','RETURNED')
     basis_kind=constant('native_model_aliases','PROVISIONAL_KIND')
     effort=constant('native_permission_probe','U4_EFFORT')
-    deadline=constant('native_u4b_policy','N1_DEADLINE_SECONDS')
+    budget,deadline=constant('native_run_limits','CANARY')
     terms=constant('native_u4b_policy','TERM_VALUES')
     auth_kind=constant('native_u4b_probe_sequence','AUTH_KIND')
     provider=constant('native_u4b_probe_sequence','PROVIDER')
@@ -63,7 +63,6 @@ def generate(source, binary, output):
     current_terms=constant('native_launch_review','CURRENT_TERMS_KIND')
     provisional_version=constraint('native_u4b_probe_sequence','validate_provisional_runtime','version')
     authorization_version=constraint('native_u4b_probe_sequence','authorization','version')
-    budget=constraint('native_u4b_probe_sequence','validate_provisional_runtime','budget_guard_usd')
     fields=[]
     def field(name,value,origin,status):
         fields.append({'field':name,'draft_value':value,'origin':origin,'status':status}); return value
@@ -89,10 +88,11 @@ def generate(source, binary, output):
         'environment':{key:field('runtime.environment.'+key,value,origin,status) for key,value,origin,status in [
             ('PATH',owner+': colon-separated absolute paths','owner explicit PATH; no environment inherited','owner'),
             ('HOME',owner+': absolute account home','owner explicit registered home; not read for account state','owner'),
+            ('PYSTOW_HOME',owner+': exact registered attempt directory / helper-cache','native_helper_cache.for_attempt; fresh per-attempt helper cache','owner'),
             ('CLAUDE_SECURESTORAGE_CONFIG_DIR',owner+': explicit value, possibly empty','owner registered secure-storage choice','owner'),
             ('CLAUDE_CODE_DISABLE_1M_CONTEXT','0','validate_provisional_runtime fixed 1M selection','source')]},
-        'deadline_seconds':field('runtime.deadline_seconds',deadline,'native_u4b_policy.N1_DEADLINE_SECONDS; owner approval still required','source/owner'),
-        'budget_guard_usd':field('runtime.budget_guard_usd',budget,'validate_provisional_runtime literal D110 comparison, not inferred billing','source/owner'),
+        'deadline_seconds':field('runtime.deadline_seconds',deadline,'native_run_limits.CANARY complete registered pair; owner approval still required','source/owner'),
+        'budget_guard_usd':field('runtime.budget_guard_usd',budget,'native_run_limits.CANARY complete registered pair, not inferred billing','source/owner'),
         'keep_awake':{'policy':field('runtime.keep_awake.policy','macos_iokit_ims_v1','validate_runtime_terms required policy, subject to owner ratification','source/owner'),
                       'host_platform':field('runtime.keep_awake.host_platform','darwin','validate_runtime_terms required platform; no host gate measured here','source/owner'),
                       'basis':field('runtime.keep_awake.basis',owner+': actual host/AC/lid confirmation','owner attestation; no keep-awake acquisition performed','owner')}}

@@ -4,7 +4,7 @@
 No live probe/capture/launch entrypoints exist here. Constructors consume saved
 files and enforce production source/runtime checks. Some read Git objects; run
 inside an offline OS sandbox. No owner or review documents are manufactured.
-The full chain is NOT validated on the protected-main base. See rehearsal log.
+Offline synthetic rehearsals do not establish native launch acceptance.
 """
 import argparse
 import json

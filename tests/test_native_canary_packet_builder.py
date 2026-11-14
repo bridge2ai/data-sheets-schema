@@ -50,6 +50,12 @@ def test_real_chorus_prefix(tmp_path):
     assert captured.project == 'CHORUS'
     declaration = json.loads((out/'selection.json').read_bytes())
     assert declaration['inputs']['profile']['name'] == 'bridge2ai'
+    assert declaration['bounds']=={
+        'max_workers':64,'max_populated_paths':32768,'max_paths_per_worker':8192,
+        'max_submissions':128,'max_history_records':1024,'max_inventory_bytes':2000000,
+        'max_input_bytes':4000000,'max_authority_bytes':16000000,
+        'max_evidence_bytes':256000000,'max_history_bytes':48000000,
+        'max_request_bytes':32000000,'max_response_bytes':4000000}
     assert 'AUTHORIZE_TWO_SCRIPTED_NATIVE_PROBES' in status['producer_authorization']
     assert not (tmp_path/'never-reserved-attempt').exists()
     assert all((out/name).stat().st_size for name in status['completed'])

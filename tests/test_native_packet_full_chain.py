@@ -47,7 +47,9 @@ def build_chain(root):
             comp=save('synthetic-composition',composed)
             selected,run,capture=composition.reconstruct_composition(comp.read_bytes())
             system=root/'system.md'; system.write_text(LABEL+'\n')
-            attempt=root/'NEVER-RESERVED-ATTEMPT'; evidence=root/'NEVER-RESERVED-EVIDENCE'
+            # runtime_for binds its saved observations to this exact helper cache.
+            attempt=root/'native-attempt'; evidence=root/'NEVER-RESERVED-EVIDENCE'
+            assert runtime['environment']['PYSTOW_HOME']==str(attempt/'helper-cache')
             expected=registration.permission_expectation(runtime,selected,run,
                 system.read_bytes().decode()+command_guidance(selected['policy']),attempt/'cli_config',authority.dependency_identity())
             save('synthetic-expectation',expected)
@@ -151,7 +153,7 @@ def test_public_commands_refuse_synthetic_before_any_reservation(complete_chain,
     else: args+=['--ci',str(case['ci']),'--subscription-guard',str(root/'NO-GUARD.json'),'--subscription-guard-sha256','0'*64]
     with pytest.raises(ValueError) as refused: cli.main(args)
     assert any(term in str(refused.value).lower() for term in ('synthetic','first-party','max subscription','firstparty'))
-    for target in ('synthetic-capture','NEVER-RESERVED-ATTEMPT','NEVER-RESERVED-EVIDENCE','NO-GUARD.json'):
+    for target in ('synthetic-capture','native-attempt','NEVER-RESERVED-EVIDENCE','NO-GUARD.json'):
         assert not (root/target).exists()
     (root/(command+'-refusal.json')).write_bytes(c.canonical({'scope':LABEL,'command':args,'refusal':str(refused.value),'no_gate_stubbed':True,'reservation_performed':False}))
 
