@@ -19,8 +19,11 @@ def pin(path):
 def main():
     target = OUT / 'issue-6217-proposal.json'
     prior = OUT / 'review-followups-before-fixes/issue-6217-proposal.json'
-    assert target.read_bytes() == prior.read_bytes()
-    value = json.loads(target.read_bytes())
+    current = json.loads(target.read_bytes())
+    assert target.read_bytes() == prior.read_bytes() or (
+        current.get('review_correction', {}).get('finding_id') == 'G2-REVIEW-6217-F1'
+        and current['review_correction']['prior_proposal'] == pin(prior))
+    value = json.loads(prior.read_bytes())
     value['decision_required'] = 'Define the last signal observation included in the final decision and the policy for signals received after that cutoff while the immutable final/publication pair is persisted.'
     value['recommendation'] = [
         'Enter a record-only signal mode in a finally immediately around preparation and transport, before failure-evidence writes, host cleanup or finalization.',
@@ -42,7 +45,8 @@ def main():
         'No production change or test execution is claimed.']
     markdown = OUT / 'issue-6217-proposal.md'
     markdown.write_text('\n'.join(lines) + '\n')
-    assert 'versioned finalization field' not in markdown
+    assert 'versioned finalization field' not in markdown.read_text()
+    assert json.loads(target.read_bytes()) == value
     print(json.dumps({'markdown': pin(markdown), 'json': pin(target)}))
 
 
