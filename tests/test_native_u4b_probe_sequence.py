@@ -462,7 +462,7 @@ def test_bound_phase_failure_is_spent_and_cannot_publish_completion(prepared, fi
         'error_type': 'ValueError', 'message': 'invented failed permission transcript',
         'authorization_sha256': sequence.sha(prepared['authorization']),
         'permission_directory_exists': False}
-    with pytest.raises(FileExistsError):
+    with pytest.raises(ValueError, match='bound-failure[.]json'):
         sequence.produce_bound_probe(prepared['authorization'], expected)
     assert failure_path.read_bytes() == failure_raw
     assert calls == [True]
