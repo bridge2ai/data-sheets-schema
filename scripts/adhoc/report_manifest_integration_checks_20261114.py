@@ -78,10 +78,15 @@ def summarize(scratch):
         'failure_reasons': dict(Counter(row['attribution'] for row in cases if row['detail'])),
         'missing_stages': [name for name in REQUIRED if name not in {group['stage'] for group in groups}]}
     (scratch / 'test-results.json').write_text(json.dumps(report, indent=2) + '\n')
+    (scratch / 'test-unclassified.json').write_text(json.dumps([
+        row for row in cases if row['attribution'] == 'inspect saved traceback; not attributed solely to pins'], indent=2) + '\n')
     summary = ['| Stage | Passed | Failed | Errors | Skipped | Seconds |', '| --- | ---: | ---: | ---: | ---: | ---: |']
     for group in groups:
-        summary.append('| ' + ' | '.join(str(group[name]) for name in ('stage', 'passed', 'failed', 'error', 'skipped', 'seconds')) + ' |')
+        summary.append('| ' + ' | '.join(str(group[name]) for name in ('stage', 'passed', 'failed', 'error', 'skipped')) + ' | ' + format(group['seconds'], '.2f') + ' |')
     (scratch / 'test-summary.md').write_text('\n'.join(summary) + '\n')
+    reasons = ['| Failure/error attribution | Cases |', '| --- | ---: |']
+    reasons.extend('| ' + name + ' | ' + str(count) + ' |' for name, count in report['failure_reasons'].items())
+    (scratch / 'test-failure-summary.md').write_text('\n'.join(reasons) + '\n')
     failures = ['| Test | Result | Attribution |', '| --- | --- | --- |']
     for row in cases:
         if row['detail']:
@@ -100,11 +105,14 @@ def handoff(scratch, destination):
         raise ValueError('required test stages remain unreported')
     inventory = read('merge-file-inventory.json')
     pins = read('pin-inventory.json')
+    controller = read('controller-verification.json')
+    assert not controller['failures']
     conflicts = (scratch / 'conflicted-files.txt').read_text().splitlines()
     commits = git('log', '--first-parent', '--format=%H %s', inventory['candidate'] + '..HEAD')
-    required = ['test-summary.md', 'test-failures.md', 'test-results.json', 'pin-inventory.md',
+    required = ['test-summary.md', 'test-failure-summary.md', 'test-failures.md', 'test-results.json', 'pin-inventory.md',
         'pin-inventory.json', 'pin-proposal-review-only.diff', 'excluded-files.md',
         'merge-file-inventory.json', 'merge-commit.log', 'namespace-witness.json',
+        'controller-verification.json',
         'merge-canary.log', 'merge-canary.xml', 'prefix-canary.log', 'prefix-canary.xml']
     for name in required:
         assert (scratch / name).is_file() and (scratch / name).stat().st_size
@@ -134,6 +142,7 @@ The builder still validates explicit project/profile, bundle/chunks, schemas, se
 Verification used the assignment's interpreter, PYTHONPATH, external basetemp and at most two xdist workers per command, never more than four concurrently. Commands and durations are saved in each stage's invocation JSON. The initial merge canary passed as recorded in `merge-canary.log`. The real prefix canary persisted its refusal/status and failed before manifest output; it did not prove a valid v3 prefix. Subsequent required suite runs are diagnostic evidence, not acceptance. Required-suite totals: {status}.
 
 {(scratch / 'test-summary.md').read_text()}
+{(scratch / 'test-failure-summary.md').read_text()}
 The all-project prefix tests deliberately permit production refusals; a pass there does not establish successful manifest output. Likewise a fixture error prevents the corresponding later assertions from being exercised. The complete per-test failure ledger is `{scratch / 'test-failures.md'}`; exact tracebacks and case timings are in `{scratch / 'test-results.json'}` and the named XML/log files. No failing assertion, production validation, pin, or timeout was weakened.
 
 Read-only review findings for the lead to file/triage (GitHub writes are outside this assignment):
@@ -142,6 +151,8 @@ Read-only review findings for the lead to file/triage (GitHub writes are outside
 2. The current scanner compares the CLI and preparer against exact v2 AST templates before checking its integrated source hashes. V3 adds the required manifest argument and field and changes the closed wire vocabulary. Recommendation: review a v3 structural proof and negative mutation tests first; then the lead can apply the identity proposal. The proposal below is a necessary identity update, not a claim that changing hashes fixes the scanner. Historical v2 summaries must remain historical.
 
 Pin proposal (unapplied): `{scratch / 'pin-proposal-review-only.diff'}`. Full old/current/proposed values, including every controller manifest module and both effective scanner summaries, follow. The historical base summary intentionally retains its historical values even where they differ from current source. The changed authority source restores the caller's sys.path after loading the exact pinned helpers, before yielding controls; its source-only finder remains active.
+
+The candidate's independent verifier also passed: `{scratch / 'controller-verification.json'}`, produced by the existing `scripts/adhoc/verify_controller_pin_rotation_20261113.py` with this worktree as its argument. It verifies controller modules against working bytes and their recorded source commit, controller constants, CONTROL_SHA and protected-file hashes. It reports scanner digest differences without accepting them.
 
 {(scratch / 'pin-inventory.md').read_text()}
 Excluded from the merge result: {len(inventory['excluded'])} incoming files, {inventory['excluded_lines']} lines. Retained incoming paths: {len(inventory['kept'])}. Excluded bytes remain in the merge's incoming parent and the owner worktree `{incoming_root}`; the table paths below refer to that incoming tree, where each was checked. A true merge retains that history but removes these files from the candidate diff. The two retained adhoc scripts are required by kept tests; their test cohorts were exercised, not their live gate launch paths.
