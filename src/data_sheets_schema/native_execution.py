@@ -149,15 +149,19 @@ def _signals(observed):
     if threading.current_thread() is not threading.main_thread():
         raise ValueError('native launch requires the main thread for bounded signal cleanup')
     previous = {sig: signal.getsignal(sig) for sig in (signal.SIGINT, signal.SIGTERM)}
+    interruptible = True
+    def record_only():
+        nonlocal interruptible
+        interruptible = False
     def interrupt(signum, _frame):
         observed.append(signum)
-        if len(observed) == 1:
+        if interruptible and len(observed) == 1:
             raise KeyboardInterrupt(f'native attempt received signal {signum}')
         # Additional signals are recorded while the first interruption cleans up.
     try:
         for sig in previous:
             signal.signal(sig, interrupt)
-        yield
+        yield record_only
     finally:
         for sig, handler in previous.items():
             signal.signal(sig, handler)

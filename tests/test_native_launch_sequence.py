@@ -4,9 +4,11 @@ The subprocess witness copies only the sequence and pure wire helper into an
 isolated test package with a fabricated native_generation module.
 """
 from pathlib import Path
+from types import SimpleNamespace
 import builtins
 import json
 import os
+import signal
 import subprocess
 import sys
 
@@ -17,7 +19,24 @@ from data_sheets_schema import native_launch_entry as entry
 from data_sheets_schema import native_subscription_guard as guard
 from data_sheets_schema import native_host_power as host_power
 
-REAL_RUN = subprocess.run
+REAL_POPEN = subprocess.Popen
+
+
+def finish_copied_process(child):
+    """Reap only a test-owned copied-package witness, including failed tests."""
+    if child.poll() is None:
+        try:
+            child.send_signal(signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+    try:
+        child.communicate(timeout=20)
+    except subprocess.TimeoutExpired:
+        try:
+            child.kill()
+        except ProcessLookupError:
+            pass
+        child.communicate()
 
 
 def run_sequence(arguments):
@@ -30,7 +49,7 @@ def deny_real_commands(monkeypatch):
         'source': 'ac', 'battery_percent': 90, 'lid': 'closed'})
     def refuse(*args, **kwargs):
         pytest.fail('test must not execute native_generation or any native binary')
-    monkeypatch.setattr(seq.subprocess, 'run', refuse)
+    monkeypatch.setattr(seq.subprocess, 'Popen', refuse)
     # Test-only clock substitution AFTER the entry verifies and compiles the
     # real fixture-pinned bytes. Production has no clock/verification bypass.
     def fixture_exec(code, namespace):
@@ -39,7 +58,7 @@ def deny_real_commands(monkeypatch):
     monkeypatch.setattr(entry, 'exec', fixture_exec, raising=False)
 
 
-def paths(tmp_path):
+def paths(tmp_path, *, registration_padding=0, attempt_directory_name='NEVER-RESERVED-ATTEMPT'):
     base = tmp_path.resolve()
     result = {name: base / (name + '.json') for name in
               ('registration', 'review', 'launch-word', 'account-choice', 'ci')}
@@ -47,7 +66,7 @@ def paths(tmp_path):
         path.write_bytes(b'{}\n')
     digest=guard.sha(Path(seq.__file__).read_bytes())
     result['registration'].write_bytes(guard.canonical({'registration': {
-        'attempt_directory': str(base / 'NEVER-RESERVED-ATTEMPT'),
+        'attempt_directory': str(base / attempt_directory_name),
         'evidence_directory': str(base / 'NEVER-RESERVED-EVIDENCE'),
         'attempt_id': 'sequence-fixture',
         # The canary's registered pair (D143): native_run_limits refuses a
@@ -60,7 +79,8 @@ def paths(tmp_path):
                     'valid_from': '2026-11-05T00:00:00Z', 'valid_until': '2026-11-19T00:00:00Z',
                     'max_starting_weekly_utilization': 0.5, 'max_starting_five_hour_utilization': 0.25,
                     'max_age_seconds': 1200, 'pre_reservation_margin_seconds': 300}})},
-        'dependencies': {'base': {'package_sources': {'src/data_sheets_schema/native_launch_sequence.py': digest}}}}}))
+        'dependencies': {'base': {'package_sources': {'src/data_sheets_schema/native_launch_sequence.py': digest}}}}})
+        + b' ' * registration_padding)
     result['review'].write_bytes(guard.canonical({'kind': 'd4d_native_execution_review_bundle_v3',
         'version': 3, 'registration_sha256': guard.sha(result['registration'].read_bytes()),
         'sequence_script_sha256': digest}))
@@ -73,9 +93,38 @@ def paths(tmp_path):
     with words.locked(value, reg_raw, create=True) as journal:
         journal.activate(result['launch-word'].read_bytes(), result['review'].read_bytes(), value,
                          now=words._timestamp(word['authorized_at'], 'fixture word'))
-    result.update({'output-directory': base / 'captures', 'subscription-guard': base / 'guard.json',
+    result.update({'output-directory': base / 'word-state', 'subscription-guard': base / 'guard.json',
                    'packet-directory': base / 'packet'})
     return result
+
+
+def capture_state_snapshot(paths):
+    """Ignored/hidden entries included; distinguish an absent journal root."""
+    root = paths['output-directory']
+    if not os.path.lexists(root):
+        return None
+    return {str(path.relative_to(root)): None if path.is_dir() else path.read_bytes()
+            for path in root.rglob('*')}
+
+
+def assert_capture_state_preserved(paths, before, *, allow_start_events=False):
+    """Preserve prior journal bytes and every capture slot; allow only starts."""
+    after = capture_state_snapshot(paths)
+    if before is None:
+        assert after is None
+        return
+    assert after is not None
+    assert all(name in after and after[name] == raw for name, raw in before.items())
+    additions = after.keys() - before.keys()
+    if allow_start_events:
+        for name in additions:
+            assert len(Path(name).parts) == 2 and Path(name).parent == Path('events')
+            assert after[name] is not None and guard.strict_json(after[name])['type'] == 'sequence_start'
+    else:
+        assert additions == set()
+    capture_rows = lambda rows: {name: raw for name, raw in rows.items()
+                                 if name == 'captures' or name.startswith('captures/')}
+    assert capture_rows(after) == capture_rows(before)
 
 
 def argv(paths):
@@ -97,7 +146,8 @@ def fake_commands(monkeypatch, paths, *, mutate=None, fail=None, fail_exception=
         name = command[6]
         assert name == seq.COMMANDS[len(calls)], 'wrong order, repeated command or retry'
         calls.append((command, kwargs))
-        assert kwargs['stdin'] == subprocess.DEVNULL and kwargs['check'] is False
+        assert kwargs['stdin'] == subprocess.DEVNULL and kwargs['start_new_session'] is True
+        assert 'check' not in kwargs
         assert kwargs['cwd'] == seq.SOURCE_ROOT
         assert kwargs['env'] == seq.CHILD_ENV
         assert kwargs['stdout'].name is not None and kwargs['stderr'].name is not None
@@ -129,8 +179,10 @@ def fake_commands(monkeypatch, paths, *, mutate=None, fail=None, fail_exception=
         raw = guard.canonical(document) if data is None else data
         kwargs['stdout'].write(raw)
         kwargs['stderr'].write(b'PRIVATE child diagnostic\n')
-        return subprocess.CompletedProcess(command, 17 if fail == name else 0)
-    monkeypatch.setattr(seq.subprocess, 'run', run)
+        code = 17 if fail == name else 0
+        return SimpleNamespace(returncode=code, wait=lambda timeout: code, poll=lambda: code,
+                               send_signal=lambda signum: None)
+    monkeypatch.setattr(seq.subprocess, 'Popen', run)
     return calls
 
 
@@ -308,7 +360,7 @@ def test_isolated_real_subprocess_uses_only_copied_fake_command(tmp_path, entry_
     for name in ('native_launch_sequence', 'native_subscription_guard', 'native_sequence_start', 'native_launch_entry',
                  'native_capture_words', 'native_subscription_guard_v2', 'native_u4b_policy',
                  # native_u4b_policy checks the registered limits pair (D143).
-                 'native_run_limits',
+                 'native_run_limits', 'native_path_identity',
                  'native_shared_runtime_values', 'native_runtime_profiles', 'native_host_power'):
         (package / (name + '.py')).write_bytes((seq.SOURCE_ROOT / 'src/data_sheets_schema' / (name + '.py')).read_bytes())
     (package / 'native_generation.py').write_text('''import json, hashlib, os, sys
@@ -338,10 +390,14 @@ def main():
                  "from data_sheets_schema import native_host_power; "
                  "native_host_power.probe=lambda: {'source':'ac','battery_percent':90,'lid':'closed'}; "
                  "runpy.run_module(name,run_name='__main__',alter_sys=True)")
-    result = REAL_RUN([sys.executable, '-I', '-B', '-c', bootstrap, str(root / 'src'), 'data_sheets_schema.' + entry_module, *argv(p)],
-                      env={'PRIVATE_TOKEN': 'secret', 'PYTHONPATH': '/foreign'},
-                      cwd=root, capture_output=True, timeout=20)
-    assert result.returncode == 0, result.stderr
+    child = REAL_POPEN([sys.executable, '-I', '-B', '-c', bootstrap, str(root / 'src'), 'data_sheets_schema.' + entry_module, *argv(p)],
+                       env={'PRIVATE_TOKEN': 'secret', 'PYTHONPATH': '/foreign'},
+                       cwd=root, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        stdout, stderr = child.communicate(timeout=20)
+        assert child.returncode == 0, stderr
+    finally:
+        finish_copied_process(child)
     assert record(p)['status'] == 'completed'
     assert all(step['argv'][5] == str(root / 'src') for step in record(p)['steps'])
 
@@ -383,6 +439,7 @@ def test_own_script_bytes_saved_before_any_command_without_self_hash(tmp_path, m
 ])
 def test_delegated_start_requires_both_independent_windows(tmp_path, monkeypatch, direction, confirmation, accepted):
     p = paths(tmp_path)
+    capture_before = capture_state_snapshot(p)
     now = '2026-11-12T12:00:00Z'
     monkeypatch.setattr(seq, '_utc_now', lambda: now)
     calls = fake_commands(monkeypatch, p)
@@ -396,7 +453,7 @@ def test_delegated_start_requires_both_independent_windows(tmp_path, monkeypatch
     assert doc['started_at'] == now
     if not accepted:
         assert doc['steps'] == []
-        assert not p['output-directory'].exists()
+        assert_capture_state_preserved(p, capture_before)
 
 
 @pytest.mark.parametrize('timestamp', [
