@@ -29,3 +29,17 @@ def _cleanup_signals():
         part = part[:a1] + '        with _cleanup_signals():\n' + ''.join('    '+line if line.strip() else line for line in lines[:n]) + ''.join(lines[n:])
         s = s[:a] + part + s[b:]
 p.write_text(s)
+if sys.argv[1] == '6219':
+    p = Path('src/data_sheets_schema/native_u4b_probe_sequence.py')
+    s = p.read_text()
+    start = s.index("    _new(root / 'expectation.json', expected_raw)", s.index('def produce_bound_probe'))
+    end = s.index('\n\n\ndef validate_bound_probe', start)
+    body = s[start:end]
+    s = s[:start] + '    try:\n' + ''.join('    '+line+'\n' for line in body.splitlines()) + '''    except BaseException as exc:
+        _new(root / 'bound-failure.json', canonical({
+            'error_type': type(exc).__name__, 'message': str(exc),
+            'authorization_sha256': sha(authorization_raw),
+            'permission_directory_exists': (root / 'permission').exists()}))
+        raise
+''' + s[end:]
+    p.write_text(s)

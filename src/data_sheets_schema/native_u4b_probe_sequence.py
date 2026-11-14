@@ -425,18 +425,26 @@ def produce_bound_probe(authorization_raw, expected, directory=None):
     # phase stays spent; deleting or retrying its retained directory is forbidden.
     claim = _bound_claim(authorization_raw, observed, runtime, expected_raw)
     _new(root / 'bound-claim.json', canonical(claim))
-    _new(root / 'expectation.json', expected_raw)
-    output = producer.produce_saved_probe(expected, root / 'permission',
-                                          deadline_seconds=authorized['permission_deadline_seconds'])
-    raw = _read(output, PERMISSION_BYTES)
-    completion = {'kind': COMPLETION_KIND, 'version': 1,
-        'authorization_sha256': sha(authorization_raw), 'observation': observed['pin'],
-        'runtime_sha256': sha(canonical(runtime)), 'expectation': _pin(root / 'expectation.json', expected_raw),
-        'claim': _pin(root / 'bound-claim.json', canonical(claim)),
-        'permission': _pin(root / 'permission/permission-probe.json', raw), 'basis': BASIS}
-    _new(root / 'sequence.json', canonical(completion))
-    validate_bound_probe(runtime, output)
-    return output
+    try:
+        _new(root / 'expectation.json', expected_raw)
+        output = producer.produce_saved_probe(expected, root / 'permission',
+                                              deadline_seconds=authorized['permission_deadline_seconds'])
+        raw = _read(output, PERMISSION_BYTES)
+        completion = {'kind': COMPLETION_KIND, 'version': 1,
+            'authorization_sha256': sha(authorization_raw), 'observation': observed['pin'],
+            'runtime_sha256': sha(canonical(runtime)), 'expectation': _pin(root / 'expectation.json', expected_raw),
+            'claim': _pin(root / 'bound-claim.json', canonical(claim)),
+            'permission': _pin(root / 'permission/permission-probe.json', raw), 'basis': BASIS}
+        _new(root / 'sequence.json', canonical(completion))
+        validate_bound_probe(runtime, output)
+        return output
+    except BaseException as exc:
+        _new(root / 'bound-failure.json', canonical({
+            'error_type': type(exc).__name__, 'message': str(exc),
+            'authorization_sha256': sha(authorization_raw),
+            'permission_directory_exists': (root / 'permission').exists()}))
+        raise
+
 
 
 def validate_bound_probe(runtime, permission_probe_path):
