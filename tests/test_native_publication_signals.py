@@ -154,7 +154,8 @@ def test_public_first_signal_during_publication_keeps_exact_readback(tmp_path, m
     evidence = Path(case['value']['evidence_directory'])
     assert (attempt / 'keep-awake.json').read_bytes() == consumed['cleanup']
     assert result['keep_awake'] == c.strict_json(consumed['cleanup'])
-    assert (evidence / 'final.json').read_bytes() == c.canonical(result)
+    # Final evidence uses the frozen pretty attribution encoding.
+    assert (evidence / 'final.json').read_bytes() == engine.draft._encoded(result)
     marker = c.strict_json((evidence / 'published.json').read_bytes())
     assert marker['final_sha256'] == c.sha((evidence / 'final.json').read_bytes())
     assert execute.read_final(case['raw']) == result
