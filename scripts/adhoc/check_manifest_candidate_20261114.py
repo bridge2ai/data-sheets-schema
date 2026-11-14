@@ -12,6 +12,7 @@ import ast
 import hashlib
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -224,50 +225,79 @@ def compare():
 def report():
     commit = frozen()
     audit_data, comparison = load(OUT / 'audit.json'), load(OUT / 'comparison.json')
-    assert audit_data['head'] == comparison['head'] == commit
+    tested = audit_data['head']
+    assert tested == comparison['head']
+    # The delivery commit only records the completed evidence and its holds.
+    report_path = str(Path(__file__).resolve().relative_to(ROOT))
+    delta = git('diff', '--name-only', tested, commit).stdout.decode().splitlines()
+    assert set(delta) <= {report_path}, delta
+    for row in audit_data['identities']:
+        assert sha((ROOT / row['path']).read_bytes()) == row['merged'], row['path']
     results = []
-    for name in cohorts():
-        outcome = load(cohort_out(name) / 'outcome.json')
-        plan = load(cohort_out(name) / 'plan.json')
-        assert plan['source_commit'] == commit
-        suites = ET.parse(cohort_out(name) / 'pytest.xml').getroot()
+    selected = [(name, cohort_out(name)) for name in cohorts() if name != 'scanner']
+    selected += [('scanner-focused', SCRATCH / 'candidate-integration-focused-scanner'),
+                 ('scanner-broad-interrupted', cohort_out('scanner'))]
+    for name, directory in selected:
+        outcome = load(directory / 'outcome.json')
+        plan = load(directory / 'plan.json')
+        assert plan['source_commit'] == tested
+        suites = ET.parse(directory / 'pytest.xml').getroot()
         cases = list(suites.iter('testcase'))
         failures = [{'node': case.get('classname') + '.' + case.get('name'),
-                     'message': element.get('message'), 'detail': element.text}
+                     'message': element.get('message'), 'detail': element.text, 'type': element.tag}
                     for case in cases for element in case if element.tag in ('failure', 'error')]
         skipped = sum(case.find('skipped') is not None for case in cases)
+        failed = sum(case.find('failure') is not None for case in cases)
+        errors = sum(case.find('error') is not None for case in cases)
+        log = (directory / 'pytest.log').read_text()
+        collected = int(re.search(r'worker \[(\d+) items?\]', log).group(1))
         results.append({'name': name, 'tests': len(cases), 'passed': len(cases) - len(failures) - skipped,
-                        'failed': len(failures), 'skipped': skipped, 'failures': failures,
+                        'collected': collected, 'failed': failed, 'errors': errors,
+                        'skipped': skipped, 'failures': failures, 'source_commit': tested,
+                        'complete': name != 'scanner-broad-interrupted',
                         'returncode': outcome['returncode'], 'seconds': outcome['seconds'],
-                        'cleanup_verified': outcome['cleanup_verified'], 'output': str(cohort_out(name))})
+                        'cleanup_verified': outcome['cleanup_verified'], 'output': str(directory),
+                        'command': plan['command']})
     save(OUT / 'results.json', results)
     resolutions = load(OUT / 'resolutions.json')
     source = 'src/data_sheets_schema/native_environment_manifest.py'
     old = audit_data['snapshots']['merged']['pins']['_NATIVE_V3_RENDER_SOURCES:' + source]
     new = next(row['merged'] for row in audit_data['identities'] if row['path'] == source)
+    authority = next(row for row in audit_data['identities']
+                     if row['path'].endswith('/native_execution_authority_v2.py'))
     lines = ['# Candidate integration continuation — 2026-11-14', '',
-        f"**Answer: merged candidate `{CANDIDATE}` into the manifest branch at `{MERGE}`; final tested head `{commit}`.**",
+        f"**Answer: merged candidate `{CANDIDATE}` into the manifest branch at `{MERGE}`; tested head `{tested}`; delivery head `{commit}`.**",
+        'The delivery commit changes only this evidence/report helper. Runtime, test and scanner bytes match the tested head. Manifest, boundary, registration and builder units pass. The focused scanner checks retain the manifest identity and D128 asset holds; both same-tool scans stop before findings.',
         'Focused cohorts only, one worker. The existing-check interpretation is confirmed. No long live-boundary or full-registration matrix ran for this integration.', '',
         f"**Pending manifest scanner identity proposal:** `{old}` → `{new}`. This binds the accepted full/light implementation and remains unapplied. Neither scanner source nor controller pins were changed to make a check pass.", '',
-        '| Focused cohort | Passed | Failed | Skipped | Exit | Seconds | Cleanup verified |',
-        '|---|---:|---:|---:|---:|---:|---|']
+        '**Second review-only proposal:** separate the historical v2 authority pin from the v3 authority pin, as detailed below. No finding delta or D128 acceptance can be claimed from the blocked scans.', '',
+        '| Cohort | Collected | Passed | Failed | Errors | Skipped | Exit | Seconds | Complete | Cleanup verified |',
+        '|---|---:|---:|---:|---:|---:|---:|---:|---|---|']
     for row in results:
-        lines.append(f"| {row['name']} | {row['passed']} | {row['failed']} | {row['skipped']} | {row['returncode']} | {row['seconds']:.3f} | {row['cleanup_verified']} |")
+        lines.append(f"| {row['name']} | {row['collected']} | {row['passed']} | {row['failed']} | {row['errors']} | {row['skipped']} | {row['returncode']} | {row['seconds']:.3f} | {row['complete']} | {row['cleanup_verified']} |")
     lines += ['', 'The first canary invocation was refused before test startup because the existing runner requires outputs to be direct children of the assigned scratch root. The helper was corrected and committed before the real canary. A subsequent report-only audit exposed the candidate having no manifest module and a misspelled v1 controller filename; those provenance checks were corrected before the final cohorts above. Earlier successful canary and manifest results remain in their original sibling evidence directories. The refused invocation is retained in canary-invocation.json.', '',
               'The canary used the same launcher, isolated dependency environment, network/native denial, output hierarchy and one-worker mode as the later cohorts. Its nonempty JUnit and verified cleanup were checked before subsequent cohorts. It proves that path and persistence for one synthetic unit; it does not prove live census timing or full registration.', '',
+              'The broader scanner roster was deliberately interrupted with SIGINT to its identified task-owned pytest process after repeated held-pin calibration failures. It returned exit 2, saved partial JUnit, and the runner verified cleanup without forced termination or observed survivors. It is not a completed suite. The replacement focused cohort completed explicit manifest-mode controls, U1/U3-L/U5/H1 route checks, and the D128 validator. The original roster and both command lists remain in saved plans/results. Counts from these overlapping runs must not be added as distinct coverage.', '',
               '## Merge resolution and preserved boundaries', '']
     for row in resolutions:
         lines.append(f"- `{row['path']}`: {row['conflict_hunks']} conflict hunks. {row['resolution']}")
     lines += ['- Scanner merged without conflicts. Candidate runtime pin rotations and the previously reviewed v3 templates and authority identity are retained; no overlapping pin needed recomputation.',
               '- All four protected files, both controller source manifests and the D128 approval fixture are byte-identical across both parents and the tested head.',
               '- The diff against the candidate passes the whitespace check. Existing candidate whitespace findings are saved in the audit and were not edited.', '',
+              'A separate read-only review compared the resolution against both parents: the outer derivation scope still unwinds on refusal, the explicit manifest scope covers registration and reconstruction, and the original live identity checks remain. The boundary units exercise scope unwinding. No additional merge-resolution defect was found; the identity and D128 findings below remain for the lead to disposition and file.', '',
               '## Scanner identity ledger', '',
               'This table covers every literal scanner pin entry differing from either parent. New means absent in that parent. These are retained merge identities, except the pending manifest proposal above.', '',
               '| Entry | Accepted parent | Candidate parent | Retained merged pin | Actual merged file |',
               '|---|---|---|---|---|']
     for row in audit_data['pin_changes']:
         lines.append('| ' + ' | '.join('`' + str(row[key] or 'new') + '`' for key in ('entry', 'accepted', 'candidate', 'merged', 'actual')) + ' |')
-    lines += ['', 'Reasons: runtime values retain the required Bash timeout keys and validator; runtime profiles retain the synthetic peer identity and 2700-second synthetic deadline. Execution authority retains the accepted import-path restoration before fresh census. The v3 wire and manifest entries retain the reviewed structural contract; the manifest implementation now needs the pending identity above. The H1 authority reference and exact v3 mode-forwarding templates are preserved in the saved candidate-relative scanner diff.', '',
+    lines += ['', 'Reasons: runtime values retain the required Bash timeout keys and validator; runtime profiles retain the synthetic peer identity and 2700-second synthetic deadline. Execution authority retains the accepted import-path restoration before fresh census. The v3 wire and manifest entries retain the reviewed structural contract; the manifest implementation now needs the pending identity above. The exact v3 mode-forwarding templates are preserved in the saved candidate-relative scanner diff. The H1 test retains the accepted authority identity.', '',
+              'Additional proposal from the same-tool candidate refusal: restore the historical v2 pin and give v3 its own explicit authority entry. This keeps each version tied to one complete source identity. This proposal has not been applied or tested as a full findings comparison; it needs the lead decision.', '',
+              '| Review-only identity proposal | Old | Proposed | Reason |',
+              '|---|---|---|---|',
+              f"| v3 manifest | `{old}` | `{new}` | Bind the accepted full/light implementation |",
+              f"| integrated v2 execution authority | `{authority['merged']}` | `{authority['candidate']}` | Preserve the current candidate's historical v2 closure |",
+              f"| explicit v3 execution authority override | inherited `{authority['merged']}` | explicit `{authority['merged']}` | Keep the accepted import-path restoration bound to the v3 route |", '',
               'Scanner tool identity also differs from historical D128 approval. These identities are evidence for review, not authority to rewrite the finite D128 fixture.', '',
               '| Scanner source | SHA-256 |', '|---|---|']
     for name, snapshot in audit_data['snapshots'].items():
@@ -277,26 +307,27 @@ def report():
     for name, row in comparison['runs'].items():
         lines += [f"- {name}: exit {row['returncode']}; derivation complete `{row['derivation_complete']}`; array counts `{row['array_counts']}`.",
                   '```text', row['stderr'].strip(), '```']
-    lines += ['', 'An incomplete derivation has no finding arrays; it is not zero findings or D128 acceptance. The held manifest pin blocks the merged v3 route, and the candidate authority uses its prior identity. The current exact historical D128 asset gate therefore remains a hold. A complete finite finding comparison requires the lead to decide the proposed manifest identity and the historical-versus-current scanner authority closure; no approval fixture was updated here.', '',
+    lines += ['', 'An incomplete derivation has no finding arrays; it is not zero findings or D128 acceptance. The held manifest pin blocks the merged v3 route, and the candidate authority uses its prior identity. The current exact historical D128 asset gate therefore remains a hold. The findings delta cannot be determined from these runs. A complete finite finding comparison requires the lead to decide the proposed manifest identity and the historical-versus-current scanner authority closure, then review all resulting ordered finding objects and scanner assets; no approval fixture was updated here.', '',
               '## Focused failures', '']
     for row in results:
         for failure in row['failures']:
             lines.append('- `' + failure['node'] + '`: ' + str(failure['message']).replace('\n', ' ')[:1200])
-    lines += ['', 'Complete failure details, including refusals under held pins, are in results.json and each cohort JUnit/log. The proposed-identity scanner controls remain isolated unit tests; they do not rotate the committed scanner pin.', '',
+    lines += ['', 'Complete failure details, including refusals under held pins, are in results.json and each cohort JUnit/log. At-sign characters in displayed test parameters are spelled [at-sign]; raw names remain in JUnit. The proposed-identity scanner controls remain isolated unit tests; they do not rotate the committed scanner pin.', '',
               '## CI-only evidence still required', '']
     for path, reason in CI_ONLY.items():
         assert (ROOT / path.split('::')[0]).exists(), path
         lines.append(f'- `{path}` — {reason}.')
     lines += ['- The prefix fix stage-module restructuring is owned elsewhere; full live callback, recording, dispatch, acceptance and gate integration must be judged in CI after integration. No new wrapper was added to helpers that previously had no manifest check.', '',
+              '- The remaining broad scanner cases and a complete D128 comparison need a quiet runner after the lead resolves the identity proposals. CI alone cannot resolve a held source pin or approve new D128 findings.', '',
               '## Reproducible evidence', '',
               f'- Evidence root: `{OUT}`.',
               f'- Merge/conflict provenance: `{OUT / "merge-start.json"}` and `{OUT / "resolutions.json"}`.',
               f'- Identity ledger: `{OUT / "audit.json"}`; focused results: `{OUT / "results.json"}`; same-tool comparison: `{OUT / "comparison.json"}`.',
               f'- Source helpers: `{ROOT / "scripts/adhoc/integrate_manifest_candidate_20261114.py"}` and `{Path(__file__).resolve()}`.',
-              '- Reproduction: invoke the check helper with `cohort canary`, then `cohort manifest`, `cohort boundaries`, `cohort registration`, `cohort builder`, `cohort scanner`, using the declared-dependencies Python with `-S -P -B`. Run `audit`, and run `compare` with the canary venv Python under its saved network-denied sandbox. Run `report` last. All outputs are exclusive-create and require a fresh assigned evidence directory for replay.',
+              '- Reproduction: invoke the check helper with `cohort canary`, then `cohort manifest`, `cohort boundaries`, `cohort registration`, and `cohort builder`, using the declared-dependencies Python with `-S -P -B`. The focused scanner command is saved verbatim in its plan and results.json. The helper action `cohort scanner` retains the interrupted broader roster for provenance; it is not the completed focused roster. Run `audit`, and run `compare` with the canary venv Python under its saved network-denied sandbox. Run `report` last. Outputs are exclusive-create and require fresh assigned evidence paths for replay.',
               '- Tables above are generated from saved JSON/JUnit by this committed report helper. No GitHub write, push, provider or native binary call occurred. Findings are handed to the lead for issue filing and publication.', '',
               '---', '', 'Earlier accepted continuation follows unchanged.', '']
-    text = '\n'.join(lines)
+    text = '\n'.join(lines).replace(chr(64), '[at-sign]')
     assert chr(64) not in text
     original = HANDOFF.read_bytes()
     (OUT / 'handoff-before.md').write_bytes(original)
@@ -304,7 +335,8 @@ def report():
     raw = HANDOFF.read_bytes()
     assert raw.endswith(original) and raw.startswith(text.encode())
     save(OUT / 'handoff-identity.json', {'path': str(HANDOFF), 'sha256': sha(raw),
-         'bytes': len(raw), 'previous_sha256': sha(original), 'head': commit})
+         'bytes': len(raw), 'previous_sha256': sha(original), 'head': commit,
+         'tested_head': tested, 'delivery_delta': delta})
     print(json.dumps(load(OUT / 'handoff-identity.json'), indent=2))
 
 
