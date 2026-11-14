@@ -36,7 +36,8 @@ def main():
         sys.modules[name] = module
         setattr(data_sheets_schema, short, module)
         spec.loader.exec_module(module)
-    return pytest.main(['tests/test_native_shared_callback_prefix.py', '-q',
+    nodes = sys.argv[2:] or ['tests/test_native_shared_callback_prefix.py']
+    return pytest.main([*nodes, '-q',
         '--basetemp=' + str(root / 'cases'), '-p', 'no:cacheprovider',
         '--junitxml=' + str(root / 'junit.xml')])
 

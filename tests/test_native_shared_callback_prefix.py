@@ -61,9 +61,10 @@ def test_guard_covers_private_bounds_and_refuses_unknown_package_binding():
     guard = guard_for(module)
     module._LIMITS['response'] = 13
     assert not guard.reusable()
-    module.dependency = ModuleType('data_sheets_schema.unreviewed_validator')
-    with pytest.raises(ValueError, match='outside its closed graph'):
-        guard_for(module)
+    for name in ('data_sheets_schema.unreviewed_validator', 'src.data_sheets_schema.native_shared_stage'):
+        module.dependency = ModuleType(name)
+        with pytest.raises(ValueError, match='outside its closed graph'):
+            guard_for(module)
 
 
 def checked(owner, run):
@@ -249,3 +250,19 @@ def test_retained_transaction_cannot_reuse_after_owner_closes(advance):
         run._prefix.get(('decision', run.history.journal.pin))
     with pytest.raises(ValueError, match='admission has closed'):
         run._prefix.commit()
+    with pytest.raises(ValueError, match='admission has closed'):
+        capture._checked_observations(run)
+
+
+def test_standalone_history_bounds_precede_every_record_parse(case, monkeypatch):
+    maximum = case[0].bounds()['max_history_records']
+    oversized = replace(case[3], records=(case[3].records[-1],) * (maximum + 1))
+    record_raw = oversized.records[-1].raw
+    original = stage.c.strict_json
+    def bounded_first(raw, *args, **kwargs):
+        if raw == record_raw:
+            raise AssertionError('standalone parsed a record before checking the history bound')
+        return original(raw, *args, **kwargs)
+    monkeypatch.setattr(stage.c, 'strict_json', bounded_first)
+    with pytest.raises(ValueError, match='history record bound'):
+        stage.prepare_next(*case[:3], oversized)

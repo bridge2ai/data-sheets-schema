@@ -594,8 +594,8 @@ def _checked_observations(run):
     init_lines = None
     settled_cache = {}
     start = 0
-    if run._prefix is not None and run._prefix.observation_state is not None:
-        state = run._prefix.observation_state
+    state = None if run._prefix is None else run._prefix.observation_checkpoint()
+    if state is not None:
         start, prior, reads, intents, writes, advances, settled, init_lines = state
         previous = dict(prior)
         seen_reads, seen_intents = dict(reads), dict(intents)

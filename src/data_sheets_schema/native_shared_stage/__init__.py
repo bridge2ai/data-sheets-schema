@@ -207,10 +207,9 @@ def _envelope(raw):
 
 class _Replay:
     def __init__(self, selection, execution, phase1, history, *, _catalogs=None, _prefix=None):
-        # U3-B owns bounded catalog/derivation reuse only. Every replay derives
-        # requests, responses and verdicts again; no admission or completion
-        # cache is stored on that owner. This deliberately trades speed for a
-        # closed owner interface and fresh validation of each captured history.
+        # Catalog reuse carries no semantic authority. Only the separate live
+        # admission prefix can resume verified stages; standalone and final
+        # replay derive requests, responses and verdicts independently.
         self.catalogs = nr._catalog_context(_catalogs)
         self.prefix = _prefix
         self.s, self.e, self.p, self.h = selection, execution, phase1, history
@@ -278,6 +277,8 @@ class _Replay:
                 self._output('receipt_result', value.result_json), self._output('receipt_carry', value.carry_json))
 
     def _packet(self):
+        if self.prefix is None:
+            return self._packet_uncached()
         key = ('packet', self.p.core.pin, c.sha(self.receipt.effective_receipt))
         if self.prefix is not None:
             cached = self.prefix.get(key)
@@ -316,6 +317,8 @@ class _Replay:
         return self.index
 
     def _receipt_request(self):
+        if self.prefix is None:
+            return nr._prepare(self.s, self.e, self.p, self.catalogs)
         key = ('receipt_request', self.p.seal.pin, self.p.full.pin, self.p.original_receipt.pin)
         cached = None if self.prefix is None else self.prefix.get(key)
         if cached is not None:
@@ -326,6 +329,8 @@ class _Replay:
         return result
 
     def _request(self, cursor, predecessor):
+        if self.prefix is None:
+            return self._request_uncached(cursor, predecessor)
         key = ('request', cursor, predecessor)
         if self.prefix is not None:
             cached = self.prefix.get(key)
@@ -387,6 +392,8 @@ class _Replay:
         return artifact, response, inner, request_hash, auxiliary
 
     def _derive_response(self, cursor, inner, raw):
+        if self.prefix is None:
+            return self._derive_response_uncached(cursor, inner, raw)
         key = ('response', cursor, self.h.records[self.at - 1].pin,
                c.sha(c.canonical(inner)), c.sha(raw))
         cached = None if self.prefix is None else self.prefix.get(key)
@@ -434,6 +441,8 @@ class _Replay:
         return envelope, outputs
 
     def _stage(self, cursor):
+        if self.prefix is None:
+            return self._stage_uncached(cursor)
         # A completed stage stores only its delta, never an entire replay or
         # journal prefix. Fresh _history and owner byte anchors precede reuse.
         key = ('stage', cursor, self.h.records[self.at - 1].pin)
@@ -627,9 +636,11 @@ def prepare_next(selection, execution, phase1, history):
 
 
 def _prepare_next(selection, execution, phase1, history, catalogs, *, _prefix=None):
+    if _prefix is None:
+        return _prepare_next_uncached(selection, execution, phase1, history, catalogs)
     if history.records and c.strict_json(history.records[-1].raw)['record_type'] == 'assembly_checked':
         # Completion never inherits controller-process semantic authority.
-        _prefix = None
+        return _prepare_next_uncached(selection, execution, phase1, history, catalogs)
     key = ('decision', history.journal.pin, phase1.core_seal.pin if phase1.core_seal else None)
     cached = None if _prefix is None else _prefix.get(key)
     if cached is not None:

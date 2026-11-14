@@ -124,15 +124,23 @@ class _PrefixTransaction:
         self.pending = {}
         self.observation_state = owner.observation_state if reusable else None
 
-    def get(self, key):
+    def check_reuse(self):
         self.owner.check_active()
         if not self.reusable:
-            return None
+            return False
         if not self.owner.guard.reusable():
             self.owner.semantic.clear()
             self.owner.observation_state = None
             self.pending.clear()
             raise ValueError('validator changed during callback semantic reuse')
+        return True
+
+    def observation_checkpoint(self):
+        return self.observation_state if self.check_reuse() else None
+
+    def get(self, key):
+        if not self.check_reuse():
+            return None
         return self.pending.get(key, self.owner.semantic.get(key))
 
     def put(self, key, value):

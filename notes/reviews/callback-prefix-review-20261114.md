@@ -18,3 +18,18 @@ window, acceptance rule, protected file or pin was changed to address them.
 
 This note records the findings, not final test outcomes. The final handoff and
 saved test outputs report validation against the resulting committed source.
+
+A subsequent read-only pass found that direct observation checkpoint access
+bypassed the retained-owner lifetime guard. The expanded closure regression
+failed before the follow-up fix; observation checkpoint reads now use the
+same active-admission and effective-binding checks as stage lookups.
+
+The same pass found a standalone validation-order regression: completion
+lookahead parsed the final record before the original history size checks.
+The focused regression passes on the assignment base and failed on the draft.
+Standalone wrappers now directly enter their original full derivation paths;
+completion also goes directly to independent full replay.
+
+The closed graph guard now refuses the alternate package namespace as well
+as unknown modules in the canonical namespace. The lead must file these
+additional findings; the helper has made no GitHub writes.

@@ -61,7 +61,7 @@ def _effective_bindings(modules, retained=None):
                 retained.append(value)
             result.append((module.__name__, name, identity))
             origin = value.__name__ if isinstance(value, ModuleType) else getattr(value, '__module__', '')
-            if origin and origin.startswith('data_sheets_schema.') and origin not in VALIDATOR_MODULES:
+            if origin and origin.startswith(('data_sheets_schema.', 'src.data_sheets_schema.')) and origin not in VALIDATOR_MODULES:
                 raise ValueError('validator binding reaches a module outside its closed graph')
             if isfunction(value) or ismethod(value):
                 functions.append((name, value.__func__ if ismethod(value) else value))
