@@ -5,6 +5,47 @@ from data_sheets_schema import native_shared_callback_io as io
 from data_sheets_schema.native_shared_evidence import read_regular
 
 
+def test_attempt_engine_uses_single_link_failure_writer(tmp_path, monkeypatch):
+    from data_sheets_schema import native_shared_execution_orchestration as engine
+    effects = engine._engine_bindings()[1]
+    for name in ('started.json', 'final.json'):
+        directory = tmp_path / name
+        directory.mkdir()
+        _check_failure_writer(effects.durable_new, directory / name, monkeypatch)
+
+
+def test_stage_uses_single_link_failure_writer(tmp_path, monkeypatch):
+    from data_sheets_schema import native_shared_publication_orchestration as stage
+    _check_failure_writer(stage.durable_new, tmp_path / 'stage.json', monkeypatch)
+
+
+def test_results_uses_single_link_failure_writer(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    from data_sheets_schema import native_shared_results_orchestration as results
+    destination = tmp_path / 'attribution-replay.json'
+    prepared = {'value': {'evidence_directory': str(tmp_path)}, 'pool': '{}',
+                'snapshot': SimpleNamespace(verify_unchanged=lambda: None)}
+    # Exercise the real results call site through its first create-once write.
+    _check_failure_writer(lambda path, raw: results.write_report(prepared, path),
+                          destination, monkeypatch, results=True)
+
+
+def _check_failure_writer(writer, target, monkeypatch, results=False):
+    original = OSError('post-link directory failure')
+    def fail(path):
+        raise original
+    monkeypatch.setattr(io, '_sync_directory', fail)
+    with pytest.raises(OSError) as caught:
+        writer(target, b'complete')
+    assert caught.value is original
+    files = list(target.parent.iterdir())
+    assert len(files) == 1 and files[0].stat().st_nlink == 1
+    raw = read_regular(str(files[0]), 'retained', max_bytes=100000).captured.raw
+    assert raw
+    if not results:
+        assert raw == b'complete'
+
+
 @pytest.mark.parametrize('persistent', [False, True])
 def test_post_link_sync_failure_retains_readable_single_link(tmp_path, monkeypatch, persistent):
     target = tmp_path / '000000.json'

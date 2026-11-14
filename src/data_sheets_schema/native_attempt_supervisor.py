@@ -13,7 +13,6 @@ import re
 import shlex
 import stat
 import sys
-import tempfile
 import threading
 from types import SimpleNamespace
 
@@ -22,6 +21,7 @@ from data_sheets_schema import native_attribution_registration as draft
 from data_sheets_schema import native_attribution_results as replay
 from data_sheets_schema import native_supervisor_authority as authority
 from data_sheets_schema import native_receipt_origin as receipt_origin
+from data_sheets_schema.native_shared_callback_io import durable_new
 
 KIND = 'd4d_native_neutral_attempt_supervisor'
 VERSION = 1
@@ -222,23 +222,6 @@ def _paths(value, selected, *, fresh):
         if any(path == other or path in other.parents or other in path.parents for other in reserved[i+1:]):
             raise ValueError('attempt, evidence and output directories must be disjoint')
     return reserved
-
-
-def durable_new(path, raw):
-    """Fsync a private staging file, link exclusively, then fsync its directory.
-
-    Failed staging files are retained as failed evidence. This never replaces
-    an existing destination; callers reserve the containing directory first.
-    """
-    path = Path(path)
-    fd, temporary = tempfile.mkstemp(prefix='.'+path.name+'.pending-', dir=path.parent)
-    with os.fdopen(fd, 'wb') as stream:
-        stream.write(raw)
-        stream.flush()
-        os.fsync(stream.fileno())
-    os.link(temporary, path)
-    _sync_directory(path.parent)
-    os.unlink(temporary)
 
 
 def _sync_directory(path):
