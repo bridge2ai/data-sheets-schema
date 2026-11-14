@@ -474,6 +474,26 @@ class FakePipe(io.BytesIO):
         return 123
 
 
+@pytest.mark.parametrize('limit', [3, 100])
+def test_shutdown_tail_retains_bytes_and_explicitly_marks_truncation(limit):
+    read_fd, write_fd = os.pipe()
+    os.write(write_fd, b'last diagnostic')
+    os.close(write_fd)
+    with os.fdopen(read_fd, 'rb') as stream:
+        raw, status = probe._pipe_tail(stream, limit, time.monotonic() + 1)
+    assert raw == b'last diagnostic'[:limit]
+    assert status == ('byte_limit' if limit == 3 else 'eof')
+
+
+def test_shutdown_tail_times_out_on_inherited_open_pipe():
+    read_fd, write_fd = os.pipe()
+    try:
+        with os.fdopen(read_fd, 'rb') as stream:
+            assert probe._pipe_tail(stream, 100, time.monotonic() + .01) == (b'', 'time_limit')
+    finally:
+        os.close(write_fd)
+
+
 @pytest.mark.parametrize("mode", ["complete", "timeout", "control_start_error", "overflow"])
 def test_native_boundary_reaps_closes_and_retains_failed_evidence(tmp_path, monkeypatch, mode):
     class BudgetStop(Exception):

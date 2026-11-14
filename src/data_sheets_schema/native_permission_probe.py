@@ -424,13 +424,38 @@ def _version(expected, deadline, directory):
                 _write_new(directory / "version.stderr", bytes(outputs["stderr"]))
 
 
+def _pipe_tail(stream, limit, deadline):
+    """Retain raw shutdown bytes without parsing or dispatching callbacks."""
+    output = bytearray()
+    if stream is None or stream.closed:
+        return b"", "unavailable"
+    try:
+        os.set_blocking(stream.fileno(), False)
+        while time.monotonic() < deadline:
+            try:
+                raw = os.read(stream.fileno(), min(65536, limit - len(output) + 1))
+            except BlockingIOError:
+                time.sleep(0.001)
+                continue
+            if not raw:
+                return bytes(output), "eof"
+            remaining = limit - len(output)
+            output.extend(raw[:remaining])
+            if len(raw) > remaining:
+                return bytes(output), "byte_limit"
+        return bytes(output), "time_limit"
+    except OSError as exc:
+        return bytes(output), type(exc).__name__
+
+
 def _run_native(expected, launch, policy, observer, classifier, transport, server, deadline):
     """Actual native process with bounded I/O and the existing control protocol."""
     budget_stop = transport.budget_stop
     control = transport.control(policy, classifier, launch["config_root"], event_observer=observer)
     process = None
     transcript, journal, stderr = io.BytesIO(), io.StringIO(), bytearray()
-    stopped = False
+    stopped, stderr_closed = False, False
+    tail, drainage = b"", {}
     try:
         _identity(expected)
         if time.monotonic() >= deadline:
@@ -440,13 +465,14 @@ def _run_native(expected, launch, policy, observer, classifier, transport, serve
         os.set_blocking(process.stderr.fileno(), False)
         control.start(process, _Bounded(transcript, MAX_STREAM), _Bounded(journal, MAX_STREAM),
                       "Execute the scripted local permission cases in order, then finish.")
-        while process.poll() is None or not control.stdout_closed:
+        while process.poll() is None or not control.stdout_closed or not stderr_closed:
             if time.monotonic() >= deadline:
                 raise TimeoutError("permission probe deadline elapsed")
             if server.failure is not None:
                 raise ValueError("scripted permission provider failed") from server.failure
             try:
                 raw = os.read(process.stderr.fileno(), 65536)
+                stderr_closed = not raw
             except BlockingIOError:
                 raw = b""
             stderr.extend(raw)
@@ -467,6 +493,12 @@ def _run_native(expected, launch, policy, observer, classifier, transport, serve
                 _terminate(process)
             finally:
                 try:
+                    if process is not None:
+                        drain_deadline = time.monotonic() + 1
+                        tail, drainage['stdout'] = _pipe_tail(process.stdout, MAX_STREAM, drain_deadline)
+                        extra, drainage['stderr'] = _pipe_tail(
+                            process.stderr, max(0, MAX_STREAM - len(stderr)), drain_deadline)
+                        stderr.extend(extra)
                     control.close()
                 finally:
                     if process is not None:
@@ -479,6 +511,15 @@ def _run_native(expected, launch, policy, observer, classifier, transport, serve
                     _write_new(evidence / "transcript.jsonl", transcript.getvalue())
                     _write_new(evidence / "control.jsonl", journal.getvalue().encode())
                     _write_new(evidence / "stderr.txt", bytes(stderr))
+                    _write_new(evidence / "stdout.unprocessed", tail)
+                    _write_new(evidence / "cleanup.json", canonical({
+                        'drainage': drainage, 'child_reaped': process is not None and process.poll() is not None,
+                        'control_shutdown_complete': control.control_shutdown_complete,
+                        'unfinished_control_workers': control.unfinished_control_workers}))
+    if any(status != 'eof' for status in drainage.values()):
+        raise ValueError("permission pipe drainage was incomplete")
+    if tail and not stopped:
+        raise ValueError("permission process left unprocessed stdout")
     if (not control.control_shutdown_complete or control.unfinished_control_workers != 0
             or process is None or process.poll() is None):
         raise ValueError("permission probe cleanup was incomplete")
