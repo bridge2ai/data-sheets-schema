@@ -73,9 +73,12 @@ def test_missing_external_gate_refuses_before_reservation_or_probe(tmp_path, mon
     # spans for this launch may be appended; no wildcard telemetry exemption.
     assert len(rows) % 2 == 0
     for index, row in enumerate(rows):
+        # #6239: every written row carries the process-local drop count.
         assert set(row) == {'boundary', 'elapsed_ns', 'wall_ns',
-            'registration_sha256', 'pid', 'trace_id', 'phase', 'step_id'} | (
+            'registration_sha256', 'pid', 'trace_id', 'phase', 'step_id',
+            'dropped_traces_total'} | (
                 {'error_type'} if index % 2 else set())
+        assert type(row['dropped_traces_total']) is int and row['dropped_traces_total'] >= 0
         assert row['boundary'] == 'registration.verified'
         assert row['registration_sha256'] == digest
         assert row['pid'] == os.getpid() and row['trace_id'] == trace.trace_id
