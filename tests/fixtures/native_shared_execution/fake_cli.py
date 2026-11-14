@@ -210,7 +210,7 @@ def main():
     json.loads(sys.stdin.readline())
     send({'type': 'system', 'subtype': 'init', 'model': runtime['model'], 'apiKeySource': 'none',
         'claude_code_version': runtime['executable']['init_version'], 'tools': ['Read', 'Write', 'Bash'],
-        'session_id': session, 'cwd': os.getcwd()})
+        'session_id': session, 'cwd': os.getcwd(), 'permissionMode': 'dontAsk'})
 
     def tool(name, inputs, allowed=(0,)):
         nonlocal number

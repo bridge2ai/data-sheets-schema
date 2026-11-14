@@ -170,11 +170,11 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
                     raise ValueError('native message role contradicts its stream frame')
             require_frame_models(event, aliases)
         require_model_usage(last, aliases)
-        if ('permissionMode' in one and one['permissionMode'] != 'dontAsk'):
+        if one.get('permissionMode') != 'dontAsk':
             raise ValueError('native initialization permission mode contradicts the selected argv')
         if (type(exit_code) is not int or exit_code != 0 or last.get('is_error') is not False
                 or last.get('terminal_reason') != 'completed' or last.get('stop_reason') != 'end_turn'
-                or 'subtype' in last and last['subtype'] != 'success'
+                or last.get('subtype') != 'success'
                 or last.get('error') is not None):
             raise ValueError('native child did not explicitly complete successfully')
         return {'passed': True, 'init': one, 'terminal': last}

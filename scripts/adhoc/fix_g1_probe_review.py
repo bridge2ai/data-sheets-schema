@@ -53,3 +53,11 @@ if sys.argv[1] == '6209':
         raise
 '''
     p.write_text(s)
+if sys.argv[1] == '6228':
+    import hashlib
+    import re
+    peer = Path('tests/fixtures/native_shared_execution/fake_cli.py')
+    digest = hashlib.sha256(peer.read_bytes()).hexdigest()
+    p = Path('src/data_sheets_schema/native_runtime_profiles.py')
+    p.write_text(re.sub(r"SYNTHETIC_PEER_SHA256 = '[a-f0-9]+'", f"SYNTHETIC_PEER_SHA256 = '{digest}'", p.read_text()))
+    print('synthetic peer SHA256', digest)
