@@ -130,6 +130,11 @@ def test_round7_refresh_preserves_history_and_excludes_dedicated_sg2():
     from decimal import Decimal
 
     data = json.loads((Path(__file__).resolve().parents[1] / 'utils/ci_test_durations.json').read_text())
+    # CL196-F2 / #6230: the old assertions describe the preserved historical
+    # layer. Check every one unchanged; independently reconstruct the new
+    # measured layer and its overlay in the test below.
+    data = {**data, 'file_seconds': data['source'][
+        'successful_ordinary_refresh_43536007079_20261114']['previous_file_seconds']}
     proof = data['ci_refresh_5213_20261105']
     local = {f: v for block in data['local_overrides'] for f, v in block['file_seconds'].items()}
     assert len(local) == len(proof['weights']) == 25
@@ -202,7 +207,29 @@ def test_round7_refresh_preserves_history_and_excludes_dedicated_sg2():
         and item['errors'] == 0
         for item in current_refresh['artifacts']
     )
-    assert current_refresh['file_seconds'] == data['file_seconds']
+    native_refresh = data['source']['native_ci_h3_20261112']
+    assert native_refresh['run_id'] == 42976790438
+    assert native_refresh['commit'] == '1a137b58860416a31618de44173180d021dfcc61'
+    assert native_refresh['updater_refusal'] == 'use a successful run for timing estimates'
+    native_weights = {name: row['seconds'] for name, row in native_refresh['files'].items()}
+    assert len(native_weights) == 134
+    assert all(name.startswith('tests/test_native_') for name in native_weights)
+    assert {row['source'] for row in native_refresh['files'].values()} == {
+        'junit', 'worker_completion_intervals'}
+    # D147's first 12-shard run (2026-11-13) raises underweighted files only.
+    twelve = data['source']['ci_12_shards_43383271447_20261113']
+    assert twelve['run_id'] == 43383271447
+    assert twelve['commit'] == 'f7f8e8bff6ea14006957d8631f66346d91bcddcd'
+    assert twelve['updater_refusal'] == 'use a successful run for timing estimates'
+    raised = {name: row['seconds'] for name, row in twelve['files'].items()}
+    assert len(raised) == 79
+    assert {row['source'] for row in twelve['files'].values()} == {
+        'junit', 'worker_completion_intervals'}
+    base = {**current_refresh['file_seconds'], **native_weights}
+    for name, row in twelve['files'].items():
+        assert row['previous'] == base.get(name)
+        assert row['previous'] is None or row['seconds'] > row['previous']
+    assert data['file_seconds'] == {**base, **raised}
     assert set(current_refresh['retired_prior_files']) == set(
         data['local_overrides'][1]['retired_modules']
     )
@@ -210,12 +237,12 @@ def test_round7_refresh_preserves_history_and_excludes_dedicated_sg2():
         'tests/test_final_generation_acceptance.py',
         'tests/test_final_record_component_limits.py',
     }
-    assert set(data['file_seconds']) == (
+    assert set(current_refresh['file_seconds']) == (
         (set(prior_weights) - set(current_refresh['retired_prior_files']))
         | set(current_refresh['newly_timed_main_files'])
         | set(current_refresh['readiness_only_files'])
     )
-    assert len(data['file_seconds']) == (
+    assert len(current_refresh['file_seconds']) == (
         len(prior_weights)
         - len(current_refresh['retired_prior_files'])
         + len(current_refresh['newly_timed_main_files'])
@@ -223,3 +250,103 @@ def test_round7_refresh_preserves_history_and_excludes_dedicated_sg2():
     )
     assert data['file_seconds']['tests/test_bc1_registration.py'] < prior_weights['tests/test_bc1_registration.py']
     assert data['file_seconds']['tests/test_wave7_5213_d76_registration.py'] < 100.0
+
+
+def test_successful_ordinary_refresh_reconstructs_measurements_and_preserves_history(tmp_path):
+    """Lossless CI inputs, not the new stored map, are the measurement oracle."""
+    from collections import defaultdict
+    from copy import deepcopy
+    from decimal import Decimal
+    import gzip
+    import json
+    from pathlib import Path
+    from utils.pytest_shard import DEDICATED_CASE_LANES
+
+    root = Path(__file__).resolve().parents[1]
+    data = json.loads((root / 'utils/ci_test_durations.json').read_text())
+    key = 'successful_ordinary_refresh_43536007079_20261114'
+    refresh = data['source'][key]
+    # Original downloaded JUnit hashes, fixed independently of the weight map.
+    original_hashes = {
+        2: 'a5095a85ae0fc8b999bd2ea853df0883a17e795275a23329c4dd09ff193d136c',
+        3: '07a38a25de9163879a4aaafed79d7639f2f0ddbf99c870d8ba71c9f487b60908',
+        4: '61db35bdea25daa1f8e272f8a045f095b7e9f426561d8c3cb065620ed04483e7',
+        5: 'bdae2bbf622ffaef224b7d8618bf9c87a7697033b32e4ef15218006358d8e21b',
+        7: '670c1ac52910e184be6a149b99eabd1ec8697970b29d2b01d6b281fe06266de2',
+        9: '993bd51e6ac568f89a2d2fdea10cb237d14d24670000c1582577e6de2aaeab28',
+        11: 'a8681a8b16c8ff4a4537d95c131031e22ee66d18e611b7c30c8556ac9186a1a7',
+        12: 'b622b0d4aa136c12acfcbe1150e7f91afad04b204da5ebcd560fac707fbe9db6',
+    }
+    assert refresh['selected_shards'] == list(original_hashes)
+    assert [row['shard'] for row in refresh['originals']] == list(original_hashes)
+    assert refresh['excluded_shards'] == {
+        '1': 'failure', '6': 'cancelled; no JUnit', '8': 'failure', '10': 'failure'}
+    dedicated = set(DEDICATED_CASE_LANES.values())
+    assert refresh['dedicated_nodes'] == sorted(dedicated)
+    measured, owners = defaultdict(Decimal), {}
+    total, excluded_total = 0, 0
+    artifacts = []
+    for row in refresh['originals']:
+        shard = row['shard']
+        fixture = root / f'tests/fixtures/ci_timings/43536007079/shard{shard}.xml.gz'
+        assert row['fixture'] == fixture.relative_to(root).as_posix()
+        assert row['conclusion'] == 'success'
+        compressed = fixture.read_bytes()
+        assert hashlib.sha256(compressed).hexdigest() == row['fixture_sha256']
+        raw = gzip.decompress(compressed)
+        assert hashlib.sha256(raw).hexdigest() == row['raw_sha256'] == original_hashes[shard]
+        cases = list(ET.fromstring(raw).iter('testcase'))
+        assert len(cases) == row['original_cases']
+        kept, excluded = [], []
+        for case in cases:
+            assert case.find('failure') is None and case.find('error') is None
+            # Resolve the longest existing Python module, independently of the
+            # updater's git-index mapping. Any class suffix remains in the node.
+            pieces = case.attrib['classname'].split('.')
+            suffix = []
+            while not (root / ('/'.join(pieces) + '.py')).is_file():
+                assert len(pieces) > 1
+                suffix.insert(0, pieces.pop())
+            filename = '/'.join(pieces) + '.py'
+            node = '::'.join([filename, *suffix, case.attrib['name']])
+            seconds = Decimal(case.attrib['time'])
+            assert seconds.is_finite() and seconds >= 0
+            if node in dedicated:
+                excluded.append(node)
+                continue
+            owner = owners.setdefault(node, shard)
+            assert owner == shard  # retain same-artifact label collisions
+            measured[filename] += seconds
+            kept.append(case)
+        assert excluded == row['excluded_nodes']
+        assert len(kept) == row['retained_cases']
+        total += len(kept)
+        excluded_total += len(excluded)
+        # Filtered XML contains only the untouched retained testcase elements.
+        filtered = ET.Element('testsuite', tests=str(len(kept)))
+        filtered.extend(kept)
+        filtered_raw = ET.tostring(filtered, encoding='utf-8', xml_declaration=True)
+        digest = hashlib.sha256(filtered_raw).hexdigest()
+        assert digest == row['filtered_sha256']
+        relative = f'tests-py3.12-shard{shard}/pytest.xml'
+        assert row['original_path'] == relative
+        target = tmp_path / relative
+        target.parent.mkdir()
+        target.write_bytes(filtered_raw)
+        artifacts.append({'path': relative, 'sha256': digest})
+    expected = {name: float(max(seconds, Decimal('0.001'))) for name, seconds in measured.items()}
+    assert total == 18736 and excluded_total == 24 and len(expected) == 558
+    assert refresh['file_seconds'] == expected
+    assert data['file_seconds'] == {**refresh['previous_file_seconds'], **expected}
+    # Restore the previous whole document, not merely its file count. This
+    # binds all historical source records and every unmeasured file weight.
+    previous = deepcopy(data)
+    del previous['source'][key]
+    previous['file_seconds'] = refresh['previous_file_seconds']
+    previous_raw = (json.dumps(previous, indent=2) + '\n').encode()
+    assert hashlib.sha256(previous_raw).hexdigest() == refresh['previous_snapshot_sha256']
+    rebuilt = build(tmp_path, root, 43536007079, '6ed891e845c1a46282338794dadb342a6fa6f261')
+    assert rebuilt['file_seconds'] == expected
+    assert rebuilt['source'] == refresh['measurement']
+    assert rebuilt['source']['artifacts'] == sorted(artifacts, key=lambda item: item['path'])
+    assert rebuilt['source']['test_cases'] == total

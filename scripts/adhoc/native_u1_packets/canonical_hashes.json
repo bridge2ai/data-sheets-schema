@@ -1,0 +1,11 @@
+{
+  "status": "proposal_only_scratch_validation_not_worktree_approval",
+  "target": "src/download/prompts/canonical_hashes.yaml",
+  "base": "8bc90e93d736d464f98e9eedffee45f0ad8e5d3f",
+  "u1_prompt_commit": "41b7169f6296c69201fc46389082c441e7d7165c",
+  "preimage_sha256": "39b93c009457681a1d8d8b8afee5a869bbd6f5e70b6f4332522db5d7e22d0584",
+  "postimage_sha256": "9efd980d77415a6a33f26928f01ff787855dfc1654356a96e5e76560b200fb99",
+  "patch_sha256": "f26d093b88eeb04bdd984d859554b47b78894c53739dc18ba81cbebae1e9f85e",
+  "producer": "d4d api prompts pin in private scratch archive",
+  "existing_pins_unchanged": true
+}

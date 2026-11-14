@@ -3,8 +3,9 @@
 Opt in with ``python -m pytest -p utils.pytest_shard --ci-shard=1/4``.
 Every collected file belongs to exactly one shard; new tests need no CI edit.
 Keeping a file together avoids multiplying its module/class fixture setup.
-Explicit ``--ci-lane`` isolates seven slow offline API/SG2 cases while retaining
-the complete collected suite across the ordinary shards and case lanes.
+Explicit ``--ci-lane`` isolates sixty-three slow offline API, SG2 and native
+cases while retaining the complete collected suite across the ordinary shards
+and case lanes.
 """
 
 import hashlib
@@ -29,7 +30,83 @@ SG2_CASE_LANES = {
     f"test_sg2_root_launch_completes_and_records_registered_paths[{mode}]"
     for mode in ("none", "conventional", "explicit")
 }
-DEDICATED_CASE_LANES = {**API_CASE_LANES, **SG2_CASE_LANES}
+# Each drives one complete synthetic native launch, from capture through
+# reservation and dispatch to the completion gates (#6191). Beside xdist
+# workers in an ordinary shard they miss the 900-second capture-to-reservation
+# window (1,200 s maximum age less the 300 s margin) and starve their shard.
+# Alone on the lead's host at load average 31, capture to reservation took
+# 246 s.
+NATIVE_PUBLIC_CASE_LANES = {
+    "native-public-correction": "tests/test_native_shared_execution.py::"
+    "test_actual_public_correction_three_workers_and_saved_completion",
+    "native-public-variant": "tests/test_native_shared_execution_variant.py::"
+    "test_actual_public_merged_omissions_and_all_chunk_statuses",
+    "native-public-pending": "tests/test_native_pending_public_completion.py::"
+    "test_pending_floor_public_completion_retains_diagnostic_reading",
+}
+# Failure cases share the expensive native fixture and each need their own lane.
+NATIVE_FAILURE_CASE_LANES = {
+    'native-failure-01': 'tests/test_native_shared_execution_failure.py::test_missing_external_gate_refuses_before_reservation_or_probe[review_path]',
+    'native-failure-02': 'tests/test_native_shared_execution_failure.py::test_missing_external_gate_refuses_before_reservation_or_probe[ci_path]',
+    'native-failure-03': 'tests/test_native_shared_execution_failure.py::test_missing_external_gate_refuses_before_reservation_or_probe[launch_word_path]',
+    'native-failure-04': 'tests/test_native_shared_execution_failure.py::test_public_pre_dispatch_failure_is_readable_and_cannot_resume',
+    'native-failure-05': 'tests/test_native_shared_execution_failure.py::test_v2_partial_reservation_stays_spent_without_probe[attempt_parent]',
+    'native-failure-06': 'tests/test_native_shared_execution_failure.py::test_v2_partial_reservation_stays_spent_without_probe[registration.json]',
+    'native-failure-07': 'tests/test_native_shared_execution_failure.py::test_v2_partial_reservation_stays_spent_without_probe[started.json]',
+    'native-failure-08': 'tests/test_native_shared_execution_failure.py::test_v2_partial_reservation_stays_spent_without_probe[evidence_parent]',
+    'native-failure-09': 'tests/test_native_shared_execution_failure.py::test_subscription_expiring_during_admission_refuses_before_reservation',
+    'native-failure-10': 'tests/test_native_shared_execution_failure.py::test_v2_signal_is_sticky_and_previous_handlers_are_restored',
+    'native-failure-11': 'tests/test_native_shared_execution_failure.py::test_v2_injected_transport_timeout_keeps_registered_limit_and_failure',
+    'native-failure-12': 'tests/test_native_shared_execution_failure.py::test_v2_publication_failure_preserves_first_error[final.json]',
+    'native-failure-13': 'tests/test_native_shared_execution_failure.py::test_v2_publication_failure_preserves_first_error[published.json]',
+    'native-failure-14': 'tests/test_native_shared_execution_failure.py::test_v2_saved_failure_rechecks_runtime_and_cleanup_after_successful_read[runtime-observation.json]',
+    'native-failure-15': 'tests/test_native_shared_execution_failure.py::test_v2_saved_failure_rechecks_runtime_and_cleanup_after_successful_read[keep-awake.json]',
+    'native-failure-16': 'tests/test_native_shared_execution_failure.py::test_saved_readback_revalidates_consumed_v2_approvals[review-independent v2 approval]',
+    'native-failure-17': 'tests/test_native_shared_execution_failure.py::test_saved_readback_revalidates_consumed_v2_approvals[ci-full v2 required CI]',
+}
+# Run 43536007079: measured native cases over 120 s, plus the three
+# public retention cases in cancelled shard 6 (no completed JUnit).
+NATIVE_CAPACITY_CASE_LANES = {
+    'native-capacity-01': 'tests/test_native_execution.py::test_actual_closed_consumer_real_helpers_complete[correction]',
+    'native-capacity-02': 'tests/test_native_execution.py::test_actual_closed_consumer_real_helpers_complete[no_correction]',
+    'native-capacity-03': 'tests/test_native_execution.py::test_cleanup_capture_and_saved_consistency[none]',
+    'native-capacity-04': 'tests/test_native_execution.py::test_runtime_observation_capture_and_saved_consistency[False]',
+    'native-capacity-05': 'tests/test_native_failure_publication.py::test_public_declared_runtime_failure_publishes_exact_readback[None]',
+    'native-capacity-06': 'tests/test_native_failure_publication.py::test_public_declared_runtime_failure_publishes_exact_readback[end]',
+    'native-capacity-07': 'tests/test_native_failure_publication.py::test_public_declared_runtime_failure_publishes_exact_readback[start]',
+    'native-capacity-08': 'tests/test_native_failure_publication.py::test_publication_pins_consumed_lifecycle_and_reports_later_change',
+    'native-capacity-09': 'tests/test_native_shared_live_capture.py::test_actual_reserved_genesis_then_observed_init_and_no_premature_stage',
+    'native-capacity-10': 'tests/test_native_shared_live_capture.py::test_actual_session_publication_records_host_stage_clock[False]',
+    'native-capacity-11': 'tests/test_native_shared_live_capture.py::test_actual_session_publication_records_host_stage_clock[True]',
+    'native-capacity-12': 'tests/test_native_shared_live_capture.py::test_binding_cannot_use_foreign_init_or_changed_actual_attempt',
+    'native-capacity-13': 'tests/test_native_shared_provenance.py::test_public_recorded_readers_refuse_genuine_v2_init_without_completed_stages',
+    'native-capacity-14': 'tests/test_native_shared_provenance.py::test_recorded_reader_refuses_render_substitution_before_recorded_verdict',
+    'native-capacity-15': 'tests/test_native_shared_registration.py::test_closed_registration_checks_actual_selected_policy_and_does_not_reserve',
+    'native-capacity-16': 'tests/test_native_shared_registration.py::test_consumer_does_not_cache_permission_acceptance',
+    'native-capacity-17': 'tests/test_native_shared_registration.py::test_consumer_rederives_every_closed_body_field[argv]',
+    'native-capacity-18': 'tests/test_native_shared_registration.py::test_consumer_rederives_every_closed_body_field[dependency]',
+    'native-capacity-19': 'tests/test_native_shared_registration.py::test_consumer_rederives_every_closed_body_field[environment]',
+    'native-capacity-20': 'tests/test_native_shared_registration.py::test_consumer_rederives_every_closed_body_field[permission_verdict]',
+    'native-capacity-21': 'tests/test_native_shared_registration.py::test_consumer_rederives_every_closed_body_field[runtime_budget]',
+    'native-capacity-22': 'tests/test_native_shared_registration.py::test_consumer_rederives_every_closed_body_field[selection]',
+    'native-capacity-23': 'tests/test_native_shared_registration.py::test_consumer_rederives_every_closed_body_field[system]',
+    'native-capacity-24': 'tests/test_native_shared_registration.py::test_consumer_rederives_every_closed_body_field[unknown]',
+    'native-capacity-25': 'tests/test_native_shared_registration.py::test_registration_refuses_separate_count_and_rehashed_permission_contradiction',
+    'native-capacity-26': 'tests/test_native_shared_results.py::test_actual_selected_receipt_paths_need_no_future_seal',
+    'native-capacity-27': 'tests/test_native_shared_results.py::test_capture_excludes_hidden_helper_cache_member',
+    'native-capacity-28': 'tests/test_native_shared_results.py::test_saved_initial_capture_rebuild_has_no_filesystem_fallback',
+    'native-capacity-29': 'tests/test_native_shared_results.py::test_saved_observation_gap_and_foreign_execution_refuse',
+    'native-capacity-30': 'tests/test_native_shared_saved_pool_bound.py::test_saved_pool_selected_cap_counts_every_member_without_io',
+    'native-capacity-31': 'tests/test_native_subscription_capture.py::test_genuine_registration_read_capture_for_event_rechecks_live_selection_and_stage_root',
+    'native-capacity-32': 'tests/test_native_u3f2_construction.py::test_registration_factory_checks_real_constructed_replay_with_genuine_controls',
+    'native-capacity-33': 'tests/test_native_u4b_probe_sequence.py::test_bound_phase_runs_genuine_saved_verifier_after_mocked_child_boundary',
+    'native-retention-stable': 'tests/test_native_incomplete_retention.py::test_public_failed_attempt_retains_records_and_reads_back_exactly[False]',
+    'native-retention-changing': 'tests/test_native_incomplete_retention.py::test_public_failed_attempt_retains_records_and_reads_back_exactly[True]',
+    'native-retention-final-floor': 'tests/test_native_incomplete_retention.py::test_public_finalization_after_injected_final_floor_failure',
+}
+NATIVE_CASE_LANES = {**NATIVE_PUBLIC_CASE_LANES, **NATIVE_FAILURE_CASE_LANES,
+                     **NATIVE_CAPACITY_CASE_LANES}
+DEDICATED_CASE_LANES = {**API_CASE_LANES, **SG2_CASE_LANES, **NATIVE_CASE_LANES}
 
 
 def partition_lanes(nodeids):

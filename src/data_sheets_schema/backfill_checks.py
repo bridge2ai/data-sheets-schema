@@ -123,7 +123,12 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
     transcript is read here, so it is the measurement the record carries
     while it still describes the receipt, else `unknown`. `origin_prior` is
     that measurement where the record no longer holds it -- a re-record
-    rewrites the file before its inline checks run."""
+    rewrites the file before its inline checks run.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: Caller supplies recorded provenance, not a live RunSpec; native receipts reconstruct the explicitly recorded selection through block_for.
+    """
     if schema_policy not in {"recorded", "legacy_current"}:
         raise ValueError("schema_policy must be recorded or legacy_current")
     want = (lambda name: only is None or name in only)
@@ -378,7 +383,7 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
     if want("receipts"):
         from data_sheets_schema.receipts import block_for, receipt_path
         from data_sheets_schema.provenance import resolve_record_input
-        from data_sheets_schema.receipt_origin_record import for_record
+        from data_sheets_schema.receipt_origin_record import for_assessment
         inputs = record.get("inputs") or {}
         chunks = inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None
         declared_mapping = chunks.get("path") if chunks else None
@@ -388,7 +393,7 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
         # while it describes the receipt on disk, and otherwise it says unknown.
         if origin_prior is None and isinstance(record.get("receipts"), dict):
             origin_prior = record["receipts"].get("origin")
-        out["receipts"] = {**block_for(full, receipt,
+        assessment = block_for(full, receipt,
                                        bundle, inputs.get("bundle_md5"),
                                        bool(inputs.get("receipt_expected")),
                                        manifest=resolve_record_input(Path(declared_mapping), provenance) if declared_mapping else None,
@@ -396,8 +401,10 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
                                        bundle_rel_path=inputs.get("bundle_path"),
                                        record_bundle_sha256=inputs.get("bundle_sha256"),
                                        record_chunks=inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None,
-                                       snapshot_record=record),
-                           "origin": for_record(origin_prior, receipt, full, api_path=bool(record.get("api_usage"))),
+                                       snapshot_record=record)
+        out["receipts"] = {**assessment,
+                           "origin": for_assessment(assessment, origin_prior, receipt, full,
+                                                    api_path=bool(record.get("api_usage"))),
                            "recorded_by": RECORDED_BY}
     return out
 

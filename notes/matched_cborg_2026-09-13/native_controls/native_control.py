@@ -218,6 +218,7 @@ class NativeControl:
         self.contract = control_contract(policy)
         self.policy, self.classify = policy, classify
         self.event_observer = event_observer
+        self.timing = None
         self.files = FileAccess(policy, config_root)
         self.classifications = {}
         self.selector = selectors.DefaultSelector()
@@ -254,6 +255,8 @@ class NativeControl:
         self.send(initialize_frame(self.contract))
 
     def record(self, value):
+        if self.timing is not None:
+            self.timing.safely('decision', value)
         if self.history_control and self._stopped.is_set():
             raise BudgetStop('native history control is stopped')
         value = {'at': datetime.now(timezone.utc).isoformat(), **value}
@@ -267,6 +270,8 @@ class NativeControl:
         if self.history_control and len(self.outgoing) + len(raw) > MAX_HISTORY_QUEUE_BYTES:
             raise BudgetStop('native history outgoing queue exceeds its bound')
         self.outgoing += raw
+        if self.timing is not None:
+            self.timing.safely('queued', value, len(self.outgoing))
         if self.history_control:
             # Selected service polls writes after the observer barrier. Keeping
             # a writable FD registered while that barrier waits would spin.
@@ -531,6 +536,8 @@ class NativeControl:
             if len(self._events) >= MAX_HISTORY_QUEUE_FRAMES or self._event_bytes + len(line) > MAX_HISTORY_QUEUE_BYTES:
                 raise BudgetStop('native history input queue exceeds its bound')
             received = time.monotonic()
+            if self.timing is not None:
+                self.timing.safely('event', event, self.transcript_line)
             if event.get('type') == 'control_request' and isinstance(event.get('request_id'), str):
                 self._callback_intake.setdefault(event['request_id'], received)
             self._events.append((self.transcript_line, event, len(line)))
@@ -569,6 +576,8 @@ class NativeControl:
             except BlockingIOError:
                 count = 0
             self.outgoing = self.outgoing[count:]
+            if self.timing is not None:
+                self.timing.safely('written', count)
             if not self.outgoing:
                 if self._pending_response_id is not None:
                     self._callback_intake.pop(self._pending_response_id, None)
@@ -620,6 +629,8 @@ class NativeControl:
                 except BlockingIOError:
                     continue
                 self.outgoing = self.outgoing[count:]
+                if self.timing is not None:
+                    self.timing.safely('written', count)
                 if not self.outgoing:
                     self.selector.unregister(key.fileobj)
             else:
@@ -645,6 +656,8 @@ class NativeControl:
                             event = json.loads(line)
                         except (ValueError, UnicodeError) as error:
                             raise BudgetStop('native control received malformed JSON') from error
+                        if self.timing is not None:
+                            self.timing.safely('event', event, self.transcript_line)
                         self.handle(event, line_number=self.transcript_line)
                 if len(self.buffer) > MAX_FRAME_BYTES:
                     raise BudgetStop('native control frame exceeds its size limit')

@@ -1,0 +1,9 @@
+{
+  "status": "proposal_only_not_applied_to_worktree",
+  "target": "src/data_sheets_schema/api_runner.py",
+  "base": "8bc90e93d736d464f98e9eedffee45f0ad8e5d3f",
+  "preimage_sha256": "db9a0f67ba7ace06bc8b39f90a00a3fe98ee72a34e553be6d48f97bff5e6d848",
+  "postimage_sha256": "3e8b7e5d3cc13c5ebc508e33f865e9ac484056fde16126118719d740656a4fb7",
+  "patch_sha256": "996bd9bce74d509033a1daf340ea2a6edfc2a820316e798459892738a989475f",
+  "rationale": "Restore unconditional final shared selector call, as required by M7 scanner admission proof. Apply only together with the separately approved protected shared-generation patch; without it native selections refuse. Preserve early native validation and existing D76 binding/replay code."
+}

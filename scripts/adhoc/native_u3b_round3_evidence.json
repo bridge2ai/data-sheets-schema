@@ -1,0 +1,31 @@
+{
+  "start_utc": "2026-11-07T20:44:28.740743+00:00",
+  "deadline_seconds": 7200,
+  "exit": 124,
+  "elapsed_seconds": 7200.125,
+  "wall_seconds": 7200.138,
+  "expected_nodes": 522,
+  "observed_nodes": 365,
+  "complete_collection_order": false,
+  "matches_collection_prefix": true,
+  "next_unfinished_node": "tests/test_download/test_api_runner.py::TestValidatorRepairRefreshCheckpoint::test_interruption_before_refresh_does_not_restart_the_sealed_full",
+  "same_original_file_roster": true,
+  "production_and_tests_unchanged": true,
+  "source_hashes_match": true,
+  "outcomes": {
+    "call:passed": 365
+  },
+  "failures": [],
+  "artifacts": {
+    "api-round3-ordered.events.jsonl": {
+      "bytes": 70007,
+      "sha256": "3b6e2cf33f776f052b84bd7e960c70531fdb813d7d67f0555bca758ed3076085"
+    },
+    "api-round3-ordered.log": {
+      "bytes": 24645,
+      "sha256": "5f4e276751e02f3c381465f8b01f0864fce2f6645733959483e554dfa9587bd9"
+    }
+  },
+  "collection_sha256": "6cbc9ea2a6d42fc4cd9413d01da38c22177a56035db7d81790fc026dc99078ea",
+  "p2_3_closed": false
+}

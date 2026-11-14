@@ -19,10 +19,10 @@ def selected():
              'executable':{'init_version':'synthetic-v1'}}
     events=[{'type':'system','subtype':'init','cwd':'/synthetic','session_id':session,
              'model':'synthetic-model','apiKeySource':'none','claude_code_version':'synthetic-v1',
-             'tools':['Read','Write','Bash']},
+             'tools':['Read','Write','Bash'], 'permissionMode':'dontAsk'},
             {'type':'assistant','session_id':session,'message':{'role':'assistant','model':'synthetic-model',
              'content':[{'type':'text','text':'Synthetic completion text.'}]}},
-            {'type':'result','session_id':session,'is_error':False,'terminal_reason':'completed','stop_reason':'end_turn'}]
+            {'type':'result','subtype':'success','session_id':session,'is_error':False,'terminal_reason':'completed','stop_reason':'end_turn'}]
     prepared={'snapshot':object(),'state':SimpleNamespace(spec=SimpleNamespace(),reg={'working_directory':'/synthetic'}),
               'events':events,'policy':{}}
     return prepared,runtime

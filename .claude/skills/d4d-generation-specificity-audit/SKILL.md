@@ -5,7 +5,7 @@ metadata:
   category: audit
   requires_database: false
   requires_internet: false
-  version: 1.9.4
+  version: 1.10.3
 ---
 
 # D4D generation-specificity audit (#4007)
@@ -20,6 +20,47 @@ possible, and must be tracked as such.
 
 This skill runs a scanner and reads its report. It does not fix findings,
 edit pinned files, or launch any run.
+
+Version 1.10.1 adds the U3-F2 source contracts and limits command discovery
+to literal named mappings and nested list/tuple command tables in existing
+model-facing generation modules. Direct argv aliases and starred literal
+prefixes are followed through unique local assignments. A package run
+with `-m` contributes its `__main__.py`, initializer and local import
+closure. The CLI entry point is included, but its initializer stays opaque:
+CLI groups are still followed only where selected. Upstream-input stops
+and existing approach roles remain in force. The shared-native command
+table receives only native-agentic attribution after deriving its separate
+native route and API refusal. A helper's runtime argv does not recursively
+become another model command. The entry point's stdout is conservatively
+model-facing; imports retain ordinary module roles. A package command with
+no `__main__.py` refuses derivation. The `model_commands` facts record
+command evidence, imports and approaches. Discovery is not proof of an
+observed command or a successful run.
+
+The separate native-v2 render proof binds `prepare`, `_job_id`, `_file_pin`,
+`_pin_map` and `_envelope` to exact AST contracts. Explicit whole-source
+pins bind the loaded preparer's `envelope` and `require_envelope`, the v2
+loader and its identity producers, and their source manifest. Changing
+these sources requires instrument review; unknown changes refuse rather
+than receiving a summary by filename. Native parser-event reuse requires
+its complete source pin during ordinary surface scanning as well as at
+the text-flow transport boundary. The stage roster proof permits
+`self.options` only at its initializer and six fixed typed-audit keyword
+expansions, refusing item/method mutations and alias escapes. These are
+source proofs, not permission, receipt validity or completed-execution
+evidence. The separately reviewed generic plain-alias model-text gap (B2)
+remains outside this revision.
+
+Version 1.10.2 composes those contracts with U5's closed imported-authority
+uses, function-escape refusals and preparation identity checks. The integrated
+producer keeps the current-module runtime reader and requires explicit
+registered input paths. It accepts that complete producer with or without the
+exact D114 runtime-basis toolchain selection immediately after runtime binding;
+it does not admit the older saved-module reader or remove arbitrary branches.
+The stage proof also refuses reflective receiver exposure through `getattr`
+and `vars`, which otherwise bypassed the literal `self.options` checks. All
+earlier package-command, parser, response-roster and loaded-source proofs remain
+in force. This integration still does not establish runtime admission.
 
 ## Run it
 
@@ -975,6 +1016,43 @@ Direct imports of the request runner share namespace-write evidence. A module-le
 Local dataclass records with structurally proved freshness admit exact field appends and counter mutations without treating the record as an untracked escape. The record class must be a finite, undecorated single-dataclass definition in the same source module, with no bases, keywords, post-init, custom methods, or dynamic factory overrides, and its class and factory references must remain unexposed. Fields are limited to explicit scalar defaults and fresh list factories (`field(default_factory=list)`).
 
 Returned-instance tracking follows the allocation through exact tuple slots, plain bindings, and authentic single-callee functions across the module call graph. Any exposure of the instance to unknown calls, attribute calls, reflection (`type()`, `__class__`), containers, global/nonlocal assignments, iterations, context managers, or recursive call cycles refuses the proof. Only exact append calls to the proved fresh list fields and direct integer augmentations to proved counter fields are cleared as non-escaping local operations; the record, its borrowed aliases, and nested values retain all ordinary effect and dependency checks.
+
+### Integrated native-v2 producer contract (1.10.3, U3-L)
+
+The separate native render proof also accepts the integrated production and
+synthetic preparation family. Its complete executable AST contracts bind
+`prepare`, `prepare_synthetic`, `_prepare`, `verify_preparer`, `_read`, `_wire`,
+`_job_id`, `_file_pin`, `_pin_map` and `_envelope`. Production runtime rejection
+precedes selection capture. The synthetic entry validates the explicit test
+profile and passes its fixed profile name to `_prepare`, which checks that name
+after validating a fresh runtime capture. Both producers construct a fresh
+RunSpec with explicit registered input paths and call its input-spelling guard
+before runtime attachment or instruction/render-spec/input-identity reads.
+Each producer admits exactly the complete body with or without the D114
+runtime-basis toolchain selection immediately after runtime attachment.
+
+The only new function-reference exception is the two branch expressions of
+`verify_preparer`'s exact local profile dispatcher. Its complete body fixes the
+wire and identity checks, runtime reread, selector, sole call and canonical
+comparison. Other function escapes still refuse. Module import identities,
+authority uses, preparation constants, byte bound and complete preparation-key
+set are checked; additional imports of the profile authorities refuse. The
+runtime validator and profile dispatcher, with the reviewed helper-cache path
+validator added by #5966, form a closed three-module dependency whose entire
+sources are pinned, including validation helpers and profile constants. The
+v2 runtime requires an explicit canonical PYSTOW_HOME disjoint from HOME;
+the helper binds that declaration to one attempt. This source proof does not
+establish cache creation, runtime admission or successful helper execution.
+The integrated loader's whole-source pin also binds the new consumer-owned
+helper module. The older
+two producer templates retain their original import and source-pin contracts;
+an arbitrary mixture or unknown source version receives no fallback.
+
+This is a source proof only. It does not execute a preparer or profile check,
+establish admission, validate a receipt or authorize a runtime. Ordinary model
+text flow, parser-event and response-roster proofs are unchanged. The integration also retains main's plain-alias and direct module-command
+discovery changes documented below. Copied-alias and imported helper-stdout
+limitations remain documented there; this native contract does not repair them.
 
 Plain local aliases (`view = contracts`) of a model-text container carry the same write and method-call obligations as the container itself (#5657, #5680, #5724): `_local_writes()` propagates subscript/attribute stores, augmented assignments, and method-call arguments across the function's pairwise may-alias sets, and `effects()` walks subscript stores and nested `.update`/`.setdefault` calls on plain and direct-subscript aliases into the container's flow. `_local_values()` and `compute_aliases_of()` also include `:=` (`NamedExpr`) and `match`/`case` pattern bindings (`case view:`) so capture aliases reach `_local_writes()` and `effects()`. Rebinding an alias to a non-`Name` kills only that variable's alias edges for subsequent writes in both `_local_writes()` and `effects()`'s alias-update branch without clobbering neighbor aliases or merging unrelated containers after branch joins, while branch-splitting across `if`/`else`, `try`/`except`/`else`/`finally` (accumulating all intermediate nested states for exception edges), `with`/`async with` (joining intermediate states for `__exit__` exception suppression), and `match`/`case` (propagating failed-guard fall-through states across subsequent cases) and iterating `for`/`async for`/`while` loops to a bounded monotonic fixed point (#5680, #5724; method calls in `effects()` still follow the pre-existing function-wide `compute_aliases_of` set). In real-repository modules (`_is_real_repo_module(q)`), subscript stores on a non-plain (`uncertain`) alias whose `proven_container_kind` is `"dict"` or `"list"` (or in an audit-evidence module when the holder is not a parameter) are skipped by a false-positive carve-out rather than refused, so nested mutations through shallow copies (`dict(contracts)`, `contracts.copy()`, `{**contracts}`) are neither traced nor refused there (#5679); non-real-repo modules still refuse with `ConfigError("nested or copied receiver alias")`. Precision changes accompanying #5657 (#5687): (1) primitive-observer argument exclusion in `flow()` builds a function-wide `id(arg)` set across all certified observer calls (`excluded`); (2) `container_origins()` extends `summary_callee` container-return inference (`function_container_return`) to all modules, not only `_is_real_repo_module(q)`; (3) `_is_local_nested_container_subscript()` admits `.update`/`.setdefault` on nested container subscripts outside `_is_real_repo_module(q)` and follows up to two levels of `summary_callee` return values when proving a dict-of-dicts origin.
 

@@ -1141,7 +1141,7 @@ class TestDiscovery(unittest.TestCase):
     def test_no_registered_launch_is_shown_to_switch_the_session_off(self):
         """CLAUDE.md is the project memory an interactive session loads; the
         assistant instructions name it but do not hand it over (#4054). Each
-        of the four registered native launches passes its flags through a
+        of the five registered native launches passes its flags through a
         starred module constant or record field (`*CLI_FLAGS`,
         `*native.CLI_FLAGS`, `*overlay['cli_flags']`,
         `*runtime['cli_flags']`), which the sound rule does not follow, so
@@ -1154,7 +1154,8 @@ class TestDiscovery(unittest.TestCase):
         spread = {"notes/claudecode_direct/run_direct_canary.py": "`*runtime['cli_flags']`",
                   "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py": "`*native.CLI_FLAGS`",
                   "notes/matched_cborg_2026-09-13/audit_controls/native.py": "`*CLI_FLAGS`",
-                  "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py": "`*overlay['cli_flags']`"}
+                  "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py": "`*overlay['cli_flags']`",
+                  "src/data_sheets_schema/native_shared_registration.py": "`*FLAGS`"}
         self.assertEqual({x["site"].split(":")[0] for x in it["launches"]}, set(spread))
         for x in it["launches"]:
             with self.subTest(site=x["site"]):
@@ -1304,7 +1305,10 @@ class TestDiscovery(unittest.TestCase):
         through the directory setup_repo_imports puts on sys.path (#4054)."""
         self.assertEqual(set(self.facts["deterministic_commands"]),
                          {"src/data_sheets_schema/cli/healthsheet.py", "src/data_sheets_schema/cli/rocrate.py"})
-        self.assertEqual(self.facts["deterministic_sys_path"], [".claude/agents/scripts"])
+        # The native shared import closure now reaches these fixed control loaders.
+        self.assertEqual(self.facts["deterministic_sys_path"], [".claude/agents/scripts",
+            "notes/claudecode_direct", "notes/matched_cborg_2026-09-13",
+            "notes/matched_cborg_2026-09-13/native_controls"])
         closure = set(self.facts["deterministic_closure"])
         for rel in ("src/data_sheets_schema/healthsheet.py", "src/data_sheets_schema/rocrate_normalize.py",
                     ".claude/agents/scripts/rocrate_to_d4d.py", ".claude/agents/scripts/field_prioritizer.py"):
@@ -1448,7 +1452,7 @@ PRECISION_MODULES = {
 #: or data with no sentence of the module's own (manifest values, JSON
 #: keys). The list is what keeps them model-facing; a change here is a
 #: change to the cross-check, made on purpose.
-LISTED_NOT_DERIVED = ["audit_batches", "audit_grammar", "audit_omissions", "evidence_assertions", "grounding",
+LISTED_NOT_DERIVED = ["audit_batches", "audit_grammar", "evidence_assertions", "grounding",
                       "scope", "source_metadata"]
 
 
@@ -2237,6 +2241,7 @@ class TestModelFacingDerivation(unittest.TestCase):
         # F1's shared S7 formatter makes this module directly discoverable;
         # it no longer relies only on the hand-kept model-facing list.
         self.assertIn("typed_audit", mf["derived"])
+        self.assertIn("audit_omissions", mf["derived"])
         self.assertEqual(mf["listed_not_derived"], LISTED_NOT_DERIVED)
         self.assertEqual(set(mf["derived"]) | set(LISTED_NOT_DERIVED), scan.MODEL_FACING_MODULES)
 
@@ -5831,7 +5836,8 @@ class TestOptionalFollowupDerivation(unittest.TestCase):
     def test_optional_turn_is_not_a_default_monolithic_call(self):
         with tempfile.TemporaryDirectory() as d:
             root = self.root(d)
-            facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": []}
+            facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": [],
+                     "registered_launch_sources": []}
             meaning = scan.api_meaning(root, facts)
         self.assertEqual(set(meaning["followup_turns"]), {"restore_full"})
         for row in meaning["conditions"].values():
@@ -5873,7 +5879,8 @@ class TestOptionalFollowupDerivation(unittest.TestCase):
             with self.subTest(value=value), tempfile.TemporaryDirectory() as d:
                 root = self.root(d)
                 self.restricted(root, value=value)
-                facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": []}
+                facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": [],
+                         "registered_launch_sources": []}
                 meaning = scan.api_meaning(root, facts)
                 turn = meaning["followup_turns"]["restore_full"]
                 self.assertEqual(turn["conditions"], ["generic_v2"])
@@ -6163,7 +6170,8 @@ def run(spec, client):
                 self.assertEqual(row['via'][0]['replacement']['phase'],'audit')
                 self.assertTrue(row['calls'][0].startswith(self.HELPER+':'))
                 self.assertTrue(row['delegated_plan']['evidence'][-1].startswith(self.PLAN+':'))
-            meaning=scan.api_meaning(root,{'conditions':scan.condition_table(root),'controllers':{},'legacy_scripts':[]})
+            meaning=scan.api_meaning(root,{'conditions':scan.condition_table(root),'controllers':{},'legacy_scripts':[],
+                                          'registered_launch_sources':[]})
             self.assertEqual(meaning['conditions']['generic']['model_calls_minimum'],3)
             self.assertIsNone(meaning['conditions']['generic_v3']['model_calls_minimum'])
             selected=meaning['conditions']['generic_v3']['selected_procedure']
@@ -6405,8 +6413,21 @@ class TestApiMeaning(unittest.TestCase):
         (#4055). Nothing here reaches a provider: the run stops at the lock."""
         from data_sheets_schema import api_runner
         ex = self.meaning["audit_continuations"]["execute_refuses"]
-        self.assertEqual(ex["refused"], [19, 20, 21, 22, 23, 24])
+        self.assertEqual(ex["refused"], [19, 20, 21, 22, 23, 24, 26])
         for n in ex["refused"]:
+            if n == 26:
+                # An ordinary API spec cannot even be constructed at native26.
+                with self.assertRaisesRegex(ValueError, "native renderer26 requires explicit"):
+                    self._spec_at(n)
+                # A changed existing spec must also refuse, including dry-run,
+                # before any lock or provider can be reached.
+                changed = self._spec_at(18)
+                changed.render_version = n
+                for dry_run in (False, True):
+                    with mock.patch.object(api_runner, "_exclusive_run", side_effect=AssertionError("lock reached")), \
+                            self.assertRaisesRegex(ValueError, "separate native execution registration"):
+                        api_runner.execute(changed, dry_run=dry_run)
+                continue
             with self.subTest(renderer=n), self.assertRaisesRegex(ValueError, "separately registered"):
                 api_runner.execute(self._spec_at(n))
         selected = {r for procedure in self.meaning.get('selected_procedures', {}).values()
@@ -6570,7 +6591,8 @@ class TestApiMeaning(unittest.TestCase):
         def meaning(**kw):
             with tempfile.TemporaryDirectory() as d:
                 root = _synthetic_root(Path(d), **kw)
-                facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": []}
+                facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": [],
+                         "registered_launch_sources": []}
                 return scan.api_meaning(root, facts)
 
         mono = meaning()
@@ -6600,7 +6622,8 @@ class TestApiMeaning(unittest.TestCase):
     def test_no_api_condition_is_a_runtime_hybrid(self):
         """Every native continuation of a parent run, at any renderer, sits in
         a package whose gate refuses a parent that is not agentic generic_v9
-        at renderer 14. The registered API-only procedure can now select a
+        at renderer 14, or the separate native shared parent at renderer26.
+        The registered API-only procedure can now select a
         renderer above that floor without admitting native work."""
         from data_sheets_schema import api_runner
         ac = self.meaning["audit_continuations"]
@@ -6609,10 +6632,11 @@ class TestApiMeaning(unittest.TestCase):
         self.assertEqual(ac["ungated_continuations"], [])
         self.assertEqual({(g["path"], g["condition"], g["parent_renderer"]) for g in ac["gates"]},
                          {("notes/matched_cborg_2026-09-13/audit_controls/contract.py", "generic_v9", 14),
-                          ("notes/matched_cborg_2026-09-13/finalization_controls/contract.py", "generic_v9", 14)})
+                          ("notes/matched_cborg_2026-09-13/finalization_controls/contract.py", "generic_v9", 14),
+                          ("src/data_sheets_schema/native_shared_registration.py", "generic_v10", 26)})
         self.assertEqual({c["package"] for c in ac["continuations"]},
                          {"notes/matched_cborg_2026-09-13/audit_controls",
-                          "notes/matched_cborg_2026-09-13/finalization_controls"})
+                          "notes/matched_cborg_2026-09-13/finalization_controls", "src/data_sheets_schema"})
         direct = [x for x in ac["setters"] if x["path"] == "notes/claudecode_direct/prepare_direct.py"]
         self.assertTrue(direct)
         for x in direct:
@@ -6684,6 +6708,23 @@ class TestApiMeaning(unittest.TestCase):
                                                       "parent['render_version'] + 6}\n"})):
             with self.subTest(why=why):
                 self.assertTrue(self._continuations(files)["runtime_hybrid_possible"])
+
+    def test_native_shared_parent_guard_is_required_by_hybrid_proof(self):
+        relative = 'src/data_sheets_schema/native_shared_registration.py'
+        source = (ROOT / relative).read_text()
+        original = "spec.condition != 'generic_v10' or spec.render_version != 26 or not spec.is_agentic"
+        self.assertEqual(source.count(original), 1)
+        good = self._continuations({relative: source})
+        self.assertFalse(good['runtime_hybrid_possible'])
+        self.assertEqual(good['ungated_continuations'], [])
+        self.assertEqual([(g['condition'], g['parent_renderer']) for g in good['gates']],
+                         [('generic_v10', 26)])
+        for replacement in ("spec.condition != 'generic_v10' or spec.render_version != 26",
+                            "spec.is_agentic", "False"):
+            with self.subTest(replacement=replacement):
+                bad = self._continuations({relative: source.replace(original, replacement, 1)})
+                self.assertTrue(bad['runtime_hybrid_possible'])
+                self.assertEqual(bad['ungated_continuations'], ['src/data_sheets_schema'])
 
     def test_a_gated_continuation_or_an_agentic_generation_is_not_a_hybrid(self):
         gate = ("def check(spec):\n    if spec.condition != 'generic_v9' or spec.render_version != 14 "
@@ -6887,7 +6928,8 @@ class TestDerivationsFailLoudly(unittest.TestCase):
     def test_a_runner_that_branches_on_the_arm_is_not_derived(self):
         with tempfile.TemporaryDirectory() as d:
             root = _synthetic_root(Path(d), extra="\ndef _x(spec):\n    if spec.arm == 'other':\n        pass\n")
-            facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": []}
+            facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": [],
+                     "registered_launch_sources": []}
             with self.assertRaisesRegex(scan.ConfigError, "arms' shape"):
                 scan.api_meaning(root, facts)
 
@@ -8020,7 +8062,11 @@ class TestLaunchFlags(unittest.TestCase):
         surfaces, facts, texts = _discovered_with_the_round_seven_rewrites()
         it = facts["interactive"]
         rows = {x["site"].split(":")[0]: x for x in it["launches"]}
-        self.assertEqual(set(rows), {AUDIT_NATIVE, BATCH_NATIVE, RUN_NATIVE, RUN_DIRECT, AUDIT_PREPARE})
+        shared = "src/data_sheets_schema/native_shared_registration.py"
+        self.assertEqual(set(rows), {AUDIT_NATIVE, BATCH_NATIVE, RUN_NATIVE, RUN_DIRECT, AUDIT_PREPARE, shared})
+        self.assertIsNone(rows[shared]["carries"])
+        self.assertIsNone(rows[shared]["memory_off"])
+        self.assertTrue(any("`*FLAGS`" in item for item in rows[shared]["evidence"]))
         for rel in (AUDIT_NATIVE, BATCH_NATIVE, RUN_NATIVE, RUN_DIRECT):
             with self.subTest(rel=rel):
                 self.assertTrue(rows[rel]["carries"] and rows[rel]["memory_off"], rows[rel])
@@ -8034,8 +8080,8 @@ class TestLaunchFlags(unittest.TestCase):
                       "until the binding runs", go["evidence"])
         self.assertIn(f"{AUDIT_PREPARE}:{bound + 1} `argv` is used outside the block that holds the binding at "
                       f"line {bound}, which may not have run there", go["evidence"])
-        self.assertEqual(it["launches_without_customizations_off"], [go["site"]])
-        self.assertEqual(it["launches_without_memory_off"], [go["site"]])
+        self.assertEqual(it["launches_without_customizations_off"], sorted([go["site"], rows[shared]["site"]]))
+        self.assertEqual(it["launches_without_memory_off"], sorted([go["site"], rows[shared]["site"]]))
         self.assertEqual(surfaces.files["CLAUDE.md"].roles, dict.fromkeys(SESSION_GATES, "model_facing"))
         statement = scan._session_statement(it)
         self.assertNotIn("does not change a registered run's verdict", statement)
@@ -8775,10 +8821,10 @@ class TestTheWholeAudit(unittest.TestCase):
         # the report names every registered launch not shown to switch the
         # session off, and the starred element that stops the proof (#4156)
         unshown = result["facts"]["interactive"]["launches_without_customizations_off"]
-        self.assertEqual(len(unshown), 4, unshown)
+        self.assertEqual(len(unshown), 5, unshown)
         for site in unshown:
             self.assertIn(f"`{site}` cannot be shown to pass `--safe-mode`", markdown)
-        for spread in ("`*CLI_FLAGS`", "`*native.CLI_FLAGS`", "`*overlay['cli_flags']`", "`*runtime['cli_flags']`"):
+        for spread in ("`*CLI_FLAGS`", "`*native.CLI_FLAGS`", "`*overlay['cli_flags']`", "`*runtime['cli_flags']`", "`*FLAGS`"):
             self.assertIn(spread, markdown)
         self.assertNotIn("does not change a registered run's verdict", markdown)
         # the derivation of the model-facing modules and its cross-check (#4085)

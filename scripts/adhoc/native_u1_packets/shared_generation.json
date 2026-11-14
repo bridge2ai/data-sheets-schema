@@ -1,0 +1,9 @@
+{
+  "status": "proposal_only_not_applied_to_worktree",
+  "target": "src/data_sheets_schema/shared_generation.py",
+  "base": "8bc90e93d736d464f98e9eedffee45f0ad8e5d3f",
+  "preimage_sha256": "94b3cf6845827c8fdf7bf05cc6251e2fb196ceb91ea8ce377f2c9e3b8be3773d",
+  "postimage_sha256": "2ec18e60316423035f88a2a30263c56385bfbbc587303e84e805a8349ab4f781",
+  "patch_sha256": "22b81b6cd63a708d82bfbd038b7e1d9aaf340bf1d86828f138b56dd9ef4756c5",
+  "rationale": "Keep the existing BC1 validation and all API v1/v2 refusals. Only a separately validated native selection may return from the disabled API branch. M7 scanner already recognizes this exact dispatch; caller must restore unconditional shared admission. No runtime/provider is called."
+}

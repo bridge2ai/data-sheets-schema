@@ -1,0 +1,5 @@
+# Entirely synthetic parser fixture; no host activity, charge or timezone data.
+2000-01-01 00:06:23 +0000 Sleep                Entering Sleep state due to 'Synthetic Fixture':TCPKeepAlive=active Using AC (Charge:50%) 1252 secs
+2000-01-01 00:27:15 +0000 Wake                 Wake from Deep Idle [SYNTHETIC] : due to Fixture Using AC (Charge:50%) 209 secs
+2000-01-01 00:30:44 +0000 Sleep                Entering Sleep state due to 'Synthetic Fixture':TCPKeepAlive=inactive Using AC (Charge:50%) 7034 secs
+2000-01-01 02:27:58 +0000 Wake                 Wake from Hibernate [SYNTHETIC] : due to Fixture Using AC (Charge:50%)

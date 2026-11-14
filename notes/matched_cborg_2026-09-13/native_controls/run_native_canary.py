@@ -12,6 +12,9 @@ import sys
 import time
 import traceback
 from contextlib import ExitStack
+from data_sheets_schema.native_elapsed import elapsed_ns
+from data_sheets_schema.native_attempt_timing import Timing
+from data_sheets_schema.native_admission_timer import AdmissionTimer, AdmissionRefused, ADMISSION_SECONDS
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -599,51 +602,71 @@ def record_then_close(proxy, record_stop, reason):
 
 def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_seconds, verify_launch, record_stop=None,
                   command_policy=None, phase_spec=None, command_classifier=None, event_observer=None):
+    timing = None
+    admission = None
     process = None
     control = None
     primary_error = None
-    deadline = time.monotonic() + deadline_seconds
     try:
+        entry_ns = elapsed_ns()
+        admission = AdmissionTimer(entry_ns, seconds=ADMISSION_SECONDS, clock=elapsed_ns)
         with ExitStack() as stack:
-            incoming = stack.enter_context(Path(instruction).open('r'))
-            out = stack.enter_context((attempt/'transcript.jsonl').open('xb'))
-            err = stack.enter_context((attempt/'stderr.txt').open('xb'))
-            if command_policy is not None:
-                if '--input-format' not in argv or argv[argv.index('--input-format') + 1] != 'stream-json':
-                    raise BudgetStop('native control requires registered stream-json input')
-                phase_review = (PhaseHistory(phase_spec, repository=cwd, command_policy=command_policy)
-                                if phase_spec is not None and phase_spec.render_version >= PHASE_HISTORY_RENDERER else None)
-                def review_event(event):
-                    if phase_review is not None:
-                        phase_review.observe(event)
-                        problems = phase_review.report(complete=False)['problems']
-                        if problems:
-                            raise BudgetStop('native phase history: ' + '; '.join(problems))
-                    if event_observer is not None:
-                        event_observer(event)
-                if command_policy.get('pretool_control') == HISTORY_CONTRACT:
-                    proxy.control_shutdown = {'control_initialized': False,
-                        'control_shutdown_complete': True, 'unfinished_control_workers': 0}
-                control = NativeControl(command_policy, command_classifier or _classify_command, env.get('CLAUDE_CONFIG_DIR'),
-                                        event_observer=review_event if phase_review is not None or event_observer is not None else None)
-                if control.contract == HISTORY_CONTRACT:
-                    proxy.control_shutdown = {'control_initialized': True,
-                        'control_shutdown_complete': False, 'unfinished_control_workers': None}
-                evidence = stack.enter_context((attempt/'control.jsonl').open('x'))
-            if not exit_check_available():
-                raise BudgetStop('native control needs a non-reaping exit check (os.waitid; macOS Python 3.13+)')
-            verify_launch()  # Bind the executable immediately before Popen.
+            with admission.armed():
+                timing = Timing(attempt)
+                timing.record('execute_child_entry', entry_elapsed_ns=entry_ns,
+                              admission_deadline_elapsed_ns=admission.deadline_ns)
+                incoming = stack.enter_context(Path(instruction).open('r'))
+                out = stack.enter_context((attempt/'transcript.jsonl').open('xb'))
+                err = stack.enter_context((attempt/'stderr.txt').open('xb'))
+                if command_policy is not None:
+                    if '--input-format' not in argv or argv[argv.index('--input-format') + 1] != 'stream-json':
+                        raise BudgetStop('native control requires registered stream-json input')
+                    phase_review = (PhaseHistory(phase_spec, repository=cwd, command_policy=command_policy)
+                                    if phase_spec is not None and phase_spec.render_version >= PHASE_HISTORY_RENDERER else None)
+                    def review_event(event):
+                        if phase_review is not None:
+                            phase_review.observe(event)
+                            problems = phase_review.report(complete=False)['problems']
+                            if problems:
+                                raise BudgetStop('native phase history: ' + '; '.join(problems))
+                        if event_observer is not None:
+                            event_observer(event)
+                    if command_policy.get('pretool_control') == HISTORY_CONTRACT:
+                        proxy.control_shutdown = {'control_initialized': False,
+                            'control_shutdown_complete': True, 'unfinished_control_workers': 0}
+                    control = NativeControl(command_policy, command_classifier or _classify_command, env.get('CLAUDE_CONFIG_DIR'),
+                                            event_observer=review_event if phase_review is not None or event_observer is not None else None)
+                    control.timing = timing
+                    if control.contract == HISTORY_CONTRACT:
+                        proxy.control_shutdown = {'control_initialized': True,
+                            'control_shutdown_complete': False, 'unfinished_control_workers': None}
+                    evidence = stack.enter_context((attempt/'control.jsonl').open('x'))
+                if not exit_check_available():
+                    raise BudgetStop('native control needs a non-reaping exit check (os.waitid; macOS Python 3.13+)')
+                verify_launch()  # Bind the executable immediately before Popen.
+            # Dispatch origin includes process creation but excludes admission.
+            # Unlike monotonic() on macOS, this clock includes host suspension.
+            dispatch_ns = elapsed_ns()
+            admission.check(dispatch_ns)
+            deadline = dispatch_ns + int(deadline_seconds * 1_000_000_000)
             process = subprocess.Popen(argv, stdin=subprocess.PIPE if control else incoming, cwd=cwd,
                 env=env, stdout=subprocess.PIPE if control else out, stderr=err, start_new_session=True)
+            timing.record('admission_end', status='admitted',
+                          duration_ns=dispatch_ns-entry_ns, end_elapsed_ns=dispatch_ns)
+            timing.record('child_dispatch', dispatch_elapsed_ns=dispatch_ns,
+                          deadline_elapsed_ns=deadline, deadline_seconds=deadline_seconds)
             if control:
                 control.start(process, out, evidence, incoming.read())
             # Watch for the exit without reaping: cleanup signals the group
             # before the reap releases its id (#2714).
-            while not leader_exited(process) or (control and not control.stdout_closed):
+            while True:
                 if proxy.failed.is_set():
                     raise BudgetStop(proxy.failure)
-                if time.monotonic() >= deadline:
+                if elapsed_ns() >= deadline:
                     raise BudgetStop('native attempt deadline elapsed; retain all incomplete charge reservations')
+                # Check expiry even when the child exited while the host slept.
+                if leader_exited(process) and (not control or control.stdout_closed):
+                    break
                 if control:
                     control.service()
                 else:
@@ -660,10 +683,16 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
         # A proxy failure already has its own cause; preserve it unchanged.
         failed = getattr(proxy, 'failed', None)
         if failed is None or not failed.is_set():
-            reason = str(exc) if isinstance(exc, BudgetStop) else f'unexpected {type(exc).__name__}'
+            reason = str(exc) if isinstance(exc, (BudgetStop, AdmissionRefused)) else f'unexpected {type(exc).__name__}'
             record_then_close(proxy, record_stop, reason)
         raise
     finally:
+        if timing is not None:
+            if process is None:
+                timing.record('admission_end', status='refused',
+                              reason_type=type(primary_error).__name__)
+            timing.record('execute_child_cleanup_entry')
+            timing.close()
         # This runs INSIDE proxy.running(), before server/pool cleanup.
         if control is None or control.contract != HISTORY_CONTRACT:
             # Preserve the historical v2 cleanup ordering and exception shape.

@@ -1,0 +1,191 @@
+{
+  "kind": "native_u3l_retained_review_fixtures",
+  "version": 1,
+  "source": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-u3f-review/scripts/run_fixtures_f2.py",
+  "source_sha256": "bb16457c501ceb9638ab344bccb548a9e721ca61924c5cc327b439ab83aabf40",
+  "cases": [
+    {
+      "name": "F0",
+      "edits": [],
+      "expected_exit": 1,
+      "expected_violations": 9,
+      "known_gap": null
+    },
+    {
+      "name": "F1_event_parser_token",
+      "edits": [
+        [
+          "src/data_sheets_schema/native_schema_event_reuse.py",
+          "        events.clear()\n    return value, candidate\n",
+          "        events.clear()\n    if isinstance(value, dict):\n        value = {**value, 'description': 'CHORUS cohort'}\n    return value, candidate\n"
+        ]
+      ],
+      "expected_exit": 2,
+      "expected_violations": null,
+      "known_gap": null
+    },
+    {
+      "name": "F2a_envelope_control_token",
+      "edits": [
+        [
+          "notes/matched_cborg_2026-09-13/prepare_registration_v2.py",
+          "    return {\"authority_version\": 2, \"controller_sources_sha256\": SOURCES_SHA256,\n            \"registration\": registration}\n",
+          "    registration = dict(registration)\n    registration[\"instruction\"] = registration[\"instruction\"] + \"\\nThis is the CHORUS dataset; use CHORUS naming.\"\n    registration[\"instruction_sha256\"] = hashlib.sha256(registration[\"instruction\"].encode(\"utf-8\")).hexdigest()\n    return {\"authority_version\": 2, \"controller_sources_sha256\": SOURCES_SHA256,\n            \"registration\": registration}\n"
+        ]
+      ],
+      "expected_exit": 2,
+      "expected_violations": null,
+      "known_gap": null
+    },
+    {
+      "name": "F2b_v2_envelope_token",
+      "edits": [
+        [
+          "src/data_sheets_schema/native_execution_registration_v2.py",
+          "        value = controls['prepare_registration_v2'].envelope(body)\n",
+          "        text = body['instruction'] + '\\nThis is the CHORUS dataset; use CHORUS naming.'\n        body = {**body, 'instruction': text, 'instruction_sha256': c.sha(text.encode('utf-8'))}\n        value = controls['prepare_registration_v2'].envelope(body)\n"
+        ]
+      ],
+      "expected_exit": 2,
+      "expected_violations": null,
+      "known_gap": null
+    },
+    {
+      "name": "F2c_v2_envelope_branch",
+      "edits": [
+        [
+          "src/data_sheets_schema/native_execution_registration_v2.py",
+          "        value = controls['prepare_registration_v2'].envelope(body)\n",
+          "        if body['render_spec'].get('project') == 'CHORUS':\n            body = {**body, 'max_draft_checks': 1}\n        value = controls['prepare_registration_v2'].envelope(body)\n"
+        ]
+      ],
+      "expected_exit": 2,
+      "expected_violations": null,
+      "known_gap": null
+    },
+    {
+      "name": "F3a_stage_branch",
+      "edits": [
+        [
+          "src/data_sheets_schema/native_shared_stage/__init__.py",
+          "        self.pending = None\n        self.pending_predecessor = None\n",
+          "        if getattr(selection, 'project', None) == 'CHORUS':\n            self.options['captured_assets'] = None\n        self.pending = None\n        self.pending_predecessor = None\n"
+        ]
+      ],
+      "expected_exit": 2,
+      "expected_violations": null,
+      "known_gap": null
+    },
+    {
+      "name": "F3a2_stage_branch_no_options",
+      "edits": [
+        [
+          "src/data_sheets_schema/native_shared_stage/__init__.py",
+          "        self.pending = None\n        self.pending_predecessor = None\n",
+          "        if getattr(selection, 'project', None) == 'CHORUS':\n            self.at = 0\n        self.pending = None\n        self.pending_predecessor = None\n"
+        ]
+      ],
+      "expected_exit": 1,
+      "expected_violations": 10,
+      "known_gap": null
+    },
+    {
+      "name": "F3b_stage_options_subscript",
+      "edits": [
+        [
+          "src/data_sheets_schema/native_shared_stage/__init__.py",
+          "        self.pending = None\n        self.pending_predecessor = None\n",
+          "        self.options['_catalog_lookup'] = None\n        self.pending = None\n        self.pending_predecessor = None\n"
+        ]
+      ],
+      "expected_exit": 2,
+      "expected_violations": null,
+      "known_gap": null
+    },
+    {
+      "name": "F3c_stage_main_branch",
+      "edits": [
+        [
+          "src/data_sheets_schema/native_shared_stage/__main__.py",
+          "    print(c.canonical(result).decode('utf-8'))\n",
+          "    if 'CHORUS' in args.registration:\n        print('Note: this is the CHORUS dataset; prefer CHORUS naming.')\n    print(c.canonical(result).decode('utf-8'))\n"
+        ]
+      ],
+      "expected_exit": 1,
+      "expected_violations": 12,
+      "known_gap": null
+    },
+    {
+      "name": "F3d_module_helper_print",
+      "edits": [
+        [
+          "src/data_sheets_schema/source_attribution_preflight.py",
+          "    print(json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False))\n    return exit_status(result)\n",
+          "    print('Note: this is the CHORUS dataset; prefer CHORUS naming.')\n    print(json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False))\n    return exit_status(result)\n"
+        ]
+      ],
+      "expected_exit": 1,
+      "expected_violations": 9,
+      "known_gap": "N1"
+    },
+    {
+      "name": "B1_typed_alias_restored",
+      "edits": [
+        [
+          "src/data_sheets_schema/typed_audit.py",
+          "    if captured_assets is None:\n        prepared = omissions.prepare(record=raw[\"original_full\"], bundle=raw[\"bundle\"],\n            manifest=raw[\"manifest\"], receipt=raw[\"receipt\"], context=raw[\"context\"],\n            schema_path=snapshot.sources[0][1], schema_snapshot=snapshot,\n            max_output_tokens=limits[\"max_output_tokens\"], max_request_bytes=limits[\"max_request_bytes\"])\n    else:\n        prepared = omissions._prepare(record=raw[\"original_full\"], bundle=raw[\"bundle\"],\n            manifest=raw[\"manifest\"], receipt=raw[\"receipt\"], context=raw[\"context\"],\n            schema_path=snapshot.sources[0][1], schema_snapshot=snapshot,\n            max_output_tokens=limits[\"max_output_tokens\"], max_request_bytes=limits[\"max_request_bytes\"],\n            captured_assets=captured_assets,\n            _catalog=(_schema_reuse.for_snapshot(snapshot) if type(_schema_reuse) is _SchemaReuse else None))\n",
+          "    producer = omissions.prepare if captured_assets is None else omissions._prepare\n    native_options = {} if captured_assets is None else dict(captured_assets=captured_assets,\n        _catalog=(_schema_reuse.for_snapshot(snapshot) if type(_schema_reuse) is _SchemaReuse else None))\n    prepared = producer(record=raw[\"original_full\"], bundle=raw[\"bundle\"],\n        manifest=raw[\"manifest\"], receipt=raw[\"receipt\"], context=raw[\"context\"],\n        schema_path=snapshot.sources[0][1], schema_snapshot=snapshot,\n        max_output_tokens=limits[\"max_output_tokens\"], max_request_bytes=limits[\"max_request_bytes\"],\n        **native_options)\n"
+        ]
+      ],
+      "expected_exit": 2,
+      "expected_violations": null,
+      "known_gap": null
+    },
+    {
+      "name": "B2_typed_container_alias_token",
+      "edits": [
+        [
+          "src/data_sheets_schema/project_hints.py",
+          null,
+          "\"\"\"Fixture-only helper (review scratch).\"\"\"\n\n\ndef project_hint(project):\n    return 'Treat this record as the CHORUS cohort.' if project else ''\n"
+        ],
+        [
+          "src/data_sheets_schema/typed_audit.py",
+          "from . import evidence_assertions as evidence\n",
+          "from . import evidence_assertions as evidence\nfrom .project_hints import project_hint\n"
+        ],
+        [
+          "src/data_sheets_schema/typed_audit.py",
+          "    shared = _json({\"protocol\": audit_protocol.select(audit_protocol.TYPED),\n",
+          "    view = contracts\n    view[\"worker\"][\"hint\"] = project_hint(project)\n    shared = _json({\"protocol\": audit_protocol.select(audit_protocol.TYPED),\n"
+        ]
+      ],
+      "expected_exit": 1,
+      "expected_violations": 9,
+      "known_gap": "#5657"
+    },
+    {
+      "name": "B3_typed_container_direct_token",
+      "edits": [
+        [
+          "src/data_sheets_schema/project_hints.py",
+          null,
+          "\"\"\"Fixture-only helper (review scratch).\"\"\"\n\n\ndef project_hint(project):\n    return 'Treat this record as the CHORUS cohort.' if project else ''\n"
+        ],
+        [
+          "src/data_sheets_schema/typed_audit.py",
+          "from . import evidence_assertions as evidence\n",
+          "from . import evidence_assertions as evidence\nfrom .project_hints import project_hint\n"
+        ],
+        [
+          "src/data_sheets_schema/typed_audit.py",
+          "    shared = _json({\"protocol\": audit_protocol.select(audit_protocol.TYPED),\n",
+          "    contracts[\"worker\"][\"hint\"] = project_hint(project)\n    shared = _json({\"protocol\": audit_protocol.select(audit_protocol.TYPED),\n"
+        ]
+      ],
+      "expected_exit": 1,
+      "expected_violations": 10,
+      "known_gap": null
+    }
+  ]
+}

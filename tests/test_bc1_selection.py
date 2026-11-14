@@ -150,7 +150,18 @@ def test_proposal_is_exact_and_does_not_modify_protected_source():
     assert manifest['proposal_sha256'] == hashlib.sha256(expected).hexdigest()
     if manifest['applied']:
         assert getattr(original_shared, 'BC1_HOOK_VERSION', None) == bc.VERSION
-        assert manifest['proposed_source_sha256'] == hashlib.sha256(raw).hexdigest()
+        actual = hashlib.sha256(raw).hexdigest()
+        if actual != manifest['proposed_source_sha256']:
+            # Preserve the historical BC1 pin and require the exact subsequent
+            # U1 proposal chain, not a regenerated historical manifest.
+            packet = proposal.ROOT / 'scripts/adhoc/native_u1_packets/shared_generation'
+            metadata = json.loads(packet.with_suffix('.json').read_text())
+            assert metadata['target'] == 'src/data_sheets_schema/shared_generation.py'
+            assert metadata['preimage_sha256'] == manifest['proposed_source_sha256']
+            assert metadata['patch_sha256'] == hashlib.sha256(packet.with_suffix('.patch').read_bytes()).hexdigest()
+            assert actual == metadata['postimage_sha256']
+        else:
+            assert actual == manifest['proposed_source_sha256']
     else:
         assert proposal.proposal_bytes(raw) == expected
         assert manifest['base_sha256'] == hashlib.sha256(raw).hexdigest()

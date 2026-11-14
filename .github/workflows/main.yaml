@@ -1,7 +1,8 @@
 # Every PR runs the complete suite, including the committed corpus (#1361).
-# CI uses Python 3.12 throughout. D81 selects eight PR shards and six on
-# main/manual without removing test or schema coverage. D75 retains the
-# 45-minute PR and 60-minute main/manual ordinary-shard limits.
+# CI uses Python 3.12 throughout. D147 (2026-11-13) selects twelve PR shards
+# and eight on main/manual (D81 had eight and six) without removing test or
+# schema coverage. D75 retains the 45-minute PR and 60-minute main/manual
+# ordinary-shard limits.
 ---
 name: Build and test data_sheets_schema
 
@@ -26,7 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.12"]
-        shard: ${{ fromJSON(github.event_name == 'pull_request' && '[1, 2, 3, 4, 5, 6, 7, 8]' || '[1, 2, 3, 4, 5, 6]') }}
+        shard: ${{ fromJSON(github.event_name == 'pull_request' && '[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]' || '[1, 2, 3, 4, 5, 6, 7, 8]') }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
@@ -56,7 +57,7 @@ jobs:
           PYTHONPYCACHEPREFIX: ${{ runner.temp }}/d4d-tests-pycache
         run: >-
           poetry run python -m pytest tests -v -p no:cacheprovider
-          -p utils.pytest_shard --ci-shard=${{ matrix.shard }}/${{ github.event_name == 'pull_request' && 8 || 6 }}
+          -p utils.pytest_shard --ci-shard=${{ matrix.shard }}/${{ github.event_name == 'pull_request' && 12 || 8 }}
           --ci-shard-timings=utils/ci_test_durations.json --ci-lane=ordinary
           --durations=25 -n logical --maxprocesses=4 --dist load --maxschedchunk=1
           --junitxml=test-results/pytest.xml
@@ -162,6 +163,53 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tests-py3.12-sg2-${{ matrix.case }}
+          path: test-results/*
+          retention-days: 14
+
+  # Each complete synthetic native launch gets its own job and one process
+  # (#6191): beside xdist workers they miss the capture-to-reservation window
+  # and starve their shard.
+  native-public-completion:
+    name: Python 3.12 / native case ${{ matrix.case }}
+    runs-on: ubuntu-latest
+    # A cap, not a duration: the public cases hold a 2,700 s synthetic attempt
+    # after about 21 minutes of setup (#6094, #6233).
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [native-public-correction, native-public-variant, native-public-pending, native-failure-01, native-failure-02, native-failure-03, native-failure-04, native-failure-05, native-failure-06, native-failure-07, native-failure-08, native-failure-09, native-failure-10, native-failure-11, native-failure-12, native-failure-13, native-failure-14, native-failure-15, native-failure-16, native-failure-17, native-capacity-01, native-capacity-02, native-capacity-03, native-capacity-04, native-capacity-05, native-capacity-06, native-capacity-07, native-capacity-08, native-capacity-09, native-capacity-10, native-capacity-11, native-capacity-12, native-capacity-13, native-capacity-14, native-capacity-15, native-capacity-16, native-capacity-17, native-capacity-18, native-capacity-19, native-capacity-20, native-capacity-21, native-capacity-22, native-capacity-23, native-capacity-24, native-capacity-25, native-capacity-26, native-capacity-27, native-capacity-28, native-capacity-29, native-capacity-30, native-capacity-31, native-capacity-32, native-capacity-33, native-retention-stable, native-retention-changing, native-retention-final-floor]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Initialise the FAIRSCAPE models submodule
+        run: git submodule update --init fairscape_models
+      - name: Set up the cached project environment
+        uses: ./.github/actions/setup-project
+        with:
+          python-version: "3.12"
+      - name: Run the required offline native public case
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/d4d-tests-pycache
+        run: |
+          mkdir -p test-results
+          set -o pipefail
+          poetry run python -m pytest tests -v -p no:cacheprovider \
+            -p utils.pytest_shard --ci-lane=${{ matrix.case }} \
+            --durations=25 --junitxml=test-results/pytest.xml \
+            2>&1 | tee test-results/pytest.log
+      - name: Require the case to leave notes/, tests/ and utils/ untouched
+        if: always()
+        run: |
+          changed="$(git status --ignored --porcelain -- notes/ tests/ utils/)"
+          test -z "$changed" || { printf '%s\n' "$changed"; exit 1; }
+      - name: Preserve test results, timings and incomplete-case output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-py3.12-native-${{ matrix.case }}
           path: test-results/*
           retention-days: 14
 
@@ -353,7 +401,7 @@ jobs:
   # skip in any required test lane must make this aggregate fail (#1812, #2237).
   test:
     if: always()
-    needs: [python-tests, api-completion, sg2-completion, offline-canary, offline-audit, offline-evaluation, schema-examples]
+    needs: [python-tests, api-completion, sg2-completion, native-public-completion, offline-canary, offline-audit, offline-evaluation, schema-examples]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -362,6 +410,7 @@ jobs:
           PYTHON_RESULT: ${{ needs.python-tests.result }}
           API_RESULT: ${{ needs.api-completion.result }}
           SG2_RESULT: ${{ needs.sg2-completion.result }}
+          NATIVE_RESULT: ${{ needs.native-public-completion.result }}
           CANARY_RESULT: ${{ needs.offline-canary.result }}
           AUDIT_RESULT: ${{ needs.offline-audit.result }}
           EVALUATION_RESULT: ${{ needs.offline-evaluation.result }}
@@ -371,6 +420,7 @@ jobs:
           test "$PYTHON_RESULT" = success
           test "$API_RESULT" = success
           test "$SG2_RESULT" = success
+          test "$NATIVE_RESULT" = success
           test "$CANARY_RESULT" = success
           test "$AUDIT_RESULT" = success
           test "$EVALUATION_RESULT" = success

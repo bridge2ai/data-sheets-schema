@@ -1,0 +1,807 @@
+{
+  "directory": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-native-u3b/round2-20261107T064201Z",
+  "runs": {
+    "api-fullorder": {
+      "start_utc": "2026-11-07T06:45:24.090284+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "-15"
+      ],
+      "elapsed_seconds": [
+        "968.313"
+      ],
+      "wall_seconds": [],
+      "summary": [],
+      "outcomes": {
+        "call:passed": 346
+      },
+      "failures": [],
+      "sha256": "b50955a56288b932168e888b0ad7faf49f9c85deac80fdeca14394f195cb8a29"
+    },
+    "api-remaining-final": {
+      "start_utc": "2026-11-07T09:15:48.449759+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "124"
+      ],
+      "elapsed_seconds": [
+        "3599.983"
+      ],
+      "wall_seconds": [
+        "3600.019"
+      ],
+      "summary": [],
+      "outcomes": {
+        "call:passed": 158
+      },
+      "failures": [],
+      "sha256": "abc0d8387144c7181c50407d9aac4a628060629808f2af45b86e58c67b1f8c64"
+    },
+    "api-remaining2-final": {
+      "start_utc": "2026-11-07T10:16:12.431713+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "0"
+      ],
+      "elapsed_seconds": [
+        "913.824"
+      ],
+      "wall_seconds": [
+        "913.824"
+      ],
+      "summary": [
+        "10 passed, 26 warnings in 913.14s (0:15:13)"
+      ],
+      "outcomes": {
+        "call:passed": 10
+      },
+      "failures": [],
+      "sha256": "3d98bd8500d87dabb82c549696a3837a3d3fd0d3a482c1ea15b6a59ccc3af13f"
+    },
+    "api-wall-final": {
+      "start_utc": "2026-11-07T08:15:27.906241+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "124"
+      ],
+      "elapsed_seconds": [
+        "3600.106"
+      ],
+      "wall_seconds": [
+        "3600.136"
+      ],
+      "summary": [],
+      "outcomes": {
+        "call:passed": 354
+      },
+      "failures": [],
+      "sha256": "867157de10955b4bdf04a45f256c14b54b73d8520fddbdac47dec73d7d649e1e"
+    },
+    "api": {
+      "start_utc": "2026-11-07T06:43:04.484124+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "1"
+      ],
+      "elapsed_seconds": [
+        "84.895"
+      ],
+      "wall_seconds": [],
+      "summary": [],
+      "outcomes": {
+        "call:passed": 251
+      },
+      "failures": [],
+      "sha256": "6345b02aadb3a161f47999317bb9d89205ecf0b3a0b0668543a1701910ea5c13"
+    },
+    "bc1-wall-final": {
+      "start_utc": "2026-11-07T08:16:20.916121+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "1"
+      ],
+      "elapsed_seconds": [
+        "740.115"
+      ],
+      "wall_seconds": [
+        "740.123"
+      ],
+      "summary": [
+        "257 passed, 1 xfailed, 14 warnings, 15 errors in 739.42s (0:12:19)"
+      ],
+      "outcomes": {
+        "call:passed": 257,
+        "setup:failed": 15,
+        "call:skipped": 1
+      },
+      "failures": [
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[selected]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.7010906249051914,
+          "failure": "[gw0] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_integrated_dispatch_derives_and_cites_its_actual_line[integrated]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.7980315829627216,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_integrated_dispatch_derives_and_cites_its_actual_line[guard_prefix]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.7956471249926835,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    local = None\\n-prefix Assign]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.7850207089213654,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    return None\\n-prefix Return]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.8166145409923047,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    refuse_legacy_execution((local := spec))\\n-prefix.*NamedExpr]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 1.1422392500098795,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    if spec:\\n        return None\\n-prefix If]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.7789652919163927,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    from .foreign import other as spec\\n-dispatch name.*spec.*rebound]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.9922348749823868,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    from .foreign import other as _bc1\\n-dispatch.*changed|dispatch name.*_bc1.*rebound]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 1.1756680420367047,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_duplicated_dispatch_refuses",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.8050202080048621,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[spec]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.9462338329758495,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[carry]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 1.0124652079539374,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[client]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.9743999999482185,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[settings]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.9613872080808505,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[usage]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 1.3162549999542534,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        }
+      ],
+      "sha256": "4d69dfd8741918049bb5dfcfe1efeaad50f99583d5ad5eb4f80423587edd06ab"
+    },
+    "bc1": {
+      "start_utc": "2026-11-07T06:47:05.404475+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "1"
+      ],
+      "elapsed_seconds": [
+        "818.500"
+      ],
+      "wall_seconds": [],
+      "summary": [
+        "257 passed, 1 xfailed, 14 warnings, 15 errors in 3816.57s (1:03:36)"
+      ],
+      "outcomes": {
+        "call:passed": 257,
+        "setup:failed": 15,
+        "call:skipped": 1
+      },
+      "failures": [
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[selected]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.9131338340230286,
+          "failure": "[gw0] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_integrated_dispatch_derives_and_cites_its_actual_line[integrated]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.6403381660347804,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_integrated_dispatch_derives_and_cites_its_actual_line[guard_prefix]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.618056874955073,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    local = None\\n-prefix Assign]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.6449189999839291,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    return None\\n-prefix Return]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.6768928330857307,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    refuse_legacy_execution((local := spec))\\n-prefix.*NamedExpr]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.6033180409576744,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    if spec:\\n        return None\\n-prefix If]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.6260720839491114,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    from .foreign import other as spec\\n-dispatch name.*spec.*rebound]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.6843931250041351,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_unsupported_dispatch_prefix_refuses_by_name[    from .foreign import other as _bc1\\n-dispatch.*changed|dispatch name.*_bc1.*rebound]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.6687889579916373,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_duplicated_dispatch_refuses",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.6645501250168309,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[spec]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.9507938330061734,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[carry]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.69997225003317,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[client]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.709187833010219,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[settings]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.7755857500014827,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        },
+        {
+          "nodeid": "tests/test_bc1_g2_round2.py::test_dispatch_names_cannot_be_rebound_later[usage]",
+          "phase": "setup",
+          "outcome": "failed",
+          "duration": 0.9410802919883281,
+          "failure": "[gw1] darwin -- Python 3.13.12 /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python\n.claude/skills/d4d-generation-specificity-audit/scan.py:13908: in _optional_turn_selection\n    return _simple_optional_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13064: in _simple_optional_turn_selection\n    raise fail()\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\n.claude/skills/d4d-generation-specificity-audit/scan.py:13911: in _optional_turn_selection\n    return _correlated_turn_selection(tree, test)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13173: in _correlated_turn_selection\n    raise fail('unsupported optional selector shape')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)\n\nDuring handling of the above exception, another exception occurred:\ntests/test_bc1_g2_round2.py:21: in entry_probe\n    funcs, selected = scan._function_defs(tree), scopes(root)\ntests/test_generation_specificity_delegated.py:38: in scopes\n    return scan._plan_scopes(scan._tree(root / RUNNER), scan._module_constants(root / RUNNER), root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:14140: in _plan_scopes\n    scopes = _local_plan_scopes(tree, consts, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13972: in _local_plan_scopes\n    visit(value, None)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13966: in visit\n    visit(node.left, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13967: in visit\n    visit(node.right, gate)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13952: in visit\n    visit(node.body, gate_of(node.test))\n.claude/skills/d4d-generation-specificity-audit/scan.py:13945: in gate_of\n    selection = _optional_turn_selection(tree, test, root=root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13918: in _optional_turn_selection\n    return _delegated_turn_selection(tree, test, root)\n.claude/skills/d4d-generation-specificity-audit/scan.py:13691: in _delegated_turn_selection\n    raise fail('shared selector call guards/order changed')\nE   delegated_scanner.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)"
+        }
+      ],
+      "sha256": "0def0ad191c597ff66b1cc74482f59be2635222206695cc3fdd9f4e05c500fd9"
+    },
+    "canary-authorized": {
+      "start_utc": "2026-11-07T06:42:14.792981+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "0"
+      ],
+      "elapsed_seconds": [
+        "3.410"
+      ],
+      "wall_seconds": [],
+      "summary": [
+        "1 passed, 1 warning in 2.85s"
+      ],
+      "outcomes": {
+        "call:passed": 1
+      },
+      "failures": [],
+      "sha256": "3d0057b5a28e06a7d9ad4572138c37e30c1d0f61dac22e5be393c624e1fa2e93"
+    },
+    "canary": {
+      "start_utc": "2026-11-07T06:42:05.277735+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "71"
+      ],
+      "elapsed_seconds": [
+        "0.092"
+      ],
+      "wall_seconds": [],
+      "summary": [],
+      "outcomes": {},
+      "failures": [],
+      "sha256": "d5af06a1324a5b3b1a09a596204f24c4872dd515794e8342d19aff7c871d2c1f"
+    },
+    "collect-final": {
+      "start_utc": "2026-11-07T06:51:23.602338+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "2"
+      ],
+      "elapsed_seconds": [
+        "60.372"
+      ],
+      "wall_seconds": [],
+      "summary": [
+        "!!!!!!!!!!!!!!!!!!! Interrupted: 3 errors during collection !!!!!!!!!!!!!!!!!!!!",
+        "22867 tests collected, 3 errors in 55.99s"
+      ],
+      "outcomes": {},
+      "failures": [],
+      "sha256": "6cbc9ea2a6d42fc4cd9413d01da38c22177a56035db7d81790fc026dc99078ea"
+    },
+    "collect": {
+      "start_utc": "2026-11-07T06:47:30.479228+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "2"
+      ],
+      "elapsed_seconds": [
+        "48.038"
+      ],
+      "wall_seconds": [],
+      "summary": [
+        "!!!!!!!!!!!!!!!!!!! Interrupted: 3 errors during collection !!!!!!!!!!!!!!!!!!!!",
+        "22865 tests collected, 3 errors in 44.92s"
+      ],
+      "outcomes": {},
+      "failures": [],
+      "sha256": "92a6822fb3b3b9bea8355be2f7fdaa6f655c5ebbcea79d84dcbf64541b14c318"
+    },
+    "event-canary": {
+      "start_utc": "2026-11-07T06:44:44.269404+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "0"
+      ],
+      "elapsed_seconds": [
+        "29.405"
+      ],
+      "wall_seconds": [],
+      "summary": [
+        "11 passed, 13 warnings in 28.48s"
+      ],
+      "outcomes": {
+        "call:passed": 11
+      },
+      "failures": [],
+      "sha256": "1f7f260c89ebe9ab25f1b9bace525b417b4d55cbc42fec919b8191eefa5777f3"
+    },
+    "focused-final": {
+      "start_utc": "2026-11-07T06:44:14.338991+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "0"
+      ],
+      "elapsed_seconds": [
+        "39.459"
+      ],
+      "wall_seconds": [],
+      "summary": [
+        "139 passed, 2 warnings in 38.98s"
+      ],
+      "outcomes": {
+        "call:passed": 139
+      },
+      "failures": [],
+      "sha256": "7a381966cde28efdd1ad8c9d7f46c72f7bc74592197fe1db5f11f1ca71c2e43e"
+    },
+    "focused": {
+      "start_utc": "2026-11-07T06:42:37.945295+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "1"
+      ],
+      "elapsed_seconds": [
+        "65.590"
+      ],
+      "wall_seconds": [],
+      "summary": [
+        "1 failed, 94 passed, 1 warning in 65.08s (0:01:05)"
+      ],
+      "outcomes": {
+        "call:passed": 94,
+        "call:failed": 1
+      },
+      "failures": [
+        {
+          "nodeid": "tests/test_native_u3b_reuse.py::test_catalog_cold_warm_private_objects",
+          "phase": "call",
+          "outcome": "failed",
+          "duration": 0.06879024999216199,
+          "failure": "tests/test_native_u3b_reuse.py:87: in test_catalog_cold_warm_private_objects\n    assert ('ex', 'https://example.org/') in first[0]\nE   AssertionError: assert ('ex', 'https://example.org/') in (('http://www.w3.org/2001/xmlschema#', 'xsd'), ('https://example.org/', 'ex'))"
+        }
+      ],
+      "sha256": "39feec8c7f5b387b41959f450b4beb32db42257cad9824612b91c6aabedea161"
+    },
+    "probe-cases-final": {
+      "start_utc": "2026-11-07T06:48:55.695391+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "0"
+      ],
+      "elapsed_seconds": [
+        "91.234"
+      ],
+      "wall_seconds": [],
+      "summary": [
+        "48 passed, 2 warnings in 90.49s (0:01:30)"
+      ],
+      "outcomes": {
+        "call:passed": 48
+      },
+      "failures": [],
+      "sha256": "2c737265ad10b23436a16f313926f00115dcb1a149238d3a2ad57ec7433be91e"
+    },
+    "shared-wall-final": {
+      "start_utc": "2026-11-07T08:16:16.614772+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "0"
+      ],
+      "elapsed_seconds": [
+        "2684.282"
+      ],
+      "wall_seconds": [
+        "2684.276"
+      ],
+      "summary": [
+        "677 passed, 26 warnings in 2683.79s (0:44:43)"
+      ],
+      "outcomes": {
+        "call:passed": 677
+      },
+      "failures": [],
+      "sha256": "a0f1c0fb989901259bb79f58df12a633f4e825d8f6e15cefce7ff708dce70ff5"
+    },
+    "shared": {
+      "start_utc": "2026-11-07T06:45:08.790008+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "-15"
+      ],
+      "elapsed_seconds": [
+        "983.617"
+      ],
+      "wall_seconds": [],
+      "summary": [],
+      "outcomes": {
+        "call:passed": 627
+      },
+      "failures": [],
+      "sha256": "8d562d5b65a3b122205ab4e41fa9b2590f0516652dca2b10831b1e1647a3a952"
+    },
+    "smoke-owner": {
+      "start_utc": "2026-11-07T06:43:46.385973+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "0"
+      ],
+      "elapsed_seconds": [
+        "4.930"
+      ],
+      "wall_seconds": [],
+      "summary": [
+        "2 passed, 1 warning in 4.41s"
+      ],
+      "outcomes": {
+        "call:passed": 2
+      },
+      "failures": [],
+      "sha256": "29a12219d858749c8da54d83d54d1b7d65c36639ccb3b571e86bc2feb2ed008a"
+    },
+    "wall-canary-parallel": {
+      "start_utc": "2026-11-07T08:00:24.111654+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "0"
+      ],
+      "elapsed_seconds": [
+        "9.065"
+      ],
+      "wall_seconds": [
+        "904.990"
+      ],
+      "summary": [
+        "1 passed, 2 warnings in 904.50s (0:15:04)"
+      ],
+      "outcomes": {
+        "call:passed": 1
+      },
+      "failures": [],
+      "sha256": "03fd2db22656c244bf8482cb7556b39232aa22d5db2ecdd11a3b440078b9497b"
+    },
+    "wall-canary-serial": {
+      "start_utc": "2026-11-07T08:00:06.482774+00:00",
+      "cwd": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-native-u3b",
+      "source_hashes_match": true,
+      "exit": [
+        "0"
+      ],
+      "elapsed_seconds": [
+        "4.575"
+      ],
+      "wall_seconds": [
+        "4.575"
+      ],
+      "summary": [
+        "1 passed, 1 warning in 4.00s"
+      ],
+      "outcomes": {
+        "call:passed": 1
+      },
+      "failures": [],
+      "sha256": "f5da267ac31b9443b9fd028da74d71214e511fd0aa40de41a3052ee240d6dace"
+    }
+  },
+  "artifacts": {
+    "canary-authorized-cpu-smoke-assembly.json": {
+      "bytes": 198737,
+      "sha256": "41bc3712439a3e63aa867cee3886fcc184d96ba27ee55d7a0f0db5d21bb2875a"
+    },
+    "canary-authorized-cpu-smoke.json": {
+      "bytes": 252,
+      "sha256": "dc08531f3120e615686e77e9e8fcec2f35f6137c61c4d9ec0bc515090dd12943",
+      "content": {
+        "scope": "synthetic typed receipt-to-record preparation and reconstruction smoke; not timing evidence",
+        "cold_owner_thread_cpu_s": 0.6764813340000002,
+        "warm_owner_thread_cpu_s": 0.5787412499999998,
+        "independent_reconstruction_passed": true
+      }
+    },
+    "focused-cpu-smoke-assembly.json": {
+      "bytes": 198717,
+      "sha256": "5229833f1183a5255d1d43150328097207b5fa04dc7bb4b0556da27ea6f1eca7"
+    },
+    "focused-cpu-smoke.json": {
+      "bytes": 251,
+      "sha256": "b50d9e61b59b43073c1d38c0e1ffe95d37f70627e1a1b399bc91f635f02d1fa8",
+      "content": {
+        "scope": "synthetic typed receipt-to-record preparation and reconstruction smoke; not timing evidence",
+        "cold_owner_thread_cpu_s": 0.6680969590000032,
+        "warm_owner_thread_cpu_s": 0.589777416000004,
+        "independent_reconstruction_passed": true
+      }
+    },
+    "focused-final-cpu-smoke-assembly.json": {
+      "bytes": 198082,
+      "sha256": "ba8e9cc07e96f961bba0f1a236204de8eadb3917a17c4db64f8b19b21f982287"
+    },
+    "focused-final-cpu-smoke.json": {
+      "bytes": 252,
+      "sha256": "e7069780079b4175f02d77635179614fc207a1d6ff0287859dea3c6b96cbd140",
+      "content": {
+        "scope": "owner-context synthetic typed receipt-to-record preparation and reconstruction smoke; not timing evidence",
+        "cold_owner_thread_cpu_s": 1.306433792,
+        "warm_owner_thread_cpu_s": 1.214846584,
+        "independent_reconstruction_passed": true
+      }
+    },
+    "overwritten-u3c-cpu-smoke-assembly.json": {
+      "bytes": 198703,
+      "sha256": "85bc5a2f8135e50dc1ab6139bcba43df9bfc56bce486deaf72b7c0cfd45085ab"
+    },
+    "overwritten-u3c-cpu-smoke.json": {
+      "bytes": 252,
+      "sha256": "96152f3762dfc1dfa3102d994e23f1b0e52897d3ecff20ad7dbfa92b48757fed",
+      "content": {
+        "scope": "synthetic typed receipt-to-record preparation and reconstruction smoke; not timing evidence",
+        "cold_owner_thread_cpu_s": 0.7170773750000006,
+        "warm_owner_thread_cpu_s": 0.5902728749999993,
+        "independent_reconstruction_passed": true
+      }
+    },
+    "probe-cases-final-cpu-smoke-assembly.json": {
+      "bytes": 198086,
+      "sha256": "23796d91559dcc2f10cd8834a2873ce23d15d22e05694d14dbadccc3d9e66817"
+    },
+    "probe-cases-final-cpu-smoke.json": {
+      "bytes": 259,
+      "sha256": "325ac13dec2cfc2110bc02dc17ff1aacc2b22a05089fa336214737d055e4869a",
+      "content": {
+        "scope": "owner-context synthetic typed receipt-to-record preparation and reconstruction smoke; not timing evidence",
+        "cold_owner_thread_cpu_s": 1.494949708,
+        "warm_owner_thread_cpu_s": 1.3069273750000008,
+        "independent_reconstruction_passed": true
+      }
+    },
+    "smoke-owner-cpu-smoke-assembly.json": {
+      "bytes": 198070,
+      "sha256": "fcc048f7109f5bf267f3ddbe90c6583d2201acb7f3800b282ef136da9572878f"
+    },
+    "smoke-owner-cpu-smoke.json": {
+      "bytes": 259,
+      "sha256": "7c78b3149d7d504339f6f65d8752a909c4cfbdae063bb2408aefff30828d1521",
+      "content": {
+        "scope": "owner-context synthetic typed receipt-to-record preparation and reconstruction smoke; not timing evidence",
+        "cold_owner_thread_cpu_s": 1.3328602499999997,
+        "warm_owner_thread_cpu_s": 1.239846833,
+        "independent_reconstruction_passed": true
+      }
+    },
+    "wall-canary-parallel-cpu-smoke-assembly.json": {
+      "bytes": 198089,
+      "sha256": "ced17343b4797521b0564b28fa6b0e30f82c5c1a7ffca57cc65839879e7cc7f8"
+    },
+    "wall-canary-parallel-cpu-smoke.json": {
+      "bytes": 266,
+      "sha256": "1b6ec1c2a12b8196cc6dddf4138359776edeeb62a65576bab3b0985f05554366",
+      "content": {
+        "scope": "owner-context synthetic typed receipt-to-record preparation and reconstruction smoke; not timing evidence",
+        "cold_owner_thread_cpu_s": 1.3883279170000002,
+        "warm_owner_thread_cpu_s": 1.3276750830000004,
+        "independent_reconstruction_passed": true
+      }
+    },
+    "wall-canary-serial-cpu-smoke-assembly.json": {
+      "bytes": 198077,
+      "sha256": "265eee641cb02131544613c211c8bbe572df7cd746b2675b8c0489bcba241f59"
+    },
+    "wall-canary-serial-cpu-smoke.json": {
+      "bytes": 266,
+      "sha256": "39bc9835a80b738a70d66a51fac3d4f7cb60d632e5e6c6c3df8a005fa1498359",
+      "content": {
+        "scope": "owner-context synthetic typed receipt-to-record preparation and reconstruction smoke; not timing evidence",
+        "cold_owner_thread_cpu_s": 1.2476586250000001,
+        "warm_owner_thread_cpu_s": 1.1713569590000001,
+        "independent_reconstruction_passed": true
+      }
+    }
+  },
+  "protected_unchanged": {
+    "src/data_sheets_schema/audit_omissions.py": true,
+    "src/data_sheets_schema/cache_dependencies.py": true,
+    "src/data_sheets_schema/typed_audit.py": true,
+    "src/data_sheets_schema/schema_snapshot.py": true,
+    "src/data_sheets_schema/shared_generation.py": true,
+    "src/data_sheets_schema/native_shared_selection.py": true,
+    "src/download/prompts/canonical_hashes.yaml": true,
+    "tests/utils/run_spec_boundaries.py": true,
+    "tests/utils/run_spec_boundary_contracts.json": true
+  },
+  "final_files": {
+    "tests/test_native_u3b_reuse.py": "fe3ba924735b39b59608b7e4cc69d44c028369f18c8b38df4f5d0d689d828184",
+    "src/data_sheets_schema/native_attempt_supervisor.py": "5b6c90755b7ef140dc36342afa527d5ce017ddebd35699fd86a6f2c8dc80328a",
+    "src/data_sheets_schema/native_attribution_controller.py": "f9dcd36939ed4897d961849c2b1f7ba15b494765e815215448b1bb04dcd0c4aa",
+    "src/data_sheets_schema/native_attribution_controller_v2.py": "1e1cc08057523bb6d6c0d2da660af6a1b68a43b5b08bf9e43993c0b17ee75722",
+    "src/data_sheets_schema/native_attribution_registration.py": "d5eccf2134cb5c5dc58d0a9eb7269cf97a96d57bf1d56089f803c77f4bbaab4f",
+    "src/data_sheets_schema/native_attribution_registration_v2.py": "41b11294a270a98f571ce424aee8b914c2e0533516e7e9bab1b232cfb8cdc0f1",
+    "src/data_sheets_schema/native_attribution_results.py": "d3d15f1bf7be36da4e928336c215d80a1b861afa0b67ab8cdee01646b4e52a74",
+    "src/data_sheets_schema/native_catalog_initialization.py": "c4aaa4db919aa42ac78bf486d8e1314f372196f07470e57d3d196b9d16e0cc36",
+    "src/data_sheets_schema/native_catalog_reuse.py": "24486e41c27e267b6357dab2577e13bc6230b9ac28c7694e28bc4d5e1d7f1d83",
+    "src/data_sheets_schema/native_execution.py": "9f9982914661e5460b7825e297164b9b4f33ca79d1da5829d1258171b77eea0c",
+    "src/data_sheets_schema/native_execution_authority.py": "12aceb23529ab7d0225b519c2b40da59acdc2133415baf02449521223c150a5e",
+    "src/data_sheets_schema/native_execution_gates.py": "c7cfb8b2453ef77a2dd93dba43190ed4442be321508ccdf1b68b73c69be0758a",
+    "src/data_sheets_schema/native_execution_permissions.py": "ea6d866aca57643f647907a00f3d6a7c124f2602faace20907a9c818bd771e21",
+    "src/data_sheets_schema/native_execution_registration.py": "043d6216343b8ef0b6d3714f995af8697cc4f93ae56299d3a64f80367d8d6cf0",
+    "src/data_sheets_schema/native_neutral_runtime_v1.py": "d2c6bbf1d69111d4adbc4eb2a4f141112894c251f986b72e0a99c3cde20e5b4d",
+    "src/data_sheets_schema/native_receipt_origin.py": "f962a17958a1497b51ea2e27b5bc3e0e5f6b2cad78998c83a2fd03ff3e3b76b6",
+    "src/data_sheets_schema/native_schema_event_reuse.py": "3e129b15084b428503a18be12e95ec4c43c684b145bfb7a84eb0dd5dcb99e335",
+    "src/data_sheets_schema/native_shared_contract.py": "1355d964c0348d9aa0b13ab8f37a649864fca62afd15191d5acdde7e2f4ccf3e",
+    "src/data_sheets_schema/native_shared_evidence.py": "e5d2a8cd3569f797c21b9598a14058670ca6b92a855f11f42772b13b28d7c020",
+    "src/data_sheets_schema/native_shared_receipts.py": "ece396c2df502b707998a01cfee4802b4a3d60f4e8d52247adfabe76f94e2bc6",
+    "src/data_sheets_schema/native_shared_render.py": "f39b4597472cb7601502680f0ddeb112ecd905d8f65cbdb65cfa5fe28aa44731",
+    "src/data_sheets_schema/native_shared_selection.py": "a98ce046c7ba19e797bf2456e1f916477fccd147a60e8223bfe5ca602426eb3c",
+    "src/data_sheets_schema/native_source_attribution.py": "7d286f2fb3f7ff3c1b5e7d48cde4cdd4147f23ec694ea8badece0d33f46a1bdf",
+    "src/data_sheets_schema/native_supervisor_authority.py": "83f728648a8beee70b8f80219ae552aeb60a6e407f9e4d097dd3d319e2b07058",
+    "src/data_sheets_schema/native_supervisor_authority_v2.py": "9ade8c83d6fe3f0d874901ae62fcaeba115513328c77a3dbbc23e5230ea8221b",
+    "src/data_sheets_schema/native_supervisor_gates.py": "401a1ba51f7b6ee5b72cfe515274d4ef16f52ad9748830c211d6eeebe4d69f51"
+  },
+  "bc1_matches_saved_exact_base_failures": true,
+  "bc1_baseline_comparison_sha256": "0fc963187cfef79568be89d40a0e82d5598a111377d9488a3d22281ecb667e97",
+  "bc1-wall-final_matches_saved_exact_base_failures": true,
+  "collect_matches_saved_exact_base_errors": true,
+  "collect-final_matches_saved_exact_base_errors": true,
+  "api_order": {
+    "expected_nodes": 522,
+    "observed_nodes": 354,
+    "matches_collection_prefix": true,
+    "complete_order": false,
+    "observed_order_sha256": "ac3b56785f0af28883728b71885e3612d7390893f301edd514ad29baeebc1533"
+  },
+  "api_broad_coverage": {
+    "runs": [
+      "api-wall-final",
+      "api-remaining-final",
+      "api-remaining2-final"
+    ],
+    "expected_nodes": 522,
+    "passed_nodes": 522,
+    "disjoint": true,
+    "complete": true,
+    "failures": [],
+    "continuation_selection_matches": true,
+    "scope": "Broad-suite coverage only; continuation does not preserve full-order process state"
+  }
+}

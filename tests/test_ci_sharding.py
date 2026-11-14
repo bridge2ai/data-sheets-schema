@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ET
 import pytest
 import yaml
 
-from utils.pytest_shard import API_CASE_LANES, SG2_CASE_LANES, DEDICATED_CASE_LANES, balanced_files, partition_lanes, read_weights, shard_for
+from utils.pytest_shard import API_CASE_LANES, SG2_CASE_LANES, NATIVE_CASE_LANES, DEDICATED_CASE_LANES, balanced_files, partition_lanes, read_weights, shard_for
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -38,8 +38,9 @@ def _assert_complete_partition(tmp_path, weighted, total, lanes=False):
     # Include both pytest filename conventions, classes, parameterization,
     # a corpus marker and a skip. Assignment must not depend on worker ID.
     (tmp_path / "pytest.ini").write_text("[pytest]\nmarkers = corpus: corpus check\n")
-    # Twenty-one files populate every hash bucket at both D81 partition sizes.
-    for number in range(21):
+    # Forty-three files populate every hash bucket at both D147 partition sizes
+    # (twenty-one filled only eleven of twelve).
+    for number in range(43):
         name = f"test_{number}.py" if number % 2 else f"{number}_test.py"
         (tmp_path / name).write_text(
             "import pytest\n"
@@ -56,12 +57,12 @@ def _assert_complete_partition(tmp_path, weighted, total, lanes=False):
     whole = _run(tmp_path, "--junitxml=all.xml")
     assert whole.returncode == 0, whole.stdout + whole.stderr
     expected = _cases(tmp_path / "all.xml")
-    assert sum(expected.values()) == (97 if lanes else 84)
+    assert sum(expected.values()) == (178 + len(DEDICATED_CASE_LANES) if lanes else 172)
     flags = []
     if weighted:
         # Only about half the files have timings. Untimed files must still run;
         # obsolete timing entries must never become collected tests.
-        weights = {f"{number}_test.py": number + 1 for number in range(0, 21, 2)}
+        weights = {f"{number}_test.py": number + 1 for number in range(0, 43, 2)}
         weights["test_removed.py"] = 10000
         timing = tmp_path / "timings.json"
         timing.write_text(json.dumps({"schema_version": 1, "file_seconds": weights}))
@@ -91,12 +92,12 @@ def _assert_complete_partition(tmp_path, weighted, total, lanes=False):
 
 @pytest.mark.parametrize("weighted", [False, True])
 def test_shards_cover_the_real_collection_exactly_once_with_xdist(tmp_path, weighted):
-    _assert_complete_partition(tmp_path, weighted, 8)
+    _assert_complete_partition(tmp_path, weighted, 12)
 
 
 @pytest.mark.parametrize("weighted", [False, True])
 def test_main_shards_retain_the_same_complete_collection(tmp_path, weighted):
-    _assert_complete_partition(tmp_path, weighted, 6)
+    _assert_complete_partition(tmp_path, weighted, 8)
 
 
 def test_one_long_case_starts_before_a_file_with_many_short_cases(tmp_path):
@@ -169,7 +170,8 @@ def test_aggregate_check_rejects_failed_cancelled_and_skipped_dependencies(tmp_p
     gate = workflow["jobs"]["test"]
     assert gate["if"] == "always()"
     assert set(gate["needs"]) == {
-        "python-tests", "api-completion", "sg2-completion", "offline-canary", "offline-audit", "offline-evaluation", "schema-examples"
+        "python-tests", "api-completion", "sg2-completion", "native-public-completion",
+        "offline-canary", "offline-audit", "offline-evaluation", "schema-examples"
     }
     step = gate["steps"][0]
     statuses = ("success", "failure", "cancelled", "skipped")
@@ -188,11 +190,12 @@ def test_aggregate_check_rejects_failed_cancelled_and_skipped_dependencies(tmp_p
             expected_build = "skipped" if event == "pull_request" else "success"
             expected.append(
                 all(results[job] == "success" for job in
-                    ("python-tests", "api-completion", "sg2-completion", "offline-canary", "offline-audit", "offline-evaluation"))
+                    ("python-tests", "api-completion", "sg2-completion", "native-public-completion",
+                     "offline-canary", "offline-audit", "offline-evaluation"))
                 and results["schema-examples"] == expected_build
             )
             combinations.append(results)
-        # Preserve the exhaustive truth table without 49,152 shell startups.
+        # Preserve the exhaustive truth table without 196,608 shell startups.
         # The subshell is an unconditional command: placing it in `if` or `||`
         # would disable errexit inside the very gate we intend to exercise.
         harness = ('while IFS= read -r bindings; do\n(\neval "$bindings"\nset -e\n'
@@ -288,10 +291,32 @@ def _lane_fixture(root, *, body="assert True", decorator="", fixture="", target=
         + "def test_sg2_root_launch_completes_and_records_registered_paths(mode):\n    "
         + (body if target.startswith("sg2-") else "assert mode") + "\n"
     )
+    # Preserve exact real parameter IDs, including spaces and dots. Group by
+    # function so parameterized nodes are collected once rather than overwritten.
+    groups = {}
+    for lane, node in NATIVE_CASE_LANES.items():
+        relative, case = node.split("::")
+        name, bracket, parameter = case.partition("[")
+        groups.setdefault(relative, {}).setdefault(name, []).append(
+            (lane, parameter[:-1] if bracket else None))
+    for relative, functions in groups.items():
+        own_file = any(lane == target for cases in functions.values() for lane, _ in cases)
+        text = "import pytest\n" + (fixture if own_file else "")
+        for name, cases in functions.items():
+            own = any(lane == target for lane, _ in cases)
+            if cases[0][1] is not None:
+                ids = [parameter for _, parameter in cases]
+                text += f"@pytest.mark.parametrize('case_id', {ids!r}, ids={ids!r})\n"
+                args = "case_id"
+            else:
+                args = ""
+            text += (decorator if own else "") + f"def {name}({args}):\n    "
+            text += (body if own else "assert True") + "\n"
+        (root / relative).write_text(text)
     return path
 
 
-@pytest.mark.parametrize("total", [6, 8])
+@pytest.mark.parametrize("total", [8, 12])
 @pytest.mark.parametrize("weighted", [False, True])
 def test_explicit_lanes_and_real_shards_equal_full_default_collection(tmp_path, total, weighted):
     _assert_complete_partition(tmp_path, weighted, total, lanes=True)
@@ -350,7 +375,8 @@ def test_missing_dedicated_target_cannot_disappear_from_any_lane(tmp_path, lane)
      "@pytest.fixture\ndef broken():\n    yield\n    raise RuntimeError('teardown failure')\n", 1),
     ("pytest.exit('preserve actual exit', returncode=17)", "", "", 17),
 ])
-@pytest.mark.parametrize("lane", ["routing-dispatch", *SG2_CASE_LANES])
+@pytest.mark.parametrize("lane", ["routing-dispatch", *SG2_CASE_LANES, "native-public-correction", "native-failure-16",
+                                  "native-capacity-05", "native-retention-changing"])
 def test_dedicated_case_requires_real_unqualified_pass(tmp_path, body, decorator, fixture, code, lane):
     _lane_fixture(tmp_path, body=body, decorator=decorator, fixture=fixture, target=lane)
     result = _run(tmp_path, f"--ci-lane={lane}")
@@ -365,17 +391,20 @@ def test_dedicated_collect_only_does_not_pass_as_execution(tmp_path, lane):
     assert "did not pass setup, call and teardown" in result.stdout
 
 
-@pytest.mark.parametrize("job_name,lanes,artifact", [
-    ("api-completion", API_CASE_LANES, "api"),
-    ("sg2-completion", SG2_CASE_LANES, "sg2"),
+@pytest.mark.parametrize("job_name,lanes,artifact,timeout", [
+    ("api-completion", API_CASE_LANES, "api", 45),
+    ("sg2-completion", SG2_CASE_LANES, "sg2", 45),
+    # The native public cases hold a 2,700 s synthetic attempt after about
+    # 21 minutes of setup (#6094, #6233); other native lanes finish early.
+    ("native-public-completion", NATIVE_CASE_LANES, "native", 90),
 ])
-def test_case_workflow_binds_all_lanes_and_retains_budget_setup_and_evidence(job_name, lanes, artifact):
+def test_case_workflow_binds_all_lanes_and_retains_budget_setup_and_evidence(job_name, lanes, artifact, timeout):
     jobs = yaml.safe_load((ROOT / ".github/workflows/main.yaml").read_text())["jobs"]
     job = jobs[job_name]
     assert job["strategy"] == {"fail-fast": False, "matrix": {"case": list(lanes)}}
     assert "if" not in job and "needs" not in job
     assert job["runs-on"] == "ubuntu-latest"
-    assert job["timeout-minutes"] == 45
+    assert job["timeout-minutes"] == timeout
     checkout, submodule, setup, case, clean, upload = job["steps"]
     assert checkout["uses"] == "actions/checkout@v5"
     assert checkout["with"] == {"fetch-depth": 0}
@@ -400,8 +429,8 @@ def test_case_workflow_binds_all_lanes_and_retains_budget_setup_and_evidence(job
     ordinary = jobs["python-tests"]["steps"][3]["run"]
     assert shlex.split(ordinary).count("--ci-lane=ordinary") == 1
     assert jobs["python-tests"]["strategy"]["matrix"]["shard"] == (
-        "${{ fromJSON(github.event_name == 'pull_request' && '[1, 2, 3, 4, 5, 6, 7, 8]' || '[1, 2, 3, 4, 5, 6]') }}")
-    assert "--ci-shard=${{ matrix.shard }}/${{ github.event_name == 'pull_request' && 8 || 6 }}" in ordinary
+        "${{ fromJSON(github.event_name == 'pull_request' && '[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]' || '[1, 2, 3, 4, 5, 6, 7, 8]') }}")
+    assert "--ci-shard=${{ matrix.shard }}/${{ github.event_name == 'pull_request' && 12 || 8 }}" in ordinary
 
 
 

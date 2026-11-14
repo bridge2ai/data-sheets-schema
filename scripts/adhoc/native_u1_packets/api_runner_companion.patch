@@ -1,0 +1,14 @@
+--- a/src/data_sheets_schema/api_runner.py
++++ b/src/data_sheets_schema/api_runner.py
+@@ -833,9 +833,8 @@
+             if self.profile_basis is None:
+                 self.profile_basis = "stated by the caller"       # the record says why, always (#1549)
+ 
+-        if not self.native_shared_generation_version:
+-            from .shared_generation import select as select_shared
+-            select_shared(self)
++        from .shared_generation import select as select_shared
++        select_shared(self)
+         registration = None
+         if self.shared_generation_version:
+             from .shared_generation import parse_registration, capture

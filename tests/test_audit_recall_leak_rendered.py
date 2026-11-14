@@ -339,7 +339,7 @@ def direct_registration(tmp_path, monkeypatch):
     monkeypatch.chdir(ROOT)
     for name in direct_preparation.FORBIDDEN_ENVIRONMENT:
         monkeypatch.delenv(name, raising=False)
-    runtime = tmp_path / "claude"
+    runtime = tmp_path / "synthetic-runtime"
     runtime.write_text("#!/bin/sh\necho '2.1.272 (Claude Code)'\n")
     runtime.chmod(0o700)
     monkeypatch.setattr(direct_preparation, "auth_evidence", lambda executable, env: {
