@@ -112,7 +112,11 @@ def audit():
     owner_rows = []
     reconciled = {'src/data_sheets_schema/native_execution_registration_v2.py': 'candidate CI roster',
                   'src/data_sheets_schema/native_shared_authority_wire.py': 'candidate controller pin',
-                  'tests/test_native_incomplete_retention.py': 'candidate module isolation'}
+                  'tests/test_native_incomplete_retention.py': 'candidate module isolation',
+                  'src/data_sheets_schema/native_shared_registration_orchestration.py': 'candidate pre-dispatch timing wrapper',
+                  'tests/test_native_execution_registration_v2.py': 'candidate explicit offline AC host fixture',
+                  'tests/test_native_failure_publication.py': 'candidate host-observation failure coverage',
+                  'tests/test_native_shared_execution.py': 'candidate helper-cache exclusion assertion'}
     for commit, meaning in OWNER_COMMITS.items():
         assert ancestor(commit), commit
         paths = git('diff-tree', '--no-commit-id', '--name-only', '-r', commit).decode().splitlines()
@@ -219,7 +223,7 @@ def markdown(data, results, scratch):
             description = 'bootstrap AST matches the owner commit in the continuation runner'
         lines.append(f"| {row['commit']} | {row['meaning']} | {description} |")
     lines += ['', 'The owner changes remain in true-merge history and their final code/test bytes '
-              'match the owner tree except the three recorded candidate reconciliations. '
+              'match the owner tree except the recorded candidate reconciliations. '
               'Superseded intermediate behavior is not reintroduced. Unneeded owner helpers remain '
               'excluded from the merge result; the bootstrap metadata change is implemented in '
               'the continuation runner. All five gate-package commits remain outside this branch.', '',

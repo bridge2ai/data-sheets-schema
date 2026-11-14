@@ -181,8 +181,18 @@ def test_v3_wire_and_manifest_callees_are_source_bound(tmp_path, relative, befor
     assert relative in route['evidence']
     path = root / relative
     source = path.read_text()
+    prefix = suffix = ''
+    if relative.endswith('/native_shared_authority_wire.py'):
+        # The historical read-only parser also compares the controller pin.
+        # Mutate only the current parser; preserve the historical fixture bytes.
+        function = next(n for n in ast.parse(source).body
+                        if isinstance(n, ast.FunctionDef) and n.name == 'require_envelope')
+        lines = source.splitlines(keepends=True)
+        prefix = ''.join(lines[:function.lineno - 1])
+        suffix = ''.join(lines[function.end_lineno:])
+        source = ''.join(lines[function.lineno - 1:function.end_lineno])
     assert source.count(before) == 1
-    path.write_text(source.replace(before, after, 1))
+    path.write_text(prefix + source.replace(before, after, 1) + suffix)
     with pytest.raises(scan.ConfigError, match='v2 envelope authority source changed: ' + relative):
         scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
 
