@@ -197,6 +197,9 @@ def main():
                  saved_manifest_tests=tests, manifest_test_report=pin(bytecode),
                  saved_gate_tests=gate_tests,
                  resume_tests=resume_tests, review_findings=read(N / 'scripts/adhoc/h3_resumed_report_review_findings_20261113.json'),
+                 resume_attempt_evidence=[pin(path) for path in sorted(S.glob('*.log'))] +
+                     [pin(path) for path in sorted(S.glob('*-readback.json'))] +
+                     [pin(path) for path in sorted(S.glob('attempt*/*-readback.json'))],
                  bounds_barrier_readbacks=[pin(S / ('barrier-readback-' + role + '.json')) for role in
                      ('reference', 'AI_READI', 'CM4AI', 'VOICE', 'VOICE_PEDIATRIC')],
                  script=pin(Path(__file__)), fresh_runner=pin(N / 'scripts/adhoc/resume_h3_matrix_20261113.py'),
@@ -219,6 +222,7 @@ def main():
                  'Branches are available for the lead’s independent reviews; integrated-candidate acceptance remains pending.', '',
                  'The prior final-format-04 cohort stopped at build-registered without a terminal outcome. '
                  'Its self-canary and completed builders are historical evidence, not an accepted matrix. '
+                 'An initial resume bootstrap invocation used the underlying interpreter rather than the required dependency-venv spelling and was refused before cohort creation; its log is retained. '
                  'Fresh final-format-05 bootstrapped but nested sandbox setup failed. '
                  'Fresh final-format-06 was held after an orchestrator refinement made its captured launcher stale. '
                  f'Fresh {CURRENT} uses the existing network-denied builder/validator sandboxes through an escalated outer launch, '
