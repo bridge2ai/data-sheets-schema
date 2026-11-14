@@ -257,6 +257,7 @@ def main():
                   '(1b5629f0f). Review these production-package changes separately. The comparison scripts and closed field '
                   'schema support equivalence verification; they are not needed to construct a v3 registration. '
                   'The adhoc builders, mutations, reports, measurement and stage orchestration are rehearsal tooling. '
+                  'Every commit added during this resume is rehearsal, reporting or test tooling; none changes production registration code. '
                   'Avoid duplicate environment carries 64d327090, 5a9f08733 and 6c7237e44. The JSON records the exact duplicate-file check.', '',
                   'Saved manifest validation (historical selections, not summed and not integrated-candidate validation):', '',
                   table(['Cohort', 'Tests', 'Failures', 'Errors', 'Skipped', 'Pinned XML matches'],
