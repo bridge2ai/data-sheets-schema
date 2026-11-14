@@ -16,7 +16,7 @@ def runtime_for(data, root):
     """Bind saved fake observations and two distinct copies of the fixed peer."""
     from data_sheets_schema import native_model_aliases as aliases
     from data_sheets_schema import native_u4b_runtime as runtime_api
-    from data_sheets_schema.native_runtime_profiles import SYNTHETIC_PROFILE
+    from data_sheets_schema.native_runtime_profiles import SYNTHETIC_DEADLINE_SECONDS, SYNTHETIC_PROFILE
     from tests.utils.native_u4b_observation import mint_observation
     from tests.utils.native_u4b_fixtures import admission_policy
 
@@ -36,7 +36,7 @@ def runtime_for(data, root):
     pair = {'requested': 'synthetic-native-model', 'returned': 'synthetic-native-returned-model'}
     runtime = deepcopy(c.strict_json(data['runtime_path'].read_bytes()))
     runtime.update(model=pair['requested'], auxiliary_models=[], effort='high',
-        provider='scripted-local', deadline_seconds=900, budget_guard_usd='1.0',
+        provider='scripted-local', deadline_seconds=SYNTHETIC_DEADLINE_SECONDS, budget_guard_usd='1.0',
         executable={'path': str(copied), 'sha256': c.sha(binary),
             'version': 'SYNTHETIC PYTHON SOFTWARE TEST', 'init_version': 'synthetic-python-1'},
         auth={'loggedIn': False, 'authMethod': SYNTHETIC_PROFILE, 'apiProvider': 'scripted-local',

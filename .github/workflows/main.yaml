@@ -172,7 +172,9 @@ jobs:
   native-public-completion:
     name: Python 3.12 / native case ${{ matrix.case }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # A cap, not a duration: the public cases hold a 2,700 s synthetic attempt
+    # after about 21 minutes of setup (#6094, #6233).
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:

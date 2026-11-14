@@ -50,7 +50,7 @@ def runtime(tmp_path):
         'environment': {'PATH': '/usr/bin:/bin', 'HOME': str(home),
             'BASH_DEFAULT_TIMEOUT_MS': '600000', 'BASH_MAX_TIMEOUT_MS': '600000', 'PYSTOW_HOME': str(root / 'attempt' / 'helper-cache'),
             'CLAUDE_SECURESTORAGE_CONFIG_DIR': '', 'CLAUDE_CODE_DISABLE_1M_CONTEXT': '0'},
-        'deadline_seconds': 900, 'budget_guard_usd': '1.0',
+        'deadline_seconds': profiles.SYNTHETIC_DEADLINE_SECONDS, 'budget_guard_usd': '1.0',
         'keep_awake': {'policy': 'not_applicable', 'host_platform': sys.platform,
             'basis': 'Ordinary Python software test; no native acceptance'}}
 
@@ -63,7 +63,7 @@ def test_explicit_synthetic_profile_is_distinct_and_registers_bash_timeout(runti
     assert aliases.model_aliases(runtime) == {
         'requested': profiles.SYNTHETIC_REQUESTED, 'returned': profiles.SYNTHETIC_RETURNED}
     assert runtime == original
-    assert runtime['deadline_seconds'] == 900
+    assert runtime['deadline_seconds'] == profiles.SYNTHETIC_DEADLINE_SECONDS == 2700
     raw = Path(runtime['executable']['path']).read_bytes()
     assert raw.split(b'\n', 1)[0] == ('#!' + sys.executable + ' -P').encode()
     assert b"timeout=int(os.environ['BASH_DEFAULT_TIMEOUT_MS']) / 1000" in raw

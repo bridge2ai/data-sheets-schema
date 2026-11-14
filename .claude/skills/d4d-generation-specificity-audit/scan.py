@@ -13029,7 +13029,10 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
     # Rotated again (#6235): against 44d32d35, SYNTHETIC_PEER_SHA256 (the
     # peer now honours the registered Bash timeout) and one call to the
     # shared require_bash_timeouts validator.
-    'src/data_sheets_schema/native_runtime_profiles.py': '58a71a0562c34934ff80ac6eb03020a25b22891a41b8bfdd73c1ce6b657645ab',
+    # Rotated again (#6094, #6233): against 58a71a05, only
+    # SYNTHETIC_DEADLINE_SECONDS 900 -> 2700 and its comment, the software-test
+    # attempt budget. No loader logic or production limit changed.
+    'src/data_sheets_schema/native_runtime_profiles.py': 'ea1cc11c939a7945e1282e889b07cc582d9a5153049ba60064c9d14a968cadb3',
     'src/data_sheets_schema/native_helper_cache.py': '0934f71630ab45e4670ffa0d14f90c1cfbb23a132a23ca8c6ccfcc0c58a52a95',
     # Controller pin rotation for the issue 6094 timing hooks (lead,
     # 2026-11-13; sources source_commit e648abe2a). Against the prior pins

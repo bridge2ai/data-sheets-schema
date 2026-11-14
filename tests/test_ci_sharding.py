@@ -391,18 +391,20 @@ def test_dedicated_collect_only_does_not_pass_as_execution(tmp_path, lane):
     assert "did not pass setup, call and teardown" in result.stdout
 
 
-@pytest.mark.parametrize("job_name,lanes,artifact", [
-    ("api-completion", API_CASE_LANES, "api"),
-    ("sg2-completion", SG2_CASE_LANES, "sg2"),
-    ("native-public-completion", NATIVE_CASE_LANES, "native"),
+@pytest.mark.parametrize("job_name,lanes,artifact,timeout", [
+    ("api-completion", API_CASE_LANES, "api", 45),
+    ("sg2-completion", SG2_CASE_LANES, "sg2", 45),
+    # The native public cases hold a 2,700 s synthetic attempt after about
+    # 21 minutes of setup (#6094, #6233); other native lanes finish early.
+    ("native-public-completion", NATIVE_CASE_LANES, "native", 90),
 ])
-def test_case_workflow_binds_all_lanes_and_retains_budget_setup_and_evidence(job_name, lanes, artifact):
+def test_case_workflow_binds_all_lanes_and_retains_budget_setup_and_evidence(job_name, lanes, artifact, timeout):
     jobs = yaml.safe_load((ROOT / ".github/workflows/main.yaml").read_text())["jobs"]
     job = jobs[job_name]
     assert job["strategy"] == {"fail-fast": False, "matrix": {"case": list(lanes)}}
     assert "if" not in job and "needs" not in job
     assert job["runs-on"] == "ubuntu-latest"
-    assert job["timeout-minutes"] == 45
+    assert job["timeout-minutes"] == timeout
     checkout, submodule, setup, case, clean, upload = job["steps"]
     assert checkout["uses"] == "actions/checkout@v5"
     assert checkout["with"] == {"fetch-depth": 0}
