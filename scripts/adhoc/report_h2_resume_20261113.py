@@ -387,6 +387,8 @@ def main():
     static_diagnosis = read_json(static_diagnosis_path)
     g3b_path = SCRATCH / 'g3b-hang-comparison.json'
     g3b = read_json(g3b_path)
+    shutdown_boundary_path = SCRATCH / 'callback-shutdown-boundary.json'
+    shutdown_boundary = read_json(shutdown_boundary_path)
     binding_source = pin(SCRATCH / 'isolation-binding-reviewed-report-source.txt')
     assert binding_source['sha256'] == isolation_binding['producer']['sha256']
     for callback in callback_analysis['answer']['stalled_callbacks']:
@@ -416,6 +418,8 @@ def main():
         'callback_static_diagnosis': static_diagnosis,
         'callback_static_diagnosis_evidence': pin(static_diagnosis_path),
         'g3b_comparison': g3b, 'g3b_comparison_evidence': pin(g3b_path),
+        'callback_shutdown_boundary': shutdown_boundary,
+        'callback_shutdown_boundary_evidence': pin(shutdown_boundary_path),
         'isolation_binding_reviewed_report_source': binding_source,
         'compatibility': compatibility, 'compatibility_evidence': pin(compatibility_path),
         'controller_pin_mismatches': pin_changes, 'report_producer': pin(Path(__file__).resolve()),
@@ -475,6 +479,9 @@ def main():
         g3b['interpretation'],
         'Evidence: `' + str(g3b_path) + '`. The inventory includes ignored and hidden files; directory aliases are not followed.',
         'The report source reviewed for H2-RESUME-REPORT-F2 is retained at `' + binding_source['path'] + '`; its hash matches the review record.']
+    lines += ['', 'H2-RESUME-SHUTDOWN-F1: ' + shutdown_boundary['answer'],
+        shutdown_boundary['established'], shutdown_boundary['causal_limit'], shutdown_boundary['recommendation'],
+        'Evidence: `' + str(shutdown_boundary_path) + '`. The existing lifetime regression passed in the preload suite. Lead filing remains needed; no production repair is claimed.']
     lines += ['', 'Saved verification cohorts:', '']
     for cohort in cohorts:
         result = cohort['counts']
