@@ -148,6 +148,41 @@ def test_captured_input_pin_is_rechecked_before_reconstruction(tmp_path):
         check()
 
 
+@pytest.mark.parametrize('kind', ['observer', 'classifier'])
+def test_worker_host_and_timing_utilities_never_load_a_module(kind, tmp_path, isolated_modules):
+    """Exercise deferred stage diagnostics cold on C's actual callback worker."""
+    dependencies = authority.dependency_identity()
+    loads = []
+
+    class RefuseAnyWorkerLoad:
+        def find_spec(self, fullname, path=None, target=None):
+            if threading.current_thread() is not threading.main_thread():
+                loads.append(fullname)
+                raise AssertionError('callback attempted a module load: ' + fullname)
+
+    with ExitStack() as stack:
+        stack.enter_context(preload.preloaded_classifier(dependencies))
+        utilities = stack.enter_context(preload.preloaded_callback_utilities(dependencies))
+        guard = RefuseAnyWorkerLoad()
+        sys.meta_path.insert(0, guard)
+        stack.callback(sys.meta_path.remove, guard)
+
+        def callback():
+            modules = [importlib.import_module('data_sheets_schema.' + name) for name in (
+                'native_host_power', 'native_elapsed', 'native_attempt_timing',
+                'native_admission_timer', 'native_pre_dispatch_timing')]
+            assert all(module is utilities[module.__name__.split('.')[-1]] for module in modules)
+            # Same deferred imports and stage clock action as _host_stage_clock;
+            # no active run means no host probe, observation write or native call.
+            from data_sheets_schema.native_host_power import checkpoint, observe
+            return observe(tmp_path, 'stage-' + 'a' * 64,
+                           checkpoint, tmp_path, 'stage-' + 'a' * 64)
+
+        result = work(sys.modules['native_control'], kind, callback)
+        assert result is None, repr(result)
+        assert loads == []
+
+
 def test_main_thread_teardown_waits_for_active_historical_worker(isolated_modules):
     """Deterministic handshake: revocation cannot precede callback release."""
     lock = threading.RLock()

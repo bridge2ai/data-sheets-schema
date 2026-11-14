@@ -198,7 +198,12 @@ def preloaded_callback_utilities(dependencies):
     with ExitStack() as stack:
         modules = {name: stack.enter_context(authority.loaded_verified_package_module(
             'data_sheets_schema.' + name, package_sources=pins)) for name in (
-                'source_metadata', 'source_review', 'duplicate_keys', 'bc1_context', 'grounding')}
+                'source_metadata', 'source_review', 'duplicate_keys', 'bc1_context', 'grounding',
+                # Stage publication calls host_power from an orchestration body
+                # outside A's consumer import graph. Keep all newly introduced
+                # timing utilities source-verified for the same worker lifetime.
+                'native_host_power', 'native_elapsed', 'native_attempt_timing',
+                'native_admission_timer', 'native_pre_dispatch_timing')}
         yield modules
 
 

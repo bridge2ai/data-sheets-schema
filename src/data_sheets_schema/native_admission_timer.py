@@ -8,6 +8,7 @@ cannot be preempted by this in-process mechanism.
 from contextlib import contextmanager
 import signal
 import threading
+import time
 
 from .native_elapsed import elapsed_ns
 
@@ -28,13 +29,72 @@ class AdmissionTimer:
         self.start_ns = start_ns
         self.deadline_ns = start_ns + int(seconds * 1_000_000_000)
         self.clock = clock
+        self._closing = True
+        self._fired = False
 
     def check(self, now_ns=None):
         if (self.clock() if now_ns is None else now_ns) >= self.deadline_ns:
             raise AdmissionExpired('native admission deadline elapsed; child was not dispatched')
 
     def _alarm(self, signum, frame):
-        self.check()
+        if self._closing or self._fired:
+            return
+        try:
+            self.check()
+        except AdmissionExpired as expired:
+            # One exception initiates unwinding. A queued tick must never raise
+            # into nested verification cleanup before armed() regains control.
+            self._fired = True
+            try:
+                signal.setitimer(signal.ITIMER_REAL, 0)
+            except BaseException:
+                # _restore retries cancellation; the fired latch already makes
+                # every queued alarm inert. Preserve the original expiry.
+                pass
+            raise expired
+
+    def _restore(self, blocked, previous, owned):
+        """Defer a raising cleanup step until every restoration was attempted.
+
+        A Python signal can raise immediately after a signal syscall changed
+        state. Retry idempotent operations once, retaining the first exception.
+        Never restore a default disposition if timer cancellation failed.
+        """
+        errors = []
+        def attempt(action):
+            for _ in range(2):
+                try:
+                    action()
+                    return True
+                except BaseException as exc:
+                    errors.append(exc)
+            return False
+        def quiet_tick():
+            # Sampling the clock is also a raising teardown step. A retry
+            # waits a complete additional tick before restoring disposition.
+            until = time.monotonic() + POLL_SECONDS
+            while True:
+                remaining = until - time.monotonic()
+                if remaining <= 0:
+                    return
+                time.sleep(remaining)
+        def drain():
+            if signal.SIGALRM in signal.sigpending():
+                signal.sigwait({signal.SIGALRM})
+        try:
+            blocked_ok = attempt(lambda: signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGALRM}))
+            if owned:
+                cancelled = attempt(lambda: signal.setitimer(signal.ITIMER_REAL, 0))
+                # XNU may post one already-dequeued callout after cancellation.
+                # Keep the alarm blocked and our handler inert for another tick.
+                quiet = attempt(quiet_tick)
+                drained = attempt(drain)
+                if blocked_ok and cancelled and quiet and drained:
+                    attempt(lambda: signal.signal(signal.SIGALRM, previous))
+        finally:
+            attempt(lambda: signal.pthread_sigmask(signal.SIG_SETMASK, blocked))
+        if errors:
+            raise errors[0]
 
     @contextmanager
     def armed(self):
@@ -43,17 +103,20 @@ class AdmissionTimer:
         if threading.current_thread() is not threading.main_thread() or any(
                 not hasattr(signal, name) for name in names):
             raise AdmissionRefused('native admission timer needs POSIX main-thread signals')
-        blocked = signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGALRM})
+        blocked = signal.pthread_sigmask(signal.SIG_BLOCK, ())
         previous = signal.getsignal(signal.SIGALRM)
         owned = False
+        self._fired = False
         try:
+            signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGALRM})
             if (signal.SIGALRM in blocked or previous != signal.SIG_DFL
                     or signal.getitimer(signal.ITIMER_REAL) != (0.0, 0.0)
                     or signal.SIGALRM in signal.sigpending()):
                 raise AdmissionRefused('native admission timer signal is already owned or blocked')
             self.check()
-            signal.signal(signal.SIGALRM, self._alarm)
             owned = True
+            signal.signal(signal.SIGALRM, self._alarm)
+            self._closing = False
             signal.siginterrupt(signal.SIGALRM, True)
             remaining = (self.deadline_ns - self.clock()) / 1_000_000_000
             self.check()
@@ -61,10 +124,5 @@ class AdmissionTimer:
             signal.pthread_sigmask(signal.SIG_SETMASK, blocked)
             yield self
         finally:
-            signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGALRM})
-            if owned:
-                signal.setitimer(signal.ITIMER_REAL, 0)
-                if signal.SIGALRM in signal.sigpending():
-                    signal.sigwait({signal.SIGALRM})
-                signal.signal(signal.SIGALRM, previous)
-            signal.pthread_sigmask(signal.SIG_SETMASK, blocked)
+            self._closing = True
+            self._restore(blocked, previous, owned)
