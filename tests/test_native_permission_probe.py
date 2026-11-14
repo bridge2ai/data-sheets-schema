@@ -689,3 +689,57 @@ def test_provider_stopping_closes_active_connection_without_socket():
     assert server.active_connection is None
     server.close_active_request()
     assert len(calls) == 2
+
+
+@pytest.mark.parametrize('fail_later', [False, True])
+def test_captured_inputs_survive_later_failure_without_authority_fixture(tmp_path, monkeypatch, fail_later):
+    """Mock process/consumer boundaries; exercise real incremental disk writes."""
+    source = tmp_path / 'source'
+    source.write_bytes(b'original source')
+    directory = tmp_path / 'evidence'
+    sources = []
+    for name in ('native_permission_probe', 'native_probe_provider', 'native_subscription_guard'):
+        path = Path(probe.__file__).with_name(name + '.py')
+        raw = path.read_bytes()
+        sources.append({'module': 'data_sheets_schema.' + name, 'path': str(path.resolve()),
+                        'bytes': len(raw), 'sha256': guard.sha(raw)})
+    expected = {'production_sources': sources, 'source': {'path': str(source), 'sha256': guard.sha(source.read_bytes())},
+        'runtime': {'executable': {'path': str(tmp_path / 'binary')}},
+        'selection': {'path': str(tmp_path / 'selection')}, 'permission_environment': {},
+        'policy': {'readonly_lookups': {'repository': str(tmp_path / 'repository'),
+                                     'inputs': [], 'output_directories': []}}}
+    selected = {'stage_root': str(tmp_path / 'stage')}
+    consumer = SimpleNamespace(MAX_MEMBER=probe.MAX_STREAM, TRACES=('settled', 'later'),
+        KIND='invented', VERSION=1, ORIGIN='invented', recipe_sources=lambda: {'recipe/provider.py': '# fixed'},
+        verify_saved_probe=lambda *a, **k: {'checked': True, 'passed': True})
+    transport_raw = Path(provider.__file__).read_bytes()
+    real_read = Path.read_bytes
+    def read(path):
+        if path == Path(provider.__file__):
+            pytest.fail('checked transport source reopened with Path.read_bytes')
+        return real_read(path)
+    monkeypatch.setattr(Path, 'read_bytes', read)
+    monkeypatch.setattr(probe, '_identity', lambda *a: None)
+    def version(*args):
+        assert (directory / 'captured/source.before').read_bytes() == b'original source'
+        assert (directory / 'captured/selection.json').read_bytes() == b'{}'
+        assert (directory / 'transport-provider.py').read_bytes() == transport_raw
+        return b'version\n'
+    monkeypatch.setattr(probe, '_version', version)
+    def trace(*args):
+        if args[-1] == 'later':
+            assert (directory / 'captured/traces/settled/outcome.json').read_bytes() == b'{}'
+            if fail_later:
+                raise TimeoutError('injected later failure')
+        return {'cases.json': b'[]', 'outcome.json': b'{}'}
+    monkeypatch.setattr(probe, '_trace', trace)
+    call = lambda: probe._produce_captured(expected, directory, time.monotonic() + 60,
+        consumer, {}, {}, object(), selected, b'{}')
+    if fail_later:
+        with pytest.raises(TimeoutError, match='injected later failure'):
+            call()
+        assert not (directory / 'permission-probe.json').exists()
+        assert guard.strict_json((directory / 'failure.json').read_bytes())['error_type'] == 'TimeoutError'
+    else:
+        assert call().is_file()
+        assert guard.strict_json((directory / 'producer-evidence.json').read_bytes())['transport_source_sha256'] == guard.sha(transport_raw)
