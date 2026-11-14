@@ -24,6 +24,44 @@ def cases(path):
             'skipped': sum(n.find('skipped') is not None for n in nodes)}
 
 
+def python_inventory(root, selectors):
+    """Read ignored and hidden Python paths; selected test files must be tracked."""
+    root = Path(root).resolve(strict=True)
+    tracked_command = ['git', 'ls-files', '-z']
+    tracked_raw = subprocess.check_output(tracked_command, cwd=root)
+    tracked = {os.fsdecode(path) for path in tracked_raw.split(b'\0') if path}
+    inventory_command = ['rg', '--files', '--hidden', '--no-ignore', '--null',
+                         'src', 'tests', '-g', '*.py', '-g', '*.pyi']
+    inventory = subprocess.run(inventory_command, cwd=root, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, check=False)
+    if inventory.returncode not in (0, 1):
+        raise RuntimeError('ignored-inclusive Python inventory failed')
+    found = {os.fsdecode(path) for path in inventory.stdout.split(b'\0') if path}
+    untracked = sorted(found - tracked)
+    if untracked:
+        raise ValueError('untracked source/test Python (ignored files included): '
+                         + ', '.join(untracked))
+    selected = []
+    for selector in selectors:
+        path_text, separator, _node = selector.partition('::')
+        candidate = Path(os.path.abspath(root / path_text))
+        try:
+            relative = candidate.relative_to(root)
+        except ValueError as exc:
+            raise ValueError('selected test must stay inside the assigned checkout') from exc
+        if not candidate.exists() or candidate.resolve(strict=True) != candidate:
+            raise ValueError('selected test must be an existing physical checkout path: ' + path_text)
+        if candidate.is_dir():
+            if separator or not (relative == Path('tests') or Path('tests') in relative.parents):
+                raise ValueError('directory selectors are allowed only within tests')
+        elif not candidate.is_file() or relative.as_posix() not in tracked:
+            raise ValueError('selected test file must be tracked: ' + path_text)
+        selected.append(relative.as_posix())
+    return {'inventory_command': inventory_command, 'tracked_command': tracked_command,
+            'ignored_and_hidden_files_included': True, 'python_files': len(found),
+            'selected_paths': selected}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('cohort')
@@ -39,8 +77,11 @@ def main():
             'total': 1, 'failed': 0, 'error': 0, 'skipped': 0}
         assert cases(OUT / 'canary/pytest.xml') == canary['counts']
         assert any(path.is_file() and path.stat().st_size for path in (OUT / 'canary/cases').rglob('*'))
-    # Synthetic authority must see committed implementation and tests.
-    subprocess.check_call(['git', 'diff', '--exit-code', 'HEAD', '--', 'src', 'tests'], cwd=ROOT)
+    # A diff alone misses untracked imports/conftest files, including ignored
+    # ones. Helpers/proposals outside src/tests may remain untracked.
+    source_inventory = python_inventory(ROOT, args.nodes)
+    subprocess.check_call(['git', 'diff', '--exit-code', 'HEAD', '--', 'src', 'tests',
+                           *source_inventory['selected_paths']], cwd=ROOT)
     directory = OUT / args.cohort
     directory.mkdir(exist_ok=False)
     env = {k: v for k, v in os.environ.items() if not (k.endswith('_API_KEY') or k in (
@@ -54,7 +95,8 @@ def main():
     record = {'command': command, 'cwd': str(ROOT), 'environment': {key: env[key] for key in (
         'PYTHONPATH', 'PYTHONDONTWRITEBYTECODE', 'PYTHONPYCACHEPREFIX', 'TMPDIR')},
         'head': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
-        'status_before': subprocess.check_output(['git', 'status', '--short'], cwd=ROOT, text=True)}
+        'status_before': subprocess.check_output(['git', 'status', '--short'], cwd=ROOT, text=True),
+        'source_inventory': source_inventory}
     (directory / 'command.json').write_text(json.dumps(record, indent=2) + '\n')
     start = time.monotonic()
     with (directory / 'pytest.log').open('xb') as log:
