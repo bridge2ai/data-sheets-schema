@@ -251,14 +251,22 @@ def report():
         errors = sum(case.find('error') is not None for case in cases)
         log = (directory / 'pytest.log').read_text()
         collected = int(re.search(r'worker \[(\d+) items?\]', log).group(1))
-        results.append({'name': name, 'tests': len(cases), 'passed': len(cases) - len(failures) - skipped,
+        passed = len(cases) - len(failures) - skipped
+        if name == 'scanner-broad-interrupted':
+            # Interrupted xdist can serialize an unfinished empty testcase.
+            # Only pytest's terminal summary certifies completed passes here.
+            passed = int(re.findall(r'(\d+) passed', log)[-1])
+        unfinished = len(cases) - passed - failed - errors - skipped
+        results.append({'name': name, 'tests': len(cases), 'passed': passed,
+                        'unfinished_xml_cases': unfinished,
                         'collected': collected, 'failed': failed, 'errors': errors,
                         'skipped': skipped, 'failures': failures, 'source_commit': tested,
                         'complete': name != 'scanner-broad-interrupted',
                         'returncode': outcome['returncode'], 'seconds': outcome['seconds'],
                         'cleanup_verified': outcome['cleanup_verified'], 'output': str(directory),
                         'command': plan['command']})
-    save(OUT / 'results.json', results)
+    result_path = OUT / 'results-v2.json'
+    save(result_path, results)
     resolutions = load(OUT / 'resolutions.json')
     source = 'src/data_sheets_schema/native_environment_manifest.py'
     old = audit_data['snapshots']['merged']['pins']['_NATIVE_V3_RENDER_SOURCES:' + source]
@@ -278,6 +286,7 @@ def report():
     lines += ['', 'The first canary invocation was refused before test startup because the existing runner requires outputs to be direct children of the assigned scratch root. The helper was corrected and committed before the real canary. A subsequent report-only audit exposed the candidate having no manifest module and a misspelled v1 controller filename; those provenance checks were corrected before the final cohorts above. Earlier successful canary and manifest results remain in their original sibling evidence directories. The refused invocation is retained in canary-invocation.json.', '',
               'The canary used the same launcher, isolated dependency environment, network/native denial, output hierarchy and one-worker mode as the later cohorts. Its nonempty JUnit and verified cleanup were checked before subsequent cohorts. It proves that path and persistence for one synthetic unit; it does not prove live census timing or full registration.', '',
               'The broader scanner roster was deliberately interrupted with SIGINT to its identified task-owned pytest process after repeated held-pin calibration failures. It returned exit 2, saved partial JUnit, and the runner verified cleanup without forced termination or observed survivors. It is not a completed suite. The replacement focused cohort completed explicit manifest-mode controls, U1/U3-L/U5/H1 route checks, and the D128 validator. The original roster and both command lists remain in saved plans/results. Counts from these overlapping runs must not be added as distinct coverage.', '',
+              f"Readback correction: the interrupted JUnit serialized {results[-1]['unfinished_xml_cases']} unfinished empty testcase. It is excluded from the pass count above, which uses pytest's terminal summary. The initial results.json and initial integration handoff are preserved as superseded evidence; results-v2.json is authoritative.", '',
               '## Merge resolution and preserved boundaries', '']
     for row in resolutions:
         lines.append(f"- `{row['path']}`: {row['conflict_hunks']} conflict hunks. {row['resolution']}")
@@ -312,7 +321,7 @@ def report():
     for row in results:
         for failure in row['failures']:
             lines.append('- `' + failure['node'] + '`: ' + str(failure['message']).replace('\n', ' ')[:1200])
-    lines += ['', 'Complete failure details, including refusals under held pins, are in results.json and each cohort JUnit/log. At-sign characters in displayed test parameters are spelled [at-sign]; raw names remain in JUnit. The proposed-identity scanner controls remain isolated unit tests; they do not rotate the committed scanner pin.', '',
+    lines += ['', 'Complete failure details, including refusals under held pins, are in results-v2.json and each cohort JUnit/log. At-sign characters in displayed test parameters are spelled [at-sign]; raw names remain in JUnit. The proposed-identity scanner controls remain isolated unit tests; they do not rotate the committed scanner pin.', '',
               '## CI-only evidence still required', '']
     for path, reason in CI_ONLY.items():
         assert (ROOT / path.split('::')[0]).exists(), path
@@ -322,22 +331,24 @@ def report():
               '## Reproducible evidence', '',
               f'- Evidence root: `{OUT}`.',
               f'- Merge/conflict provenance: `{OUT / "merge-start.json"}` and `{OUT / "resolutions.json"}`.',
-              f'- Identity ledger: `{OUT / "audit.json"}`; focused results: `{OUT / "results.json"}`; same-tool comparison: `{OUT / "comparison.json"}`.',
+              f'- Identity ledger: `{OUT / "audit.json"}`; focused results: `{result_path}`; same-tool comparison: `{OUT / "comparison.json"}`.',
               f'- Source helpers: `{ROOT / "scripts/adhoc/integrate_manifest_candidate_20261114.py"}` and `{Path(__file__).resolve()}`.',
-              '- Reproduction: invoke the check helper with `cohort canary`, then `cohort manifest`, `cohort boundaries`, `cohort registration`, and `cohort builder`, using the declared-dependencies Python with `-S -P -B`. The focused scanner command is saved verbatim in its plan and results.json. The helper action `cohort scanner` retains the interrupted broader roster for provenance; it is not the completed focused roster. Run `audit`, and run `compare` with the canary venv Python under its saved network-denied sandbox. Run `report` last. Outputs are exclusive-create and require fresh assigned evidence paths for replay.',
+              '- Reproduction: invoke the check helper with `cohort canary`, then `cohort manifest`, `cohort boundaries`, `cohort registration`, and `cohort builder`, using the declared-dependencies Python with `-S -P -B`. The focused scanner command is saved verbatim in its plan and results-v2.json. The helper action `cohort scanner` retains the interrupted broader roster for provenance; it is not the completed focused roster. Run `audit`, and run `compare` with the canary venv Python under its saved network-denied sandbox. Run `report` last. Outputs are exclusive-create and require fresh assigned evidence paths for replay.',
               '- Tables above are generated from saved JSON/JUnit by this committed report helper. No GitHub write, push, provider or native binary call occurred. Findings are handed to the lead for issue filing and publication.', '',
               '---', '', 'Earlier accepted continuation follows unchanged.', '']
     text = '\n'.join(lines).replace(chr(64), '[at-sign]')
     assert chr(64) not in text
-    original = HANDOFF.read_bytes()
-    (OUT / 'handoff-before.md').write_bytes(original)
+    original = (OUT / 'handoff-before.md').read_bytes()
+    superseded = OUT / 'handoff-initial-integration.md'
+    with superseded.open('xb') as stream:
+        stream.write(HANDOFF.read_bytes())
     HANDOFF.write_bytes(text.encode() + original)
     raw = HANDOFF.read_bytes()
     assert raw.endswith(original) and raw.startswith(text.encode())
-    save(OUT / 'handoff-identity.json', {'path': str(HANDOFF), 'sha256': sha(raw),
+    save(OUT / 'handoff-identity-v2.json', {'path': str(HANDOFF), 'sha256': sha(raw),
          'bytes': len(raw), 'previous_sha256': sha(original), 'head': commit,
          'tested_head': tested, 'delivery_delta': delta})
-    print(json.dumps(load(OUT / 'handoff-identity.json'), indent=2))
+    print(json.dumps(load(OUT / 'handoff-identity-v2.json'), indent=2))
 
 
 def main():
