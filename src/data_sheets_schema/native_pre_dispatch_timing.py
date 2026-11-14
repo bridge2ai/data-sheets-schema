@@ -5,13 +5,16 @@ when its outer scope exits, after its outcome and freshness decisions and after
 registration locks have unwound, through a bounded nonblocking handoff to a
 daemon writer. Never write into the closed capture tree or consume an attempt.
 Queue contention, capacity, I/O failure or process exit may drop diagnostics;
-missing records mean unknown durations. Callers never join the writer.
+missing records mean unknown durations. Only interpreter exit joins the writer,
+for at most two seconds. Written rows carry a process-local cumulative drop count.
 """
 from contextlib import contextmanager
 from contextvars import ContextVar
+import atexit
 import fcntl
 import hashlib
 import json
+import itertools
 import os
 from pathlib import Path
 from collections import deque
@@ -28,9 +31,29 @@ MAX_QUEUED_TRACES = 8
 _pending = deque()
 _writer_lock = threading.Lock()
 _writer = None
+_drop_sequence = itertools.count(1)
+_dropped_traces = 0
+
+
+def _note_drop(trace):
+    global _dropped_traces
+    if not trace.drop_recorded:
+        trace.drop_recorded = True
+        _dropped_traces = next(_drop_sequence)
+
+
+def _finish_writer():
+    writer = _writer
+    if writer is not None:
+        writer.join(timeout=2)
+
+
+atexit.register(_finish_writer)
 
 
 def _drop(trace):
+    if trace.pending or trace.disabled:
+        _note_drop(trace)
     trace.disabled = True
     trace.pending.clear()
     trace._persisted.set()
@@ -97,6 +120,7 @@ class Trace:
         self.path = None
         self.pending = []
         self.disabled = False
+        self.drop_recorded = False
         self.sealed = False
         self.sequence = 0
         self.trace_id = f'{os.getpid()}-{time.monotonic_ns()}'
@@ -114,10 +138,12 @@ class Trace:
                 raise ValueError('pre-dispatch timing buffer bound')
             self.pending.append(raw)
         except InterruptedError:
+            _note_drop(self)
             self.disabled = True
             self.pending.clear()
             raise
         except Exception:
+            _note_drop(self)
             self.disabled = True
             self.pending.clear()
 
@@ -154,7 +180,9 @@ class Trace:
                 if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_nlink != 1:
                     raise ValueError('unsafe diagnostic file')
                 fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                body = b''.join(self.pending)
+                body = b''.join(json.dumps({**json.loads(raw),
+                    'dropped_traces_total': _dropped_traces}, sort_keys=True,
+                    separators=(',', ':')).encode() + b'\n' for raw in self.pending)
                 if os.fstat(fd).st_size + len(body) > MAX_BYTES:
                     raise ValueError('pre-dispatch timing file bound')
                 if os.write(fd, body) != len(body):
@@ -163,9 +191,11 @@ class Trace:
                 os.close(fd)
         except InterruptedError:
             self.disabled = True
+            _note_drop(self)
             raise
         except Exception:
             self.disabled = True
+            _note_drop(self)
         finally:
             self.pending.clear()
             self._persisted.set()
