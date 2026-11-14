@@ -447,8 +447,10 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
             raise ValueError('verified loader did not load the closed validator graph')
         guard = _ValidatorGuard(validator_modules.values(), source_check,
             (composition_raw, preparation_raw, c.canonical(arguments)))
-        capture_inputs._PREFIX_OWNERS[admitted] = capture_inputs._PrefixOwner(guard)
+        prefix = capture_inputs._PrefixOwner(guard, admitted)
+        capture_inputs._PREFIX_OWNERS[admitted] = prefix
         stack.callback(capture_inputs._PREFIX_OWNERS.pop, admitted, None)
+        stack.callback(prefix.close)
         paths = frozen._agentic_artifact_paths
         phase = modules['native_shared_phase'].PhaseState(rendered_commands,
             full_path=paths['full'], core_path=paths['core'], report_path=paths['report'],

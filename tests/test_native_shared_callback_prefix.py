@@ -236,3 +236,16 @@ def test_all_resumed_stage_decisions_equal_independent_full_replay(case, monkeyp
     assert {'await_core', 'request_ready', 'awaiting_response', 'assembly_complete'} <= set(compared)
     assert all(value[0].state != 'assembly_complete' for key, value in transaction.pending.items()
                if key[0] == 'decision')
+
+
+def test_retained_transaction_cannot_reuse_after_owner_closes(advance):
+    owner = owner_api._PrefixOwner(guard_for(ModuleType('test_validator')))
+    run, _ = captured_run(advance)
+    checked(owner, run)
+    assert owner.semantic
+    owner.close()
+    assert not owner.semantic and owner.observation_state is None
+    with pytest.raises(ValueError, match='admission has closed'):
+        run._prefix.get(('decision', run.history.journal.pin))
+    with pytest.raises(ValueError, match='admission has closed'):
+        run._prefix.commit()

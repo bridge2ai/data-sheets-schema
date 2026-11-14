@@ -145,6 +145,7 @@ def main():
                                     targets['response'] = item.pin.path
                                 if item.pin.role == 'packet':
                                     targets['stage'] = item.pin.path
+                            assert {'response', 'stage'} <= set(targets), 'public evidence has not reached the required stage mutations'
                             for role, path in targets.items():
                                 target = Path(path)
                                 original = target.read_bytes()
@@ -164,6 +165,14 @@ def main():
                                 load()
                                 report['bytes'].append({'role': role, 'refusal': refusal,
                                     'restored_sha256': hashlib.sha256(original).hexdigest()})
+                assert first._prefix.owner.closed and not first._prefix.owner.semantic
+                try:
+                    first._prefix.owner.begin(first)
+                except ValueError as exc:
+                    assert 'admission has closed' in str(exc)
+                else:
+                    raise AssertionError('closed admission reused a retained owner')
+                report.setdefault('closed_owners', []).append(kind)
     finally:
         monitor.set_events(tool, 0)
         monitor.free_tool_id(tool)

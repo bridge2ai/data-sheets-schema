@@ -5,7 +5,7 @@ Neither an earlier replay verdict nor a mutable RunSpec is worker authority.
 """
 from dataclasses import dataclass
 from pathlib import Path
-from weakref import WeakKeyDictionary
+from weakref import WeakKeyDictionary, ref
 
 from . import native_shared_contract as c
 from . import native_shared_capture as captured
@@ -71,8 +71,10 @@ def require_admission(value):
 
 class _PrefixOwner:
     """One admission's bounded semantic checkpoints and irreversible byte anchors."""
-    def __init__(self, guard):
+    def __init__(self, guard, admission=None):
         self.guard = guard
+        self.admission = None if admission is None else ref(admission)
+        self.closed = False
         self.records = ()
         self.observations = ()
         self.streams = ()
@@ -81,7 +83,20 @@ class _PrefixOwner:
         self.observation_state = None
         self.epoch = 0
 
+    def check_active(self):
+        if self.closed:
+            raise ValueError('callback prefix admission has closed')
+        if self.admission is not None:
+            require_admission(self.admission())
+
+    def close(self):
+        self.closed = True
+        self.guard.disabled = True
+        self.semantic.clear()
+        self.observation_state = None
+
     def begin(self, run):
+        self.check_active()
         epoch = self.epoch
         records = tuple(item.pin for item in run.history.records)
         observations = tuple(item.pin for item in run.observations)
@@ -110,6 +125,7 @@ class _PrefixTransaction:
         self.observation_state = owner.observation_state if reusable else None
 
     def get(self, key):
+        self.owner.check_active()
         if not self.reusable:
             return None
         if not self.owner.guard.reusable():
@@ -120,11 +136,13 @@ class _PrefixTransaction:
         return self.pending.get(key, self.owner.semantic.get(key))
 
     def put(self, key, value):
+        self.owner.check_active()
         if self.reusable:
             self.pending[key] = value
 
     def commit(self):
         run, owner = self.run, self.owner
+        owner.check_active()
         if owner.epoch != self.epoch:
             raise ValueError('overlapping callback cannot replace a newer verified prefix')
         if self.reusable and not owner.guard.reusable():

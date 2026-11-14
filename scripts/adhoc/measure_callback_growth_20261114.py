@@ -20,7 +20,8 @@ OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 monitor = sys.monitoring
 tool = 0
 active = {}
-detail_names = {'_checked_observations', '_prepare_next', 'phase_replay', '_loaded', 'reconstruct', '_history'}
+detail_names = {'_checked_observations', '_prepare_next', 'phase_replay', '_loaded', 'reconstruct', '_history',
+                '_stage_uncached', '_derive_response_uncached'}
 names = {'_observe_event', '_classify_frame', 'read_regular', 'read_live_stream'} | detail_names
 stacks = {}
 snapshots = {}
@@ -35,7 +36,8 @@ def start(code, offset):
     filename = code.co_filename.rsplit('/', 1)[-1]
     thread = threading.get_ident()
     if code.co_name in detail_names:
-        if thread in active and filename.startswith('native_shared_'):
+        if thread in active and (filename.startswith('native_shared_') or
+                (filename == '__init__.py' and '/native_shared_stage/' in code.co_filename)):
             stacks.setdefault(thread, []).append((code, time.thread_time(), time.perf_counter()))
             local = sys._getframe(1).f_locals
             counts = active[thread]['verification_inputs']
@@ -90,6 +92,9 @@ def end(code, offset, value):
             detail['calls'] += 1
             detail['thread_cpu'] += time.thread_time() - cpu
             detail['wall'] += time.perf_counter() - wall
+            if code.co_name == '_checked_observations' and value is not UNWOUND:
+                counts = row['verification_inputs']
+                counts['new_observations_checked'] = counts.get('new_observations_checked', 0) + len(value)
             if code.co_name == '_loaded' and value is not UNWOUND:
                 frame = sys._getframe(1)
                 if frame.f_code is code:

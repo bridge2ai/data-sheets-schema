@@ -4,6 +4,7 @@ Input: current pinned package sources. Output: JSON graph in assigned scratch.
 """
 import json
 import sys
+import time
 from contextlib import ExitStack
 from pathlib import Path
 from data_sheets_schema import native_execution_authority_v2 as authority
@@ -39,6 +40,13 @@ def main():
                         print('Unsupported constant:', module.__name__, name, type(value).__name__)
         guard = callbacks._ValidatorGuard(modules, lambda: None, b'probe')
         print('Reusable:', guard.reusable())
+        started = time.thread_time()
+        for _ in range(100):
+            assert guard.reusable()
+        timing = {'iterations': 100, 'thread_cpu_seconds': time.thread_time() - started,
+                  'scope': 'verified-loader guard microbenchmark, not a callback measurement'}
+        output.with_suffix('.guard.json').write_text(json.dumps(timing, indent=2) + '\n')
+        print(json.dumps(timing))
 
 
 if __name__ == '__main__':
