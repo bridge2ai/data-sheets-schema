@@ -196,14 +196,16 @@ def test_v2_injected_transport_timeout_keeps_registered_limit_and_failure(execut
     """Inject the transport timeout; no native or Python peer is dispatched."""
     from data_sheets_schema import native_execution_orchestration as lifetime
     case = execution_case
+    from data_sheets_schema.native_runtime_profiles import SYNTHETIC_DEADLINE_SECONDS
     calls = []
     def timeout(controls, argv, **kwargs):
         calls.append((argv, kwargs['deadline_seconds']))
-        assert kwargs['deadline_seconds'] == case['value']['runtime']['deadline_seconds'] == 900
+        assert (kwargs['deadline_seconds'] == case['value']['runtime']['deadline_seconds']
+                == SYNTHETIC_DEADLINE_SECONDS)
         raise subprocess.TimeoutExpired(argv, kwargs['deadline_seconds'])
     monkeypatch.setattr(lifetime, '_execute_child', timeout)
     result = execute.synthetic_launch(case['raw'], **case['kwargs'])
-    assert calls == [(case['value']['argv'], 900)]
+    assert calls == [(case['value']['argv'], SYNTHETIC_DEADLINE_SECONDS)]
     assert result['state'] == 'failed' and result['runtime_gates_passed'] is False
     assert 'TimeoutExpired' in result['first_stop']
     assert result['subscription_guard']['dispatched'] is False
