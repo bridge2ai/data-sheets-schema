@@ -215,7 +215,7 @@ def _saved_authorizations(raw, value, started_raw, result, *, contract, file):
 
 
 def _admit_subscription_guard(guard, attempt, file, write):
-    """Consume exact saved admission after launch checks and before spawn."""
+    """Consume exact saved admission before stage activation and spawn."""
     if guard is None:
         return
     if file(attempt/'subscription-guard.json', 'subscription guard') != guard.raw:
@@ -489,7 +489,6 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                             or _file(attempt/'runtime-observation.json', 'runtime observation') != draft._encoded(observation)
                             or proxy.closed or proxy.failed.is_set()):
                         raise ValueError('native admission is closed or consumed identity changed')
-                    contract.activate_before_dispatch(adapter, started_raw)
                     _require_launch_profile(value['runtime'], expected_profile)
                     try:
                         host_power.dispatch_power()
@@ -500,6 +499,9 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                         stopped(reason)
                         raise controls['run_native_canary'].BudgetStop(reason) from exc
                     _admit_subscription_guard(launch_guard, attempt, _file, durable_new)
+                    # Keep one-use stage writes behind the consumed-guard checks.
+                    # A final check at actual Popen remains the separate 6207 gap.
+                    contract.activate_before_dispatch(adapter, started_raw)
                 observe = _guarded_observer(launch_guard, adapter, controls['run_native_canary'].BudgetStop)
                 status = _execute_child(controls, value['argv'], proxy=proxy,
                     instruction=Path(selected['instruction_path']), attempt=attempt,

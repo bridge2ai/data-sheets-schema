@@ -212,6 +212,8 @@ def test_unplug_after_reservation_retains_reading_without_consuming_dispatch(tmp
     attempt = Path(case['value']['attempt_directory'])
     assert attempt.is_dir() and not (attempt / 'subscription-dispatched.json').exists()
     assert (attempt / 'transcript.jsonl').read_bytes() == b''
+    assert all(not Path(case['selection'].role(role)).exists()
+               for role in ('execution_capture', 'started_capture', 'journal'))
     assert execute.read_final(case['raw']) == result
 
 
@@ -242,3 +244,74 @@ def test_slow_power_probe_cannot_age_an_already_checked_reservation_margin(tmp_p
     assert probes == [True]
     assert not Path(case['value']['attempt_directory']).exists()
     assert not Path(case['value']['evidence_directory']).exists()
+
+
+@pytest.mark.parametrize('defect', ['changed_consumed_guard', 'expired_after_power'])
+def test_dispatch_guard_refusal_precedes_stage_activation(tmp_path, monkeypatch, defect):
+    from tests.test_native_shared_execution import make_case
+    from data_sheets_schema import native_shared_execution_orchestration as execute
+    from data_sheets_schema import native_execution_authority_v2 as authority
+    from data_sheets_schema import native_execution_orchestration as engine
+    from data_sheets_schema import native_subscription_guard_v2 as subscription
+    monkeypatch.chdir(authority.ROOT)
+    case = make_case(tmp_path / 'guard-before-activation')
+    attempt = Path(case['value']['attempt_directory'])
+    stage_paths = [Path(case['selection'].role(role))
+                   for role in ('execution_capture', 'started_capture', 'journal')]
+    assert all(not path.exists() for path in stage_paths)
+    document = json.loads(Path(case['kwargs']['subscription_guard_path']).read_bytes())
+    captured = subscription._timestamp(document['captured_at'], 'synthetic capture time')
+    ticks = [captured + 1]
+    monkeypatch.setattr(subscription, '_now', lambda: ticks[0])
+    original_power = power.dispatch_power
+    original_execute = engine._execute_child
+    original_activate = engine.ExecutionContract.activate_before_dispatch
+    probes, activated, refused, entered = [], [], [], []
+    def observed_power():
+        reading = original_power()
+        probes.append(reading)
+        if defect == 'expired_after_power' and len(probes) == 2:
+            # Expire after launch_check's independent authority join, at the
+            # last power probe; only the consuming guard can catch this change.
+            ticks[0] = captured + document['max_age_seconds'] + 1
+        return reading
+    monkeypatch.setattr(power, 'dispatch_power', observed_power)
+    def activation(self, adapter, started_raw):
+        activated.append(True)
+        return original_activate(self, adapter, started_raw)
+    monkeypatch.setattr(engine.ExecutionContract, 'activate_before_dispatch', activation)
+    def checked_transport(controls, argv, **kwargs):
+        entered.append(True)
+        if defect == 'changed_consumed_guard':
+            consumed = attempt / 'subscription-guard.json'
+            consumed.write_bytes(consumed.read_bytes() + b' ')
+        runner = sys.modules['run_native_canary']
+        real_popen = runner.subprocess.Popen
+        def popen(command, *args, **named):
+            if list(command) == list(argv):
+                pytest.fail('refused guard reached child dispatch')
+            return real_popen(command, *args, **named)
+        with monkeypatch.context() as patch:
+            patch.setattr(runner.subprocess, 'Popen', popen)
+            try:
+                return original_execute(controls, argv, **kwargs)
+            except ValueError as exc:
+                refused.append(str(exc))
+                raise
+    monkeypatch.setattr(engine, '_execute_child', checked_transport)
+    if defect == 'changed_consumed_guard':
+        # Publication must also refuse the changed consumed evidence; never
+        # restore those bytes merely to manufacture a readable final record.
+        with pytest.raises(ValueError, match='consumed subscription guard changed before dispatch'):
+            execute.synthetic_launch(case['raw'], **case['kwargs'])
+        assert refused == ['consumed subscription guard changed before dispatch']
+    else:
+        result = execute.synthetic_launch(case['raw'], **case['kwargs'])
+        assert result['state'] == 'failed' and result['child_exit_code'] is None
+        assert result['subscription_guard']['dispatched'] is False
+        assert refused == ['subscription observation is stale or future-dated']
+        assert execute.read_final(case['raw']) == result
+    assert entered == [True] and len(probes) == 2
+    assert activated == [] and all(not path.exists() for path in stage_paths)
+    assert not (attempt / 'subscription-dispatched.json').exists()
+    assert (attempt / 'transcript.jsonl').read_bytes() == b''
