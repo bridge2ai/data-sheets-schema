@@ -58,6 +58,21 @@ def test_real_observation_consumer_keeps_two_phase_dependency_acyclic(prepared):
     assert runtime_module.validate_prepared_runtime(final) == final
 
 
+def test_bound_failure_marker_blocks_saved_readers_before_loading(prepared, monkeypatch):
+    from data_sheets_schema import native_shared_permission_orchestration as permission
+    marker = prepared['root'] / 'bound-failure.json'
+    marker.symlink_to(prepared['root'] / 'missing-failure-target')
+    monkeypatch.setattr(permission.authority, 'dependency_identity',
+                        lambda: pytest.fail('failed evidence reached authority loading'))
+    with pytest.raises(ValueError, match='bound-failure.json'):
+        sequence.validate_bound_probe(prepared['runtime'],
+                                      prepared['root'] / 'permission/permission-probe.json')
+    with pytest.raises(ValueError, match='bound-failure.json'):
+        sequence.validate_observation(prepared['path'])
+    with pytest.raises(ValueError, match='bound-failure.json'):
+        permission.verify_saved_probe(b'{}', expected={'runtime': prepared['runtime']})
+
+
 @pytest.mark.parametrize('field', ['model', 'effort', 'provider', 'auth', 'environment',
                                   'executable', 'deadline_seconds', 'budget_guard_usd', 'keep_awake'])
 def test_final_runtime_cannot_change_other_provisional_fields(prepared, field):
