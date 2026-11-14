@@ -331,7 +331,7 @@ def test_isolated_real_subprocess_uses_only_copied_fake_command(tmp_path, entry_
     for name in ('native_launch_sequence', 'native_subscription_guard', 'native_sequence_start', 'native_launch_entry',
                  'native_capture_words', 'native_subscription_guard_v2', 'native_u4b_policy',
                  # native_u4b_policy checks the registered limits pair (D143).
-                 'native_run_limits',
+                 'native_run_limits', 'native_path_identity',
                  'native_shared_runtime_values', 'native_runtime_profiles', 'native_host_power'):
         (package / (name + '.py')).write_bytes((seq.SOURCE_ROOT / 'src/data_sheets_schema' / (name + '.py')).read_bytes())
     (package / 'native_generation.py').write_text('''import json, hashlib, os, sys
