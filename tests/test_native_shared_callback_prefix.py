@@ -9,7 +9,8 @@ from data_sheets_schema import native_shared_callback_orchestration as guards
 from data_sheets_schema import native_shared_capture as capture
 from data_sheets_schema import native_shared_stage as stage
 from tests.test_native_shared_saved_advance import advance, captured_run
-from tests.test_native_shared_stages import case, artifact, respond, receipt_answer, publish, add_core
+from tests import test_native_shared_saved_advance as saved_fixture
+from tests.test_native_shared_stages import case, artifact, respond, receipt_answer, publish, add_core, full_roundtrip
 from tests.test_typed_audit import supplied
 
 
@@ -199,3 +200,39 @@ def test_older_transaction_cannot_rewind_newer_checkpoint(advance):
     with pytest.raises(ValueError, match='overlapping callback'):
         older._prefix.commit()
     assert anchors == (owner.records, owner.observations, owner.streams)
+
+
+def test_semantically_valid_rehashed_old_history_still_refuses(advance, monkeypatch):
+    owner = owner_api._PrefixOwner(guard_for(ModuleType('test_validator')))
+    original, _ = captured_run(advance)
+    checked(owner, original)
+    events = saved_fixture.events
+    def alternate_transport():
+        calls, control, extra = events()
+        calls[0]['uninterpreted_transport_marker'] = 'coherently replaced old bytes'
+        return calls, control, extra
+    monkeypatch.setattr(saved_fixture, 'events', alternate_transport)
+    replacement, _ = captured_run(advance)
+    assert len(capture._checked_observations(replacement)) == 3
+    with pytest.raises(ValueError, match='replaced its verified prefix'):
+        checked(owner, replacement)
+
+
+def test_all_resumed_stage_decisions_equal_independent_full_replay(case, monkeypatch):
+    owner = owner_api._PrefixOwner(guard_for(ModuleType('test_validator')))
+    transaction = owner_api._PrefixTransaction(owner, None, True)
+    catalogs = stage.nr._ReceiptCatalogContext()
+    full = stage.prepare_next
+    compared = []
+    def compare(*args):
+        expected = full(*args)
+        actual = stage._prepare_next(*args, catalogs, _prefix=transaction)
+        assert actual == expected
+        compared.append(actual.state)
+        return actual
+    monkeypatch.setattr(stage, 'prepare_next', compare)
+    completed, completion = full_roundtrip(case)
+    assert full(*completed).completion == completion
+    assert {'await_core', 'request_ready', 'awaiting_response', 'assembly_complete'} <= set(compared)
+    assert all(value[0].state != 'assembly_complete' for key, value in transaction.pending.items()
+               if key[0] == 'decision')

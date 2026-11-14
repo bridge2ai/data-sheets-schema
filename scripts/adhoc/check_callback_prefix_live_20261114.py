@@ -10,7 +10,7 @@ import hashlib
 import json
 from pathlib import Path
 import sys
-from types import ModuleType
+from types import MappingProxyType, ModuleType
 
 from data_sheets_schema import native_execution_authority_v2 as authority
 from data_sheets_schema import native_execution_registration_v2 as registration
@@ -22,6 +22,21 @@ from data_sheets_schema import native_shared_selection as selections
 
 def mutation(modules, kind):
     stage = modules['data_sheets_schema.native_shared_stage']
+    if kind == 'source':
+        path = Path(stage.__file__)
+        original = path.read_bytes()
+        path.write_bytes(original + b'\n')
+        def restore_source():
+            path.write_bytes(original)
+            assert path.read_bytes() == original
+        return restore_source
+    if kind == 'limit':
+        contract = modules['data_sheets_schema.native_shared_contract']
+        original = contract.HARD_LIMITS
+        changed = dict(original)
+        changed['failure_diagnostics_bytes'] -= 1
+        contract.HARD_LIMITS = MappingProxyType(changed)
+        return lambda: setattr(contract, 'HARD_LIMITS', original)
     if kind == 'alias':
         original = stage.typed
         changed = ModuleType(original.__name__)
@@ -75,7 +90,7 @@ def main():
                 execution = registration.verified(raw, classifier_projection=projection)
             composition, spec, selection = controller.reconstruct_composition(
                 execution['composition_raw_json'].encode())
-            for kind in ('alias', 'default', 'closure', 'bytes'):
+            for kind in ('alias', 'default', 'closure', 'limit', 'source', 'bytes'):
                 with callbacks.preloaded_callbacks(composition, spec, selection, execution, raw,
                         controller.render.commands(spec)) as resources:
                     with ThreadPoolExecutor(max_workers=1) as worker:
@@ -97,18 +112,29 @@ def main():
                         if kind != 'bytes':
                             modules = {m.__name__: m for m in first._prefix.owner.guard.modules}
                             restore = mutation(modules, kind)
+                            refusal = None
+                            full_count = None
                             try:
-                                changed = load()
-                                assert not changed._prefix.reusable
-                                assert checked[-1] == len(changed.observations)
-                                full_count = checked[-1]
+                                if kind == 'source':
+                                    try:
+                                        load()
+                                    except ValueError as exc:
+                                        refusal = str(exc)
+                                    else:
+                                        raise AssertionError('changed source was accepted')
+                                else:
+                                    changed = load()
+                                    assert not changed._prefix.reusable
+                                    assert checked[-1] == len(changed.observations)
+                                    full_count = checked[-1]
                             finally:
                                 restore()
                             restored = load()
                             assert not restored._prefix.reusable
                             assert checked[-1] == len(restored.observations)
                             report['bindings'].append({'kind': kind, 'full_observations': full_count,
-                                'restored_full_observations': checked[-1], 'reuse_stays_disabled': True})
+                                'restored_full_observations': checked[-1], 'reuse_stays_disabled': True,
+                                'refusal': refusal})
                         else:
                             targets = {'transcript': first.transcript.path, 'control': first.control.path,
                                 'journal': first.history.journal.pin.path,
