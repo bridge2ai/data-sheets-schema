@@ -21,6 +21,8 @@ def main():
     root = Path.cwd().resolve()
     base = 'b35e264571a4e8ba6f152b7fc7053c35758d6823'
     head = git('rev-parse', 'HEAD').decode().strip()
+    code_head = git('log', '-1', '--format=%H', '--', 'src', 'tests').decode().strip()
+    assert not git('diff', code_head, '--', 'src', 'tests')
     public = scratch / 'prefix-final-correction'
     public_result = junit(public / 'junit.xml')
     assert public_result['counts']['failures'] == 1
@@ -48,7 +50,7 @@ def main():
         previous, current = sha(git('show', base + ':' + path)), sha((root / path).read_bytes())
         assert previous == current
         unchanged.append({'path': path, 'base_sha256': previous, 'current_sha256': current})
-    evidence = {'head': head, 'base': base, 'public': public_result,
+    evidence = {'head': head, 'tested_code_head': code_head, 'base': base, 'public': public_result,
         'callback_metric_files': [str(path) for path in metrics],
         'unchanged_failure_path': unchanged, 'suites': suites,
         'host_load_start': (public / 'host-load-start.txt').read_text().strip(),
@@ -91,6 +93,7 @@ def main():
         'Base comparison of the failure: the three source files in its path are byte-identical to the assignment base, as recorded in ' + str(evidence_path) + '. The existing chronology regression passes with candidate modules and with assignment-base replacements. This is a component comparison, not a matched full public test on the base. The earlier baseline correction run failed later at its deadline and remains a separate measurement.', '',
         'Implementation', '',
         'Local head: ' + head + '. Branch: codex/native-callback-growth-20261114. No push, PR, GitHub write, provider call or native binary call was made. The public fixture uses its existing ordinary-Python synthetic peer.', '',
+        'Tested source/test revision: ' + code_head + '. Later commits contain only review/provenance changes; source and tests still match that revision.', '',
         'The separate weak-admission owner keeps exact byte anchors, causal observation state, compact completed-stage deltas and exact-input derivations only in controller memory. Every callback still reconstructs admission, checks source/input pins, rereads prior streams and artifacts, and proves exact record/observation prefix extension. Failed suffixes cannot publish checkpoints. Source, binding or limit drift disables reuse for the attempt while retaining byte anchors. Closure clears semantic state and rejects retained transaction access.', '',
         'The closed guard includes verified source identities, composition/policy data, bounds, interpreter identity, effective module/function/class/method bindings, function code/default/keyword-default/closure identities and class methods. Unknown package graph entries refuse. No new binding baseline is adopted after drift.', '',
         'Standalone helpers, saved evidence and final completion retain full replay. No semantic state is stored in a receipt catalog token. Predicted journal bytes are regenerated rather than retained per checkpoint. All protected files, pins, deadlines, observer timeouts, freshness limits and windows remain unchanged.', '',
