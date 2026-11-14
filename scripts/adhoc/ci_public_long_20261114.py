@@ -81,3 +81,22 @@ elif sys.argv[1] == 'finish':
     replace('.github/workflows/main.yaml',
         '# Every PR runs the complete suite, including the committed corpus (#1361).',
         '# PRs include the committed corpus; long native completion runs on main/manual.')
+elif sys.argv[1] == 'summarize':
+    import xml.etree.ElementTree as ET
+    from collections import Counter
+    scratch = Path(sys.argv[2])
+    for filename in ('results.xml', 'final-workflow.xml'):
+        root = ET.parse(scratch / filename).getroot()
+        counts = {}
+        for case in root.iter('testcase'):
+            status = 'failed' if case.find('failure') is not None else ('error' if case.find('error') is not None else ('skipped' if case.find('skipped') is not None else 'passed'))
+            counts.setdefault(case.attrib['classname'], Counter())[status] += 1
+            failure = case.find('failure')
+            if failure is not None:
+                print(filename, 'failure:', case.attrib['name'], failure.attrib.get('message'))
+        for name, result in counts.items():
+            print(filename, name, dict(result))
+    handoff = Path(sys.argv[3])
+    assert chr(64) not in handoff.read_text()
+    assert handoff.stat().st_size > 0
+    print('Handoff SHA-256:', hashlib.sha256(handoff.read_bytes()).hexdigest())
