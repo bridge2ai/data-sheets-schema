@@ -315,6 +315,63 @@ def close_tests(identity, ledger_name, requirements, directories, head, evidence
     return 'All required cases passed in retained exit-0, source-equivalent invocations; full files required where specified.'
 
 
+def close_engine_freshness(directories, head, evidence, details):
+    identity = 'G2-REVIEW-ENGINE-FRESHNESS-F1'
+    original = ledger(identity, 'review-engine-freshness.json', evidence)
+    finding, = [row for row in original['findings'] if row['finding_id'] == identity]
+    file = 'tests/test_native_shared_execution_failure.py'
+    expected = {
+        'test_v2_publication_failure_preserves_first_error[published.json]',
+        'test_v2_injected_transport_timeout_keeps_registered_limit_and_failure',
+        'test_v2_publication_failure_preserves_first_error[final.json]',
+    }
+    module = file[:-3].replace('/', '.')
+    require(original['cohort'] == 'final-engine-dependents'
+            and original['outcome']['returncode'] == 2
+            and original['outcome']['counts'] == {'total': 241, 'failed': 3, 'error': 0, 'skipped': 0}
+            and finding['required_clean_full_file'] == file,
+            'original interrupted freshness finding differs')
+    checked_pin(original['producer'], evidence)
+    for pair in [*original['artifacts'].values(), original['cleanup']]:
+        for key in ('original', 'snapshot'):
+            checked_pin(pair[key], evidence)
+    for pair in original['reviewed_sources'].values():
+        checked_pin(pair['snapshot'], evidence)
+        require(all(pair['snapshot'][key] == pair['original'][key] for key in ('bytes', 'sha256')),
+                'historical source snapshot differs from its recorded original')
+    cleanup = document(original['cleanup']['snapshot']['path'], evidence)
+    require(cleanup['status'] == 'cleanup-confirmed'
+            and cleanup['safe_to_release_source_freeze'] is True
+            and all(row['original_reaped'] for row in [cleanup['runner'], cleanup['coordinator'],
+                    *cleanup['workers'], *cleanup['observed_descendants']]),
+            'original cohort cleanup is unconfirmed')
+    recorded_cases = finding['cases']
+    require(len(recorded_cases) == 3 and {row['name'] for row in recorded_cases} == expected
+            and all(row['classname'] == module and row['nodeid'] == file + '::' + row['name']
+                    for row in recorded_cases), 'original exact failed identities differ')
+    for row in recorded_cases:
+        for key, artifact in row['evidence'].items():
+            if key == 'artifact_inventory':
+                checked_pin(artifact, evidence)
+            else:
+                checked_pin(artifact['original'], evidence)
+                checked_pin(artifact['snapshot'], evidence)
+    proof = test_proof(file, None, directories, head, evidence)
+    rows = cases(OUT / proof['cohort'] / 'pytest.xml')
+    exact = [row for row in rows if row['classname'] == module and row['name'] in expected]
+    require(len(exact) == 3 and {row['name'] for row in exact} == expected
+            and all(row['status'] == 'passed' for row in exact),
+            'the three exact failed parameter identities did not all pass')
+    details.extend([proof, {'exact_failed_identities_passed': sorted(expected),
+        'original_interrupted_cohort': original['cohort'], 'original_source_head': original['source_head'],
+        'original_returncode': 2, 'original_junit_entries': 241,
+        'original_log_passes': 237, 'original_failures': 3,
+        'cause_established': False, 'source_correction_claimed': False}])
+    return ('Required clean whole-file rerun verified in its recorded execution mode; '
+            'original parallel failures and interrupted evidence retained, latency cause unresolved, '
+            'no code correction claimed; lead filing remains required.')
+
+
 def close_legacy_rerun(identity, directories, head, evidence, details):
     original = ledger(identity, 'review-legacy-component-failures-v2.json', evidence)
     finding, = [row for row in original['findings'] if row['finding_id'] == identity]
@@ -600,7 +657,7 @@ def close_scheduled_runner(evidence, details):
 def close_report(evidence, details):
     identity = 'G2-REVIEW-REPORT-F1'
     ledger(identity, 'review-report.json', evidence)
-    result = document(OUT / 'report-closure-pin-verification-after-scheduled-runner/result.json', evidence)
+    result = document(OUT / 'report-closure-pin-verification-after-engine-freshness/result.json', evidence)
     require(result['finding_id'] == identity and result['status'] == 'verified'
             and result['verified_entrypoint'] == 'review_ledger',
             'report closure-pin verification is incomplete')
@@ -622,7 +679,7 @@ def close_report(evidence, details):
 def close_report_discovery(evidence, details):
     identity = 'G2-REVIEW-REPORT-F2'
     ledger(identity, 'review-report-f2.json', evidence)
-    result = document(OUT / 'report-cohort-discovery-after-scheduled-runner/result.json', evidence)
+    result = document(OUT / 'report-cohort-discovery-after-engine-freshness/result.json', evidence)
     require(result['finding_id'] == identity and result['status'] == 'verified',
             'cohort discovery verification is incomplete')
     for name in ('reporter', 'closure', 'producer', 'ledger'):
@@ -643,7 +700,7 @@ def close_report_discovery(evidence, details):
 def close_auxiliary_discovery(evidence, details):
     identity = 'G2-REVIEW-REPORT-F4'
     ledger(identity, 'review-report-f4.json', evidence)
-    result = document(OUT / 'report-auxiliary-discovery-verification-after-scheduled-runner/result.json', evidence)
+    result = document(OUT / 'report-auxiliary-discovery-verification-after-engine-freshness/result.json', evidence)
     require(result['finding_id'] == identity and result['status'] == 'verified',
             'auxiliary discovery verification is incomplete')
     for key in ('reporter', 'closure', 'producer', 'ledger', 'auxiliary_outcome'):
@@ -698,7 +755,7 @@ def close_bytecode(evidence, details):
 def close_bytecode_pins(evidence, details):
     identity = 'G2-REVIEW-REPORT-F3'
     ledger(identity, 'review-report-f3.json', evidence)
-    result = document(OUT / 'bytecode-closure-pin-verification-after-scheduled-runner/result.json', evidence)
+    result = document(OUT / 'bytecode-closure-pin-verification-after-engine-freshness/result.json', evidence)
     require(result['finding_id'] == identity and result['status'] == 'verified'
             and result['verified_entrypoint'] == 'close_bytecode',
             'bytecode closure-pin verification is incomplete')
@@ -837,6 +894,11 @@ def main():
     proofs[identity] = details
     identity = 'G2-REVIEW-6217-F4'
     row, details = close(identity, lambda evidence, details: close_publication_oracle(
+        directories, head, evidence, details))
+    findings.append(row)
+    proofs[identity] = details
+    identity = 'G2-REVIEW-ENGINE-FRESHNESS-F1'
+    row, details = close(identity, lambda evidence, details: close_engine_freshness(
         directories, head, evidence, details))
     findings.append(row)
     proofs[identity] = details

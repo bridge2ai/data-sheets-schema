@@ -76,7 +76,7 @@ REVIEW_FILES = ('review-6208.json', 'review-followups.json', 'review-runner.json
                 'proposal-6217-implementation/review-6217-superseding.json',
                 'review-6217-f3-withdrawn-frozen.json',
                 'review-legacy-component-failures-v2.json', 'review-bytecode.json', 'review-report-f3.json', 'review-6217-f4-confirmed.json',
-                'scheduled-runner-review-20261114/correction.json')
+                'scheduled-runner-review-20261114/correction.json', 'review-engine-freshness.json')
 
 
 def git(*args):
@@ -488,6 +488,8 @@ def review_ledger(regressions, coverage):
             proof.append(coverage['tests/test_native_publication_signals.py'])
         if identity == 'G2-REVIEW-6218-F2':
             proof = [coverage[name] for name in ('tests/test_native_u4b_a3_reservation.py', 'tests/test_native_u3k_freshness_order.py')]
+        if identity == 'G2-REVIEW-ENGINE-FRESHNESS-F1':
+            proof = [coverage['tests/test_native_shared_execution_failure.py']]
         if identity in ('G2-REVIEW-LEGACY-F1', 'G2-REVIEW-LEGACY-F2'):
             proof = [coverage[finding['required_clean_full_file']]]
         declaration = declared.get(identity)
@@ -502,6 +504,10 @@ def review_ledger(regressions, coverage):
             'reported_status': 'disputed/withdrawn after source check; no fix required; lead filing retained' if withdrawn
                 else 'required clean rerun verified; original failure and undetermined cause retained; lead filing retained'
                     if closed and identity in ('G2-REVIEW-LEGACY-F1', 'G2-REVIEW-LEGACY-F2')
+                else 'required clean whole-file rerun verified; original three freshness failures and unknown latency cause retained; no code correction claimed; lead filing required'
+                    if closed and identity == 'G2-REVIEW-ENGINE-FRESHNESS-F1'
+                else 'whole-file rerun pending; original three freshness failures and interrupted cohort retained; latency cause unknown; lead filing required'
+                    if identity == 'G2-REVIEW-ENGINE-FRESHNESS-F1'
                 else 'scheduled canary verified; static correction retained; lead filing required'
                     if closed and identity == 'G2-REVIEW-SCHEDULED-RUNNER-F1'
                 else 'static correction retained; scheduled canary runtime verification pending; lead filing required'
@@ -593,7 +599,7 @@ def main():
     check_nested_pins(inventory)
     assert inventory['passed'] == sum(row['passed'] is True for row in inventory['cases'])
     assert inventory['failed'] == sum(row['passed'] is not True for row in inventory['cases'])
-    report_verification_path = SCRATCH / 'report-closure-pin-verification-after-scheduled-runner/result.json'
+    report_verification_path = SCRATCH / 'report-closure-pin-verification-after-engine-freshness/result.json'
     report_verification = read_json(report_verification_path)
     check_nested_pins(report_verification)
     assert report_verification['reporter'] == pin(Path(__file__).resolve())
@@ -608,6 +614,13 @@ def main():
     assert all(row['original_reaped'] is True for row in (
         oracle_cleanup['coordinator'], oracle_cleanup['runner'], *oracle_cleanup['workers'],
         *oracle_cleanup['observed_descendants']))
+    freshness_cleanup_path = SCRATCH / 'final-engine-freshness-interruption/cleanup-1794646795499479000.json'
+    freshness_cleanup = read_json(freshness_cleanup_path)
+    check_nested_pins(freshness_cleanup)
+    assert freshness_cleanup['status'] == 'cleanup-confirmed' and freshness_cleanup['safe_to_release_source_freeze'] is True
+    assert all(row['original_reaped'] is True for row in (
+        freshness_cleanup['coordinator'], freshness_cleanup['runner'], *freshness_cleanup['workers'],
+        *freshness_cleanup['observed_descendants']))
     issues = []
     for issue in ISSUES:
         linked = [row for row in history if issue in row['issues']]
@@ -639,6 +652,7 @@ def main():
         'report_revision_verification': {'record': report_verification, 'evidence': pin(report_verification_path)},
         'interrupted_cohort_cleanup': {'record': interruption, 'evidence': pin(interruption_path)},
         'publication_oracle_interruption': {'record': oracle_cleanup, 'evidence': pin(oracle_cleanup_path)},
+        'engine_freshness_interruption': {'record': freshness_cleanup, 'evidence': pin(freshness_cleanup_path)},
         'runner_inventory_verification': {'record': inventory, 'evidence': pin(inventory_path)},
         'runner': pin(ROOT / 'scripts/adhoc/run_g2_checks_20261114.py'),
         'environment': {'report_python': sys.version, 'platform': sys.platform,
