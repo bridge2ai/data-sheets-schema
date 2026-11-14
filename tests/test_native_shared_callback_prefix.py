@@ -301,3 +301,23 @@ def test_decision_changed_input_and_guard_drift_force_whole_replay(case, monkeyp
     with pytest.raises(ValueError, match='validator changed'):
         capture._stage_decision(*case, catalogs, _prefix=transaction)
     assert not owner.semantic and not transaction.pending
+
+
+def test_input_extensions_replace_one_decision_slot_without_retaining_histories(case):
+    owner = owner_api._PrefixOwner(guard_for(ModuleType('test_validator')))
+    transaction = owner_api._PrefixTransaction(owner, None, True)
+    catalogs = stage.nr._ReceiptCatalogContext()
+    history = case[3]
+    for index in range(40):
+        # Unreferenced pure-stage inputs test storage replacement only; these
+        # are not admitted causal observations or callback CPU evidence.
+        extra = artifact('observation', case[0].role('observations_root') + f'/{index + 10:06d}.json',
+                         stage.c.canonical({'unreferenced_fixture_observation': index}))
+        history = replace(history, observations=history.observations + (extra,))
+        actual = capture._stage_decision(*case[:3], history, catalogs, _prefix=transaction)
+        assert actual.state == 'request_ready'
+        assert len(transaction.pending) == 1
+        identity, decision, journal = next(iter(transaction.pending.values()))
+        assert type(identity) is str and len(identity) == 64
+        assert all(pub.artifact.pin.role != 'journal' for pub in decision.publications)
+        assert journal is not None
