@@ -211,7 +211,7 @@ def test_legacy_producer_cannot_borrow_integrated_dispatcher(route_root, legacy_
     _, legacy, _ = _parts(path, '_prepare')
     for before, after in (
         (b'def _prepare(', b'def prepare('),
-        (b', expected_profile):', b'):'),
+        (b'max_draft_checks, expected_profile,', b'max_draft_checks,'),
         (b'    from .native_runtime_profiles import profile_name\n'
          b'    if profile_name(runtime) != expected_profile:\n'
          b"        raise ValueError('preparation entry differs from the explicitly selected runtime profile')\n", b''),
@@ -223,7 +223,7 @@ def test_legacy_producer_cannot_borrow_integrated_dispatcher(route_root, legacy_
     path.write_bytes(prefix + legacy + suffix)
     if legacy_import:
         _change(path, None, CURRENT_IMPORT, LEGACY_IMPORT)
-    diagnostic = ('v2 render function escapes its fixed direct callers: prepare' if legacy_import
-                  else 'v2 producer import is not exact: validate_runtime')
-    with pytest.raises(scan.ConfigError, match=diagnostic):
+    # A v3 CLI must match the full production preparer family. It now refuses
+    # this borrowed unguarded body before considering the runtime import.
+    with pytest.raises(scan.ConfigError, match='unsupported v2 render producer: prepare'):
         _derive(route_root)
