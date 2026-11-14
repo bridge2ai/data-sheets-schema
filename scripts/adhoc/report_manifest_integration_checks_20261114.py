@@ -20,16 +20,19 @@ REQUIRED = ('manifest', 'manifest-boundaries', 'registration', 'builder', 'reten
 def classify(detail):
     if 'own distribution exclusion requires the exact pinned project namespace' in detail:
         return 'mixed project namespace; manifest refuses before later validation'
-    if 'unsupported v2 render producer: prepare' in detail:
-        return 'scanner v2 producer AST rejects v3 preparation; not a pin-only failure'
+    # Match the actual CLI exception before text quoted by an expected regex.
     if 'unsupported v2 render producer: render_native_shared' in detail:
         return 'scanner v2 CLI AST rejects v3 CLI; not a pin-only failure'
+    if 'unsupported v2 render producer: prepare' in detail:
+        return 'scanner v2 producer AST rejects v3 preparation; not a pin-only failure'
     if 'unsupported v2 render CLI' in detail:
         return 'scanner v2 CLI AST rejects v3 CLI; not a pin-only failure'
     if 'v2 envelope authority source changed' in detail:
         return 'scanner source pin refusal; later checks unverified'
     if '00b0f717' in detail and 'f865fea7' in detail:
         return 'direct H1 authority hash assertion; unapplied pin rotation, later scanner proof unverified'
+    if 'D128 requires the exact approved scanner assets' in detail:
+        return 'D128 historical scanner-asset approval differs; predates this merge; complete array comparison unexecuted'
     return 'inspect saved traceback; not attributed solely to pins'
 
 
@@ -113,6 +116,7 @@ def handoff(scratch, destination):
         'pin-inventory.json', 'pin-proposal-review-only.diff', 'excluded-files.md',
         'merge-file-inventory.json', 'merge-commit.log', 'namespace-witness.json',
         'controller-verification.json',
+        'd128-asset-comparison.json',
         'merge-canary.log', 'merge-canary.xml', 'prefix-canary.log', 'prefix-canary.xml']
     for name in required:
         assert (scratch / name).is_file() and (scratch / name).stat().st_size
@@ -124,6 +128,9 @@ def handoff(scratch, destination):
         assert (ROOT / row['target']).is_file()
     rotated = pins['proposed_rotations']
     changed = rotated[0]
+    d128 = read('d128-asset-comparison.json')
+    assert d128['candidate_mismatches'] == d128['merged_mismatches']
+    assert all(row['candidate_sha256'] == row['working_sha256'] for row in d128['assets'])
     status = ', '.join(str(count) + ' ' + state for state, count in tests['totals'].items())
     text = f'''Merge done: committed merge of `{inventory['incoming']}` into `{inventory['candidate']}`, with {len(conflicts)} conflicted files resolved. No pinned value was changed. Two review-only references to the authority source digest need `{changed['current_pin']}` to become `{changed['proposed_pin']}`: the integrated specificity-scanner summary and its H1 assertion. Controller manifests, SOURCES_SHA256, the wire controller pin, and CONTROL_SHA remain exact and unchanged. Version 3 is implemented in the merged constructors and adapted builder/rehearsals, but is **not end-to-end verified or ready for acceptance**: the mandated interpreter exposes two project namespaces, and the scanner has v2-only structural contracts. The observed failures are not all pin-only.
 
@@ -149,6 +156,8 @@ Read-only review findings for the lead to file/triage (GitHub writes are outside
 
 1. The mandated interpreter's data_sheets_schema.pth contributes the primary checkout alongside this worktree. The saved namespace witness lists both roots and the exact .pth hash. The manifest correctly refuses its own-project exclusion. Do not remove that refusal or edit the primary environment to obtain a pass. Recommendation: approve a separately isolated interpreter/import environment, as used by the manifest owner's runner, and rerun the v3 prefix, preparation, dispatch and full-chain checks there. That environment change was not made here.
 2. The current scanner compares the CLI and preparer against exact v2 AST templates before checking its integrated source hashes. V3 adds the required manifest argument and field and changes the closed wire vocabulary. Recommendation: review a v3 structural proof and negative mutation tests first; then the lead can apply the identity proposal. The proposal below is a necessary identity update, not a claim that changing hashes fixes the scanner. Historical v2 summaries must remain historical.
+3. The D128 final-composition comparison refuses the exact approved scanner assets before scanning either tree. This hold already exists at the candidate commit: the approval fixture and every current scanner asset are unchanged by this merge. The candidate and merged mismatch rosters are equal; `{scratch / 'd128-asset-comparison.json'}` records the approved, candidate and merged hashes. Preserve the historical approval and obtain a reviewed successor comparison; changing its digest alone would not establish the ordered finding-array requirements.
+4. Resolved integration documentation omission: the draft runbook did not list the new manifest output or required preparation argument. Its output list and preparation step now name the prefix manifest and v3 document contract. No operational command was executed from the runbook.
 
 Pin proposal (unapplied): `{scratch / 'pin-proposal-review-only.diff'}`. Full old/current/proposed values, including every controller manifest module and both effective scanner summaries, follow. The historical base summary intentionally retains its historical values even where they differ from current source. The changed authority source restores the caller's sys.path after loading the exact pinned helpers, before yielding controls; its source-only finder remains active.
 

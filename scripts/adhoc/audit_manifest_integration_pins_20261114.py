@@ -91,10 +91,23 @@ def main():
         old, new = be(b[summary]), ae(a[summary])
         for target, value in new.items():
             row(SCAN + ':' + summary, target, old[target], value, historical=summary == SUMMARIES[0])
+    approval_path = 'tests/fixtures/native_d128_approved.json'
+    old_approval, approval = json.loads(before(approval_path)), json.loads(current(approval_path))
+    d128_assets = []
+    for target, value in approval['tool_assets_sha256'].items():
+        row(approval_path + ':tool_assets_sha256', target,
+            old_approval['tool_assets_sha256'][target], value, historical=True)
+        d128_assets.append(rows[-1])
+    assert before(approval_path) == current(approval_path)
+    d128 = {'fixture': approval_path, 'fixture_sha256': sha(current(approval_path)),
+        'assets': d128_assets,
+        'candidate_mismatches': [r['target'] for r in d128_assets if r['current_pin'] != r['candidate_sha256']],
+        'merged_mismatches': [r['target'] for r in d128_assets if r['current_pin'] != r['working_sha256']]}
+    (scratch / 'd128-asset-comparison.json').write_text(json.dumps(d128, indent=2) + '\n')
     protected = {path: {'candidate': sha(before(path)), 'working': sha(current(path))} for path in PROTECTED}
     assert all(item['candidate'] == item['working'] for item in protected.values())
     report = {'candidate': args.candidate, 'head': git('rev-parse', 'HEAD').decode().strip(),
-        'rows': rows, 'protected': protected, 'applied_rotations': 0,
+        'rows': rows, 'protected': protected, 'd128': d128, 'applied_rotations': 0,
         'pin_changes': [r for r in rows if r['pin_changed_by_merge']],
         'proposed_rotations': [r for r in rows if r['proposed_pin'] != r['current_pin']]}
     # Do not update historical summaries. This diff is necessary identity review
