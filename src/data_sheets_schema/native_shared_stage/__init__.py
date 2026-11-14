@@ -431,9 +431,9 @@ class _Replay:
         try:
             envelope, outputs = self._derive_response(cursor, inner, response.raw)
         except ValueError as exc:
-            self._expect('failed', _failure_payload(cursor, request_hash, response.pin.sha256, exc))
-            self.failure = _failure_payload(cursor, request_hash, response.pin.sha256, exc)
-            return False
+            raise ValueError(
+                f'native checked stage no longer reconstructs from its first consumed response: {exc}'
+            ) from exc
         checked = {'cursor': asdict(cursor), 'request_sha256': request_hash,
             'response_sha256': response.pin.sha256, 'outputs': [c.pin_dict(item.pin) for item in outputs],
             'derived_response': None if envelope is None else _envelope(envelope)}

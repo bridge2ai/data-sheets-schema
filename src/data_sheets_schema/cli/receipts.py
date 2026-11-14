@@ -218,19 +218,9 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
     from data_sheets_schema import receipt_completion_policy as cp
     # A native claim demands reconstruction; it never grants permission. The
     # exact integer-zero axis alone is the ordinary API/default declaration.
-    recorded_native_claim = False
-    if record is not None:
-        recorded_native_claim = native_capture is not None or 'native_shared_generation' in record
-        prompts = record.get('prompts')
-        request = prompts.get('request') if isinstance(prompts, dict) else None
-        recorded_spec = request.get('spec') if isinstance(request, dict) else None
-        if isinstance(recorded_spec, dict):
-            native_keys = {key for key in recorded_spec
-                           if isinstance(key, str) and key.startswith('native_shared_')}
-            neutral_axis = (native_keys == {'native_shared_generation_version'}
-                            and type(recorded_spec['native_shared_generation_version']) is int
-                            and recorded_spec['native_shared_generation_version'] == 0)
-            recorded_native_claim = recorded_native_claim or (bool(native_keys) and not neutral_axis)
+    recorded_native_claim = record is not None and (
+        native_capture is not None or cp.record_claims_native(record)
+    )
     try:
         if recorded_native_claim:
             selected_policy = cp.select_policy(

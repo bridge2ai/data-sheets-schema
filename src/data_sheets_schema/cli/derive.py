@@ -51,10 +51,13 @@ def derive_core_cmd(full_path, core_path, validate, phase4_complete,
         facts = write_core(full, core, phase4_complete=phase4_complete)
     else:
         from data_sheets_schema.d4d_pair_consistency import load_pair_schema
+        from data_sheets_schema.resources import is_resource, repo_relative
         selected_core = Path(core_schema_path)
         pair_schema = load_pair_schema(Path(full_schema_path), selected_core)
+        rel_core = repo_relative(selected_core, cwd=False)
+        core_identity = rel_core if is_resource(rel_core) else str(selected_core)
         facts = write_core(full, core, pair_schema, phase4_complete=phase4_complete,
-                           core_schema_identity=str(selected_core))
+                           core_schema_identity=core_identity)
     click.echo(f"✓ {core}")
     click.echo(json.dumps(facts))
     if validate:
