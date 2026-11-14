@@ -22,7 +22,7 @@ def sha(raw):
 
 
 def main():
-    base = 'b35e264571a4e8ba6f152b7fc7053c35758d6823'
+    base = sys.argv[2] if len(sys.argv) > 2 else 'b35e264571a4e8ba6f152b7fc7053c35758d6823'
     sources = []
     for path in git('diff', '--name-only', base, '--', 'src').decode().splitlines():
         previous = sha(git('show', base + ':' + path))
