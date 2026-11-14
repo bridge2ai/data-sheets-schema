@@ -28,6 +28,7 @@ if args.canary:
     nodes = nodes[:1]
 python = '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python'
 command = [python, '-m', 'pytest', *nodes, '-n', '4',
+           '-o', 'cache_dir=' + str(args.scratch / (args.label + '-cache')),
            '--basetemp=' + str(args.scratch / args.label),
            '--junitxml=' + str(args.scratch / (args.label + '.xml'))]
 environment = dict(os.environ, PYTHONPATH=str(args.checkout / 'src'))
