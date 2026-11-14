@@ -50,6 +50,54 @@ def test_owner_start_records_are_repeatable(tmp_path):
     assert not p['output-directory'].exists()
 
 
+def test_sequence_start_accepts_registration_above_quota_event_limit(tmp_path):
+    p = fixtures.paths(tmp_path, registration_padding=65536)
+    registration_raw = p['registration'].read_bytes()
+    assert 65536 < len(registration_raw) <= 32 * 1024 * 1024
+    # The shared parser must retain its smaller default for quota evidence.
+    with pytest.raises(ValueError, match='not bounded JSON bytes'):
+        words.strict_json(registration_raw)
+    word = words.strict_json(p['launch-word'].read_bytes())
+    review = words.strict_json(p['review'].read_bytes())
+    assert word['registration_sha256'] == review['registration_sha256'] == words.sha(registration_raw)
+    root = tmp_path / 'word-state'
+    before = {path.relative_to(root): path.read_bytes() for path in root.rglob('*') if path.is_file()}
+
+    event_path = Path(start.claim(registration_raw,
+        launch_word_raw=p['launch-word'].read_bytes(), direction=None, confirmation=None,
+        packet=p['packet-directory'], started_at='2026-11-12T12:00:00Z'))
+
+    event = words.strict_json(event_path.read_bytes())
+    assert event['type'] == 'sequence_start'
+    assert event['registration_sha256'] == words.sha(registration_raw)
+    assert event['previous_sha256'] == words.sha(before[Path('events/000001.json')])
+    after = {path.relative_to(root): path.read_bytes() for path in root.rglob('*') if path.is_file()}
+    assert after.keys() - before.keys() == {event_path.relative_to(root)}
+    assert all(after[name] == raw for name, raw in before.items())
+    assert not p['output-directory'].exists()
+    assert not (tmp_path / 'NEVER-RESERVED-ATTEMPT').exists()
+
+
+def test_sequence_start_rejects_registration_above_input_limit_before_lock(tmp_path, monkeypatch):
+    p = fixtures.paths(tmp_path)
+    registration_raw = p['registration'].read_bytes()
+    registration_raw += b' ' * (32 * 1024 * 1024 + 1 - len(registration_raw))
+    root = tmp_path / 'word-state'
+    before = {path.relative_to(root): path.read_bytes() for path in root.rglob('*') if path.is_file()}
+    def forbidden_lock(*args, **kwargs):
+        pytest.fail('oversized registration reached the journal lock')
+    monkeypatch.setattr(words, 'locked', forbidden_lock)
+
+    with pytest.raises(ValueError, match='not bounded JSON bytes'):
+        start.claim(registration_raw,
+            launch_word_raw=p['launch-word'].read_bytes(), direction=None, confirmation=None,
+            packet=p['packet-directory'], started_at='2026-11-12T12:00:00Z')
+
+    assert {path.relative_to(root): path.read_bytes() for path in root.rglob('*') if path.is_file()} == before
+    assert not p['output-directory'].exists()
+    assert not (tmp_path / 'NEVER-RESERVED-ATTEMPT').exists()
+
+
 def test_direction_claim_refuses_symlink_state(tmp_path):
     p=fixtures.paths(tmp_path); elsewhere=tmp_path/'elsewhere'; elsewhere.mkdir()
     (tmp_path/'word-state').rename(tmp_path/'retained-word-state')

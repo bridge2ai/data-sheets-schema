@@ -8,7 +8,8 @@ from . import native_capture_words as words
 
 def claim(registration_raw, *, launch_word_raw, direction, confirmation, packet, started_at):
     """Require a recorded current word, then durably append before any child."""
-    value = words.strict_json(registration_raw)['registration']
+    # Registrations use the sequence input bound, not the quota-event default.
+    value = words.strict_json(registration_raw, limit=32 * 1024 * 1024)['registration']
     with words.locked(value, registration_raw) as journal:
         words.require_unspent(value)
         event = journal.start(launch_word_raw, direction=direction, confirmation=confirmation,

@@ -39,7 +39,7 @@ def deny_real_commands(monkeypatch):
     monkeypatch.setattr(entry, 'exec', fixture_exec, raising=False)
 
 
-def paths(tmp_path):
+def paths(tmp_path, *, registration_padding=0):
     base = tmp_path.resolve()
     result = {name: base / (name + '.json') for name in
               ('registration', 'review', 'launch-word', 'account-choice', 'ci')}
@@ -60,7 +60,8 @@ def paths(tmp_path):
                     'valid_from': '2026-11-05T00:00:00Z', 'valid_until': '2026-11-19T00:00:00Z',
                     'max_starting_weekly_utilization': 0.5, 'max_starting_five_hour_utilization': 0.25,
                     'max_age_seconds': 1200, 'pre_reservation_margin_seconds': 300}})},
-        'dependencies': {'base': {'package_sources': {'src/data_sheets_schema/native_launch_sequence.py': digest}}}}}))
+        'dependencies': {'base': {'package_sources': {'src/data_sheets_schema/native_launch_sequence.py': digest}}}}})
+        + b' ' * registration_padding)
     result['review'].write_bytes(guard.canonical({'kind': 'd4d_native_execution_review_bundle_v3',
         'version': 3, 'registration_sha256': guard.sha(result['registration'].read_bytes()),
         'sequence_script_sha256': digest}))
