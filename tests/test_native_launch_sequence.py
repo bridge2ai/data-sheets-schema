@@ -4,9 +4,11 @@ The subprocess witness copies only the sequence and pure wire helper into an
 isolated test package with a fabricated native_generation module.
 """
 from pathlib import Path
+from types import SimpleNamespace
 import builtins
 import json
 import os
+import signal
 import subprocess
 import sys
 
@@ -17,7 +19,24 @@ from data_sheets_schema import native_launch_entry as entry
 from data_sheets_schema import native_subscription_guard as guard
 from data_sheets_schema import native_host_power as host_power
 
-REAL_RUN = subprocess.run
+REAL_POPEN = subprocess.Popen
+
+
+def finish_copied_process(child):
+    """Reap only a test-owned copied-package witness, including failed tests."""
+    if child.poll() is None:
+        try:
+            child.send_signal(signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+    try:
+        child.communicate(timeout=20)
+    except subprocess.TimeoutExpired:
+        try:
+            child.kill()
+        except ProcessLookupError:
+            pass
+        child.communicate()
 
 
 def run_sequence(arguments):
@@ -30,7 +49,7 @@ def deny_real_commands(monkeypatch):
         'source': 'ac', 'battery_percent': 90, 'lid': 'closed'})
     def refuse(*args, **kwargs):
         pytest.fail('test must not execute native_generation or any native binary')
-    monkeypatch.setattr(seq.subprocess, 'run', refuse)
+    monkeypatch.setattr(seq.subprocess, 'Popen', refuse)
     # Test-only clock substitution AFTER the entry verifies and compiles the
     # real fixture-pinned bytes. Production has no clock/verification bypass.
     def fixture_exec(code, namespace):
@@ -98,7 +117,8 @@ def fake_commands(monkeypatch, paths, *, mutate=None, fail=None, fail_exception=
         name = command[6]
         assert name == seq.COMMANDS[len(calls)], 'wrong order, repeated command or retry'
         calls.append((command, kwargs))
-        assert kwargs['stdin'] == subprocess.DEVNULL and kwargs['check'] is False
+        assert kwargs['stdin'] == subprocess.DEVNULL and kwargs['start_new_session'] is True
+        assert 'check' not in kwargs
         assert kwargs['cwd'] == seq.SOURCE_ROOT
         assert kwargs['env'] == seq.CHILD_ENV
         assert kwargs['stdout'].name is not None and kwargs['stderr'].name is not None
@@ -130,8 +150,10 @@ def fake_commands(monkeypatch, paths, *, mutate=None, fail=None, fail_exception=
         raw = guard.canonical(document) if data is None else data
         kwargs['stdout'].write(raw)
         kwargs['stderr'].write(b'PRIVATE child diagnostic\n')
-        return subprocess.CompletedProcess(command, 17 if fail == name else 0)
-    monkeypatch.setattr(seq.subprocess, 'run', run)
+        code = 17 if fail == name else 0
+        return SimpleNamespace(returncode=code, wait=lambda timeout: code, poll=lambda: code,
+                               send_signal=lambda signum: None)
+    monkeypatch.setattr(seq.subprocess, 'Popen', run)
     return calls
 
 
@@ -339,10 +361,14 @@ def main():
                  "from data_sheets_schema import native_host_power; "
                  "native_host_power.probe=lambda: {'source':'ac','battery_percent':90,'lid':'closed'}; "
                  "runpy.run_module(name,run_name='__main__',alter_sys=True)")
-    result = REAL_RUN([sys.executable, '-I', '-B', '-c', bootstrap, str(root / 'src'), 'data_sheets_schema.' + entry_module, *argv(p)],
-                      env={'PRIVATE_TOKEN': 'secret', 'PYTHONPATH': '/foreign'},
-                      cwd=root, capture_output=True, timeout=20)
-    assert result.returncode == 0, result.stderr
+    child = REAL_POPEN([sys.executable, '-I', '-B', '-c', bootstrap, str(root / 'src'), 'data_sheets_schema.' + entry_module, *argv(p)],
+                       env={'PRIVATE_TOKEN': 'secret', 'PYTHONPATH': '/foreign'},
+                       cwd=root, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        stdout, stderr = child.communicate(timeout=20)
+        assert child.returncode == 0, stderr
+    finally:
+        finish_copied_process(child)
     assert record(p)['status'] == 'completed'
     assert all(step['argv'][5] == str(root / 'src') for step in record(p)['steps'])
 

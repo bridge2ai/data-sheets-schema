@@ -163,12 +163,12 @@ def test_start_event_is_synced_before_first_child(tmp_path, monkeypatch):
     monkeypatch.setattr(os, 'fsync', sync)
     monkeypatch.setattr(words, '_new', new)
     calls = fixtures.fake_commands(monkeypatch, p)
-    fake = seq.subprocess.run
+    fake = seq.subprocess.Popen
     def child(*args, **kwargs):
         assert len(completed) == 1
         assert words.strict_json(completed[0].read_bytes())['type'] == 'sequence_start'
         return fake(*args, **kwargs)
-    monkeypatch.setattr(seq.subprocess, 'run', child)
+    monkeypatch.setattr(seq.subprocess, 'Popen', child)
     assert fixtures.run_sequence(fixtures.argv(p)) == 0
     assert len(calls) == 3
 
