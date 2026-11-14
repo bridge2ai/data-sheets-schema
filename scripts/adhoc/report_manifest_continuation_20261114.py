@@ -141,11 +141,13 @@ def audit():
     pth = ROOT.parents[1] / 'data-sheets-schema/.venv/lib/python3.13/site-packages/data_sheets_schema.pth'
     pth_hash = sha(pth.read_bytes())
     assert pth_hash == '56826535cb8408ac3c905c231aa18fc41627167d31bf06a359b406fe730ec116'
+    git('diff', '--check', BASE, 'HEAD')
     return {'head': git('rev-parse', 'HEAD').decode().strip(), 'accepted_base': BASE,
             'pins': rows, 'constants': constant_rows, 'protected': protected,
             'controller_manifests': manifests, 'd128': d128, 'owner_commits': owner_rows,
             'bootstrap_matches_owner_commit': '69d1cd8ee', 'gate_commits_present': gates,
             'primary_pth_sha256': pth_hash,
+            'diff_check': {'before': BASE, 'after': 'HEAD', 'passed': True},
             'commits': git('log', '--format=%H %s', BASE + '..HEAD').decode().splitlines()}
 
 
@@ -155,6 +157,7 @@ def cohorts(scratch):
         if not directory.is_dir() or not (directory / 'outcome.json').exists():
             continue
         outcome = json.loads((directory / 'outcome.json').read_bytes())
+        plan = json.loads((directory / 'plan.json').read_bytes())
         xml = directory / 'pytest.xml'
         counts = dict(passed=0, failed=0, errors=0, skipped=0)
         cases = []
@@ -171,7 +174,7 @@ def cohorts(scratch):
         results[directory.name] = {'path': str(directory), 'counts': counts, 'outcome': outcome,
                                    'junit_available': xml.exists(),
                                    'nonpassing': cases,
-                                   'source_commit': json.loads((directory / 'plan.json').read_bytes())['source_commit']}
+                                   'source_commit': plan['source_commit'], 'workers': plan['workers']}
     return results
 
 
@@ -208,8 +211,8 @@ def markdown(data, results, scratch):
              'Parent and ordinary child origin witnesses, OS network denial and observed-descendant '
              'cleanup are recorded per cohort. The primary environment was not modified. '
              'These are offline synthetic checks, not production registration or launch approval.', '',
-             '| Stage/cohort | Passed | Failed | Errors | Skipped | Seconds | Cleanup verified | Evidence |',
-             '| --- | ---: | ---: | ---: | ---: | ---: | --- | --- |']
+             '| Stage/cohort | Workers | Passed | Failed | Errors | Skipped | Seconds | Cleanup verified | Evidence |',
+             '| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |']
     for name, row in results.items():
         c, out = row['counts'], row['outcome']
         shown = [str(c[k]) if row['junit_available'] else 'unrecorded' for k in ('passed', 'failed', 'errors', 'skipped')]
@@ -219,8 +222,15 @@ def markdown(data, results, scratch):
             evidence = 'partial pytest log; deadline, exit 124'
         elif name == 'registration-collection':
             evidence = 'collection only; no test execution'
-        lines.append(f"| {name} | " + ' | '.join(shown) + ' | '
+        lines.append(f"| {name} | {row['workers']} | " + ' | '.join(shown) + ' | '
                      f"{out['seconds']:.2f} | {out['cleanup_verified']} | {evidence} |")
+    if 'prefix-canary-builder-serial' in results:
+        lines += ['', 'Builder verification uses one worker after a matching one-worker prefix canary. '
+                  'Its subprocess checks retain their fixed timeouts, and its module-scoped full-chain '
+                  'fixture is constructed once per worker. This avoids concurrent manifest censuses '
+                  'within those subprocess limits and duplicate shared-fixture construction. The other '
+                  'final execution cohorts use four workers. No timing improvement is claimed from '
+                  'these differently scheduled cohorts.']
     if resume:
         p = resume['plan']
         lines += ['', f"Registration collected {p['collected']} exact cases. The first cohort logged "
@@ -283,8 +293,9 @@ def markdown(data, results, scratch):
               'Continuation commits, newest first:', '', '```', *data['commits'], '```', '',
               'Reproduction (from the assigned worktree; choose a new output cohort each time):', '', '```bash',
               f'{scratch}/declared-dependencies/bin/python -S -P -B scripts/adhoc/run_manifest_continuation_tests_20261114.py \\',
-              f'  --tree {ROOT} \\', f'  --out {scratch}/NEW-COHORT --workers 4 --timeout-seconds 14400 --stage STAGE',
+              f'  --tree {ROOT} \\', f'  --out {scratch}/NEW-COHORT --workers WORKERS --timeout-seconds 14400 --stage STAGE',
               '```', '', 'STAGE is manifest, manifest-boundaries, registration, builder, retention or scanner. '
+              'WORKERS is 1 for builder and 4 for the other execution stages. '
               'The runner uses the original explicit test-file roster. No assertion, production refusal, '
               'D128 approval or protected source was weakened.', '',
               'Report provenance:', '', '```bash',
