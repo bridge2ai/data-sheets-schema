@@ -76,7 +76,9 @@ class Trace:
             value = {'mode': 'initial_structure', 'structure_passed': not code,
                      'floors': 'pending', 'floor_acceptance_claimed': False,
                      'summary': None, 'reason': None, 'findings': [], 'structural_checks': {},
-                     'native_initial_inputs': None, 'receipt_completion_policy': None}
+                     'native_initial_inputs': {'selection_sha256': 'a' * 64,
+                         'full_sha256': 'b' * 64, 'receipt_sha256': 'c' * 64},
+                     'receipt_completion_policy': None}
         elif value is None and name == 'advance':
             after = after or decision(number=self.number)
             value = {'kind': c.KINDS['advance_result'], 'version': 1,
@@ -596,7 +598,10 @@ def test_initial_producer_json_joins_observer(mutation):
     from data_sheets_schema import receipts as rc
     from tests.test_native_initial_structure_mode import assessment
     trace = _initial_check_ready()
-    raw = json.dumps(rc.initial_structure_result(assessment(mutation)), sort_keys=True)
+    block = assessment(mutation)
+    block['native_initial_inputs'] = {'selection_sha256': 'a' * 64,
+        'full_sha256': 'b' * 64, 'receipt_sha256': 'c' * 64}
+    raw = json.dumps(rc.initial_structure_result(block), sort_keys=True)
     identity = trace.call('Bash', {'command': shlex.join(trace.commands['phase1_receipts'])})
     assert trace.result(identity, code=int(mutation is not None), text=raw) == (
         ('seal_phase1',) if mutation is None else ())

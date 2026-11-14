@@ -38,6 +38,15 @@ def _digest(value):
     return type(value) is str and re.fullmatch(r'[0-9a-f]{64}', value) is not None
 
 
+def initial_input_identity(value):
+    """Require the complete receipt helper identity before it earns credit."""
+    c.exact(value, {'selection_sha256', 'full_sha256', 'receipt_sha256'},
+            'initial receipt input identity')
+    _require(all(_digest(digest) for digest in value.values()),
+             'initial receipt input identity has an invalid digest')
+    return value
+
+
 class PhaseState:
     """Track actual settled helpers and mutation epochs, never proposed success.
 
@@ -256,6 +265,7 @@ class PhaseState:
                      and value.get('floors') == 'pending'
                      and value.get('floor_acceptance_claimed') is False,
                      'initial receipt result must be structural with no floor acceptance')
+            initial_input_identity(value['native_initial_inputs'])
         elif kind == 'advance':
             c.exact(value, _ADVANCE_KEYS, 'advance result')
             _require(value['kind'] == c.KINDS['advance_result'] and type(value['version']) is int

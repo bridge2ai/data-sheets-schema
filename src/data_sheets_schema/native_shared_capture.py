@@ -775,6 +775,25 @@ def _chronology(run):
     return result
 
 
+def _require_initial_seal_identity(run, report, full, receipt):
+    """Bind the checked helper result to the exact original bytes, live or saved."""
+    from .native_shared_phase import initial_input_identity
+    checks = [row for row in report['checks']
+              if row['helper'] == 'phase1_receipts' and row['exit_code'] == 0]
+    if not checks:
+        raise ValueError('original seal lacks a successful initial receipt helper')
+    trace = run.trace()
+    actual = trace.settled(checks[-1]['tool_use_id'])
+    block = evidence.event(trace.transcript, actual.result)
+    value = _document(block['content'].encode('utf-8'), 'initial receipt helper result')
+    observed.helper_result(trace, actual, value)
+    identity = initial_input_identity(value.get('native_initial_inputs'))
+    expected = {'selection_sha256': run.selection.registration.pin.sha256,
+                'full_sha256': c.sha(full.raw), 'receipt_sha256': c.sha(receipt.raw)}
+    if identity != expected:
+        raise ValueError('original seal bytes differ from checked initial receipt inputs')
+
+
 def phase_replay(run, *, complete=False):
     """Freshly run the actual phase machine over observed journal visibility."""
     from .native_shared_phase import PhaseState
@@ -834,6 +853,9 @@ def phase_replay(run, *, complete=False):
                                             if needed == 'seal_phase1' else {'derive_core', 'core_schema', 'pair'})]
             if payload['helper_calls'] != expected:
                 raise ValueError('seal helper identities differ from actual phase observations')
+            if kind == 'phase1_sealed':
+                _require_initial_seal_identity(run, phase.report(),
+                    run.reader.pinned(payload['full']), run.reader.pinned(payload['original_receipt']))
     if complete and set(visible) != {item.pin.sha256 for item in run.history.records}:
         raise ValueError('completed history has unpublished or unobserved stage records')
     return phase.report(complete=complete), actions

@@ -35,6 +35,7 @@ from .native_shared_capture import (
     _provenance_block,
     _receipt_assessment,
     _require_completed_read_before_write,
+    _require_initial_seal_identity,
     _streams,
     _through,
     call_document,
@@ -340,6 +341,8 @@ def seal_originals(run, kind):
         helpers = {'derive_core', 'core_schema', 'pair'}
     captured = {source: evidence.read_regular(paths[source], role,
         max_bytes=min(c.HARD_LIMITS['original_full_bytes'], run.selection.bounds()['max_input_bytes'])).captured for source, role in inputs}
+    if kind == 'seal_phase1':
+        _require_initial_seal_identity(run, report, captured['full'], captured['receipt'])
     for source, role in inputs:
         _create(run.selection, role, captured[source].raw)
     sealed = {source: _captured(role, run.selection.role(role), captured[source].raw) for source, role in inputs}
