@@ -243,6 +243,11 @@ def test_release_failure_is_recorded_and_fails_the_wrapper(registration, monkeyp
 def real_direct(tmp_path, monkeypatch):
     """Reuse the established offline direct fixture without collection-time imports."""
     saved_path = awake.sys.path[:]
+    absent = object()
+    saved_modules = {
+        name: awake.sys.modules.pop(name, absent)
+        for name in ("prepare_direct", "run_direct_canary")
+    }
     spec = importlib.util.spec_from_file_location("awake_direct_fixture", ROOT / "notes/claudecode_direct/test_direct_arm.py")
     fixture = importlib.util.module_from_spec(spec)
     try:
@@ -257,6 +262,11 @@ def real_direct(tmp_path, monkeypatch):
                 next(context)
     finally:
         awake.sys.path[:] = saved_path
+        for name, module in saved_modules.items():
+            if module is absent:
+                awake.sys.modules.pop(name, None)
+            else:
+                awake.sys.modules[name] = module
 
 
 @pytest.mark.parametrize("outcome", ["success", "nonzero", "signal", "old_review"])
