@@ -150,6 +150,7 @@ def _runtime(value):
         _need(type(text) is str and len(text) <= 16384 and not any(ch in text for ch in ('\0','\n','\r'))
               and (bool(text.strip()) or key == 'CLAUDE_SECURESTORAGE_CONFIG_DIR'), 'invalid runtime environment text')
     _path(env['HOME'])
+    runtime_values.require_bash_timeouts(env)
     from .native_helper_cache import declared_path
     declared_path(env)
     for path in env['PATH'].split(':'):
