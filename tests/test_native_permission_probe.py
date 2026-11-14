@@ -494,7 +494,7 @@ def test_shutdown_tail_times_out_on_inherited_open_pipe():
         os.close(write_fd)
 
 
-@pytest.mark.parametrize("mode", ["complete", "timeout", "control_start_error", "overflow"])
+@pytest.mark.parametrize("mode", ["complete", "timeout", "control_start_error", "overflow", "sigterm"])
 def test_native_boundary_reaps_closes_and_retains_failed_evidence(tmp_path, monkeypatch, mode):
     class BudgetStop(Exception):
         pass
@@ -521,6 +521,8 @@ def test_native_boundary_reaps_closes_and_retains_failed_evidence(tmp_path, monk
             if mode == "control_start_error":
                 raise ValueError("injected start failure")
         def service(self):
+            if mode == "sigterm":
+                probe.signal.raise_signal(probe.signal.SIGTERM)
             if mode == "timeout":
                 raise TimeoutError("injected deadline")
             self.stdout_closed, process.returncode = True, 0
@@ -544,8 +546,9 @@ def test_native_boundary_reaps_closes_and_retains_failed_evidence(tmp_path, monk
         result = call()
         assert result["shutdown"]["child_reaped"]
     else:
-        with pytest.raises((ValueError, TimeoutError)):
-            call()
+        with pytest.raises((ValueError, TimeoutError, InterruptedError)):
+            with probe._probe_signals():
+                call()
     assert process.poll() is not None and len(signals) == 2
     assert all(stream.closed for stream in (process.stdin, process.stdout, process.stderr))
     assert b"synthetic-start" in (root / "transcript.jsonl").read_bytes()
