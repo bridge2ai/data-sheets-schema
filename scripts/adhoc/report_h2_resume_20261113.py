@@ -23,6 +23,7 @@ PUBLIC = {
     'pending': 'tests/test_native_pending_public_completion.py::test_pending_floor_public_completion_retains_diagnostic_reading',
 }
 COMMIT_ISSUES = {
+    '10fb5d6b4': ['H1-420-F1'],
     '0b7ab4669': ['6200'], 'c03dc762f': ['6201', '6202'],
     '54d724fb7': ['6193', '6194'], 'f90492c46': ['6195', '6196'],
     '3fdaf7c6d': ['6197', '6198', '6199'], 'f59b0e8e8': ['6202'],
@@ -137,10 +138,12 @@ def test_proof(cohorts, name, expected):
             if case['name'].split('[', 1)[0] == name:
                 selected[(case['classname'], case['name'])] = {
                     **case, 'cohort': cohort['name'], 'cohort_complete': cohort['complete'],
+                    'cohort_returncode': cohort.get('outcome', {}).get('returncode'),
                     'junit': cohort['evidence']['junit']}
     found = list(selected.values())
     passed = len(found) == expected and all(
-        case['status'] == 'passed' and case['cohort_complete'] for case in found)
+        case['status'] == 'passed' and case['cohort_complete']
+        and case['cohort_returncode'] == 0 for case in found)
     return {'test': name, 'required_cases': expected, 'counts': counts(found),
             'passed': passed, 'cases': found}
 
@@ -340,8 +343,12 @@ def main():
     review = read_json(review_path)
     budget_review_path = SCRATCH / 'budget-origin-review.json'
     budget_review = read_json(budget_review_path)
+    proof_review_path = SCRATCH / 'report-proof-review.json'
+    proof_review = read_json(proof_review_path)
     callback_analysis_path = SCRATCH / 'correction/callback-stop-analysis.json'
     callback_analysis = read_json(callback_analysis_path)
+    static_diagnosis_path = SCRATCH / 'callback-static-diagnosis.json'
+    static_diagnosis = read_json(static_diagnosis_path)
     for callback in callback_analysis['answer']['stalled_callbacks']:
         request_path = callback.get('request_file', {}).get('path')
         callback['request_path_present_at_report'] = bool(request_path and Path(request_path).is_file())
@@ -356,9 +363,12 @@ def main():
         'incomplete_cohorts': incomplete, 'required_cohorts_not_run': unavailable,
         'commits': commits, 'commit_map_evidence': pin(commits_path),
         'review': review, 'review_evidence': pin(review_path),
+        'report_proof_review': proof_review, 'report_proof_review_evidence': pin(proof_review_path),
         'budget_origin_review': budget_review, 'budget_origin_review_evidence': pin(budget_review_path),
         'correction_callback_analysis': callback_analysis,
         'correction_callback_analysis_evidence': pin(callback_analysis_path),
+        'callback_static_diagnosis': static_diagnosis,
+        'callback_static_diagnosis_evidence': pin(static_diagnosis_path),
         'compatibility': compatibility, 'compatibility_evidence': pin(compatibility_path),
         'controller_pin_mismatches': pin_changes, 'report_producer': pin(Path(__file__).resolve()),
         'environment': {'report_interpreter': sys.version, 'platform': sys.platform,
@@ -405,8 +415,11 @@ def main():
         lines += ['', 'Correction remains a blocker for 6200: callback ' + identity + request
             + ' has a request-to-cleanup interval of ' + duration + ' s; the saved initialization advertised '
             + timeout + ' s, and ' + remaining + ' s remained before the recorded child deadline at cleanup entry. '
-            + 'These boundary intervals do not establish an internal cause. Lead diagnosis remains required without changing deadlines. '
+            + 'The response window includes queued ordered history work; the pending Read does not prove that its observer or classifier began. '
+            + 'These boundary intervals do not establish an internal cause. No concrete algorithmic defect introduced by the H2 preload/timing repairs was demonstrated by static review. '
+            + 'Lead design/performance diagnosis remains required without weakening checks, deadlines or response windows. '
             + 'Evidence: `' + str(callback_analysis_path) + '`.']
+    lines += ['', 'Static callback-path diagnosis: `' + str(static_diagnosis_path) + '`.']
     lines += ['', 'Saved verification cohorts:', '']
     for cohort in cohorts:
         result = cohort['counts']
@@ -446,6 +459,7 @@ def main():
         '- Exact-definition compatibility proof: `' + str(compatibility_path) + '`.',
         '- Internal read-only review: `' + str(review_path) + '`; no findings; no tests were run by that review.',
         '- H2-RESUME-HARNESS-F1: `' + str(budget_review_path) + '`; ' + budget_review['status'] + '. Lead filing remains needed because helper GitHub writes are prohibited.',
+        '- H2-RESUME-REPORT-F1: `' + str(proof_review_path) + '`; corrected and verified with a failed-session counterexample. Lead filing remains needed because helper GitHub writes are prohibited.',
         '- Supplemental budget retains an explicit local src PYTHONPATH override to select the assigned worktree with the primary interpreter. Native/audit retain their exact CI environment. Budget is not literal CI-environment equivalence.',
         '- ' + ('Controller pin mismatches require a review-only proposal; no rotation applied.' if pin_changes else 'Controller manifest entries match the final audit; no pin rotation applied.'),
         '- Local macOS Python 3.13 results do not establish CI Python 3.12 results or a full-suite pass.',
