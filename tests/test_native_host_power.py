@@ -144,3 +144,52 @@ def test_local_probe_bounds_and_reaps_its_child(monkeypatch, program, limit, tim
     result = power._local([sys.executable, '-I', '-c', program], limit=limit, timeout=timeout)
     assert result['status'] == 'unknown' and result['reason'] == reason
     assert len(children) == 1 and children[0].poll() is not None
+
+
+@pytest.mark.parametrize('battery,source,reason,admitted', [
+    ({'status': 'read', 'reason': None, 'returncode': 0,
+      'text': "Now drawing from 'AC Power'\n90%; sensitive probe remainder"}, 'ac', None, True),
+    ({'status': 'read', 'reason': None, 'returncode': 0,
+      'text': "Now drawing from 'Battery Power'\n12%; sensitive probe remainder"}, 'battery', None, False),
+    ({'status': 'read', 'reason': None, 'returncode': 0,
+      'text': 'unrecognized sensitive probe remainder'}, 'unknown', None, False),
+    ({'status': 'unknown', 'reason': 'TimeoutError',
+      'text': 'sensitive probe remainder'}, 'unknown', 'TimeoutError', False),
+    ({'status': 'unknown', 'reason': 'nonzero_exit', 'returncode': 3,
+      'text': 'sensitive probe remainder'}, 'unknown', 'nonzero_exit', False),
+    ({'status': 'unknown', 'reason': 'sensitive probe remainder' * 1000,
+      'returncode': 2 ** 100, 'text': 'sensitive probe remainder'},
+     'unknown', 'unrecognized_probe_reason', False),
+    ({'status': 'read', 'reason': None, 'returncode': 1,
+      'text': "Now drawing from 'AC Power'\nsensitive probe remainder"}, 'ac', None, False),
+])
+def test_dispatch_power_retains_only_bounded_normalized_reading(monkeypatch, battery, source, reason, admitted):
+    calls = []
+    def local(argv, **kwargs):
+        calls.append((argv, kwargs))
+        return battery
+    monkeypatch.setattr(power, '_local', local)
+    monkeypatch.setattr(power.time, 'time_ns', lambda: 123456789)
+    if admitted:
+        reading = power.dispatch_power()
+    else:
+        with pytest.raises(power.DispatchPowerRefused, match='positively observed as AC') as caught:
+            power.dispatch_power()
+        reading = caught.value.reading
+        assert json.loads(str(caught.value).split('; reading=', 1)[1]) == reading
+        assert 'sensitive probe remainder' not in str(caught.value)
+        assert len(str(caught.value).encode()) < 1024
+    assert set(reading) == {'source', 'battery_percent', 'observed_wall_ns',
+                            'probe_status', 'probe_reason', 'probe_returncode'}
+    assert reading['source'] == source and reading['probe_reason'] == reason
+    assert reading['observed_wall_ns'] == 123456789
+    assert 'sensitive probe remainder' not in json.dumps(reading)
+    assert calls == [(['/usr/bin/pmset', '-g', 'batt'], {'limit': 16384})]
+
+
+def test_dispatch_power_does_not_swallow_interruption(monkeypatch):
+    def interrupted(*args, **kwargs):
+        raise InterruptedError('synthetic operator interruption')
+    monkeypatch.setattr(power, '_local', interrupted)
+    with pytest.raises(InterruptedError, match='operator interruption'):
+        power.dispatch_power()

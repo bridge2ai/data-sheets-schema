@@ -215,7 +215,7 @@ def _saved_authorizations(raw, value, started_raw, result, *, contract, file):
 
 
 def _admit_subscription_guard(guard, attempt, file, write):
-    """Consume exact saved admission before the caller may activate/spawn."""
+    """Consume exact saved admission after launch checks and before spawn."""
     if guard is None:
         return
     if file(attempt/'subscription-guard.json', 'subscription guard') != guard.raw:
@@ -415,14 +415,22 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                                         authorization['raw']['launch_word'])
             yield current
 
+    from . import native_host_power as host_power
     # Hold the registration-wide word/limits lock through the first reservation
     # effect. A renewal cannot supersede the word between checking and mkdir.
     with pre_timing.step('reservation'), reservation_lease():
         controls.require_complete()
-        # Source recapture can be slow: measure the preparation margin only
-        # after it, immediately before the attempt identity is consumed.
-        launch_guard.before_reservation()
         _require_launch_profile(value['runtime'], expected_profile)
+        try:
+            power_reading = host_power.dispatch_power()
+        except host_power.DispatchPowerRefused as exc:
+            # Buffer only: the outer scope persists after refusal and lock release.
+            pre_timing.record('reservation_power', passed=False, **exc.reading)
+            raise
+        pre_timing.record('reservation_power', passed=True, **power_reading)
+        # Source recapture, profile verification and the bounded power probe can
+        # be slow. Recheck the margin after them, immediately before reservation.
+        launch_guard.before_reservation()
         attempt.mkdir(mode=0o700)  # Even a partial reservation consumes the identity.
         _sync_directory(attempt.parent)
         pre_timing.record('attempt_reserved')
@@ -452,7 +460,6 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
         nonlocal first_stop
         if first_stop is None:
             first_stop = str(message)
-    from . import native_host_power as host_power
     host_power.observe(attempt, 'start', host_power.start_run, attempt)
     with _signals(signals):
         proxy = controls['run_direct_canary'].NoProxy()
@@ -482,10 +489,17 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                             or _file(attempt/'runtime-observation.json', 'runtime observation') != draft._encoded(observation)
                             or proxy.closed or proxy.failed.is_set()):
                         raise ValueError('native admission is closed or consumed identity changed')
-                    _admit_subscription_guard(launch_guard, attempt, _file, durable_new)
                     contract.activate_before_dispatch(adapter, started_raw)
                     _require_launch_profile(value['runtime'], expected_profile)
-                    host_power.dispatch_power()
+                    try:
+                        host_power.dispatch_power()
+                    except host_power.DispatchPowerRefused as exc:
+                        # The pre-reservation trace is sealed. The immutable final
+                        # result retains this bounded reading through the sticky stop.
+                        reason = 'dispatch power refused: ' + str(exc)
+                        stopped(reason)
+                        raise controls['run_native_canary'].BudgetStop(reason) from exc
+                    _admit_subscription_guard(launch_guard, attempt, _file, durable_new)
                 observe = _guarded_observer(launch_guard, adapter, controls['run_native_canary'].BudgetStop)
                 status = _execute_child(controls, value['argv'], proxy=proxy,
                     instruction=Path(selected['instruction_path']), attempt=attempt,
