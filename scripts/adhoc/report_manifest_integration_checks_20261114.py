@@ -70,6 +70,7 @@ def summarize(scratch):
             detail = ''.join((entry.text or '') for entry in (failure, error) if entry is not None)
             row = {'stage': stage, 'node': case.get('classname', '') + '::' + case.get('name', ''),
                 'status': state, 'seconds': float(case.get('time', 0)), 'detail': detail,
+                'skip_reason': skip.get('message') if skip is not None else None,
                 'attribution': classify(detail) if detail else None, 'junit': str(path)}
             counts[state] += 1
             cases.append(row)
@@ -132,6 +133,8 @@ def handoff(scratch, destination):
     assert d128['candidate_mismatches'] == d128['merged_mismatches']
     assert all(row['candidate_sha256'] == row['working_sha256'] for row in d128['assets'])
     status = ', '.join(str(count) + ' ' + state for state, count in tests['totals'].items())
+    skipped = '\n'.join('- ' + row['node'] + ': ' + row['skip_reason']
+                        for row in tests['cases'] if row['status'] == 'skipped')
     text = f'''Merge done: committed merge of `{inventory['incoming']}` into `{inventory['candidate']}`, with {len(conflicts)} conflicted files resolved. No pinned value was changed. Two review-only references to the authority source digest need `{changed['current_pin']}` to become `{changed['proposed_pin']}`: the integrated specificity-scanner summary and its H1 assertion. Controller manifests, SOURCES_SHA256, the wire controller pin, and CONTROL_SHA remain exact and unchanged. Version 3 is implemented in the merged constructors and adapted builder/rehearsals, but is **not end-to-end verified or ready for acceptance**: the mandated interpreter exposes two project namespaces, and the scanner has v2-only structural contracts. The observed failures are not all pin-only.
 
 Branch: `codex/native-manifest-integration-20261114`. Worktree: `{ROOT}`. Head: `{git('rev-parse', 'HEAD')}`. Scratch: `{scratch}`. No push, PR, GitHub write, provider call or real native-binary call was made. The owner branch was only read. The four protected files match the candidate byte for byte; their full hashes are in the pin inventory.
@@ -151,6 +154,10 @@ Verification used the assignment's interpreter, PYTHONPATH, external basetemp an
 {(scratch / 'test-summary.md').read_text()}
 {(scratch / 'test-failure-summary.md').read_text()}
 The all-project prefix tests deliberately permit production refusals; a pass there does not establish successful manifest output. Likewise a fixture error prevents the corresponding later assertions from being exercised. The complete per-test failure ledger is `{scratch / 'test-failures.md'}`; exact tracebacks and case timings are in `{scratch / 'test-results.json'}` and the named XML/log files. No failing assertion, production validation, pin, or timeout was weakened.
+
+The existing skipped check, as recorded by JUnit:
+
+{skipped}
 
 Read-only review findings for the lead to file/triage (GitHub writes are outside this assignment):
 
@@ -179,6 +186,8 @@ scripts/adhoc/report_manifest_integration_checks_20261114.py
 Commands used to generate all tables from saved JSON/XML:
 
 ```
+# Historical exclusion inventory command; used only while MERGE_HEAD existed:
+PYTHONDONTWRITEBYTECODE=1 {ROOT.parents[1] / 'data-sheets-schema/.venv/bin/python'} scripts/adhoc/stage_manifest_code_merge_20261114.py {scratch}
 PYTHONDONTWRITEBYTECODE=1 {ROOT.parents[1] / 'data-sheets-schema/.venv/bin/python'} scripts/adhoc/audit_manifest_integration_pins_20261114.py --candidate {inventory['candidate']} --scratch {scratch}
 PYTHONDONTWRITEBYTECODE=1 {ROOT.parents[1] / 'data-sheets-schema/.venv/bin/python'} scripts/adhoc/report_manifest_integration_checks_20261114.py --scratch {scratch}
 PYTHONDONTWRITEBYTECODE=1 {ROOT.parents[1] / 'data-sheets-schema/.venv/bin/python'} scripts/adhoc/report_manifest_integration_checks_20261114.py --scratch {scratch} --handoff {destination}
