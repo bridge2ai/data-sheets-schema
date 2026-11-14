@@ -3,8 +3,11 @@
 Inputs: stopped attempt directory and fresh output directory. Outputs: cProfile
 and outcome JSON. No capture_stage, advance or publication call is made. Two
 fresh loads model the invocation/publication read boundaries, not a completion
-test. The registered 600-second limit bounds this diagnostic too. cProfile
+test. A repeating signal requests termination at the selected diagnostic limit. cProfile
 uses process CPU time; wall and resource CPU totals are recorded separately.
+The first run's ordinary TimeoutError did not unwind promptly; its partial
+profile was retained after manual interrupt. A BaseException deadline avoids
+ordinary Exception handlers, and repeats in case an inner boundary swallows it.
 """
 import argparse
 import cProfile
@@ -17,15 +20,22 @@ import signal
 import time
 
 
+class ProfileDeadline(BaseException):
+    """A diagnostic cancellation, never an authority or data-validation error."""
+
+
 def expired(signum, frame):
-    raise TimeoutError('read-only diagnostic reached registered 600-second helper bound')
+    raise ProfileDeadline('read-only diagnostic deadline reached')
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('attempt', type=Path)
     parser.add_argument('output', type=Path)
+    parser.add_argument('--timeout-seconds', type=float, default=600)
     args = parser.parse_args()
+    if not 0 < args.timeout_seconds <= 600:
+        parser.error('diagnostic timeout must be positive and no larger than 600')
     args.output.mkdir(parents=True, exist_ok=False)
     body = json.loads((args.attempt / 'registration.json').read_text())['registration']
     composition = json.loads(body['composition_raw_json'])
@@ -35,7 +45,7 @@ def main():
     os.chdir(body['working_directory'])
     profiler = cProfile.Profile(timer=time.process_time)
     signal.signal(signal.SIGALRM, expired)
-    signal.setitimer(signal.ITIMER_REAL, 600)
+    signal.setitimer(signal.ITIMER_REAL, args.timeout_seconds, 1)
     before = time.monotonic()
     cpu_before = resource.getrusage(resource.RUSAGE_SELF)
     error, completed = None, []
@@ -54,8 +64,8 @@ def main():
     except BaseException as exc:
         error = type(exc).__name__ + ': ' + str(exc)
     finally:
-        profiler.disable()
         signal.setitimer(signal.ITIMER_REAL, 0)
+        profiler.disable()
         wall = time.monotonic() - before
         cpu_after = resource.getrusage(resource.RUSAGE_SELF)
         profiler.dump_stats(str(args.output / 'reads.pstats'))
@@ -67,6 +77,7 @@ def main():
         (args.output / 'profile.json').write_text(json.dumps(
             {'wall_seconds': wall,
              'cpu_seconds': cpu_after.ru_utime + cpu_after.ru_stime - cpu_before.ru_utime - cpu_before.ru_stime,
+             'requested_timeout_seconds': args.timeout_seconds,
              'profile_timer': 'process_time', 'error': error, 'completed': completed,
              'scope': 'Read-only reconstruction, no stage invocation or publication.',
              'functions': rows}, indent=2))
