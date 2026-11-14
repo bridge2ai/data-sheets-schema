@@ -106,7 +106,8 @@ def test_changed_chunk_manifest_refuses_before_selection(tmp_path):
     assert not (out/'selection.json').exists()
 
 
-@pytest.mark.parametrize('action', ['process', 'network', 'write', 'symlink'])
+@pytest.mark.parametrize('action', ['process', 'network', 'write', 'symlink',
+                                  'outside-fd', 'other-fd', 'chmod-fd', 'truncate-fd'])
 def test_audit_barrier_denies_effects(tmp_path, action):
     # The helper is a durable test source, never an inline shell/python program.
     helper=ROOT/'tests/utils/native_packet_audit_probe.py'
@@ -115,6 +116,16 @@ def test_audit_barrier_denies_effects(tmp_path, action):
     assert run.returncode == 0, run.stdout+run.stderr
     assert 'DENIED' in run.stdout
     assert not (tmp_path/'outside').exists()
+
+
+def test_audit_barrier_allows_only_exact_manifest_descriptor(tmp_path):
+    helper = ROOT/'tests/utils/native_packet_audit_probe.py'
+    out = tmp_path/'out'; out.mkdir()
+    run = subprocess.run([sys.executable, '-P', '-B', str(helper), str(out), 'manifest-fd'],
+                         cwd=ROOT, capture_output=True, text=True)
+    assert run.returncode == 0, run.stdout + run.stderr
+    assert 'ALLOWED exact manifest descriptor' in run.stdout
+    assert (out/'environment-manifest.json').read_bytes() == b'isolated descriptor canary\n'
 
 
 def test_stage_root_cannot_overlap_packet(tmp_path):

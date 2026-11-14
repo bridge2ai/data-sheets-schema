@@ -18,6 +18,7 @@ import json
 import os
 from pathlib import Path
 import sys
+import stat
 
 
 # Lead ruling under NP1 item (ap), 2026-11-13; common to the canary and stratum.
@@ -69,6 +70,20 @@ def offline_guard(output):
         candidate = Path(os.fsdecode(path)).absolute().resolve()
         if candidate != output and not candidate.is_relative_to(output):
             raise OfflineViolation('write outside output directory: ' + str(candidate))
+    def manifest_descriptor(fd):
+        # environment.write uses exclusive O_NOFOLLOW creation, then fdopen.
+        # Allow that wrapper only for the exact new read-only manifest inode;
+        # arbitrary descriptors and descriptor mutation APIs still refuse.
+        path = output / 'environment-manifest.json'
+        try:
+            if path != path.resolve(strict=True) or path.is_symlink():
+                return False
+            named, opened = path.lstat(), os.fstat(fd)
+            return (stat.S_ISREG(opened.st_mode) and opened.st_nlink == 1
+                    and not opened.st_mode & 0o222
+                    and (named.st_dev, named.st_ino) == (opened.st_dev, opened.st_ino))
+        except OSError:
+            return False
     def audit(event, args):
         if (event.startswith('socket.') or event.startswith('subprocess.')
                 or event in {'os.system', 'os.posix_spawn', 'os.fork', 'os.forkpty', 'os.exec', 'pty.spawn'}):
@@ -77,7 +92,8 @@ def offline_guard(output):
             path, mode, flags = args
             if ((isinstance(mode, str) and any(x in mode for x in 'wax+'))
                     or flags & (os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC | os.O_APPEND)):
-                writable(path)
+                if not (isinstance(path, int) and manifest_descriptor(path)):
+                    writable(path)
         elif event in {'os.mkdir', 'os.remove', 'os.rmdir', 'os.chmod', 'os.chown', 'os.truncate', 'os.utime'}:
             writable(args[0])
         elif event in {'os.rename', 'os.link'}:
