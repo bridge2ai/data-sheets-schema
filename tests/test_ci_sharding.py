@@ -376,7 +376,8 @@ def test_missing_dedicated_target_cannot_disappear_from_any_lane(tmp_path, lane)
     ("pytest.exit('preserve actual exit', returncode=17)", "", "", 17),
 ])
 @pytest.mark.parametrize("lane", ["routing-dispatch", *SG2_CASE_LANES, "native-public-correction", "native-failure-16",
-                                  "native-capacity-05", "native-retention-changing"])
+                                  "native-capacity-05", "native-retention-changing",
+                                  *[f"native-capacity-{n}" for n in range(34, 46)]])
 def test_dedicated_case_requires_real_unqualified_pass(tmp_path, body, decorator, fixture, code, lane):
     _lane_fixture(tmp_path, body=body, decorator=decorator, fixture=fixture, target=lane)
     result = _run(tmp_path, f"--ci-lane={lane}")
@@ -454,3 +455,34 @@ def test_repeated_dedicated_target_cannot_enter_any_lane(tmp_path, lane):
                   f"--ci-lane={lane}", *flags)
     assert result.returncode == 4, result.stdout + result.stderr
     assert "dedicated target exactly once" in result.stderr
+
+
+def test_g2_full_fixture_cases_have_exact_dedicated_lanes(tmp_path):
+    import ast
+
+    paths = sorted({*ROOT.glob("tests/test_native_launch_sequence*.py"),
+                    ROOT / "tests/test_native_attempt_deadline.py",
+                    ROOT / "tests/test_native_publication_signals.py",
+                    ROOT / "tests/test_native_sequence_start.py"})
+    heavy_functions = set()
+    for path in paths:
+        for function in ast.parse(path.read_text()).body:
+            if not isinstance(function, ast.FunctionDef) or not function.name.startswith("test_"):
+                continue
+            calls = [node.func for node in ast.walk(function) if isinstance(node, ast.Call)]
+            if any((isinstance(call, ast.Name) and call.id == "make_case")
+                   or (isinstance(call, ast.Attribute) and call.attr == "synthetic_launch")
+                   for call in calls):
+                heavy_functions.add(str(path.relative_to(ROOT)) + "::" + function.name)
+    result = _run(ROOT, *(str(path.relative_to(ROOT)) for path in paths),
+                  "--collect-only", f"--basetemp={tmp_path / 'collection'}")
+    assert result.returncode == 0, result.stdout + result.stderr
+    collected = [line for line in result.stdout.splitlines()
+                 if line.startswith("tests/") and "::" in line]
+    expected = [node for node in collected if node.split("[", 1)[0] in heavy_functions]
+    actual = [NATIVE_CASE_LANES[f"native-capacity-{n}"] for n in range(34, 46)]
+    assert expected and set(expected) == set(actual)
+    assert len(expected) == len(actual)
+    split = partition_lanes([*DEDICATED_CASE_LANES.values(),
+                             *(node for node in collected if node not in actual)])
+    assert not set(expected).intersection(split["ordinary"])

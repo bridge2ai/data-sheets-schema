@@ -3,7 +3,7 @@
 Opt in with ``python -m pytest -p utils.pytest_shard --ci-shard=1/4``.
 Every collected file belongs to exactly one shard; new tests need no CI edit.
 Keeping a file together avoids multiplying its module/class fixture setup.
-Explicit ``--ci-lane`` isolates sixty-three slow offline API, SG2 and native
+Explicit ``--ci-lane`` isolates seventy-five slow offline API, SG2 and native
 cases while retaining the complete collected suite across the ordinary shards
 and case lanes.
 """
@@ -100,6 +100,19 @@ NATIVE_CAPACITY_CASE_LANES = {
     'native-capacity-31': 'tests/test_native_subscription_capture.py::test_genuine_registration_read_capture_for_event_rechecks_live_selection_and_stage_root',
     'native-capacity-32': 'tests/test_native_u3f2_construction.py::test_registration_factory_checks_real_constructed_replay_with_genuine_controls',
     'native-capacity-33': 'tests/test_native_u4b_probe_sequence.py::test_bound_phase_runs_genuine_saved_verifier_after_mocked_child_boundary',
+    # G2 full-fixture deadline and publication cases overflowed shard 9.
+    'native-capacity-34': 'tests/test_native_attempt_deadline.py::test_unplug_before_reservation_keeps_attempt_unspent[Battery Power-False]',
+    'native-capacity-35': 'tests/test_native_attempt_deadline.py::test_unplug_before_reservation_keeps_attempt_unspent[unrecognized-False]',
+    'native-capacity-36': 'tests/test_native_attempt_deadline.py::test_unplug_before_reservation_keeps_attempt_unspent[probe_failure-False]',
+    'native-capacity-37': 'tests/test_native_attempt_deadline.py::test_unplug_before_reservation_keeps_attempt_unspent[Battery Power-True]',
+    'native-capacity-38': 'tests/test_native_attempt_deadline.py::test_unplug_after_reservation_retains_reading_without_consuming_dispatch[Battery Power]',
+    'native-capacity-39': 'tests/test_native_attempt_deadline.py::test_unplug_after_reservation_retains_reading_without_consuming_dispatch[unrecognized]',
+    'native-capacity-40': 'tests/test_native_attempt_deadline.py::test_unplug_after_reservation_retains_reading_without_consuming_dispatch[probe_failure]',
+    'native-capacity-41': 'tests/test_native_attempt_deadline.py::test_slow_power_probe_cannot_age_an_already_checked_reservation_margin',
+    'native-capacity-42': 'tests/test_native_attempt_deadline.py::test_dispatch_guard_refusal_precedes_stage_activation[changed_consumed_guard]',
+    'native-capacity-43': 'tests/test_native_attempt_deadline.py::test_dispatch_guard_refusal_precedes_stage_activation[expired_after_power]',
+    'native-capacity-44': 'tests/test_native_publication_signals.py::test_public_first_signal_during_publication_keeps_exact_readback[2]',
+    'native-capacity-45': 'tests/test_native_publication_signals.py::test_public_first_signal_during_publication_keeps_exact_readback[15]',
     'native-retention-stable': 'tests/test_native_incomplete_retention.py::test_public_failed_attempt_retains_records_and_reads_back_exactly[False]',
     'native-retention-changing': 'tests/test_native_incomplete_retention.py::test_public_failed_attempt_retains_records_and_reads_back_exactly[True]',
     'native-retention-final-floor': 'tests/test_native_incomplete_retention.py::test_public_finalization_after_injected_final_floor_failure',
