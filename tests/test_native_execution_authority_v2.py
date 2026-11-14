@@ -97,10 +97,10 @@ def test_additional_helper_tampering_refuses(isolated_modules, monkeypatch):
 
 @pytest.mark.parametrize('name', ['prepare_registration', 'prepare_registration_v2', 'prepare_direct',
                                 'run_direct_canary_awake'])
-def test_foreign_or_v1_module_origin_refuses_without_replacement(isolated_modules, monkeypatch, name):
+def test_foreign_or_v1_module_origin_refuses_without_replacement(isolated_modules, name):
     identity = authority.dependency_identity()
     foreign = SimpleNamespace(__file__=str(authority.ROOT / 'notes/foreign' / (name + '.py')))
-    monkeypatch.setitem(sys.modules, name, foreign)
+    sys.modules[name] = foreign
     old_path = list(sys.path)
     with pytest.raises(ValueError, match='another origin'):
         with authority.loaded_dependencies(identity):
