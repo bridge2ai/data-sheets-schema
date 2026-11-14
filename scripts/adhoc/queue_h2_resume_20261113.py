@@ -35,7 +35,7 @@ def main():
         cohorts = [(name, []) for name in ('native', 'audit', 'budget')]
     elif args.phase == 'canary':
         cohorts = [('parallel-canary', ['--workers', '2',
-            'tests/test_native_admission_timer.py::test_exact_boundary_is_expired_without_waiting_for_alarm_delivery'])]
+            'tests/test_native_admission_timer.py::test_existing_signal_state_is_refused_and_preserved[pending]'])]
     else:
         require_canary('parallel-canary')
         cohorts = [
