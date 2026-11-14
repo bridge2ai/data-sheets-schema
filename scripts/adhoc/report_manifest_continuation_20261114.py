@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 import re
 import runpy
+import shlex
 import subprocess
 import xml.etree.ElementTree as ET
 
@@ -176,13 +177,19 @@ def cohorts(scratch):
 
 def markdown(data, results, scratch):
     final = {stage: results.get('final-' + stage) for stage in STAGES}
+    resume = data.get('registration_resume')
     pending = [stage for stage, row in final.items()
-               if row is None or not row['junit_available'] or not row['outcome']['cleanup_verified']]
-    unexpected = [case for row in final.values() if row for case in row['nonpassing']
-                  if case['status'] != 'skipped' and not case['case'].startswith('tests.test_native_d128_scanner_comparison::')]
+               if (row is None or not row['junit_available'] or not row['outcome']['cleanup_verified'])
+               and not (stage == 'registration' and resume and resume['all_cases_completed'])]
+    acceptance_rows = [*final.values(), results.get('final-registration-resumed')]
+    expected_d128 = ('tests.test_native_d128_scanner_comparison::'
+                     'test_d128_final_composition_has_only_the_finite_approved_scanner_differences')
+    unexpected = [case for row in acceptance_rows if row for case in row['nonpassing']
+                  if case['status'] != 'skipped' and case['case'] != expected_d128]
     verdict = ('Required verification is still incomplete.' if pending else
                'Required verification has additional failures; see the case ledger.' if unexpected else
-               'All required stages completed; only the inherited D128 approval hold remains.')
+               'All required cases completed; the inherited D128 approval hold and the initial registration timeout remain recorded.'
+               if resume else 'All required stages completed; only the inherited D128 approval hold remains.')
     lines = ['Continuation — the accepted merge remains the base (2 resolved conflicts). '
              'The v3 CLI/preparer structural proof and its separate identity update are committed. '
              'The isolated prefix canary now persists the manifest and reaches the intended dependency stop. '
@@ -201,15 +208,40 @@ def markdown(data, results, scratch):
              'Parent and ordinary child origin witnesses, OS network denial and observed-descendant '
              'cleanup are recorded per cohort. The primary environment was not modified. '
              'These are offline synthetic checks, not production registration or launch approval.', '',
-             '| Stage/cohort | Passed | Failed | Errors | Skipped | Seconds | Cleanup verified |',
-             '| --- | ---: | ---: | ---: | ---: | ---: | --- |']
+             '| Stage/cohort | Passed | Failed | Errors | Skipped | Seconds | Cleanup verified | Evidence |',
+             '| --- | ---: | ---: | ---: | ---: | ---: | --- | --- |']
     for name, row in results.items():
         c, out = row['counts'], row['outcome']
         shown = [str(c[k]) if row['junit_available'] else 'unrecorded' for k in ('passed', 'failed', 'errors', 'skipped')]
+        evidence = 'JUnit' if row['junit_available'] else 'no JUnit'
+        if name == 'final-registration' and resume:
+            shown = [str(resume['plan']['completed_log_passes']) + ' logged', '0 logged', '0 logged', '0 logged']
+            evidence = 'partial pytest log; deadline, exit 124'
+        elif name == 'registration-collection':
+            evidence = 'collection only; no test execution'
         lines.append(f"| {name} | " + ' | '.join(shown) + ' | '
-                     f"{out['seconds']:.2f} | {out['cleanup_verified']} |")
+                     f"{out['seconds']:.2f} | {out['cleanup_verified']} | {evidence} |")
+    if resume:
+        p = resume['plan']
+        lines += ['', f"Registration collected {p['collected']} exact cases. The first cohort logged "
+                  f"{p['completed_log_passes']} passes before its {p['original_seconds']:.2f}-second deadline. "
+                  f"The {len(p['pending_nodes'])} unfinished cases are the exact resume roster in "
+                  '`registration-resume-plan.json`; input hashes and per-case statuses are in '
+                  '`registration-coverage.json`. A logged completed case is distinguished from a JUnit result. '
+                  'The original cohort remains a timeout, with forced cleanup and no observed surviving descendants; '
+                  'it is not relabeled as a successful whole-suite run. '
+                  + ('All collected cases have now passed across the original log and the clean resumed JUnit cohort.'
+                     if resume['all_cases_passed'] else 'The complete resumed roster has not yet passed.'), '',
+                  'This runtime limit is a finding for the lead’s issue filing. The continuation changes no test '
+                  'assertion or production census to reduce it. Initial final-cohort source: '
+                  f"`{p['initial_source_commit']}`. The later source differs only in the saved reporting helpers "
+                  'and removal of the runner’s extra trailing blank line; production and test sources are unchanged. '
+                  'The source-delta ledger is in `continuation-audit.json`.', '',
+                  'Read-only review found the trailing blank line; it was corrected between cohorts. '
+                  'Report review also restricted the inherited D128 exception to its exact comparison test. '
+                  'These findings and the descriptor-barrier finding below are retained for the lead’s issue filing.']
     lines += ['', 'Every stage retains its exact command and environment in `plan.json` and '
-              '`pytest-command.json`, with `pytest.log`, `pytest.xml`, origin witnesses and `outcome.json`. '
+              '`pytest-command.json`, with `pytest.log`, available `pytest.xml`, origin witnesses and `outcome.json`. '
               'All cohort results, including failed attempts, are retained in `continuation-results.json`.', '',
               'The initial broad-environment boundary cohort was deliberately interrupted after the '
               'helper-preservation case passed and while dispatch fixture construction was active. '
@@ -257,7 +289,16 @@ def markdown(data, results, scratch):
               'D128 approval or protected source was weakened.', '',
               'Report provenance:', '', '```bash',
               f'python -B scripts/adhoc/report_manifest_continuation_20261114.py --scratch {scratch}',
-              '```', '', 'Nonpassing cases (including retained failed canaries):', '']
+              '```', '']
+    if resume:
+        command = [str(scratch / 'declared-dependencies/bin/python'), '-S', '-P', '-B',
+                   'scripts/adhoc/run_manifest_continuation_tests_20261114.py',
+                   '--tree', str(ROOT), '--out', str(scratch / 'NEW-REGISTRATION-RESUME'),
+                   '--workers', '4', '--timeout-seconds', '14400', *resume['plan']['pending_nodes']]
+        lines += ['Registration coverage provenance and exact unfinished-case reproduction:', '', '```bash',
+                  f'python -B scripts/adhoc/audit_manifest_registration_resume_20261114.py --scratch {scratch}',
+                  shlex.join(command), '```', '']
+    lines += ['Nonpassing cases (including retained failed canaries):', '']
     for name, row in results.items():
         for case in row['nonpassing']:
             lines.append(f"- {name}: `{case['case']}` — {case['status']}; {case['message']}")
@@ -272,6 +313,21 @@ def main():
     scratch = args.scratch.resolve(strict=True)
     assert scratch == ROOT.parent / 'scratch-native-manifest-integration-20261114/continuation'
     data, results = audit(), cohorts(scratch)
+    if (scratch / 'registration-resume-plan.json').exists():
+        resume_audit = runpy.run_path(str(ROOT / 'scripts/adhoc/audit_manifest_registration_resume_20261114.py'))['audit']
+        resume = resume_audit(scratch)
+        save(scratch / 'registration-coverage.json', resume)
+        data['registration_resume'] = resume
+        before = resume['plan']['initial_source_commit']
+        delta = git('diff', '--name-only', before, 'HEAD').decode().splitlines()
+        allowed = {'scripts/adhoc/audit_manifest_registration_resume_20261114.py',
+                   'scripts/adhoc/report_manifest_continuation_20261114.py',
+                   'scripts/adhoc/run_manifest_continuation_tests_20261114.py'}
+        assert set(delta) <= allowed, ('verification source changed beyond reporting/formatting', delta)
+        runner = 'scripts/adhoc/run_manifest_continuation_tests_20261114.py'
+        assert at(before, runner).rstrip() == (ROOT / runner).read_bytes().rstrip()
+        data['verification_source_delta'] = {'before': before, 'after': data['head'], 'paths': delta,
+                                            'production_and_tests_unchanged': True}
     save(scratch / 'continuation-audit.json', data)
     save(scratch / 'continuation-results.json', results)
     report = markdown(data, results, scratch)
