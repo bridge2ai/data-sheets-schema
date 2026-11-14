@@ -65,7 +65,15 @@ def _create(selection, role, raw, *, ordinal=None):
             or not root.is_dir() or root.is_symlink() or root.resolve() != root):
         raise ValueError('native publication is not one new physical S-owned destination')
     _mkdir_durable(target.parent)
-    durable_new(target, raw)
+    if role == 'observation':
+        # Failed partial bytes are evidence, but not observation ordinals.
+        staging = target.parent.with_name(target.parent.name + '.pending')
+        if staging.resolve() != staging or staging.is_symlink():
+            raise ValueError('observation staging is not a physical sibling directory')
+        _mkdir_durable(staging)
+        durable_new(target, raw, staging_directory=staging)
+    else:
+        durable_new(target, raw)
     item = evidence.read_regular(path, role, max_bytes=limit).captured
     if item.raw != raw:
         raise ValueError('published native artifact differs from its intended bytes')

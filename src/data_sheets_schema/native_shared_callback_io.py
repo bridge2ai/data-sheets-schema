@@ -19,9 +19,10 @@ def _sync_directory(path):
         os.close(handle)
 
 
-def durable_new(path, raw):
+def durable_new(path, raw, *, staging_directory=None):
     path = Path(path)
-    fd, temporary = tempfile.mkstemp(prefix='.' + path.name + '.pending-', dir=path.parent)
+    staging = path.parent if staging_directory is None else Path(staging_directory)
+    fd, temporary = tempfile.mkstemp(prefix='.' + path.name + '.pending-', dir=staging)
     with os.fdopen(fd, 'wb') as stream:
         stream.write(raw)
         stream.flush()
@@ -35,12 +36,12 @@ def durable_new(path, raw):
         # Cleanup must not replace the original publication failure.
         try:
             os.unlink(temporary)
-            _sync_directory(path.parent)
+            _sync_directory(staging)
         except OSError:
             pass
         raise
     os.unlink(temporary)
-    _sync_directory(path.parent)
+    _sync_directory(staging)
 
 
 def _mkdir_durable(path):
