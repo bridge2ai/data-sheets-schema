@@ -158,7 +158,9 @@ def worker(args):
                "--basetemp", str(out / "cases"),
                "--junitxml", str(out / "pytest.xml")]
     if args.workers:
-        command += ["-p", "xdist.plugin", "-n", str(args.workers), "--dist=loadfile"]
+        # Function-scoped native fixtures isolate aliases and scratch paths.
+        # Balance cases so the two-file registration stage uses all four slots.
+        command += ["-p", "xdist.plugin", "-n", str(args.workers), "--dist=load"]
     if args.collect_only:
         command += ["--collect-only"]
     command += args.nodes
