@@ -8,6 +8,7 @@ from contextlib import contextmanager, ExitStack
 from dataclasses import asdict, dataclass
 from inspect import isfunction, ismethod
 from types import ModuleType
+from pathlib import PurePath
 import sys
 from threading import current_thread, main_thread, RLock
 
@@ -86,7 +87,13 @@ class _ValidatorGuard:
         constants = []
         for module in self.modules:
             for name, value in sorted(vars(module).items()):
-                if name.isupper() and not name.startswith('_') and _binding_identity(value) is None:
+                private_contract = name in ('_DYNAMIC', '_LIMITS', '_OBSERVATION_KEYS',
+                    '_OBSERVATION_PAYLOADS', '_METADATA', '_COMPOSITION_KEYS',
+                    '_REQUIRED', '_OPTIONAL', '_TERMINAL_HELPERS', '_JSON_HELPERS', '_ADVANCE_KEYS')
+                private_limit = name.startswith('_') and any(token in name for token in (
+                    'LIMIT', 'MAX_', 'CEILING', '_BYTES', '_ENTRIES', '_SECONDS'))
+                if (name.isupper() and (not name.startswith('_') or private_contract or private_limit)
+                        and _binding_identity(value) is None and name != '_BYTES'):
                     constants.append((module.__name__, name, _constant_value(value)))
         return (_effective_bindings(self.modules), tuple(constants),
             self.admission_bytes, sys.executable, sys.version, sys.implementation.cache_tag)
@@ -106,6 +113,8 @@ class _ValidatorGuard:
 def _constant_value(value):
     if value is None or type(value) in (str, bytes, int, float, bool):
         return value
+    if isinstance(value, PurePath):
+        return (type(value), str(value))
     if type(value) is dict:
         return ('dict', tuple(sorted((key, _constant_value(item)) for key, item in value.items())))
     if type(value) in (tuple, list):
@@ -389,10 +398,10 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
         stack.callback(capture_inputs._ADMISSIONS.pop, admitted, None)
         # Reconstruct once before the first possible publication, too.
         admitted.reconstruct()
-        validator_modules = {}
-        for name in sorted(VALIDATOR_MODULES):
-            validator_modules[name] = stack.enter_context(authority.loaded_verified_package_module(
-                name, package_sources=pins))
+        validator_modules = {module.__name__: module for module in (*modules.values(), *graph_modules)
+                             if module.__name__ in VALIDATOR_MODULES}
+        if set(validator_modules) != VALIDATOR_MODULES:
+            raise ValueError('verified loader did not load the closed validator graph')
         guard = _ValidatorGuard(validator_modules.values(), source_check,
             (composition_raw, preparation_raw, c.canonical(arguments)))
         capture_inputs._PREFIX_OWNERS[admitted] = capture_inputs._PrefixOwner(guard)
