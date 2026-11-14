@@ -44,11 +44,37 @@ text = path.read_text()
 text = text.replace('"native-capacity-05", "native-retention-changing"]',
                     '"native-capacity-05", "native-retention-changing",\n'
                     '                                  *[f"native-capacity-{n}" for n in range(34, 46)]]')
-text += '\n\ndef test_g2_full_fixture_cases_have_exact_dedicated_lanes():\n'
-text += '    expected = {\n' + ''.join(f'        {lane!r}: {node!r},\n' for lane, node in lanes.items()) + '    }\n'
-text += '    assert {lane: NATIVE_CASE_LANES[lane] for lane in expected} == expected\n'
-text += '    split = partition_lanes([*DEDICATED_CASE_LANES.values(), "tests/light.py::test_light"])\n'
-text += '    assert split["ordinary"] == ["tests/light.py::test_light"]\n'
-text += '    assert all(split[lane] == [node] for lane, node in expected.items())\n'
+text += '''
+
+def test_g2_full_fixture_cases_have_exact_dedicated_lanes(tmp_path):
+    import ast
+
+    paths = sorted({*ROOT.glob("tests/test_native_launch_sequence*.py"),
+                    ROOT / "tests/test_native_attempt_deadline.py",
+                    ROOT / "tests/test_native_publication_signals.py",
+                    ROOT / "tests/test_native_sequence_start.py"})
+    heavy_functions = set()
+    for path in paths:
+        for function in ast.parse(path.read_text()).body:
+            if not isinstance(function, ast.FunctionDef) or not function.name.startswith("test_"):
+                continue
+            calls = [node.func for node in ast.walk(function) if isinstance(node, ast.Call)]
+            if any((isinstance(call, ast.Name) and call.id == "make_case")
+                   or (isinstance(call, ast.Attribute) and call.attr == "synthetic_launch")
+                   for call in calls):
+                heavy_functions.add(str(path.relative_to(ROOT)) + "::" + function.name)
+    result = _run(ROOT, *(str(path.relative_to(ROOT)) for path in paths),
+                  "--collect-only", f"--basetemp={tmp_path / 'collection'}")
+    assert result.returncode == 0, result.stdout + result.stderr
+    collected = [line for line in result.stdout.splitlines()
+                 if line.startswith("tests/") and "::" in line]
+    expected = [node for node in collected if node.split("[", 1)[0] in heavy_functions]
+    actual = [NATIVE_CASE_LANES[f"native-capacity-{n}"] for n in range(34, 46)]
+    assert expected and set(expected) == set(actual)
+    assert len(expected) == len(actual)
+    split = partition_lanes([*DEDICATED_CASE_LANES.values(),
+                             *(node for node in collected if node not in actual)])
+    assert not set(expected).intersection(split["ordinary"])
+'''
 path.write_text(text)
 print(json.dumps(lanes, indent=2))

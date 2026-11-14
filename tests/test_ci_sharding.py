@@ -457,22 +457,32 @@ def test_repeated_dedicated_target_cannot_enter_any_lane(tmp_path, lane):
     assert "dedicated target exactly once" in result.stderr
 
 
-def test_g2_full_fixture_cases_have_exact_dedicated_lanes():
-    expected = {
-        'native-capacity-34': 'tests/test_native_attempt_deadline.py::test_unplug_before_reservation_keeps_attempt_unspent[Battery Power-False]',
-        'native-capacity-35': 'tests/test_native_attempt_deadline.py::test_unplug_before_reservation_keeps_attempt_unspent[unrecognized-False]',
-        'native-capacity-36': 'tests/test_native_attempt_deadline.py::test_unplug_before_reservation_keeps_attempt_unspent[probe_failure-False]',
-        'native-capacity-37': 'tests/test_native_attempt_deadline.py::test_unplug_before_reservation_keeps_attempt_unspent[Battery Power-True]',
-        'native-capacity-38': 'tests/test_native_attempt_deadline.py::test_unplug_after_reservation_retains_reading_without_consuming_dispatch[Battery Power]',
-        'native-capacity-39': 'tests/test_native_attempt_deadline.py::test_unplug_after_reservation_retains_reading_without_consuming_dispatch[unrecognized]',
-        'native-capacity-40': 'tests/test_native_attempt_deadline.py::test_unplug_after_reservation_retains_reading_without_consuming_dispatch[probe_failure]',
-        'native-capacity-41': 'tests/test_native_attempt_deadline.py::test_slow_power_probe_cannot_age_an_already_checked_reservation_margin',
-        'native-capacity-42': 'tests/test_native_attempt_deadline.py::test_dispatch_guard_refusal_precedes_stage_activation[changed_consumed_guard]',
-        'native-capacity-43': 'tests/test_native_attempt_deadline.py::test_dispatch_guard_refusal_precedes_stage_activation[expired_after_power]',
-        'native-capacity-44': 'tests/test_native_publication_signals.py::test_public_first_signal_during_publication_keeps_exact_readback[2]',
-        'native-capacity-45': 'tests/test_native_publication_signals.py::test_public_first_signal_during_publication_keeps_exact_readback[15]',
-    }
-    assert {lane: NATIVE_CASE_LANES[lane] for lane in expected} == expected
-    split = partition_lanes([*DEDICATED_CASE_LANES.values(), "tests/light.py::test_light"])
-    assert split["ordinary"] == ["tests/light.py::test_light"]
-    assert all(split[lane] == [node] for lane, node in expected.items())
+def test_g2_full_fixture_cases_have_exact_dedicated_lanes(tmp_path):
+    import ast
+
+    paths = sorted({*ROOT.glob("tests/test_native_launch_sequence*.py"),
+                    ROOT / "tests/test_native_attempt_deadline.py",
+                    ROOT / "tests/test_native_publication_signals.py",
+                    ROOT / "tests/test_native_sequence_start.py"})
+    heavy_functions = set()
+    for path in paths:
+        for function in ast.parse(path.read_text()).body:
+            if not isinstance(function, ast.FunctionDef) or not function.name.startswith("test_"):
+                continue
+            calls = [node.func for node in ast.walk(function) if isinstance(node, ast.Call)]
+            if any((isinstance(call, ast.Name) and call.id == "make_case")
+                   or (isinstance(call, ast.Attribute) and call.attr == "synthetic_launch")
+                   for call in calls):
+                heavy_functions.add(str(path.relative_to(ROOT)) + "::" + function.name)
+    result = _run(ROOT, *(str(path.relative_to(ROOT)) for path in paths),
+                  "--collect-only", f"--basetemp={tmp_path / 'collection'}")
+    assert result.returncode == 0, result.stdout + result.stderr
+    collected = [line for line in result.stdout.splitlines()
+                 if line.startswith("tests/") and "::" in line]
+    expected = [node for node in collected if node.split("[", 1)[0] in heavy_functions]
+    actual = [NATIVE_CASE_LANES[f"native-capacity-{n}"] for n in range(34, 46)]
+    assert expected and set(expected) == set(actual)
+    assert len(expected) == len(actual)
+    split = partition_lanes([*DEDICATED_CASE_LANES.values(),
+                             *(node for node in collected if node not in actual)])
+    assert not set(expected).intersection(split["ordinary"])
