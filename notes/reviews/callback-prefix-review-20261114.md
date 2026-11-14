@@ -33,3 +33,14 @@ completion also goes directly to independent full replay.
 The closed graph guard now refuses the alternate package namespace as well
 as unknown modules in the canonical namespace. The lead must file these
 additional findings; the helper has made no GitHub writes.
+
+The final native suite passed. The isolated correction public canary then
+failed before dispatch because its subscription observation had expired.
+It emitted no callback CPU samples. The guard, admission and execution files
+on that failure path are unchanged from the assignment base, and the existing
+freshness chronology regression passes with both candidate and base module
+sets. This does not establish a matched full public base outcome or prove
+host contention is the sole cause. The handoff records the measured host load,
+the failed-canary stop, and the still-unverified public and real-worker checks.
+The lead must file this public-canary finding as well. No freshness rule or
+deadline was changed to bypass it.
