@@ -1,4 +1,5 @@
 """Lead cost ruling: explicit full/light checks and process-only reuse, 2026-11-14."""
+from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 from pathlib import Path
@@ -128,7 +129,6 @@ def test_full_regeneration_once_across_module_instances_and_live_rechecks(instal
 
 
 def test_concurrent_full_calls_regenerate_once(installed, tmp_path, monkeypatch):
-    from concurrent.futures import ThreadPoolExecutor
     import sys
     import threading
     import time

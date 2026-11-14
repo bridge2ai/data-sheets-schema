@@ -169,7 +169,7 @@ def results():
 def markdown(data, cohorts, costs):
     current = [row for row in cohorts if row['name'] in (
         'cost-mode-committed', 'cost-installed-canary', 'cost-builder-prefix',
-        'cost-live-boundaries', 'cost-concurrency-and-capture')]
+        'cost-live-boundaries', 'cost-concurrency-final')]
     held = [row['name'] for row in current if row['outcome']['returncode'] != 0]
     lines = ['Continuation — explicit manifest modes and process-local full verification reuse are implemented; '
              'integration acceptance is held. '
@@ -255,6 +255,10 @@ def markdown(data, cohorts, costs):
               'test exercises two simultaneous full calls and requires one regeneration. Recommend evaluating '
               'the remaining census cost together with the lead’s derivation-scope change before rerunning '
               'the full acceptance matrix; keep the current timeouts and freshness checks intact.', '',
+              'The initial concurrency test failed before verification because its delayed standard-library '
+              'import followed the synthetic fixture’s restricted import-path setup. Moving that import '
+              'to collection time preserves the same assertions; the separate final concurrency cohort '
+              'records the retry. Both capture-refusal cases passed in the earlier mixed cohort.', '',
               'Commits:', '', '```', *data['commits'], '```', '',
               'Report provenance (all tables are generated from saved audit/results data):', '', '```bash',
               'python -S -P -B scripts/adhoc/report_manifest_cost_ruling_20261114.py --handoff', '```', '',
