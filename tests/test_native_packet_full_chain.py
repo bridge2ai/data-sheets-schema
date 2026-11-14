@@ -3,10 +3,13 @@ No model/native peer executes; no attempt, capture or word reservation is made.
 Production prepare/validate functions remain intact; source defects are findings.
 """
 from datetime import datetime, timezone
+from contextlib import contextmanager
 import importlib.util
 import json
 from pathlib import Path
 import sys
+
+import pytest
 
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_execution_authority_v2 as authority
@@ -17,6 +20,9 @@ from tests.native_shared_fixture import build_native_fixture
 from tests.utils.native_synthetic_evidence import runtime_for, bound_permission_for
 from tests.utils.native_shared_consumer_scope import command_guidance
 from tests.utils.native_u4b_fixtures import bundle_for
+from tests.test_native_execution_registration_v2 import isolated_modules  # noqa: F401
+
+pytestmark = pytest.mark.usefixtures('isolated_modules')
 
 ROOT=Path(__file__).resolve().parents[1]
 LABEL='SYNTHETIC FULL-CHAIN REHEARSAL; NOT ACTUAL CI, REVIEW, OWNER OR LAUNCH AUTHORITY'
@@ -97,14 +103,16 @@ def test_full_chain_canary(tmp_path):
     assert case['results']['review_current_validated'] is True
 
 
-import pytest
-
-
 @pytest.fixture(scope='module')
 def complete_chain(tmp_path_factory):
     # One real reconstruction shared by this cohort; no approved flags cached.
-    with authority.launch_derivations():
-        yield build_chain(tmp_path_factory.mktemp('full-chain-cohort')/'SYNTHETIC-chain')
+    # Module fixtures run before function-scoped usefixtures. Reuse the same
+    # isolation here for the entire shared fixture lifetime and restore it on
+    # teardown; the per-test fixture still isolates each consumer.
+    with pytest.MonkeyPatch.context() as patch:
+        with contextmanager(isolated_modules.__wrapped__)(patch):
+            with authority.launch_derivations():
+                yield build_chain(tmp_path_factory.mktemp('full-chain-cohort')/'SYNTHETIC-chain')
 
 
 def test_source_versions_and_terms(complete_chain):
