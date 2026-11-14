@@ -376,7 +376,8 @@ def test_missing_dedicated_target_cannot_disappear_from_any_lane(tmp_path, lane)
     ("pytest.exit('preserve actual exit', returncode=17)", "", "", 17),
 ])
 @pytest.mark.parametrize("lane", ["routing-dispatch", *SG2_CASE_LANES, "native-public-correction", "native-failure-16",
-                                  "native-capacity-05", "native-retention-changing"])
+                                  "native-capacity-05", "native-retention-changing",
+                                  *[f"native-capacity-{n}" for n in range(34, 46)]])
 def test_dedicated_case_requires_real_unqualified_pass(tmp_path, body, decorator, fixture, code, lane):
     _lane_fixture(tmp_path, body=body, decorator=decorator, fixture=fixture, target=lane)
     result = _run(tmp_path, f"--ci-lane={lane}")
@@ -454,3 +455,24 @@ def test_repeated_dedicated_target_cannot_enter_any_lane(tmp_path, lane):
                   f"--ci-lane={lane}", *flags)
     assert result.returncode == 4, result.stdout + result.stderr
     assert "dedicated target exactly once" in result.stderr
+
+
+def test_g2_full_fixture_cases_have_exact_dedicated_lanes():
+    expected = {
+        'native-capacity-34': 'tests/test_native_attempt_deadline.py::test_unplug_before_reservation_keeps_attempt_unspent[Battery Power-False]',
+        'native-capacity-35': 'tests/test_native_attempt_deadline.py::test_unplug_before_reservation_keeps_attempt_unspent[unrecognized-False]',
+        'native-capacity-36': 'tests/test_native_attempt_deadline.py::test_unplug_before_reservation_keeps_attempt_unspent[probe_failure-False]',
+        'native-capacity-37': 'tests/test_native_attempt_deadline.py::test_unplug_before_reservation_keeps_attempt_unspent[Battery Power-True]',
+        'native-capacity-38': 'tests/test_native_attempt_deadline.py::test_unplug_after_reservation_retains_reading_without_consuming_dispatch[Battery Power]',
+        'native-capacity-39': 'tests/test_native_attempt_deadline.py::test_unplug_after_reservation_retains_reading_without_consuming_dispatch[unrecognized]',
+        'native-capacity-40': 'tests/test_native_attempt_deadline.py::test_unplug_after_reservation_retains_reading_without_consuming_dispatch[probe_failure]',
+        'native-capacity-41': 'tests/test_native_attempt_deadline.py::test_slow_power_probe_cannot_age_an_already_checked_reservation_margin',
+        'native-capacity-42': 'tests/test_native_attempt_deadline.py::test_dispatch_guard_refusal_precedes_stage_activation[changed_consumed_guard]',
+        'native-capacity-43': 'tests/test_native_attempt_deadline.py::test_dispatch_guard_refusal_precedes_stage_activation[expired_after_power]',
+        'native-capacity-44': 'tests/test_native_publication_signals.py::test_public_first_signal_during_publication_keeps_exact_readback[2]',
+        'native-capacity-45': 'tests/test_native_publication_signals.py::test_public_first_signal_during_publication_keeps_exact_readback[15]',
+    }
+    assert {lane: NATIVE_CASE_LANES[lane] for lane in expected} == expected
+    split = partition_lanes([*DEDICATED_CASE_LANES.values(), "tests/light.py::test_light"])
+    assert split["ordinary"] == ["tests/light.py::test_light"]
+    assert all(split[lane] == [node] for lane, node in expected.items())
