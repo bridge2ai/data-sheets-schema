@@ -202,6 +202,7 @@ def main():
     commands = composition['policy']['native_shared_helpers']
     session = '43540000-0000-4000-8000-000000000001'
     number = 0
+    denials = []
     def send(event):
         print(json.dumps(event, allow_nan=False), flush=True)
     init = json.loads(sys.stdin.readline())
@@ -212,12 +213,18 @@ def main():
         'claude_code_version': runtime['executable']['init_version'], 'tools': ['Read', 'Write', 'Bash'],
         'session_id': session, 'cwd': os.getcwd(), 'permissionMode': 'dontAsk'})
 
-    def tool(name, inputs, allowed=(0,)):
+    def tool(name, inputs, allowed=(0,), refusal=None):
         nonlocal number
         number += 1
         identity = 'shared-test-' + str(number)
         send({'type': 'assistant', 'session_id': session, 'message': {'model': aliases['returned'], 'content': [
             {'type': 'tool_use', 'id': identity, 'name': name, 'input': inputs}]}})
+        if refusal == 'unclassifiable':
+            send({'type': 'user', 'session_id': session, 'message': {'content': [
+                {'type': 'tool_result', 'tool_use_id': identity, 'is_error': True,
+                 'content': 'Permission to use Bash has been denied.'}]}})
+            sys.stdin.readline()
+            return
         request_id = 'callback-' + identity
         send({'type': 'control_request', 'request_id': request_id, 'request': {'subtype': 'hook_callback',
             'callback_id': callback, 'input': {'hook_event_name': 'PreToolUse', 'tool_name': name,
@@ -225,6 +232,20 @@ def main():
         line = sys.stdin.readline()
         if not line: raise RuntimeError('test peer was stopped before callback grant')
         response = json.loads(line)['response']
+        if refusal:
+            expected = response.get('response', {}).get('hookSpecificOutput', {})
+            if refusal == 'not_prescribed':
+                assert expected['permissionDecision'] == 'deny'
+                text = expected['permissionDecisionReason']
+            else:
+                assert response.get('response') == {}
+                text = 'Permission to use Bash has been denied.'
+            denials.append({'tool_name': name, 'tool_use_id': identity, 'tool_input': inputs})
+            send({'type': 'user', 'session_id': session, 'message': {'content': [
+                {'type': 'tool_result', 'tool_use_id': identity, 'is_error': True, 'content': text}]}})
+            if refusal != 'not_prescribed':
+                sys.stdin.readline()
+            return
         if response.get('request_id') != request_id or response.get('response') != {}:
             raise RuntimeError('test peer callback denied')
         if name == 'Bash':
@@ -255,6 +276,11 @@ def main():
         return tool('Bash', {'command': commands[name]}, allowed)
     def read(path): return tool('Read', {'file_path': str(path)})
     def write(path, text): return tool('Write', {'file_path': str(path), 'content': text})
+
+    if fixture.get('denial'):
+        source = selection.document()['inputs']['bundle']['path']
+        command = 'cat "' + source + '"' if fixture['denial'] == 'not_prescribed' else shlex.join(['cat', source])
+        tool('Bash', {'command': command}, refusal=fixture['denial'])
 
     for role in ('bundle', 'chunk_manifest', 'source_manifest'):
         read(selection.document()['inputs'][role]['path'])
@@ -305,7 +331,7 @@ def main():
     send({'type': 'result', 'session_id': session, 'is_error': False, 'terminal_reason': 'completed', 'stop_reason': 'end_turn',
         'usage': {'input_tokens': 10, 'output_tokens': 2, 'cache_read_input_tokens': 0, 'cache_creation_input_tokens': 0},
         'modelUsage': {runtime['model']: {'inputTokens': 10, 'outputTokens': 2, 'cacheReadInputTokens': 0,
-            'cacheCreationInputTokens': 0, **runtime['limits']}}, 'total_cost_usd': 0, 'permission_denials': []})
+            'cacheCreationInputTokens': 0, **runtime['limits']}}, 'total_cost_usd': 0, 'permission_denials': denials})
     return 0
 
 
