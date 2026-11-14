@@ -695,6 +695,7 @@ def _produce_captured(expected, directory, deadline, p, controls, controller_sou
                       transport, selected, selection_raw):
     """Host-only producer using already captured, live source-bound inputs."""
     sources = {row["module"]: row for row in expected["production_sources"]}
+    transport_source = None
     for name in ("native_permission_probe", "native_probe_provider", "native_subscription_guard"):
         path = Path(__file__).with_name(name + ".py")
         pin = sources.get("data_sheets_schema." + name)
@@ -702,6 +703,8 @@ def _produce_captured(expected, directory, deadline, p, controls, controller_sou
         if pin != {"module": "data_sheets_schema." + name, "path": str(path.resolve()),
                    "sha256": sha(raw), "bytes": len(raw)}:
             raise ValueError("permission producer source is absent from selected production closure: " + name)
+        if name == "native_probe_provider":
+            transport_source = raw
     _identity(expected)
     directory = Path(directory)
     if not directory.is_absolute() or directory.parent.resolve(strict=True) != directory.parent:
@@ -719,6 +722,7 @@ def _produce_captured(expected, directory, deadline, p, controls, controller_sou
     _remaining(deadline)
     directory.mkdir(mode=0o700)
     try:
+        _write_new(directory / "transport-provider.py", transport_source)
         (directory / "version-config").mkdir(mode=0o700)
         source = read_regular(expected["source"]["path"], limit=p.MAX_MEMBER)
         if sha(source) != expected["source"]["sha256"]:
@@ -749,11 +753,9 @@ def _produce_captured(expected, directory, deadline, p, controls, controller_sou
         if reading.get("checked") is not True or reading.get("passed") is not True:
             raise ValueError("actual permission observation did not pass its verifier")
         _write_new(directory / "verification.json", canonical(reading))
-        transport = Path(__file__).with_name("native_probe_provider.py").read_bytes()
-        _write_new(directory / "transport-provider.py", transport)
         _write_new(directory / "producer-evidence.json", canonical({
             "kind": "d4d_native_probe_producer_evidence", "version": 1,
-            "manifest_sha256": sha(raw_manifest), "transport_source_sha256": sha(transport),
+            "manifest_sha256": sha(raw_manifest), "transport_source_sha256": sha(transport_source),
             "selector_source_sha256": sha(files["recipe/provider.py"]),
             "basis": "Actual transport source and fixed selector are distinct; no simulator or fallback."}))
         output = directory / "permission-probe.json"

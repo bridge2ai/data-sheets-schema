@@ -402,6 +402,13 @@ def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_ca
     monkeypatch.setattr(probe, "_version", lambda expected, deadline, directory:
                         (expected["runtime"]["executable"]["version"] + "\n").encode())
     monkeypatch.setattr(probe, "local_provider", mock_provider)
+    transport_source = Path(provider.__file__).read_bytes()
+    actual_read_bytes = Path.read_bytes
+    def refuse_late_transport_read(path):
+        if path == Path(provider.__file__) and (directory / 'transport-provider.py').exists():
+            pytest.fail('transport source was reopened after its checked capture')
+        return actual_read_bytes(path)
+    monkeypatch.setattr(Path, 'read_bytes', refuse_late_transport_read)
     def git_only(argv, *args, **kwargs):
         if (not isinstance(argv, (list, tuple)) or Path(argv[0]).name != 'git'
                 or kwargs.get('shell')):
@@ -451,11 +458,12 @@ def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_ca
     assert reading["passed"]
     assert len(reading["cases"]) == len(json.loads(manifest['members']['cases.json']['text']))
     assert len(reading["traces"]) == len(p.TRACES)
-    assert (directory / "transport-provider.py").read_bytes() == Path(provider.__file__).read_bytes()
+    assert (directory / "transport-provider.py").read_bytes() == transport_source
     assert all((directory / trace / "evidence_root" / "parent-stop.json").is_file()
                for trace in p.TRACES if trace != "settled")
     sidecar = guard.strict_json((directory / 'producer-evidence.json').read_bytes())
     assert sidecar['manifest_sha256'] == guard.sha(output.read_bytes())
+    assert sidecar['transport_source_sha256'] == guard.sha(transport_source)
     monkeypatch.setattr(probe, '_version', lambda *a: pytest.fail('spent path started another probe'))
     with pytest.raises(FileExistsError):
         probe.produce_saved_probe(expected, directory, deadline_seconds=60)
