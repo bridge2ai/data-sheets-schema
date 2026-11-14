@@ -471,18 +471,17 @@ def _pool(reader, streams):
 
 
 def _journal_prefix_digest(run, end):
-    pins = tuple(item.pin for item in run.history.records[:end])
     key = (run.selection.registration.pin.sha256, run.binding.execution.pin.sha256,
-           run.binding.attempt_id, pins)
+           run.binding.attempt_id, end, run.history.records[end - 1].pin)
     prefixes = getattr(run, '_prefixes', None)
     if prefixes is not None and key in prefixes:
         return prefixes[key]
     raw = stage.journal_bytes(selection_sha256=run.selection.registration.pin.sha256,
         execution_sha256=run.binding.execution.pin.sha256, attempt_id=run.binding.attempt_id,
-        records=pins)
+        records=tuple(item.pin for item in run.history.records[:end]))
     pair = (c.sha(raw), raw)
     if prefixes is not None:
-        prefixes[key] = pair
+        prefixes[key] = (pair[0], None)
     return pair
 
 
@@ -492,6 +491,10 @@ def _history_prefix(run, digest):
     for end in range(1, len(run.history.records) + 1):
         prefix_digest, raw = _journal_prefix_digest(run, end)
         if prefix_digest == digest:
+            if raw is None:
+                raw = stage.journal_bytes(selection_sha256=run.selection.registration.pin.sha256,
+                    execution_sha256=run.binding.execution.pin.sha256, attempt_id=run.binding.attempt_id,
+                    records=tuple(item.pin for item in run.history.records[:end]))
             found.append(replace(run.history, journal=_captured('journal', run.selection.role('journal'), raw),
                                  records=run.history.records[:end]))
     if len(found) != 1:
@@ -746,7 +749,11 @@ def _loaded(base, streams, prefixes, *, _catalogs=None, _prefix_owner=None):
         run._prefix = _prefix_owner.begin(run)
     _checked_observations(run)
     if run._prefix is not None:
-        run._prefix.commit()
+        # Do not publish historical observation checkpoints before the current
+        # stage suffix has also reconstructed successfully.
+        current = run.decision()
+        if current is None or current.state != 'failed':
+            run._prefix.commit()
     return run
 
 
@@ -952,14 +959,16 @@ def _check_advance_acknowledgement(run, actual, result, *, before_history_sha256
         raise ValueError('advance acknowledgement identity differs from selected admission')
     before = _history_prefix(run, before_history_sha256)
     phase1 = _phase1(run.selection, run.binding, before, run.reader)
-    replay = stage._Replay(run.selection, run.binding, phase1, before, _catalogs=run._catalogs).run()
+    replay = stage._Replay(run.selection, run.binding, phase1, before, _catalogs=run._catalogs, _prefix=run._prefix).run()
     if replay.pending is not None and replay.pending[-1] is not None:
         response, _ = replay.pending[-1]
-        proposal = stage._check_response(run.selection, run.binding, phase1, before, replay.pending[2].raw, response.raw, run._catalogs)
+        proposal = stage._check_response(run.selection, run.binding, phase1, before, replay.pending[2].raw,
+            response.raw, run._catalogs, _prefix=run._prefix)
         publications = (*proposal.publications, *(c.HelperPublication('create_once', item, None) for item in proposal.records_to_append),
             c.HelperPublication('replace_journal_from_exact_predecessor', proposal.predicted_journal, before.journal.pin.sha256))
     else:
-        publications = stage._prepare_next(run.selection, run.binding, phase1, before, run._catalogs).publications
+        publications = stage._prepare_next(run.selection, run.binding, phase1, before,
+            run._catalogs, _prefix=run._prefix).publications
     expected_publications = [c.pin_dict(item.artifact.pin) for item in publications]
     if type(result['publications']) is not list or c.canonical(result['publications']) != c.canonical(expected_publications):
         raise ValueError('advance result does not describe every freshly derived actual effect')

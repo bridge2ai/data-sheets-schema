@@ -20,6 +20,9 @@ def main():
             raw = authority._verified_source_bytes(identity['path'], identity['sha256'])
             graph.update(authority.refuse_legacy_consumer_imports(raw, name=name, package_sources=pins))
     raw = json.dumps(graph, sort_keys=True, indent=2) + '\n'
+    assert set(graph) <= callbacks.VALIDATOR_MODULES
+    assert {'data_sheets_schema.native_shared_capture', 'data_sheets_schema.native_shared_stage',
+            'data_sheets_schema.native_shared_observations'} <= set(graph)
     output = Path(sys.argv[1])
     output.write_text(raw)
     assert output.read_text() == raw

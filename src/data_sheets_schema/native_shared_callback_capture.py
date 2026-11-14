@@ -144,6 +144,18 @@ def prefix_owner(admission):
     return _PREFIX_OWNERS.get(admission)
 
 
+def _check_admitted_sources(admission):
+    try:
+        admission.check_sources()
+    except (ValueError, OSError):
+        owner = _PREFIX_OWNERS.get(admission)
+        if owner is not None:
+            owner.guard.disabled = True
+            owner.semantic.clear()
+            owner.observation_state = None
+        raise
+
+
 @dataclass(frozen=True, slots=True, weakref_slot=True, eq=False)
 class Admission:
     registration_raw: bytes
@@ -162,13 +174,13 @@ class Admission:
 
     def reconstruct(self):
         require_admission(self)
-        self.check_sources()
+        _check_admitted_sources(self)
         arguments = c.strict_json(self.rebuild_arguments_json)
         value = self.rebuild(preparation_raw=self.preparation_raw,
             classifier_projection=self.controls, **arguments)
         if c.canonical(value) != self.execution_json:
             raise ValueError('callback execution changed after admission')
-        self.check_sources()
+        _check_admitted_sources(self)
         require_admission(self)
         return value
 
@@ -204,5 +216,5 @@ class Admission:
                 or started.get('composition_sha256') != value['composition_sha256']
                 or type(started.get('dispatch_limit')) is not int or started['dispatch_limit'] != 1):
             raise ValueError('selected stage does not have its actual one-use started identity')
-        self.check_sources()
+        _check_admitted_sources(self)
         return current, reader, value, composition, self.spec

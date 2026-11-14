@@ -6,7 +6,7 @@ This is a source contract, not a sandbox against arbitrary Python reflection.
 """
 from contextlib import contextmanager, ExitStack
 from dataclasses import asdict, dataclass
-from inspect import isfunction, ismethod
+from inspect import isbuiltin, isfunction, ismethod
 from types import ModuleType
 from pathlib import PurePath
 import sys
@@ -37,12 +37,18 @@ VALIDATOR_MODULES = frozenset('data_sheets_schema.' + name for name in (
 
 
 def _binding_identity(value):
-    if isinstance(value, (ModuleType, type)) or isfunction(value) or ismethod(value):
+    if isinstance(value, (ModuleType, type)) or isfunction(value) or ismethod(value) or isbuiltin(value):
         return id(value), type(value)
     return None
 
 
-def _effective_bindings(modules):
+def _environment_identity(value):
+    if value is None or type(value) in (str, bytes, int, float, bool):
+        return type(value), value
+    return _binding_identity(value)
+
+
+def _effective_bindings(modules, retained=None):
     """Attest imported aliases and callable environments, without retaining runs."""
     result = []
     for module in modules:
@@ -51,14 +57,20 @@ def _effective_bindings(modules):
             identity = _binding_identity(value)
             if identity is None:
                 continue
+            if retained is not None:
+                retained.append(value)
             result.append((module.__name__, name, identity))
-            if isinstance(value, ModuleType) and value.__name__.startswith('data_sheets_schema.'):
-                if value.__name__ not in VALIDATOR_MODULES:
-                    raise ValueError('validator binding reaches a module outside its closed graph')
+            origin = value.__name__ if isinstance(value, ModuleType) else getattr(value, '__module__', '')
+            if origin and origin.startswith('data_sheets_schema.') and origin not in VALIDATOR_MODULES:
+                raise ValueError('validator binding reaches a module outside its closed graph')
             if isfunction(value) or ismethod(value):
                 functions.append((name, value.__func__ if ismethod(value) else value))
             elif isinstance(value, type) and value.__module__ == module.__name__:
                 for member, function in sorted(vars(value).items()):
+                    if isinstance(function, property):
+                        for index, accessor in enumerate((function.fget, function.fset, function.fdel)):
+                            if isfunction(accessor):
+                                functions.append((name + '.' + member + ':' + str(index), accessor))
                     if isinstance(function, (staticmethod, classmethod)):
                         function = function.__func__
                     if isfunction(function):
@@ -67,11 +79,16 @@ def _effective_bindings(modules):
             environments = (function.__defaults__ or (),
                 tuple(sorted((function.__kwdefaults__ or {}).items())),
                 tuple(cell.cell_contents for cell in (function.__closure__ or ())))
+            if retained is not None:
+                retained.extend((function, function.__code__, function.__defaults__, function.__kwdefaults__))
+                retained.extend(environments[0])
+                retained.extend(value for _, value in environments[1])
+                retained.extend(environments[2])
             result.append((module.__name__, name, id(function), id(function.__code__),
                 id(function.__defaults__), id(function.__kwdefaults__),
-                tuple(_binding_identity(value) for value in environments[0]),
-                tuple((key, _binding_identity(value)) for key, value in environments[1]),
-                tuple(_binding_identity(value) for value in environments[2])))
+                tuple(_environment_identity(value) for value in environments[0]),
+                tuple((key, _environment_identity(value)) for key, value in environments[1]),
+                tuple(_environment_identity(value) for value in environments[2])))
     return tuple(result)
 
 
@@ -81,9 +98,12 @@ class _ValidatorGuard:
         self.source_check = source_check
         self.admission_bytes = admission_bytes
         self.disabled = False
-        self.baseline = self.snapshot()
+        self.references = []
+        self.source_identities = (getattr(source_check, 'pins', ()),
+            tuple(identity for _, identity in getattr(source_check, 'modules', ())))
+        self.baseline = self.snapshot(retain=True)
 
-    def snapshot(self):
+    def snapshot(self, *, retain=False):
         constants = []
         for module in self.modules:
             for name, value in sorted(vars(module).items()):
@@ -92,10 +112,12 @@ class _ValidatorGuard:
                     '_REQUIRED', '_OPTIONAL', '_TERMINAL_HELPERS', '_JSON_HELPERS', '_ADVANCE_KEYS')
                 private_limit = name.startswith('_') and any(token in name for token in (
                     'LIMIT', 'MAX_', 'CEILING', '_BYTES', '_ENTRIES', '_SECONDS'))
-                if (name.isupper() and (not name.startswith('_') or private_contract or private_limit)
+                grammar = hasattr(value, 'pattern') and hasattr(value, 'flags')
+                if (name.isupper() and (not name.startswith('_') or private_contract or private_limit or grammar)
                         and _binding_identity(value) is None and name != '_BYTES'):
                     constants.append((module.__name__, name, _constant_value(value)))
-        return (_effective_bindings(self.modules), tuple(constants),
+        return (_effective_bindings(self.modules, self.references if retain else None), tuple(constants),
+            self.source_identities,
             self.admission_bytes, sys.executable, sys.version, sys.implementation.cache_tag)
 
     def reusable(self):
@@ -357,8 +379,11 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
         for module in (*modules.values(), rebuild):
             identity = authority.module_source_identity(module)
             raw = authority._verified_source_bytes(identity['path'], identity['sha256'])
-            graph.update(authority.refuse_legacy_consumer_imports(raw,
-                name=identity['name'], package_sources=pins))
+            reached = authority.refuse_legacy_consumer_imports(raw,
+                name=identity['name'], package_sources=pins)
+            if identity['name'] == 'data_sheets_schema.native_shared_capture' and not set(reached) <= VALIDATOR_MODULES:
+                raise ValueError('validator import graph exceeds its closed binding guard')
+            graph.update(reached)
         graph_modules = []
         for name in sorted(graph):
             if name.startswith('data_sheets_schema.'):
