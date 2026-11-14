@@ -21,6 +21,22 @@ from tests.test_native_generation_frontdoor import saved_case
 _REAL_POPEN = probe.subprocess.Popen
 
 
+def test_permission_stop_unwinds_and_restores_handlers():
+    before = {number: probe.signal.getsignal(number)
+              for number in (probe.signal.SIGINT, probe.signal.SIGTERM)}
+    cleaned = []
+    with pytest.raises(InterruptedError, match="permission probe stopped"):
+        with probe._probe_signals():
+            try:
+                probe.signal.raise_signal(probe.signal.SIGTERM)
+            finally:
+                probe.signal.raise_signal(probe.signal.SIGTERM)
+                probe.signal.raise_signal(probe.signal.SIGINT)
+                cleaned.append(True)
+    assert cleaned == [True]
+    assert {number: probe.signal.getsignal(number) for number in before} == before
+
+
 def retained_binary(tmp_path):
     """Invented Mach-O-format bytes; tests never execute this file."""
     target = tmp_path / "claude-retained"

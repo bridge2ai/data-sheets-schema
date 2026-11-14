@@ -33,6 +33,34 @@ U4_EFFORT = 'high'
 U4_RECEIPT_INSTRUMENT = 4
 
 
+@contextmanager
+def _probe_signals():
+    """Turn the first stop into unwinding; subsequent stops cannot abort it."""
+    previous = {}
+    def stop(signum, frame):
+        for number in previous:
+            signal.signal(number, signal.SIG_IGN)
+        raise InterruptedError("permission probe stopped by signal " + str(signum))
+    try:
+        for number in (signal.SIGINT, signal.SIGTERM):
+            previous[number] = signal.signal(number, stop)
+        yield
+    finally:
+        for number, handler in previous.items():
+            signal.signal(number, handler)
+
+
+@contextmanager
+def _cleanup_signals():
+    previous = {number: signal.signal(number, signal.SIG_IGN)
+                for number in (signal.SIGINT, signal.SIGTERM)}
+    try:
+        yield
+    finally:
+        for number, handler in previous.items():
+            signal.signal(number, handler)
+
+
 def require_u4_runtime(runtime):
     """Validate D106's saved selection, without querying an account or binary.
 
@@ -384,15 +412,16 @@ def _version(expected, deadline, directory):
             raise ValueError("observed native version differs from registration")
         return raw
     finally:
-        try:
-            _terminate(process)
-        finally:
-            if process is not None:
-                for stream in (process.stdout, process.stderr):
-                    if stream is not None:
-                        stream.close()
-            _write_new(directory / "version.stdout", bytes(outputs["stdout"]))
-            _write_new(directory / "version.stderr", bytes(outputs["stderr"]))
+        with _cleanup_signals():
+            try:
+                _terminate(process)
+            finally:
+                if process is not None:
+                    for stream in (process.stdout, process.stderr):
+                        if stream is not None:
+                            stream.close()
+                _write_new(directory / "version.stdout", bytes(outputs["stdout"]))
+                _write_new(directory / "version.stderr", bytes(outputs["stderr"]))
 
 
 def _run_native(expected, launch, policy, observer, classifier, transport, server, deadline):
@@ -433,22 +462,23 @@ def _run_native(expected, launch, policy, observer, classifier, transport, serve
         else:
             raise
     finally:
-        try:
-            _terminate(process)
-        finally:
+        with _cleanup_signals():
             try:
-                control.close()
+                _terminate(process)
             finally:
-                if process is not None:
-                    for stream in (process.stdin, process.stdout, process.stderr):
-                        if stream is not None and not stream.closed:
-                            stream.close()
-                # Preserve even timeout/refusal/overflow traces. Publication
-                # still requires a full independently verified manifest.
-                evidence = Path(launch["config_root"]).parent
-                _write_new(evidence / "transcript.jsonl", transcript.getvalue())
-                _write_new(evidence / "control.jsonl", journal.getvalue().encode())
-                _write_new(evidence / "stderr.txt", bytes(stderr))
+                try:
+                    control.close()
+                finally:
+                    if process is not None:
+                        for stream in (process.stdin, process.stdout, process.stderr):
+                            if stream is not None and not stream.closed:
+                                stream.close()
+                    # Preserve even timeout/refusal/overflow traces. Publication
+                    # still requires a full independently verified manifest.
+                    evidence = Path(launch["config_root"]).parent
+                    _write_new(evidence / "transcript.jsonl", transcript.getvalue())
+                    _write_new(evidence / "control.jsonl", journal.getvalue().encode())
+                    _write_new(evidence / "stderr.txt", bytes(stderr))
     if (not control.control_shutdown_complete or control.unfinished_control_workers != 0
             or process is None or process.poll() is None):
         raise ValueError("permission probe cleanup was incomplete")
@@ -641,7 +671,7 @@ def produce_saved_probe(expected, directory, *, deadline_seconds):
     if deadline_seconds > expected['runtime']['deadline_seconds']:
         raise ValueError("permission probe deadline exceeds selected runtime deadline")
     deadline = time.monotonic() + deadline_seconds
-    with _loaded_probe_inputs(expected) as inputs:
+    with _probe_signals(), _loaded_probe_inputs(expected) as inputs:
         return _produce_captured(expected, directory, deadline, *inputs)
 
 
