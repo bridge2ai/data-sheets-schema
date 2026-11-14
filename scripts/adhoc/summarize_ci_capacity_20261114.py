@@ -39,7 +39,7 @@ def main():
     assert not git('diff', report['acceptance_head'], '--', 'src/', 'tests/', 'utils/', '.github/')
     report['acceptance_inputs_unchanged'] = True
     runs = {}
-    rows = ['| Saved run | Passed | Failed | Errors | Skipped | Pytest seconds |',
+    rows = ['| Saved run | Passed | Failed | Errors | Skipped | JUnit seconds |',
             '| --- | ---: | ---: | ---: | ---: | ---: |']
     names = ['isolation-before', 'isolation-after', 'module-isolation-before', 'module-isolation-after',
              'layout-canary', 'timing-tests', 'acceptance']
@@ -74,7 +74,10 @@ def main():
     report['native_lanes'] = len(NATIVE_CASE_LANES)
     report['dedicated_lanes'] = len(DEDICATED_CASE_LANES)
     workflow = '.github/workflows/main.yaml'
-    old_jobs = yaml.safe_load(git('show', BASE + ':' + workflow))['jobs']
+    # Preserve the terminal newline: YAML literal-block scalar values depend
+    # on it. The convenience git() helper strips CLI output for hashes/status.
+    old_workflow = subprocess.check_output(['git', 'show', BASE + ':' + workflow], cwd=ROOT)
+    old_jobs = yaml.safe_load(old_workflow)['jobs']
     new_jobs = yaml.safe_load((ROOT / workflow).read_text())['jobs']
     assert old_jobs['test'] == new_jobs['test']
     for name in old_jobs:
@@ -161,7 +164,7 @@ The full acceptance command deliberately starts with the legacy contamination te
 
 {file_counts}
 
-The acceptance source head was `{report['acceptance_head']}`. The final reporting-helper commit changes none of its source, test, utility or workflow inputs. S/interpreter.txt records Python 3.13.12; S/dependency-files.sha256 records the repository dependency-file hashes. This is local offline verification, not Python 3.12 CI acceptance.
+The acceptance source head was `{report['acceptance_head']}`. The reporting-helper commits change none of its source, test, utility or workflow inputs. S/interpreter.txt records Python 3.13.12; S/dependency-files.sha256 records the repository dependency-file hashes. This is local offline verification, not Python 3.12 CI acceptance.
 
 The audit found {report['slow_cases']} ordinary-shard testcase records over 120 seconds in the eleven available JUnit artifacts. It moves all {report['slow_dispositions']['dedicated']} measured native runtime cases to `native-capacity-01` through `native-capacity-33`, and additionally moves the three public retention cases from cancelled shard 6. Shard 6 has no completed JUnit artifact; those three are selected from the lead's timeout finding and are explicitly not counted as measured cases.
 
@@ -177,7 +180,7 @@ CL196-F2 / issue 6230 is addressed. Every historical assertion remains unchanged
 
 The refresh uses successful ordinary shards {', '.join(map(str, timing['selected_shards']))} from run 43536007079. Failed shards 1, 8 and 10, cancelled shard 6, and all dedicated cases are excluded. It contains {timing['test_cases']} retained testcase records, excludes {timing['excluded_cases']} newly dedicated records from those inputs, measures {timing['measured_files']} files, adds {timing['added_files']} previously untimed files and preserves {timing['retained_unmeasured_files']} unmeasured weights. Lossless originals occupy {timing['fixture_bytes']} compressed bytes under W/tests/fixtures/ci_timings/43536007079. The run as a whole failed; this is a partial refresh from its successful shards. The single-artifact timing canary verified persistence, decompression and the unchanged updater before the batch. The full contract additionally verifies all dedicated-case exclusions.
 
-Review finding CL196-CI-R1, fixed: function-scoped isolation alone did not cover module-scoped builder setup. Its failing and passing evidence is retained in the module-isolation logs. The lead should record this finding; no GitHub issue was filed because the assignment forbids GitHub writes. No other unresolved implementation finding arose in the read-only review. Existing unrelated CI failures in the lead's run summary were not repaired here. Corrected builder duration in Linux CI and actual execution of the newly dedicated lanes remain unverified.
+Review finding CL196-CI-R1, fixed: function-scoped isolation alone did not cover module-scoped builder setup. Its failing and passing evidence is retained in the module-isolation logs. Reporting finding CL196-CI-R2, fixed: the initial summary helper stripped the trailing newline from git-show output, changing the parsed final YAML literal scalar and falsely reporting an aggregate-job difference. S/report-initial-error.log retains the failure. The helper now parses the exact original bytes and keeps the equality assertion intact; the workflow did not change. The lead should record both findings; no GitHub issue was filed because the assignment forbids GitHub writes. No unresolved implementation finding remains from the read-only review. Existing unrelated CI failures in the lead's run summary were not repaired here. Corrected builder duration in Linux CI and actual execution of the newly dedicated lanes remain unverified.
 
 Saved verification runs (generated from JUnit by W/scripts/adhoc/summarize_ci_capacity_20261114.py):
 
