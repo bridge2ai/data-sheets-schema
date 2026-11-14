@@ -27,6 +27,7 @@ for name in ('focused', 'propagation'):
     matches = re.findall(r'\d+ passed[^\n]*', log)
     assert matches, name
     tests[name] = matches[-1]
+assert (scratch / 'propagation-exit-status.txt').read_text().strip() == '0'
 protected = ['src/data_sheets_schema/shared_generation.py', 'src/data_sheets_schema/api_runner.py',
     'src/download/prompts/canonical_hashes.yaml', 'tests/utils/run_spec_boundary_contracts.json',
     'src/data_sheets_schema/native_controller_sources_v2.json',
@@ -78,6 +79,7 @@ Checks and review
 
 S/focused.log: {tests['focused']}.
 S/propagation.log: {tests['propagation']}.
+The first propagation session passed its assertions but tripped the repository notes guard because I created the review note while it was running. S/propagation-notes-guard.log and S/propagation-notes-guard.xml preserve that contaminated session. The final propagation result above is a fresh rerun after committing the note, with exit status zero saved in S/propagation-exit-status.txt.
 The focused cohort covers exact/missing/wrong-type timeout refusal, synthetic identity, legacy environment parity, probe drafting, runtime-basis validation, and recorder environment. The propagation cohort covers the observation child, full saved permission verification, and helper-cache boundaries. Successful public helpers also demonstrate environment forwarding. No real native binary timeout behavior was exercised.
 
 The separate read-only source review retained all authority checks and found no production cache or relaxed assertion. W/notes/native_bash_timeout_review_20261114.md records findings for the lead because GitHub issue creation was forbidden: public completion failures, unfinished shutdown workers, pending scanner expectations, and the diagnostic timeout defect with its bounded repair. A full suite and scanner acceptance after the lead's pin rotation remain unverified. No further expensive retry or changed acceptance bound was launched.
