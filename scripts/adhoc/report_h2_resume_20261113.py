@@ -359,6 +359,9 @@ def main():
     bytecode = verified_bytecode(bytecode_path)
     bytecode_review_path = SCRATCH / 'bytecode-review.json'
     bytecode_review = read_json(bytecode_review_path)
+    queue_control_path = SCRATCH / 'acceptance-queue-control.json'
+    queue_control = read_json(queue_control_path)
+    assert queue_control['state'] == 'queue_retired_after_focused_saved'
     callback_analysis_path = SCRATCH / 'correction/callback-stop-analysis.json'
     callback_analysis = read_json(callback_analysis_path)
     static_diagnosis_path = SCRATCH / 'callback-static-diagnosis.json'
@@ -380,6 +383,7 @@ def main():
         'report_proof_review': proof_review, 'report_proof_review_evidence': pin(proof_review_path),
         'bytecode_preservation': bytecode, 'bytecode_preservation_evidence': pin(bytecode_path),
         'bytecode_review': bytecode_review, 'bytecode_review_evidence': pin(bytecode_review_path),
+        'acceptance_queue_control': queue_control, 'acceptance_queue_control_evidence': pin(queue_control_path),
         'budget_origin_review': budget_review, 'budget_origin_review_evidence': pin(budget_review_path),
         'correction_callback_analysis': callback_analysis,
         'correction_callback_analysis_evidence': pin(callback_analysis_path),
@@ -479,6 +483,7 @@ def main():
         '- Supplemental budget retains an explicit local src PYTHONPATH override to select the assigned worktree with the primary interpreter. Native/audit retain their exact CI environment. Budget is not literal CI-environment equivalence.',
         '- Source-tree bytecode was observed after native-lane launch, consistent with known issue 3865. The files were preserved in scratch with a single-file canary and hash verification: `' + str(bytecode_path) + '`.',
         '- H2-RESUME-BYTECODE-F1 and F2: `' + str(bytecode_review_path) + '`; preservation recovery and complete-ledger verification were corrected before relocation. Lead filing remains needed because helper GitHub writes are prohibited.',
+        '- The waiting acceptance-queue parent was held and retired after focused results were saved; current tests were not signalled. Later concurrency and canary results are retained in their command and JUnit evidence. Control evidence: `' + str(queue_control_path) + '`.',
         '- ' + ('Controller pin mismatches require a review-only proposal; no rotation applied.' if pin_changes else 'Controller manifest entries match the final audit; no pin rotation applied.'),
         '- Local macOS Python 3.13 results do not establish CI Python 3.12 results or a full-suite pass.',
         '- Saved command HEADs and complete case details are preserved in the JSON twin; uncommitted test bytes are not independently identified by HEAD alone.',
