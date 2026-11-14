@@ -27,8 +27,20 @@ def durable_new(path, raw):
         stream.flush()
         os.fsync(stream.fileno())
     os.link(temporary, path)
-    _sync_directory(path.parent)
+    try:
+        _sync_directory(path.parent)
+    except BaseException:
+        # The final name already retains the complete bytes. Remove only its
+        # redundant link so the evidence reader can still inspect that file.
+        # Cleanup must not replace the original publication failure.
+        try:
+            os.unlink(temporary)
+            _sync_directory(path.parent)
+        except OSError:
+            pass
+        raise
     os.unlink(temporary)
+    _sync_directory(path.parent)
 
 
 def _mkdir_durable(path):
