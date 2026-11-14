@@ -150,6 +150,8 @@ def test_background_stage_helper_is_never_admitted():
     'grep pattern ../stages/observations/000000.json',
     'cat /selected/sta"ges"/sealed/full.yaml',
     'cat ./../stages/responses/000001.bin',
+    'cat ../sta\\\nges/requests/000000.json',
+    'cat //selected/sta"ges"/requests/000000.json',
 ])
 def test_relative_and_fragmented_stage_bash_cannot_bypass_overlay(command):
     from data_sheets_schema import native_shared_policy as policy_api

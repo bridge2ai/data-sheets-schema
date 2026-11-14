@@ -110,14 +110,16 @@ def governs_stage_effect(view, *, tool_name, tool_input):
         # still decides admission. Inspect every lexical word conservatively
         # so quoted fragments, relative operands and pipe-adjacent operands
         # cannot hide stage paths. Never resolve against the live filesystem.
-        lexer = shlex.shlex(command, posix=True, punctuation_chars=True)
+        # Bash removes backslash-newline before reading an unquoted word.
+        # Removing it inside single quotes too can only add a restriction here.
+        lexer = shlex.shlex(command.replace('\\\n', ''), posix=True, punctuation_chars=True)
         lexer.whitespace_split = True
         lexer.commenters = ''
         try:
             words = list(lexer)
         except ValueError:
             return True  # malformed shell text cannot bypass the overlay
-        return any(_within(posixpath.normpath(posixpath.join(view.working_directory, word)),
+        return any(_within('/' + posixpath.normpath(posixpath.join(view.working_directory, word)).lstrip('/'),
                            view.stage_root) for word in words)
     return False
 
