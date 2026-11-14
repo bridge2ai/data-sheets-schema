@@ -389,7 +389,8 @@ def test_unknown_or_legacy_producer_never_falls_back(tmp_path, monkeypatch, kind
     assert not out.exists()
 
 
-def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_case, tmp_path, monkeypatch):
+@pytest.mark.parametrize('fail_later', [False, True])
+def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_case, tmp_path, monkeypatch, fail_later):
     from data_sheets_schema import native_shared_permissions as p
     from data_sheets_schema import native_shared_permission_orchestration as verify
     expected = deepcopy(saved_case["expected"])
@@ -414,6 +415,8 @@ def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_ca
         for event in events:
             try:
                 observer(event)
+                if fail_later and observer.trace != 'settled' and observer.session:
+                    raise TimeoutError('later trace failed')
             except transport.budget_stop:
                 assert observer.expected_stop
                 break
@@ -433,6 +436,16 @@ def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_ca
             "shutdown": {"control_initialized": True, "control_shutdown_complete": True,
                          "unfinished_control_workers": 0, "child_reaped": True}}
     monkeypatch.setattr(probe, "_run_native", synthetic_run)
+    if fail_later:
+        with pytest.raises(TimeoutError, match='later trace failed'):
+            probe.produce_saved_probe(expected, directory, deadline_seconds=60)
+        assert (directory / 'captured/source.before').read_bytes() == source_raw
+        assert (directory / 'captured/traces/settled/outcome.json').is_file()
+        assert (directory / p.TRACES[1] / 'evidence_root/neutral.before.json').is_file()
+        assert (directory / p.TRACES[1] / 'launch.before.json').is_file()
+        assert guard.strict_json((directory / 'failure.json').read_bytes())['error_type'] == 'TimeoutError'
+        assert not (directory / 'permission-probe.json').exists()
+        return
     output = probe.produce_saved_probe(expected, directory, deadline_seconds=60)
     reading = verify.verify_saved_probe(output.read_bytes(), expected=expected)
     assert reading["passed"]

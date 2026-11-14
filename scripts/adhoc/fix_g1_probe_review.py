@@ -43,3 +43,13 @@ if sys.argv[1] == '6219':
         raise
 ''' + s[end:]
     p.write_text(s)
+if sys.argv[1] == '6209':
+    p = Path('src/data_sheets_schema/native_permission_probe.py')
+    s = p.read_text()
+    start = s.index('    (directory / "version-config").mkdir(mode=0o700)', s.index('def _produce_captured'))
+    s = s[:start] + '    try:\n' + ''.join('    '+line+'\n' for line in s[start:].splitlines()) + '''    except BaseException as exc:
+        _write_new(directory / 'failure.json', canonical({
+            'error_type': type(exc).__name__, 'message': str(exc)}))
+        raise
+'''
+    p.write_text(s)

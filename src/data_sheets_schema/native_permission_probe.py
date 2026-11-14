@@ -523,13 +523,28 @@ def _inventory(p, expected, selected, launch, session):
     return shape
 
 
+class _RetainedMembers(dict):
+    """Persist captured bytes before making them available for publication."""
+    def __init__(self, root):
+        super().__init__()
+        self.root = Path(root)
+
+    def __setitem__(self, name, raw):
+        _write_new(self.root / name, raw)
+        super().__setitem__(name, raw)
+
+    def update(self, values):
+        for name, raw in values.items():
+            self[name] = raw
+
+
 class _SharedObserver:
     def __init__(self, p, expected, selected, launch, trace, controls, transport):
         self.p, self.expected, self.selected, self.launch = p, expected, selected, launch
         self.trace, self.controls = trace, controls
         self.transport = transport
         self.session = None
-        self.cases, self.members = [], {}
+        self.cases, self.members = [], _RetainedMembers(launch["evidence_root"])
         self.calls = {}
         self.expected_stop = False
         self.policy = p.projected_policy(expected, selected, launch["effect_root"])
@@ -582,8 +597,6 @@ class _SharedObserver:
                     "kind": "native_shared_permission_parent_stop", "version": 1,
                     "outcome": "observer_stopped", "effect_stop_sha256": sha(canonical(stop)),
                     "reason_code": "prohibited_file_effect", "error_type": "BudgetStop"})
-                for name in ("effect-stop.json", "parent-stop.json"):
-                    _write_new(Path(self.launch["evidence_root"]) / name, self.members[name])
                 self.expected_stop = True
                 raise self.transport.budget_stop("prohibited_file_effect")
 
@@ -628,6 +641,7 @@ def _trace(expected, directory, deadline, controls, p, selected, transport, trac
                 "PYTHONPATH": launch["stub_root"], "ANTHROPIC_BASE_URL": url,
                 "ANTHROPIC_API_KEY": "d4d-local-permission-probe-token"},
             argv=p.probe_argv(expected, policy))
+        _write_new(directory / "launch.before.json", canonical(launch))
         result = _run_native(expected, launch, policy, observer, classifier, transport, server, deadline)
         if server.failure is not None:
             raise ValueError("scripted permission provider failed") from server.failure
@@ -649,6 +663,8 @@ def _trace(expected, directory, deadline, controls, p, selected, transport, trac
         "mode": "settled" if trace == "settled" else "observer_stopped",
         "session_id": observer.session, "terminal_sha256": terminal_hash,
         "parent_stop_sha256": parent_hash})
+    for name, raw in members.items():
+        _write_new(directory / "completed" / name, raw)
     return members
 
 
@@ -702,43 +718,48 @@ def _produce_captured(expected, directory, deadline, p, controls, controller_sou
             raise ValueError("permission evidence directory overlaps protected authority")
     _remaining(deadline)
     directory.mkdir(mode=0o700)
-    (directory / "version-config").mkdir(mode=0o700)
-    source = read_regular(expected["source"]["path"], limit=p.MAX_MEMBER)
-    if sha(source) != expected["source"]["sha256"]:
-        raise ValueError("permission source differs from selected source")
-    files = {"policy.json": canonical(expected["policy"]), "source.before": source,
-             "version.txt": _version(expected, deadline, directory)}
-    files["selection.json"] = selection_raw
-    files.update({name: text.encode() for name, text in p.recipe_sources().items()})
-    for trace in p.TRACES:
-        rows = _trace(expected, directory / trace, deadline, controls, p, selected, transport, trace)
-        roster = rows.pop("cases.json")
-        if trace == "settled":
-            files["cases.json"] = roster
-        files.update({"traces/" + trace + "/" + name: raw for name, raw in rows.items()})
-    files["source.after"] = read_regular(expected["source"]["path"], limit=len(source) + 1)
-    _remaining(deadline)
-    _identity(expected)
-    manifest = {"kind": p.KIND, "version": p.VERSION, "origin": p.ORIGIN,
-                "binding": deepcopy(expected), "members": {}}
-    for name, raw in files.items():
-        _write_new(directory / "captured" / name, raw)
-        row = {"text": raw.decode("utf-8"), "sha256": sha(raw), "bytes": len(raw)}
-        manifest["members"][name] = row
-    raw_manifest = canonical(manifest)
-    reading = p.verify_saved_probe(raw_manifest, expected=expected, controls=controls,
-                                   controller_sources=controller_sources)
-    _remaining(deadline)
-    if reading.get("checked") is not True or reading.get("passed") is not True:
-        raise ValueError("actual permission observation did not pass its verifier")
-    _write_new(directory / "verification.json", canonical(reading))
-    transport = Path(__file__).with_name("native_probe_provider.py").read_bytes()
-    _write_new(directory / "transport-provider.py", transport)
-    _write_new(directory / "producer-evidence.json", canonical({
-        "kind": "d4d_native_probe_producer_evidence", "version": 1,
-        "manifest_sha256": sha(raw_manifest), "transport_source_sha256": sha(transport),
-        "selector_source_sha256": sha(files["recipe/provider.py"]),
-        "basis": "Actual transport source and fixed selector are distinct; no simulator or fallback."}))
-    output = directory / "permission-probe.json"
-    _write_new(output, raw_manifest)
-    return output
+    try:
+        (directory / "version-config").mkdir(mode=0o700)
+        source = read_regular(expected["source"]["path"], limit=p.MAX_MEMBER)
+        if sha(source) != expected["source"]["sha256"]:
+            raise ValueError("permission source differs from selected source")
+        files = _RetainedMembers(directory / "captured")
+        files.update({"policy.json": canonical(expected["policy"]), "source.before": source})
+        files["selection.json"] = selection_raw
+        files.update({name: text.encode() for name, text in p.recipe_sources().items()})
+        files["version.txt"] = _version(expected, deadline, directory)
+        for trace in p.TRACES:
+            rows = _trace(expected, directory / trace, deadline, controls, p, selected, transport, trace)
+            roster = rows.pop("cases.json")
+            if trace == "settled":
+                files["cases.json"] = roster
+            files.update({"traces/" + trace + "/" + name: raw for name, raw in rows.items()})
+        files["source.after"] = read_regular(expected["source"]["path"], limit=len(source) + 1)
+        _remaining(deadline)
+        _identity(expected)
+        manifest = {"kind": p.KIND, "version": p.VERSION, "origin": p.ORIGIN,
+                    "binding": deepcopy(expected), "members": {}}
+        for name, raw in files.items():
+            row = {"text": raw.decode("utf-8"), "sha256": sha(raw), "bytes": len(raw)}
+            manifest["members"][name] = row
+        raw_manifest = canonical(manifest)
+        reading = p.verify_saved_probe(raw_manifest, expected=expected, controls=controls,
+                                       controller_sources=controller_sources)
+        _remaining(deadline)
+        if reading.get("checked") is not True or reading.get("passed") is not True:
+            raise ValueError("actual permission observation did not pass its verifier")
+        _write_new(directory / "verification.json", canonical(reading))
+        transport = Path(__file__).with_name("native_probe_provider.py").read_bytes()
+        _write_new(directory / "transport-provider.py", transport)
+        _write_new(directory / "producer-evidence.json", canonical({
+            "kind": "d4d_native_probe_producer_evidence", "version": 1,
+            "manifest_sha256": sha(raw_manifest), "transport_source_sha256": sha(transport),
+            "selector_source_sha256": sha(files["recipe/provider.py"]),
+            "basis": "Actual transport source and fixed selector are distinct; no simulator or fallback."}))
+        output = directory / "permission-probe.json"
+        _write_new(output, raw_manifest)
+        return output
+    except BaseException as exc:
+        _write_new(directory / 'failure.json', canonical({
+            'error_type': type(exc).__name__, 'message': str(exc)}))
+        raise
