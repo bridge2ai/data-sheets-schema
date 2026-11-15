@@ -13422,6 +13422,133 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
                and id(node) not in dispatcher_references
                for node in ast.walk(tree)):
             raise fail('v2 render function escapes its fixed direct callers: ' + name)
+
+    # Issue 6246: close module execution, including definition-time expressions.
+    # Function bodies retain their existing detailed producer proofs above.
+    module_shape = ast.parse(ast.unparse(tree))
+    for node in ast.walk(module_shape):
+        if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef)):
+            node.body = _without_docstring(node.body)
+    for node in module_shape.body:
+        if isinstance(node, ast.FunctionDef):
+            node.body = [ast.Pass()]
+    expected_module = ast.parse((
+        'from __future__ import annotations\n'
+        'from dataclasses import dataclass\n'
+        'from contextlib import contextmanager\n'
+        'import inspect\n'
+        'from pathlib import Path\n'
+        'import re\n'
+        'import subprocess\n'
+        'import sys\n'
+        'import threading\n'
+        'from . import native_execution_authority_v2 as authority\n'
+        'from . import native_shared_contract as c\n'
+        'from . import native_shared_selection as selection\n'
+        'from .native_shared_evidence import read_regular\n'
+        'from .resources import git_env\n'
+        'from .native_shared_runtime_values import validate_runtime_v2 as validate_runtime\n'
+        'VERSION = 2\n'
+        "PREPARATION_KIND = 'd4d_native_shared_preparation_v2'\n"
+        "EXECUTION_KIND = 'd4d_native_shared_execution_registration_v2'\n"
+        "PREPARATION_SCOPE = 'offline_inputs_only_not_permission_or_launch_authority'\n"
+        "EXECUTION_SCOPE = 'requires_exact_independent_review_ci_permission_and_owner_launch_evidence'\n"
+        "MAX_WIRE_BYTES = c.HARD_LIMITS['request_bytes']\n"
+        "_COMMON_CHECKS = tuple(('Python 3.12 / API case ' + name for name in ('routing-dispatch', 'routing-portable', 'routing-regate', 'routing-default-layout'))) + tuple(('Python 3.12 / SG2 case ' + name for name in ('sg2-none', 'sg2-conventional', 'sg2-explicit'))) + tuple(('Python 3.12 / native case ' + name for name in ('native-failure-01', 'native-failure-02', 'native-failure-03', 'native-failure-04', 'native-failure-05', 'native-failure-06', 'native-failure-07', 'native-failure-08', 'native-failure-09', 'native-failure-10', 'native-failure-11', 'native-failure-12', 'native-failure-13', 'native-failure-14', 'native-failure-15', 'native-failure-16', 'native-failure-17', 'native-capacity-01', 'native-capacity-02', 'native-capacity-03', 'native-capacity-04', 'native-capacity-05', 'native-capacity-06', 'native-capacity-07', 'native-capacity-08', 'native-capacity-09', 'native-capacity-10', 'native-capacity-11', 'native-capacity-12', 'native-capacity-13', 'native-capacity-14', 'native-capacity-15', 'native-capacity-16', 'native-capacity-17', 'native-capacity-18', 'native-capacity-19', 'native-capacity-20', 'native-capacity-21', 'native-capacity-22', 'native-capacity-23', 'native-capacity-24', 'native-capacity-25', 'native-capacity-26', 'native-capacity-27', 'native-capacity-28', 'native-capacity-29', 'native-capacity-30', 'native-capacity-31', 'native-capacity-32', 'native-capacity-33', 'native-capacity-34', 'native-capacity-35', 'native-capacity-36', 'native-capacity-37', 'native-capacity-38', 'native-capacity-39', 'native-capacity-40', 'native-capacity-41', 'native-capacity-42', 'native-capacity-43', 'native-capacity-44', 'native-capacity-45', 'native-retention-stable', 'native-retention-changing', 'native-retention-final-floor'))) + ('Python 3.12 / offline canary controls', 'Python 3.12 / offline audit and finalization', 'Python 3.12 / offline evaluation', 'test')\n"
+        "_LONG_CHECKS = tuple(('Python 3.12 / native case ' + name for name in ('native-public-correction', 'native-public-variant', 'native-public-pending')))\n"
+        "EXECUTION_GATES = ('terminal', 'shutdown', 'first_stop', 'live_attribution', 'saved_attribution', 'phase_history', 'tool_history', 'schema', 'pair', 'receipts', 'evidence', 'observation', 'accounting', 'runtime_authority', 'keep_awake')\n"
+        "_PREPARATION_KEYS = frozenset(('kind', 'schema_version', 'execution', 'job_id', 'working_directory', 'dependencies', 'selection', 'runtime', 'run_date', 'max_draft_checks', 'render_spec', 'input_identity', 'instruction', 'instruction_sha256', 'outputs', 'pinned_files'))\n"
+        "EXECUTION_KEYS = frozenset(('kind', 'schema_version', 'execution', 'attempt_id', 'composition', 'system_path', 'permission_probe', 'attempt_directory', 'evidence_directory', 'job_id', 'preparation_raw_json', 'preparation_sha256', 'execution_gates', 'runtime', 'max_draft_checks', 'selection_sha256', 'runtime_declaration_sha256', 'working_directory', 'dependencies', 'composition_raw_json', 'composition_sha256', 'system_sha256', 'effective_system', 'effective_system_sha256', 'instruction_sha256', 'permission_probe_sha256', 'permission_expected_sha256', 'permission_observations', 'argv', 'environment', 'selection', 'scope'))\n"
+        "_REBUILD_INPUTS = ('preparation_raw', 'composition_path', 'system_path', 'permission_probe_path', 'attempt_id', 'attempt_directory', 'evidence_directory', 'max_draft_checks', 'receipt_origin_version', 'classifier_projection')\n"
+        '\n'
+        'def required_checks(event):\n'
+        '    pass\n'
+        '\n'
+        'def _ci_git(*args, absent=False):\n'
+        '    pass\n'
+        '\n'
+        'def _ci_commit(commit, label):\n'
+        '    pass\n'
+        '\n'
+        'def _ci_tested_commit(source_commit, tested_commit, event, ref):\n'
+        '    pass\n'
+        '\n'
+        'def _workflow_paths(event):\n'
+        '    pass\n'
+        '\n'
+        'def _workflow_sha(source_commit, tested_commit, event):\n'
+        '    pass\n'
+        '\n'
+        'def _ci_repository_url():\n'
+        '    pass\n'
+        '\n'
+        'def _read(path, label, maximum=MAX_WIRE_BYTES):\n'
+        '    pass\n'
+        '\n'
+        'def _file_pin(artifact):\n'
+        '    pass\n'
+        '\n'
+        'def _job_id(value):\n'
+        '    pass\n'
+        '\n'
+        'def _wire(raw):\n'
+        '    pass\n'
+        '\n'
+        'def _envelope(body, dependencies):\n'
+        '    pass\n'
+        '\n'
+        'def _pin_map(captured, runtime, dependencies):\n'
+        '    pass\n'
+        '\n'
+        'def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):\n'
+        '    pass\n'
+        '\n'
+        'def prepare_synthetic(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):\n'
+        '    pass\n'
+        '\n'
+        'def _prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks, expected_profile):\n'
+        '    pass\n'
+        '\n'
+        'def verify_preparer(raw, *, job_id):\n'
+        '    pass\n'
+        '\n'
+        '\x40contextmanager\n'
+        'def _consumer(dependencies):\n'
+        '    pass\n'
+        '\n'
+        'def _signature(module, name, positional, keywords):\n'
+        '    pass\n'
+        '\n'
+        'def _closed_execution(body):\n'
+        '    pass\n'
+        '\n'
+        'def _rebuild_inputs(body, preparation_raw):\n'
+        '    pass\n'
+        '\n'
+        'def verified(raw, *, classifier_projection):\n'
+        '    pass\n'
+        '\n'
+        'def _text(value, label):\n'
+        '    pass\n'
+        '\n'
+        'def _authorizations(raw, value, *, review_path, ci_path, launch_word_path, require_current=False):\n'
+        '    pass\n'
+        '\n'
+        '\x40dataclass(frozen=True)\n'
+        'class Admission:\n'
+        '    registration_raw: bytes\n'
+        '    evidence: tuple[c.CapturedArtifact, ...]\n'
+        '    reservations: tuple[Path, ...]\n'
+        '\n'
+        'def _checked_reservations(result, value, evidence):\n'
+        '    pass\n'
+        '\n'
+        'def admit(raw, *, review_path, ci_path, launch_word_path, classifier_projection):\n'
+        '    pass'
+    ))
+    if dump(module_shape) != dump(expected_module):
+        raise fail('v2 producer module execution is not exact')
+
     # Module-level CLI rebinding must not bypass the fixed decorated command.
     for n in cli.body:
         if n is command:
@@ -13562,8 +13689,8 @@ for key in {companions!r}:
         if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant) and type(body[0].value.value) is str:
             body = body[1:]
         # D76 precedes phase assembly on M7. Accept only its exact same-spec
-        # guard call and a unique, unshadowed local definition, as a structural
-        # guard contract (not a general purity claim about called Python).
+        # guard call and a unique, unshadowed local definition with the exact
+        # reviewed body. This is not a general purity claim about called Python.
         if name == 'build_phase':
             invariant = '_require_registered_input_spellings'
             expected_invariant = ast.parse(invariant + '(spec)').body[0]
@@ -13577,6 +13704,42 @@ for key in {companions!r}:
                            and isinstance(n.ctx, (ast.Store, ast.Del))
                            for n in ast.walk(tree) if n is not definitions[0])):
                 raise fail('phase input invariant is not an exact bound guard')
+            # Issue 6247: a name/signature alone cannot prove this guard.
+            expected_invariant_body = ast.parse((
+                'def _require_registered_input_spellings(spec: RunSpec) -> None:\n'
+                '    binding = _input_binding(spec)\n'
+                '    if binding is None:\n'
+                "        raise ValueError('registered inputs have no construction origin; construct a new validated RunSpec or literal replay')\n"
+                '    if binding.historical_replay:\n'
+                '        if not spec._replay_only:\n'
+                "            raise ValueError('historical replay construction origin cannot execute; construct a new validated RunSpec')\n"
+                '        return\n'
+                '    if spec._replay_only:\n'
+                "        raise ValueError('registered input construction cannot be changed to historical replay; construct a literal replay RunSpec')\n"
+                '    mirror = spec._registered_input_spellings\n'
+                '    if binding.spellings is not None and mirror is None:\n'
+                "        raise ValueError('registered inputs have no construction binding; construct a new validated RunSpec')\n"
+                '    bound = binding.spellings\n'
+                '    if bound is None:\n'
+                '        if mirror is not None or provenance.registered_input_paths(vars(spec)):\n'
+                "            raise ValueError('registered inputs have no construction binding; construct a new validated RunSpec')\n"
+                '        return\n'
+                '    valid_roster = mirror is bound and type(mirror) is tuple and (len(mirror) == len(_REGISTERED_INPUT_FIELDS)) and all((type(row) is tuple and len(row) == 2 and (type(row[0]) is str) and (row[0] == name) and (row[1] is None or type(row[1]) is str) for name, row in zip(_REGISTERED_INPUT_FIELDS, mirror)))\n'
+                '    if not valid_roster:\n'
+                "        raise ValueError('registered input construction binding was replaced; construct a new validated RunSpec')\n"
+                '    current = _registered_input_spellings(spec)\n'
+                '    changed = [name for (name, original), (_, value) in zip(bound, current) if value != original]\n'
+                '    if changed:\n'
+                "        raise ValueError('registered input spelling changed after construction: ' + ', '.join(changed) + '; construct a new validated RunSpec')\n"
+                '    for name, original_type, original in binding.selectors:\n'
+                '        value = getattr(spec, name)\n'
+                '        if type(value) is not original_type or value != original:\n'
+                "            raise ValueError(f'registered input binding selection changed after construction: {name}; construct a new validated RunSpec')\n"
+                '    if binding.registration_inputs is not None and current != binding.registration_inputs:\n'
+                "        raise ValueError('registered input spellings differ from parsed registration')"
+            )).body[0]
+            if [dump(n) for n in _without_docstring(definitions[0].body)] != [dump(n) for n in expected_invariant_body.body]:
+                raise fail('phase input invariant body is not exact')
             evidence.append(f'{RUNNER}:{body[0].lineno}')
             body = body[1:]
         guard = body[0] if body else None
@@ -13685,7 +13848,7 @@ def derive_native_shared_procedure(root: Path) -> dict:
     paths = {name: prefix + name + '.py' for name in (
         'native_shared_stage', 'native_shared_receipts', 'typed_audit',
         'audit_omissions', 'native_shared_render')}
-    # Read the pure package body, never the CLI or a fallback legacy module.
+    # Read the package body; the registered CLI is contracted separately below.
     paths['native_shared_stage'] = prefix + 'native_shared_stage/__init__.py'
     trees = {name: _tree(root / path) for name, path in paths.items()}
     fail = lambda detail: _not_derived('native shared response roster', detail)
@@ -13785,6 +13948,39 @@ def derive_native_shared_procedure(root: Path) -> dict:
         if [n for n in ast.walk(fn) if isinstance(n, ast.Return)] != [expected]:
             raise fail('alternate counted result in ' + fn.name)
 
+    # Issue 6248: the registered module command executes this entry point.
+    stage_cli = ast.parse(ast.unparse(_tree(root / (prefix + 'native_shared_stage/__main__.py'))))
+    for node in ast.walk(stage_cli):
+        if isinstance(node, (ast.Module, ast.FunctionDef)):
+            node.body = _without_docstring(node.body)
+    if dump(stage_cli) != dump(ast.parse((
+        'from __future__ import annotations\n'
+        'import argparse\n'
+        'from . import _Replay, _check_response, _prepare_next, c, nr\n'
+        'from ..native_shared_capture_orchestration import capture_stage, publish_stage\n'
+        '\n'
+        'def main():\n'
+        '    parser = argparse.ArgumentParser(description=__doc__)\n'
+        "    commands = parser.add_subparsers(dest='command', required=True)\n"
+        "    advance = commands.add_parser('advance')\n"
+        "    advance.add_argument('--registration', required=True)\n"
+        '    args = parser.parse_args()\n'
+        '    catalogs = nr._catalog_context()\n'
+        '    invocation = capture_stage(args.registration, _catalogs=catalogs)\n'
+        '    selected = (invocation.selection, invocation.execution, invocation.phase1, invocation.history)\n'
+        '    replay = _Replay(*selected, _catalogs=catalogs).run()\n'
+        '    if replay.pending is not None and replay.pending[-1] is not None:\n'
+        '        response, _ = replay.pending[-1]\n'
+        '        proposal = _check_response(*selected, replay.pending[2].raw, response.raw, catalogs)\n'
+        '    else:\n'
+        '        proposal = _prepare_next(*selected, catalogs)\n'
+        '    result = publish_stage(invocation, proposal, _catalogs=catalogs)\n'
+        "    print(c.canonical(result).decode('utf-8'))\n"
+        "if __name__ == '__main__':\n"
+        '    main()'
+    ))):
+        raise fail('native stage CLI execution is not exact')
+
     fixed_import('native_shared_stage', '', 'native_shared_receipts', 'nr')
     fixed_import('native_shared_stage', '', 'typed_audit', 'typed')
     fixed_import('native_shared_stage', '', 'native_catalog_reuse', 'catalog_reuse')
@@ -13848,10 +14044,50 @@ def derive_native_shared_procedure(root: Path) -> dict:
         if len(matches) != 1:
             raise fail('native packet options have an unproved consumer')
         allowed_options.update(id(k.value) for k in matches[0].keywords if k.arg is None)
+    # Final reconstruction has one additional fixed read on the returned replay.
+    # Account for it explicitly so a different receiver spelling cannot conceal
+    # an options mutation, including a chained call returning the same instance.
+    completion_options = statement(function('native_shared_stage', '_complete'),
+        "checked = typed.check(replay.assembly, captured_assets=replay.options['captured_assets'], "
+        "derivations=typed.DerivationCache(), "
+        "_catalog_lookup=catalog_reuse._CatalogLookup(replay.catalogs, replay.s))")
+    allowed_options.update(id(node) for node in ast.walk(completion_options)
+                           if isinstance(node, ast.Attribute) and node.attr == 'options')
     actual_options = {id(n) for n in ast.walk(trees['native_shared_stage'])
-                      if isinstance(n, ast.Attribute) and ast.unparse(n) == 'self.options'}
+                      if isinstance(n, ast.Attribute) and n.attr == 'options'}
     if actual_options != allowed_options:
         raise fail('native packet options are replaced, mutated or aliased')
+    # Issue 6245: close receiver aliases and dynamic reflection as well as the
+    # literal options spelling. Only run's direct replay returns are its API;
+    # another bare receiver load or internal run reference can escape its state.
+    parents = _parents(trees['native_shared_stage'])
+    returned_self = {id(node.value) for node in ast.walk(run)
+                     if isinstance(node, ast.Return) and isinstance(node.value, ast.Name)
+                     and node.value.id == 'self'
+                     and _innermost_function(trees['native_shared_stage'], node.lineno) is run}
+    for node in ast.walk(trees['native_shared_stage']):
+        if (isinstance(node, ast.Attribute) and node.attr == 'options'
+                and isinstance(node.ctx, (ast.Store, ast.Del))
+                and id(node) not in allowed_options):
+            raise fail('native packet options are replaced, mutated or aliased')
+        if isinstance(node, ast.Name) and node.id == 'self':
+            parent = parents.get(id(node))
+            if (not isinstance(node.ctx, ast.Load)
+                    or not (isinstance(parent, ast.Attribute) and parent.value is node
+                            and parent.attr != 'run' or id(node) in returned_self)):
+                raise fail('native packet options are replaced, mutated or aliased')
+        if isinstance(node, ast.Attribute) and node.attr in {
+                '__dict__', '__getattribute__', '__getattr__', '__setattr__', '__delattr__'}:
+            raise fail('native packet options are replaced, mutated or aliased')
+        if isinstance(node, ast.ClassDef) and node.name == '_Replay':
+            for member in node.body:
+                if (isinstance(member, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+                        and member.name == 'options') or any(
+                        isinstance(child, ast.Name) and child.id == 'options'
+                        and isinstance(child.ctx, (ast.Store, ast.Del))
+                        for child in ast.walk(member)
+                        if not isinstance(member, (ast.FunctionDef, ast.AsyncFunctionDef))):
+                    raise fail('native packet options are replaced, mutated or aliased')
     for node in ast.walk(trees['native_shared_stage']):
         # These reflective reads expose the same mutable options without an
         # Attribute node. They have no use in the fixed producer; refuse the
@@ -13860,9 +14096,7 @@ def derive_native_shared_procedure(root: Path) -> dict:
                 and node.args and isinstance(node.args[0], ast.Name)
                 and node.args[0].id == 'self'):
             raise fail('native packet options are replaced, mutated or aliased')
-        if (isinstance(node, ast.Call) and ast.unparse(node.func) in {'setattr', 'delattr'}
-                and len(node.args) >= 2 and isinstance(node.args[1], ast.Constant)
-                and node.args[1].value == 'options') or (
+        if (isinstance(node, ast.Call) and ast.unparse(node.func) in {'setattr', 'delattr'}) or (
                 isinstance(node, ast.Subscript) and isinstance(node.value, ast.Attribute)
                 and node.value.attr == '__dict__' and isinstance(node.slice, ast.Constant)
                 and node.slice.value == 'options'):
@@ -14101,6 +14335,7 @@ else:
         ('native_shared_stage', run), ('native_shared_stage', packet_fn),
         ('native_shared_receipts', receipt_fn), ('typed_audit', derived),
         ('audit_omissions', omission), ('native_shared_render', commands))]
+    evidence.append(prefix + 'native_shared_stage/__main__.py')
     return {'basis': 'Source-derived required response-bearing roster; no observed execution or enforcement proof.',
         'stages': [{'kind': 'receipt', 'cardinality': 'R = 0 or 1', 'condition': 'captured uncovered receiptable leaves; verified zero-work has no answer'},
                    {'kind': 'worker', 'cardinality': 'W, unknown until the original record is partitioned', 'requirement': 'every worker in the complete derived plan'},

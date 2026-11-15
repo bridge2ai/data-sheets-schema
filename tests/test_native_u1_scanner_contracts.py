@@ -321,7 +321,7 @@ def test_native_non_v2_route_retains_configuration_refusal(tmp_path):
 
 
 def _procedure_root(tmp_path):
-    for relative in ('native_shared_stage/__init__.py', 'native_shared_receipts.py',
+    for relative in ('native_shared_stage/__init__.py', 'native_shared_stage/__main__.py', 'native_shared_receipts.py',
                      'typed_audit.py', 'audit_omissions.py', 'native_shared_render.py'):
         path = tmp_path / 'src/data_sheets_schema' / relative
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -577,6 +577,11 @@ def test_native_response_roster_refuses_changed_producer(tmp_path, relative, bef
     "vars(self)['options']['_catalog_lookup'] = None",
     "opts = getattr(self, 'options')\n        opts['_catalog_lookup'] = None",
     "fields = vars(self)\n        fields['options']['_catalog_lookup'] = None",
+    "owner = self\n        owner.options.clear()",
+    "me = self\n        me.options = {}",
+    "name = 'options'\n        setattr(self, name, {})",
+    "object.__setattr__(self, 'options', {})",
+    "self.__dict__.update(options={})",
 ])
 def test_native_packet_options_refuse_mutation_and_alias_escape(tmp_path, mutation):
     root = _procedure_root(tmp_path)
