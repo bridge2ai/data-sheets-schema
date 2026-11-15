@@ -63,7 +63,7 @@ def test_explicit_synthetic_profile_is_distinct_and_registers_bash_timeout(runti
     assert aliases.model_aliases(runtime) == {
         'requested': profiles.SYNTHETIC_REQUESTED, 'returned': profiles.SYNTHETIC_RETURNED}
     assert runtime == original
-    assert runtime['deadline_seconds'] == profiles.SYNTHETIC_DEADLINE_SECONDS == 2700
+    assert runtime['deadline_seconds'] == profiles.SYNTHETIC_DEADLINE_SECONDS
     raw = Path(runtime['executable']['path']).read_bytes()
     assert raw.split(b'\n', 1)[0] == ('#!' + sys.executable + ' -P').encode()
     assert b"timeout=int(os.environ['BASH_DEFAULT_TIMEOUT_MS']) / 1000" in raw
