@@ -45,6 +45,18 @@ REFUSALS = {
     'B1_typed_alias_restored': 'unsupported effect on model-text local container (nested or copied receiver alias)',
 }
 ALL_GATES = ['api', 'deterministic', 'github_assistant', 'native_agentic']
+V3_COUNTERPARTS = {
+    'F2b_v2_envelope_token': 'F2b_v3_wire_envelope_token',
+    'F2c_v2_envelope_branch': 'F2c_v3_wire_envelope_branch',
+}
+V2_ENVELOPE_ANCHOR = "        value = controls['prepare_registration_v2'].envelope(body)\n"
+V3_ENVELOPE_ANCHOR = '        value = wire.envelope(body)\n'
+ANCHOR_MOVE_REASON = (
+    'v3 delegates envelope construction to native_shared_authority_wire '
+    'instead of the loaded v2 controller'
+)
+for original, counterpart in V3_COUNTERPARTS.items():
+    REFUSALS[counterpart] = REFUSALS[original]
 PRINT = "print('Note: this is the CHORUS dataset; prefer CHORUS naming.')"
 HINT = "return 'Treat this record as the CHORUS cohort.' if project else ''"
 PLANTED = {
@@ -150,7 +162,20 @@ def _cases():
     cases = value['cases']
     assert tuple(case['name'] for case in cases) == CASE_NAMES
     assert {case['name']: case['known_gap'] for case in cases if case['known_gap']} == KNOWN_GAPS
-    return cases
+    counterparts = []
+    for case in cases:
+        if case['name'] not in V3_COUNTERPARTS:
+            continue
+        assert len(case['edits']) == 1
+        relative, before, after = case['edits'][0]
+        assert before == V2_ENVELOPE_ANCHOR and after.count(before) == 1
+        counterparts.append(dict(
+            case, name=V3_COUNTERPARTS[case['name']],
+            v2_original=case['name'], anchor_move_reason=ANCHOR_MOVE_REASON,
+            edits=[[relative, V3_ENVELOPE_ANCHOR,
+                    after.replace(before, V3_ENVELOPE_ANCHOR, 1)]],
+        ))
+    return cases + counterparts
 
 
 def _apply_edits(tree, case, expected):
@@ -279,7 +304,21 @@ def test_retained_review_outcome(tmp_path, monkeypatch, case):
                     for name, row in manifest['files'].items()}
         evidence.update(commit=head, commit_tree=manifest['commit_tree'],
                         input_path_mask=manifest['path_mask'], input_entry_count=manifest['entry_count'],
-                        input_total_blob_bytes=manifest['total_blob_bytes'], root=str(tree),
+                        input_total_blob_bytes=manifest['total_blob_bytes'], root=str(tree))
+        if case['name'] in V3_COUNTERPARTS:
+            relative, before, _ = case['edits'][0]
+            source = (tree / relative).read_text(encoding='utf-8')
+            if before not in source:
+                assert 'VERSION = 3\n' in source
+                assert source.count(V3_ENVELOPE_ANCHOR) == 1
+                _require_unchanged_tree(tree, expected)
+                reason = 'historical, not applicable to v3'
+                evidence.update(status=reason, historical_anchor_occurrences=0,
+                                v3_counterpart=V3_COUNTERPARTS[case['name']],
+                                anchor_move_reason=ANCHOR_MOVE_REASON)
+                pytest.skip(reason + '; counterpart: ' + V3_COUNTERPARTS[case['name']])
+        evidence.update(v2_original=case.get('v2_original'),
+                        anchor_move_reason=case.get('anchor_move_reason'),
                         mutations=_apply_edits(tree, case, expected))
         tool = tree / SKILL / 'scan.py'
         assets = {name: row['sha256'] for name, row in manifest['files'].items()
