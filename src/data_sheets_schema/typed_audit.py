@@ -555,9 +555,6 @@ def _open(packet, *, derivations=None, captured_assets=None, _catalog_lookup=Non
     assets = (None if captured_assets is None else _sha(_json({name: _sha(value)
         for name, value in asset_bytes.items()})))
     key = (_sha(raw_packet), len(raw_packet), _parse_identity(), assets)
-    cached = _OPEN_PACKET_CACHE.get(key, raw_packet)
-    if cached is not None:
-        return cached
     _schema_reuse = None
     if captured_assets is not None and _catalog_lookup is not None:
         from .native_catalog_reuse import _CatalogLookup
@@ -569,13 +566,21 @@ def _open(packet, *, derivations=None, captured_assets=None, _catalog_lookup=Non
                     _schema_reuse = _SchemaReuse(snapshot.sources, catalog)
             except Exception:
                 _schema_reuse = None
+    # Explicit native captures without their private catalog association keep
+    # the existing fresh-schema boundary, including its refusal behavior.
+    memo = captured_assets is None or _schema_reuse is not None
+    if memo:
+        cached = _OPEN_PACKET_CACHE.get(key, raw_packet)
+        if cached is not None:
+            return cached
     derived, raw, prepared = _derive(packet["inputs"], packet["schema_sources"], packet["project"], packet["limits"], derivations=derivations, captured_assets=captured_assets, _schema_reuse=_schema_reuse)
     expected = _seal({**{key: packet[key] for key in ("kind", "protocol", "inputs", "schema_sources", "project", "limits")},
                       **derived, "limitations": list(LIMITATIONS),
                       **({"omission_wire": packet["omission_wire"]} if selected else {})})
     if raw_packet != _json(expected):
         raise ValueError("packet request/plan/contract/input identity mismatch")
-    _OPEN_PACKET_CACHE.put(key, raw_packet, raw, prepared, _parse_identity)
+    if memo:
+        _OPEN_PACKET_CACHE.put(key, raw_packet, raw, prepared, _parse_identity)
     return raw, prepared
 
 

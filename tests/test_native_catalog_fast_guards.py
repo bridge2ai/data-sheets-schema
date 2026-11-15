@@ -69,6 +69,17 @@ def test_each_guard_refuses_and_uses_full_fallback(monkeypatch, phase, mutation)
         monkeypatch.setattr(catalog.omissions._sha, '__defaults__', (None,))
     elif mutation == 'kwdefaults':
         monkeypatch.setattr(catalog.omissions._sha, '__kwdefaults__', {'changed': True})
+    elif mutation == 'function_dict':
+        monkeypatch.setattr(catalog.omissions._sha, '__dict__', {'__wrapped__': replacement})
+    elif mutation == 'encoder_dict':
+        encoder = catalog.json._default_encoder
+        monkeypatch.setattr(encoder, '__dict__', {**vars(encoder), 'skipkeys': True})
+    elif mutation == 'encoder_class':
+        class ChangedEncoder(catalog.json.JSONEncoder):
+            pass
+        monkeypatch.setattr(catalog.json._default_encoder, '__class__', ChangedEncoder)
+    elif mutation == 'dumper_dict':
+        monkeypatch.setattr(catalog.json_dumper, '__dict__', {'unexpected': True})
     elif mutation == 'limit_reader':
         limit = sys.getrecursionlimit()
         monkeypatch.setattr(sys, 'getrecursionlimit', lambda: limit)
@@ -91,7 +102,8 @@ def test_each_guard_refuses_and_uses_full_fallback(monkeypatch, phase, mutation)
 
 test_each_guard_refuses_and_uses_full_fallback = pytest.mark.parametrize('phase', [0, 1])(
     pytest.mark.parametrize('mutation', ['meta', 'meta_attribute', 'slotnames', 'loader', 'copy', 'synapse_json_default',
-        'code', 'defaults', 'kwdefaults', 'closure', 'recursion', 'limit_reader'])(test_each_guard_refuses_and_uses_full_fallback))
+        'code', 'defaults', 'kwdefaults', 'closure', 'recursion', 'limit_reader',
+        'function_dict', 'encoder_dict', 'encoder_class', 'dumper_dict'])(test_each_guard_refuses_and_uses_full_fallback))
 
 
 def test_loader_transition_with_same_marker_and_empty_slot_cache(monkeypatch):

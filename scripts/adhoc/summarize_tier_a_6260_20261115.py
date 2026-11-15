@@ -4,6 +4,7 @@ Inputs: scratch run artifacts and this worktree. Outputs: evidence-summary.json
 and verification.json in scratch. No tests, network calls or source edits.
 """
 import hashlib
+import ast
 import json
 from pathlib import Path
 import pstats
@@ -57,6 +58,34 @@ for directory in sorted(scratch.iterdir()):
         if log.is_file():
             value['last_lines'] = log.read_text(errors='replace').splitlines()[-8:]
         summary[directory.name] = value
+
+contract = ast.parse((root / 'src/data_sheets_schema/native_shared_contract.py').read_text())
+limits = next(ast.literal_eval(node.value.args[0]) for node in contract.body
+              if isinstance(node, ast.Assign)
+              and any(isinstance(target, ast.Name) and target.id == 'HARD_LIMITS' for target in node.targets))
+for manifest in (scratch / 'public-isolated-tmp').rglob('preparation-environment.json'):
+    raw = manifest.read_bytes()
+    document = json.loads(raw)
+    pending, starts, maximum_depth = [(document, 0)], 0, 0
+    while pending:
+        value, depth = pending.pop()
+        starts += 1
+        if type(value) in (dict, list):
+            depth += 1
+            maximum_depth = max(maximum_depth, depth)
+            if type(value) is dict:
+                starts += len(value)  # Quoted mapping keys count in the lexical guard.
+                values = value.values()
+            else:
+                values = value
+            pending.extend((item, depth) for item in values)
+    summary['public_environment_manifest'] = {
+        'path': str(manifest), 'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest(),
+        'lexical_value_starts': starts, 'maximum_container_depth': maximum_depth,
+        'value_start_limit': limits['json_yaml_nodes_per_document'],
+        'depth_limit': limits['json_yaml_depth'],
+        'distribution_count': len(document['distributions']),
+    }
 
 source = 'src/data_sheets_schema/typed_audit.py'
 old = subprocess.check_output(['git', 'show', base + ':' + source], cwd=root)

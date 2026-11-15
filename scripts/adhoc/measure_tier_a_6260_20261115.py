@@ -48,6 +48,8 @@ if mode == 'final':
     # It does not supply a completed-stage decision to either measured call.
 cache = typed_audit._JSON_PARSE_CACHE
 hits_before = cache.hits
+packet_cache = getattr(typed_audit, '_OPEN_PACKET_CACHE', None)
+packet_hits_before = packet_cache.hits if packet_cache is not None else 0
 rows = []
 materialized = False
 try:
@@ -92,6 +94,10 @@ try:
                'decision_calls': rows, 'parse_cache_hits': cache.hits - hits_before,
                'parse_cache_entries': len(cache._entries), 'parse_cache_bytes': cache._bytes,
                'scope': 'Stage component only; excludes public capture and observer admission.'}
+    if packet_cache is not None:
+        metrics['packet_cache_hits'] = packet_cache.hits - packet_hits_before
+        metrics['packet_cache_entries'] = len(packet_cache._entries)
+        metrics['packet_cache_bytes'] = packet_cache._bytes
     assert state == 'assembly_complete'
     assert source_hashes == {str(path): hashlib.sha256(path.read_bytes()).hexdigest() for path in source_paths}
     metrics['source_sha256'] = source_hashes

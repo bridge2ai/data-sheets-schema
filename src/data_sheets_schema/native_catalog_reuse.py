@@ -540,6 +540,7 @@ def _compile_guards(actual):
                               value.__kwdefaults__, value.__closure__))
             attributes.append((value, '__name__', value.__name__))
             attributes.append((value, '__module__', value.__module__))
+            attributes.append((value, '__dict__', value.__dict__))
             visit(value.__dict__)
             visit(value.__defaults__)
             visit(value.__kwdefaults__)
@@ -579,6 +580,8 @@ def _compile_guards(actual):
     # Instance state and C-scanner descriptors are not class dictionary state.
     for owner in (json_dumper, json._default_encoder, json._default_decoder,
                   strictness.GLOBAL_STRICT):
+        attributes.append((owner, '__class__', type(owner)))
+        attributes.append((owner, '__dict__', vars(owner)))
         mappings.append((vars(owner), dict(vars(owner))))
         for value in vars(owner).values():
             visit(value)
