@@ -65,6 +65,61 @@ def cohort_out(name):
     return SCRATCH / ('final-merge-20261115-' + name)
 
 
+def reporting_only_since(tested, delivery):
+    changed = git('diff', '--name-only', tested, delivery).stdout.decode().splitlines()
+    assert set(changed) <= {'scripts/adhoc/check_manifest_final_20261115.py'}, changed
+    return changed
+
+
+def completed_ci_nodes():
+    log = (cohort_out('ci-sharding') / 'pytest.log').read_text()
+    matches = re.findall(r'^(tests/test_ci_sharding\.py::.+) (PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS) \[\s*\d+%\]$', log, re.M)
+    assert matches and all(status == 'PASSED' for _, status in matches), matches
+    nodes = [node for node, _ in matches]
+    assert len(nodes) == len(set(nodes))
+    return nodes
+
+
+def resume_ci():
+    """Resume only cases lacking a completed result after the bounded run."""
+    head = frozen()
+    tested = load(OUT / 'audit.json')['head']
+    changed = reporting_only_since(tested, head)
+    original = load(cohort_out('ci-sharding') / 'outcome.json')
+    assert original['returncode'] == 124 and original['interrupted'] == 'deadline'
+    assert not original['observed_surviving_pids'] and not original['observation_errors']
+    canary = load(cohort_out('ci-canary') / 'outcome.json')
+    assert canary['returncode'] == 0 and canary['cleanup_verified']
+    assert load(cohort_out('ci-canary') / 'plan.json')['source_commit'] == tested
+    base = [str(SCRATCH / 'declared-dependencies/bin/python'), '-S', '-P', '-B',
+            str(ROOT / 'scripts/adhoc/run_manifest_continuation_tests_20261114.py'),
+            '--tree', str(ROOT), '--workers', '0', '--timeout-seconds', '3600']
+    directory = cohort_out('ci-remaining-collect')
+    command = [*base, '--out', str(directory), '--collect-only', 'tests/test_ci_sharding.py']
+    save(OUT / 'ci-remaining-collect-launch.json', {'head': head, 'command': command})
+    result = subprocess.run(command, cwd=ROOT)
+    assert result.returncode == 0 and load(directory / 'outcome.json')['cleanup_verified']
+    log = (directory / 'pytest.log').read_text()
+    count = int(re.search(r'collected (\d+) items', log).group(1))
+    nodes = ['tests/test_ci_sharding.py::' + name
+             for name in re.findall(r'^\s*<Function (.+)>$', log, re.M)]
+    assert len(nodes) == len(set(nodes)) == count
+    completed = completed_ci_nodes()
+    assert set(completed) <= set(nodes)
+    pending = [node for node in nodes if node not in set(completed)]
+    assert pending
+    command = [*base, '--out', str(cohort_out('ci-remaining')), *pending]
+    save(OUT / 'ci-resume-plan.json', {'head': head, 'original_head': tested,
+         'reporting_only_changes': changed, 'all_nodes': nodes, 'completed_nodes': completed,
+         'pending_nodes': pending, 'command': command,
+         'original_outcome_sha256': sha((cohort_out('ci-sharding') / 'outcome.json').read_bytes()),
+         'collection_log_sha256': sha(log.encode())})
+    print(json.dumps({'completed': len(completed), 'remaining': len(pending), 'total': count}), flush=True)
+    result = subprocess.run(command, cwd=ROOT)
+    assert frozen() == head
+    return result.returncode
+
+
 def cohort(name, collect=False):
     head = frozen()
     if not collect and name != 'canary':
@@ -152,16 +207,31 @@ def audit():
 def report():
     head = frozen()
     audit_data = load(OUT / 'audit.json')
-    assert audit_data['head'] == head
+    tested = audit_data['head']
+    reporting_changes = reporting_only_since(tested, head)
     results = []
-    for name in COHORTS:
+    resumed = (OUT / 'ci-resume-plan.json').exists()
+    names = [*COHORTS, *(['ci-remaining'] if resumed else [])]
+    for name in names:
         directory = cohort_out(name)
         plan, outcome = load(directory / 'plan.json'), load(directory / 'outcome.json')
-        assert plan['source_commit'] == head
+        assert plan['source_commit'] == (head if name == 'ci-remaining' else tested)
         log = (directory / 'pytest.log').read_text()
         match = re.search(r'(?:workers? \[|collected )(\d+) items?', log)
         assert match, name
         collected = int(match.group(1))
+        if name == 'ci-sharding' and outcome['returncode'] == 124:
+            assert resumed and outcome['interrupted'] == 'deadline'
+            assert not outcome['observed_surviving_pids'] and not outcome['observation_errors']
+            completed = completed_ci_nodes()
+            results.append({'name': name, 'collected': collected, 'passed': len(completed),
+                'failed': 0, 'errors': 0, 'skipped': 0, 'unfinished': collected - len(completed),
+                'returncode': outcome['returncode'], 'seconds': outcome['seconds'],
+                'workers': plan['workers'], 'cleanup_verified': outcome['cleanup_verified'],
+                'failures': [], 'output': str(directory), 'command': plan['command'],
+                'source_commit': plan['source_commit'], 'proof': 'completed verbose pytest result lines; interrupted case excluded',
+                'completed_nodes': completed})
+            continue
         cases = list(ET.parse(directory / 'pytest.xml').iter('testcase'))
         failures = [{'node': case.get('classname') + '.' + case.get('name'),
                      'type': item.tag, 'message': item.get('message'), 'detail': item.text}
@@ -172,9 +242,28 @@ def report():
         assert outcome['returncode'] in (0, 1) and len(cases) == collected, (name, outcome)
         results.append({'name': name, 'collected': collected, 'passed': len(cases) - failed - errors - skipped,
                         'failed': failed, 'errors': errors, 'skipped': skipped,
+                        'unfinished': 0, 'source_commit': plan['source_commit'], 'proof': 'complete JUnit and ordinary pytest exit',
                         'returncode': outcome['returncode'], 'seconds': outcome['seconds'],
                         'workers': plan['workers'], 'cleanup_verified': outcome['cleanup_verified'],
                         'failures': failures, 'output': str(directory), 'command': plan['command']})
+    completion = None
+    if resumed:
+        resume = load(OUT / 'ci-resume-plan.json')
+        assert resume['head'] == head and resume['original_head'] == tested
+        assert resume['completed_nodes'] == completed_ci_nodes()
+        cases = list(ET.parse(cohort_out('ci-remaining') / 'pytest.xml').iter('testcase'))
+        assert all(case.get('classname') == 'tests.test_ci_sharding' for case in cases)
+        actual = ['tests/test_ci_sharding.py::' + case.get('name') for case in cases]
+        assert len(actual) == len(set(actual)) and set(actual) == set(resume['pending_nodes'])
+        assert not set(actual) & set(resume['completed_nodes'])
+        assert set(actual) | set(resume['completed_nodes']) == set(resume['all_nodes'])
+        initial, remaining = [row for row in results if row['name'] in ('ci-sharding', 'ci-remaining')]
+        completion = {'total_unique_cases': len(resume['all_nodes']),
+            'passed': initial['passed'] + remaining['passed'], 'failed': remaining['failed'],
+            'errors': remaining['errors'], 'skipped': remaining['skipped'], 'unfinished': 0,
+            'initial_exit': initial['returncode'], 'resume_exit': remaining['returncode'],
+            'repeated_completed_cases': 0, 'initial_head': tested, 'resume_head': head}
+        save(OUT / 'ci-full-coverage.json', completion)
     save(OUT / 'results.json', results)
     pin_result, pin_document = load(OUT / 'pin-verifier-result.json'), load(OUT / 'pin-verifier.stdout.json')
     pins = load(OUT / 'pin-changes.json')
@@ -186,10 +275,14 @@ def report():
         lines.append(f"| `{row['entry']}:{row['path']}` | `{row['old']}` | `{row['new']}` | {row['reason']} |")
     profile = 'src/data_sheets_schema/native_runtime_profiles.py'
     lines += ['', f"Retained candidate runtime-profile pin: `{audit_data['scanner_pins']['_NATIVE_V3_RENDER_SOURCES'][profile]}`. Every v3 source pin matches the merged bytes; the v2 authority pin matches the candidate's historical authority bytes.", '',
-        '| Focused cohort | Passed | Failed | Errors | Skipped | Exit | Seconds | Outer workers | Cleanup verified |',
-        '|---|---:|---:|---:|---:|---:|---:|---:|---|']
+        '| Focused cohort | Passed | Failed | Errors | Skipped | Unfinished in run | Exit | Seconds | Outer workers | Cleanup verified |',
+        '|---|---:|---:|---:|---:|---:|---:|---:|---:|---|']
     for row in results:
-        lines.append(f"| {row['name']} | {row['passed']} | {row['failed']} | {row['errors']} | {row['skipped']} | {row['returncode']} | {row['seconds']:.3f} | {row['workers']} | {row['cleanup_verified']} |")
+        lines.append(f"| {row['name']} | {row['passed']} | {row['failed']} | {row['errors']} | {row['skipped']} | {row['unfinished']} | {row['returncode']} | {row['seconds']:.3f} | {row['workers']} | {row['cleanup_verified']} |")
+    if completion:
+        lines += ['', f"CI file coverage across the original run and its continuation: **{completion['total_unique_cases']} unique cases, {completion['passed']} passed, {completion['failed']} failed, {completion['errors']} errors, {completion['skipped']} skipped, {completion['unfinished']} unfinished**. No completed case was rerun. The original run reached its 3,600-second deadline and exited 124; its completed verbose result lines count only cases explicitly marked PASSED. The interrupted case was excluded and then resumed. The runner forcibly stopped its observed descendants and reported none surviving, with no observation errors; this is not classified as verified normal cleanup. The continuation has its own complete JUnit and cleanup outcome."]
+    if reporting_changes:
+        lines += ['', f"Core cohorts and the initial CI run tested `{tested}`. The delivery head changes only `{reporting_changes[0]}` to resume unfinished CI cases and report partial evidence accurately. All runtime, scanner, test and other source bytes remain identical; the continuation tested the delivery head. The source audit and lead pin verifier therefore retain their original tested-head identity."]
     lines += ['', f"Lead pin verifier: exit **{pin_result['returncode']}**, {len(pin_result['failures'])} failures. The verifier's stdout is saved unchanged. Its historical v2 scanner-pin differences are advisory; the v3 closure is separately checked against the working bytes.", '',
               '## Merge and review', '',
               '- Git merged without conflicts; no manual conflict resolution was needed.',
@@ -214,7 +307,8 @@ def report():
               f'- Cohort results: `{OUT / "results.json"}`; each row names its saved plan, command, JUnit/log directory and cleanup outcome.',
               f'- Lead verifier output: `{OUT / "pin-verifier.stdout.json"}`; invocation and result: `{OUT / "pin-verifier-result.json"}`.',
               f'- Helpers: `{ROOT / "scripts/adhoc/merge_manifest_final_20261115.py"}` and `{Path(__file__).resolve()}`.',
-              '- Invoke the check helper with the declared-dependencies Python and `-S -P -B`: `collect canary`, `cohort canary`, then the named cohorts in results.json. Run `cohort ci-canary` before `cohort ci-sharding`. `audit` runs the exact lead verifier. `report` generates these tables from saved JSON/JUnit. Output paths are exclusive-create; replay requires fresh assigned evidence paths.', '',
+              '- Invoke the check helper with the declared-dependencies Python and `-S -P -B`: `collect canary`, `cohort canary`, then the named cohorts in results.json. Run `cohort ci-canary` before `cohort ci-sharding`. If the CI run reaches its deadline, `resume-ci` recollects the file and runs exactly the cases without completed results. `audit` runs the exact lead verifier. `report` generates these tables from saved JSON/JUnit and the explicitly identified partial-run log. Output paths are exclusive-create; replay requires fresh assigned evidence paths.',
+              *([f'- CI continuation selection and command: `{OUT / "ci-resume-plan.json"}`; complete unique coverage: `{OUT / "ci-full-coverage.json"}`.'] if resumed else []), '',
               '---', '', 'Earlier integration handoff follows unchanged.', '']
     text = '\n'.join(lines).replace(chr(64), '[at-sign]')
     original = HANDOFF.read_bytes()
@@ -230,11 +324,13 @@ def report():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=('cohort', 'collect', 'audit', 'report'))
+    parser.add_argument('action', choices=('cohort', 'collect', 'audit', 'report', 'resume-ci'))
     parser.add_argument('name', nargs='?', choices=tuple(COHORTS))
     args = parser.parse_args()
     if args.action in ('cohort', 'collect'):
         assert args.name
         raise SystemExit(cohort(args.name, collect=args.action == 'collect'))
     assert args.name is None
+    if args.action == 'resume-ci':
+        raise SystemExit(resume_ci())
     {'audit': audit, 'report': report}[args.action]()
