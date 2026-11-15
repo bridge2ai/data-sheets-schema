@@ -1,5 +1,6 @@
 """Actual public failed publication; runtime observation fails before dispatch."""
 from pathlib import Path
+from datetime import datetime, timezone
 import os
 import json
 import signal
@@ -17,6 +18,26 @@ def execution_case(tmp_path, monkeypatch):
     monkeypatch.chdir(authority.ROOT)
     case = make_case(tmp_path / 'v2-lifecycle')
     return case
+
+
+def readback_case(tmp_path, monkeypatch):
+    """Keep invented capture and guard clocks aligned through slow setup."""
+    from tests.utils import native_synthetic_evidence as evidence
+    from data_sheets_schema import native_subscription_guard_v2 as subscription
+
+    now = datetime.now(timezone.utc)
+
+    class FixtureDateTime(datetime):
+        def now(tz=None):
+            return now.astimezone(tz) if tz is not None else now.replace(tzinfo=None)
+
+    monkeypatch.setattr(evidence, 'datetime', FixtureDateTime)
+    monkeypatch.setattr(subscription, '_now', lambda: now.timestamp())
+    monkeypatch.chdir(authority.ROOT)
+    return make_case(tmp_path / 'v2-readback')
+
+
+readback_case = pytest.fixture(readback_case)
 
 
 @pytest.mark.parametrize('missing', ['review_path', 'ci_path', 'launch_word_path'])
@@ -237,8 +258,8 @@ def test_v2_publication_failure_preserves_first_error(execution_case, monkeypatc
 
 
 @pytest.mark.parametrize('filename', ['runtime-observation.json', 'keep-awake.json'])
-def test_v2_saved_failure_rechecks_runtime_and_cleanup_after_successful_read(execution_case, monkeypatch, filename):
-    case = execution_case
+def test_v2_saved_failure_rechecks_runtime_and_cleanup_after_successful_read(readback_case, monkeypatch, filename):
+    case = readback_case
     def failed_probe(value):
         raise RuntimeError('synthetic refusal before any native operation')
     monkeypatch.setattr(execute, '_synthetic_runtime_observation', failed_probe)
@@ -259,9 +280,9 @@ def test_v2_saved_failure_rechecks_runtime_and_cleanup_after_successful_read(exe
     pytest.param('ci', 'v2 CI check roster differs from the exact required event roster',
                  id='ci-full v2 required CI'),
 ])
-def test_saved_readback_revalidates_consumed_v2_approvals(execution_case, monkeypatch, role, expected):
+def test_saved_readback_revalidates_consumed_v2_approvals(readback_case, monkeypatch, role, expected):
     """A partial capture cannot omit its consumed independent approval checks."""
-    case = execution_case
+    case = readback_case
     def failed_probe(value):
         raise RuntimeError('synthetic refusal before native dispatch')
     monkeypatch.setattr(execute, '_synthetic_runtime_observation', failed_probe)
