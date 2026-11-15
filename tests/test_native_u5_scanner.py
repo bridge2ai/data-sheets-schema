@@ -121,7 +121,8 @@ def test_v2_route_refuses_imported_authority_mutations_and_escapes(tmp_path, mut
 
 
 def copied_procedure(tmp_path):
-    for relative in (STAGE, 'src/data_sheets_schema/native_shared_receipts.py',
+    for relative in (STAGE, 'src/data_sheets_schema/native_shared_stage/__main__.py',
+                     'src/data_sheets_schema/native_shared_receipts.py',
                      'src/data_sheets_schema/typed_audit.py',
                      'src/data_sheets_schema/audit_omissions.py',
                      'src/data_sheets_schema/native_shared_render.py'):

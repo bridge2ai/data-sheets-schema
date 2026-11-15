@@ -34,6 +34,7 @@ CASE_NAMES = (
     'B2_typed_container_alias_token', 'B3_typed_container_direct_token',
 )
 REFUSALS = {
+    'F3c_stage_main_branch': 'native stage CLI execution is not exact',
     'F1_event_parser_token': 'native event parser transport source changed',
     'F2a_envelope_control_token':
         'v2 envelope authority source changed: notes/matched_cborg_2026-09-13/prepare_registration_v2.py',
@@ -103,6 +104,14 @@ B2_CURRENT_VIOLATION = {
     'violation': True,
 }
 CURRENT_EXPECTATIONS = {
+    # Issue 6248 closes CLI execution. Keep the historical fixture immutable;
+    # the current scanner now refuses before producing finding arrays.
+    'F3c_stage_main_branch': {
+        'version': 3,
+        'expected_exit': 2,
+        'expected_violations': None,
+        'issue': 6248,
+    },
     'F3d_module_helper_print': {
         'version': 2,
         'historical_known_gap': 'N1',
