@@ -56,6 +56,11 @@ _generation_capture = ContextVar('environment_generation_capture', default=None)
 _IMPLEMENTATION_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 
 
+def _ancestor_identity(info):
+    """Bind resolution to the object, independent of sibling entry changes."""
+    return info.st_dev, info.st_ino, stat.S_IFMT(info.st_mode)
+
+
 class _CensusResolver:
     """Reuse directory resolution only within one checked live census."""
 
@@ -90,7 +95,7 @@ class _CensusResolver:
                 return physical
             if stat.S_ISLNK(info.st_mode):
                 target = os.readlink(physical)
-                identity = (_file_identity(info), target)
+                identity = (_ancestor_identity(info), target)
                 previous = self.links.setdefault(str(physical), identity)
                 if previous != identity:
                     raise ValueError('symlink changed during environment census: ' + str(physical))
@@ -102,7 +107,7 @@ class _CensusResolver:
                     self.directories[key] = resolved
                 return resolved
             if stat.S_ISDIR(info.st_mode):
-                identity = _file_identity(info)
+                identity = _ancestor_identity(info)
                 previous = self.identities.setdefault(str(physical), identity)
                 if previous != identity:
                     raise ValueError('ancestor changed during environment census: ' + str(physical))
@@ -113,10 +118,10 @@ class _CensusResolver:
 
     def require_stable(self):
         for path, identity in self.identities.items():
-            if _file_identity(Path(path).lstat()) != identity:
+            if _ancestor_identity(Path(path).lstat()) != identity:
                 raise ValueError('ancestor changed during environment census: ' + path)
         for path, identity in self.links.items():
-            if (_file_identity(Path(path).lstat()), os.readlink(path)) != identity:
+            if (_ancestor_identity(Path(path).lstat()), os.readlink(path)) != identity:
                 raise ValueError('symlink changed during environment census: ' + path)
 
 
