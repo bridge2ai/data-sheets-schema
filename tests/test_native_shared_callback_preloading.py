@@ -190,11 +190,10 @@ def test_main_thread_teardown_waits_for_active_historical_worker(isolated_module
     order = []
 
     class ObservedLock:
-        def __enter__(self):
-            if threading.current_thread() is threading.main_thread():
-                closing.set()
-            lock.acquire()
-        def __exit__(self, *exc):
+        def acquire(self, *, timeout):
+            closing.set()
+            return lock.acquire(timeout=timeout)
+        def release(self):
             lock.release()
 
     def callback():

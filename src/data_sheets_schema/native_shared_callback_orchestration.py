@@ -98,6 +98,7 @@ class _ValidatorGuard:
         self.source_check = source_check
         self.admission_bytes = admission_bytes
         self.disabled = False
+        self.scope = None
         self.references = []
         self.source_identities = (getattr(source_check, 'pins', ()),
             tuple(identity for _, identity in getattr(source_check, 'modules', ())))
@@ -122,6 +123,8 @@ class _ValidatorGuard:
             self.admission_bytes, sys.executable, sys.version, sys.implementation.cache_tag)
 
     def reusable(self):
+        if self.scope is not None:
+            self.scope.check()
         if self.disabled:
             return False
         try:
@@ -172,21 +175,78 @@ def require_main_thread():
         raise ValueError('native callback cannot load captures; preload on the main thread at admission')
 
 
+# Match the classifier's existing 2-second window. Teardown is a separate
+# grace period, not an extension of the 120-second observer acceptance window.
+CALLBACK_TEARDOWN_SECONDS = 2.0
+# sys is process-rooted even when a verified loader restores module bindings.
+_POISONED_STACKS = sys.__dict__.setdefault('_d4d_poisoned_callback_stacks', [])
+
+
+class _CallbackLock:
+    """Shared admission gate; poison is checked before and after waiting."""
+    def __init__(self):
+        self.lock = RLock()
+        self.poisoned = False
+
+    def check(self):
+        if self.poisoned:
+            raise ValueError('native callback scope is poisoned; reuse refused')
+
+    def acquire(self, *, timeout):
+        self.check()
+        return self.lock.acquire(timeout=timeout)
+
+    def release(self):
+        self.lock.release()
+
+    def __enter__(self):
+        self.check()
+        self.lock.acquire()
+        try:
+            self.check()
+        except BaseException:
+            self.lock.release()
+            raise
+        return self
+
+    def __exit__(self, *exc):
+        self.lock.release()
+
+
+def _poison_stack(lock, stack):
+    lock.poisoned = True
+    _POISONED_STACKS.append(stack)
+    return ValueError('native callback teardown exceeded '
+                      + str(CALLBACK_TEARDOWN_SECONDS)
+                      + ' seconds; scope poisoned and loaders retained')
+
+
 @contextmanager
 def _locked_stack(lock):
-    """Never revoke a carrier or unwind a loader while a callback uses it."""
+    """Retain poisoned loaders until process exit; never revoke under a worker."""
+    if isinstance(lock, _CallbackLock):
+        lock.check()
     stack = ExitStack()
     try:
         yield stack
-    except BaseException:
+    except BaseException as original:
         require_main_thread()
-        with lock:
+        if not lock.acquire(timeout=CALLBACK_TEARDOWN_SECONDS):
+            refusal = _poison_stack(lock, stack)
+            raise original from refusal
+        try:
             if not stack.__exit__(*sys.exc_info()):
                 raise
+        finally:
+            lock.release()
     else:
         require_main_thread()
-        with lock:
+        if not lock.acquire(timeout=CALLBACK_TEARDOWN_SECONDS):
+            raise _poison_stack(lock, stack)
+        try:
             stack.close()
+        finally:
+            lock.release()
 
 
 @dataclass(frozen=True, slots=True)
@@ -265,7 +325,7 @@ def _function(module, name):
 def preloaded_classifier(dependencies, *, _lock=None):
     """Keep A's verified carrier alive until all callback workers have joined."""
     require_main_thread()
-    lock = RLock() if _lock is None else _lock
+    lock = _CallbackLock() if _lock is None else _lock
     with _locked_stack(lock) as stack:
         controls = stack.enter_context(loading.loaded_controls(dependencies))
         pins = dependencies['base']['package_sources']
@@ -378,7 +438,7 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
     prepared = c.strict_json(preparation_raw, max_bytes=c.HARD_LIMITS['request_bytes'])['registration']
     arguments = registration._rebuild_inputs(execution, preparation_raw)
     arguments.pop('preparation_raw')
-    lock = RLock()
+    lock = _CallbackLock()
     with _locked_stack(lock) as stack:
         classifier = stack.enter_context(preloaded_classifier(dependencies, _lock=lock))
         modules = stack.enter_context(preloaded_callback_utilities(dependencies))
@@ -447,6 +507,7 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
             raise ValueError('verified loader did not load the closed validator graph')
         guard = _ValidatorGuard(validator_modules.values(), source_check,
             (composition_raw, preparation_raw, c.canonical(arguments)))
+        guard.scope = lock
         prefix = capture_inputs._PrefixOwner(guard, admitted)
         capture_inputs._PREFIX_OWNERS[admitted] = prefix
         stack.callback(capture_inputs._PREFIX_OWNERS.pop, admitted, None)
