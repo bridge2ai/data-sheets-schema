@@ -807,6 +807,9 @@ def _execute_job(context, state, *, client=None, upstream=None, protocol=None):
             state['stop_source'] = state.get('first_stop_source') or ('native_proxy' if proxy.failed.is_set() else 'native_controller')
             primary = controller_primary(state, error)
             state.update(primary_error=primary, primary_traceback=primary.__traceback__, escaped_child_error=error)
+            if getattr(primary, 'native_cleanup_errors', None):
+                state.setdefault('cleanup_errors', []).extend(
+                    dict(item) for item in primary.native_cleanup_errors)
             if primary is not error:
                 state.setdefault('cleanup_errors', []).append(cleanup_error('native_controller_cleanup', error))
             raise
