@@ -713,7 +713,7 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
             if primary_error is None:
                 primary_error = error
                 raise
-            primary_error.add_note(f'native cleanup also failed: {type(error).__name__}')
+            record_cleanup_error(primary_error, error)
         finally:
             # Synchronous diagnostics may stall or be interrupted. The child
             # and controller must already be shut down before any of this I/O.
@@ -729,7 +729,7 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
             except BaseException as error:
                 if primary_error is None:
                     raise
-                primary_error.add_note(f'native timing cleanup also failed: {type(error).__name__}')
+                record_cleanup_error(primary_error, error, timing=True)
     # Read after the cleanup above, which is what reaps the leader (#2714).
     # Callers read a falsy status as success, so an unknown one stops (#2984,
     # #2985).
@@ -770,7 +770,18 @@ def _close_responsive_control(proxy, process, control, attempt, primary_error):
     # only sign a group member may have survived, so it travels with it (#5078).
     # The class name only, as other cleanup records keep: an error's text can
     # carry the child's argv (#5079).
-    primary_error.add_note(f'native cleanup also failed: {type(cleanup_error).__name__}')
+    record_cleanup_error(primary_error, cleanup_error)
+
+
+def record_cleanup_error(primary_error, error, *, timing=False):
+    # Retain only the type: cleanup exception text can contain private paths.
+    error_type = type(error).__name__
+    errors = list(getattr(primary_error, 'native_cleanup_errors', ()))
+    errors.append({'source': 'native_controller_cleanup',
+                   'error_type': error_type, 'reason': error_type})
+    primary_error.native_cleanup_errors = errors
+    label = 'native timing cleanup' if timing else 'native cleanup'
+    primary_error.add_note(f'{label} also failed: {error_type}')
 
 
 def main():

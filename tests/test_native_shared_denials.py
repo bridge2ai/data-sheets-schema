@@ -5,12 +5,13 @@ from types import SimpleNamespace
 import pytest
 
 from tests.test_native_shared_execution import make_case, launch_case, authority, execute, c
+from tests.test_native_execution_registration_v2 import isolated_modules
 
 
 @pytest.mark.parametrize(('denied_tool', 'classification'), [
     ('Bash', 'not_prescribed'), ('Bash', 'prescribed'), ('Bash', 'unclassifiable'),
     ('Read', 'not_prescribed'), ('Write', 'not_prescribed')])
-def test_denial_live_and_saved(tmp_path, monkeypatch, classification, denied_tool):
+def test_denial_live_and_saved(tmp_path, monkeypatch, classification, denied_tool, isolated_modules):
     monkeypatch.chdir(authority.ROOT)
     case = make_case(tmp_path / classification)
     composition = c.strict_json(case['value']['composition_raw_json'].encode())
