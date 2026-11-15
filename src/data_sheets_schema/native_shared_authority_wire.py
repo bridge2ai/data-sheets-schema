@@ -6,7 +6,7 @@ the current parser never falls back to it. The A/v1 modules remain unmodified.
 """
 AUTHORITY_VERSION = 2
 VERSION = 3
-CONTROLLER_SOURCES_SHA256 = 'e500cb15c54d2db9a05a20b2259b67943b8f346f2221250cfd6f472ca6412e0c'
+CONTROLLER_SOURCES_SHA256 = '99f189f810c83fd78629dd60667fa9016131847389c44fd401f3be86c2d0e60b'
 PREPARATION_KIND = 'd4d_native_shared_preparation_v3'
 EXECUTION_KIND = 'd4d_native_shared_execution_registration_v3'
 HISTORICAL_PREPARATION_KIND = 'd4d_native_shared_preparation_v2'

@@ -57,7 +57,10 @@ SUPPORTED_SOURCES = {
         'b7b810b53ec922c0b382edda90fdab5ba620243b39489aaee84cdb59cc87488b',
         # #2541 lets a protocol stage select its own thinking display;
         # `classify_command` is byte-identical.
-        'e7279038e22984e0cb652c6cf2ef7576dc10c430224766cf1f18cbccf7a73ea5'}),
+        'e7279038e22984e0cb652c6cf2ef7576dc10c430224766cf1f18cbccf7a73ea5',
+        # #6259 carries structured cleanup errors onto native_stop;
+        # `classify_command` is byte-identical.
+        '004c10ca5d3c6c5b636d9f86cad6d1a8a327945738f0e13e7c14c69cb33a6818'}),
 }
 HEX = re.compile('[0-9a-f]{64}')
 MAX_DOCUMENT = 32 * 1024 * 1024
