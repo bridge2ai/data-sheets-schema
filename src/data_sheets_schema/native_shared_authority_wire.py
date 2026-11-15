@@ -4,7 +4,7 @@ These declarations parse closed saved shapes only. They neither verify current
 sources nor grant execution. The original A/v1 modules remain unmodified.
 """
 VERSION = 2
-CONTROLLER_SOURCES_SHA256 = 'd4ad9c21abc470bfffe6c68268ca5b343b548bea822fce19b5e6b9abb29c322b'
+CONTROLLER_SOURCES_SHA256 = 'e500cb15c54d2db9a05a20b2259b67943b8f346f2221250cfd6f472ca6412e0c'
 PREPARATION_KIND = 'd4d_native_shared_preparation_v2'
 EXECUTION_KIND = 'd4d_native_shared_execution_registration_v2'
 PREPARATION_SCOPE = 'offline_inputs_only_not_permission_or_launch_authority'

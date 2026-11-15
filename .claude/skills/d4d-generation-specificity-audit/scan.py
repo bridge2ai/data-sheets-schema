@@ -13045,8 +13045,8 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
     # and the native_control and run_native_canary hashes. These are identity
     # data, not loader logic. The base summary keeps the earlier contract's
     # identity.
-    'src/data_sheets_schema/native_attribution_controller_v2.py': '4cdfc7adb575d6572d76027c0e0d640876effd8c72c9ed1bc9798f6df060934a',
-    'src/data_sheets_schema/native_controller_sources_v2.json': 'd4ad9c21abc470bfffe6c68268ca5b343b548bea822fce19b5e6b9abb29c322b',
+    'src/data_sheets_schema/native_attribution_controller_v2.py': '75c748000983aa82e8e07bbc24fa888cf3b995685e4e8726e1e6dcf10af9004f',
+    'src/data_sheets_schema/native_controller_sources_v2.json': 'e500cb15c54d2db9a05a20b2259b67943b8f346f2221250cfd6f472ca6412e0c',
 }
 
 

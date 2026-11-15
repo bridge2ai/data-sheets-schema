@@ -21,7 +21,7 @@ KIND = 'd4d_native_attribution_callback_composition'
 VERSION = 1
 EXECUTION = 'offline_composition_only_no_production_launcher'
 SOURCES_PATH = Path('src/data_sheets_schema/native_controller_sources_v1.json')
-SOURCES_SHA256 = '280bdcaeee2cd0a84751f6ed0162541250fa830b39f1169907054c124a010aa6'
+SOURCES_SHA256 = 'ece499cb7e82b19a950c70ca6a50079091ffe7f3c362df48b2e183dfa06695f7'
 ROOT = Path(__file__).resolve().parents[2]
 
 
