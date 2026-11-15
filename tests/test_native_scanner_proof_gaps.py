@@ -1,4 +1,6 @@
 """Offline regressions for review issues 6245–6248, 2026-11-15."""
+import ast
+
 import pytest
 
 from tests.test_native_u1_scanner_contracts import _procedure_root
@@ -12,6 +14,61 @@ def test_6245_class_descriptor_refuses(tmp_path):
     text = path.read_text()
     assert text.count('class _Replay:') == 1
     path.write_text(text.replace('class _Replay:', 'class _Replay:\n    options = property(lambda self: {})'))
+    with pytest.raises(scan.ConfigError, match='native packet options are replaced, mutated or aliased'):
+        scan.derive_native_shared_procedure(root)
+
+
+def test_6245_dynamic_receiver_lookup_refuses(tmp_path):
+    root = _procedure_root(tmp_path)
+    assert scan.derive_native_shared_procedure(root)
+    path = root / 'src/data_sheets_schema/native_shared_stage/__init__.py'
+    text = path.read_text()
+    marker = '        self.pending = None\n        self.pending_predecessor = None'
+    assert text.count(marker) == 1
+    mutation = "        name = 'options'\n        self.__getattribute__(name).clear()\n"
+    path.write_text(text.replace(marker, mutation + marker))
+    with pytest.raises(scan.ConfigError, match='native packet options are replaced, mutated or aliased'):
+        scan.derive_native_shared_procedure(root)
+
+
+def test_6245_returned_receiver_options_refuses(tmp_path):
+    root = _procedure_root(tmp_path)
+    assert scan.derive_native_shared_procedure(root)
+    path = root / 'src/data_sheets_schema/native_shared_stage/__init__.py'
+    text = path.read_text()
+    marker = '        self._base()\n'
+    assert text.count(marker) == 1
+    path.write_text(text.replace(marker, marker + '        self.run().options.clear()\n'))
+    with pytest.raises(scan.ConfigError, match='native packet options are replaced, mutated or aliased'):
+        scan.derive_native_shared_procedure(root)
+
+
+def test_6245_returned_receiver_reflection_refuses(tmp_path):
+    for index, receiver in enumerate(('self.run()', 'self._owner()')):
+        root = _procedure_root(tmp_path / str(index))
+        assert scan.derive_native_shared_procedure(root)
+        path = root / 'src/data_sheets_schema/native_shared_stage/__init__.py'
+        text = path.read_text()
+        if index:
+            text = text.replace('class _Replay:', 'class _Replay:\n    def _owner(self):\n        return self\n')
+        marker = '        self._base()\n'
+        assert text.count(marker) == 1
+        mutation = "        name = 'options'\n        owner = " + receiver + "\n        getattr(owner, name).clear()\n"
+        path.write_text(text.replace(marker, marker + mutation))
+        with pytest.raises(scan.ConfigError, match='native packet options are replaced, mutated or aliased'):
+            scan.derive_native_shared_procedure(root)
+
+
+def test_6245_nested_receiver_return_refuses(tmp_path):
+    root = _procedure_root(tmp_path)
+    assert scan.derive_native_shared_procedure(root)
+    path = root / 'src/data_sheets_schema/native_shared_stage/__init__.py'
+    text = path.read_text()
+    marker = '    def run(self):\n'
+    assert text.count(marker) == 1
+    mutation = ("        def owner():\n            return self\n"
+                "        name = 'options'\n        getattr(owner(), name).clear()\n")
+    path.write_text(text.replace(marker, marker + mutation))
     with pytest.raises(scan.ConfigError, match='native packet options are replaced, mutated or aliased'):
         scan.derive_native_shared_procedure(root)
 
@@ -68,3 +125,11 @@ def test_6248_cli_mutation_refuses(tmp_path):
         path.write_text(text.replace(before, after))
         with pytest.raises(scan.ConfigError, match='native stage CLI execution is not exact'):
             scan.derive_native_shared_procedure(root)
+
+
+def test_6248_preserves_shared_ast(tmp_path):
+    root = _procedure_root(tmp_path)
+    tree = scan._tree(root / 'src/data_sheets_schema/native_shared_stage/__main__.py')
+    before = ast.dump(tree, include_attributes=True)
+    assert scan.derive_native_shared_procedure(root)
+    assert ast.dump(tree, include_attributes=True) == before

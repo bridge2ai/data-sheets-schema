@@ -25,6 +25,8 @@ def strip_docstrings(node):
 
 def main():
     text = SCAN.read_text()
+    if 'Issue 6246: close module execution' in text:
+        raise SystemExit('contracts already present; use this builder only on the base scanner')
     producer = strip_docstrings(ast.parse(source('src/data_sheets_schema/native_execution_registration_v2.py')))
     # Bodies are separately proved where they participate in rendering. Keep
     # every signature, decorator, class body, import and module initializer.
@@ -64,6 +66,9 @@ def main():
     text = text.replace(marker, contract + marker)
     cli = strip_docstrings(ast.parse(source('src/data_sheets_schema/native_shared_stage/__main__.py')))
     contract = "    # Issue 6248: the registered module command executes this entry point.\n    stage_cli = _tree(root / (prefix + 'native_shared_stage/__main__.py'))\n    for node in ast.walk(stage_cli):\n        if isinstance(node, (ast.Module, ast.FunctionDef)):\n            node.body = _without_docstring(node.body)\n    if dump(stage_cli) != dump(ast.parse(" + literal_source(ast.unparse(cli), 8) + ")):\n        raise fail('native stage CLI execution is not exact')\n"
+    contract = contract.replace(
+        "stage_cli = _tree(root / (prefix + 'native_shared_stage/__main__.py'))",
+        "stage_cli = ast.parse(ast.unparse(_tree(root / (prefix + 'native_shared_stage/__main__.py'))))")
     marker = "    fixed_import('native_shared_stage', '', 'native_shared_receipts', 'nr')"
     assert text.count(marker) == 1
     text = text.replace(marker, contract + '\n' + marker)

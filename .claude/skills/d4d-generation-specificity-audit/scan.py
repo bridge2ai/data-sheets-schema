@@ -13949,7 +13949,7 @@ def derive_native_shared_procedure(root: Path) -> dict:
             raise fail('alternate counted result in ' + fn.name)
 
     # Issue 6248: the registered module command executes this entry point.
-    stage_cli = _tree(root / (prefix + 'native_shared_stage/__main__.py'))
+    stage_cli = ast.parse(ast.unparse(_tree(root / (prefix + 'native_shared_stage/__main__.py'))))
     for node in ast.walk(stage_cli):
         if isinstance(node, (ast.Module, ast.FunctionDef)):
             node.body = _without_docstring(node.body)
@@ -14044,14 +14044,27 @@ def derive_native_shared_procedure(root: Path) -> dict:
         if len(matches) != 1:
             raise fail('native packet options have an unproved consumer')
         allowed_options.update(id(k.value) for k in matches[0].keywords if k.arg is None)
+    # Final reconstruction has one additional fixed read on the returned replay.
+    # Account for it explicitly so a different receiver spelling cannot conceal
+    # an options mutation, including a chained call returning the same instance.
+    completion_options = statement(function('native_shared_stage', '_complete'),
+        "checked = typed.check(replay.assembly, captured_assets=replay.options['captured_assets'], "
+        "derivations=typed.DerivationCache(), "
+        "_catalog_lookup=catalog_reuse._CatalogLookup(replay.catalogs, replay.s))")
+    allowed_options.update(id(node) for node in ast.walk(completion_options)
+                           if isinstance(node, ast.Attribute) and node.attr == 'options')
     actual_options = {id(n) for n in ast.walk(trees['native_shared_stage'])
-                      if isinstance(n, ast.Attribute) and ast.unparse(n) == 'self.options'}
+                      if isinstance(n, ast.Attribute) and n.attr == 'options'}
     if actual_options != allowed_options:
         raise fail('native packet options are replaced, mutated or aliased')
     # Issue 6245: close receiver aliases and dynamic reflection as well as the
-    # literal options spelling. Returning the replay itself is its fixed API;
-    # other bare receiver loads can hand its mutable state to unknown code.
+    # literal options spelling. Only run's direct replay returns are its API;
+    # another bare receiver load or internal run reference can escape its state.
     parents = _parents(trees['native_shared_stage'])
+    returned_self = {id(node.value) for node in ast.walk(run)
+                     if isinstance(node, ast.Return) and isinstance(node.value, ast.Name)
+                     and node.value.id == 'self'
+                     and _innermost_function(trees['native_shared_stage'], node.lineno) is run}
     for node in ast.walk(trees['native_shared_stage']):
         if (isinstance(node, ast.Attribute) and node.attr == 'options'
                 and isinstance(node.ctx, (ast.Store, ast.Del))
@@ -14061,9 +14074,10 @@ def derive_native_shared_procedure(root: Path) -> dict:
             parent = parents.get(id(node))
             if (not isinstance(node.ctx, ast.Load)
                     or not (isinstance(parent, ast.Attribute) and parent.value is node
-                            or isinstance(parent, ast.Return) and parent.value is node)):
+                            and parent.attr != 'run' or id(node) in returned_self)):
                 raise fail('native packet options are replaced, mutated or aliased')
-        if isinstance(node, ast.Attribute) and node.attr in {'__dict__', '__setattr__', '__delattr__'}:
+        if isinstance(node, ast.Attribute) and node.attr in {
+                '__dict__', '__getattribute__', '__getattr__', '__setattr__', '__delattr__'}:
             raise fail('native packet options are replaced, mutated or aliased')
         if isinstance(node, ast.ClassDef) and node.name == '_Replay':
             for member in node.body:
