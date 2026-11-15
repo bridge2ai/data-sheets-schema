@@ -1662,3 +1662,102 @@ def test_cleanup_refusal_after_a_failed_run_travels_with_the_primary_error(monke
     assert primary.__notes__==['native cleanup also failed: PermissionError']
     with pytest.raises(PermissionError):
         runner._close_responsive_control(proxy,object(),control,tmp_path,None)
+
+
+def test_timing_failure_cannot_prevent_shutdown(monkeypatch, tmp_path, fault, contract, failed_run):
+    """Issue 6244: real synthetic process cleanup precedes faulty timing I/O."""
+    instruction = tmp_path / 'instruction'
+    instruction.write_text('offline')
+    actions = []
+    primary = ValueError('original controller failure')
+    diagnostic = KeyboardInterrupt() if fault == 'interrupt' else OSError('diagnostic write')
+    proxy = SimpleNamespace(failed=threading.Event(), failure=None,
+                            close_admission=lambda: actions.append('admission'))
+
+    class Control:
+        stdout_closed = True
+        control_shutdown_complete = False
+        unfinished_control_workers = 0
+
+        def __init__(self, *args, **kwargs):
+            self.contract = contract
+
+        def start(self, process, *args):
+            self.process = process
+
+        def service(self):
+            if failed_run:
+                raise primary
+            time.sleep(0.01)
+
+        def finish(self):
+            pass
+
+        def retain_pipe_tail(self, path):
+            pass
+
+        def close(self):
+            assert self.process.returncode is not None
+            self.process.stdin.close()
+            self.process.stdout.close()
+            self.control_shutdown_complete = True
+            actions.append('control')
+
+    def diagnostic_write():
+        assert actions[-2:] == ['group', 'control']
+        if fault == 'stall':
+            # Simulate a synchronous diagnostic write that cannot complete yet.
+            # Shutdown must be visible throughout this bounded stall.
+            assert not threading.Event().wait(0.05)
+            assert actions[-2:] == ['group', 'control']
+        else:
+            raise diagnostic
+
+    class Timing:
+        def __init__(self, attempt):
+            pass
+
+        def record(self, name, **kwargs):
+            if name == 'execute_child_cleanup_entry' and fault != 'oserror':
+                diagnostic_write()
+
+        def close(self):
+            actions.append('timing_close') if fault != 'oserror' else diagnostic_write()
+
+    terminate = runner.terminate_group
+
+    def terminate_checked(process):
+        assert 'admission' in actions
+        terminate(process)
+        with pytest.raises(ProcessLookupError):
+            os.killpg(process.pid, 0)
+        actions.append('group')
+
+    monkeypatch.setattr(runner, 'NativeControl', Control)
+    monkeypatch.setattr(runner, 'Timing', Timing)
+    monkeypatch.setattr(runner, 'terminate_group', terminate_checked)
+    caught = None
+    try:
+        execute_child([sys.executable, '-c', 'import time; time.sleep(0.1)',
+                       '--input-format', 'stream-json'], proxy=proxy,
+            instruction=instruction, attempt=tmp_path, cwd=tmp_path, env={},
+            deadline_seconds=5, verify_launch=lambda: None, command_policy={'test': True})
+    except BaseException as error:
+        caught = error
+    assert 'group' in actions and 'control' in actions
+    if failed_run:
+        assert caught is primary
+        if fault != 'stall':
+            assert primary.__notes__ == [f'native timing cleanup also failed: {type(diagnostic).__name__}']
+    elif fault == 'stall':
+        assert caught is None
+    else:
+        assert caught is diagnostic
+    if contract == runner.HISTORY_CONTRACT:
+        assert proxy.control_shutdown['control_shutdown_complete'] is True
+
+
+test_timing_failure_cannot_prevent_shutdown = pytest.mark.parametrize(
+    'fault', ['interrupt', 'stall', 'oserror'])(pytest.mark.parametrize(
+    'contract', ['legacy', runner.HISTORY_CONTRACT])(pytest.mark.parametrize(
+    'failed_run', [False, True])(test_timing_failure_cannot_prevent_shutdown)))
