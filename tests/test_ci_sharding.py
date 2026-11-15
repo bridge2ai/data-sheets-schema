@@ -412,7 +412,13 @@ def test_case_workflow_binds_all_lanes_and_retains_budget_setup_and_evidence(job
     assert job["name"] == "Python 3.12 / " + (artifact.upper() if artifact != "native" else artifact) + " case ${{ matrix.case }}"
     assert job["runs-on"] == "ubuntu-latest"
     assert job["timeout-minutes"] == timeout
-    checkout, submodule, setup, case, clean, upload = job["steps"]
+    steps = list(job["steps"])
+    if artifact == "native":
+        diagnostics = steps.pop(4)
+        assert diagnostics["if"] == "failure()"
+        assert "scripts/adhoc/collect_native_failure_evidence.py" in diagnostics["run"]
+        assert '"${{ runner.temp }}/native-case" test-results/native-failure' in diagnostics["run"]
+    checkout, submodule, setup, case, clean, upload = steps
     assert checkout["uses"] == "actions/checkout@v5"
     assert checkout["with"] == {"fetch-depth": 0}
     assert submodule["run"] == "git submodule update --init fairscape_models"
@@ -421,11 +427,12 @@ def test_case_workflow_binds_all_lanes_and_retains_budget_setup_and_evidence(job
     assert case["env"] == {"PYTHONPYCACHEPREFIX": "${{ runner.temp }}/d4d-tests-pycache"}
     assert "if" not in case
     command_text = case["run"].replace("\\\n", " ")
-    command = shlex.split(command_text.replace("${{ matrix.case }}", "routing-dispatch"))
+    command = shlex.split(command_text.replace("${{ matrix.case }}", "routing-dispatch").replace("${{ runner.temp }}", "/runner-temp"))
     start = command.index("poetry")
     end = command.index("2>&1")
     assert command[start:end] == ["poetry", "run", "python", "-m", "pytest", "tests", "-v",
         "-p", "no:cacheprovider", "-p", "utils.pytest_shard", "--ci-lane=routing-dispatch",
+        *(["--basetemp=/runner-temp/native-case"] if artifact == "native" else []),
         "--durations=25", "--junitxml=test-results/pytest.xml"]
     assert "set -o pipefail" in case["run"] and "| tee test-results/pytest.log" in case["run"]
     assert clean["if"] == "always()"

@@ -8,10 +8,13 @@ from __future__ import annotations
 
 import argparse
 import base64
-from collections import Counter
+from collections import Counter, OrderedDict
+from copy import deepcopy
 import hashlib
 import json
 from pathlib import Path
+import sys
+from threading import Lock
 
 import yaml
 
@@ -19,6 +22,7 @@ from . import audit_batches as batches, audit_batch_format as output_format
 from . import audit_grammar, audit_omissions as omissions, audit_protocol
 from . import evidence_assertions as evidence
 from .schema_snapshot import SchemaSnapshot, capture_schema
+from .cache_dependencies import FunctionBindings
 
 PACKET = "typed_audit_packet_v1"
 ASSEMBLY = "typed_audit_assembly_v1"
@@ -74,8 +78,117 @@ def _seal(value):
     return {**value, "sha256": _sha(_json(value))}
 
 
+def _parse_source_digest():
+    """Identity of the loaded bounded parser sources, captured at import.
+
+    Runtime binding checks below invalidate changed implementations without
+    filesystem reads on observer workers. Fresh processes capture fresh source.
+    """
+    paths = {__file__, *(fn.__code__.co_filename for fn in (
+        omissions._mapping, omissions._read, omissions.nesting_exceeds,
+        omissions._validate_json, evidence.load_json))}
+    try:
+        return hashlib.sha256(b''.join(hashlib.sha256(Path(path).read_bytes()).digest()
+                                      for path in sorted(paths))).hexdigest()
+    except OSError:
+        return None
+
+
+_JSON_PARSER_SOURCE_SHA256 = _parse_source_digest()
+_JSON_PARSE_BINDINGS = FunctionBindings(additional_modules=frozenset({evidence.__name__}))
+_JSON_PARSE_BINDINGS.bind(lambda: _JSON_PARSE_BINDINGS.key(evidence.load_json))
+_JSON_LIMIT_READERS = (sys.getrecursionlimit, getattr(sys, 'get_int_max_str_digits', None))
+
+
+def _parse_identity():
+    # The existing native dependency checker covers the actual mapping,
+    # depth/node validators, YAML preflight and JSON codec. Its state check
+    # still runs every time; no dependency verdict is retained by this cache.
+    native = sys.modules.get('data_sheets_schema.native_catalog_reuse')
+    if native is None or not _JSON_PARSER_SOURCE_SHA256 or not _JSON_PARSE_BINDINGS.ready:
+        return None
+    try:
+        marker = native.runtime_token()
+        if (marker is None or evidence.json is not json or omissions.evidence is not evidence
+                or omissions is not native.omissions or json is not native.json
+                or deepcopy is not native.copy.deepcopy):
+            return None
+        for reader, name in zip(_JSON_LIMIT_READERS, ('getrecursionlimit', 'get_int_max_str_digits')):
+            if reader is not None and (type(reader) is not type(len)
+                                      or reader.__self__ is not sys or reader.__name__ != name):
+                return None
+        runtime_limits = tuple(reader() if reader is not None else None for reader in _JSON_LIMIT_READERS)
+        duplicate_parser = _JSON_PARSE_BINDINGS.key(evidence.load_json)
+        return (_JSON_PARSER_SOURCE_SHA256, omissions.MAX_DEPTH, omissions.MAX_NODES,
+                0, duplicate_parser, marker, runtime_limits)  # Zero duplicate keys are permitted.
+    except (TypeError, ValueError, AttributeError):
+        return None
+
+
+def _parse_retained_bytes(value):
+    """Conservative owned payload accounting; shared objects count repeatedly."""
+    size = sys.getsizeof(value)
+    if type(value) is dict:
+        size += sum(_parse_retained_bytes(k) + _parse_retained_bytes(v) for k, v in value.items())
+    elif type(value) in (tuple, list):
+        size += sum(_parse_retained_bytes(item) for item in value)
+    return size
+
+
+class _JSONParseCache:
+    """Process-local LRU of successful pure parses; callers always own a copy.
+
+    Bounds cover retained raw bytes, keys, parsed objects and a per-entry
+    container allowance, not total process RSS. Nothing is serialized or
+    attached to receipt catalogs, admissions, history or stage decisions.
+    """
+    def __init__(self, max_entries=16, max_bytes=32 * 1024 * 1024):
+        if type(max_entries) is not int or max_entries < 1 or type(max_bytes) is not int or max_bytes < 1:
+            raise ValueError('parse cache requires positive integer bounds')
+        self._max_entries, self._max_bytes = max_entries, max_bytes
+        self._entries, self._bytes = OrderedDict(), 0
+        self._lock = Lock()
+        self.hits = 0
+
+    def parse(self, raw, label, limit, identity, identity_check=None):
+        if identity is None or type(raw) is not bytes or not raw or len(raw) > limit:
+            return omissions._mapping(raw, label, json_only=True, limit=limit)
+        # Hash freshly supplied bytes on every call, including recapture and
+        # independent final reconstruction. Also compare exact retained bytes.
+        key = (_sha(raw), len(raw), identity, limit)
+        with self._lock:
+            prior = self._entries.get(key)
+            if prior is not None and prior[0] == raw:
+                self._entries.move_to_end(key)
+                self.hits += 1
+                return deepcopy(prior[1])
+        value = omissions._mapping(raw, label, json_only=True, limit=limit)
+        # A refusal never reaches retention. Never publish a candidate parsed
+        # across a dependency transition under the earlier implementation key.
+        if identity_check is not None and identity_check() != identity:
+            return value
+        owned = deepcopy(value)
+        size = _parse_retained_bytes((key, raw, owned)) + 256
+        if size > self._max_bytes:
+            return value
+        with self._lock:
+            prior = self._entries.pop(key, None)
+            if prior is not None:
+                self._bytes -= prior[2]
+            while self._entries and (len(self._entries) >= self._max_entries
+                                     or self._bytes + size > self._max_bytes):
+                _, prior = self._entries.popitem(last=False)
+                self._bytes -= prior[2]
+            self._entries[key] = (raw, owned, size)
+            self._bytes += size
+        return value
+
+
+_JSON_PARSE_CACHE = _JSONParseCache()
+
+
 def _bounded_json(raw, label, limit):
-    return omissions._mapping(raw, label, json_only=True, limit=limit)
+    return _JSON_PARSE_CACHE.parse(raw, label, limit, _parse_identity(), _parse_identity)
 
 
 def _snapshot_rows(snapshot):

@@ -21,7 +21,7 @@ from .native_shared_callback_capture import FrozenSpec
 
 # Closed verified observation/stage graph, including deferred pure utilities.
 VALIDATOR_MODULES = frozenset('data_sheets_schema.' + name for name in (
-    'agentic_runtime', 'audit_batch_format', 'audit_batches', 'audit_grammar',
+    'agentic_runtime', 'anonymous_removals', 'audit_batch_format', 'audit_batches', 'audit_grammar',
     'audit_omissions', 'audit_protocol', 'cache_dependencies', 'canary',
     'chunking', 'corpus', 'duplicate_keys', 'evidence_assertions', 'grounding',
     'native_catalog_initialization', 'native_catalog_reuse', 'native_model_aliases',
@@ -409,6 +409,9 @@ def preloaded_callback_utilities(dependencies):
         modules = {name: stack.enter_context(authority.loaded_verified_package_module(
             'data_sheets_schema.' + name, package_sources=pins)) for name in (
                 'source_metadata', 'source_review', 'duplicate_keys', 'bc1_context', 'grounding',
+                # Audit acceptance imports this even for an empty finding list.
+                # Replay must use the same verified utility as the main-thread helper.
+                'anonymous_removals',
                 # Stage publication calls host_power from an orchestration body
                 # outside A's consumer import graph. Keep all newly introduced
                 # timing utilities source-verified for the same worker lifetime.

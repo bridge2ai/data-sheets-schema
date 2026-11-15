@@ -196,8 +196,14 @@ jobs:
           set -o pipefail
           poetry run python -m pytest tests -v -p no:cacheprovider \
             -p utils.pytest_shard --ci-lane=${{ matrix.case }} \
+            --basetemp="${{ runner.temp }}/native-case" \
             --durations=25 --junitxml=test-results/pytest.xml \
             2>&1 | tee test-results/pytest.log
+      - name: Preserve bounded native failure diagnostics
+        if: failure()
+        run: |
+          poetry run python scripts/adhoc/collect_native_failure_evidence.py \
+            "${{ runner.temp }}/native-case" test-results/native-failure
       - name: Require the case to leave notes/, tests/ and utils/ untouched
         if: always()
         run: |
@@ -240,8 +246,14 @@ jobs:
           set -o pipefail
           poetry run python -m pytest tests -v -p no:cacheprovider \
             -p utils.pytest_shard --ci-lane=${{ matrix.case }} \
+            --basetemp="${{ runner.temp }}/native-case" \
             --durations=25 --junitxml=test-results/pytest.xml \
             2>&1 | tee test-results/pytest.log
+      - name: Preserve bounded native failure diagnostics
+        if: failure()
+        run: |
+          poetry run python scripts/adhoc/collect_native_failure_evidence.py \
+            "${{ runner.temp }}/native-case" test-results/native-failure
       - name: Require the case to leave notes/, tests/ and utils/ untouched
         if: always()
         run: |
