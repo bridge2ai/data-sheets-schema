@@ -201,17 +201,23 @@ def test_development_egg_link_refuses(installed):
 
 
 def test_own_project_excluded_only_with_exact_namespace(installed, monkeypatch, tmp_path):
+    # Distribution metadata and namespace authority are both synthetic inputs.
+    package = m.sys.modules['data_sheets_schema']
+    pinned = str(m.ROOT / 'src/data_sheets_schema')
+    monkeypatch.setattr(package, '__path__', [pinned])
     own = Distribution(tmp_path / 'own', name='data_sheets_schema', record=b'')
     monkeypatch.setattr(m.metadata, 'distributions', lambda **kwargs: [own, installed])
     value = m.generate()
     assert [row['name'] for row in value['distributions']] == ['synthetic-package']
-    package = m.sys.modules['data_sheets_schema']
-    monkeypatch.setattr(package, '__path__', [str(tmp_path)])
-    with pytest.raises(ValueError, match='exact pinned project namespace'):
-        m.generate()
+    for roots in ([str(tmp_path)], [pinned, str(tmp_path)]):
+        monkeypatch.setattr(package, '__path__', roots)
+        with pytest.raises(ValueError, match='exact pinned project namespace'):
+            m.generate()
 
 
 def test_own_distribution_name_cannot_hide_unrelated_payload(installed, monkeypatch, tmp_path):
+    monkeypatch.setattr(m.sys.modules['data_sheets_schema'], '__path__',
+                        [str(m.ROOT / 'src/data_sheets_schema')])
     own = Distribution(tmp_path / 'own', name='data_sheets_schema')
     monkeypatch.setattr(m.metadata, 'distributions', lambda **kwargs: [own, installed])
     with pytest.raises(ValueError, match='cannot own unrelated package files'):
@@ -225,6 +231,37 @@ def test_old_manifest_shape_is_historical_only(installed):
                              if key in {'name', 'version', 'record_sha256'}} for row in old['distributions']]
     with pytest.raises(ValueError, match='environment distribution'):
         m.validate(old)
+
+
+def test_record_stat_pairs_preserve_the_closed_type_and_size_checks(installed):
+    value = m.generate()
+    stats = value['distributions'][0]['file_stats']
+    assert stats['file.py'] == [stat.S_IFREG, 17]
+    for bad in ({'type': stat.S_IFREG, 'bytes': 17}, [], [stat.S_IFREG],
+                [stat.S_IFREG, 17, 0], [True, 17], [stat.S_IFREG, True],
+                [12345, 17], [stat.S_IFREG, -1], [0, 1],
+                [stat.S_IFREG, max(m.MAX_PAYLOAD_BYTES, m.MAX_RECORD_BYTES) + 1]):
+        stats['file.py'] = bad
+        with pytest.raises(ValueError, match='lstat'):
+            m.validate(value)
+
+
+def test_large_record_inventory_roundtrips_without_relaxing_json_bounds(installed):
+    # Fabricated census tests wire capacity only; it is not live authority.
+    value = m.generate()
+    row = value['distributions'][0]
+    for index in range(40_000):
+        row['file_stats']['invented/' + str(index) + '.py'] = [stat.S_IFREG, 17]
+    row['verified_files']['count'] += 40_000
+    row['verified_files']['bytes'] += 40_000 * 17
+    compact = c.canonical(m.validate(value))
+    assert c.strict_json(compact, 'large synthetic manifest', m.MAX_BYTES) == value
+    expanded = json.loads(compact)
+    for distribution in expanded['distributions']:
+        distribution['file_stats'] = {path: {'type': item[0], 'bytes': item[1]}
+                                      for path, item in distribution['file_stats'].items()}
+    with pytest.raises(ValueError, match='structural bound'):
+        c.strict_json(c.canonical(expanded), 'expanded synthetic manifest', m.MAX_BYTES)
 
 
 @pytest.mark.parametrize('change', ['count', 'unknown_kind', 'duplicate', 'version'])
