@@ -95,6 +95,15 @@ def _stat_shape(value):
     return value
 
 
+def _record_stat_shape(value):
+    # A fixed [file type, byte size] pair preserves both lstat fields without
+    # repeating their keys for every installed file. Full dev environments
+    # must fit the existing shared JSON structural budget, not raise it.
+    if type(value) is not list or len(value) != 2:
+        raise ValueError('installed RECORD lstat requires a type and size pair')
+    return _stat_shape({'type': value[0], 'bytes': value[1]})
+
+
 def _lstat(path):
     try:
         info = Path(path).lstat()
@@ -181,7 +190,7 @@ def validate(value):
             _record_name(path)
             if path.endswith('.pyc'):
                 raise ValueError('pyc bytecode is excluded from the environment manifest')
-            _stat_shape(item)
+            _record_stat_shape(item)
         names.append(row['name'])
     if names != sorted(set(names)):
         raise ValueError('environment distributions must be sorted and unique')
@@ -439,7 +448,8 @@ def _capture_distribution(distribution, *, verify_payloads=True, light=False):
         if len(owned) > MAX_IMPORT_ENTRIES:
             raise ValueError('distribution RECORD exceeds its entry count bound')
         original = Path(distribution.locate_file(entry))
-        file_stats[entry], stat_identities[str(original)] = _lstat(original)
+        observed_stat, stat_identities[str(original)] = _lstat(original)
+        file_stats[entry] = [observed_stat['type'], observed_stat['bytes']]
         if row[1]:
             # A generate call hashes each payload once. Its second capture
             # rereads metadata/RECORD and the final pass checks every original

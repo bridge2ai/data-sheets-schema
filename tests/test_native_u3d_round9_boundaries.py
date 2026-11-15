@@ -173,7 +173,8 @@ def test_unmasked_shared_registration_constants_equal_the_real_a_contract(isolat
 
     assert shared.KIND == registration.EXECUTION_KIND
     assert shared.EXECUTION == registration.EXECUTION_SCOPE
-    assert shared.VERSION == shared.AUTHORITY_VERSION == 2
+    assert shared.VERSION == registration.VERSION == 3
+    assert shared.AUTHORITY_VERSION == registration.AUTHORITY_VERSION == 2
     assert shared.GATES == engine.GATES == primitives.GATES == registration.EXECUTION_GATES
 
 
