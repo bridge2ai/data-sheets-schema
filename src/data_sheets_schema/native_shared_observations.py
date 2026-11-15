@@ -119,8 +119,59 @@ class Trace:
         self.calls={};self.callbacks={};self.results={};self.decisions={}
         self.frames={};self.terminal=None
         self._req_cache={};self._adm_cache={};self._set_cache={}
+        self._callback_ids=set()
+        self._identity=c.canonical((session_id,policy,runtime))
+        self._native_lines=len(native);self._control_lines=len(parent)
+        self._append(native,parent,runtime)
+
+    def extend_verified_suffix(prior, transcript_suffix_bytes, control_suffix_bytes,
+            *, transcript, control, session_id, policy, runtime):
+        """Extend one verified prefix without mutating its settled checkpoint."""
+        if c.canonical((session_id,policy,runtime)) != prior._identity:
+            raise ValueError('trace extension changed its initialized identity')
+        decoded=[]
+        for old,new,suffix,count in (
+                (prior.transcript,transcript,transcript_suffix_bytes,prior._native_lines),
+                (prior.control,control,control_suffix_bytes,prior._control_lines)):
+            if (new.stream!=old.stream or new.path!=old.path
+                    or len(new.raw)!=len(old.raw)+len(suffix)
+                    or c.sha(new.raw[:len(old.raw)])!=old.sha256
+                    or new.raw[len(old.raw):]!=suffix):
+                raise ValueError('trace extension lacks its verified stream prefix')
+            values=[]
+            if suffix and not suffix.endswith(b'\n'):
+                raise ValueError('native prefix contains an incomplete or blank physical row')
+            for number,line in enumerate(suffix.split(b'\n')[:-1],count+1):
+                raw=line+b'\n'
+                if not raw.endswith(b'\n') or not raw.strip():
+                    raise ValueError('native prefix contains an incomplete or blank physical row')
+                value=c.strict_json(raw,'native observed row',16*1024*1024)
+                if type(value) is not dict:
+                    raise ValueError('native observed row is not an object')
+                if (old.stream=='control' and value.get('kind') in ('initialize_sent','initialize_ack')
+                        or old.stream=='transcript' and (value.get('type')=='control_response'
+                            or value.get('type')=='system' and value.get('subtype')=='init')):
+                    raise ValueError('native initialization is missing, duplicate or contradictory')
+                values.append((number,raw,value))
+            decoded.append(values)
+        result=Trace.__new__(Trace)
+        result.transcript,result.control=transcript,control
+        result.session,result.policy=session_id,policy
+        result._identity=prior._identity
+        result.terminal=prior.terminal
+        for name in ('calls','callbacks','results','decisions','frames',
+                     '_req_cache','_adm_cache','_set_cache'):
+            setattr(result,name,getattr(prior,name).copy())
+        result._callback_ids=prior._callback_ids.copy()
+        result._native_lines=prior._native_lines+len(decoded[0])
+        result._control_lines=prior._control_lines+len(decoded[1])
+        result._append(*decoded,runtime)
+        return result
+
+    def _append(self,native,parent,runtime):
+        session_id,policy=self.session,self.policy
         aliases=native_model_aliases.model_aliases(runtime)
-        callback_ids=set()
+        callback_ids=self._callback_ids
         for number,raw,value in native:
             self.frames[number]=value
             kind=value.get('type')

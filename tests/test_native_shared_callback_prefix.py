@@ -1,6 +1,7 @@
 """Issue 6233: prefix anchors, transactional suffixes and sticky binding guards."""
 from dataclasses import fields, is_dataclass, replace
-from types import ModuleType
+from types import ModuleType, SimpleNamespace
+from pathlib import Path
 
 import pytest
 
@@ -236,8 +237,10 @@ def test_all_resumed_stage_decisions_equal_independent_full_replay(case, monkeyp
     completed, completion = full_roundtrip(case)
     assert full(*completed).completion == completion
     assert {'await_core', 'request_ready', 'awaiting_response', 'assembly_complete'} <= set(compared)
-    assert all(value[1].state != 'assembly_complete' for key, value in transaction.pending.items()
-               if key[0] == 'decision')
+    # This detached transaction has no live reader; completed retention is
+    # exercised below only through begin, fresh disk reads and commit.
+    assert all(not isinstance(value[1], capture._StageCheckpoint)
+               for value in transaction.pending.values())
 
 
 def test_retained_transaction_cannot_reuse_after_owner_closes(advance):
@@ -321,3 +324,131 @@ def test_input_extensions_replace_one_decision_slot_without_retaining_histories(
         assert type(identity) is str and len(identity) == 64
         assert all(pub.artifact.pin.role != 'journal' for pub in decision.publications)
         assert journal is not None
+
+
+def test_completed_checkpoint_rehydrates_only_after_fresh_verification(case, monkeypatch, tmp_path):
+    completed, completion = full_roundtrip(case)
+    selected, execution, phase1, history = completed
+    artifacts = [getattr(completion, f.name) for f in fields(completion)
+                 if type(getattr(completion, f.name)) is capture.c.CapturedArtifact]
+    paths = {item.pin.path: tmp_path / item.pin.role for item in artifacts}
+    for item in artifacts:
+        path = paths[item.pin.path]
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(item.raw)
+    read_regular = capture.evidence.read_regular
+    def redirected(path, role, **kwargs):
+        # The pure stage fixture uses logical /neutral paths. Keep its pins
+        # while exercising actual bounded reads of temporary disk files.
+        member = read_regular(str(paths[path]), role, **kwargs)
+        return replace(member, captured=replace(member.captured,
+            pin=replace(member.captured.pin, path=path)))
+    monkeypatch.setattr(capture.evidence, 'read_regular', redirected)
+    module = ModuleType('test_validator')
+    module._LIMIT = 1
+    owner = owner_api._PrefixOwner(guard_for(module))
+    def fresh():
+        reader = capture._Reader(selected)
+        for item in artifacts:
+            reader.pinned(capture.c.pin_dict(item.pin))
+        streams = {role: capture.c.EvidencePrefix(role, '/neutral/' + role,
+            b'{}\n', 3, capture.c.sha(b'{}\n'), 1) for role in ('transcript', 'control')}
+        return SimpleNamespace(history=history, observations=(), reader=reader,
+            _trace=None, **streams)
+    first = fresh()
+    transaction = owner.begin(first)
+    expected = capture._stage_decision(*completed, None, _prefix=transaction)
+    assert expected.completion == completion
+    transaction.commit()
+    retained = next(value[1] for value in owner.semantic.values())
+    assert isinstance(retained, capture._StageCheckpoint)
+    assert len(retained.pins) == 7
+    assert not {name for name, _ in retained.pins} & dict(retained.completion).keys()
+    original = stage._prepare_next
+    calls = []
+    def counted(*args):
+        calls.append(1)
+        return original(*args)
+    monkeypatch.setattr(stage, '_prepare_next', counted)
+    second = fresh()
+    assert capture._stage_decision(*completed, None, _prefix=owner.begin(second)) == expected
+    assert calls == []
+    for role in ('transcript', 'control'):
+        changed = fresh()
+        old = getattr(changed, role)
+        setattr(changed, role, replace(old, raw=b'[]\n', sha256=capture.c.sha(b'[]\n')))
+        with pytest.raises(ValueError, match='replaced its verified prefix'):
+            owner.begin(changed)
+    for item in artifacts:
+        path = paths[item.pin.path]
+        path.write_bytes(item.raw + b' ')
+        unread = SimpleNamespace(**vars(second))
+        unread.reader = capture._Reader(selected)
+        with pytest.raises(ValueError):
+            owner.begin(unread)
+        path.write_bytes(item.raw)
+    with monkeypatch.context() as runtime_change:
+        runtime_change.setattr(owner_api.catalog.json.JSONEncoder, 'default', lambda *args: None)
+        assert not owner.begin(fresh()).reusable
+        assert not owner.semantic and owner.trace_state is None
+    module._LIMIT = 2
+    last = fresh()
+    transaction = owner.begin(last)
+    assert not transaction.reusable and not owner.semantic
+    assert capture._stage_decision(*completed, None, _prefix=transaction) == expected
+    assert calls == [1]
+
+
+def test_one_captured_callback_memoizes_decision(advance, monkeypatch):
+    run, _ = captured_run(advance)
+    original = capture._stage_decision
+    calls = []
+    def counted(*args, **kwargs):
+        calls.append(1)
+        return original(*args, **kwargs)
+    monkeypatch.setattr(capture, '_stage_decision', counted)
+    first = run.decision()
+    assert run.decision() is first and run.decision() is first
+    assert len(calls) == 1
+
+
+def test_trace_suffix_matches_full_and_refuses_invalid_extensions(monkeypatch):
+    from tests import test_native_shared_observations as fixture
+    from copy import deepcopy
+    observed = capture.observed
+    native, parent, _ = fixture.events()
+    init, sent, runtime = fixture.initial()
+    options = dict(session_id=fixture.SESSION, policy=fixture.POLICY, runtime=runtime)
+    prior = observed.Trace(fixture.prefix('transcript', init + native[:2]),
+        fixture.prefix('control', sent), **options)
+    transcript = fixture.prefix('transcript', init + native)
+    control = fixture.prefix('control', sent + parent)
+    expected = observed.Trace(transcript, control, **options)
+    def extend(t, c):
+        return observed.Trace.extend_verified_suffix(prior,
+            t.raw[len(prior.transcript.raw):], c.raw[len(prior.control.raw):],
+            transcript=t, control=c, **options)
+    original = observed.c.strict_json
+    parsed = []
+    def counted(raw, *args, **kwargs):
+        parsed.append(raw)
+        return original(raw, *args, **kwargs)
+    monkeypatch.setattr(observed.c, 'strict_json', counted)
+    actual = extend(transcript, control)
+    assert len(parsed) == 2
+    assert actual.calls == expected.calls and actual.results == expected.results
+    assert actual.decisions == expected.decisions
+    assert actual.settled('tool-1') == expected.settled('tool-1')
+    assert not prior.results and not prior.decisions
+    invalid = [native + [native[-1]], native + [native[0]], native + [native[1]],
+               native + init]
+    orphan = deepcopy(native[-1])
+    orphan['message']['content'][0]['tool_use_id'] = 'missing'
+    invalid.append(native[:2] + [orphan])
+    for suffix in invalid:
+        with pytest.raises(ValueError):
+            extend(fixture.prefix('transcript', init + suffix), control)
+    with pytest.raises(ValueError):
+        extend(transcript, fixture.prefix('control', sent + parent + parent))
+    with pytest.raises(ValueError):
+        extend(transcript, fixture.prefix('control', sent + parent + sent))

@@ -11,6 +11,7 @@ from . import native_shared_contract as c
 from . import native_shared_capture as captured
 from . import native_shared_evidence as evidence
 from . import native_shared_selection as selection
+from . import native_catalog_reuse as catalog
 
 
 _SPEC_FIELDS = (
@@ -81,7 +82,9 @@ class _PrefixOwner:
         self.artifacts = {}
         self.semantic = {}
         self.observation_state = None
+        self.trace_state = None
         self.epoch = 0
+        self.runtime = None
 
     def check_active(self):
         if self.closed:
@@ -94,6 +97,7 @@ class _PrefixOwner:
         self.guard.disabled = True
         self.semantic.clear()
         self.observation_state = None
+        self.trace_state = None
 
     def begin(self, run):
         self.check_active()
@@ -109,11 +113,16 @@ class _PrefixOwner:
                 raise ValueError('callback stream replaced its verified prefix')
         for pin in self.artifacts.values():
             run.reader.read(pin.role, pin.path, pin)
-        reusable = self.guard.reusable()
+        runtime = catalog.runtime_token()
+        reusable = (self.guard.reusable() and runtime is not None
+                    and (not self.epoch or runtime is self.runtime))
         if not reusable:
             self.semantic.clear()
             self.observation_state = None
-        return _PrefixTransaction(self, run, reusable, epoch=epoch)
+            self.trace_state = None
+        transaction = _PrefixTransaction(self, run, reusable, epoch=epoch)
+        transaction.runtime = runtime
+        return transaction
 
 
 class _PrefixTransaction:
@@ -123,20 +132,27 @@ class _PrefixTransaction:
         self.epoch = owner.epoch if epoch is None else epoch
         self.pending = {}
         self.observation_state = owner.observation_state if reusable else None
+        self.trace_state = owner.trace_state if reusable else None
+        self.runtime = catalog.runtime_token()
 
     def check_reuse(self):
         self.owner.check_active()
         if not self.reusable:
             return False
-        if not self.owner.guard.reusable():
+        if (not self.owner.guard.reusable() or self.runtime is None
+                or catalog.runtime_token() is not self.runtime):
             self.owner.semantic.clear()
             self.owner.observation_state = None
+            self.owner.trace_state = None
             self.pending.clear()
             raise ValueError('validator changed during callback semantic reuse')
         return True
 
     def observation_checkpoint(self):
         return self.observation_state if self.check_reuse() else None
+
+    def trace_checkpoint(self):
+        return self.trace_state if self.check_reuse() else None
 
     def get(self, key):
         if not self.check_reuse():
@@ -153,9 +169,11 @@ class _PrefixTransaction:
         owner.check_active()
         if owner.epoch != self.epoch:
             raise ValueError('overlapping callback cannot replace a newer verified prefix')
-        if self.reusable and not owner.guard.reusable():
+        if self.reusable and (not owner.guard.reusable()
+                              or catalog.runtime_token() is not self.runtime):
             owner.semantic.clear()
             owner.observation_state = None
+            owner.trace_state = None
             raise ValueError('validator changed during callback verification')
         owner.records = tuple(item.pin for item in run.history.records)
         owner.observations = tuple(item.pin for item in run.observations)
@@ -168,7 +186,9 @@ class _PrefixTransaction:
         if self.reusable:
             owner.semantic.update(self.pending)
             owner.observation_state = self.observation_state
+            owner.trace_state = run._trace if run._trace is not None else self.trace_state
         owner.epoch += 1
+        owner.runtime = self.runtime
 
 
 def prefix_owner(admission):
@@ -185,6 +205,7 @@ def _check_admitted_sources(admission):
             owner.guard.disabled = True
             owner.semantic.clear()
             owner.observation_state = None
+            owner.trace_state = None
         raise
 
 
