@@ -212,7 +212,11 @@ def build_native_fixture(root: Path, *, registered_python: str, coverage_floor=N
                        'basis': 'offline fixture, never invoked as native'}}
     runtime_path = authority / 'runtime.json'
     _save(runtime_path, c.canonical(runtime))
+    from data_sheets_schema import native_environment_manifest
+    environment_path = authority / 'preparation-environment.json'
+    native_environment_manifest.write(environment_path)
     prepared = preparation.prepare(document['registration_path'], runtime_path,
+        environment_manifest_path=environment_path,
         job_id='synthetic-native-fixture', run_date='2026-10-05',
         max_draft_checks=synthetic['max_draft_checks'])
     preparation_raw = c.canonical(prepared)

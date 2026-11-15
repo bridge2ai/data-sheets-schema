@@ -13009,8 +13009,9 @@ _NATIVE_V2_RENDER_SOURCES = {
 
 _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
     **_NATIVE_V2_RENDER_SOURCES,
-    # U3-L: one integrated authority version, coupled to the complete producer
-    # family below. The older contracts retain their original source identity.
+    # Lead-authorized split, 2026-11-15: restore the historical integrated
+    # v2 authority (00b0f717). The v3 import-path restoration has its own
+    # explicit entry below; each route keeps one complete source identity.
     'src/data_sheets_schema/native_execution_authority_v2.py': '00b0f717bc0398b905cfcb81de47c4434f70c2909bbbffb0b92789dbf867047c',
     # The reviewed #5966 v2 dispatcher adds a required, attempt-local
     # PYSTOW_HOME declaration. Include its path validator in the closed
@@ -13052,8 +13053,29 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
 }
 
 
+_NATIVE_V3_RENDER_SOURCES = {
+    **_NATIVE_V2_INTEGRATED_RENDER_SOURCES,
+    # Lead-authorized split, 2026-11-15: v3 retains f865fea7, whose
+    # verified loader restores caller import roots before the census.
+    # This override prevents the historical v2 pin changing v3 authority.
+    'src/data_sheets_schema/native_execution_authority_v2.py': 'f865fea7736d4c1531742ab5081bfa19b1c43ba123f3d233dc4816d7d5d2b79e',
+    # New v3 summaries authorized by the lead, 2026-11-14 (D148), after the
+    # structural proof. Bind the complete v3 wire vocabulary and fresh v1
+    # environment census, including payload verification and unowned files.
+    # The v2 summaries retain their separate source closure. These identities
+    # establish source structure, never a successful census or launch approval.
+    # Rotated at the merge into the candidate (lead, 2026-11-15): against
+    # f0a21bb7, only CONTROLLER_SOURCES_SHA256 d4ad9c21 -> e500cb15, the
+    # controller sources rotated for #6244 (b9192ff75).
+    'src/data_sheets_schema/native_shared_authority_wire.py': '270672bbd40559552ba308d1536f859108774e5719807db5309142e013590ed4',
+    # Lead-authorized rotation, 2026-11-15: bind the full/light modes,
+    # process-local full verification reuse, and RECORD/size live checks.
+    'src/data_sheets_schema/native_environment_manifest.py': '72003fcee74562ce8f4a17eda49218830d44a74aebbee3c27b0b33fe987655e6',
+}
+
+
 def _derive_native_v2_render(root, cli, command):
-    """Closed source proof of the v2 preparation producer and CLI data flow.
+    """Closed source proof of the v2/v3 preparation producer and CLI data flow.
 
     Exact executable AST templates bind selection/runtime arguments, RunSpec
     construction, its entry guard, runtime capture, instruction and envelope
@@ -13073,7 +13095,7 @@ def _derive_native_v2_render(root, cli, command):
             if dump(observed) == dump(template):
                 return index
         raise fail('unsupported v2 render producer: ' + actual.name)
-    exact(command, r"""@prompt.command('render-native-shared')
+    v2_cli = r"""@prompt.command('render-native-shared')
 @click.option('--selection', required=True, type=click.Path(exists=True, dir_okay=False), help='Exact native shared-generation selection JSON.')
 @click.option('--runtime-declaration', required=True, type=click.Path(exists=True, dir_okay=False), help='Sole runtime declaration, checked without invoking the runtime.')
 @click.option('--job-id', required=True, help='Explicit job identity for the v2 preparation.')
@@ -13112,7 +13134,16 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
     if out:
         click.echo(f'✓ {out}', err=True)
     else:
-        click.echo(text, nl=False)""")
+        click.echo(text, nl=False)"""
+    # These transformations build finite scanner-owned templates, never
+    # normalize an observed producer. The CLI chooses one complete family.
+    v3_cli = v2_cli.replace(
+        "@click.option('--job-id',", "@click.option('--environment-manifest', required=True, type=click.Path(exists=True, dir_okay=False))\n@click.option('--job-id',", 1).replace(
+        'for the v2 preparation.', 'for the v3 preparation.', 1).replace(
+        'max_draft_checks, run_date, out):', 'max_draft_checks, run_date, out, environment_manifest):', 1).replace(
+        'job_id=job_id, run_date=', 'job_id=job_id, environment_manifest_path=environment_manifest, run_date=', 1).replace(
+        '# Offline v2 preparation;', '# Offline v3 preparation;', 1)
+    v3 = exact(command, v2_cli, alternatives=(v3_cli,)) == 1
     relative = 'src/data_sheets_schema/native_execution_registration_v2.py'
     tree = _tree(root / relative)
     definitions = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == 'prepare']
@@ -13171,8 +13202,24 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
         '    runtime = validate_runtime(declared_runtime)\n'
         '    captured = selection.capture(selection_path)\n', 1)
     integrated_without_u4b = integrated_prepare.replace(anchor + u4b_hook, anchor, 1)
-    integrated = exact(prepare, current_prepare,
-        alternatives=(current_u4b_prepare, integrated_prepare, integrated_without_u4b)) >= 2
+    def with_manifest(template):
+        return template.replace('max_draft_checks):',
+            'max_draft_checks, environment_manifest_path):', 1).replace(
+            'expected_profile):', 'expected_profile, environment_manifest_path):', 1).replace(
+            "    body = {'kind': PREPARATION_KIND, 'schema_version': VERSION, 'execution': PREPARATION_SCOPE,",
+            "    environment_pin = _environment_pin(environment_manifest_path, pins)\n"
+            "    body = {'kind': PREPARATION_KIND, 'schema_version': VERSION, 'execution': PREPARATION_SCOPE, 'environment_manifest': environment_pin,", 1).replace(
+            '    return _envelope(body, dependencies)',
+            '    from . import native_environment_manifest\n'
+            '    native_environment_manifest.verify(environment_pin, mode=native_environment_manifest.preparation_mode())\n'
+            '    return _envelope(body, dependencies)', 1)
+    if v3:
+        exact(prepare, with_manifest(integrated_prepare),
+              alternatives=(with_manifest(integrated_without_u4b),))
+        integrated = True
+    else:
+        integrated = exact(prepare, current_prepare,
+            alternatives=(current_u4b_prepare, integrated_prepare, integrated_without_u4b)) >= 2
     helpers = {
         '_job_id': """def _job_id(value):
     if type(value) is not str or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,127}', value) is None:
@@ -13257,6 +13304,47 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
         inner = controls['prepare_registration_v2'].require_envelope(value)
     return inner, identity""",
         })
+    if v3:
+        helpers['_prepare'] = with_manifest(helpers['_prepare'])
+        helpers['prepare_synthetic'] = helpers['prepare_synthetic'].replace(
+            'max_draft_checks):', 'max_draft_checks, environment_manifest_path):', 1).replace(
+            'expected_profile=SYNTHETIC_PROFILE)',
+            'expected_profile=SYNTHETIC_PROFILE, environment_manifest_path=environment_manifest_path)', 1)
+        helpers['verify_preparer'] = helpers['verify_preparer'].replace(
+            '    from .native_runtime_profiles import profile_name, SYNTHETIC_PROFILE',
+            "    from . import native_environment_manifest\n"
+            "    native_environment_manifest.verify(body['environment_manifest'], mode=native_environment_manifest.preparation_mode())\n"
+            '    from .native_runtime_profiles import profile_name, SYNTHETIC_PROFILE', 1).replace(
+            "max_draft_checks=body['max_draft_checks'])",
+            "max_draft_checks=body['max_draft_checks'], environment_manifest_path=body['environment_manifest']['path'])", 1)
+        helpers.update({
+            '_environment_pin': """def _environment_pin(path, pins):
+    from . import native_environment_manifest
+    artifact = _read(path, 'environment_manifest', c.HARD_LIMITS['input_bytes'])
+    pin = _file_pin(artifact)
+    native_environment_manifest.verify(pin, mode=native_environment_manifest.preparation_mode())
+    if pin['path'] in pins:
+        raise ValueError('environment manifest must be a separate pinned artifact')
+    pins[pin['path']] = pin['sha256']
+    return pin""",
+            '_wire': """def _wire(raw):
+    from . import native_shared_authority_wire as wire
+    value = c.strict_json(raw, 'v3 registration envelope', MAX_WIRE_BYTES)
+    inner = wire.require_envelope(value)
+    identity = authority.dependency_identity()
+    authority.require_committed(identity)
+    with authority.loaded_dependencies(identity):
+        pass
+    return inner, identity""",
+            '_envelope': """def _envelope(body, dependencies):
+    from . import native_shared_authority_wire as wire
+    with authority.loaded_dependencies(dependencies):
+        value = wire.envelope(body)
+    raw = c.canonical(value)
+    if len(raw) > MAX_WIRE_BYTES:
+        raise ValueError('v2 authority envelope exceeds its byte bound')
+    return value""",
+        })
     producers = {'prepare': prepare}
     for name, template in helpers.items():
         found = [n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == name]
@@ -13283,6 +13371,10 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
     }
     if integrated:
         fixed_calls['read_regular'] = {'read_regular'}
+    if v3:
+        fixed_calls.update(wire={'wire.require_envelope', 'wire.envelope'},
+                           native_environment_manifest={'native_environment_manifest.verify',
+                                                        'native_environment_manifest.preparation_mode'})
     fixed_values = {'authority.ROOT', 'authority.neutral.composition.SOURCES_SHA256',
                     'c.CONDITION', 'c.RENDERER', 'c.RUNTIME',
                     "c.HARD_LIMITS['request_bytes']", "c.HARD_LIMITS['input_bytes']"}
@@ -13318,8 +13410,12 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
 
     for name in fixed_calls:
         closed_import_uses(name)
-    for name, value in (('VERSION', 2), ('PREPARATION_KIND', 'd4d_native_shared_preparation_v2'),
-                        ('PREPARATION_SCOPE', 'offline_inputs_only_not_permission_or_launch_authority')):
+    identities = [('VERSION', 3 if v3 else 2),
+                  ('PREPARATION_KIND', 'd4d_native_shared_preparation_v3' if v3 else 'd4d_native_shared_preparation_v2'),
+                  ('PREPARATION_SCOPE', 'offline_inputs_only_not_permission_or_launch_authority')]
+    if v3:
+        identities += [('AUTHORITY_VERSION', 2), ('EXECUTION_KIND', 'd4d_native_shared_execution_registration_v3')]
+    for name, value in identities:
         expected = ast.parse(f'{name} = {value!r}').body[0]
         bindings = [node for node in tree.body if dump(node) == dump(expected)]
         if len(bindings) != 1 or any(
@@ -13335,6 +13431,8 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
     'max_draft_checks', 'render_spec', 'input_identity', 'instruction',
     'instruction_sha256', 'outputs', 'pinned_files'))"""),
         ):
+            if v3 and name == '_PREPARATION_KEYS':
+                statement = statement.replace("'pinned_files'))", "'pinned_files', 'environment_manifest'))", 1)
             expected = ast.parse(statement).body[0]
             bindings = [node for node in tree.body if dump(node) == dump(expected)]
             if len(bindings) != 1 or any(
@@ -13395,6 +13493,16 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
                                if isinstance(node, ast.ImportFrom) and node.level == 1
                                and node.module == 'native_shared_runtime_values'
                                and dump(node) == dump(ast.parse(import_contracts[3][0]).body[0]))
+        if v3:
+            # Only the local imports in the exact proved bodies may bind the
+            # new callees. Extra aliases, parent-package access and rebinding
+            # cannot bypass their source pins or their fixed call sites.
+            manifest_modules = {'native_environment_manifest', 'native_shared_authority_wire'}
+            allowed_imports.update(id(node) for producer in producers.values()
+                                   for node in producer.body if isinstance(node, ast.ImportFrom)
+                                   and node.level == 1 and node.module is None
+                                   and len(node.names) == 1 and node.names[0].name in manifest_modules)
+            profile_modules |= manifest_modules
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 # An unaliased dotted import binds its first package, not its
@@ -13564,7 +13672,8 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
            for node in ast.walk(cli)):
         raise fail('v2 render function escapes its fixed direct callers: ' + command.name)
     import hashlib
-    source_contract = _NATIVE_V2_INTEGRATED_RENDER_SOURCES if integrated else _NATIVE_V2_RENDER_SOURCES
+    source_contract = (_NATIVE_V3_RENDER_SOURCES if v3 else
+                       _NATIVE_V2_INTEGRATED_RENDER_SOURCES if integrated else _NATIVE_V2_RENDER_SOURCES)
     for source, digest in source_contract.items():
         try:
             raw = (root / source).read_bytes()

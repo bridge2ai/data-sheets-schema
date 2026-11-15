@@ -12,7 +12,9 @@ from tests.test_native_u5_scanner import copied_route, RUNNER, scan
 
 
 AUTHORITY = 'src/data_sheets_schema/native_execution_authority_v2.py'
-REVIEWED = '00b0f717bc0398b905cfcb81de47c4434f70c2909bbbffb0b92789dbf867047c'
+# Lead-authorized D148 rotation, 2026-11-14: restore caller import roots before
+# yielding verified helpers, with the exact source finder still active.
+REVIEWED = 'f865fea7736d4c1531742ab5081bfa19b1c43ba123f3d233dc4816d7d5d2b79e'
 HELPER_CACHE = 'src/data_sheets_schema/native_helper_cache.py'
 REVIEWED_HELPER_CACHE = '0934f71630ab45e4670ffa0d14f90c1cfbb23a132a23ca8c6ccfcc0c58a52a95'
 

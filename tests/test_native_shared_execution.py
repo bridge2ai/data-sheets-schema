@@ -37,9 +37,12 @@ def make_case(root, *, fixture='neutral', receipt_origin_version=0):
     parent = data['runtime_path'].parent
     runtime = runtime_for(data, root)
     runtime_path = parent / 'runtime-execution.json'; runtime_path.write_bytes(c.canonical(runtime))
+    from data_sheets_schema import native_environment_manifest
+    environment_path = parent / "environment-manifest.json"
+    native_environment_manifest.write(environment_path)
     with authority.launch_derivations():
         prepared = preparation.prepare_synthetic(data['selection'].registration.pin.path, runtime_path,
-            job_id='synthetic-native-execution', run_date='2026-10-05', max_draft_checks=3)
+            environment_manifest_path=environment_path, job_id='synthetic-native-execution', run_date='2026-10-05', max_draft_checks=3)
         preparation_raw = c.canonical(prepared)
         (parent / 'preparation-execution.json').write_bytes(preparation_raw)
         instruction = parent / 'instruction-execution.md'

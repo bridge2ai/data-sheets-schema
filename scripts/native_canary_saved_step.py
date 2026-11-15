@@ -5,6 +5,11 @@ No live probe/capture/launch entrypoints exist here. Constructors consume saved
 files and enforce production source/runtime checks. Some read Git objects; run
 inside an offline OS sandbox. No owner or review documents are manufactured.
 Offline synthetic rehearsals do not establish native launch acceptance.
+
+Preparation inputs require environment_manifest_path from the offline prefix.
+Run with the same interpreter and import roots as that prefix; the production
+constructor freshly verifies the manifest and emits a version 3 preparation.
+Composition retains it, and registration emits version 3 execution documents.
 """
 import argparse
 import json

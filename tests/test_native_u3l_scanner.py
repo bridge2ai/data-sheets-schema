@@ -133,14 +133,12 @@ def test_only_the_two_proved_dispatcher_references_may_escape(route_root, statem
 @pytest.mark.parametrize('function,before,after', [
     ('_read', 'max_bytes=maximum', 'max_bytes=1'),
     ('_read', ').captured', ')'),
-    ('_wire', "value['registration']['schema_version'] != VERSION",
-     "value['registration']['schema_version'] == VERSION"),
-    ('_wire', "value['controller_sources_sha256'] != authority.neutral.composition.SOURCES_SHA256",
-     "value['controller_sources_sha256'] == authority.neutral.composition.SOURCES_SHA256"),
+    ('_wire', 'inner = wire.require_envelope(value)', 'inner = value'),
+    ('_wire', "c.strict_json(raw, 'v3 registration envelope', MAX_WIRE_BYTES)",
+     "c.strict_json(raw, 'v2 authority envelope', MAX_WIRE_BYTES)"),
     ('_wire', 'identity = authority.dependency_identity()', 'identity = {}'),
     ('_wire', 'authority.require_committed(identity)', 'pass'),
-    ('_wire', "controls['prepare_registration_v2'].require_envelope(value)",
-     "controls['prepare_registration_v2'].envelope(value)"),
+    ('_wire', 'wire.require_envelope(value)', 'wire.historical_body(value)'),
 ])
 def test_profile_wire_and_reader_helpers_are_exact(route_root, function, before, after):
     _change(route_root / PREPARER, function, before, after)
@@ -157,8 +155,8 @@ def test_profile_reader_requires_its_bound_current_import(route_root):
 
 @pytest.mark.parametrize('name,before,after', [
     ('MAX_WIRE_BYTES', "MAX_WIRE_BYTES = c.HARD_LIMITS['request_bytes']", 'MAX_WIRE_BYTES = 1'),
-    ('_PREPARATION_KEYS', "'instruction_sha256', 'outputs', 'pinned_files'))",
-     "'instruction_sha256', 'pinned_files'))"),
+    ('_PREPARATION_KEYS', "'instruction_sha256', 'outputs', 'pinned_files', 'environment_manifest'))",
+     "'instruction_sha256', 'pinned_files', 'environment_manifest'))"),
     ('MAX_WIRE_BYTES', '\ndef required_checks(event):',
      '\nMAX_WIRE_BYTES = 1\n\ndef required_checks(event):'),
     ('_PREPARATION_KEYS', '\ndef required_checks(event):',
@@ -213,7 +211,7 @@ def test_legacy_producer_cannot_borrow_integrated_dispatcher(route_root, legacy_
     _, legacy, _ = _parts(path, '_prepare')
     for before, after in (
         (b'def _prepare(', b'def prepare('),
-        (b', expected_profile):', b'):'),
+        (b'max_draft_checks, expected_profile,', b'max_draft_checks,'),
         (b'    from .native_runtime_profiles import profile_name\n'
          b'    if profile_name(runtime) != expected_profile:\n'
          b"        raise ValueError('preparation entry differs from the explicitly selected runtime profile')\n", b''),
@@ -225,7 +223,7 @@ def test_legacy_producer_cannot_borrow_integrated_dispatcher(route_root, legacy_
     path.write_bytes(prefix + legacy + suffix)
     if legacy_import:
         _change(path, None, CURRENT_IMPORT, LEGACY_IMPORT)
-    diagnostic = ('v2 render function escapes its fixed direct callers: prepare' if legacy_import
-                  else 'v2 producer import is not exact: validate_runtime')
-    with pytest.raises(scan.ConfigError, match=diagnostic):
+    # A v3 CLI must match the full production preparer family. It now refuses
+    # this borrowed unguarded body before considering the runtime import.
+    with pytest.raises(scan.ConfigError, match='unsupported v2 render producer: prepare'):
         _derive(route_root)

@@ -57,6 +57,20 @@ def test_real_chorus_prefix(tmp_path):
         'max_evidence_bytes':256000000,'max_history_bytes':48000000,
         'max_request_bytes':32000000,'max_response_bytes':4000000}
     assert 'AUTHORIZE_TWO_SCRIPTED_NATIVE_PROBES' in status['producer_authorization']
+    from data_sheets_schema import native_environment_manifest as environment
+    from data_sheets_schema import native_shared_authority_wire as wire
+    contract = status['registration_contract']
+    assert contract == {'authority_version': 2, 'schema_version': 3,
+        'preparation_kind': wire.PREPARATION_KIND, 'execution_kind': wire.EXECUTION_KIND,
+        'environment_manifest': builder.pin(out/'environment-manifest.json')}
+    inventory = json.loads((out/'input-inventory.json').read_bytes())
+    assert inventory['registration_contract'] == contract
+    assert status['preparation_arguments'] == {'selection_path': str(out/'selection.json'),
+        'environment_manifest_path': str(out/'environment-manifest.json')}
+    # The CLI has its own import roots. Validate its saved shape here; the CLI's
+    # environment.write already performs the full fresh census comparison.
+    manifest = environment.validate(json.loads((out/'environment-manifest.json').read_bytes()))
+    assert manifest['distributions']
     assert not (tmp_path/'never-reserved-attempt').exists()
     assert all((out/name).stat().st_size for name in status['completed'])
 
@@ -92,7 +106,8 @@ def test_changed_chunk_manifest_refuses_before_selection(tmp_path):
     assert not (out/'selection.json').exists()
 
 
-@pytest.mark.parametrize('action', ['process', 'network', 'write', 'symlink'])
+@pytest.mark.parametrize('action', ['process', 'network', 'write', 'symlink',
+                                  'outside-fd', 'other-fd', 'chmod-fd', 'truncate-fd'])
 def test_audit_barrier_denies_effects(tmp_path, action):
     # The helper is a durable test source, never an inline shell/python program.
     helper=ROOT/'tests/utils/native_packet_audit_probe.py'
@@ -101,6 +116,16 @@ def test_audit_barrier_denies_effects(tmp_path, action):
     assert run.returncode == 0, run.stdout+run.stderr
     assert 'DENIED' in run.stdout
     assert not (tmp_path/'outside').exists()
+
+
+def test_audit_barrier_allows_only_exact_manifest_descriptor(tmp_path):
+    helper = ROOT/'tests/utils/native_packet_audit_probe.py'
+    out = tmp_path/'out'; out.mkdir()
+    run = subprocess.run([sys.executable, '-P', '-B', str(helper), str(out), 'manifest-fd'],
+                         cwd=ROOT, capture_output=True, text=True)
+    assert run.returncode == 0, run.stdout + run.stderr
+    assert 'ALLOWED exact manifest descriptor' in run.stdout
+    assert (out/'environment-manifest.json').read_bytes() == b'isolated descriptor canary\n'
 
 
 def test_stage_root_cannot_overlap_packet(tmp_path):

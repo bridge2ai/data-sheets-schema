@@ -37,7 +37,7 @@ def publication(tmp_path, monkeypatch, mode='buffered'):
     # with explicit placeholders, not an actual registration or launch authority.
     value = dict.fromkeys(admission.EXECUTION_KEYS)
     value.update(deepcopy(original))
-    value.update(kind=admission.EXECUTION_KIND, schema_version=2,
+    value.update(kind=admission.EXECUTION_KIND, schema_version=3,
         execution=admission.EXECUTION_SCOPE,
         execution_gates=list(admission.EXECUTION_GATES))
     # This component retains the production-profile wire with invented runtime

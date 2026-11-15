@@ -97,7 +97,7 @@ any later replicate plan need their own ratification.
    ```
 
    Expected exit **2**, `status=dependency_stop`, with nonempty receipt-policy,
-   selection, input-inventory and status files. Exit 1 is a production refusal;
+   selection, environment-manifest, input-inventory and status files. Exit 1 is a production refusal;
    retain its status and stop. Existing output, altered chunks, profile mismatch,
    foreign resources and overlapping stage paths are refusals. This builder
    never executes any child process and denies network and outside writes.
@@ -165,8 +165,12 @@ any later replicate plan need their own ratification.
    It does not copy/move binary or probe files. Keep all paths stable.
 
 6. **Worker; saved-input preparation.** Supply `preparation-inputs.json` with
-   `selection_path`, `runtime_path`, `job_id`, ISO `run_date`, and integer
-   `max_draft_checks`, all from the registered plan. Invoke:
+   `selection_path`, `runtime_path`, `job_id`, ISO `run_date`, integer
+   `max_draft_checks`, and `environment_manifest_path`, all from the registered
+   plan and saved inputs. Under D148 NP1 item (as), use the prefix's
+   `environment-manifest.json` path reported in `status.json`. Use the same
+   interpreter and import roots as the prefix; preparation freshly verifies
+   the manifest rather than treating the saved file as cached admission. Invoke:
 
    ```sh
    "$PYTHON" -P -B "$CHECKOUT/scripts/native_canary_saved_step.py" \
@@ -174,10 +178,11 @@ any later replicate plan need their own ratification.
      --output "$PACKET/preparation"
    ```
 
-   Outputs: preparation envelope and exact derived instruction bytes, verified
-   with `verify_preparer`. The protected-main branch still refuses native fields;
-   the authorized scratch post-images make this stage pass in the rehearsal.
-   Production must use the independently reviewed merged implementation.
+   Outputs: version 3 preparation over authority version 2, carrying the exact
+   environment-manifest pin, and derived instruction bytes, freshly verified
+   with `verify_preparer`. Subsequent composition retains this preparation and
+   execution registration uses version 3. Production must use the independently
+   reviewed merged implementation and satisfy all existing admission checks.
 
 7. **Worker then independent reviewers.** Supply `composition-inputs.json` with
    `preparation_path` and `instruction_path`; compose through the shared-native

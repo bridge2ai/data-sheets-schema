@@ -25,9 +25,10 @@ from .resources import git_env
 # verification, composition, loader or execution entrypoint is called.
 from .native_shared_runtime_values import validate_runtime_v2 as validate_runtime
 
-VERSION = 2
-PREPARATION_KIND = 'd4d_native_shared_preparation_v2'
-EXECUTION_KIND = 'd4d_native_shared_execution_registration_v2'
+AUTHORITY_VERSION = 2
+VERSION = 3
+PREPARATION_KIND = 'd4d_native_shared_preparation_v3'
+EXECUTION_KIND = 'd4d_native_shared_execution_registration_v3'
 PREPARATION_SCOPE = 'offline_inputs_only_not_permission_or_launch_authority'
 EXECUTION_SCOPE = 'requires_exact_independent_review_ci_permission_and_owner_launch_evidence'
 MAX_WIRE_BYTES = c.HARD_LIMITS['request_bytes']
@@ -101,7 +102,7 @@ EXECUTION_GATES = ('terminal', 'shutdown', 'first_stop', 'live_attribution',
 _PREPARATION_KEYS = frozenset(('kind', 'schema_version', 'execution', 'job_id',
     'working_directory', 'dependencies', 'selection', 'runtime', 'run_date',
     'max_draft_checks', 'render_spec', 'input_identity', 'instruction',
-    'instruction_sha256', 'outputs', 'pinned_files'))
+    'instruction_sha256', 'outputs', 'pinned_files', 'environment_manifest'))
 EXECUTION_KEYS = frozenset(('kind', 'schema_version', 'execution', 'attempt_id',
     'composition', 'system_path', 'permission_probe', 'attempt_directory',
     'evidence_directory', 'job_id', 'preparation_raw_json', 'preparation_sha256',
@@ -236,27 +237,20 @@ def _job_id(value):
 
 def _wire(raw):
     """Pure structural refusal precedes Git/imports; pinned U2 check follows."""
-    value = c.strict_json(raw, 'v2 authority envelope', MAX_WIRE_BYTES)
-    if (type(value) is not dict
-            or set(value) != {'authority_version', 'controller_sources_sha256', 'registration'}
-            or type(value['authority_version']) is not int or value['authority_version'] != VERSION
-            or type(value['controller_sources_sha256']) is not str
-            or value['controller_sources_sha256'] != authority.neutral.composition.SOURCES_SHA256
-            or type(value['registration']) is not dict
-            or type(value['registration'].get('schema_version')) is not int
-            or value['registration']['schema_version'] != VERSION):
-        raise ValueError('v2 launch requires an exact v2 authority envelope')
+    from . import native_shared_authority_wire as wire
+    value = c.strict_json(raw, 'v3 registration envelope', MAX_WIRE_BYTES)
+    inner = wire.require_envelope(value)
     identity = authority.dependency_identity()
     authority.require_committed(identity)
-    with authority.loaded_dependencies(identity) as controls:
-        inner = controls['prepare_registration_v2'].require_envelope(value)
+    with authority.loaded_dependencies(identity):
+        pass
     return inner, identity
 
 
 def _envelope(body, dependencies):
-    with authority.loaded_dependencies(dependencies) as controls:
-        value = controls['prepare_registration_v2'].envelope(body)
-        controls['prepare_registration_v2'].require_envelope(value)
+    from . import native_shared_authority_wire as wire
+    with authority.loaded_dependencies(dependencies):
+        value = wire.envelope(body)
     raw = c.canonical(value)
     if len(raw) > MAX_WIRE_BYTES:
         raise ValueError('v2 authority envelope exceeds its byte bound')
@@ -283,7 +277,20 @@ def _pin_map(captured, runtime, dependencies):
     return pins
 
 
-def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
+def _environment_pin(path, pins):
+    """Bind the supplied manifest file and freshly check installed metadata."""
+    from . import native_environment_manifest
+    artifact = _read(path, 'environment_manifest', c.HARD_LIMITS['input_bytes'])
+    pin = _file_pin(artifact)
+    native_environment_manifest.verify(pin, mode=native_environment_manifest.preparation_mode())
+    if pin['path'] in pins:
+        raise ValueError('environment manifest must be a separate pinned artifact')
+    pins[pin['path']] = pin['sha256']
+    return pin
+
+
+def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks,
+            environment_manifest_path):
     """Prepare a real native contract; explicit software-test runtimes refuse.
 
     RunSpec boundary: validated-caller
@@ -334,7 +341,9 @@ def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks)
     dependencies = authority.dependency_identity()
     pins = _pin_map(captured, runtime_capture, dependencies)
     pins[runtime['executable']['path']] = runtime['executable']['sha256']
+    environment_pin = _environment_pin(environment_manifest_path, pins)
     body = {'kind': PREPARATION_KIND, 'schema_version': VERSION, 'execution': PREPARATION_SCOPE,
+        'environment_manifest': environment_pin,
         'job_id': job_id, 'working_directory': str(authority.ROOT), 'dependencies': dependencies,
         'selection': _file_pin(captured.registration), 'runtime': _file_pin(runtime_capture),
         'run_date': run_date, 'max_draft_checks': max_draft_checks, 'render_spec': spec.render_spec(),
@@ -348,10 +357,13 @@ def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks)
                 max_bytes=c.HARD_LIMITS['input_bytes']).captured != runtime_capture
             or authority.dependency_identity() != dependencies):
         raise ValueError('v2 preparation authority changed during capture')
+    from . import native_environment_manifest
+    native_environment_manifest.verify(environment_pin, mode=native_environment_manifest.preparation_mode())
     return _envelope(body, dependencies)
 
 
-def prepare_synthetic(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):
+def prepare_synthetic(selection_path, runtime_path, *, job_id, run_date, max_draft_checks,
+                      environment_manifest_path):
     """Prepare the distinct software-test contract over the exact isolated peer.
 
     RunSpec boundary: validated-caller
@@ -362,10 +374,12 @@ def prepare_synthetic(selection_path, runtime_path, *, job_id, run_date, max_dra
     require_synthetic(c.strict_json(_read(str(runtime_path), 'runtime declaration',
                                         c.HARD_LIMITS['input_bytes']).raw, 'runtime declaration'))
     return _prepare(selection_path, runtime_path, job_id=job_id, run_date=run_date,
-                    max_draft_checks=max_draft_checks, expected_profile=SYNTHETIC_PROFILE)
+                    max_draft_checks=max_draft_checks, expected_profile=SYNTHETIC_PROFILE,
+                    environment_manifest_path=environment_manifest_path)
 
 
-def _prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks, expected_profile):
+def _prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks, expected_profile,
+             environment_manifest_path):
     """Prepare the explicit shared-native input contract; perform no writes.
 
     RunSpec boundary: validated-caller
@@ -414,7 +428,9 @@ def _prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks
     dependencies = authority.dependency_identity()
     pins = _pin_map(captured, runtime_capture, dependencies)
     pins[runtime['executable']['path']] = runtime['executable']['sha256']
+    environment_pin = _environment_pin(environment_manifest_path, pins)
     body = {'kind': PREPARATION_KIND, 'schema_version': VERSION, 'execution': PREPARATION_SCOPE,
+        'environment_manifest': environment_pin,
         'job_id': job_id, 'working_directory': str(authority.ROOT), 'dependencies': dependencies,
         'selection': _file_pin(captured.registration), 'runtime': _file_pin(runtime_capture),
         'run_date': run_date, 'max_draft_checks': max_draft_checks, 'render_spec': spec.render_spec(),
@@ -430,6 +446,8 @@ def _prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks
                 max_bytes=c.HARD_LIMITS['input_bytes']).captured != runtime_capture
             or authority.dependency_identity() != dependencies):
         raise ValueError('v2 preparation authority changed during capture')
+    from . import native_environment_manifest
+    native_environment_manifest.verify(environment_pin, mode=native_environment_manifest.preparation_mode())
     return _envelope(body, dependencies)
 
 
@@ -448,12 +466,15 @@ def verify_preparer(raw, *, job_id):
         raise ValueError('not the selected shared-native v2 preparation')
     c.file_pin(body['selection'], 'selection pin')
     c.file_pin(body['runtime'], 'runtime pin')
+    from . import native_environment_manifest
+    native_environment_manifest.verify(body['environment_manifest'], mode=native_environment_manifest.preparation_mode())
     from .native_runtime_profiles import profile_name, SYNTHETIC_PROFILE
     runtime = c.strict_json(_read(body['runtime']['path'], 'runtime declaration',
                                  c.HARD_LIMITS['input_bytes']).raw, 'runtime declaration')
     preparer = prepare_synthetic if profile_name(runtime) == SYNTHETIC_PROFILE else prepare
     expected = preparer(body['selection']['path'], body['runtime']['path'], job_id=job_id,
-                       run_date=body['run_date'], max_draft_checks=body['max_draft_checks'])
+                       run_date=body['run_date'], max_draft_checks=body['max_draft_checks'],
+                       environment_manifest_path=body['environment_manifest']['path'])
     if c.canonical(body) != c.canonical(expected['registration']):
         raise ValueError('v2 preparation differs from current pins, selection, runtime or rendering')
     if body['dependencies'] != dependencies:
@@ -485,7 +506,7 @@ def _consumer(dependencies):
         if authority.module_source_identity(module) != identity:
             raise ValueError('v2 execution consumer source identity mismatch')
         if (type(getattr(module, 'AUTHORITY_VERSION', None)) is not int
-                or module.AUTHORITY_VERSION != VERSION):
+                or module.AUTHORITY_VERSION != AUTHORITY_VERSION):
             raise ValueError('v2 execution consumer authority version mismatch')
         _signature(module, 'rebuild_v2_body', (), _REBUILD_INPUTS)
         _signature(module, 'execution_paths_v2', ('body',), ('fresh', 'extra_protected'))
@@ -614,7 +635,7 @@ def _authorizations(raw, value, *, review_path, ci_path, launch_word_path, requi
     for name, record in records.items():
         if (type(record) is not dict or type(record.get('version')) is not int
                 or record['version'] != (3 if name == 'review' and
-                    record.get('kind') == launch_review.CURRENT_KIND else VERSION)
+                    record.get('kind') == launch_review.CURRENT_KIND else 2)
                 or any(record.get(k) != v for k, v in binding.items())):
             raise ValueError(name + ' must bind this exact v2 execution, attempt and source')
     review = records['review']
@@ -630,7 +651,7 @@ def _authorizations(raw, value, *, review_path, ci_path, launch_word_path, requi
             raise ValueError('U4b requires its two-review owner-terms bundle')
         c.exact(review, set(binding) | {'kind', 'version', 'reviewer', 'author', 'independent',
             'decision', 'reviewed_at', 'evidence'}, 'v2 independent review')
-        if review['kind'] != 'd4d_native_execution_review_v2' or review['version'] != VERSION:
+        if review['kind'] != 'd4d_native_execution_review_v2' or review['version'] != 2:
             raise ValueError('v2 review kind is not independent review evidence')
         for key in ('reviewer', 'author', 'reviewed_at', 'evidence'):
             _text(review[key], key)

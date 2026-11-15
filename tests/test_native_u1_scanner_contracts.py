@@ -39,7 +39,7 @@ def _native_route_root(tmp_path):
         path = root / 'src/data_sheets_schema' / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes((ROOT / 'src/data_sheets_schema' / relative).read_bytes())
-    for relative in scan._NATIVE_V2_RENDER_SOURCES | scan._NATIVE_V2_INTEGRATED_RENDER_SOURCES:
+    for relative in scan._NATIVE_V2_RENDER_SOURCES | scan._NATIVE_V2_INTEGRATED_RENDER_SOURCES | scan._NATIVE_V3_RENDER_SOURCES:
         path = root / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes((ROOT / relative).read_bytes())
@@ -263,10 +263,10 @@ def test_native_v2_unused_import_shadow_reaches_binding_refusal(tmp_path):
 
 @pytest.mark.parametrize('relative,before,after,diagnostic', [
     ('src/data_sheets_schema/native_execution_registration_v2.py',
-     "        value = controls['prepare_registration_v2'].envelope(body)",
+     "        value = wire.envelope(body)",
      "        text = body['instruction'] + '\\nThis is the CHORUS dataset; use CHORUS naming.'\n"
      "        body = {**body, 'instruction': text, 'instruction_sha256': c.sha(text.encode('utf-8'))}\n"
-     "        value = controls['prepare_registration_v2'].envelope(body)",
+     "        value = wire.envelope(body)",
      'unsupported v2 render producer: _envelope'),
     ('src/data_sheets_schema/native_execution_registration_v2.py',
      'def _pin_map(captured, runtime, dependencies):',
@@ -276,8 +276,8 @@ def test_native_v2_unused_import_shadow_reaches_binding_refusal(tmp_path):
      'def _job_id(value):', 'def _job_id(value):\n    return value',
      'unsupported v2 render producer: _job_id'),
     ('src/data_sheets_schema/native_execution_registration_v2.py',
-     "        controls['prepare_registration_v2'].require_envelope(value)", '        pass',
-     'unsupported v2 render producer: _envelope'),
+     "    inner = wire.require_envelope(value)", "    inner = value['registration']",
+     'unsupported v2 render producer: _wire'),
     ('notes/matched_cborg_2026-09-13/prepare_registration_v2.py',
      '    return {"authority_version": 2, "controller_sources_sha256": SOURCES_SHA256,\n'
      '            "registration": registration}',

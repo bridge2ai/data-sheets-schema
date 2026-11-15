@@ -260,7 +260,8 @@ def test_real_preparation_refuses_synthetic_before_constructing_selection(runtim
     path = tmp_path / 'runtime.json'
     path.write_text(json.dumps(runtime))
     with pytest.raises(ValueError, match='real native entry refuses'):
-        preparation.prepare('unused', str(path), job_id='unused', run_date='2026-11-09', max_draft_checks=3)
+        preparation.prepare('unused', str(path), job_id='unused', run_date='2026-11-09', max_draft_checks=3,
+                            environment_manifest_path=tmp_path / 'unread-manifest.json')
 
 
 @pytest.mark.parametrize('marker', ['model', 'provider', 'auth', 'profile', 'kind'])

@@ -225,10 +225,12 @@ def list_retained_records(registration_raw):
     envelope = c.strict_json(registration_raw, 'retained execution')
     c.exact(envelope, {'authority_version', 'controller_sources_sha256', 'registration'}, 'retained envelope')
     value = envelope['registration']
-    if (type(envelope['authority_version']) is not int or envelope['authority_version'] != 2
-            or type(value) is not dict or value.get('kind') != 'd4d_native_shared_execution_registration_v2'
-            or type(value.get('schema_version')) is not int or value['schema_version'] != 2):
-        raise ValueError('retained inventory requires shared execution v2')
+    from . import native_shared_authority_wire as wire
+    if type(value) is dict and value.get('kind') == wire.HISTORICAL_EXECUTION_KIND:
+        wire.historical_body(envelope)
+    else:
+        wire.require_envelope(envelope)
+        wire.closed_execution(value)
     for name in ('attempt_directory', 'evidence_directory'):
         c.canonical_path(value[name], name)
     attempt, directory = Path(value['attempt_directory']), Path(value['evidence_directory'])

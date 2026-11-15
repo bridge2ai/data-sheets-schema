@@ -50,18 +50,27 @@ def test_synthetic_preparation_roundtrips_without_production_authority(synthetic
     out=tmp_path/'packet'
     result=invoke(out)
     assert result.returncode==2,result.stdout+result.stderr
-    prepared=execution.prepare_synthetic(out/'selection.json',path,job_id='synthetic-rehearsal',run_date='2026-11-12',max_draft_checks=1)
+    from data_sheets_schema import native_environment_manifest as environment
+    # Pytest's import roots differ from the standalone prefix/saved-step CLIs.
+    # Register the actual rehearsal environment without changing that census.
+    manifest=environment.write(tmp_path/'rehearsal-environment.json')
+    prepared=execution.prepare_synthetic(out/'selection.json',path,job_id='synthetic-rehearsal',run_date='2026-11-12',max_draft_checks=1,
+        environment_manifest_path=manifest['path'])
     raw=c.canonical(prepared)
     body=execution.verify_preparer(raw,job_id='synthetic-rehearsal')
     assert body==prepared['registration']
     assert body['kind']==execution.PREPARATION_KIND
     assert body['schema_version']==execution.VERSION
+    assert body['schema_version']==3 and prepared['authority_version']==2
+    assert body['environment_manifest']==manifest
+    assert body['pinned_files'][manifest['path']]==manifest['sha256']
     assert body['runtime']['path']==str(path)
     assert body['runtime']['sha256']==c.sha(path.read_bytes())
     (tmp_path/'synthetic-preparation.json').write_bytes(raw)
     # The ordinary production entry rejects these bytes before constructing RunSpec.
     with pytest.raises(ValueError,match='production|synthetic'):
-        execution.prepare(out/'selection.json',path,job_id='synthetic-rehearsal',run_date='2026-11-12',max_draft_checks=1)
+        execution.prepare(out/'selection.json',path,job_id='synthetic-rehearsal',run_date='2026-11-12',max_draft_checks=1,
+            environment_manifest_path=manifest['path'])
     assert not (tmp_path/'never-reserved-attempt').exists()
 
 

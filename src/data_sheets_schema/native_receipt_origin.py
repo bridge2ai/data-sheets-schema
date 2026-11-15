@@ -18,6 +18,7 @@ FAMILIES = {
     'd4d_native_attribution_execution_registration': 'native_attribution',
     'd4d_native_neutral_attempt_supervisor': 'neutral_supervisor',
     'd4d_native_shared_execution_registration_v2': 'native_shared',
+    'd4d_native_shared_execution_registration_v3': 'native_shared',
 }
 
 

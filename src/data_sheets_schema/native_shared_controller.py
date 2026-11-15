@@ -28,16 +28,14 @@ def _file_pin(artifact):
 
 
 def _captured_wire(raw):
-    value = c.strict_json(raw, 'captured v2 authority envelope', c.HARD_LIMITS['request_bytes'])
-    c.exact(value, {'authority_version', 'controller_sources_sha256', 'registration'},
-            'captured v2 authority envelope')
-    body = value['registration']
-    if (type(value['authority_version']) is not int or value['authority_version'] != AUTHORITY_VERSION
-            or value['controller_sources_sha256'] != wire.CONTROLLER_SOURCES_SHA256
-            or type(body) is not dict or type(body.get('schema_version')) is not int
-            or body['schema_version'] != AUTHORITY_VERSION):
-        raise ValueError('captured record is not the exact v2 authority wire')
-    return body
+    value = c.strict_json(raw, 'captured v3 registration envelope', c.HARD_LIMITS['request_bytes'])
+    return wire.require_envelope(value)
+
+
+def historical_registration_body(raw):
+    """Explicit read-only v2 evidence parser; never used by current composition."""
+    value = c.strict_json(raw, 'historical v2 registration', c.HARD_LIMITS['request_bytes'])
+    return wire.historical_body(value)
 
 
 def captured_execution_body(raw):

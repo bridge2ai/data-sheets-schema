@@ -10,7 +10,7 @@ from data_sheets_schema import native_execution_registration_v2 as registration
 
 def execution_body(**captures):
     body = {
-        'kind': registration.EXECUTION_KIND, 'schema_version': 2,
+        'kind': registration.EXECUTION_KIND, 'schema_version': 3,
         'execution': registration.EXECUTION_SCOPE,
         'execution_gates': list(registration.EXECUTION_GATES),
         'attempt_id': 'synthetic-captured-attempt',

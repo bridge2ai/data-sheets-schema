@@ -155,7 +155,7 @@ def _activate_bound(selection, value, execution_raw, started_raw):
         execution_sha256=e.pin.sha256, attempt_id=value['attempt_id'], records=(record.pin,)))
 
 
-def _base(selection_path, *, _catalogs=None, _admission=None):
+def _base(selection_path, *, _catalogs=None, _admission=None, _manifest_mode='full'):
     if _admission is not None:
         if type(_admission) is not Admission:
             raise ValueError('callback capture requires its fixed admitted interface')
@@ -166,6 +166,7 @@ def _base(selection_path, *, _catalogs=None, _admission=None):
     from . import native_execution_registration_v2 as registration
     from . import native_shared_controls_orchestration as controls_orchestration
     from .native_shared_controller_orchestration import reconstruct_composition
+    from . import native_environment_manifest
     # Standalone helpers need the same bounded, byte-keyed schema derivation
     # lifetime as launch. This shares only pure metadata across verified loader
     # copies; every call below still reads and verifies current authority.
@@ -175,10 +176,11 @@ def _base(selection_path, *, _catalogs=None, _admission=None):
         e = reader.read('execution_capture', selection.role('execution_capture'))
         # Never turn an earlier successful E/C check into current admission. The
         # fixed U3-D consumer must exist and freshly reconstruct every execution.
-        with controls_orchestration.loaded_controls() as controls:
-            value = registration.verified(e.raw, classifier_projection=controls)
-        composition, spec, captured_selection = reconstruct_composition(
-            value['composition_raw_json'].encode('utf-8'))
+        with native_environment_manifest.verification_scope(mode=_manifest_mode):
+            with controls_orchestration.loaded_controls() as controls:
+                value = registration.verified(e.raw, classifier_projection=controls)
+            composition, spec, captured_selection = reconstruct_composition(
+                value['composition_raw_json'].encode('utf-8'))
         doc = captured_selection.document()
         if (captured_selection != selection or doc['registration_path'] != selection_path
                 or composition['selection_raw_json'].encode('utf-8') != selection.registration.raw
@@ -233,14 +235,14 @@ def initialize(selection_path, *, transcript_bytes, control_bytes, stream_files,
 
 def _load(selection_path, *, transcript_bytes=None, control_bytes=None, _catalogs=None, _admission=None):
     """Strict complete-file route for final and recorded consumers."""
-    base = _base(selection_path, _catalogs=_catalogs, _admission=_admission)
+    base = _base(selection_path, _catalogs=_catalogs, _admission=_admission, _manifest_mode='full')
     streams, prefixes = _streams(base[2], transcript_bytes=transcript_bytes, control_bytes=control_bytes)
     return _loaded(base, streams, prefixes, _catalogs=_catalogs)
 
 
-def _load_live(selection_path, *, transcript_bytes=None, control_bytes=None, stream_files=None, _catalogs=None, _admission=None):
+def _load_live(selection_path, *, transcript_bytes=None, control_bytes=None, stream_files=None, _catalogs=None, _admission=None, _manifest_mode='full'):
     """Fresh live authority, optionally with owner-reused pure catalog storage."""
-    base = _base(selection_path, _catalogs=_catalogs, _admission=_admission)
+    base = _base(selection_path, _catalogs=_catalogs, _admission=_admission, _manifest_mode=_manifest_mode)
     anchors = _declared_stream_files(base[0], base[1])
     if stream_files is not None and live_streams.identities(stream_files) != anchors:
         raise ValueError('observed stream identities differ from initialized authority')
@@ -263,7 +265,7 @@ def capture_stage(selection_registration_path, *, _catalogs=None):
 
     RunSpec precondition: Caller supplies the selected registration path; _load_live reconstructs active execution and preparation before returning the pending invocation.
     """
-    run = _load_live(str(selection_registration_path), _catalogs=_catalogs)
+    run = _load_live(str(selection_registration_path), _catalogs=_catalogs, _manifest_mode='light')
     if run.phase1 is None:
         raise ValueError('advance precedes actual sealed originals')
     phase, _ = phase_replay(run)
@@ -466,7 +468,7 @@ def selected_receipt_paths(selection_registration_path):
 
     RunSpec precondition: Caller supplies explicit active selection; _base reconstructs the execution and its guarded preparation before returning paths.
     """
-    _, _, _, composition, spec = _base(str(selection_registration_path))
+    _, _, _, composition, spec = _base(str(selection_registration_path), _manifest_mode='light')
     paths = spec._agentic_artifact_paths
     return {'full': Path(paths['full']), 'receipt': Path(paths['receipt']),
             'provenance': Path(composition['policy']['post_final_recorder']['destination']),
@@ -478,7 +480,7 @@ def live_receipt_block(selection_registration_path, *, full_path, receipt_path):
 
     RunSpec precondition: Caller supplies explicit active selection and output paths; _load_live reconstructs the selected preparation before receipt assessment.
     """
-    run = _load_live(str(selection_registration_path))
+    run = _load_live(str(selection_registration_path), _manifest_mode='light')
     phase_replay(run)
     block = _receipt_assessment(run, full_path=full_path, receipt_path=receipt_path)[0]
     return block
@@ -489,7 +491,7 @@ def live_provenance_block(selection_registration_path):
 
     RunSpec precondition: Caller supplies explicit active selection; _load_live reconstructs preparation and current final obligations before provenance assessment.
     """
-    run = _load_live(str(selection_registration_path))
+    run = _load_live(str(selection_registration_path), _manifest_mode='full')
     phase, _ = phase_replay(run)
     required = {'draft', 'final_evidence', 'final_source_inventory', 'final_receipts', 'final_scope',
                 'derive_final_core', 'core_schema', 'pair', 'full_schema', 'full_terms', 'audit_evidence'}

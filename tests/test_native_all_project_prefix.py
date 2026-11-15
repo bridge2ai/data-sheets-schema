@@ -53,6 +53,8 @@ def test_project_prefix(tmp_path,project):
         from data_sheets_schema.native_shared_selection import capture
         assert capture(tmp_path/'packet/selection.json').project==project
         assert status['status']=='dependency_stop'
+        assert status['registration_contract']['schema_version']==3
+        assert status['registration_contract']['environment_manifest']==pin(tmp_path/'packet/environment-manifest.json')
         assert all((tmp_path/'packet'/name).stat().st_size for name in status['completed'])
     else:
         assert status['status']=='production_refusal'

@@ -59,8 +59,8 @@ def _producer_source(path, producer):
           ("'instruction': instruction,", "'instruction': 'replacement',"),
           ('    return _envelope(body, dependencies)', '    return _envelope({}, dependencies)'),
       ]],
-    (PREPARER, None, "controls['prepare_registration_v2'].envelope(body)", "controls['prepare_registration_v2'].envelope({})"),
-    (PREPARER, None, 'VERSION = 2', 'VERSION = 1'),
+    (PREPARER, None, 'wire.envelope(body)', 'wire.envelope({})'),
+    (PREPARER, None, '\nVERSION = 3', '\nVERSION = 2'),
 ])
 def test_v2_route_refuses_one_changed_producer_or_consumer(tmp_path, relative, producer, before, after):
     root = copied_route(tmp_path)
@@ -130,6 +130,86 @@ def copied_procedure(tmp_path):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes((ROOT / relative).read_bytes())
     return tmp_path
+
+
+@pytest.mark.parametrize('before,after', [
+    ('            environment_manifest_path=environment_manifest,\n', ''),
+    ('environment_manifest_path=environment_manifest,', 'manifest_path=environment_manifest,'),
+    ('environment_manifest_path=environment_manifest,',
+     'environment_manifest_path=environment_manifest, unchecked=True,'),
+    ('@click.option("--environment-manifest", required=True,',
+     '@click.option("--environment-manifest", required=False,'),
+])
+def test_v3_cli_manifest_argument_is_exact(tmp_path, before, after):
+    root = copied_route(tmp_path)
+    assert scan.derive_native_shared_route(root, scan._tree(root / RUNNER))['renderer'] == 26
+    path = root / CLI
+    source = path.read_text()
+    assert source.count(before) == 1
+    path.write_text(source.replace(before, after, 1))
+    with pytest.raises(scan.ConfigError, match='unsupported v2 render producer: render_native_shared'):
+        scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
+
+
+@pytest.mark.parametrize('producer', ['prepare', '_prepare'])
+@pytest.mark.parametrize('before,after', [
+    ("'environment_manifest': environment_pin,", "'manifest': environment_pin,"),
+    ('environment_pin = _environment_pin(environment_manifest_path, pins)', 'environment_pin = {}'),
+    ('    native_environment_manifest.verify(environment_pin, mode=native_environment_manifest.preparation_mode())\n', ''),
+])
+def test_v3_preparer_manifest_field_and_fresh_checks_are_exact(tmp_path, producer, before, after):
+    root = copied_route(tmp_path)
+    assert scan.derive_native_shared_route(root, scan._tree(root / RUNNER))['renderer'] == 26
+    path = root / PREPARER
+    prefix, source, suffix = _producer_source(path, producer)
+    assert source.count(before.encode()) == 1
+    path.write_bytes(prefix + source.replace(before.encode(), after.encode(), 1) + suffix)
+    with pytest.raises(scan.ConfigError, match='unsupported v2 render producer: ' + producer):
+        scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
+
+
+@pytest.mark.parametrize('relative,before,after', [
+    ('native_shared_authority_wire.py', "value['registration']['schema_version'] != VERSION",
+     "value['registration']['schema_version'] == VERSION"),
+    ('native_shared_authority_wire.py', "value['controller_sources_sha256'] != CONTROLLER_SOURCES_SHA256",
+     "value['controller_sources_sha256'] == CONTROLLER_SOURCES_SHA256"),
+    ('native_environment_manifest.py', '\nVERSION = 1', '\nVERSION = 2'),
+])
+def test_v3_wire_and_manifest_callees_are_source_bound(tmp_path, relative, before, after):
+    root = copied_route(tmp_path)
+    route = scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
+    relative = 'src/data_sheets_schema/' + relative
+    assert relative in route['evidence']
+    path = root / relative
+    source = path.read_text()
+    prefix = suffix = ''
+    if relative.endswith('/native_shared_authority_wire.py'):
+        # The historical read-only parser also compares the controller pin.
+        # Mutate only the current parser; preserve the historical fixture bytes.
+        function = next(n for n in ast.parse(source).body
+                        if isinstance(n, ast.FunctionDef) and n.name == 'require_envelope')
+        lines = source.splitlines(keepends=True)
+        prefix = ''.join(lines[:function.lineno - 1])
+        suffix = ''.join(lines[function.end_lineno:])
+        source = ''.join(lines[function.lineno - 1:function.end_lineno])
+    assert source.count(before) == 1
+    path.write_text(prefix + source.replace(before, after, 1) + suffix)
+    with pytest.raises(scan.ConfigError, match='v2 envelope authority source changed: ' + relative):
+        scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
+
+
+@pytest.mark.parametrize('statement', [
+    'from . import native_environment_manifest as unchecked',
+    'from .native_shared_authority_wire import require_envelope as unchecked',
+    'import data_sheets_schema.native_shared_authority_wire as unchecked',
+])
+def test_v3_extra_callee_alias_import_refuses(tmp_path, statement):
+    root = copied_route(tmp_path)
+    assert scan.derive_native_shared_route(root, scan._tree(root / RUNNER))['renderer'] == 26
+    path = root / PREPARER
+    path.write_text(path.read_text() + '\n' + statement + '\n')
+    with pytest.raises(scan.ConfigError, match='v2 preparation profile authority has an unsupported import'):
+        scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
 
 
 def test_stage_package_and_private_options_derive_current_response_roster(tmp_path):

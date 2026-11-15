@@ -43,11 +43,17 @@ def build_chain(root):
     try:
         runtime=runtime_for(data,root)
         runtime_path=save('synthetic-final-runtime',runtime)
+        from data_sheets_schema import native_environment_manifest as environment
+        manifest=environment.write(root/'rehearsal-environment.json')
         with authority.launch_derivations():
             prepared=preparation.prepare_synthetic(data['selection'].registration.pin.path,runtime_path,
-                job_id='SYNTHETIC-NOT-AUTHORITY',run_date='2026-11-12',max_draft_checks=3)
+                job_id='SYNTHETIC-NOT-AUTHORITY',run_date='2026-11-12',max_draft_checks=3,
+                environment_manifest_path=manifest['path'])
             raw=c.canonical(prepared); save('synthetic-preparation',raw)
             verified=preparation.verify_preparer(raw,job_id='SYNTHETIC-NOT-AUTHORITY')
+            assert prepared['authority_version']==2 and verified['schema_version']==3
+            assert verified['environment_manifest']==manifest
+            assert verified['pinned_files'][manifest['path']]==manifest['sha256']
             instruction=root/'instruction.md'; instruction.write_bytes(verified['instruction'].encode())
             composed=composition.compose(raw,instruction_path=instruction)
             comp=save('synthetic-composition',composed)
@@ -65,6 +71,10 @@ def build_chain(root):
                 attempt_id=attempt.name,attempt_directory=attempt,evidence_directory=evidence,max_draft_checks=3)
             reg=save('synthetic-registration',envelope)
             value=registration.verified(reg.read_bytes())
+            assert envelope['authority_version']==2 and value['schema_version']==3
+            embedded=c.strict_json(value['preparation_raw_json'].encode())['registration']
+            assert embedded['environment_manifest']==manifest
+            assert embedded['pinned_files'][manifest['path']]==manifest['sha256']
             contract=adapter.source_contract(); save('source-contract',contract)
             stamp=datetime.now(timezone.utc).isoformat().replace('+00:00','Z')
             bundle,word=bundle_for(reg.read_bytes(),root/'synthetic-capture',now=stamp)
