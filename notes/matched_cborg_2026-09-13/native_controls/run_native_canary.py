@@ -602,6 +602,12 @@ def record_then_close(proxy, record_stop, reason):
 
 def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_seconds, verify_launch, record_stop=None,
                   command_policy=None, phase_spec=None, command_classifier=None, event_observer=None):
+    """Run a child after a separate bounded admission phase.
+
+    The attempt deadline starts at dispatch on the suspension-inclusive clock.
+    Controller callback windows remain on time.monotonic(); admission time is
+    excluded from the attempt deadline. Cleanup precedes supplemental timing.
+    """
     timing = None
     admission = None
     process = None
@@ -687,24 +693,43 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
             record_then_close(proxy, record_stop, reason)
         raise
     finally:
-        if timing is not None:
-            if process is None:
-                timing.record('admission_end', status='refused',
-                              reason_type=type(primary_error).__name__)
-            timing.record('execute_child_cleanup_entry')
-            timing.close()
         # This runs INSIDE proxy.running(), before server/pool cleanup.
-        if control is None or control.contract != HISTORY_CONTRACT:
-            # Preserve the historical v2 cleanup ordering and exception shape.
-            proxy.close_admission()
-            terminate_group(process)
-            if control:
+        try:
+            if control is None or control.contract != HISTORY_CONTRACT:
                 try:
-                    control.retain_pipe_tail(attempt/'transcript.jsonl')
+                    proxy.close_admission()
                 finally:
-                    control.close()
-        else:
-            _close_responsive_control(proxy, process, control, attempt, primary_error)
+                    try:
+                        terminate_group(process)
+                    finally:
+                        if control:
+                            try:
+                                control.retain_pipe_tail(attempt/'transcript.jsonl')
+                            finally:
+                                control.close()
+            else:
+                _close_responsive_control(proxy, process, control, attempt, primary_error)
+        except BaseException as error:
+            if primary_error is None:
+                primary_error = error
+                raise
+            primary_error.add_note(f'native cleanup also failed: {type(error).__name__}')
+        finally:
+            # Synchronous diagnostics may stall or be interrupted. The child
+            # and controller must already be shut down before any of this I/O.
+            try:
+                if timing is not None:
+                    try:
+                        if process is None:
+                            timing.record('admission_end', status='refused',
+                                          reason_type=type(primary_error).__name__)
+                        timing.record('execute_child_cleanup_entry')
+                    finally:
+                        timing.close()
+            except BaseException as error:
+                if primary_error is None:
+                    raise
+                primary_error.add_note(f'native timing cleanup also failed: {type(error).__name__}')
     # Read after the cleanup above, which is what reaps the leader (#2714).
     # Callers read a falsy status as success, so an unknown one stops (#2984,
     # #2985).
