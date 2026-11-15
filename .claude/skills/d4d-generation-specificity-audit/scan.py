@@ -14045,7 +14045,7 @@ def derive_native_shared_procedure(root: Path) -> dict:
             raise fail('native packet options have an unproved consumer')
         allowed_options.update(id(k.value) for k in matches[0].keywords if k.arg is None)
     actual_options = {id(n) for n in ast.walk(trees['native_shared_stage'])
-                      if isinstance(n, ast.Attribute) and n.attr == 'options'}
+                      if isinstance(n, ast.Attribute) and ast.unparse(n) == 'self.options'}
     if actual_options != allowed_options:
         raise fail('native packet options are replaced, mutated or aliased')
     # Issue 6245: close receiver aliases and dynamic reflection as well as the
@@ -14053,6 +14053,10 @@ def derive_native_shared_procedure(root: Path) -> dict:
     # other bare receiver loads can hand its mutable state to unknown code.
     parents = _parents(trees['native_shared_stage'])
     for node in ast.walk(trees['native_shared_stage']):
+        if (isinstance(node, ast.Attribute) and node.attr == 'options'
+                and isinstance(node.ctx, (ast.Store, ast.Del))
+                and id(node) not in allowed_options):
+            raise fail('native packet options are replaced, mutated or aliased')
         if isinstance(node, ast.Name) and node.id == 'self':
             parent = parents.get(id(node))
             if (not isinstance(node.ctx, ast.Load)
@@ -14317,6 +14321,7 @@ else:
         ('native_shared_stage', run), ('native_shared_stage', packet_fn),
         ('native_shared_receipts', receipt_fn), ('typed_audit', derived),
         ('audit_omissions', omission), ('native_shared_render', commands))]
+    evidence.append(prefix + 'native_shared_stage/__main__.py')
     return {'basis': 'Source-derived required response-bearing roster; no observed execution or enforcement proof.',
         'stages': [{'kind': 'receipt', 'cardinality': 'R = 0 or 1', 'condition': 'captured uncovered receiptable leaves; verified zero-work has no answer'},
                    {'kind': 'worker', 'cardinality': 'W, unknown until the original record is partitioned', 'requirement': 'every worker in the complete derived plan'},
