@@ -22,7 +22,7 @@ SYNTHETIC_PROVIDER = 'scripted-local'
 # 900 s could not hold on any host. Production limits are separate pairs.
 SYNTHETIC_DEADLINE_SECONDS = 7200
 SYNTHETIC_BUDGET = '1.0'
-SYNTHETIC_PEER_SHA256 = '69ac6cfc8ce64ca11e5ea390ccd0298dbf70b4e256d0ec41fe21089a9e7d3b64'
+SYNTHETIC_PEER_SHA256 = '5b02d7ce301a8f32b8c0500a32c845c5089d6a26e31e7667eedf51b55a22d464'
 _KINDS = {'d4d_native_u4b_runtime_basis', 'd4d_native_u4b_provisional_runtime_basis'}
 _AUTH = {'loggedIn': False, 'authMethod': SYNTHETIC_PROFILE,
          'apiProvider': SYNTHETIC_PROVIDER, 'subscriptionType': SYNTHETIC_PROFILE,

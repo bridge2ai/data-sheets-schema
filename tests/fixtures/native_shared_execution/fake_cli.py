@@ -293,7 +293,8 @@ def main():
 
     if fixture.get('denial'):
         source = selection.document()['inputs']['bundle']['path']
-        command = 'cat "' + source + '"' if fixture['denial'] == 'not_prescribed' else shlex.join(['cat', source])
+        target = str(Path(source).parent / 'never-accessed.txt') if fixture['denial'] == 'not_prescribed' else source
+        command = shlex.join(['cat', target])
         denied_tool = fixture.get('denied_tool', 'Bash')
         inputs = {'command': command} if denied_tool == 'Bash' else {
             'file_path': str(Path(composition['instruction_path']).parent / 'never-accessed.txt')}
