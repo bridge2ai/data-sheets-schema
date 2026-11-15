@@ -164,16 +164,16 @@ def test_saved_guard_readback_rechecks_context_even_after_hashes_are_rebound(gua
 
 
 @pytest.mark.parametrize('mutation,diagnostic', [
-    ('missing', 'no five_hour window'),
+    ('missing', 'no seven_day window'),
     ('nested_unsafe', 'five_hour subscription window is rejected'),
     ('unknown', 'unrecognized.*exhausted'),
 ])
-def test_admission_requires_five_hour_and_checks_every_present_window(guard_case, mutation, diagnostic):
+def test_admission_requires_weekly_and_checks_every_present_window(guard_case, mutation, diagnostic):
     case = guard_case
     event = deepcopy(case['event'])
     windows = event['rate_limit_info']['unifiedWindows']
     if mutation == 'missing':
-        del windows['five_hour']
+        del windows['seven_day']
     elif mutation == 'nested_unsafe':
         windows['five_hour']['status'] = 'rejected'
     else:

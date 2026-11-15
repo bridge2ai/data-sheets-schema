@@ -95,6 +95,9 @@ def test_every_admission_window_refuses_unsafe_nested_row_under_allowed_top(case
     windows = event['rate_limit_info']['unifiedWindows']
     if change == 'missing':
         del windows[window]
+        if window == 'five_hour':
+            assert build(case, document=event_document(case, event)).five_hour is None
+            return
     elif change == 'null':
         windows[window] = None
     else:
@@ -405,3 +408,77 @@ def test_file_descriptor_closed_if_initial_fstat_fails(tmp_path, monkeypatch):
         with pytest.raises(OSError, match='injected fstat'):
             guard.read_regular(path)
     assert len(closed) == 1
+
+
+def weekly_only_event(case):
+    """Invented values with the observed wire shape; no account evidence."""
+    row = {'utilization': 0.12, 'resetsAt': case['now'] + 7200,
+           'status': 'allowed_warning', 'surpassedThreshold': 0.1}
+    return {'type': 'rate_limit_event', 'rate_limit_info': {
+        **row, 'rateLimitType': 'seven_day', 'isUsingOverage': False,
+        'overageEnabled': False, 'overageStatus': 'rejected',
+        'overageDisabledReason': 'invented_disabled',
+        'unifiedWindows': {'seven_day': deepcopy(row)}}}
+
+
+def test_weekly_only_warning_admits_and_replays_without_inventing_five_hour(case):
+    event = weekly_only_event(case)
+    value = build(case, document=event_document(case, event))
+    value.before_reservation()
+    assert value.five_hour is None
+    assert value.snapshot()['five_hour'] is None
+    assert set(value.snapshot()['initial_windows']) == {'seven_day'}
+    value.before_dispatch()
+    value.observe(event)
+    assert saved(case, value, guard.canonical(event) + b'\n')['passed']
+    assert value.snapshot()['observed_windows']['five_hour']['count'] == 0
+
+
+def test_weekly_only_headroom_and_reported_five_hour_limit(case):
+    event = weekly_only_event(case)
+    maximum = case['owner']['max_starting_weekly_utilization']
+    for utilization in (maximum, maximum + 0.01):
+        info = event['rate_limit_info']
+        info['utilization'] = info['unifiedWindows']['seven_day']['utilization'] = utilization
+        if utilization == maximum:
+            build(case, document=event_document(case, event))
+        else:
+            with pytest.raises(ValueError, match='weekly subscription headroom'):
+                build(case, document=event_document(case, event))
+    event = weekly_only_event(case)
+    limit = case['owner']['max_starting_five_hour_utilization']
+    for utilization in (limit, limit + 0.01):
+        event['rate_limit_info']['unifiedWindows']['five_hour'] = {
+            'utilization': utilization, 'resetsAt': case['now'] + 3600}
+        if utilization == limit:
+            build(case, document=event_document(case, event))
+        else:
+            with pytest.raises(ValueError, match='five-hour subscription headroom'):
+                build(case, document=event_document(case, event))
+
+
+def test_weekly_only_unsafe_shapes_and_freshness_refuse(case):
+    for field, bad, reason in (
+        ('isUsingOverage', True, 'overage'), ('status', 'rejected', 'status'),
+        ('status', 'invented_unknown', 'status'), ('overageEnabled', True, 'overage'),
+        ('overageEnabled', 0, 'overage'), ('overageStatus', 'allowed', 'overage'),
+        ('overageDisabledReason', '', 'overage')):
+        event = weekly_only_event(case)
+        event['rate_limit_info'][field] = bad
+        with pytest.raises(ValueError, match=reason):
+            build(case, document=event_document(case, event))
+    for bad in (None, [], {'utilization': True}, {'utilization': 0.1, 'resetsAt': False}):
+        event = weekly_only_event(case)
+        event['rate_limit_info']['unifiedWindows']['seven_day'] = bad
+        with pytest.raises(ValueError):
+            build(case, document=event_document(case, event))
+    event = weekly_only_event(case)
+    document = event_document(case, event)
+    for now in (case['now'] - 1, case['now'] + case['owner']['max_age_seconds'] + 1):
+        with pytest.raises(ValueError, match='stale or future-dated'):
+            build(case, document=document, now=now)
+    info = event['rate_limit_info']
+    info['rateLimitType'] = 'five_hour'
+    info['unifiedWindows'] = {'five_hour': info['unifiedWindows']['seven_day']}
+    with pytest.raises(ValueError, match='no seven_day window'):
+        build(case, document=event_document(case, event))
