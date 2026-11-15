@@ -27,7 +27,7 @@ def test_installed_manifest_modes_cost_and_reuse(tmp_path, monkeypatch):
     full = measure('full_reuse', lambda: manifest.verify(pin, mode='full'))
     light = measure('light', lambda: manifest.verify(pin, mode='light'))
     assert full == light
-    assert [row['generate_calls'] for row in rows] == [2, 0, 0]
+    assert [row['generate_calls'] for row in rows] == [1, 0, 0]
     raw = Path(pin['path']).read_bytes()
     assert len(raw) == pin['bytes'] and manifest.c.sha(raw) == pin['sha256']
     report = {'pin': pin, 'distributions': len(full['distributions']),
