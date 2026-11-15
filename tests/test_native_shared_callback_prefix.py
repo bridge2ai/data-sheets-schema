@@ -89,8 +89,7 @@ def test_valid_extension_matches_full_replay_and_only_checks_suffix(advance):
     repeated, _ = captured_run(advance)
     assert checked(owner, repeated) == ()
     assert len(owner.observations) == 3
-    assert all(key[0] in ('decision', 'request', 'stage', 'packet', 'receipt_request',
-                         'receipt_zero', 'response') for key in owner.semantic)
+    assert all(key[0] in ('decision', 'advance') for key in owner.semantic)
 
 
 def test_failed_suffix_does_not_commit_checkpoint(advance):
@@ -144,7 +143,7 @@ def test_binding_change_forces_full_replay_and_keeps_anchors(advance):
     assert owner.records and owner.observations and owner.streams
 
 
-def test_completed_stage_delta_skips_only_previously_checked_response(case, monkeypatch):
+def test_completed_stage_decision_skips_only_exact_verified_unit(case, monkeypatch):
     updated, transition = respond(case, receipt_answer(case))
     assert transition.disposition == 'checked'
     owner = owner_api._PrefixOwner(guard_for(ModuleType('test_validator')))
@@ -156,20 +155,22 @@ def test_completed_stage_delta_skips_only_previously_checked_response(case, monk
         counts.append(cursor.kind)
         return original(self, cursor, inner, raw)
     monkeypatch.setattr(stage._Replay, '_derive_response', counted)
-    wait = stage._prepare_next(*updated, catalogs, _prefix=transaction)
+    wait = capture._stage_decision(*updated, catalogs, _prefix=transaction)
+    assert counts == ['receipt']
+    assert capture._stage_decision(*updated, catalogs, _prefix=transaction) == wait
     assert counts == ['receipt']
     extended = add_core((*updated[:3], publish(updated[3], wait)))
-    resumed = stage._prepare_next(*extended, catalogs, _prefix=transaction)
-    assert counts == ['receipt']
-    complete = stage.prepare_next(*extended)
+    resumed = capture._stage_decision(*extended, catalogs, _prefix=transaction)
     assert counts == ['receipt', 'receipt']
+    complete = stage.prepare_next(*extended)
+    assert counts == ['receipt', 'receipt', 'receipt']
     assert resumed == complete
 
 
 def test_checkpoint_storage_does_not_retain_journal_prefix_copies(case):
     owner = owner_api._PrefixOwner(guard_for(ModuleType('test_validator')))
     transaction = owner_api._PrefixTransaction(owner, None, True)
-    stage._prepare_next(*case, stage.nr._ReceiptCatalogContext(), _prefix=transaction)
+    capture._stage_decision(*case, stage.nr._ReceiptCatalogContext(), _prefix=transaction)
     seen = set()
     def walk(value):
         if id(value) in seen:
@@ -227,7 +228,7 @@ def test_all_resumed_stage_decisions_equal_independent_full_replay(case, monkeyp
     compared = []
     def compare(*args):
         expected = full(*args)
-        actual = stage._prepare_next(*args, catalogs, _prefix=transaction)
+        actual = capture._stage_decision(*args, catalogs, _prefix=transaction)
         assert actual == expected
         compared.append(actual.state)
         return actual
@@ -235,7 +236,7 @@ def test_all_resumed_stage_decisions_equal_independent_full_replay(case, monkeyp
     completed, completion = full_roundtrip(case)
     assert full(*completed).completion == completion
     assert {'await_core', 'request_ready', 'awaiting_response', 'assembly_complete'} <= set(compared)
-    assert all(value[0].state != 'assembly_complete' for key, value in transaction.pending.items()
+    assert all(value[1].state != 'assembly_complete' for key, value in transaction.pending.items()
                if key[0] == 'decision')
 
 
@@ -266,3 +267,57 @@ def test_standalone_history_bounds_precede_every_record_parse(case, monkeypatch)
     monkeypatch.setattr(stage.c, 'strict_json', bounded_first)
     with pytest.raises(ValueError, match='history record bound'):
         stage.prepare_next(*case[:3], oversized)
+
+
+def test_capture_relayer_preserves_scanner_roster_without_stage_hooks():
+    import inspect
+    from tests.test_generation_specificity_delegated import ROOT, scan
+    assert '_prefix' not in inspect.signature(stage._Replay).parameters
+    assert '_prefix' not in inspect.signature(stage._prepare_next).parameters
+    assert '_prefix' not in inspect.signature(stage._check_response).parameters
+    result = scan.derive_native_shared_procedure(ROOT)
+    assert result['protocol_responses']['formula'] == 'R + W + 2'
+
+
+def test_decision_changed_input_and_guard_drift_force_whole_replay(case, monkeypatch):
+    module = ModuleType('test_validator')
+    module._LIMIT = 1
+    owner = owner_api._PrefixOwner(guard_for(module))
+    transaction = owner_api._PrefixTransaction(owner, None, True)
+    catalogs = stage.nr._ReceiptCatalogContext()
+    original = stage._prepare_next
+    calls = []
+    def counted(*args):
+        calls.append(args[3].journal.pin)
+        return original(*args)
+    monkeypatch.setattr(stage, '_prepare_next', counted)
+    first = capture._stage_decision(*case, catalogs, _prefix=transaction)
+    assert capture._stage_decision(*case, catalogs, _prefix=transaction) == first
+    assert len(calls) == 1
+    history = replace(case[3], observations=(case[2].full_seal_observation,) * 2)
+    with pytest.raises(ValueError, match='repeats an artifact path'):
+        capture._stage_decision(*case[:3], history, catalogs, _prefix=transaction)
+    module._LIMIT = 2
+    with pytest.raises(ValueError, match='validator changed'):
+        capture._stage_decision(*case, catalogs, _prefix=transaction)
+    assert not owner.semantic and not transaction.pending
+
+
+def test_input_extensions_replace_one_decision_slot_without_retaining_histories(case):
+    owner = owner_api._PrefixOwner(guard_for(ModuleType('test_validator')))
+    transaction = owner_api._PrefixTransaction(owner, None, True)
+    catalogs = stage.nr._ReceiptCatalogContext()
+    history = case[3]
+    for index in range(40):
+        # Unreferenced pure-stage inputs test storage replacement only; these
+        # are not admitted causal observations or callback CPU evidence.
+        extra = artifact('observation', case[0].role('observations_root') + f'/{index + 10:06d}.json',
+                         stage.c.canonical({'unreferenced_fixture_observation': index}))
+        history = replace(history, observations=history.observations + (extra,))
+        actual = capture._stage_decision(*case[:3], history, catalogs, _prefix=transaction)
+        assert actual.state == 'request_ready'
+        assert len(transaction.pending) == 1
+        identity, decision, journal = next(iter(transaction.pending.values()))
+        assert type(identity) is str and len(identity) == 64
+        assert all(pub.artifact.pin.role != 'journal' for pub in decision.publications)
+        assert journal is not None

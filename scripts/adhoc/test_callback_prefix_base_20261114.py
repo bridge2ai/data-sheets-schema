@@ -5,6 +5,7 @@ and pytest output in assigned scratch. No verified-loader/public-path claim.
 """
 import importlib
 import importlib.util
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -16,7 +17,7 @@ import data_sheets_schema
 def main():
     root = Path(sys.argv[1])
     root.mkdir(parents=True, exist_ok=False)
-    base = 'b35e264571a4e8ba6f152b7fc7053c35758d6823'
+    base = os.environ.get('CALLBACK_BASE', 'b35e264571a4e8ba6f152b7fc7053c35758d6823')
     modules = ('native_shared_stage', 'native_shared_capture', 'native_shared_callback_capture',
                'native_shared_callback_orchestration', 'native_shared_capture_orchestration')
     # Establish unchanged carrier/dependency classes through the assigned source

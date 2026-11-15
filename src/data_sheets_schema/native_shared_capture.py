@@ -6,7 +6,7 @@ Live callers and the saved replay use the same closed observation joins.
 """
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field, replace
+from dataclasses import asdict, dataclass, field, fields, is_dataclass, replace
 from pathlib import Path, PurePosixPath
 import re
 import os
@@ -347,7 +347,7 @@ class _CapturedRun:
             session_id=self.binding.session_id, policy=self.composition['policy'], runtime=self.value['runtime'])
 
     def decision(self):
-        return None if self.phase1 is None else stage._prepare_next(
+        return None if self.phase1 is None else _stage_decision(
             self.selection, self.binding, self.phase1, self.history, self._catalogs, _prefix=self._prefix)
 
 
@@ -502,12 +502,72 @@ def _history_prefix(run, digest):
     return found[0]
 
 
+def _unit_identity(value):
+    """Digest exact immutable unit inputs without retaining their byte buffers."""
+    def token(item):
+        if type(item) is bytes:
+            return ['bytes', len(item), c.sha(item)]
+        if is_dataclass(item) and not isinstance(item, type):
+            return [type(item).__name__, [[f.name, token(getattr(item, f.name))] for f in fields(item)]]
+        if isinstance(item, (tuple, list)):
+            return [type(item).__name__, [token(part) for part in item]]
+        if isinstance(item, dict):
+            return ['dict', [[name, token(part)] for name, part in sorted(item.items())]]
+        if item is None or type(item) in (str, int, bool):
+            return item
+        raise ValueError('unsupported callback verification unit input')
+    return c.sha(c.canonical(token(value)))
+
+
+def _stage_decision(selection, execution, phase1, history, catalogs, *, _prefix=None):
+    """Reuse a whole verified decision, never a stage producer or replay state.
+
+    Inputs include all artifact and observation bytes, including unreferenced
+    members used by evidence bounds. One slot per journal/core identity replaces
+    older input variants; predicted journal prefixes are not retained.
+    """
+    if _prefix is None:
+        return stage._prepare_next(selection, execution, phase1, history, catalogs)
+    rows, _ = stage._history(selection, execution, history)
+    if rows and rows[-1]['record_type'] == 'assembly_checked':
+        return stage._prepare_next(selection, execution, phase1, history, catalogs)
+    key = ('decision', history.journal.pin, phase1.core_seal.pin if phase1.core_seal else None)
+    identity = _unit_identity((selection, execution, phase1, history))
+    cached = _prefix.get(key)
+    if cached is not None and cached[0] == identity:
+        _, decision, journal = cached
+        if journal is None:
+            return decision
+        index, pin, action, predecessor = journal
+        records = tuple(pub.artifact.pin for pub in decision.publications if pub.artifact.pin.role == 'record')
+        raw = stage.journal_bytes(selection_sha256=selection.registration.pin.sha256,
+            execution_sha256=execution.execution.pin.sha256, attempt_id=execution.attempt_id,
+            records=tuple(item.pin for item in history.records) + records)
+        artifact = stage._artifact(raw, 'journal', pin.path)
+        if artifact.pin != pin:
+            raise ValueError('callback decision no longer derives its exact journal')
+        publication = c.HelperPublication(action=action, artifact=artifact, predecessor_sha256=predecessor)
+        return replace(decision, publications=decision.publications[:index] + (publication,) + decision.publications[index:])
+    result = stage._prepare_next(selection, execution, phase1, history, catalogs)
+    if result.state not in ('failed', 'assembly_complete'):
+        journals = [(index, pub) for index, pub in enumerate(result.publications) if pub.artifact.pin.role == 'journal']
+        if len(journals) > 1:
+            raise ValueError('callback decision has multiple predicted journals')
+        compact = replace(result, publications=tuple(pub for pub in result.publications if pub.artifact.pin.role != 'journal'))
+        journal = None
+        if journals:
+            index, pub = journals[0]
+            journal = index, pub.artifact.pin, pub.action, pub.predecessor_sha256
+        _prefix.put(key, (identity, compact, journal))
+    return result
+
+
 def _decision_at(run, digest):
     history = _history_prefix(run, digest)
     phase1 = _phase1(run.selection, run.binding, history, run.reader)
     if phase1 is None:
         raise ValueError('stage observation precedes actual phase1 seal')
-    return stage._prepare_next(run.selection, run.binding, phase1, history, run._catalogs, _prefix=run._prefix)
+    return _stage_decision(run.selection, run.binding, phase1, history, run._catalogs, _prefix=run._prefix)
 
 
 def _require_completed_read_before_write(request, read):
@@ -865,7 +925,14 @@ def phase_replay(run, *, complete=False):
             if block.get('type') == 'tool_result' and identity in advance_after:
                 digest = advance_after[identity]
         decision = None if digest is None else decision_at(digest)
-        emitted = phase.observe(frame, stage_decision=decision)
+        denials = run.trace().terminal_denials() if frame.get('type') == 'result' else {}
+        for block in blocks if type(blocks) is list else ():
+            if type(block) is dict and block.get('type') == 'tool_result':
+                identity = block.get('tool_use_id')
+                denial = run.trace().denial(identity)
+                if denial is not None:
+                    denials[identity] = denial
+        emitted = phase.observe(frame, stage_decision=decision, denials=denials)
         if emitted:
             actions[line] = (emitted, phase.report())
         if line in seal_observations:
@@ -944,6 +1011,21 @@ def _effect_view_from_decision(run, decision, *, correction_window=False, exclud
 
 
 def _check_advance_acknowledgement(run, actual, result, *, before_history_sha256):
+    """Checkpoint only a complete successful acknowledgement verification."""
+    key = ('advance', actual.call.tool_use_id, before_history_sha256)
+    identity = None
+    if run._prefix is not None:
+        identity = _unit_identity((run.selection, run.binding, run.phase1,
+            run.history, actual, result, before_history_sha256))
+        if run._prefix.get(key) == identity:
+            return
+    _verify_advance_acknowledgement(run, actual, result,
+        before_history_sha256=before_history_sha256)
+    if run._prefix is not None:
+        run._prefix.put(key, identity)
+
+
+def _verify_advance_acknowledgement(run, actual, result, *, before_history_sha256):
     """Reconstruct one acknowledgement from captured inputs in live and saved reads.
 
     Earlier saved acknowledgements name their own journal version, not the
@@ -959,15 +1041,15 @@ def _check_advance_acknowledgement(run, actual, result, *, before_history_sha256
         raise ValueError('advance acknowledgement identity differs from selected admission')
     before = _history_prefix(run, before_history_sha256)
     phase1 = _phase1(run.selection, run.binding, before, run.reader)
-    replay = stage._Replay(run.selection, run.binding, phase1, before, _catalogs=run._catalogs, _prefix=run._prefix).run()
+    replay = stage._Replay(run.selection, run.binding, phase1, before, _catalogs=run._catalogs).run()
     if replay.pending is not None and replay.pending[-1] is not None:
         response, _ = replay.pending[-1]
         proposal = stage._check_response(run.selection, run.binding, phase1, before, replay.pending[2].raw,
-            response.raw, run._catalogs, _prefix=run._prefix)
+            response.raw, run._catalogs)
         publications = (*proposal.publications, *(c.HelperPublication('create_once', item, None) for item in proposal.records_to_append),
             c.HelperPublication('replace_journal_from_exact_predecessor', proposal.predicted_journal, before.journal.pin.sha256))
     else:
-        publications = stage._prepare_next(run.selection, run.binding, phase1, before,
+        publications = _stage_decision(run.selection, run.binding, phase1, before,
             run._catalogs, _prefix=run._prefix).publications
     expected_publications = [c.pin_dict(item.artifact.pin) for item in publications]
     if type(result['publications']) is not list or c.canonical(result['publications']) != c.canonical(expected_publications):

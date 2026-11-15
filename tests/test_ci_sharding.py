@@ -17,6 +17,8 @@ from utils.pytest_shard import API_CASE_LANES, SG2_CASE_LANES, NATIVE_CASE_LANES
 
 
 ROOT = Path(__file__).resolve().parents[1]
+LONG_NATIVE_LANES = ('native-public-correction', 'native-public-variant', 'native-public-pending')
+SHORT_NATIVE_LANES = tuple(lane for lane in NATIVE_CASE_LANES if lane not in LONG_NATIVE_LANES)
 
 
 def _run(root, *args):
@@ -376,7 +378,8 @@ def test_missing_dedicated_target_cannot_disappear_from_any_lane(tmp_path, lane)
     ("pytest.exit('preserve actual exit', returncode=17)", "", "", 17),
 ])
 @pytest.mark.parametrize("lane", ["routing-dispatch", *SG2_CASE_LANES, "native-public-correction", "native-failure-16",
-                                  "native-capacity-05", "native-retention-changing"])
+                                  "native-capacity-05", "native-retention-changing",
+                                  *[f"native-capacity-{n}" for n in range(34, 46)]])
 def test_dedicated_case_requires_real_unqualified_pass(tmp_path, body, decorator, fixture, code, lane):
     _lane_fixture(tmp_path, body=body, decorator=decorator, fixture=fixture, target=lane)
     result = _run(tmp_path, f"--ci-lane={lane}")
@@ -394,15 +397,19 @@ def test_dedicated_collect_only_does_not_pass_as_execution(tmp_path, lane):
 @pytest.mark.parametrize("job_name,lanes,artifact,timeout", [
     ("api-completion", API_CASE_LANES, "api", 45),
     ("sg2-completion", SG2_CASE_LANES, "sg2", 45),
-    # The native public cases hold a 2,700 s synthetic attempt after about
-    # 21 minutes of setup (#6094, #6233); other native lanes finish early.
-    ("native-public-completion", NATIVE_CASE_LANES, "native", 90),
+    ("native-public-completion", SHORT_NATIVE_LANES, "native", 45),
+    ("native-public-long", LONG_NATIVE_LANES, "native", 180),
 ])
 def test_case_workflow_binds_all_lanes_and_retains_budget_setup_and_evidence(job_name, lanes, artifact, timeout):
     jobs = yaml.safe_load((ROOT / ".github/workflows/main.yaml").read_text())["jobs"]
     job = jobs[job_name]
     assert job["strategy"] == {"fail-fast": False, "matrix": {"case": list(lanes)}}
-    assert "if" not in job and "needs" not in job
+    assert "needs" not in job
+    if job_name == "native-public-long":
+        assert job["if"] == "github.event_name != 'pull_request'"
+    else:
+        assert "if" not in job
+    assert job["name"] == "Python 3.12 / " + (artifact.upper() if artifact != "native" else artifact) + " case ${{ matrix.case }}"
     assert job["runs-on"] == "ubuntu-latest"
     assert job["timeout-minutes"] == timeout
     checkout, submodule, setup, case, clean, upload = job["steps"]
@@ -454,3 +461,47 @@ def test_repeated_dedicated_target_cannot_enter_any_lane(tmp_path, lane):
                   f"--ci-lane={lane}", *flags)
     assert result.returncode == 4, result.stdout + result.stderr
     assert "dedicated target exactly once" in result.stderr
+
+
+def test_g2_full_fixture_cases_have_exact_dedicated_lanes(tmp_path):
+    import ast
+
+    paths = sorted({*ROOT.glob("tests/test_native_launch_sequence*.py"),
+                    ROOT / "tests/test_native_attempt_deadline.py",
+                    ROOT / "tests/test_native_publication_signals.py",
+                    ROOT / "tests/test_native_sequence_start.py"})
+    heavy_functions = set()
+    for path in paths:
+        for function in ast.parse(path.read_text()).body:
+            if not isinstance(function, ast.FunctionDef) or not function.name.startswith("test_"):
+                continue
+            calls = [node.func for node in ast.walk(function) if isinstance(node, ast.Call)]
+            if any((isinstance(call, ast.Name) and call.id == "make_case")
+                   or (isinstance(call, ast.Attribute) and call.attr == "synthetic_launch")
+                   for call in calls):
+                heavy_functions.add(str(path.relative_to(ROOT)) + "::" + function.name)
+    result = _run(ROOT, *(str(path.relative_to(ROOT)) for path in paths),
+                  "--collect-only", f"--basetemp={tmp_path / 'collection'}")
+    assert result.returncode == 0, result.stdout + result.stderr
+    collected = [line for line in result.stdout.splitlines()
+                 if line.startswith("tests/") and "::" in line]
+    expected = [node for node in collected if node.split("[", 1)[0] in heavy_functions]
+    actual = [NATIVE_CASE_LANES[f"native-capacity-{n}"] for n in range(34, 46)]
+    assert expected and set(expected) == set(actual)
+    assert len(expected) == len(actual)
+    split = partition_lanes([*DEDICATED_CASE_LANES.values(),
+                             *(node for node in collected if node not in actual)])
+    assert not set(expected).intersection(split["ordinary"])
+
+
+def test_long_native_cases_are_required_only_for_main_and_manual_ci():
+    from data_sheets_schema.native_execution_registration_v2 import required_checks
+    workflow = yaml.load((ROOT / ".github/workflows/main.yaml").read_text(), Loader=yaml.BaseLoader)
+    assert set(workflow["on"]) == {"push", "pull_request", "workflow_dispatch"}
+    assert workflow["on"]["push"]["branches"] == ["main"]
+    long_checks = {"Python 3.12 / native case " + lane for lane in LONG_NATIVE_LANES}
+    assert not long_checks.intersection(required_checks("pull_request"))
+    for event in ("push", "workflow_dispatch"):
+        assert long_checks.issubset(required_checks(event))
+    assert set(SHORT_NATIVE_LANES).isdisjoint(LONG_NATIVE_LANES)
+    assert set(SHORT_NATIVE_LANES) | set(LONG_NATIVE_LANES) == set(NATIVE_CASE_LANES)

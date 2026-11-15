@@ -281,8 +281,14 @@ def test_successful_ordinary_refresh_reconstructs_measurements_and_preserves_his
     assert [row['shard'] for row in refresh['originals']] == list(original_hashes)
     assert refresh['excluded_shards'] == {
         '1': 'failure', '6': 'cancelled; no JUnit', '8': 'failure', '10': 'failure'}
-    dedicated = set(DEDICATED_CASE_LANES.values())
+    # Reconstruct with the dedicated set in force when this refresh was made.
+    # Lanes added later (for example native-capacity-34..45) are dedicated now;
+    # every node the refresh excluded must still be dedicated, and no node that
+    # is dedicated now may have been measured as an ordinary case.
+    dedicated_now = set(DEDICATED_CASE_LANES.values())
+    dedicated = set(refresh['dedicated_nodes'])
     assert refresh['dedicated_nodes'] == sorted(dedicated)
+    assert dedicated <= dedicated_now
     measured, owners = defaultdict(Decimal), {}
     total, excluded_total = 0, 0
     artifacts = []
@@ -314,6 +320,7 @@ def test_successful_ordinary_refresh_reconstructs_measurements_and_preserves_his
             if node in dedicated:
                 excluded.append(node)
                 continue
+            assert node not in dedicated_now, node
             owner = owners.setdefault(node, shard)
             assert owner == shard  # retain same-artifact label collisions
             measured[filename] += seconds

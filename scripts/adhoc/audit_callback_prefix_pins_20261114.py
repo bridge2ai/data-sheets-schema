@@ -22,7 +22,7 @@ def sha(raw):
 
 
 def main():
-    base = 'b35e264571a4e8ba6f152b7fc7053c35758d6823'
+    base = sys.argv[2] if len(sys.argv) > 2 else 'b35e264571a4e8ba6f152b7fc7053c35758d6823'
     sources = []
     for path in git('diff', '--name-only', base, '--', 'src').decode().splitlines():
         previous = sha(git('show', base + ':' + path))
@@ -67,7 +67,11 @@ def main():
     raw = json.dumps(result, indent=2, sort_keys=True) + '\n'
     output.write_text(raw)
     assert output.read_text() == raw
-    print(json.dumps({'path': str(output), 'sha256': sha(raw.encode()), 'sources': sources}, indent=2))
+    print(json.dumps({'path': str(output), 'sha256': sha(raw.encode()), 'sources': sources,
+        'controller_entries_match': all(row['matches'] for row in controllers),
+        'constants_match': all(row['current'] == row['pinned'] for row in constants),
+        'scanner_pins_moved_here': [row for row in scanner if row['moved_here']],
+        'protected_match': all(row['base'] == row['current'] for row in result['protected'].values())}, indent=2))
 
 
 if __name__ == '__main__':

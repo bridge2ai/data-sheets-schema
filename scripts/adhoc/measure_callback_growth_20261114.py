@@ -21,7 +21,8 @@ monitor = sys.monitoring
 tool = 0
 active = {}
 detail_names = {'_checked_observations', '_prepare_next', 'phase_replay', '_loaded', 'reconstruct', '_history',
-                '_stage_uncached', '_derive_response_uncached'}
+                '_stage_uncached', '_derive_response_uncached', '_stage', '_derive_response',
+                '_phase_state', '_stage_decision', '_check_advance_acknowledgement'}
 names = {'_observe_event', '_classify_frame', 'read_regular', 'read_live_stream'} | detail_names
 stacks = {}
 snapshots = {}

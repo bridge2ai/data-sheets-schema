@@ -110,6 +110,10 @@ def tool_history(prepared):
             if event.get('type') != 'user' or identity not in pending:
                 raise ValueError('native result lacks a unique pending call')
             call = pending.pop(identity)
+            if identity in prepared.get('denied_tool_ids', ()):
+                if block.get('is_error') is not True:
+                    raise ValueError('denied tool has a successful result')
+                continue
             if call.get('name') != 'Bash':
                 continue
             metadata = event.get('tool_use_result')
