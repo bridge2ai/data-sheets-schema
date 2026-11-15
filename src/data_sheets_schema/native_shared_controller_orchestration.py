@@ -584,8 +584,21 @@ class CallbackAdapter:
 
     def report(self, *, complete=False):
         if hasattr(self, '_classifier_scope'):
-            with self._classifier._lock:
+            lock = self._classifier._lock
+            if not lock.acquire(timeout=callback_loading.CALLBACK_TEARDOWN_SECONDS):
+                # Retain the whole generator scope, including its loader stack.
+                # Never enter reporting or unwind underneath the live worker.
+                original = sys.exc_info()[1]
+                refusal = callback_loading._poison_stack(lock, self._classifier_scope)
+                if self.failure is None:
+                    self.failure = str(refusal)
+                if original is not None:
+                    raise original from refusal
+                raise refusal
+            try:
                 return self._report_and_close(complete=complete)
+            finally:
+                lock.release()
         return self._report(complete=complete)
 
     def _report_and_close(self, *, complete=False):
