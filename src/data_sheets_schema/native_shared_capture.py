@@ -925,7 +925,14 @@ def phase_replay(run, *, complete=False):
             if block.get('type') == 'tool_result' and identity in advance_after:
                 digest = advance_after[identity]
         decision = None if digest is None else decision_at(digest)
-        emitted = phase.observe(frame, stage_decision=decision)
+        denials = run.trace().terminal_denials() if frame.get('type') == 'result' else {}
+        for block in blocks if type(blocks) is list else ():
+            if type(block) is dict and block.get('type') == 'tool_result':
+                identity = block.get('tool_use_id')
+                denial = run.trace().denial(identity)
+                if denial is not None:
+                    denials[identity] = denial
+        emitted = phase.observe(frame, stage_decision=decision, denials=denials)
         if emitted:
             actions[line] = (emitted, phase.report())
         if line in seal_observations:

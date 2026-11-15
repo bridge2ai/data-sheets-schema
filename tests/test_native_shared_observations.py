@@ -48,6 +48,36 @@ def trace(native,parent):
         session_id=SESSION,policy=POLICY,runtime=runtime)
 
 
+@pytest.mark.parametrize('tool', ['Read', 'Write', 'Bash'])
+def test_denied_calls_have_no_observed_file_or_command_effect(tool):
+    native, parent, _ = events(tool)
+    parent[0].update(classification='not_prescribed', basis='outside selected authority')
+    parent[0]['response']['response']['response'] = {'hookSpecificOutput': {
+        'hookEventName': 'PreToolUse', 'permissionDecision': 'deny',
+        'permissionDecisionReason': 'Outside the registered tool policy: outside selected authority'}}
+    native[-1].pop('tool_use_result')
+    block = native[-1]['message']['content'][0]
+    block.update(is_error=True, content='Outside the registered tool policy: outside selected authority')
+    value = trace(native, parent)
+    assert value.denied_ids() == {'tool-1'}
+    assert value.denial('tool-1')['classification'] == 'not_prescribed'
+    for metadata in ({'exitCode': 0}, {'exitCode': True}, {'exitCode': 1, 'exit_code': 2},
+                     {'backgroundTaskId': 'pending'}, {'persistedOutputPath': '/untrusted'}):
+        native[-1]['tool_use_result'] = metadata
+        with pytest.raises(ValueError, match='denied tool'):
+            trace(native, parent).denied_ids()
+
+
+def test_ordinary_error_is_not_a_denial_and_unmatched_runtime_refusal_is_unclassifiable():
+    native, parent, _ = events()
+    native[-1]['message']['content'][0].update(is_error=True, content='File not found')
+    assert trace(native, parent).denied_ids() == set()
+    native[-1].pop('tool_use_result')
+    native[-1]['message']['content'][0]['content'] = 'Permission to use Read has been denied.'
+    assert trace(native, parent).denial('tool-1')['classification'] == 'prescribed'
+    assert trace([native[0], native[-1]], []).denial('tool-1')['classification'] == 'unclassifiable'
+
+
 @pytest.mark.parametrize('raw',[b'{}',b'{"long":"'+b'a'*100000+b'"}\n','{"text":"α\u2028β"}\n'.encode()])
 def test_complete_read_uses_all_actual_raw_content(raw):
     native,parent,request=events(raw=raw);value=trace(native,parent)
