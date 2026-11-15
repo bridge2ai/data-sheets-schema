@@ -159,7 +159,12 @@ def test_execution_facade_requires_the_current_explicit_ci_event():
     assert set(pull) - set(push) == {
         'Python 3.12 / shard 9', 'Python 3.12 / shard 10', 'Python 3.12 / shard 11',
         'Python 3.12 / shard 12', 'large-files'}
-    assert set(push) - set(pull) == {'schema-examples (3.12)'}
+    assert set(push) - set(pull) == {
+        'schema-examples (3.12)',
+        'Python 3.12 / native case native-public-correction',
+        'Python 3.12 / native case native-public-variant',
+        'Python 3.12 / native case native-public-pending',
+    }
     with pytest.raises(TypeError):
         execution.required_checks()
     for invalid in (None, True, '', 'unknown'):
