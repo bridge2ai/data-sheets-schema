@@ -132,7 +132,8 @@ def _window_name(name):
 def _reading(row, info, name):
     if type(row) is not dict:
         raise ValueError(name + " subscription window is malformed")
-    allowed = {"utilization", "resetsAt", "status", "isUsingOverage", "rateLimitType"}
+    allowed = {"utilization", "resetsAt", "status", "isUsingOverage", "rateLimitType",
+               "surpassedThreshold"}
     if row is not info and set(row) - allowed:
         raise ValueError(name + " subscription window has unknown fields")
     if "rateLimitType" in row and row["rateLimitType"] != name:
@@ -169,9 +170,13 @@ def _inspect(event, *, require_both):
     if info.get("isUsingOverage") is not False:
         errors.append("subscription overage must be explicitly false")
     allowed = {"status", "isUsingOverage", "rateLimitType", "utilization", "resetsAt", "unifiedWindows",
-               "overageStatus", "overageDisabledReason"}
+               "overageStatus", "overageDisabledReason", "overageEnabled", "surpassedThreshold"}
     if set(info) - allowed:
         errors.append("subscription information has unknown fields")
+    # Threshold annotations do not grant headroom. An explicit enabled-overage
+    # declaration contradicts this subscription-only admission policy.
+    if "overageEnabled" in info and info["overageEnabled"] is not False:
+        errors.append("subscription overage enabled must be explicitly false when present")
     # First-party allowed events may report disabled overage even when their
     # numerical reading appears only in unifiedWindows. This is evidence of
     # refusal, never permission to use overage or infer subscription headroom.
@@ -375,12 +380,14 @@ def _admission(raw, expected_sha256, registration_raw, runtime, launch_word_raw,
     event_raw = value["event_json"]
     if type(event_raw) is not str or sha(event_raw.encode()) != value["event_sha256"]:
         raise ValueError("subscription event differs from its captured hash")
-    readings, recorded, refusal = _inspect(strict_json(event_raw), require_both=True)
+    readings, recorded, refusal = _inspect(strict_json(event_raw), require_both=False)
     if refusal is not None:
         raise ValueError(refusal)
+    if "seven_day" not in readings:
+        raise ValueError("subscription evidence has no seven_day window")
     if readings["seven_day"]["utilization"] > maximum:
         raise ValueError("insufficient weekly subscription headroom")
-    if readings["five_hour"]["utilization"] > five_hour_maximum:
+    if "five_hour" in readings and readings["five_hour"]["utilization"] > five_hour_maximum:
         raise ValueError("insufficient five-hour subscription headroom")
     captured = _timestamp(value["captured_at"], "captured_at")
     if captured < authorized:
@@ -433,7 +440,7 @@ class SubscriptionGuard:
     pre_reservation_margin = property(lambda self: self._static()["margin"])
     captured_at = property(lambda self: self._static()["captured"])
     reading = property(lambda self: self._static()["readings"]["seven_day"])
-    five_hour = property(lambda self: self._static()["readings"]["five_hour"])
+    five_hour = property(lambda self: self._static()["readings"].get("five_hour"))
     path = property(lambda self: self._path)
     dispatched = property(lambda self: self._dispatched)
     observed_events = property(lambda self: self._count)
@@ -510,7 +517,7 @@ class SubscriptionGuard:
             "observation_sha256": bound["value"]["event_sha256"],
             "owner_statement_sha256": bound["value"]["owner_statement_sha256"],
             "authorized_at": bound["authorized_at"], "captured_at": bound["value"]["captured_at"],
-            "weekly": bound["readings"]["seven_day"], "five_hour": bound["readings"]["five_hour"],
+            "weekly": bound["readings"]["seven_day"], "five_hour": bound["readings"].get("five_hour"),
             "initial_windows": deepcopy(bound["readings"]),
             "initial_record_only_windows": deepcopy(bound["record_only"]),
             "maximum_starting_utilization": bound["maximum"], "max_age_seconds": bound["max_age"],
