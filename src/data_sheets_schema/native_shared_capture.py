@@ -333,22 +333,30 @@ class _CapturedRun:
     _chronology_cache: object = field(default=None, init=False, compare=False, repr=False)
     _callback_state_cache: dict = field(default_factory=dict, init=False, compare=False, repr=False)
     _prefix: object = field(default=None, init=False, compare=False, repr=False)
+    _decision: object = field(default=None, init=False, compare=False, repr=False)
 
     def trace(self, transcript=None, control=None):
         if (transcript is None or transcript == self.transcript) and (control is None or control == self.control):
             if self._trace is None:
-                # Only this immutable capture owns the parsed trace. The U3-B
-                # context exposes pure catalog/derivation reuse, not admissions
-                # or previously successful observation checks.
-                self._trace = observed.Trace(self.transcript, self.control,
-                    session_id=self.binding.session_id, policy=self.composition['policy'], runtime=self.value['runtime'])
+                prior = self._prefix.trace_checkpoint() if self._prefix is not None else None
+                options = dict(session_id=self.binding.session_id,
+                    policy=self.composition['policy'], runtime=self.value['runtime'])
+                if prior is None:
+                    self._trace = observed.Trace(self.transcript, self.control, **options)
+                else:
+                    self._trace = observed.Trace.extend_verified_suffix(prior,
+                        self.transcript.raw[len(prior.transcript.raw):],
+                        self.control.raw[len(prior.control.raw):],
+                        transcript=self.transcript, control=self.control, **options)
             return self._trace
         return observed.Trace(transcript or self.transcript, control or self.control,
             session_id=self.binding.session_id, policy=self.composition['policy'], runtime=self.value['runtime'])
 
     def decision(self):
-        return None if self.phase1 is None else _stage_decision(
-            self.selection, self.binding, self.phase1, self.history, self._catalogs, _prefix=self._prefix)
+        if self.phase1 is not None and self._decision is None:
+            self._decision = _stage_decision(self.selection, self.binding, self.phase1,
+                self.history, self._catalogs, _prefix=self._prefix)
+        return self._decision
 
 
 def _binding_document(selection, value, composition, execution, started, observation_item, session):
@@ -519,6 +527,27 @@ def _unit_identity(value):
     return c.sha(c.canonical(token(value)))
 
 
+class _StageCheckpoint:
+    """Completion metadata and artifact pins, owned only by a live prefix."""
+    __slots__ = ('decision', 'completion', 'pins')
+
+    def __init__(self, decision):
+        completion = decision.completion
+        self.pins = tuple((f.name, getattr(completion, f.name).pin)
+            for f in fields(completion)
+            if type(getattr(completion, f.name)) is c.CapturedArtifact)
+        self.completion = tuple((f.name, getattr(completion, f.name))
+            for f in fields(completion)
+            if type(getattr(completion, f.name)) is not c.CapturedArtifact)
+        self.decision = tuple((f.name, getattr(decision, f.name))
+            for f in fields(decision) if f.name != 'completion')
+
+    def restore(self, reader):
+        completion = c.StageCompletion(**dict(self.completion),
+            **{name: reader.pinned(c.pin_dict(pin)) for name, pin in self.pins})
+        return c.StageDecision(**dict(self.decision), completion=completion)
+
+
 def _stage_decision(selection, execution, phase1, history, catalogs, *, _prefix=None):
     """Reuse a whole verified decision, never a stage producer or replay state.
 
@@ -528,14 +557,13 @@ def _stage_decision(selection, execution, phase1, history, catalogs, *, _prefix=
     """
     if _prefix is None:
         return stage._prepare_next(selection, execution, phase1, history, catalogs)
-    rows, _ = stage._history(selection, execution, history)
-    if rows and rows[-1]['record_type'] == 'assembly_checked':
-        return stage._prepare_next(selection, execution, phase1, history, catalogs)
     key = ('decision', history.journal.pin, phase1.core_seal.pin if phase1.core_seal else None)
     identity = _unit_identity((selection, execution, phase1, history))
     cached = _prefix.get(key)
     if cached is not None and cached[0] == identity:
         _, decision, journal = cached
+        if type(decision) is _StageCheckpoint:
+            return decision.restore(_prefix.run.reader)
         if journal is None:
             return decision
         index, pin, action, predecessor = journal
@@ -549,7 +577,10 @@ def _stage_decision(selection, execution, phase1, history, catalogs, *, _prefix=
         publication = c.HelperPublication(action=action, artifact=artifact, predecessor_sha256=predecessor)
         return replace(decision, publications=decision.publications[:index] + (publication,) + decision.publications[index:])
     result = stage._prepare_next(selection, execution, phase1, history, catalogs)
-    if result.state not in ('failed', 'assembly_complete'):
+    if result.state == 'assembly_complete':
+        if _prefix.run is not None:
+            _prefix.put(key, (identity, _StageCheckpoint(result), None))
+    elif result.state != 'failed':
         journals = [(index, pub) for index, pub in enumerate(result.publications) if pub.artifact.pin.role == 'journal']
         if len(journals) > 1:
             raise ValueError('callback decision has multiple predicted journals')

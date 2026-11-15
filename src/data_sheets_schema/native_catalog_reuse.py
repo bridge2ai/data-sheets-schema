@@ -11,6 +11,7 @@ import functools
 import json
 import os
 import posixpath
+import sys
 import types
 
 try:
@@ -56,6 +57,9 @@ _FUNCTIONS = FunctionBindings(additional_modules=_MODULES, callable_defaults=Tru
 _READY = object()
 _STATE = None
 _INITIALIZED_STATE = None
+_FAST_PLANS = {}
+_LIMIT_READERS = (sys.getrecursionlimit, getattr(sys, 'get_int_max_str_digits', None))
+_RUNTIME_LIMITS = tuple(reader() if reader is not None else None for reader in _LIMIT_READERS)
 _PARSE = yaml.parse
 _DEFAULT_LOADER = yaml.Loader
 
@@ -327,6 +331,28 @@ def _bound_schema_state():
             _methods_key(views.DupCheckYamlLoader, _FUNCTIONS, views), tables, resolvers)
 
 
+def _model_attributes():
+    """Include noncallable metamodel attributes in the full fallback too."""
+    def snapshot(value, seen=frozenset()):
+        kind = type(value)
+        if id(value) in seen:
+            return kind, id(value)
+        seen = seen | {id(value)}
+        if kind is dict:
+            return kind, tuple((snapshot(k, seen), snapshot(v, seen)) for k, v in value.items())
+        if kind in (list, tuple):
+            return kind, tuple(snapshot(v, seen) for v in value)
+        if kind in (set, frozenset):
+            return kind, frozenset(snapshot(v, seen) for v in value)
+        if value is None or kind in (str, bytes, int, float, bool):
+            return kind, value
+        return kind, id(value)
+    return tuple((name, tuple((key, snapshot(value)) for key, value in sorted(vars(cls).items())
+                             if key not in ('__slotnames__', 'MissingRequiredField')))
+                 for name, cls in sorted(vars(meta).items())
+                 if isinstance(cls, type) and cls.__module__ == meta.__name__)
+
+
 def _state():
     # Fixed bindings actually used by the two schema producers. Unfamiliar
     # replacements cannot become bound merely by being the first observation.
@@ -334,6 +360,13 @@ def _state():
             or omissions.json is not json or snapshots.json is not json or contract.json is not json
             or snapshots.SchemaDefinition is not meta.SchemaDefinition):
         raise TypeError('schema producer module alias differs')
+    # copyreg lazily records an empty slot roster for these nonslotted models.
+    # Any nonempty or unfamiliar replacement changes reduction semantics.
+    for cls in vars(meta).values():
+        if isinstance(cls, type) and cls.__module__ == meta.__name__:
+            slots = vars(cls).get('__slotnames__', [])
+            if type(slots) is not list or slots:
+                raise TypeError('unsupported metamodel reduction slots')
     functions = tuple(_FUNCTIONS.key(fn) for fn in (
         omissions._schema, omissions._schema_product, omissions._schema_with_root_bases,
         omissions._mapping, omissions._read,
@@ -426,7 +459,7 @@ def _state():
             # Effective aliases and dispatch used by native captured-byte schemas.
             (snapshots.Path, views.Path, snapshots.deepcopy, copy.deepcopy),
             tuple((cls, _FUNCTIONS.key(fn)) for cls, fn in copy._deepcopy_dispatch.items()),
-            _native_path_state())
+            _native_path_state(), _model_attributes())
 
 
 def _bind():
@@ -439,15 +472,207 @@ def _bind():
 _FUNCTIONS.bind(_bind)
 
 
+def _compile_guards(actual):
+    """Compile conservative identity checks only after full state acceptance.
+
+    The state readers' attribute vocabulary includes literal getattr names and
+    nested comprehension code. Module bindings and class rosters are checked
+    separately from mutable containers and function signatures. No producer
+    result or validation verdict is retained here.
+    """
+    readers = (_state, _explicit_loader_parse, _bound_schema_state, _metadata,
+        _loader, _yaml_constructor_state, _primitive_state, _loader_handlers,
+        _json_state, _constant_parser, _native_path_state, _selected_methods, _model_attributes)
+    names = set(_YAML_NAMES)
+    def vocabulary(code):
+        names.update(code.co_names)
+        for value in code.co_consts:
+            if type(value) is types.CodeType:
+                vocabulary(value)
+            elif type(value) is str:
+                names.add(value)
+            elif type(value) is tuple:
+                names.update(item for item in value if type(item) is str)
+    for reader in readers:
+        vocabulary(reader.__code__)
+    attributes, mappings, sequences, functions, cells, rosters = [], [], [], [], [], []
+    namespaces = []
+    model_dicts = []
+    seen = set()
+    missing = object()
+    def attribute(owner, name):
+        value = getattr(owner, name, missing)
+        attributes.append((owner, name, value))
+        visit(value)
+    def visit(value):
+        if id(value) in seen:
+            return
+        seen.add(id(value))
+        kind = type(value)
+        if kind is types.ModuleType:
+            if value is sys:
+                return
+            for name in names:
+                if name in vars(value) or name in _YAML_NAMES and value.__name__.startswith('yaml'):
+                    attribute(value, name)
+            if value in (meta, annotations, extensions, units, *_YAML_DEFINITIONS):
+                roster = {name: cls for name, cls in vars(value).items()
+                          if isinstance(cls, type) and cls.__module__ == value.__name__}
+                rosters.append((value, roster))
+                for cls in roster.values():
+                    visit(cls)
+        elif isinstance(value, type):
+            if value.__module__ == 'builtins':
+                return
+            attributes.append((value, '__bases__', value.__bases__))
+            snapshot = dict(vars(value))
+            if value.__module__ == meta.__name__:
+                snapshot.pop('__slotnames__', None)
+                model_dicts.append((value, snapshot))
+            else:
+                mappings.append((vars(value), snapshot))
+            for member in snapshot.values():
+                visit(member)
+            for base in value.__bases__:
+                visit(base)
+        elif kind is types.FunctionType:
+            functions.append((value, value.__code__, value.__defaults__,
+                              value.__kwdefaults__, value.__closure__))
+            attributes.append((value, '__name__', value.__name__))
+            attributes.append((value, '__module__', value.__module__))
+            visit(value.__dict__)
+            visit(value.__defaults__)
+            visit(value.__kwdefaults__)
+            for cell in value.__closure__ or ():
+                member = cell.cell_contents
+                cells.append((cell, member))
+                visit(member)
+        elif kind is functools._lru_cache_wrapper:
+            visit(vars(value))
+            attribute(value, '__wrapped__')
+        elif kind is dict:
+            mappings.append((value, value.copy()))
+            for key, member in value.items():
+                visit(key)
+                visit(member)
+        elif kind in (list, tuple, set, frozenset):
+            if kind in (list, set):
+                sequences.append((value, value.copy()))
+            for member in value:
+                visit(member)
+        elif kind in (staticmethod, classmethod):
+            visit(value.__func__)
+        elif kind is property:
+            for member in (value.fget, value.fset, value.fdel):
+                visit(member)
+        elif isinstance(value, views._InstanceCached):
+            for name in ('function', 'name', 'maxsize', 'typed'):
+                attribute(value, name)
+    for reader in readers:
+        for name in reader.__code__.co_names:
+            if name in reader.__globals__ and name not in ('_FUNCTIONS', 'sys'):
+                namespaces.append((reader.__globals__, name, reader.__globals__[name]))
+                visit(reader.__globals__[name])
+    visit(actual)
+    for function in _FUNCTIONS._functions:
+        visit(function)
+    # Instance state and C-scanner descriptors are not class dictionary state.
+    for owner in (json_dumper, json._default_encoder, json._default_decoder,
+                  strictness.GLOBAL_STRICT):
+        mappings.append((vars(owner), dict(vars(owner))))
+        for value in vars(owner).values():
+            visit(value)
+    for name in ('object_hook', 'object_pairs_hook', 'strict', 'parse_float',
+                 'parse_int', 'parse_constant'):
+        attribute(json._default_decoder.scan_once, name)
+    visit(copy.dispatch_table)
+    import linkml_runtime.dumpers as dumpers
+    attribute(dumpers, 'json_dumper')
+    for name in ('as_json_object', 'remove_empty_items'):
+        namespace = JSONDumper.dumps.__globals__
+        namespaces.append((namespace, name, namespace[name]))
+    import dataclasses
+    import _thread
+    import builtins
+    for name in ('_recursive_repr', '_thread'):
+        attribute(dataclasses, name)
+    attribute(_thread, 'get_ident')
+    attribute(dataclasses, 'id')
+    attribute(dataclasses, '__builtins__')
+    attribute(builtins, 'id')
+    return (tuple(attributes), tuple(mappings), tuple(sequences), tuple(functions),
+            tuple(cells), tuple(rosters), missing, snapshots._metadata.cache_parameters(),
+            tuple(namespaces), tuple(model_dicts))
+
+
+def _guards_match(plan):
+    attributes, mappings, sequences, functions, cells, rosters, missing, parameters, namespaces, model_dicts = plan
+    for namespace, name, expected in namespaces:
+        if namespace.get(name, missing) is not expected:
+            return False
+    for cls, expected in model_dicts:
+        current = vars(cls)
+        slots = current.get('__slotnames__', missing)
+        if slots is not missing and (type(slots) is not list or slots):
+            return False
+        if (len(current) != len(expected) + (slots is not missing)
+                or any(current.get(name, missing) is not value for name, value in expected.items())):
+            return False
+    for owner, name, expected in attributes:
+        if getattr(owner, name, missing) is not expected:
+            return False
+    for current, expected in mappings:
+        if (len(current) != len(expected) or any(key is not prior_key or value is not prior_value
+                for (key, value), (prior_key, prior_value) in zip(current.items(), expected.items()))):
+            return False
+    for current, expected in sequences:
+        if (type(current) is list and (len(current) != len(expected)
+                or any(value is not prior for value, prior in zip(current, expected)))
+                or type(current) is set and {id(value) for value in current} != {id(value) for value in expected}):
+            return False
+    for fn, code, defaults, kwdefaults, closure in functions:
+        if (fn.__code__ is not code or fn.__defaults__ is not defaults
+                or fn.__kwdefaults__ is not kwdefaults or fn.__closure__ is not closure):
+            return False
+    for cell, expected in cells:
+        if cell.cell_contents is not expected:
+            return False
+    for module, expected in rosters:
+        if {name: cls for name, cls in vars(module).items()
+                if isinstance(cls, type) and cls.__module__ == module.__name__} != expected:
+            return False
+    return snapshots._metadata.cache_parameters() == parameters
+
+
 def runtime_token():
     """A constant-size marker only for the still-supported bound implementation."""
     try:
         if _FUNCTIONS.ready:
             marker = initialization.marker()
+            if (sys.getrecursionlimit is not _LIMIT_READERS[0]
+                    or getattr(sys, 'get_int_max_str_digits', None) is not _LIMIT_READERS[1]):
+                _state()
+                return None
+            limits = tuple(reader() if reader is not None else None for reader in _LIMIT_READERS)
+            plans = _FAST_PLANS.get(marker, {})
+            for plan in plans.values():
+                try:
+                    if _guards_match(plan) and limits == _RUNTIME_LIMITS:
+                        if initialization.marker() is marker:
+                            return marker
+                except Exception:
+                    pass
             actual = _state()
-            if actual == _STATE or actual == _INITIALIZED_STATE:
+            if limits == _RUNTIME_LIMITS and (actual == _STATE or actual == _INITIALIZED_STATE):
                 if initialization.marker() is marker:
-                    return marker
+                    state = 0 if actual == _STATE else 1
+                    if state not in plans:
+                        plan = _compile_guards(actual)
+                        if _state() != actual or initialization.marker() is not marker:
+                            return None
+                        _FAST_PLANS.setdefault(marker, {})[state] = plan
+                    if initialization.marker() is marker:
+                        return marker
     except Exception:
         pass
     return None

@@ -496,6 +496,50 @@ def _prepare(*, protocol, original_full, bundle, manifest, receipt, context, sch
     return packet
 
 
+class _OpenPacketCache:
+    """Bounded pure packet derivations; never worker or assembly verdicts."""
+    def __init__(self, max_entries=4, max_bytes=48 * 1024 * 1024):
+        if type(max_entries) is not int or max_entries < 1 or type(max_bytes) is not int or max_bytes < 1:
+            raise ValueError('packet cache requires positive integer bounds')
+        self._max_entries, self._max_bytes = max_entries, max_bytes
+        self._entries, self._bytes = OrderedDict(), 0
+        self._lock = Lock()
+        self.hits = 0
+
+    def get(self, key, raw_packet):
+        if key[2] is None:
+            return None
+        with self._lock:
+            prior = self._entries.get(key)
+            if prior is not None and prior[0] == raw_packet:
+                self._entries.move_to_end(key)
+                self.hits += 1
+                return deepcopy(prior[1]), omissions.Prepared(prior[2])
+        return None
+
+    def put(self, key, raw_packet, raw, prepared, identity_check):
+        if key[2] is None or identity_check() != key[2]:
+            return
+        owned = deepcopy(raw)
+        payload = prepared.payload_json
+        size = _parse_retained_bytes((key, raw_packet, owned, payload)) + 256
+        if size > self._max_bytes:
+            return
+        with self._lock:
+            prior = self._entries.pop(key, None)
+            if prior is not None:
+                self._bytes -= prior[3]
+            while self._entries and (len(self._entries) >= self._max_entries
+                                     or self._bytes + size > self._max_bytes):
+                _, prior = self._entries.popitem(last=False)
+                self._bytes -= prior[3]
+            self._entries[key] = (raw_packet, owned, payload, size)
+            self._bytes += size
+
+
+_OPEN_PACKET_CACHE = _OpenPacketCache()
+
+
 def _open(packet, *, derivations=None, captured_assets=None, _catalog_lookup=None):
     selected = {"omission_wire"} if type(packet) is dict and "omission_wire" in packet else set()
     _exact(packet, {"kind", "protocol", "inputs", "schema_sources", "project", "limits", "plan",
@@ -505,6 +549,15 @@ def _open(packet, *, derivations=None, captured_assets=None, _catalog_lookup=Non
     raw_packet = _json(packet)
     if len(raw_packet) > MAX_PACKET_BYTES or packet["kind"] != PACKET or _json(packet["protocol"]) != _json(audit_protocol.select(audit_protocol.TYPED)):
         raise ValueError("packet protocol/size mismatch")
+    # The ambient route still verifies its pinned packaged assets on a hit.
+    # Explicit captures remain entirely independent of installed resource I/O.
+    asset_bytes = omissions.captured_asset_bytes(captured_assets)
+    assets = (None if captured_assets is None else _sha(_json({name: _sha(value)
+        for name, value in asset_bytes.items()})))
+    key = (_sha(raw_packet), len(raw_packet), _parse_identity(), assets)
+    cached = _OPEN_PACKET_CACHE.get(key, raw_packet)
+    if cached is not None:
+        return cached
     _schema_reuse = None
     if captured_assets is not None and _catalog_lookup is not None:
         from .native_catalog_reuse import _CatalogLookup
@@ -522,6 +575,7 @@ def _open(packet, *, derivations=None, captured_assets=None, _catalog_lookup=Non
                       **({"omission_wire": packet["omission_wire"]} if selected else {})})
     if raw_packet != _json(expected):
         raise ValueError("packet request/plan/contract/input identity mismatch")
+    _OPEN_PACKET_CACHE.put(key, raw_packet, raw, prepared, _parse_identity)
     return raw, prepared
 
 
