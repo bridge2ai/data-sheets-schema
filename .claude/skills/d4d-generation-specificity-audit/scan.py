@@ -13074,6 +13074,255 @@ _NATIVE_V3_RENDER_SOURCES = {
 }
 
 
+def _native_producer_module_matches(tree, *, v3):
+    """Compare only the selected reviewed version, including definition time.
+
+    Historical v2 is retained verbatim; v3 derives from f10e8ae20.
+    Render-relevant function bodies have separate exact proofs.
+    """
+    module_shape = ast.parse(ast.unparse(tree))
+    for node in ast.walk(module_shape):
+        if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef)):
+            node.body = _without_docstring(node.body)
+    for node in module_shape.body:
+        if isinstance(node, ast.FunctionDef):
+            node.body = [ast.Pass()]
+    v2_template = (
+        'from __future__ import annotations\n'
+        'from dataclasses import dataclass\n'
+        'from contextlib import contextmanager\n'
+        'import inspect\n'
+        'from pathlib import Path\n'
+        'import re\n'
+        'import subprocess\n'
+        'import sys\n'
+        'import threading\n'
+        'from . import native_execution_authority_v2 as authority\n'
+        'from . import native_shared_contract as c\n'
+        'from . import native_shared_selection as selection\n'
+        'from .native_shared_evidence import read_regular\n'
+        'from .resources import git_env\n'
+        'from .native_shared_runtime_values import validate_runtime_v2 as validate_runtime\n'
+        'VERSION = 2\n'
+        "PREPARATION_KIND = 'd4d_native_shared_preparation_v2'\n"
+        "EXECUTION_KIND = 'd4d_native_shared_execution_registration_v2'\n"
+        "PREPARATION_SCOPE = 'offline_inputs_only_not_permission_or_launch_authority'\n"
+        "EXECUTION_SCOPE = 'requires_exact_independent_review_ci_permission_and_owner_launch_evidence'\n"
+        "MAX_WIRE_BYTES = c.HARD_LIMITS['request_bytes']\n"
+        "_COMMON_CHECKS = tuple(('Python 3.12 / API case ' + name for name in ('routing-dispatch', 'routing-portable', 'routing-regate', 'routing-default-layout'))) + tuple(('Python 3.12 / SG2 case ' + name for name in ('sg2-none', 'sg2-conventional', 'sg2-explicit'))) + tuple(('Python 3.12 / native case ' + name for name in ('native-failure-01', 'native-failure-02', 'native-failure-03', 'native-failure-04', 'native-failure-05', 'native-failure-06', 'native-failure-07', 'native-failure-08', 'native-failure-09', 'native-failure-10', 'native-failure-11', 'native-failure-12', 'native-failure-13', 'native-failure-14', 'native-failure-15', 'native-failure-16', 'native-failure-17', 'native-capacity-01', 'native-capacity-02', 'native-capacity-03', 'native-capacity-04', 'native-capacity-05', 'native-capacity-06', 'native-capacity-07', 'native-capacity-08', 'native-capacity-09', 'native-capacity-10', 'native-capacity-11', 'native-capacity-12', 'native-capacity-13', 'native-capacity-14', 'native-capacity-15', 'native-capacity-16', 'native-capacity-17', 'native-capacity-18', 'native-capacity-19', 'native-capacity-20', 'native-capacity-21', 'native-capacity-22', 'native-capacity-23', 'native-capacity-24', 'native-capacity-25', 'native-capacity-26', 'native-capacity-27', 'native-capacity-28', 'native-capacity-29', 'native-capacity-30', 'native-capacity-31', 'native-capacity-32', 'native-capacity-33', 'native-capacity-34', 'native-capacity-35', 'native-capacity-36', 'native-capacity-37', 'native-capacity-38', 'native-capacity-39', 'native-capacity-40', 'native-capacity-41', 'native-capacity-42', 'native-capacity-43', 'native-capacity-44', 'native-capacity-45', 'native-retention-stable', 'native-retention-changing', 'native-retention-final-floor'))) + ('Python 3.12 / offline canary controls', 'Python 3.12 / offline audit and finalization', 'Python 3.12 / offline evaluation', 'test')\n"
+        "_LONG_CHECKS = tuple(('Python 3.12 / native case ' + name for name in ('native-public-correction', 'native-public-variant', 'native-public-pending')))\n"
+        "EXECUTION_GATES = ('terminal', 'shutdown', 'first_stop', 'live_attribution', 'saved_attribution', 'phase_history', 'tool_history', 'schema', 'pair', 'receipts', 'evidence', 'observation', 'accounting', 'runtime_authority', 'keep_awake')\n"
+        "_PREPARATION_KEYS = frozenset(('kind', 'schema_version', 'execution', 'job_id', 'working_directory', 'dependencies', 'selection', 'runtime', 'run_date', 'max_draft_checks', 'render_spec', 'input_identity', 'instruction', 'instruction_sha256', 'outputs', 'pinned_files'))\n"
+        "EXECUTION_KEYS = frozenset(('kind', 'schema_version', 'execution', 'attempt_id', 'composition', 'system_path', 'permission_probe', 'attempt_directory', 'evidence_directory', 'job_id', 'preparation_raw_json', 'preparation_sha256', 'execution_gates', 'runtime', 'max_draft_checks', 'selection_sha256', 'runtime_declaration_sha256', 'working_directory', 'dependencies', 'composition_raw_json', 'composition_sha256', 'system_sha256', 'effective_system', 'effective_system_sha256', 'instruction_sha256', 'permission_probe_sha256', 'permission_expected_sha256', 'permission_observations', 'argv', 'environment', 'selection', 'scope'))\n"
+        "_REBUILD_INPUTS = ('preparation_raw', 'composition_path', 'system_path', 'permission_probe_path', 'attempt_id', 'attempt_directory', 'evidence_directory', 'max_draft_checks', 'receipt_origin_version', 'classifier_projection')\n"
+        '\n'
+        'def required_checks(event):\n'
+        '    pass\n'
+        '\n'
+        'def _ci_git(*args, absent=False):\n'
+        '    pass\n'
+        '\n'
+        'def _ci_commit(commit, label):\n'
+        '    pass\n'
+        '\n'
+        'def _ci_tested_commit(source_commit, tested_commit, event, ref):\n'
+        '    pass\n'
+        '\n'
+        'def _workflow_paths(event):\n'
+        '    pass\n'
+        '\n'
+        'def _workflow_sha(source_commit, tested_commit, event):\n'
+        '    pass\n'
+        '\n'
+        'def _ci_repository_url():\n'
+        '    pass\n'
+        '\n'
+        'def _read(path, label, maximum=MAX_WIRE_BYTES):\n'
+        '    pass\n'
+        '\n'
+        'def _file_pin(artifact):\n'
+        '    pass\n'
+        '\n'
+        'def _job_id(value):\n'
+        '    pass\n'
+        '\n'
+        'def _wire(raw):\n'
+        '    pass\n'
+        '\n'
+        'def _envelope(body, dependencies):\n'
+        '    pass\n'
+        '\n'
+        'def _pin_map(captured, runtime, dependencies):\n'
+        '    pass\n'
+        '\n'
+        'def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):\n'
+        '    pass\n'
+        '\n'
+        'def prepare_synthetic(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):\n'
+        '    pass\n'
+        '\n'
+        'def _prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks, expected_profile):\n'
+        '    pass\n'
+        '\n'
+        'def verify_preparer(raw, *, job_id):\n'
+        '    pass\n'
+        '\n'
+        '\x40contextmanager\n'
+        'def _consumer(dependencies):\n'
+        '    pass\n'
+        '\n'
+        'def _signature(module, name, positional, keywords):\n'
+        '    pass\n'
+        '\n'
+        'def _closed_execution(body):\n'
+        '    pass\n'
+        '\n'
+        'def _rebuild_inputs(body, preparation_raw):\n'
+        '    pass\n'
+        '\n'
+        'def verified(raw, *, classifier_projection):\n'
+        '    pass\n'
+        '\n'
+        'def _text(value, label):\n'
+        '    pass\n'
+        '\n'
+        'def _authorizations(raw, value, *, review_path, ci_path, launch_word_path, require_current=False):\n'
+        '    pass\n'
+        '\n'
+        '\x40dataclass(frozen=True)\n'
+        'class Admission:\n'
+        '    registration_raw: bytes\n'
+        '    evidence: tuple[c.CapturedArtifact, ...]\n'
+        '    reservations: tuple[Path, ...]\n'
+        '\n'
+        'def _checked_reservations(result, value, evidence):\n'
+        '    pass\n'
+        '\n'
+        'def admit(raw, *, review_path, ci_path, launch_word_path, classifier_projection):\n'
+        '    pass'
+    )
+    v3_template = (
+        'from __future__ import annotations\n'
+        'from dataclasses import dataclass\n'
+        'from contextlib import contextmanager\n'
+        'import inspect\n'
+        'from pathlib import Path\n'
+        'import re\n'
+        'import subprocess\n'
+        'import sys\n'
+        'import threading\n'
+        'from . import native_execution_authority_v2 as authority\n'
+        'from . import native_shared_contract as c\n'
+        'from . import native_shared_selection as selection\n'
+        'from .native_shared_evidence import read_regular\n'
+        'from .resources import git_env\n'
+        'from .native_shared_runtime_values import validate_runtime_v2 as validate_runtime\n'
+        'AUTHORITY_VERSION = 2\n'
+        'VERSION = 3\n'
+        "PREPARATION_KIND = 'd4d_native_shared_preparation_v3'\n"
+        "EXECUTION_KIND = 'd4d_native_shared_execution_registration_v3'\n"
+        "PREPARATION_SCOPE = 'offline_inputs_only_not_permission_or_launch_authority'\n"
+        "EXECUTION_SCOPE = 'requires_exact_independent_review_ci_permission_and_owner_launch_evidence'\n"
+        "MAX_WIRE_BYTES = c.HARD_LIMITS['request_bytes']\n"
+        "_COMMON_CHECKS = tuple(('Python 3.12 / API case ' + name for name in ('routing-dispatch', 'routing-portable', 'routing-regate', 'routing-default-layout'))) + tuple(('Python 3.12 / SG2 case ' + name for name in ('sg2-none', 'sg2-conventional', 'sg2-explicit'))) + tuple(('Python 3.12 / native case ' + name for name in ('native-failure-01', 'native-failure-02', 'native-failure-03', 'native-failure-04', 'native-failure-05', 'native-failure-06', 'native-failure-07', 'native-failure-08', 'native-failure-09', 'native-failure-10', 'native-failure-11', 'native-failure-12', 'native-failure-13', 'native-failure-14', 'native-failure-15', 'native-failure-16', 'native-failure-17', 'native-capacity-01', 'native-capacity-02', 'native-capacity-03', 'native-capacity-04', 'native-capacity-05', 'native-capacity-06', 'native-capacity-07', 'native-capacity-08', 'native-capacity-09', 'native-capacity-10', 'native-capacity-11', 'native-capacity-12', 'native-capacity-13', 'native-capacity-14', 'native-capacity-15', 'native-capacity-16', 'native-capacity-17', 'native-capacity-18', 'native-capacity-19', 'native-capacity-20', 'native-capacity-21', 'native-capacity-22', 'native-capacity-23', 'native-capacity-24', 'native-capacity-25', 'native-capacity-26', 'native-capacity-27', 'native-capacity-28', 'native-capacity-29', 'native-capacity-30', 'native-capacity-31', 'native-capacity-32', 'native-capacity-33', 'native-capacity-34', 'native-capacity-35', 'native-capacity-36', 'native-capacity-37', 'native-capacity-38', 'native-capacity-39', 'native-capacity-40', 'native-capacity-41', 'native-capacity-42', 'native-capacity-43', 'native-capacity-44', 'native-capacity-45', 'native-retention-stable', 'native-retention-changing', 'native-retention-final-floor'))) + ('Python 3.12 / offline canary controls', 'Python 3.12 / offline audit and finalization', 'Python 3.12 / offline evaluation', 'test')\n"
+        "_LONG_CHECKS = tuple(('Python 3.12 / native case ' + name for name in ('native-public-correction', 'native-public-variant', 'native-public-pending')))\n"
+        "EXECUTION_GATES = ('terminal', 'shutdown', 'first_stop', 'live_attribution', 'saved_attribution', 'phase_history', 'tool_history', 'schema', 'pair', 'receipts', 'evidence', 'observation', 'accounting', 'runtime_authority', 'keep_awake')\n"
+        "_PREPARATION_KEYS = frozenset(('kind', 'schema_version', 'execution', 'job_id', 'working_directory', 'dependencies', 'selection', 'runtime', 'run_date', 'max_draft_checks', 'render_spec', 'input_identity', 'instruction', 'instruction_sha256', 'outputs', 'pinned_files', 'environment_manifest'))\n"
+        "EXECUTION_KEYS = frozenset(('kind', 'schema_version', 'execution', 'attempt_id', 'composition', 'system_path', 'permission_probe', 'attempt_directory', 'evidence_directory', 'job_id', 'preparation_raw_json', 'preparation_sha256', 'execution_gates', 'runtime', 'max_draft_checks', 'selection_sha256', 'runtime_declaration_sha256', 'working_directory', 'dependencies', 'composition_raw_json', 'composition_sha256', 'system_sha256', 'effective_system', 'effective_system_sha256', 'instruction_sha256', 'permission_probe_sha256', 'permission_expected_sha256', 'permission_observations', 'argv', 'environment', 'selection', 'scope'))\n"
+        "_REBUILD_INPUTS = ('preparation_raw', 'composition_path', 'system_path', 'permission_probe_path', 'attempt_id', 'attempt_directory', 'evidence_directory', 'max_draft_checks', 'receipt_origin_version', 'classifier_projection')\n"
+        '\n'
+        'def required_checks(event):\n'
+        '    pass\n'
+        '\n'
+        'def _ci_git(*args, absent=False):\n'
+        '    pass\n'
+        '\n'
+        'def _ci_commit(commit, label):\n'
+        '    pass\n'
+        '\n'
+        'def _ci_tested_commit(source_commit, tested_commit, event, ref):\n'
+        '    pass\n'
+        '\n'
+        'def _workflow_paths(event):\n'
+        '    pass\n'
+        '\n'
+        'def _workflow_sha(source_commit, tested_commit, event):\n'
+        '    pass\n'
+        '\n'
+        'def _ci_repository_url():\n'
+        '    pass\n'
+        '\n'
+        'def _read(path, label, maximum=MAX_WIRE_BYTES):\n'
+        '    pass\n'
+        '\n'
+        'def _file_pin(artifact):\n'
+        '    pass\n'
+        '\n'
+        'def _job_id(value):\n'
+        '    pass\n'
+        '\n'
+        'def _wire(raw):\n'
+        '    pass\n'
+        '\n'
+        'def _envelope(body, dependencies):\n'
+        '    pass\n'
+        '\n'
+        'def _pin_map(captured, runtime, dependencies):\n'
+        '    pass\n'
+        '\n'
+        'def _environment_pin(path, pins):\n'
+        '    pass\n'
+        '\n'
+        'def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks, environment_manifest_path):\n'
+        '    pass\n'
+        '\n'
+        'def prepare_synthetic(selection_path, runtime_path, *, job_id, run_date, max_draft_checks, environment_manifest_path):\n'
+        '    pass\n'
+        '\n'
+        'def _prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks, expected_profile, environment_manifest_path):\n'
+        '    pass\n'
+        '\n'
+        'def verify_preparer(raw, *, job_id):\n'
+        '    pass\n'
+        '\n'
+        '\x40contextmanager\n'
+        'def _consumer(dependencies):\n'
+        '    pass\n'
+        '\n'
+        'def _signature(module, name, positional, keywords):\n'
+        '    pass\n'
+        '\n'
+        'def _closed_execution(body):\n'
+        '    pass\n'
+        '\n'
+        'def _rebuild_inputs(body, preparation_raw):\n'
+        '    pass\n'
+        '\n'
+        'def verified(raw, *, classifier_projection):\n'
+        '    pass\n'
+        '\n'
+        'def _text(value, label):\n'
+        '    pass\n'
+        '\n'
+        'def _authorizations(raw, value, *, review_path, ci_path, launch_word_path, require_current=False):\n'
+        '    pass\n'
+        '\n'
+        '\x40dataclass(frozen=True)\n'
+        'class Admission:\n'
+        '    registration_raw: bytes\n'
+        '    evidence: tuple[c.CapturedArtifact, ...]\n'
+        '    reservations: tuple[Path, ...]\n'
+        '\n'
+        'def _checked_reservations(result, value, evidence):\n'
+        '    pass\n'
+        '\n'
+        'def admit(raw, *, review_path, ci_path, launch_word_path, classifier_projection):\n'
+        '    pass'
+    )
+    expected_module = ast.parse(v3_template if v3 else v2_template)
+    return ast.dump(module_shape) == ast.dump(expected_module)
+
+
 def _derive_native_v2_render(root, cli, command):
     """Closed source proof of the v2/v3 preparation producer and CLI data flow.
 
@@ -13533,130 +13782,8 @@ def render_native_shared(selection, runtime_declaration, job_id, provider, reaso
                for node in ast.walk(tree)):
             raise fail('v2 render function escapes its fixed direct callers: ' + name)
 
-    # Issue 6246: close module execution, including definition-time expressions.
-    # Function bodies retain their existing detailed producer proofs above.
-    module_shape = ast.parse(ast.unparse(tree))
-    for node in ast.walk(module_shape):
-        if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef)):
-            node.body = _without_docstring(node.body)
-    for node in module_shape.body:
-        if isinstance(node, ast.FunctionDef):
-            node.body = [ast.Pass()]
-    expected_module = ast.parse((
-        'from __future__ import annotations\n'
-        'from dataclasses import dataclass\n'
-        'from contextlib import contextmanager\n'
-        'import inspect\n'
-        'from pathlib import Path\n'
-        'import re\n'
-        'import subprocess\n'
-        'import sys\n'
-        'import threading\n'
-        'from . import native_execution_authority_v2 as authority\n'
-        'from . import native_shared_contract as c\n'
-        'from . import native_shared_selection as selection\n'
-        'from .native_shared_evidence import read_regular\n'
-        'from .resources import git_env\n'
-        'from .native_shared_runtime_values import validate_runtime_v2 as validate_runtime\n'
-        'VERSION = 2\n'
-        "PREPARATION_KIND = 'd4d_native_shared_preparation_v2'\n"
-        "EXECUTION_KIND = 'd4d_native_shared_execution_registration_v2'\n"
-        "PREPARATION_SCOPE = 'offline_inputs_only_not_permission_or_launch_authority'\n"
-        "EXECUTION_SCOPE = 'requires_exact_independent_review_ci_permission_and_owner_launch_evidence'\n"
-        "MAX_WIRE_BYTES = c.HARD_LIMITS['request_bytes']\n"
-        "_COMMON_CHECKS = tuple(('Python 3.12 / API case ' + name for name in ('routing-dispatch', 'routing-portable', 'routing-regate', 'routing-default-layout'))) + tuple(('Python 3.12 / SG2 case ' + name for name in ('sg2-none', 'sg2-conventional', 'sg2-explicit'))) + tuple(('Python 3.12 / native case ' + name for name in ('native-failure-01', 'native-failure-02', 'native-failure-03', 'native-failure-04', 'native-failure-05', 'native-failure-06', 'native-failure-07', 'native-failure-08', 'native-failure-09', 'native-failure-10', 'native-failure-11', 'native-failure-12', 'native-failure-13', 'native-failure-14', 'native-failure-15', 'native-failure-16', 'native-failure-17', 'native-capacity-01', 'native-capacity-02', 'native-capacity-03', 'native-capacity-04', 'native-capacity-05', 'native-capacity-06', 'native-capacity-07', 'native-capacity-08', 'native-capacity-09', 'native-capacity-10', 'native-capacity-11', 'native-capacity-12', 'native-capacity-13', 'native-capacity-14', 'native-capacity-15', 'native-capacity-16', 'native-capacity-17', 'native-capacity-18', 'native-capacity-19', 'native-capacity-20', 'native-capacity-21', 'native-capacity-22', 'native-capacity-23', 'native-capacity-24', 'native-capacity-25', 'native-capacity-26', 'native-capacity-27', 'native-capacity-28', 'native-capacity-29', 'native-capacity-30', 'native-capacity-31', 'native-capacity-32', 'native-capacity-33', 'native-capacity-34', 'native-capacity-35', 'native-capacity-36', 'native-capacity-37', 'native-capacity-38', 'native-capacity-39', 'native-capacity-40', 'native-capacity-41', 'native-capacity-42', 'native-capacity-43', 'native-capacity-44', 'native-capacity-45', 'native-retention-stable', 'native-retention-changing', 'native-retention-final-floor'))) + ('Python 3.12 / offline canary controls', 'Python 3.12 / offline audit and finalization', 'Python 3.12 / offline evaluation', 'test')\n"
-        "_LONG_CHECKS = tuple(('Python 3.12 / native case ' + name for name in ('native-public-correction', 'native-public-variant', 'native-public-pending')))\n"
-        "EXECUTION_GATES = ('terminal', 'shutdown', 'first_stop', 'live_attribution', 'saved_attribution', 'phase_history', 'tool_history', 'schema', 'pair', 'receipts', 'evidence', 'observation', 'accounting', 'runtime_authority', 'keep_awake')\n"
-        "_PREPARATION_KEYS = frozenset(('kind', 'schema_version', 'execution', 'job_id', 'working_directory', 'dependencies', 'selection', 'runtime', 'run_date', 'max_draft_checks', 'render_spec', 'input_identity', 'instruction', 'instruction_sha256', 'outputs', 'pinned_files'))\n"
-        "EXECUTION_KEYS = frozenset(('kind', 'schema_version', 'execution', 'attempt_id', 'composition', 'system_path', 'permission_probe', 'attempt_directory', 'evidence_directory', 'job_id', 'preparation_raw_json', 'preparation_sha256', 'execution_gates', 'runtime', 'max_draft_checks', 'selection_sha256', 'runtime_declaration_sha256', 'working_directory', 'dependencies', 'composition_raw_json', 'composition_sha256', 'system_sha256', 'effective_system', 'effective_system_sha256', 'instruction_sha256', 'permission_probe_sha256', 'permission_expected_sha256', 'permission_observations', 'argv', 'environment', 'selection', 'scope'))\n"
-        "_REBUILD_INPUTS = ('preparation_raw', 'composition_path', 'system_path', 'permission_probe_path', 'attempt_id', 'attempt_directory', 'evidence_directory', 'max_draft_checks', 'receipt_origin_version', 'classifier_projection')\n"
-        '\n'
-        'def required_checks(event):\n'
-        '    pass\n'
-        '\n'
-        'def _ci_git(*args, absent=False):\n'
-        '    pass\n'
-        '\n'
-        'def _ci_commit(commit, label):\n'
-        '    pass\n'
-        '\n'
-        'def _ci_tested_commit(source_commit, tested_commit, event, ref):\n'
-        '    pass\n'
-        '\n'
-        'def _workflow_paths(event):\n'
-        '    pass\n'
-        '\n'
-        'def _workflow_sha(source_commit, tested_commit, event):\n'
-        '    pass\n'
-        '\n'
-        'def _ci_repository_url():\n'
-        '    pass\n'
-        '\n'
-        'def _read(path, label, maximum=MAX_WIRE_BYTES):\n'
-        '    pass\n'
-        '\n'
-        'def _file_pin(artifact):\n'
-        '    pass\n'
-        '\n'
-        'def _job_id(value):\n'
-        '    pass\n'
-        '\n'
-        'def _wire(raw):\n'
-        '    pass\n'
-        '\n'
-        'def _envelope(body, dependencies):\n'
-        '    pass\n'
-        '\n'
-        'def _pin_map(captured, runtime, dependencies):\n'
-        '    pass\n'
-        '\n'
-        'def prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):\n'
-        '    pass\n'
-        '\n'
-        'def prepare_synthetic(selection_path, runtime_path, *, job_id, run_date, max_draft_checks):\n'
-        '    pass\n'
-        '\n'
-        'def _prepare(selection_path, runtime_path, *, job_id, run_date, max_draft_checks, expected_profile):\n'
-        '    pass\n'
-        '\n'
-        'def verify_preparer(raw, *, job_id):\n'
-        '    pass\n'
-        '\n'
-        '\x40contextmanager\n'
-        'def _consumer(dependencies):\n'
-        '    pass\n'
-        '\n'
-        'def _signature(module, name, positional, keywords):\n'
-        '    pass\n'
-        '\n'
-        'def _closed_execution(body):\n'
-        '    pass\n'
-        '\n'
-        'def _rebuild_inputs(body, preparation_raw):\n'
-        '    pass\n'
-        '\n'
-        'def verified(raw, *, classifier_projection):\n'
-        '    pass\n'
-        '\n'
-        'def _text(value, label):\n'
-        '    pass\n'
-        '\n'
-        'def _authorizations(raw, value, *, review_path, ci_path, launch_word_path, require_current=False):\n'
-        '    pass\n'
-        '\n'
-        '\x40dataclass(frozen=True)\n'
-        'class Admission:\n'
-        '    registration_raw: bytes\n'
-        '    evidence: tuple[c.CapturedArtifact, ...]\n'
-        '    reservations: tuple[Path, ...]\n'
-        '\n'
-        'def _checked_reservations(result, value, evidence):\n'
-        '    pass\n'
-        '\n'
-        'def admit(raw, *, review_path, ci_path, launch_word_path, classifier_projection):\n'
-        '    pass'
-    ))
-    if dump(module_shape) != dump(expected_module):
+    # Issue 6246: version-selected exact module execution proof.
+    if not _native_producer_module_matches(tree, v3=v3):
         raise fail('v2 producer module execution is not exact')
 
     # Module-level CLI rebinding must not bypass the fixed decorated command.

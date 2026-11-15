@@ -133,3 +133,18 @@ def test_6248_preserves_shared_ast(tmp_path):
     before = ast.dump(tree, include_attributes=True)
     assert scan.derive_native_shared_procedure(root)
     assert ast.dump(tree, include_attributes=True) == before
+
+
+def test_6246_v3_real_source_and_crossed_templates(tmp_path):
+    import subprocess
+    from tests.test_generation_specificity_delegated import ROOT
+
+    root = copied_route(tmp_path)
+    current = scan._tree(root / PREPARER)
+    historical = ast.parse(subprocess.check_output(
+        ['git', 'show', 'f5c7c312f:' + PREPARER], cwd=ROOT))
+    assert scan._native_producer_module_matches(current, v3=True)
+    assert scan._native_producer_module_matches(historical, v3=False)
+    assert not scan._native_producer_module_matches(current, v3=False)
+    assert not scan._native_producer_module_matches(historical, v3=True)
+    assert scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
