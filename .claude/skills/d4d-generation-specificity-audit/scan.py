@@ -13034,7 +13034,9 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
     # attempt budget. No loader logic or production limit changed.
     # Rotated again: against ea1cc11c, only SYNTHETIC_DEADLINE_SECONDS
     # 2700 -> 7200 (the public cases moved to native-public-long).
-    'src/data_sheets_schema/native_runtime_profiles.py': '3afb5ed2602fbe74568f2a404235f3713cac9f93d6df0419178a237d56fc2056',
+    # Rotated again (#6214): against 3afb5ed2, only SYNTHETIC_PEER_SHA256, for
+    # the merged peer that keeps the Bash timeout and emits G3b's denials.
+    'src/data_sheets_schema/native_runtime_profiles.py': 'd9e0be6ae12590443f7d4d3a61e9e0f3f5ba46911df61880fd6e59b564da583b',
     'src/data_sheets_schema/native_helper_cache.py': '0934f71630ab45e4670ffa0d14f90c1cfbb23a132a23ca8c6ccfcc0c58a52a95',
     # Controller pin rotation for the issue 6094 timing hooks (lead,
     # 2026-11-13; sources source_commit e648abe2a). Against the prior pins
