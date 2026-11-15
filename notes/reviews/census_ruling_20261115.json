@@ -1,0 +1,206 @@
+{
+  "after": {
+    "first_phase_seconds": {
+      "native_environment_manifest.py:_light_live": 9.606490542006213,
+      "native_environment_manifest.py:generate": 24.83492516601109,
+      "native_environment_manifest.py:verify": 9.99395191599615,
+      "native_environment_manifest.py:write": 44.52604337502271,
+      "native_execution_registration_v2.py:prepare": 22.133810083003482
+    },
+    "phases": {
+      "native_environment_manifest.py:_light_live": {
+        "calls": 4,
+        "seconds": 38.748697625036584
+      },
+      "native_environment_manifest.py:generate": {
+        "calls": 1,
+        "seconds": 24.83492516601109
+      },
+      "native_environment_manifest.py:verify": {
+        "calls": 3,
+        "seconds": 30.09536058298545
+      },
+      "native_environment_manifest.py:write": {
+        "calls": 1,
+        "seconds": 44.52604337502271
+      },
+      "native_execution_registration_v2.py:prepare": {
+        "calls": 1,
+        "seconds": 22.133810083003482
+      }
+    },
+    "timing": null,
+    "watchdog": {
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/isolated-venv/bin/python",
+        "scripts/adhoc/profile_public_stale_20261115.py",
+        "phases",
+        "../scratch-public-stale-20261115/after-ruling"
+      ],
+      "elapsed": 75.68228895799257,
+      "returncode": 1
+    }
+  },
+  "before": {
+    "first_phase_seconds": {
+      "native_environment_manifest.py:_light_live": 29.66289816700737,
+      "native_environment_manifest.py:generate": 57.89267133298563,
+      "native_environment_manifest.py:verify": 106.20928195898887,
+      "native_environment_manifest.py:write": 164.2120909160003,
+      "native_execution_registration_v2.py:prepare": 51.19404191701324,
+      "native_execution_registration_v2.py:prepare_synthetic": 29.73601208400214,
+      "native_shared_controller_orchestration.py:compose": 113.48143129100208,
+      "native_shared_controller_orchestration.py:reconstruct_composition": 113.2912678749999,
+      "native_shared_fixture.py:build_native_fixture": 452.67952825000975,
+      "native_shared_registration_orchestration.py:synthetic_registration": 216.57760412502103,
+      "native_shared_registration_orchestration.py:verified": 59.44569195798249,
+      "native_subscription_capture.py:_current_authority": 75.23366666701622,
+      "native_synthetic_evidence.py:authority_for": 257.64169554199907,
+      "native_synthetic_evidence.py:bound_permission_for": 3.0967890829779208,
+      "native_synthetic_evidence.py:runtime_for": 0.036097583011724055,
+      "test_native_shared_execution.py:make_case": 1314.5439315839903
+    },
+    "phases": {
+      "native_environment_manifest.py:_light_live": {
+        "calls": 59,
+        "seconds": 996.1697635869205
+      },
+      "native_environment_manifest.py:generate": {
+        "calls": 4,
+        "seconds": 178.14778504197602
+      },
+      "native_environment_manifest.py:verify": {
+        "calls": 57,
+        "seconds": 1096.7098239559273
+      },
+      "native_environment_manifest.py:write": {
+        "calls": 2,
+        "seconds": 262.0299295410223
+      },
+      "native_execution_registration_v2.py:prepare": {
+        "calls": 5,
+        "seconds": 188.65540625003632
+      },
+      "native_execution_registration_v2.py:prepare_synthetic": {
+        "calls": 14,
+        "seconds": 480.5631059979496
+      },
+      "native_shared_controller_orchestration.py:compose": {
+        "calls": 2,
+        "seconds": 213.03726354098762
+      },
+      "native_shared_controller_orchestration.py:reconstruct_composition": {
+        "calls": 3,
+        "seconds": 321.4391931669961
+      },
+      "native_shared_fixture.py:build_native_fixture": {
+        "calls": 1,
+        "seconds": 452.67952825000975
+      },
+      "native_shared_registration_orchestration.py:synthetic_registration": {
+        "calls": 1,
+        "seconds": 216.57760412502103
+      },
+      "native_shared_registration_orchestration.py:verified": {
+        "calls": 5,
+        "seconds": 314.552081500995
+      },
+      "native_subscription_capture.py:_current_authority": {
+        "calls": 2,
+        "seconds": 134.42745800002012
+      },
+      "native_synthetic_evidence.py:authority_for": {
+        "calls": 1,
+        "seconds": 257.64169554199907
+      },
+      "native_synthetic_evidence.py:bound_permission_for": {
+        "calls": 1,
+        "seconds": 3.0967890829779208
+      },
+      "native_synthetic_evidence.py:runtime_for": {
+        "calls": 1,
+        "seconds": 0.036097583011724055
+      },
+      "test_native_shared_execution.py:make_case": {
+        "calls": 1,
+        "seconds": 1314.5439315839903
+      }
+    },
+    "timing": {
+      "capture_to_ready_seconds": 59.52804780006409,
+      "freshness_margin_at_ready_seconds": 1140.471952199936,
+      "make_case_seconds": 1314.5439315839903,
+      "max_age_seconds": 1200,
+      "ready_elapsed_seconds": 1314.5460075839947
+    },
+    "watchdog": {
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/isolated-venv/bin/python",
+        "scripts/adhoc/profile_public_stale_20261115.py",
+        "phases",
+        "../scratch-public-stale-20261115/before-ruling-canonical"
+      ],
+      "elapsed": 1317.3862771249842,
+      "returncode": 0
+    }
+  },
+  "evidence": {
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/after-ruling/phases.jsonl": "9054492b1ea65c9914187caa2b9ff4761d2a3b78df36fc7566d69b402f4df13e",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/after-ruling/run.log": "01bfdb6191299737f225e0c70a8e8725a8bd4df11088d8c33b52b18fdb792863",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/before-ruling-canonical/phases.jsonl": "a14d4e511ad23002cc9e6442d8bcac289d37405e7fe3649f852bb5a1e76e717a",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/before-ruling-canonical/run.log": "e2db5dc2ff613fe9a0a87e27c3aea91f74dc84ec5b90810315908fcbba095a4d",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/before-ruling-canonical/source-commit.txt": "cbfbdda745cc4a1b4a7fd5f9bd7ce9c24502bef68fac9a8c317c733264a54f1d",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/before-ruling-canonical/source-sha256.txt": "099c3c39861f0ff292aa1901a69a230f0d4eb9f0e28449b09dd89355ceda75ed",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/candidate-cost-corrected.log": "1dcaa809e7eb6709527afe88b5837edc2695aa4132783b249c82bb52644ba8e1",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/candidate-cost-stable.log": "568f87592a15b78e22b7c6d36066b9bec61333f8b78089cd10531fcbb4cb4867",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/candidate-cost.log": "a643e6528136df025074dc92472465f84b0e5a7c2b18cfd1dc8a815c5f835900",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/candidate-focused.log": "bb6942c242691999c98c990b34a1c8faa7e9952fc8392f5733924c19f94d1474",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/candidate-identity.log": "889cf86f3f3ba94749c6df6fa33a06c8608c53073c40fb4dbdca1126c090b036",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/candidate-memo-preservation.log": "f629df343a176d25f1451a98866a268b19d67880ece4458bbcb413bb014202f4",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/candidate-unit.log": "c88a68fbcb9c78406191867b008d16563c86af766785f41b1d10354d06ac7381",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/ruling-canaries.log": "febbb25188a05637918cbdc78919ae31f51f4b8c8e650f89f76ee83e29f1db65",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/ruling-collection.log": "e29945d61f9ed0cda93065c0987abab6792a2b0730fc31464075f237f1ace78e",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/ruling-final-collection.log": "0168aace5e6eb02229d7901931d8a1e9b0ec2076da1ae3e5ef53c19d329b5736",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/ruling-focused.log": "8e0fe675baf84a3f13a119b12001866574dff7c5c1daeecbd1ea700914501a73",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/ruling-focused.xml": "31de6bf5eb33f898459cdb15857563a28cfae4e2676543eca5923625193087c7",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/ruling-runs/canaries.xml": "f8c3e60084f4b62f3af42526ff8abc455ea533bce86a499302212e42d6c838b0",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/ruling-runs/canaries/test_installed_manifest_modes_0/manifest-cost.json": "fb6750fd7774dcabb717cdfe7420f3bace5199f38e5e2947bfaa5575e6b4b277",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/ruling-runs/commit-boundary-timing.jsonl": "7be8f4eb18e6e67592b6b26153d8bf094a6eb3a38c5be39caf87c37945062959",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/ruling-runs/commit-boundary.log": "8d4d93aee772b2290578cb32c698181244a06cf3c0cc49f595327cebaf923425",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/ruling-runs/commit-boundary.xml": "fceb09e7124eca9dd0e327a6afd8fbe01b51d0b5762ed799011c8fdb7097a3fb",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/ruling-runs/public-timing.jsonl": "62bcf9e5950e5a70cba3cd1d7a419dfa1d062eb67e10fa79b72f24501f2b3887",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/ruling-runs/scanner.log": "3183110d5a5c4369e37dc1dec2b6ba9443b33ed2a1e0a1ec910af9baefd57023",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-public-stale-20261115/ruling-runs/scanner.xml": "faff096e39d3fab878a85cbf60dd2d8799126804ffc27003e1887369d034e8a8"
+  },
+  "pin_proposal": {
+    "new_sha256": "6af3e242659a04fb84c424e1ca5279458bfc9974d12f392f2ba2444227b5f937",
+    "old_sha256": "790040b275d4d67aed40a6805835bb688030ec0ef3e7e004984aadcf4a2c10b7",
+    "path": "src/data_sheets_schema/native_environment_manifest.py"
+  },
+  "tests": {
+    "canaries": {
+      "cases": 3,
+      "errors": 0,
+      "failures": 2,
+      "skipped": 0
+    },
+    "commit_boundary": {
+      "cases": 2,
+      "errors": 0,
+      "failures": 2,
+      "skipped": 0
+    },
+    "focused": {
+      "cases": 278,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0
+    },
+    "scanner": {
+      "cases": 9,
+      "errors": 0,
+      "failures": 7,
+      "skipped": 0
+    }
+  }
+}

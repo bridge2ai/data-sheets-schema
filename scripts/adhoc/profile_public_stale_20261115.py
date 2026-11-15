@@ -85,7 +85,8 @@ def main():
         try:
             case = make_case(scratch / mode)
             guard = json.loads(case['kwargs']['subscription_guard_path'].read_text())
-            print(json.dumps({'seconds': time.monotonic()-origin, 'guard': guard}), flush=True)
+            print(json.dumps({'seconds': time.monotonic()-origin, 'guard': guard,
+                              'ready_wall_ns': time.time_ns()}), flush=True)
         finally:
             monitoring.set_events(tool, 0)
             for code in active:

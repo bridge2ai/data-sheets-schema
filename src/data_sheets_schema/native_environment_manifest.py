@@ -50,6 +50,108 @@ _STAT_TYPES = frozenset((0, stat.S_IFREG, stat.S_IFLNK, stat.S_IFDIR,
 _PROCESS_STATE_NAME = '_d4d_environment_manifest_verification_v1'
 
 
+
+_census_resolver = ContextVar('environment_census_resolver', default=None)
+_generation_capture = ContextVar('environment_generation_capture', default=None)
+_IMPLEMENTATION_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+
+
+class _CensusResolver:
+    """Reuse directory resolution only within one checked live census."""
+
+    def __init__(self):
+        self.directories = {}
+        self.identities = {}
+        self.links = {}
+
+    def resolve(self, path, *, strict=True, pending=None):
+        path = Path(path)
+        if not path.is_absolute():
+            path = Path.cwd() / path
+        key = str(path)
+        if key in self.directories:
+            return self.directories[key]
+        if pending is None:
+            pending = set()
+        if key in pending:
+            raise ValueError('symlink loop during environment census: ' + key)
+        pending.add(key)
+        try:
+            if path.parent == path:
+                physical = path
+            else:
+                parent = self.resolve(path.parent, strict=strict, pending=pending)
+                physical = parent.parent if path.name == '..' else parent / path.name
+            try:
+                info = physical.lstat()
+            except FileNotFoundError:
+                if strict:
+                    raise
+                return physical
+            if stat.S_ISLNK(info.st_mode):
+                target = os.readlink(physical)
+                identity = (_file_identity(info), target)
+                previous = self.links.setdefault(str(physical), identity)
+                if previous != identity:
+                    raise ValueError('symlink changed during environment census: ' + str(physical))
+                destination = Path(target)
+                if not destination.is_absolute():
+                    destination = physical.parent / destination
+                resolved = self.resolve(destination, strict=strict, pending=pending)
+                if resolved.is_dir():
+                    self.directories[key] = resolved
+                return resolved
+            if stat.S_ISDIR(info.st_mode):
+                identity = _file_identity(info)
+                previous = self.identities.setdefault(str(physical), identity)
+                if previous != identity:
+                    raise ValueError('ancestor changed during environment census: ' + str(physical))
+                self.directories[key] = physical
+            return physical
+        finally:
+            pending.remove(key)
+
+    def require_stable(self):
+        for path, identity in self.identities.items():
+            if _file_identity(Path(path).lstat()) != identity:
+                raise ValueError('ancestor changed during environment census: ' + path)
+        for path, identity in self.links.items():
+            if (_file_identity(Path(path).lstat()), os.readlink(path)) != identity:
+                raise ValueError('symlink changed during environment census: ' + path)
+
+
+def _resolve(path, *, strict=True):
+    resolver = _census_resolver.get()
+    if resolver is None:
+        return Path(path).resolve(strict=strict)
+    return resolver.resolve(path, strict=strict)
+
+
+def _run_census(operation, *args):
+    resolver = _CensusResolver()
+    token = _census_resolver.set(resolver)
+    try:
+        result = operation(*args)
+        resolver.require_stable()
+        return result
+    except OSError as exc:
+        raise ValueError('environment census path disappeared or became unreadable') from exc
+    finally:
+        _census_resolver.reset(token)
+
+
+def _fingerprints(captures, census):
+    fingerprints = {path: pin for row in captures for path, pin in row['stat_identities'].items()}
+    for row in census['payloads']:
+        fingerprints[row['path']] = row['alias_identity']
+        fingerprints[row['physical']] = row['identity']
+    for capture in captures:
+        for row in capture['payloads']:
+            fingerprints[row['path']] = row['alias_identity']
+            fingerprints[row['physical']] = row['identity']
+    return fingerprints
+
+
 def _process_state():
     # Source-attested imports may instantiate this module more than once. Keep
     # only this interpreter process's memo on sys, not in a reloaded module or
@@ -288,7 +390,7 @@ def _verify_payload(path, recorded_hash, recorded_size):
     digest, expected = _record_hash(recorded_hash)
     size = _record_size(recorded_size)
     original = Path(path)
-    physical = original.resolve(strict=True)
+    physical = _resolve(original, strict=True)
     alias_identity = _file_identity(original.lstat())
     descriptor = os.open(physical, os.O_RDONLY | os.O_NOFOLLOW)
     with os.fdopen(descriptor, 'rb') as stream:
@@ -309,7 +411,7 @@ def _verify_payload(path, recorded_hash, recorded_size):
         raise ValueError('installed payload hash or byte count differs: ' + str(original))
     if (_file_identity(before) != _file_identity(after)
             or _file_identity(after) != _file_identity(physical.lstat())
-            or original.resolve(strict=True) != physical
+            or _resolve(original, strict=True) != physical
             or _file_identity(original.lstat()) != alias_identity):
         raise ValueError('installed payload changed during verification: ' + str(original))
     return {'path': str(original), 'physical': str(physical), 'identity': _file_identity(after),
@@ -320,14 +422,14 @@ def _require_stable_payloads(captures):
     for capture in captures:
         for item in capture['payloads']:
             path, physical = Path(item['path']), Path(item['physical'])
-            if (path.resolve(strict=True) != physical or _file_identity(path.lstat()) != item['alias_identity']
+            if (_resolve(path, strict=True) != physical or _file_identity(path.lstat()) != item['alias_identity']
                     or _file_identity(physical.lstat()) != item['identity']):
                 raise ValueError('installed payload changed during environment census: ' + str(path))
 
 
 def _capture_unowned_file(path):
     """Fresh bounded hash, including stable physical and alias identities."""
-    physical = path.resolve(strict=True)
+    physical = _resolve(path, strict=True)
     alias_identity = _file_identity(path.lstat())
     descriptor = os.open(physical, os.O_RDONLY | os.O_NOFOLLOW)
     digest = hashlib.sha256()
@@ -347,7 +449,7 @@ def _capture_unowned_file(path):
         after = os.fstat(stream.fileno())
     if (total != before.st_size or _file_identity(before) != _file_identity(after)
             or _file_identity(after) != _file_identity(physical.lstat())
-            or path.resolve(strict=True) != physical
+            or _resolve(path, strict=True) != physical
             or _file_identity(path.lstat()) != alias_identity):
         raise ValueError('unowned file changed during verification: ' + str(path))
     return {'path': str(path), 'physical': str(physical), 'identity': _file_identity(after),
@@ -401,7 +503,7 @@ def _capture_distribution(distribution, *, verify_payloads=True, light=False):
     records = [f for f in files if str(f).endswith('.dist-info/RECORD')]
     if len(records) != 1:
         raise ValueError('distribution has missing or ambiguous installed RECORD: ' + name)
-    path = Path(distribution.locate_file(records[0])).resolve(strict=True)
+    path = _resolve(distribution.locate_file(records[0]), strict=True)
     record_identity = _file_identity(path.lstat())
     raw = read_regular(str(path), 'distribution_record', max_bytes=MAX_RECORD_BYTES).captured.raw
     if not raw:
@@ -437,7 +539,7 @@ def _capture_distribution(distribution, *, verify_payloads=True, light=False):
             continue
         if not own and (Path(entry).name.startswith('__editable__') or entry.endswith('.egg-link')):
             raise ValueError('editable or development third-party distribution holds: ' + name)
-        target = Path(distribution.locate_file(row[0])).resolve(strict=False)
+        target = _resolve(distribution.locate_file(row[0]), strict=False)
         if own:
             _own_record_entry(target, path)
         if target in owned:
@@ -462,7 +564,7 @@ def _capture_distribution(distribution, *, verify_payloads=True, light=False):
                 _record_hash(row[1])
                 size = _record_size(row[2])
                 if light:
-                    physical = original.resolve(strict=True)
+                    physical = _resolve(original, strict=True)
                     observed, identity = _lstat(physical)
                     if observed != {'type': stat.S_IFREG, 'bytes': size}:
                         raise ValueError('installed payload size or type differs from RECORD: ' + str(original))
@@ -524,7 +626,7 @@ def _metadata_snapshot(captures):
 
 
 def _import_paths():
-    return list(dict.fromkeys(str(Path(p or os.getcwd()).resolve(strict=True))
+    return list(dict.fromkeys(str(_resolve(p or os.getcwd(), strict=True))
                              for p in sys.path if Path(p or os.getcwd()).exists()))
 
 
@@ -604,7 +706,7 @@ def _require_owned_import_roots(paths, captures, *, light_unowned=None):
                 if path not in actual:
                     pending.append((root, path))
             else:
-                physical = path.resolve(strict=True)
+                physical = _resolve(path, strict=True)
                 if not path.is_file():
                     raise ValueError('unsupported non-regular import-root file: ' + str(path))
                 files[path] = (root, physical)
@@ -642,6 +744,10 @@ def _require_owned_import_roots(paths, captures, *, light_unowned=None):
 
 
 def generate():
+    return _run_census(_generate)
+
+
+def _generate():
     """Regenerate semantic identity and verify each installed hashed payload.
 
     Do not narrow this to packages already imported: registered helpers may
@@ -664,12 +770,20 @@ def generate():
         value = {'kind': KIND, 'version': VERSION, 'interpreter': identity,
                  'distributions': [capture['row'] for capture in captures if not capture['own_project']],
                  'unowned_files': census['unowned_files'], 'excluded_roots': census['excluded_roots']}
-        return validate(value)
+        result = validate(value)
+        holder = _generation_capture.get()
+        if holder is not None:
+            holder.append(tuple(sorted(_fingerprints(captures, census).items())))
+        return result
     except (OSError, UnicodeError, TypeError, AttributeError, csv.Error) as exc:
         raise ValueError('environment metadata is missing, ambiguous or unreadable') from exc
 
 
 def _light_live(value):
+    return _run_census(_light_census, value)
+
+
+def _light_census(value):
     """Re-read RECORD hashes and lstat the complete included inventory.
 
     Same-size payload edits are intentionally outside this mode's guarantee.
@@ -688,10 +802,7 @@ def _light_live(value):
             raise ValueError('environment manifest is stale for the current interpreter environment')
         _require_stable_directories(census['directories'])
         _require_stable_payloads([census])
-        fingerprints = {path: pin for row in captures for path, pin in row['stat_identities'].items()}
-        for row in census['payloads']:
-            fingerprints[row['path']] = row['alias_identity']
-            fingerprints[row['physical']] = row['identity']
+        fingerprints = _fingerprints(captures, census)
         # Stat identities are only a process-local full-cache invalidation key,
         # never serialized as environment authority or used to hash payloads.
         for path, expected_stat in fingerprints.items():
@@ -703,8 +814,12 @@ def _light_live(value):
 
 
 def _verification_key(pin):
+    implementation = read_regular(str(Path(__file__).resolve(strict=True)),
+        'environment_manifest_implementation', max_bytes=MAX_BYTES).captured
+    if implementation.pin.sha256 != _IMPLEMENTATION_SHA256:
+        raise ValueError('environment manifest implementation changed since loading')
     executable = Path(sys.executable).resolve(strict=True)
-    return (str(ROOT), tuple(sorted(pin.items())), c.canonical(_interpreter_identity()),
+    return (_IMPLEMENTATION_SHA256, str(ROOT), tuple(sorted(pin.items())), c.canonical(_interpreter_identity()),
             str(executable), _file_identity(executable.lstat()), sys.prefix, sys.base_prefix,
             tuple(_import_paths()))
 
@@ -762,12 +877,28 @@ def write(path):
     path = c.canonical_path(str(path), 'environment manifest path')
     if str(Path(path).parent.resolve(strict=True) / Path(path).name) != path:
         raise ValueError('environment manifest parent must be its physical path')
-    raw = c.canonical(generate())
+    fingerprints = []
+    token = _generation_capture.set(fingerprints)
+    try:
+        value = generate()
+    finally:
+        _generation_capture.reset(token)
+    raw = c.canonical(value)
+    if len(fingerprints) != 1 or _light_live(value) != fingerprints[0]:
+        raise ValueError('installed payload changed during manifest generation')
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o444)
     with os.fdopen(fd, 'wb') as stream:
         stream.write(raw)
         stream.flush()
         os.fsync(stream.fileno())
     pin = {'path': path, 'bytes': len(raw), 'sha256': c.sha(raw)}
-    verify(pin, mode='full')
+    state = _process_state()
+    with state['lock']:
+        key = _verification_key(pin)
+        if len(state['full']) >= 64 and key not in state['full']:
+            raise ValueError('process environment verification pin bound exceeded')
+        if key not in state['full']:
+            state['full'][key] = (None, fingerprints[0])
+        # Re-read the persisted pin and recheck the live census after publication.
+        verify(pin, mode='full')
     return pin
