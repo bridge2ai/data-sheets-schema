@@ -13009,13 +13009,10 @@ _NATIVE_V2_RENDER_SOURCES = {
 
 _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
     **_NATIVE_V2_RENDER_SOURCES,
-    # U3-L: one integrated authority version, coupled to the complete producer
-    # family below. The older contracts retain their original source identity.
-    # Rotation authorized by the lead, 2026-11-14 (D148 manifest integration).
-    # Against 00b0f717, the loader restores the caller's import path after the
-    # verified helpers load and before yielding; the exact byte finder stays
-    # active. This prevents historical helper paths entering the fresh census.
-    'src/data_sheets_schema/native_execution_authority_v2.py': 'f865fea7736d4c1531742ab5081bfa19b1c43ba123f3d233dc4816d7d5d2b79e',
+    # Lead-authorized split, 2026-11-15: restore the historical integrated
+    # v2 authority (00b0f717). The v3 import-path restoration has its own
+    # explicit entry below; each route keeps one complete source identity.
+    'src/data_sheets_schema/native_execution_authority_v2.py': '00b0f717bc0398b905cfcb81de47c4434f70c2909bbbffb0b92789dbf867047c',
     # The reviewed #5966 v2 dispatcher adds a required, attempt-local
     # PYSTOW_HOME declaration. Include its path validator in the closed
     # three-module source contract; a new callee cannot inherit the prior
@@ -13056,13 +13053,19 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
 
 _NATIVE_V3_RENDER_SOURCES = {
     **_NATIVE_V2_INTEGRATED_RENDER_SOURCES,
+    # Lead-authorized split, 2026-11-15: v3 retains f865fea7, whose
+    # verified loader restores caller import roots before the census.
+    # This override prevents the historical v2 pin changing v3 authority.
+    'src/data_sheets_schema/native_execution_authority_v2.py': 'f865fea7736d4c1531742ab5081bfa19b1c43ba123f3d233dc4816d7d5d2b79e',
     # New v3 summaries authorized by the lead, 2026-11-14 (D148), after the
     # structural proof. Bind the complete v3 wire vocabulary and fresh v1
     # environment census, including payload verification and unowned files.
     # The v2 summaries retain their separate source closure. These identities
     # establish source structure, never a successful census or launch approval.
     'src/data_sheets_schema/native_shared_authority_wire.py': 'f0a21bb711b8b39e38350addf42627e338d1a17cacf1f653b56c6613098fdd6c',
-    'src/data_sheets_schema/native_environment_manifest.py': '13d4d45e0bd375608d3b8c4808af6ea51cb6489d1053e0415fa799e443f46e7c',
+    # Lead-authorized rotation, 2026-11-15: bind the full/light modes,
+    # process-local full verification reuse, and RECORD/size live checks.
+    'src/data_sheets_schema/native_environment_manifest.py': '72003fcee74562ce8f4a17eda49218830d44a74aebbee3c27b0b33fe987655e6',
 }
 
 
