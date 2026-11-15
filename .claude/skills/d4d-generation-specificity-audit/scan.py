@@ -13070,7 +13070,9 @@ _NATIVE_V3_RENDER_SOURCES = {
     'src/data_sheets_schema/native_shared_authority_wire.py': 'ef5bd0e1fb248597a53c0ba2973b94708a817abf04c1e13bea30811222797d99',
     # Lead-authorized rotation, 2026-11-15: bind the full/light modes,
     # process-local full verification reuse, and RECORD/size live checks.
-    'src/data_sheets_schema/native_environment_manifest.py': '790040b275d4d67aed40a6805835bb688030ec0ef3e7e004984aadcf4a2c10b7',
+    # Rotated (lead, 2026-11-16): the census ruling's call-local ancestor resolver
+    # (dev/ino/type identity) and write-seeded full memo, 3aaa19e77 + 14547b766.
+    'src/data_sheets_schema/native_environment_manifest.py': '14a6d87bf6a9c6b49989552a62a0ae7f81eec0673408c43570b0f3ad1df572be',
 }
 
 
