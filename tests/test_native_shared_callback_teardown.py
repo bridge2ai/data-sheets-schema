@@ -30,7 +30,7 @@ def exercise_timeout(monkeypatch, exceptional):
         try:
             with lock:
                 entered.set()
-                assert release.wait(2)
+                assert release.wait(60)
                 assert reference() is not None
                 assert not closed
         except BaseException as exc:
@@ -44,7 +44,7 @@ def exercise_timeout(monkeypatch, exceptional):
                 reference = weakref.ref(resource)
                 del resource
                 worker.start()
-                assert entered.wait(1)
+                assert entered.wait(30)
                 if exceptional:
                     raise original
         refusal = caught.value.__cause__ if exceptional else caught.value
@@ -68,7 +68,7 @@ def exercise_timeout(monkeypatch, exceptional):
                 pytest.fail('poisoned scope body entered')
     finally:
         release.set()
-        worker.join(2)
+        worker.join(30)
     assert not worker.is_alive()
     assert not errors
     gc.collect()

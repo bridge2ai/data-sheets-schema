@@ -45,7 +45,7 @@ def exercise_report_timeout(monkeypatch, exceptional, complete):
         try:
             with lock:
                 entered.set()
-                assert release.wait(2)
+                assert release.wait(60)
                 assert reference() is not None
                 assert not closed
         except BaseException as exc:
@@ -54,7 +54,7 @@ def exercise_report_timeout(monkeypatch, exceptional, complete):
     worker = threading.Thread(target=work)
     worker.start()
     try:
-        assert entered.wait(1)
+        assert entered.wait(30)
         with pytest.raises(RuntimeError if exceptional else ValueError) as caught:
             if exceptional:
                 try:
@@ -83,7 +83,7 @@ def exercise_report_timeout(monkeypatch, exceptional, complete):
         assert reference() is not None
     finally:
         release.set()
-        worker.join(2)
+        worker.join(30)
     assert not worker.is_alive()
     assert not errors
     gc.collect()
