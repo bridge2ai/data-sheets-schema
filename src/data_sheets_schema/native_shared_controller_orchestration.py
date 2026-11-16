@@ -248,12 +248,13 @@ class CallbackAdapter:
                 self.execution, self.registration_raw, render.commands(self.spec)) as warming:
             warming.admission.check_active()
 
-    def activate_before_dispatch(self, started_raw):
-        """        RunSpec boundary: validated-caller
+    def prepare_before_capture(self):
+        """RunSpec boundary: validated-caller
 
-        RunSpec precondition: Adapter holds the validated spec from composition reconstruction; fresh execution verification precedes freezing the same spec for callback admission.
+        RunSpec precondition: Adapter holds a reconstructed composition; fresh
+        execution verification precedes opening the non-reserving callback scope.
         """
-        if self._activated:
+        if self._activated or hasattr(self, '_classifier_scope'):
             raise ValueError('native shared callback identity is already spent')
         with control_loading.loaded_controls(self.value['dependencies']) as controls:
             if c.canonical(registration.verified(self.registration_raw,
@@ -266,12 +267,32 @@ class CallbackAdapter:
         self._classifier_scope = scope
         self.state, self.phase = self._callbacks.state, self._callbacks.phase
         self._receipt_catalogs = self._callbacks.catalogs
+
+    def close_prepared(self):
+        """Close an unreserved preparation after refusal, on the main thread."""
+        if not self._activated and hasattr(self, '_classifier_scope'):
+            scope = self._classifier_scope
+            del self._classifier_scope
+            scope.__exit__(None, None, None)
+
+    def activate_before_dispatch(self, started_raw):
+        """RunSpec boundary: validated-caller
+
+        RunSpec precondition: Prepared callbacks retain their active source
+        admission; activate_admitted freshly reconstructs before reserved writes.
+        """
+        if self._activated:
+            raise ValueError('native shared callback identity is already spent')
+        if not hasattr(self, '_classifier_scope'):
+            self.prepare_before_capture()
+        self._callbacks.admission.check_active()
         # Latch before any fallible write: partial activation cannot redispatch.
         self._activated = True
         try:
             self._callbacks.capture.activate_admitted(self._callbacks.admission, started_raw)
         except BaseException:
-            scope.__exit__(*sys.exc_info())
+            self._classifier_scope.__exit__(*sys.exc_info())
+            del self._classifier_scope
             raise
 
     def _callback_resources(self):

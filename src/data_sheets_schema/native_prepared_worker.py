@@ -26,7 +26,10 @@ class PreparedIdentity:
 
     def __init__(self, registration_raw, value, authorization):
         from . import native_execution_authority_v2 as authority
+        from . import native_shared_registration_orchestration as registration
         from .native_shared_controller import captured_preparation_body
+        if wire.canonical(registration.verified(registration_raw)) != wire.canonical(value):
+            raise ValueError('prepared worker requires freshly verified registration')
         self.registration_raw = registration_raw
         self.value_raw = wire.canonical(value)
         self.inputs = tuple((path, authorization['raw'][name])
@@ -59,6 +62,25 @@ class PreparedIdentity:
         if wire.canonical(value) != self.value_raw:
             raise ValueError('prepared worker registration changed')
         return value
+
+
+def checked_value(identity, registration_raw):
+    if type(identity) is not PreparedIdentity or identity.registration_raw != registration_raw:
+        raise ValueError('prepared registration differs from capture authority')
+    return identity.recheck()
+
+
+def exchange(directory, *, identity, attempt, max_age_seconds):
+    """Publish readiness only after preparation; return the one-use guard pin."""
+    raw = publish_prepared(directory, registration_raw=identity.registration_raw,
+        attempt=attempt, max_age_seconds=max_age_seconds,
+        source_sha256=identity.source_sha256,
+        environment_sha256=identity.environment_sha256)
+    result = wait_proceed(directory, prepared_raw=raw,
+        registration_raw=identity.registration_raw, attempt=attempt,
+        max_age_seconds=max_age_seconds)
+    checked_value(identity, identity.registration_raw)
+    return result
 
 
 def _directory(path):

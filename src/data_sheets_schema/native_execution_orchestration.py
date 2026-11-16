@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from . import native_pre_dispatch_timing as pre_timing
 
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 from dataclasses import dataclass
 from pathlib import Path
 import stat
@@ -139,13 +139,14 @@ def authorizations(raw, value, *, review_path, ci_path, launch_word_path, contra
             'identity': {name: {'path': inputs[name], 'sha256': draft._sha(body)} for name, body in captured.items()}}
 
 
-def _join_subscription_authority(guard, raw, value, authorization, *, current_launch=False):
+def _join_subscription_authority(guard, raw, value, authorization, *, current_launch=False,
+                                 prepared_identity=None):
     """Join admission to the engine's independently recaptured authority."""
     if guard is not None:
         from .native_subscription_admission import context
         module, extra = context(guard.raw, registration_raw=raw, runtime=value['runtime'],
             launch_word_raw=authorization['raw']['launch_word'], review_bundle_raw=authorization['raw']['review'],
-            current=current_launch)
+            current=current_launch, prepared_identity=prepared_identity)
         if current_launch:
             from .native_u4b_runtime import validate_prepared_runtime
             from .native_subscription_guard_v2 import SubscriptionGuard
@@ -269,7 +270,8 @@ def _guarded_classifier(adapter, budget_stop):
 
 
 def launch(registration_raw, *, review_path, ci_path, launch_word_path,
-           contract: ExecutionContract, effects: ExecutionEffects, expected_authority_sha256=None):
+           contract: ExecutionContract, effects: ExecutionEffects, expected_authority_sha256=None,
+           prepared_directory=None):
     """Consume one explicitly authorized native attempt, never retry or resume.
 
     This method can invoke the selected native executable. Calling it is a
@@ -291,11 +293,12 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
             return _launch(registration_raw, review_path=review_path, ci_path=ci_path,
                 launch_word_path=launch_word_path, contract=contract, effects=effects,
                 controls=controls, expected_profile=PRODUCTION_PROFILE,
-                expected_authority_sha256=expected_authority_sha256)
+                expected_authority_sha256=expected_authority_sha256,
+                prepared_directory=prepared_directory)
 
 
 def synthetic_launch(registration_raw, *, review_path, ci_path, launch_word_path,
-                     contract: ExecutionContract, effects: ExecutionEffects):
+                     contract: ExecutionContract, effects: ExecutionEffects, prepare_capture=None):
     """Fixed synthetic dispatch entry; the real launch entry always refuses it.
 
     RunSpec boundary: validated-caller
@@ -311,7 +314,8 @@ def synthetic_launch(registration_raw, *, review_path, ci_path, launch_word_path
         with loaded_capabilities(value['dependencies']) as controls:
             return _launch(registration_raw, review_path=review_path, ci_path=ci_path,
                 launch_word_path=launch_word_path, contract=contract, effects=effects,
-                controls=controls, expected_profile=SYNTHETIC_PROFILE)
+                controls=controls, expected_profile=SYNTHETIC_PROFILE,
+                prepare_capture=prepare_capture)
 
 
 def _require_launch_profile(runtime, expected):
@@ -332,7 +336,20 @@ def _execute_child(controls, argv, **kwargs):
 
 
 def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
-            contract, effects, controls, expected_profile='production', expected_authority_sha256=None):
+            contract, effects, controls, expected_profile='production', expected_authority_sha256=None,
+            prepared_directory=None, prepare_capture=None):
+    with ExitStack() as preparation_cleanup:
+        return _launch_prepared(registration_raw, review_path=review_path, ci_path=ci_path,
+            launch_word_path=launch_word_path, contract=contract, effects=effects,
+            controls=controls, expected_profile=expected_profile,
+            expected_authority_sha256=expected_authority_sha256,
+            prepared_directory=prepared_directory, prepare_capture=prepare_capture,
+            preparation_cleanup=preparation_cleanup)
+
+
+def _launch_prepared(registration_raw, *, review_path, ci_path, launch_word_path,
+            contract, effects, controls, expected_profile, expected_authority_sha256,
+            prepared_directory, prepare_capture, preparation_cleanup):
     controls.require_complete()
     registration, composition, authority = contract.registration, contract.composition, contract.authority
     gates, replay, shared = contract.gates, contract.replay, contract.shared
@@ -342,7 +359,9 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     _probe_runtime, expected_runtime_observation = effects.probe_runtime, effects.expected_runtime_observation
     authorizations, _unchanged, sys = effects.authorizations, effects.unchanged, effects.sys
     launch_guard = effects.launch_guard
-    if contract.kind == 'd4d_native_shared_attempt' and launch_guard is None:
+    preparing = prepared_directory is not None or prepare_capture is not None
+    prepared_identity = None
+    if contract.kind == 'd4d_native_shared_attempt' and launch_guard is None and not preparing:
         raise ValueError('shared native launch requires a subscription guard')
     value = registration.verified(registration_raw)
     original_execution = c.canonical(value)  # Invocation-local comparison bytes, never authority.
@@ -353,7 +372,9 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     check_authority(expected_authority_sha256, authorization['raw'])
     from .native_subscription_admission import (
         CurrentSelection, inspect_current_selection, accept_current_selection)
-    if type(launch_guard) is CurrentSelection:
+    if preparing:
+        pass  # No capture exists yet; all static verification continues below.
+    elif type(launch_guard) is CurrentSelection:
         inspect_current_selection(launch_guard, registration_raw=registration_raw,
             runtime=value['runtime'], authorization=authorization)
     else:
@@ -385,14 +406,34 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
     with pre_timing.step('controller_prewarm'):
         adapter = contract.make_controller(value, registration_raw)
         contract.prewarm_controller(adapter)
+    if preparing:
+        from .native_prepared_worker import PreparedIdentity, exchange
+        from .native_subscription_admission import select_current, preflight_current_selection
+        from .native_u4b_policy import registered_policy
+        prepared_identity = PreparedIdentity(registration_raw, value, authorization)
+        preparation_cleanup.callback(adapter.close_prepared)
+        adapter.prepare_before_capture()
+        if prepared_directory is not None:
+            selected_guard = exchange(prepared_directory, identity=prepared_identity,
+                attempt=attempt, max_age_seconds=registered_policy(value['runtime'])['max_age_seconds'])
+        else:
+            from .native_runtime_profiles import require_synthetic
+            require_synthetic(value['runtime'])
+            selected_guard = prepare_capture(prepared_identity)
+            prepared_identity.recheck()
+        launch_guard = select_current(selected_guard['guard_path'], selected_guard['guard_sha256'],
+            registration_raw=registration_raw, runtime=value['runtime'],
+            launch_word_path=launch_word_path, review_path=review_path)
+        preflight_current_selection(launch_guard, registration_raw=registration_raw, value=value)
     accepted_current_selection = False
     if type(launch_guard) is CurrentSelection:
         launch_guard = accept_current_selection(launch_guard,
             registration_raw=registration_raw, runtime=value['runtime'],
-            authorization=authorization)
+            authorization=authorization, prepared_identity=prepared_identity)
         accepted_current_selection = contract.kind == 'd4d_native_shared_attempt'
     _join_subscription_authority(
-        launch_guard, registration_raw, value, authorization, current_launch=True)
+        launch_guard, registration_raw, value, authorization, current_launch=True,
+        prepared_identity=prepared_identity)
     if accepted_current_selection:
         # Skip this effects.unchanged invocation only on the actual accepted
         # shared selection route. Its complete reconstruction/equality check is
@@ -419,7 +460,8 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
         from .native_subscription_capture import _current_authority, _require_latest_guard_claim
         from . import native_capture_words as words
         fresh_authority = _current_authority(registration_raw,
-            authorization['raw']['review'], authorization['raw']['launch_word'])
+            authorization['raw']['review'], authorization['raw']['launch_word'],
+            prepared_identity=prepared_identity)
         fresh_value = fresh_authority[0]
         if (c.canonical(fresh_value) != original_execution
                 or c.canonical(value) != original_execution):
@@ -501,7 +543,8 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                     def launch_check():
                         nonlocal dispatch_authority
                         _unchanged(value, registration_raw, authorization)
-                        _join_subscription_authority(launch_guard, registration_raw, value, authorization, current_launch=True)
+                        _join_subscription_authority(launch_guard, registration_raw, value, authorization,
+                            current_launch=True, prepared_identity=prepared_identity)
                         if (_file(attempt/'registration.json', 'consumed registration') != registration_raw
                                 or _file(attempt/'started.json', 'started identity') != started_raw
                                 or _file(attempt/'runtime-observation.json', 'runtime observation') != draft._encoded(observation)

@@ -114,6 +114,7 @@ def identity_fixture(tmp_path, monkeypatch):
     value = {'dependencies': {'base': {'package_sources': {
         'source.py': worker.wire.sha(source.read_bytes())}, 'modules': {}},
         'additional_modules': {}}, 'preparation_raw_json': '{}'}
+    monkeypatch.setattr(registration, 'verified', lambda raw: value)
     calls = []
     def recheck(raw, current, *, environment_mode):
         calls.append((raw, current, environment_mode))

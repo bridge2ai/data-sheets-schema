@@ -141,10 +141,12 @@ def manifest(paths):
 
 def fake_commands(monkeypatch, paths, *, mutate=None, fail=None, fail_exception=None):
     calls = []
+    order = (seq.COMMANDS[2], seq.COMMANDS[0], seq.COMMANDS[1])
+    monkeypatch.setattr(seq.os, 'killpg', lambda pid, signum: None)
     def run(command, **kwargs):
         assert command[:6] == [sys.executable, '-I', '-B', '-c', seq.BOOTSTRAP, str(seq.SOURCE_ROOT / 'src')]
         name = command[6]
-        assert name == seq.COMMANDS[len(calls)], 'wrong order, repeated command or retry'
+        assert name == order[len(calls)], 'wrong order, repeated command or retry'
         calls.append((command, kwargs))
         assert kwargs['stdin'] == subprocess.DEVNULL and kwargs['start_new_session'] is True
         assert 'check' not in kwargs
@@ -155,7 +157,6 @@ def fake_commands(monkeypatch, paths, *, mutate=None, fail=None, fail_exception=
         names = {'registration', 'review', 'launch_word', 'account_choice', 'ci'}
         if name == seq.COMMANDS[0]: names.add('sequence_start')
         if name == seq.COMMANDS[1]: names.add('capture')
-        if name == seq.COMMANDS[2]: names.add('subscription_guard')
         assert set(pins) == names
         for key, pin in pins.items():
             assert guard.sha(Path(pin['path']).read_bytes()) == pin['sha256']
@@ -172,7 +173,11 @@ def fake_commands(monkeypatch, paths, *, mutate=None, fail=None, fail_exception=
             target.write_bytes(b'{"invented":"guard"}\n')
             body = {'path': str(target), 'guard_sha256': guard.sha(target.read_bytes())}
         else:
-            assert command[command.index('--subscription-guard-sha256') + 1] == guard.sha(paths['subscription-guard'].read_bytes())
+            from data_sheets_schema import native_prepared_worker as worker
+            ipc = Path(command[command.index('--prepared-directory') + 1])
+            worker.publish_prepared(ipc, registration_raw=paths['registration'].read_bytes(),
+                attempt=guard.strict_json(paths['registration'].read_bytes())['registration']['attempt_directory'],
+                source_sha256='a' * 64, environment_sha256='b' * 64, max_age_seconds=1200)
             body = {'state': 'completed_pending_independent_review', 'runtime_gates_passed': True}
         document = {'command': name, 'result': body}
         data = mutate(name, document) if mutate else None
@@ -180,7 +185,11 @@ def fake_commands(monkeypatch, paths, *, mutate=None, fail=None, fail_exception=
         kwargs['stdout'].write(raw)
         kwargs['stderr'].write(b'PRIVATE child diagnostic\n')
         code = 17 if fail == name else 0
-        return SimpleNamespace(returncode=code, wait=lambda timeout: code, poll=lambda: code,
+        def poll():
+            if name == 'launch' and code == 0 and not (ipc / 'proceed.json').exists():
+                return None
+            return code
+        return SimpleNamespace(pid=os.getpid(), returncode=code, wait=lambda timeout=None: code, poll=poll,
                                send_signal=lambda signum: None)
     monkeypatch.setattr(seq.subprocess, 'Popen', run)
     return calls
@@ -197,7 +206,7 @@ def test_order_files_bytes_hashes_times_and_no_environment_input(tmp_path, monke
     assert doc['status'] == 'completed' and len(calls) == 3
     assert doc['capture_manifest'] == str(manifest(p))
     for index, step in enumerate(doc['steps']):
-        assert step['step'] == seq.COMMANDS[index]
+        assert step['step'] == (seq.COMMANDS[2], seq.COMMANDS[0], seq.COMMANDS[1])[index]
         assert doc['started_at'] <= step['started_at'] <= step['completed_at'] <= doc['completed_at']
         raw = Path(step['output_path']).read_bytes()
         assert step['output_sha256'] == guard.sha(raw)
@@ -215,10 +224,10 @@ def test_nonzero_or_spawn_error_stops_without_retry(tmp_path, monkeypatch, capsy
     p = paths(tmp_path)
     calls = fake_commands(monkeypatch, p, **({'fail_exception': step} if exception else {'fail': step}))
     assert run_sequence(argv(p)) == 1
-    expected = seq.COMMANDS.index(step) + 1
+    expected = (seq.COMMANDS[2], seq.COMMANDS[0], seq.COMMANDS[1]).index(step) + 1
     assert len(calls) == expected and len(record(p)['steps']) == expected
     assert record(p)['status'] == 'stopped'
-    for name in seq.OUTPUTS[expected:]:
+    for name in (seq.OUTPUTS[2], seq.OUTPUTS[0], seq.OUTPUTS[1])[expected:]:
         assert not (p['packet-directory'] / name).exists()
     assert 'PRIVATE' not in capsys.readouterr().err
 
@@ -240,7 +249,7 @@ def test_bad_response_stops_before_next_command(tmp_path, monkeypatch, step, bad
         if bad == 'result_empty': doc['result'] = {}
     calls = fake_commands(monkeypatch, p, mutate=mutate)
     assert run_sequence(argv(p)) == 1
-    assert len(calls) == seq.COMMANDS.index(step) + 1
+    assert len(calls) == min(seq.COMMANDS.index(step) + 2, 3)
 
 
 @pytest.mark.parametrize('step,key,value', [
@@ -260,14 +269,14 @@ def test_required_result_values_fail_closed(tmp_path, monkeypatch, step, key, va
             else: doc['result'][key] = value
     calls = fake_commands(monkeypatch, p, mutate=mutate)
     assert run_sequence(argv(p)) == 1
-    assert len(calls) == step + 1
+    assert len(calls) == min(step + 2, 3)
 
 
 def test_latest_capture_refusal_is_terminal(tmp_path, monkeypatch):
     p = paths(tmp_path)
     calls = fake_commands(monkeypatch, p, fail=seq.COMMANDS[1])
     assert run_sequence(argv(p)) == 1
-    assert len(calls) == 2
+    assert len(calls) == 3
     assert record(p)['steps'][-1]['return_code'] == 17
 
 
@@ -290,10 +299,12 @@ def test_repeated_packet_cannot_recapture(tmp_path, monkeypatch):
     p = paths(tmp_path)
     calls = fake_commands(monkeypatch, p)
     assert run_sequence(argv(p)) == 0
-    before = {f.name: f.read_bytes() for f in p['packet-directory'].iterdir()}
+    before = {str(f.relative_to(p['packet-directory'])): f.read_bytes()
+              for f in p['packet-directory'].rglob('*') if f.is_file()}
     assert run_sequence(argv(p)) == 1
     assert len(calls) == 3
-    assert {f.name: f.read_bytes() for f in p['packet-directory'].iterdir()} == before
+    assert {str(f.relative_to(p['packet-directory'])): f.read_bytes()
+            for f in p['packet-directory'].rglob('*') if f.is_file()} == before
 
 
 @pytest.mark.parametrize('after', [0, 1])
@@ -303,7 +314,7 @@ def test_mutated_inputs_stop_before_later_command(tmp_path, monkeypatch, after):
         if name == seq.COMMANDS[after]: p['review'].write_bytes(b'changed')
     calls = fake_commands(monkeypatch, p, mutate=mutate)
     assert run_sequence(argv(p)) == 1
-    assert len(calls) == after + 1
+    assert len(calls) == after + 2
 
 
 def test_returned_old_capture_is_refused(tmp_path, monkeypatch):
@@ -313,7 +324,7 @@ def test_returned_old_capture_is_refused(tmp_path, monkeypatch):
     m.write_bytes(b'previous capture')
     calls = fake_commands(monkeypatch, p)
     assert run_sequence(argv(p)) == 1
-    assert len(calls) == 1
+    assert len(calls) == 2
 
 
 @pytest.mark.parametrize('change', ['relative', 'missing_input', 'symlink_input', 'guard_collision'])
@@ -360,7 +371,7 @@ def test_isolated_real_subprocess_uses_only_copied_fake_command(tmp_path, entry_
     for name in ('native_launch_sequence', 'native_subscription_guard', 'native_sequence_start', 'native_launch_entry',
                  'native_capture_words', 'native_subscription_guard_v2', 'native_u4b_policy',
                  # native_u4b_policy checks the registered limits pair (D143).
-                 'native_run_limits', 'native_path_identity',
+                 'native_run_limits', 'native_path_identity', 'native_prepared_worker',
                  'native_shared_runtime_values', 'native_runtime_profiles', 'native_host_power'):
         (package / (name + '.py')).write_bytes((seq.SOURCE_ROOT / 'src/data_sheets_schema' / (name + '.py')).read_bytes())
     (package / 'native_generation.py').write_text('''import json, hashlib, os, sys
@@ -380,6 +391,13 @@ def main():
         path = Path(flags['--output']); path.write_bytes(b'{}')
         body = {'path': str(path), 'guard_sha256': hashlib.sha256(b'{}').hexdigest()}
     elif name == 'launch':
+        from data_sheets_schema import native_prepared_worker as worker
+        raw = Path(flags['--registration']).read_bytes()
+        attempt = json.loads(raw)['registration']['attempt_directory']
+        prepared = worker.publish_prepared(flags['--prepared-directory'], registration_raw=raw,
+            attempt=attempt, source_sha256='a' * 64, environment_sha256='b' * 64, max_age_seconds=1200)
+        worker.wait_proceed(flags['--prepared-directory'], prepared_raw=prepared,
+            registration_raw=raw, attempt=attempt, max_age_seconds=1200)
         body = {'state': 'completed_pending_independent_review', 'runtime_gates_passed': True}
     else:
         raise AssertionError('unexpected command')
