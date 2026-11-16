@@ -321,12 +321,12 @@ def _fact_targets(facts, *, module, package, owned, package_sources,
     return targets
 
 
-def _package_name(path):
+def _package_name(path, *, package_root=None):
     """Classify physical package sources independently of their import spelling."""
     if not path:
         return None
     resolved = Path(path).resolve()
-    root = (ROOT / PACKAGE).resolve()
+    root = (ROOT / PACKAGE).resolve() if package_root is None else package_root
     if not resolved.is_relative_to(root):
         return None
     if resolved.suffix != '.py':
@@ -335,6 +335,26 @@ def _package_name(path):
     if parts[-1] == '__init__':
         parts = parts[:-1]
     return '.'.join(('data_sheets_schema', *parts))
+
+
+def _ambient_package_bindings():
+    """Scan one pre-import segment; discard its root before any source load.
+
+    Only the duplicate package-root resolution is shared. Every module origin
+    is resolved independently. Exit checks call _package_name without this
+    local root and therefore observe the physical package again.
+    """
+    root = None
+    for key, loaded in list(sys.modules.items()):
+        if key.startswith('data_sheets_schema.'):
+            yield key
+        elif key != 'data_sheets_schema':
+            path = getattr(loaded, '__file__', None)
+            if path:
+                if root is None:
+                    root = (ROOT / PACKAGE).resolve()
+                if _package_name(path, package_root=root):
+                    yield key
 
 
 def _resolved_import(name):
@@ -1022,9 +1042,7 @@ def verified_source_module(name, *, path, raw, sha256, package_sources=None):
     absent = object()
     bindings = set(sources) - {'data_sheets_schema'}
     if package_sources is not None:
-        bindings.update(key for key, loaded in list(sys.modules.items())
-                        if key.startswith('data_sheets_schema.') or
-                        key != 'data_sheets_schema' and _package_name(getattr(loaded, '__file__', None)))
+        bindings.update(_ambient_package_bindings())
     previous = {key: sys.modules.get(key, absent) for key in bindings}
     parents = {}
     for key in bindings:
