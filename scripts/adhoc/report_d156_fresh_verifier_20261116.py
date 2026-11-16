@@ -47,21 +47,28 @@ def main():
     timing_path = SCRATCH / 'guard-public-timings.jsonl'
     timings = rows(timing_path) if timing_path.exists() else []
     observers = [row for row in timings if row.get('function') == '_observe_event']
-    dispatches = [row for row in timings if row.get('function') == '_admit_subscription_guard']
     artifacts = {name: [str(path) for path in public.rglob(name)] for name in
                  ('capture.json', 'subscription-dispatched.json', 'actual-result.json')}
     traces = [row for path in public.rglob('host-pre-dispatch-*.jsonl') for row in rows(path)]
     captures = [row for row in traces if row.get('boundary') == 'capture_observed']
+    results = [json.loads(Path(path).read_text()) for path in artifacts['actual-result.json']]
+    guard = results[-1].get('subscription_guard', {}) if results else {}
     capture_to_dispatch = None
-    if captures and dispatches:
-        stamp = captures[-1].get('captured_at')
-        if stamp:
-            capture_to_dispatch = dispatches[-1]['completed_wall'] - datetime.fromisoformat(stamp.replace('Z', '+00:00')).timestamp()
+    if guard.get('captured_at') and guard.get('dispatched_at'):
+        capture_to_dispatch = (datetime.fromisoformat(guard['dispatched_at'].replace('Z', '+00:00'))
+                               - datetime.fromisoformat(guard['captured_at'].replace('Z', '+00:00'))).total_seconds()
+    callbacks = [row for row in timings if row.get('function') == 'at_callback']
+    final_observers = [row for row in observers if any(
+        callback['started_wall'] <= row['started_wall'] <= row['completed_wall'] <= callback['completed_wall']
+        for callback in callbacks)]
     helpers = []
+    receipt_errors = []
     for path in public.rglob('*stderr*'):
         if not path.is_file():
             continue
         for line in path.read_text(errors='replace').splitlines():
+            if line.startswith('Error: native receipt paths refused:'):
+                receipt_errors.append({'path': str(path), 'error': line})
             try:
                 row = json.loads(line)
             except ValueError:
@@ -73,7 +80,9 @@ def main():
     pins = json.loads(pins_path.read_text())
     ledger = {'head': head, 'lanes': lanes, 'artifacts': artifacts,
         'capture_to_dispatch_seconds': capture_to_dispatch,
-        'peak_final_callback_observe_event_seconds': max((row['seconds'] for row in observers), default=None),
+        'peak_final_callback_observe_event_seconds': max((row['seconds'] for row in final_observers), default=None),
+        'peak_all_completed_observe_event_seconds': max((row['seconds'] for row in observers), default=None),
+        'receipt_errors': receipt_errors, 'dispatch_guard': guard,
         'late_advance': advances[-1] if advances else None,
         'helper_times': helpers, 'timings': timings, 'capture_traces': captures, 'pins': pins}
     ledger_path = SCRATCH / 'fresh-verifier-evidence.json'
@@ -87,7 +96,9 @@ def main():
         threshold = 'At or under 60 seconds: owner ruling 4A-Post keeps issues 4400 and 4550 deferred.'
     else:
         threshold = 'Neither threshold is established by a completed final-callback result.'
-    lines = ['# D156 fresh-process verifier: ' + ('public correction passed' if passed else 'public correction not established'), '',
+    lines = ['# D156 fresh-process verifier: ' + ('public correction passed' if passed else 'public correction failed after dispatch'), '',
+        'Final public case: ' + ('passed.' if passed else 'failed. First runtime stop: ' + (receipt_errors[0]['error'] if receipt_errors else 'see retained lane results')),
+        'Tested source head: 38db5aaca76e3c806831c2c78c76bd0eaa9cb230. Subsequent changes affect this report only.', '',
         'Implemented design A. It touches zero lines in the security-relevant loader; design B would alter ownership and restoration of its nested process-wide scopes. Exact-class checked_value and the verifier import restriction remain unchanged. Every check uses a new interpreter, nonce and exact-input digest over pipes; only an exit-zero matching pass is accepted. Timeout kills the verifier process group. No reusable verdict is persisted.', '',
         'The constructor freshly verifies the registration and compares its census identities with the original full preparation baseline. Later checks freshly validate bytes, HEAD, roster/pins, committed sources, interpreter, preparation/composition, runtime and light census against those identities. Transferred census identities are comparison data and never populate a child full-verification cache. CLI launches carry the registration file path; synthetic byte-only callers retain exact registration-byte binding.', '',
         'Source head: ' + head + '. No push, GitHub write, provider call, Claude binary execution or pin edit.', '',
@@ -96,13 +107,15 @@ def main():
         for path, result in lane['results'].items():
             lines.append('- ' + name + ': ' + ', '.join(str(result[key]) + ' ' + key for key in ('passed', 'failed', 'errors', 'skipped')) + '. Evidence: ' + path)
             for stop in result['stops']:
-                lines.append('  First stop: ' + str(stop))
+                lines.append('  Failure excerpt: ' + str(stop)[:500] + '. Full failure retained in XML and evidence ledger.')
     lines += ['', 'Capture-to-dispatch seconds: ' + str(capture_to_dispatch) + '.',
         'Peak completed final-callback _observe_event seconds: ' + str(ledger['peak_final_callback_observe_event_seconds']) + '.',
+        'Peak across all earlier completed _observe_event spans: ' + str(ledger['peak_all_completed_observe_event_seconds']) + ' seconds; this is not a final-callback measurement.',
         threshold,
         'Late advance: ' + json.dumps(ledger['late_advance'], sort_keys=True) + '.',
         'Missing timings are unknown and establish neither owner threshold. Artifact discovery includes ignored and hidden files through Path.rglob.', '',
-        'The real-loader canary exercises the unmocked constructor and a real child: the parent still refuses verifier-bootstrap imports while the child reaches fresh registration validation. It is an invalid-input refusal witness; the public case supplies the complete acceptance check. Timeout and reply-replay tests are focused simulations.', '',
+        'Capture-to-dispatch uses captured_at and dispatched_at from the saved result subscription_guard. The receipts failure occurred before a completed at_callback span or late advance. Its underlying census difference is not diagnosed here; no environment check was weakened and no unrelated receipt changes were made. Retained receipt errors: ' + json.dumps(receipt_errors, sort_keys=True) + '.', '',
+        'The real-loader canary exercises the unmocked constructor and a real child: the parent still refuses verifier-bootstrap imports while the child reaches fresh registration validation. It is an invalid-input refusal witness; the public case confirms prepared rechecks and dispatch, but not completion. Timeout and reply-replay tests are focused simulations.', '',
         'The strengthened constructor assertion initially exposed a noncanonical interpreter spelling in the unit command. The child correctly refused the differing executable strings. The canonical-path rerun retains strict interpreter equality and verifies the actual registration-validation frame, rather than accepting any child refusal.', '',
         '## Integration and review', '',
         'Overlapping-file functions touched: native_prepared_worker._full_preparation_baseline, _verify, PreparedIdentity.__init__, PreparedIdentity._verify, PreparedIdentity.recheck, PreparedIdentity.require_unchanged and exchange. No edits to native_launch_sequence.py or run_native_canary.py.', '',
