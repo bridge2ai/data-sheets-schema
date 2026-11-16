@@ -412,6 +412,7 @@ def _launch_prepared(registration_raw, *, review_path, ci_path, launch_word_path
         prepared_identity = PreparedIdentity(registration_raw, value, authorization)
         preparation_cleanup.callback(adapter.close_prepared)
         adapter.prepare_before_capture()
+        contract.transport_phase_spec(adapter)
         if prepared_directory is not None:
             selected_guard = exchange(prepared_directory, identity=prepared_identity,
                 attempt=attempt, max_age_seconds=registered_policy(value['runtime'])['max_age_seconds'])
@@ -424,6 +425,9 @@ def _launch_prepared(registration_raw, *, review_path, ci_path, launch_word_path
             registration_raw=registration_raw, runtime=value['runtime'],
             launch_word_path=launch_word_path, review_path=review_path)
         preflight_current_selection(launch_guard, registration_raw=registration_raw, value=value)
+        # Preserve every later refusal seam while replacing full semantic
+        # reconstruction with fresh bytes, HEAD, package and census checks.
+        _unchanged = prepared_identity.require_unchanged
     accepted_current_selection = False
     if type(launch_guard) is CurrentSelection:
         launch_guard = accept_current_selection(launch_guard,

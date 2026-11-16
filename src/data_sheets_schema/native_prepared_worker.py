@@ -66,6 +66,17 @@ class PreparedIdentity:
             raise ValueError('prepared worker registration changed')
         return value
 
+    def require_unchanged(self, value, raw, authorization):
+        if raw != self.registration_raw or wire.canonical(value) != self.value_raw:
+            raise ValueError('prepared worker in-memory registration changed')
+        current = tuple((path, authorization['raw'][name])
+                        for name, path in authorization['inputs'].items())
+        if current != self.inputs:
+            raise ValueError('prepared worker in-memory authorization changed')
+        self.recheck()
+        from .native_shared_execution_orchestration import _unchanged_inputs
+        _unchanged_inputs(value, authorization)
+
 
 def checked_value(identity, registration_raw):
     if type(identity) is not PreparedIdentity or identity.registration_raw != registration_raw:
