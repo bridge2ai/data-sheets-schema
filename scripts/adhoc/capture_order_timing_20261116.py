@@ -16,6 +16,7 @@ SELECTED = {
     'native_shared_capture.py': {'at_callback'},
     'native_prepared_worker.py': {'exchange', 'recheck'},
     'native_synthetic_evidence.py': {'_mint_capture'},
+    'native_execution_orchestration.py': {'_admit_subscription_guard'},
 }
 active = {}
 stream = None
