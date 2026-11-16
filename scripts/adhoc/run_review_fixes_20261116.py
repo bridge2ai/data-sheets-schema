@@ -26,6 +26,7 @@ plans = [
                   'tests/test_native_h1_scanner_authority.py', 'tests/test_native_u1_scanner_contracts.py']),
     ('collection', ['--lane', 'unit', '--', '--collect-only', '-q', 'tests']),
 ]
+failed = False
 for name, flags in plans:
     command = [sys.executable, str(primary / 'scripts/adhoc/run_lane_20261115.py'),
         '--root', str(root), '--python', str(scratch / 'isolated-venv/bin/python'),
@@ -33,6 +34,7 @@ for name, flags in plans:
         '--timeout-seconds', '1800', *dry, *flags]
     print('COMMAND: ' + ' '.join(command), flush=True)
     result = subprocess.run(command, cwd=root)
+    failed = failed or result.returncode != 0
     print('LANE RESULT: ' + name + ' ' + str(result.returncode), flush=True)
     if name == 'canary-three-workers' and not dry:
         markers = list((scratch / name / 'basetemp').rglob('cleanup-completed'))
@@ -40,3 +42,4 @@ for name, flags in plans:
         if (result.returncode != 0 or not report.is_file() or report.stat().st_size == 0
                 or not any(path.read_text() == 'transport cleanup returned' for path in markers)):
             raise SystemExit('Canary did not persist successful cleanup evidence; no batch launched')
+raise SystemExit(1 if failed else 0)
