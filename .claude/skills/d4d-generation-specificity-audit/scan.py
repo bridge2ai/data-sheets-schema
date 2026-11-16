@@ -13055,7 +13055,7 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
 
 _NATIVE_V3_RENDER_SOURCES = {
     **_NATIVE_V2_INTEGRATED_RENDER_SOURCES,
-    # Lead-authorized split, 2026-11-15: v3 retains f865fea7, whose
+    # Lead-authorized split, updated 2026-11-16: v3 uses 7d6c13f8, whose
     # verified loader restores caller import roots before the census.
     # This override prevents the historical v2 pin changing v3 authority.
     'src/data_sheets_schema/native_execution_authority_v2.py': '7d6c13f8ca6c58be9a322cf5fb8679cf6d5734564227990eb5adac6261eac6e8',
