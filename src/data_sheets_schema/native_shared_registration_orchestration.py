@@ -142,7 +142,7 @@ def verified(raw):
         return result
 
 
-def _recheck_verified(raw, value):
+def _recheck_verified(raw, value, *, environment_mode='full'):
     """Recheck live source, preparation/composition pins and runtime for a verified body."""
     from pathlib import Path
     import sys
@@ -189,7 +189,7 @@ def _recheck_verified(raw, value):
             raise ValueError('v2 preparation digest mismatch')
         preparation = captured_composition.captured_preparation_body(preparation_raw)
         from . import native_environment_manifest
-        native_environment_manifest.verify(preparation['environment_manifest'], mode='full')
+        native_environment_manifest.verify(preparation['environment_manifest'], mode=environment_mode)
         if preparation['pinned_files'].get(preparation['environment_manifest']['path']) != preparation['environment_manifest']['sha256']:
             raise ValueError('prepared environment manifest is not in the pinned file map')
         execution_v2._job_id(preparation['job_id'])

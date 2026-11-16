@@ -17,6 +17,50 @@ LIMIT = 64 * 1024
 POLL_SECONDS = 0.1
 
 
+class PreparedIdentity:
+    """Invocation-local comparison bytes; every resume freshly checks live inputs.
+
+    Construction follows full registration and classifier verification. This
+    object grants no admission and is never serialized as a reusable verdict.
+    """
+
+    def __init__(self, registration_raw, value, authorization):
+        from . import native_execution_authority_v2 as authority
+        from .native_shared_controller import captured_preparation_body
+        self.registration_raw = registration_raw
+        self.value_raw = wire.canonical(value)
+        self.inputs = tuple((path, authorization['raw'][name])
+                            for name, path in authorization['inputs'].items())
+        dependencies = value['dependencies']
+        self.source_sha256 = wire.sha(wire.canonical(dependencies))
+        preparation = captured_preparation_body(value['preparation_raw_json'].encode())
+        self.environment_sha256 = preparation['environment_manifest']['sha256']
+        paths = dict(dependencies['base']['package_sources'])
+        paths.update((pin['path'], pin['sha256'])
+                     for pin in dependencies['base']['modules'].values())
+        paths.update((pin['path'], pin['sha256'])
+                     for pin in dependencies['additional_modules'].values())
+        self.sources = tuple((authority.ROOT / path, digest)
+                             for path, digest in sorted(paths.items()))
+
+    def recheck(self):
+        from . import native_shared_registration_orchestration as registration
+        for path, digest in self.sources:
+            if wire.sha(wire.read_regular(path, limit=32 * 1024 * 1024)) != digest:
+                raise ValueError('prepared worker source bytes changed')
+        for path, raw in self.inputs:
+            if wire.read_regular(path, limit=32 * 1024 * 1024) != raw:
+                raise ValueError('prepared worker authority bytes changed')
+        # This reconstructs the live dependency identity (including Git HEAD,
+        # package roster/pins and interpreter), checks committed source blobs,
+        # all preparation/composition pins and runtime, and runs a light census.
+        value = registration._recheck_verified(self.registration_raw,
+            wire.strict_json(self.value_raw), environment_mode='light')
+        if wire.canonical(value) != self.value_raw:
+            raise ValueError('prepared worker registration changed')
+        return value
+
+
 def _directory(path):
     path = Path(path)
     if not path.is_absolute() or path.resolve(strict=True) != path or not path.is_dir():

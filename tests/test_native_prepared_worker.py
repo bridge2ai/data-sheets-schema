@@ -98,3 +98,53 @@ def test_refuse_attempt_as_ipc(tmp_path):
     with pytest.raises(ValueError, match='overlaps'):
         worker.publish_prepared(tmp_path, registration_raw=b'registration', attempt=tmp_path,
             max_age_seconds=1200, source_sha256='a' * 64, environment_sha256='b' * 64)
+
+
+def identity_fixture(tmp_path, monkeypatch):
+    from data_sheets_schema import native_execution_authority_v2 as authority
+    from data_sheets_schema import native_shared_controller as controller
+    from data_sheets_schema import native_shared_registration_orchestration as registration
+    source = tmp_path / 'source.py'
+    source.write_bytes(b'original source')
+    review = tmp_path / 'review.json'
+    review.write_bytes(b'original review')
+    monkeypatch.setattr(authority, 'ROOT', tmp_path)
+    monkeypatch.setattr(controller, 'captured_preparation_body', lambda raw:
+        {'environment_manifest': {'sha256': 'a' * 64}})
+    value = {'dependencies': {'base': {'package_sources': {
+        'source.py': worker.wire.sha(source.read_bytes())}, 'modules': {}},
+        'additional_modules': {}}, 'preparation_raw_json': '{}'}
+    calls = []
+    def recheck(raw, current, *, environment_mode):
+        calls.append((raw, current, environment_mode))
+        return current
+    monkeypatch.setattr(registration, '_recheck_verified', recheck)
+    identity = worker.PreparedIdentity(b'registration', value,
+        {'inputs': {'review': str(review)}, 'raw': {'review': review.read_bytes()}})
+    return identity, source, review, calls
+
+
+def test_changed_source_refuses_before_live_reconstruction(tmp_path, monkeypatch):
+    identity, source, _, calls = identity_fixture(tmp_path, monkeypatch)
+    source.write_bytes(b'changed source')
+    with pytest.raises(ValueError, match='source bytes changed'):
+        identity.recheck()
+    assert not calls
+
+
+def test_changed_authority_refuses(tmp_path, monkeypatch):
+    identity, _, review, calls = identity_fixture(tmp_path, monkeypatch)
+    review.write_bytes(b'changed review')
+    with pytest.raises(ValueError, match='authority bytes changed'):
+        identity.recheck()
+    assert not calls
+
+
+def test_each_recheck_requests_fresh_light_verification(tmp_path, monkeypatch):
+    identity, _, _, calls = identity_fixture(tmp_path, monkeypatch)
+    first = identity.recheck()
+    first['dependencies'].clear()
+    second = identity.recheck()
+    assert second['dependencies']
+    assert len(calls) == 2
+    assert all(call[0] == b'registration' and call[2] == 'light' for call in calls)
