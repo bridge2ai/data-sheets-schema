@@ -13048,8 +13048,8 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
     # and the native_control and run_native_canary hashes. These are identity
     # data, not loader logic. The base summary keeps the earlier contract's
     # identity.
-    'src/data_sheets_schema/native_attribution_controller_v2.py': '277a7730f8aa47077cd69124cba165ec7af78b41679f046b92ad979d205cb5e1',
-    'src/data_sheets_schema/native_controller_sources_v2.json': 'dffa68b9e199d7d3eb48f7f74f7226f345f1e8d9d38cb4423267d8e09dc9473b',
+    'src/data_sheets_schema/native_attribution_controller_v2.py': '6baa7e1fcdd64c22442ad54e3554178ee390d64c0e17594bd7e298be3a204247',
+    'src/data_sheets_schema/native_controller_sources_v2.json': '80e6d1febbfe420e1cc3c2900d45a7551b4fbe106bad1bac3d25c84226fd042f',
 }
 
 
@@ -13067,12 +13067,12 @@ _NATIVE_V3_RENDER_SOURCES = {
     # Rotated at the merge into the candidate (lead, 2026-11-15): against
     # f0a21bb7, only CONTROLLER_SOURCES_SHA256 d4ad9c21 -> e500cb15, the
     # controller sources rotated for #6244 (b9192ff75).
-    'src/data_sheets_schema/native_shared_authority_wire.py': '8affe5f878119d0d602b5c951e6ce93fe2aa7e03de9a7b20466a3e8e716ddeef',
+    'src/data_sheets_schema/native_shared_authority_wire.py': '3040f1ba23f14fd89add554c13a017ce4fde095e2ecead82e768fb0d94bac165',
     # Lead-authorized rotation, 2026-11-15: bind the full/light modes,
     # process-local full verification reuse, and RECORD/size live checks.
     # Rotated (lead, 2026-11-16): the census ruling's call-local ancestor resolver
     # (dev/ino/type identity) and write-seeded full memo, 3aaa19e77 + 14547b766.
-    'src/data_sheets_schema/native_environment_manifest.py': '527d0948c0b0bbd808950c3bcd9e28788a30b5067eed155eaec10ffc06fef2d6',
+    'src/data_sheets_schema/native_environment_manifest.py': '054f6dd80b4b5b38888699a32b8ecf5b0d4ec5076588d2a02de175e6bdc71fa0',
 }
 
 
