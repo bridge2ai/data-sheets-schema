@@ -733,10 +733,12 @@ def _require_owned_import_roots(paths, captures, *, light_unowned=None):
         root, directory = pending.pop()
         if not _path_kind(directory, stat.S_ISDIR):
             raise ValueError('unsupported archive or non-directory third-party import root: ' + str(directory))
-        snapshots[directory] = _file_identity(_path_status(directory))
         # Shared-parent resolution also follows the independent 8acf20b47
         # optimization; leaf symlinks still receive strict resolution.
         physical_directory = _resolve(directory, strict=True)
+        # Directory stability covers this enumeration, not an earlier cached
+        # resolver observation made before unrelated entry activity.
+        snapshots[directory] = _file_identity(os.lstat(directory))
         with os.scandir(directory) as iterator:
             entries = sorted(iterator, key=lambda entry: entry.name)
         for entry in entries:
