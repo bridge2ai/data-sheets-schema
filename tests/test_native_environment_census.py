@@ -9,6 +9,22 @@ from tests.test_native_environment_manifest import installed  # noqa: F401
 from tests.test_native_environment_modes import pin_document
 
 
+def test_import_root_snapshot_is_fresh_at_enumeration(tmp_path):
+    root = tmp_path / 'imports'
+    root.mkdir()
+    resolver = m._CensusResolver()
+    resolver.status(root)
+    # Bytecode is excluded from the inventory but changes directory metadata.
+    (root / 'unrelated.pyc').write_bytes(b'ignored')
+    token = m._census_resolver.set(resolver)
+    try:
+        result = m._require_owned_import_roots([str(root)], [])
+        assert result['directories'][root] == m._file_identity(root.lstat())
+        assert result['unowned_files'] == []
+    finally:
+        m._census_resolver.reset(token)
+
+
 def test_census_allows_unrelated_sibling_creation(installed, monkeypatch):
     check = m._require_stable_payloads
     sibling = installed.root.with_name('unrelated-sibling')

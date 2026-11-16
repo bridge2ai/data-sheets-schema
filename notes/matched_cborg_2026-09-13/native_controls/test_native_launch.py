@@ -67,6 +67,32 @@ def test_final_dispatch_refusal_after_admission_teardown_prevents_spawn(tmp_path
     assert any('stale at final boundary' in reason for reason in recorded)
 
 
+def test_elapsed_clock_work_precedes_final_subscription_sample(tmp_path, monkeypatch):
+    instruction = tmp_path / 'input.txt'
+    instruction.write_text('offline')
+    wall = [100.0]
+    elapsed = runner.elapsed_ns
+    verified = [False]
+    def elapsed_with_wall_advance():
+        if verified[0]:
+            wall[0] = 160.0
+        return elapsed()
+    def launch_check():
+        verified[0] = True
+    def final_check():
+        if wall[0] >= 160.0:
+            raise BudgetStop('subscription window reset during elapsed-clock work')
+    def forbidden_spawn(*args, **kwargs):
+        pytest.fail('window reset must prevent process creation')
+    monkeypatch.setattr(runner, 'elapsed_ns', elapsed_with_wall_advance)
+    monkeypatch.setattr(runner.subprocess, 'Popen', forbidden_spawn)
+    proxy = SimpleNamespace(failed=threading.Event(), failure=None, close_admission=lambda: None)
+    with pytest.raises(BudgetStop, match='window reset during elapsed-clock work'):
+        execute_child(['unused'], proxy=proxy, instruction=instruction,
+            attempt=tmp_path, cwd=tmp_path, env={}, deadline_seconds=5,
+            verify_launch=launch_check, verify_dispatch=final_check)
+
+
 def test_same_version_alias_retarget_cannot_change_launched_bytes(tmp_path):
     one=tmp_path/'one';two=tmp_path/'two';alias=tmp_path/'cli'
     executable(one,'one');executable(two,'two');alias.symlink_to(one)

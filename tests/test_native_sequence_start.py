@@ -17,7 +17,7 @@ def test_different_packet_retry_needs_new_direction(tmp_path, monkeypatch):
            '--host-confirmed-at','2026-11-12T11:59:00Z']
     calls=fixtures.fake_commands(monkeypatch,p,fail=seq.COMMANDS[0])
     assert fixtures.run_sequence([*fixtures.argv(p),*flags])==1
-    assert len(calls)==1
+    assert [command[6] for command, _ in calls] == [seq.COMMANDS[2], seq.COMMANDS[0]]
     old=Path(fixtures.record(p)['start_claim']); raw=old.read_bytes()
     first_manifest=fixtures.manifest(p)
     p['packet-directory']=tmp_path/'second-packet'

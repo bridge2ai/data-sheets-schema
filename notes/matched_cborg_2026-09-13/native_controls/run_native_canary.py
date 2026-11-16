@@ -651,13 +651,13 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                 if not exit_check_available():
                     raise BudgetStop('native control needs a non-reaping exit check (os.waitid; macOS Python 3.13+)')
                 verify_launch()  # Bind the executable immediately before Popen.
-            if verify_dispatch is not None:
-                verify_dispatch()
             # Dispatch origin includes process creation but excludes admission.
             # Unlike monotonic() on macOS, this clock includes host suspension.
             dispatch_ns = elapsed_ns()
             admission.check(dispatch_ns)
             deadline = dispatch_ns + int(deadline_seconds * 1_000_000_000)
+            if verify_dispatch is not None:
+                verify_dispatch()
             process = subprocess.Popen(argv, stdin=subprocess.PIPE if control else incoming, cwd=cwd,
                 env=env, stdout=subprocess.PIPE if control else out, stderr=err, start_new_session=True)
             timing.record('admission_end', status='admitted',

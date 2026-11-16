@@ -55,6 +55,9 @@ def deny_real_commands(monkeypatch):
     def fixture_exec(code, namespace):
         builtins.exec(code, namespace)
         namespace['_utc_now'] = seq._utc_now
+        # This fixture forbids real command processes. Stub only the prepared
+        # owner's delivery, preserving actual signals sent to the test parent.
+        namespace['_PreparedStep'].send_signal = lambda self, signum: None
     monkeypatch.setattr(entry, 'exec', fixture_exec, raising=False)
 
 
@@ -199,6 +202,38 @@ def fake_commands(monkeypatch, paths, *, mutate=None, fail=None, fail_exception=
                                send_signal=lambda signum: None)
     monkeypatch.setattr(seq.subprocess, 'Popen', run)
     return calls
+
+
+def test_worker_death_after_ready_does_not_spend_capture(tmp_path, monkeypatch):
+    from data_sheets_schema import native_prepared_worker as worker
+    p = paths(tmp_path)
+    calls = fake_commands(monkeypatch, p)
+    require = worker.require_prepared
+    def die_after_ready(*args, **kwargs):
+        raw = require(*args, **kwargs)
+        monkeypatch.setattr(seq.os, 'waitid', lambda *args: SimpleNamespace(
+            si_pid=os.getpid(), si_code=os.CLD_EXITED, si_status=7))
+        return raw
+    monkeypatch.setattr(worker, 'require_prepared', die_after_ready)
+    assert run_sequence(argv(p)) == 1
+    assert len(calls) == 1 and calls[0][0][6] == 'launch'
+    assert not manifest(p).exists()
+
+
+def test_worker_expiry_after_ready_does_not_spend_capture(tmp_path, monkeypatch):
+    from data_sheets_schema import native_prepared_worker as worker
+    p = paths(tmp_path)
+    calls = fake_commands(monkeypatch, p)
+    require = worker.require_prepared
+    def expire_after_ready(*args, **kwargs):
+        raw = require(*args, **kwargs)
+        expiry = guard.strict_json(raw)['prepared_at'] + 1200
+        monkeypatch.setattr(worker.time, 'time', lambda: expiry)
+        return raw
+    monkeypatch.setattr(worker, 'require_prepared', expire_after_ready)
+    assert run_sequence(argv(p)) == 1
+    assert len(calls) == 1 and calls[0][0][6] == 'launch'
+    assert not manifest(p).exists()
 
 
 def test_order_files_bytes_hashes_times_and_no_environment_input(tmp_path, monkeypatch, capsys):

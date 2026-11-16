@@ -137,7 +137,13 @@ def exchange(directory, *, identity, attempt, max_age_seconds):
     result = wait_proceed(directory, prepared_raw=raw,
         registration_raw=identity.registration_raw, attempt=attempt,
         max_age_seconds=max_age_seconds)
-    checked_value(identity, identity.registration_raw)
+    fresh = checked_value(identity, identity.registration_raw)
+    from .native_shared_controller import captured_preparation_body
+    prepared = wire.strict_json(raw)
+    preparation = captured_preparation_body(fresh['preparation_raw_json'].encode())
+    if (prepared['source_sha256'] != wire.sha(wire.canonical(fresh['dependencies']))
+            or prepared['environment_sha256'] != preparation['environment_manifest']['sha256']):
+        raise ValueError('prepared source or environment identity changed')
     return result
 
 

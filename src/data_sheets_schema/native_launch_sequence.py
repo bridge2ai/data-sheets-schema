@@ -241,6 +241,7 @@ class _PreparedStep:
         self.output, self.interrupts = output, interrupts
         self.child = self.stdout = self.stderr = None
         self.complete = False
+        self.proceed_possible = False
         argv = [sys.executable, '-I', '-B', '-c', BOOTSTRAP,
                 str(SOURCE_ROOT / 'src'), 'launch', *flags]
         self.step = {'step': 'launch', 'argv': argv, 'started_at': _utc_now(),
@@ -274,6 +275,22 @@ class _PreparedStep:
         if status is None or status.si_pid == 0:
             return None
         return status.si_status if status.si_code == os.CLD_EXITED else -status.si_status
+
+    def require_ready(self, directory, *, prepared_raw, registration_raw, attempt, max_age_seconds):
+        from .native_prepared_worker import require_prepared
+        self.interrupts.check()
+        if self._exit_status() is not None:
+            raise ValueError('prepared launch exited before proceed')
+        if require_prepared(directory, registration_raw=registration_raw,
+                attempt=attempt, max_age_seconds=max_age_seconds,
+                pid=self.child.pid) != prepared_raw:
+            raise ValueError('prepared record changed before proceed')
+
+    def proceed(self, directory, **kwargs):
+        from .native_prepared_worker import publish_proceed
+        # Publication can fail after the link becomes visible to the worker.
+        self.proceed_possible = True
+        return publish_proceed(directory, **kwargs)
 
     def send_signal(self, signum):
         # Popen.send_signal polls (and can reap) first. This owner deliberately
@@ -332,7 +349,16 @@ class _PreparedStep:
             if self.child is not None:
                 try:
                     if not self.complete:
-                        self._kill_group()
+                        if self.proceed_possible:
+                            # The native child owns a separate session. Let the
+                            # worker's signal handler unwind transport cleanup;
+                            # never kill its owner or impose a cleanup timeout.
+                            try:
+                                self.send_signal(signal.SIGTERM)
+                            except ProcessLookupError:
+                                pass
+                        else:
+                            self._kill_group()
                 finally:
                     self.step['return_code'] = self.child.wait()
         finally:
@@ -439,7 +465,6 @@ def _run_verified(argv, *, verified_script, entry_inputs):
             _delegation(args.direction_recorded_at, args.host_confirmed_at, record['delegation_checked_at'])
             start_pin = {'path': record['start_claim'],
                          'sha256': guard.sha(guard.read_regular(record['start_claim'], limit=MAX_COMMAND_OUTPUT_BYTES))}
-            from .native_prepared_worker import publish_proceed
             from .native_u4b_policy import registered_policy
             registration_raw = inputs[Path(args.registration)]
             registered = guard.strict_json(registration_raw)['registration']
@@ -454,6 +479,10 @@ def _run_verified(argv, *, verified_script, entry_inputs):
             _unchanged(inputs)
             record['prepared_at'] = _utc_now()
             _delegation(args.direction_recorded_at, args.host_confirmed_at, record['prepared_at'])
+            readiness = dict(prepared_raw=prepared_raw, registration_raw=registration_raw,
+                attempt=Path(registered['attempt_directory']),
+                max_age_seconds=registered_policy(registered['runtime'])['max_age_seconds'])
+            worker.require_ready(ipc, **readiness)
             captured = _run_step(COMMANDS[0], [*bound({'sequence_start': start_pin}), '--output-directory', str(capture_root)],
                                  outputs[0], record['steps'], interrupts)
             manifest_value = captured.get('capture_manifest')
@@ -478,7 +507,8 @@ def _run_verified(argv, *, verified_script, entry_inputs):
             _unchanged(inputs)
             if guard.read_regular(manifest, limit=MAX_COMMAND_OUTPUT_BYTES) != manifest_raw:
                 raise ValueError('capture manifest changed before launch')
-            publish_proceed(ipc, prepared_raw=prepared_raw, guard_path=guard_path,
+            worker.require_ready(ipc, **readiness)
+            worker.proceed(ipc, prepared_raw=prepared_raw, guard_path=guard_path,
                             guard_sha256=digest)
             final = worker.finish()
             if (final.get('state') != 'completed_pending_independent_review'

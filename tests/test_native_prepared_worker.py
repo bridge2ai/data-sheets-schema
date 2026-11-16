@@ -268,3 +268,20 @@ def test_cold_carrier_hints_remain_bound_to_their_defining_scope(monkeypatch):
             ambient.CapturedArtifact(new_pin, raw)
         with pytest.raises(ValueError, match='wrong immutable type'):
             scoped.CapturedArtifact(old_pin, raw)
+
+
+def test_exchange_compares_prepared_hashes_to_fresh_recheck(tmp_path, monkeypatch):
+    identity, _, _, _ = identity_fixture(tmp_path, monkeypatch)
+    monkeypatch.setattr(worker, 'wait_proceed', lambda *args, **kwargs: {'guard_path': 'checked'})
+    for field in ('source_sha256', 'environment_sha256'):
+        ipc = tmp_path / field
+        ipc.mkdir()
+        original = getattr(identity, field)
+        setattr(identity, field, 'c' * 64)
+        with pytest.raises(ValueError, match='source or environment identity changed'):
+            worker.exchange(ipc, identity=identity, attempt=tmp_path / 'attempt', max_age_seconds=60)
+        setattr(identity, field, original)
+    ipc = tmp_path / 'valid'
+    ipc.mkdir()
+    assert worker.exchange(ipc, identity=identity, attempt=tmp_path / 'attempt',
+                           max_age_seconds=60) == {'guard_path': 'checked'}
