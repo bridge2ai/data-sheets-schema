@@ -5,6 +5,7 @@ import sys
 import pytest
 
 from data_sheets_schema import native_prepared_worker as worker
+from tests.test_native_execution_registration_v2 import isolated_modules  # noqa: F401
 
 
 def setup_packet(tmp_path, monkeypatch):
@@ -196,7 +197,7 @@ def test_registration_file_and_prepared_record_are_freshly_checked(tmp_path, mon
     assert len(calls) == 2
 
 
-def test_constructor_uses_fresh_process_under_real_consumer_import_restriction():
+def test_constructor_uses_fresh_process_under_real_consumer_import_restriction(isolated_modules):
     from data_sheets_schema import native_shared_authority_wire as envelope
     from tests.utils.native_shared_consumer_scope import loaded_consumer
     import importlib
@@ -253,7 +254,7 @@ def test_verifier_timeout_kills_group_and_reaps(monkeypatch):
     assert events == [(12345, worker.signal.SIGKILL), 'reaped']
 
 
-def test_cold_carrier_hints_remain_bound_to_their_defining_scope(monkeypatch):
+def test_cold_carrier_hints_remain_bound_to_their_defining_scope(monkeypatch, isolated_modules):
     from data_sheets_schema import native_shared_contract as ambient
     from tests.utils.native_shared_consumer_scope import loaded_consumer
     for cls in (ambient.ArtifactPin, ambient.CapturedArtifact):
