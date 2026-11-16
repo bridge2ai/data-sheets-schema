@@ -195,9 +195,10 @@ def test_assigned_signature_cannot_spoof_interface():
 
 
 def test_wire_commit_proof_precedes_any_helper_loading(monkeypatch):
+    from data_sheets_schema import native_shared_authority_wire as wire
     value = {'authority_version': 2,
         'controller_sources_sha256': authority.neutral.composition.SOURCES_SHA256,
-        'registration': {'schema_version': 2}}
+        'registration': {'schema_version': wire.VERSION, 'kind': wire.PREPARATION_KIND}}
     identity = {'uncommitted': 'fixture'}
     monkeypatch.setattr(authority, 'dependency_identity', lambda: deepcopy(identity))
     observed = []
