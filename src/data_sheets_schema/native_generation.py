@@ -274,7 +274,8 @@ def main(argv=None):
         result = launch(subject_raw, review_path=args.review, ci_path=args.ci,
             launch_word_path=args.launch_word, subscription_guard_path=args.subscription_guard,
             subscription_guard_sha256=args.subscription_guard_sha256,
-            prepared_directory=args.prepared_directory, **bound_authority)
+            prepared_directory=args.prepared_directory, registration_path=args.registration,
+            **bound_authority)
         _emit(result, choice_raw, command=args.command)
     else:
         from .native_shared_execution_orchestration import read_final

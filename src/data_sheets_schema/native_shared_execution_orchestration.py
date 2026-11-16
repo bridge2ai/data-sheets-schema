@@ -81,7 +81,7 @@ def authorizations(raw, value, *, review_path, ci_path, launch_word_path):
 
 def launch(registration_raw, *, review_path, ci_path, launch_word_path,
            subscription_guard_path=None, subscription_guard_sha256=None,
-           expected_authority_sha256=None, prepared_directory=None):
+           expected_authority_sha256=None, prepared_directory=None, registration_path=None):
     """    RunSpec boundary: validated-caller
 
     RunSpec precondition: Caller supplies explicit execution registration; registration.verified reconstructs guarded preparation before creating fixed effects or dispatching.
@@ -110,7 +110,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
             return execute(registration_raw, review_path=review_path, ci_path=ci_path,
                 launch_word_path=launch_word_path, contract=contract, effects=effects,
                 expected_authority_sha256=expected_authority_sha256,
-                prepared_directory=prepared_directory)
+                prepared_directory=prepared_directory, registration_path=registration_path)
 
 
 def synthetic_launch(registration_raw, *, review_path, ci_path, launch_word_path,

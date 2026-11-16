@@ -271,7 +271,7 @@ def _guarded_classifier(adapter, budget_stop):
 
 def launch(registration_raw, *, review_path, ci_path, launch_word_path,
            contract: ExecutionContract, effects: ExecutionEffects, expected_authority_sha256=None,
-           prepared_directory=None):
+           prepared_directory=None, registration_path=None):
     """Consume one explicitly authorized native attempt, never retry or resume.
 
     This method can invoke the selected native executable. Calling it is a
@@ -294,7 +294,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
                 launch_word_path=launch_word_path, contract=contract, effects=effects,
                 controls=controls, expected_profile=PRODUCTION_PROFILE,
                 expected_authority_sha256=expected_authority_sha256,
-                prepared_directory=prepared_directory)
+                prepared_directory=prepared_directory, registration_path=registration_path)
 
 
 def synthetic_launch(registration_raw, *, review_path, ci_path, launch_word_path,
@@ -337,19 +337,19 @@ def _execute_child(controls, argv, **kwargs):
 
 def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
             contract, effects, controls, expected_profile='production', expected_authority_sha256=None,
-            prepared_directory=None, prepare_capture=None):
+            prepared_directory=None, prepare_capture=None, registration_path=None):
     with ExitStack() as preparation_cleanup:
         return _launch_prepared(registration_raw, review_path=review_path, ci_path=ci_path,
             launch_word_path=launch_word_path, contract=contract, effects=effects,
             controls=controls, expected_profile=expected_profile,
             expected_authority_sha256=expected_authority_sha256,
             prepared_directory=prepared_directory, prepare_capture=prepare_capture,
-            preparation_cleanup=preparation_cleanup)
+            preparation_cleanup=preparation_cleanup, registration_path=registration_path)
 
 
 def _launch_prepared(registration_raw, *, review_path, ci_path, launch_word_path,
             contract, effects, controls, expected_profile, expected_authority_sha256,
-            prepared_directory, prepare_capture, preparation_cleanup):
+            prepared_directory, prepare_capture, preparation_cleanup, registration_path=None):
     controls.require_complete()
     registration, composition, authority = contract.registration, contract.composition, contract.authority
     gates, replay, shared = contract.gates, contract.replay, contract.shared
@@ -416,6 +416,7 @@ def _launch_prepared(registration_raw, *, review_path, ci_path, launch_word_path
         # lifetime as the capture consumers' exact-class checks.
         from .native_prepared_worker import PreparedIdentity, exchange
         prepared_identity = PreparedIdentity(registration_raw, value, authorization)
+        prepared_identity.registration_path = None if registration_path is None else str(Path(registration_path).absolute())
         if prepared_directory is not None:
             selected_guard = exchange(prepared_directory, identity=prepared_identity,
                 attempt=attempt, max_age_seconds=registered_policy(value['runtime'])['max_age_seconds'])
