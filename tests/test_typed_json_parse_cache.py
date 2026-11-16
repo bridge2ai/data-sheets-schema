@@ -1,6 +1,8 @@
 """Pure bounded JSON reuse: identity, isolation, refusals and retention bounds."""
 import pytest
 import sys
+import subprocess
+from pathlib import Path
 
 from data_sheets_schema import typed_audit as ta
 
@@ -133,7 +135,7 @@ def test_digest_collision_still_compares_exact_bytes(monkeypatch):
     assert len(cache._entries) == 1 and cache._bytes <= cache._max_bytes
 
 
-def test_replaced_copy_alias_disables_shared_values(monkeypatch):
+def _assert_replaced_copy_alias_disables_shared_values(monkeypatch):
     from data_sheets_schema import native_catalog_reuse
     assert native_catalog_reuse.runtime_token() is not None
     raw = b'{"a":[1]}'
@@ -145,7 +147,7 @@ def test_replaced_copy_alias_disables_shared_values(monkeypatch):
     assert ta._bounded_json(raw, 'fresh', 1000) == {'a': [1]}
 
 
-def test_interpreter_integer_limit_change_refuses_a_warm_value():
+def _assert_interpreter_integer_limit_change_refuses_a_warm_value():
     if not hasattr(sys, 'get_int_max_str_digits'):
         pytest.skip('this interpreter has no integer-string limit')
     from data_sheets_schema import native_catalog_reuse
@@ -173,3 +175,23 @@ def test_interpreter_recursion_limit_is_part_of_identity():
         assert ta._parse_identity() != identity
     finally:
         sys.setrecursionlimit(before)
+
+
+def test_replaced_copy_alias_disables_shared_values(tmp_path):
+    probe = Path(__file__).resolve().parents[1] / 'scripts/adhoc/json_cache_test_probe_20261116.py'
+    result = subprocess.run([sys.executable, str(probe), 'test_replaced_copy_alias_disables_shared_values'],
+                            capture_output=True, text=True, timeout=60)
+    (tmp_path / 'json-cache-probe.log').write_text(result.stdout + result.stderr)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout.strip() == 'test_replaced_copy_alias_disables_shared_values passed'
+
+
+def test_interpreter_integer_limit_change_refuses_a_warm_value(tmp_path):
+    if not hasattr(sys, 'get_int_max_str_digits'):
+        pytest.skip('this interpreter has no integer-string limit')
+    probe = Path(__file__).resolve().parents[1] / 'scripts/adhoc/json_cache_test_probe_20261116.py'
+    result = subprocess.run([sys.executable, str(probe), 'test_interpreter_integer_limit_change_refuses_a_warm_value'],
+                            capture_output=True, text=True, timeout=60)
+    (tmp_path / 'json-cache-probe.log').write_text(result.stdout + result.stderr)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout.strip() == 'test_interpreter_integer_limit_change_refuses_a_warm_value passed'
