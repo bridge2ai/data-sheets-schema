@@ -5,6 +5,7 @@ The fingerprint-only executable is never run. Fabricated E/C prefixes and
 approval evidence below are rejection/unit fixtures, not execution acceptance.
 """
 from copy import deepcopy
+from contextlib import contextmanager
 import json
 import os
 from pathlib import Path
@@ -39,6 +40,22 @@ def isolated_modules(monkeypatch):
     monkeypatch.setattr(native_host_power, '_local', lambda *a, **k: {
         'status': 'read', 'reason': None,
         'text': "Now drawing from 'AC Power'\n -InternalBattery-0 90%; charging;\n"})
+    # D156 keeps this verified scope open before reservation. Its fresh power
+    # module must see the same invented interface as the ambient fixture,
+    # including transition overrides installed later by individual tests.
+    # Replace only its subprocess interface; verified callable identities stay
+    # intact, and the real parser and positive-AC refusal still run.
+    from data_sheets_schema import native_shared_callback_orchestration as callbacks
+    from tests.utils.native_synthetic_power import SyntheticPowerSubprocess
+    real_utilities = callbacks.preloaded_callback_utilities
+    def synthetic_utilities(dependencies):
+        with real_utilities(dependencies) as modules:
+            with monkeypatch.context() as patch:
+                patch.setattr(modules['native_host_power'], 'subprocess',
+                    SyntheticPowerSubprocess(native_host_power))
+                yield modules
+    monkeypatch.setattr(callbacks, 'preloaded_callback_utilities',
+                       contextmanager(synthetic_utilities))
     try:
         yield names
     finally:

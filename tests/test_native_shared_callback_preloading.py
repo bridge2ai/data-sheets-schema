@@ -303,3 +303,44 @@ def test_preloaded_identity_cannot_be_rebound_and_expires(isolated_modules):
             module.classify_bash = original
     with pytest.raises(ValueError, match='active loader'):
         selected.classify('pwd', sys.executable, set(), {'python': sys.executable})
+
+
+def test_synthetic_power_survives_prepared_scope_without_pmset(isolated_modules, monkeypatch):
+    """The actual verified module and callback worker retain invented AC bytes."""
+    from data_sheets_schema import native_host_power as ambient
+    dependencies = authority.dependency_identity()
+    original_popen = ambient.subprocess.Popen
+    probes = []
+    def linux_popen(argv, *args, **kwargs):
+        if argv[0] == '/usr/bin/pmset':
+            probes.append(tuple(argv))
+            raise FileNotFoundError('Linux-like host without pmset')
+        return original_popen(argv, *args, **kwargs)
+    monkeypatch.setattr(ambient.subprocess, 'Popen', linux_popen)
+    # A fresh production module still refuses the missing probe. The fixture
+    # only installs invented readings in its synthetic callback scope.
+    with authority.loaded_verified_package_module('data_sheets_schema.native_host_power',
+            package_sources=dependencies['base']['package_sources']) as real:
+        with pytest.raises(real.DispatchPowerRefused) as refused:
+            real.dispatch_power()
+        assert refused.value.reading['source'] == 'unknown'
+        assert refused.value.reading['probe_reason'] == 'unrecognized_probe_reason'
+    assert probes == [('/usr/bin/pmset', '-g', 'batt')]
+    with preload.preloaded_classifier(dependencies):
+        with preload.preloaded_callback_utilities(dependencies) as utilities:
+            scoped = utilities['native_host_power']
+            assert scoped is not ambient
+            assert authority.module_source_identity(scoped)['name'] == scoped.__name__
+            assert scoped.dispatch_power()['source'] == 'ac'
+            result = work(sys.modules['native_control'], 'observer', scoped.dispatch_power)
+            assert result['source'] == 'ac'
+            assert result['battery_percent'] == 90
+            # Later tests' power transitions must also reach the prepared module.
+            monkeypatch.setattr(ambient, '_local', lambda *args, **kwargs: {
+                'status': 'read', 'reason': None,
+                'text': "Now drawing from 'Battery Power'\n -InternalBattery-0 80%; discharging;\n"})
+            result = work(sys.modules['native_control'], 'observer', scoped.dispatch_power)
+            assert isinstance(result, scoped.DispatchPowerRefused)
+            assert result.reading['source'] == 'battery'
+            assert authority.module_source_identity(scoped)['name'] == scoped.__name__
+    assert probes == [('/usr/bin/pmset', '-g', 'batt')]
