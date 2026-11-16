@@ -78,11 +78,11 @@ def test_resolver_stats_distinct_ancestors_once_then_revalidates(tmp_path, monke
     files = [directory / name for name in ('a', 'b', 'c')]
     for path in files:
         path.write_bytes(b'payload')
-    original, calls = Path.lstat, []
+    original, calls = m.os.lstat, []
     def counted(path, *args, **kwargs):
         calls.append(str(path))
         return original(path, *args, **kwargs)
-    monkeypatch.setattr(Path, 'lstat', counted)
+    monkeypatch.setattr(m.os, 'lstat', counted)
     resolver = m._CensusResolver()
     for path in files:
         assert resolver.resolve(path) == path

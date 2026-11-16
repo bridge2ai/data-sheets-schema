@@ -73,7 +73,9 @@ class _CensusResolver:
         path = Path(path)
         if not path.is_absolute():
             path = Path.cwd() / path
-        key = str(path)
+        return Path(self._resolve_string(str(path), strict=strict, pending=pending))
+
+    def _resolve_string(self, key, *, strict=True, pending=None):
         if key in self.directories:
             return self.directories[key]
         if pending is None:
@@ -82,13 +84,14 @@ class _CensusResolver:
             raise ValueError('symlink loop during environment census: ' + key)
         pending.add(key)
         try:
-            if path.parent == path:
-                physical = path
+            parent_key, name = os.path.split(key)
+            if parent_key == key:
+                physical = key
             else:
-                parent = self.resolve(path.parent, strict=strict, pending=pending)
-                physical = parent.parent if path.name == '..' else parent / path.name
+                parent = self._resolve_string(parent_key, strict=strict, pending=pending)
+                physical = os.path.dirname(parent) if name == '..' else os.path.join(parent, name)
             try:
-                info = physical.lstat()
+                info = os.lstat(physical)
             except FileNotFoundError:
                 if strict:
                     raise
@@ -96,21 +99,21 @@ class _CensusResolver:
             if stat.S_ISLNK(info.st_mode):
                 target = os.readlink(physical)
                 identity = (_ancestor_identity(info), target)
-                previous = self.links.setdefault(str(physical), identity)
+                previous = self.links.setdefault(physical, identity)
                 if previous != identity:
-                    raise ValueError('symlink changed during environment census: ' + str(physical))
+                    raise ValueError('symlink changed during environment census: ' + physical)
                 destination = Path(target)
                 if not destination.is_absolute():
-                    destination = physical.parent / destination
-                resolved = self.resolve(destination, strict=strict, pending=pending)
-                if resolved.is_dir():
+                    destination = Path(os.path.dirname(physical)) / destination
+                resolved = self._resolve_string(str(destination), strict=strict, pending=pending)
+                if Path(resolved).is_dir():
                     self.directories[key] = resolved
                 return resolved
             if stat.S_ISDIR(info.st_mode):
                 identity = _ancestor_identity(info)
-                previous = self.identities.setdefault(str(physical), identity)
+                previous = self.identities.setdefault(physical, identity)
                 if previous != identity:
-                    raise ValueError('ancestor changed during environment census: ' + str(physical))
+                    raise ValueError('ancestor changed during environment census: ' + physical)
                 self.directories[key] = physical
             return physical
         finally:
@@ -118,10 +121,10 @@ class _CensusResolver:
 
     def require_stable(self):
         for path, identity in self.identities.items():
-            if _ancestor_identity(Path(path).lstat()) != identity:
+            if _ancestor_identity(os.lstat(path)) != identity:
                 raise ValueError('ancestor changed during environment census: ' + path)
         for path, identity in self.links.items():
-            if (_ancestor_identity(Path(path).lstat()), os.readlink(path)) != identity:
+            if (_ancestor_identity(os.lstat(path)), os.readlink(path)) != identity:
                 raise ValueError('symlink changed during environment census: ' + path)
 
 
@@ -213,7 +216,7 @@ def _record_stat_shape(value):
 
 def _lstat(path):
     try:
-        info = Path(path).lstat()
+        info = os.lstat(path)
     except FileNotFoundError:
         # Unhashed RECORD entries have always been explicitly unverified and
         # may be absent. Pin that absence too; a later addition is a change.

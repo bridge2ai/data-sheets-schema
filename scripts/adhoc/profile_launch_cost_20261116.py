@@ -31,6 +31,19 @@ def main():
     output.mkdir(parents=True, exist_ok=False)
     from tests.test_native_shared_execution import make_case, launch_case
     import pytest
+    if mode == 'light':
+        from data_sheets_schema import native_environment_manifest as environment
+        value = json.loads(Path(sys.argv[3]).read_bytes())
+        profile = cProfile.Profile()
+        started = time.monotonic()
+        profile.runcall(environment._light_live, value)
+        elapsed = time.monotonic() - started
+        profile.dump_stats(str(output / 'light.pstats'))
+        with (output / 'light-profile.txt').open('w') as stream:
+            pstats.Stats(profile, stream=stream).sort_stats('cumulative').print_stats(70)
+        (output / 'result.json').write_text(json.dumps({'seconds': elapsed, 'load': os.getloadavg()}))
+        print(json.dumps({'seconds': elapsed}))
+        return
     finished = threading.Event()
     main_id = threading.get_ident()
     phase = ['make_case']
