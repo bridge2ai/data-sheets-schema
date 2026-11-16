@@ -149,3 +149,11 @@ def test_each_recheck_requests_fresh_light_verification(tmp_path, monkeypatch):
     assert second['dependencies']
     assert len(calls) == 2
     assert all(call[0] == b'registration' and call[2] == 'light' for call in calls)
+
+
+def test_empty_pinned_package_initializer_is_valid(tmp_path, monkeypatch):
+    identity, source, _, calls = identity_fixture(tmp_path, monkeypatch)
+    source.write_bytes(b'')
+    identity.sources = ((source, worker.wire.sha(b'')),)
+    identity.recheck()
+    assert len(calls) == 1

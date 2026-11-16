@@ -47,10 +47,13 @@ class PreparedIdentity:
                              for path, digest in sorted(paths.items()))
 
     def recheck(self):
+        from . import native_execution_authority_v2 as authority
         from . import native_shared_registration_orchestration as registration
         for path, digest in self.sources:
-            if wire.sha(wire.read_regular(path, limit=32 * 1024 * 1024)) != digest:
-                raise ValueError('prepared worker source bytes changed')
+            try:
+                authority._verified_source_bytes(path, digest)
+            except (OSError, ValueError) as exc:
+                raise ValueError('prepared worker source bytes changed') from exc
         for path, raw in self.inputs:
             if wire.read_regular(path, limit=32 * 1024 * 1024) != raw:
                 raise ValueError('prepared worker authority bytes changed')

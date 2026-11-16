@@ -391,7 +391,7 @@ def test_genuine_registration_read_capture_for_event_rechecks_live_selection_and
         return original_popen(argv, *args, **kwargs)
 
     monkeypatch.setattr(subprocess, 'Popen', git_only)
-    case = make_case((tmp_path / 'case').resolve())
+    case = make_case((tmp_path / 'case').resolve(), defer_capture=False)
     raw = case['raw']
     value = case['value']
     review_raw = case['kwargs']['review_path'].read_bytes()

@@ -400,9 +400,8 @@ def _launch_prepared(registration_raw, *, review_path, ci_path, launch_word_path
                 (authorization['inputs'][name], authorization['raw'][name])
                 for name in ('review', 'ci', 'launch_word'))):
         raise ValueError('fresh v2 admission differs from the captured launch authority')
-    # All cold controller/callback derivations finish before saved-capture
-    # acceptance. The warmup closes its source-loader scope before returning:
-    # never keep a consumer finder active across live bootstrap orchestration.
+    # Warmup closes its loader scope. D156 then opens a new non-reserving
+    # callback scope in the launch worker before the separate capture process.
     with pre_timing.step('controller_prewarm'):
         adapter = contract.make_controller(value, registration_raw)
         contract.prewarm_controller(adapter)

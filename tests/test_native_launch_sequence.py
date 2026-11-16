@@ -205,6 +205,7 @@ def test_order_files_bytes_hashes_times_and_no_environment_input(tmp_path, monke
     doc = record(p)
     assert doc['status'] == 'completed' and len(calls) == 3
     assert doc['capture_manifest'] == str(manifest(p))
+    assert doc['steps'][0]['started_at'] <= doc['prepared_at'] <= doc['steps'][1]['started_at']
     for index, step in enumerate(doc['steps']):
         assert step['step'] == (seq.COMMANDS[2], seq.COMMANDS[0], seq.COMMANDS[1])[index]
         assert doc['started_at'] <= step['started_at'] <= step['completed_at'] <= doc['completed_at']

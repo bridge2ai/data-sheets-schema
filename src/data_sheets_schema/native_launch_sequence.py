@@ -398,6 +398,7 @@ def _run_verified(argv, *, verified_script, entry_inputs):
                 max_age_seconds=registered_policy(registered['runtime'])['max_age_seconds'])
             _unchanged(inputs)
             record['prepared_at'] = _utc_now()
+            _delegation(args.direction_recorded_at, args.host_confirmed_at, record['prepared_at'])
             captured = _run_step(COMMANDS[0], [*bound({'sequence_start': start_pin}), '--output-directory', str(capture_root)],
                                  outputs[0], record['steps'], interrupts)
             manifest_value = captured.get('capture_manifest')
