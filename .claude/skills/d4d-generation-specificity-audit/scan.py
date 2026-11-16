@@ -13039,7 +13039,7 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
     # the merged peer that keeps the Bash timeout and emits G3b's denials.
     # Rotated again (#6251): against d9e0be6a, only SYNTHETIC_PEER_SHA256, for
     # the peer whose not_prescribed Bash denial targets an unregistered file.
-    'src/data_sheets_schema/native_runtime_profiles.py': 'a041e8dcb9747352076b61afc7809660e6c02f448d0344fb028528c6cc97100f',
+    'src/data_sheets_schema/native_runtime_profiles.py': '0a0aa121a9406b1e29cf505256ef317fac63187f560c6d6fb58bbaa6240c128f',
     'src/data_sheets_schema/native_helper_cache.py': '0934f71630ab45e4670ffa0d14f90c1cfbb23a132a23ca8c6ccfcc0c58a52a95',
     # Controller pin rotation for the issue 6094 timing hooks (lead,
     # 2026-11-13; sources source_commit e648abe2a). Against the prior pins
