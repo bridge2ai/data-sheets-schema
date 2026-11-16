@@ -216,6 +216,8 @@ def test_constructor_uses_fresh_process_under_real_consumer_import_restriction()
         with pytest.raises(ValueError, match='prepared fresh verifier refused') as refusal:
             scoped.PreparedIdentity(b'invalid registration', value, {'inputs': {}, 'raw': {}})
         assert 'cannot import verifier bootstrap' not in str(refusal.value)
+        assert 'native_prepared_verifier.py' in str(refusal.value)
+        assert 'current = registration.verified(raw)' in str(refusal.value)
         with pytest.raises(ValueError, match='differs from capture authority'):
             scoped.checked_value(object.__new__(worker.PreparedIdentity), b'invalid registration')
 
@@ -249,3 +251,20 @@ def test_verifier_timeout_kills_group_and_reaps(monkeypatch):
     with pytest.raises(worker.subprocess.TimeoutExpired):
         worker._verify({})
     assert events == [(12345, worker.signal.SIGKILL), 'reaped']
+
+
+def test_cold_carrier_hints_remain_bound_to_their_defining_scope(monkeypatch):
+    from data_sheets_schema import native_shared_contract as ambient
+    from tests.utils.native_shared_consumer_scope import loaded_consumer
+    for cls in (ambient.ArtifactPin, ambient.CapturedArtifact):
+        monkeypatch.delitem(ambient._TYPE_CACHE, cls, raising=False)
+    with loaded_consumer('native_shared_contract') as scoped:
+        raw = b'{}'
+        old_pin = ambient.ArtifactPin('test', '/test', len(raw), ambient.sha(raw))
+        new_pin = scoped.ArtifactPin('test', '/test', len(raw), scoped.sha(raw))
+        assert ambient.CapturedArtifact(old_pin, raw).pin is old_pin
+        assert scoped.CapturedArtifact(new_pin, raw).pin is new_pin
+        with pytest.raises(ValueError, match='wrong immutable type'):
+            ambient.CapturedArtifact(new_pin, raw)
+        with pytest.raises(ValueError, match='wrong immutable type'):
+            scoped.CapturedArtifact(old_pin, raw)

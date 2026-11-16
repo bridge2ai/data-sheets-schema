@@ -143,7 +143,7 @@ class _Carrier:
     def __post_init__(self):
         cls = type(self)
         if cls not in _TYPE_CACHE:
-            _TYPE_CACHE[cls] = get_type_hints(cls)
+            _TYPE_CACHE[cls] = get_type_hints(cls, globalns=globals())
         for field in fields(self):
             if not _matches(getattr(self, field.name), _TYPE_CACHE[cls][field.name]):
                 raise ValueError(f"{cls.__name__}.{field.name} has the wrong immutable type")

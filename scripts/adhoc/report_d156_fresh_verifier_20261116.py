@@ -24,7 +24,9 @@ def main():
     head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     lanes = {}
     for name in ('fresh-scope-canary', 'fresh-worker-sequence', 'fresh-worker-final',
-                 'fresh-controls-canary', 'fresh-controls', 'fresh-public-correction'):
+                 'fresh-controls-canary', 'fresh-controls', 'fresh-public-correction',
+                 'carrier-canary', 'carrier-worker-final', 'carrier-controls-canary',
+                 'carrier-controls', 'carrier-public-correction'):
         folder = SCRATCH / name
         summary = folder / 'lane_summary.json'
         entry = {'summary': json.loads(summary.read_text()) if summary.exists() else None,
@@ -39,8 +41,8 @@ def main():
                 'stops': [child.get('message') for case in failed + errors for child in case
                           if child.tag in ('failure', 'error')]}
         lanes[name] = entry
-    public = SCRATCH / 'fresh-public-correction'
-    timing_path = SCRATCH / 'fresh-public-timings.jsonl'
+    public = SCRATCH / 'carrier-public-correction'
+    timing_path = SCRATCH / 'carrier-public-timings.jsonl'
     timings = rows(timing_path) if timing_path.exists() else []
     observers = [row for row in timings if row.get('function') == '_observe_event']
     dispatches = [row for row in timings if row.get('function') == '_admit_subscription_guard']
@@ -65,7 +67,7 @@ def main():
             if isinstance(row, dict) and 'helper_timing' in row:
                 helpers.append({'path': str(path), **row['helper_timing']})
     advances = [row for row in helpers if ' advance ' in row.get('command', '')]
-    pins_path = SCRATCH / 'fresh-pin-proposals.json'
+    pins_path = SCRATCH / 'carrier-pin-proposals.json'
     pins = json.loads(pins_path.read_text())
     ledger = {'head': head, 'lanes': lanes, 'artifacts': artifacts,
         'capture_to_dispatch_seconds': capture_to_dispatch,
@@ -74,7 +76,7 @@ def main():
         'helper_times': helpers, 'timings': timings, 'capture_traces': captures, 'pins': pins}
     ledger_path = SCRATCH / 'fresh-verifier-evidence.json'
     ledger_path.write_text(json.dumps(ledger, indent=2, sort_keys=True) + '\n')
-    public_results = lanes['fresh-public-correction']['results'].values()
+    public_results = lanes['carrier-public-correction']['results'].values()
     passed = any(row['passed'] == 1 and row['failed'] == 0 and row['errors'] == 0 for row in public_results)
     lines = ['# D156 fresh-process verifier: ' + ('public correction passed' if passed else 'public correction not established'), '',
         'Implemented design A. It touches zero lines in the security-relevant loader; design B would alter ownership and restoration of its nested process-wide scopes. Exact-class checked_value and the verifier import restriction remain unchanged. Every check uses a new interpreter, nonce and exact-input digest over pipes; only an exit-zero matching pass is accepted. Timeout kills the verifier process group. No reusable verdict is persisted.', '',
@@ -94,6 +96,7 @@ def main():
         '## Integration and review', '',
         'Overlapping-file functions touched: native_prepared_worker._full_preparation_baseline, _verify, PreparedIdentity.__init__, PreparedIdentity._verify, PreparedIdentity.recheck, PreparedIdentity.require_unchanged and exchange. No edits to native_launch_sequence.py or run_native_canary.py.', '',
         'Other production functions touched: native_execution_orchestration.launch, _launch and _launch_prepared; native_shared_execution_orchestration.launch; native_generation.main. New module native_prepared_verifier owns _baseline, verify and main.', '',
+        'Also touched native_shared_contract._Carrier.__post_init__: resolve type hints against the defining module globals. The first public run exposed a cold-child CapturedArtifact.pin mismatch because default type-hint resolution used a different live module binding. The real-loader regression now checks both matching carrier lifetimes and both directions of foreign-class refusal. No foreign class is accepted.', '',
         'Read-only review found that a fresh child cannot use the parent process full-census cache. Addressed by carrying comparison identities and checking a fresh census without installing a cached verdict. This finding is retained for the lead issue ledger; helper bounds forbid GitHub issue writes.', '',
         'Pin proposals: ' + str(pins_path) + '. Proposed edits: ' + json.dumps(pins['proposed_edits']) + '. Protected files check: ' + str(pins['protected_files_ok']) + '.',
         'The pin tool also reports existing scanner asset refresh actions; see the JSON for exact computed hashes.', '',
