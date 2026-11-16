@@ -115,7 +115,7 @@ The sandboxed controls run was interrupted after local loopback socket binds wer
 
 The first public invocation failed collection on three unrelated fairscape_models.rocrate imports and never ran the selected case. The subsequent public-case invocation excludes only tests/test_fairscape_integration and selects the one requested correction case. It failed during setup with frozen native controller bytes changed: run_native_canary, before capture or dispatch. Its result is retained separately; no second correction case was attempted.
 
-Saved gate waits: {'; '.join(waits)}. No gate was bypassed. One staging attempt was refused; the prescribed ten-second retry succeeded. No push or GitHub write was made.
+Saved gate waits: {'; '.join(waits)}. No gate was bypassed. Staging refusals cleared on the prescribed ten-second retries. No push or GitHub write was made.
 
 The timing canary proved observer startup, completion and persistence of a non-empty file; it did not reach a final native callback. The native-controls canary proved the final boundary refuses without spawning a native binary. Each full run followed its same-path canary.
 

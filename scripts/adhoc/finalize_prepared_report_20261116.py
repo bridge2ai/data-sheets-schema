@@ -1,7 +1,7 @@
 """Add timeout and rerun evidence to the D156 report, 2026-11-16.
 
-Input/output: report_prepared_worker_20261116.py. One-time provenance edit for
-the Claude lead handoff; results remain read from persisted lane artifacts.
+Input/output: report_prepared_worker_20261116.py. Idempotent provenance edit
+for the Claude lead handoff; results come from persisted lane artifacts.
 """
 from pathlib import Path
 
@@ -19,6 +19,8 @@ replacements = [
      'It failed during setup with frozen native controller bytes changed: run_native_canary, before capture or dispatch. Its result is retained separately; no second correction case was attempted.'),
     ('and report_prepared_worker_20261116.py. The transformation scripts',
      'report_prepared_worker_20261116.py and finalize_prepared_report_20261116.py. The transformation scripts'),
+    ('One staging attempt was refused; the prescribed ten-second retry succeeded.',
+     'Staging refusals cleared on the prescribed ten-second retries.'),
     ("    ledger['pins'] = pins\n",
      "    ledger['pins'] = pins\n"
      "    ledger['review_findings'] = {\n"
@@ -29,6 +31,8 @@ replacements = [
      "        'reaped_worker_group_signal': 'fixed with retained PID and probe-only Darwin fallback',\n"
      "        'same_size_dependency_edit': 'fixed with required full baseline comparison'}\n")]
 for old, new in replacements:
+    if new in text:
+        continue
     if text.count(old) != 1:
         raise ValueError('unexpected report shape')
     text = text.replace(old, new, 1)
