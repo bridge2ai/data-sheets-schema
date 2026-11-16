@@ -214,6 +214,21 @@ def _saved_authorizations(raw, value, started_raw, result, *, contract, file):
     return captured
 
 
+def _dispatch_memory_authority(value, authorization, selected, observation, policy,
+                               registration_raw, started_raw):
+    """Snapshot captured values without opening, resolving or verifying paths."""
+    raw = authorization['raw']
+    if (type(raw) is not dict
+            or any(type(name) is not str or type(body) is not bytes for name, body in raw.items())):
+        raise ValueError('native captured authority bytes changed before process dispatch')
+    # Canonical bytes detach every nested mutable mapping/list; object identity
+    # alone would miss an in-place change between admission and process spawn.
+    return (c.canonical(value),
+        c.canonical({name: item for name, item in authorization.items() if name != 'raw'}),
+        tuple(sorted(raw.items())), c.canonical(selected), c.canonical(observation),
+        c.canonical(policy), registration_raw, started_raw)
+
+
 def _admit_subscription_guard(guard, attempt, file, write):
     """Consume exact saved admission before stage activation and spawn."""
     if guard is None:
@@ -482,7 +497,9 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                         awake.update(state='explicitly_not_applicable', passed=True)
                     observation = _probe_runtime(value)
                     durable_new(attempt/'runtime-observation.json', draft._encoded(observation))
+                    dispatch_authority = None
                     def launch_check():
+                        nonlocal dispatch_authority
                         _unchanged(value, registration_raw, authorization)
                         _join_subscription_authority(launch_guard, registration_raw, value, authorization, current_launch=True)
                         if (_file(attempt/'registration.json', 'consumed registration') != registration_raw
@@ -490,6 +507,9 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                                 or _file(attempt/'runtime-observation.json', 'runtime observation') != draft._encoded(observation)
                                 or proxy.closed or proxy.failed.is_set()):
                             raise ValueError('native admission is closed or consumed identity changed')
+                        dispatch_authority = _dispatch_memory_authority(
+                            value, authorization, selected, observation, adapter.policy,
+                            registration_raw, started_raw)
                         _require_launch_profile(value['runtime'], expected_profile)
                         try:
                             host_power.dispatch_power()
@@ -501,13 +521,35 @@ def _launch(registration_raw, *, review_path, ci_path, launch_word_path,
                             raise controls['run_native_canary'].BudgetStop(reason) from exc
                         _admit_subscription_guard(launch_guard, attempt, _file, durable_new)
                         # Keep one-use stage writes behind the consumed-guard checks.
-                        # A final check at actual Popen remains the separate 6207 gap.
+                        # Final temporal revalidation follows activation and alarm teardown.
                         contract.activate_before_dispatch(adapter, started_raw)
+                    def dispatch_check():
+                        refusal = None
+                        try:
+                            if dispatch_authority is None or _dispatch_memory_authority(
+                                    value, authorization, selected, observation, adapter.policy,
+                                    registration_raw, started_raw) != dispatch_authority:
+                                raise ValueError('native captured authority changed before process dispatch')
+                            if proxy.closed or proxy.failed.is_set():
+                                raise ValueError('native admission is closed before process dispatch')
+                        except ValueError as exc:
+                            refusal = str(exc)
+                        except (TypeError, KeyError, RecursionError):
+                            refusal = 'native captured authority is malformed before process dispatch'
+                        try:
+                            # The guard latches this attempt even when the captured
+                            # caller authority has changed. No restored value retries.
+                            launch_guard.before_process_dispatch(refusal=refusal)
+                        except ValueError as exc:
+                            reason = 'subscription guard: ' + str(exc)
+                            stopped(reason)
+                            raise controls['run_native_canary'].BudgetStop(reason) from exc
                     observe = _guarded_observer(launch_guard, adapter, controls['run_native_canary'].BudgetStop)
                     status = _execute_child(controls, value['argv'], proxy=proxy,
                         instruction=Path(selected['instruction_path']), attempt=attempt,
                         cwd=value['working_directory'], env=value['environment'],
                         deadline_seconds=value['runtime']['deadline_seconds'], verify_launch=launch_check,
+                        verify_dispatch=dispatch_check,
                         record_stop=stopped, command_policy=adapter.policy, phase_spec=contract.transport_phase_spec(adapter),
                         command_classifier=_guarded_classifier(adapter, controls['run_native_canary'].BudgetStop),
                         event_observer=observe)

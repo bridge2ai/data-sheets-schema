@@ -601,7 +601,8 @@ def record_then_close(proxy, record_stop, reason):
 
 
 def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_seconds, verify_launch, record_stop=None,
-                  command_policy=None, phase_spec=None, command_classifier=None, event_observer=None):
+                  command_policy=None, phase_spec=None, command_classifier=None, event_observer=None,
+                  verify_dispatch=None):
     """Run a child after a separate bounded admission phase.
 
     The attempt deadline starts at dispatch on the suspension-inclusive clock.
@@ -650,6 +651,8 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                 if not exit_check_available():
                     raise BudgetStop('native control needs a non-reaping exit check (os.waitid; macOS Python 3.13+)')
                 verify_launch()  # Bind the executable immediately before Popen.
+            if verify_dispatch is not None:
+                verify_dispatch()
             # Dispatch origin includes process creation but excludes admission.
             # Unlike monotonic() on macOS, this clock includes host suspension.
             dispatch_ns = elapsed_ns()
