@@ -4,7 +4,7 @@
 # Outputs: protocol snapshots and ignore-independent search evidence. 2026-11-16.
 set -eu
 P=$(cd -- "$(dirname -- "$0")/../.." && pwd)
-E=${1:?Usage: check_capture_order_protocol_20261116.sh EXECUTION_ROOT}
+E=$(cd -- "${1:?Usage: check_capture_order_protocol_20261116.sh EXECUTION_ROOT}" && pwd)
 S="$E/scratch-capture-order-20261116"
 mkdir -p "$S"
 cd "$P"
