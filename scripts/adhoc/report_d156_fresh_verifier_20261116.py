@@ -78,6 +78,13 @@ def main():
     ledger_path.write_text(json.dumps(ledger, indent=2, sort_keys=True) + '\n')
     public_results = lanes['carrier-public-correction']['results'].values()
     passed = any(row['passed'] == 1 and row['failed'] == 0 and row['errors'] == 0 for row in public_results)
+    peak = ledger['peak_final_callback_observe_event_seconds']
+    if peak is not None and peak > 75:
+        threshold = 'Over 75 seconds: owner ruling 4A-Post triggers issues 4400 and 4550.'
+    elif passed and peak is not None and peak <= 60:
+        threshold = 'At or under 60 seconds: owner ruling 4A-Post keeps issues 4400 and 4550 deferred.'
+    else:
+        threshold = 'Neither threshold is established by a completed final-callback result.'
     lines = ['# D156 fresh-process verifier: ' + ('public correction passed' if passed else 'public correction not established'), '',
         'Implemented design A. It touches zero lines in the security-relevant loader; design B would alter ownership and restoration of its nested process-wide scopes. Exact-class checked_value and the verifier import restriction remain unchanged. Every check uses a new interpreter, nonce and exact-input digest over pipes; only an exit-zero matching pass is accepted. Timeout kills the verifier process group. No reusable verdict is persisted.', '',
         'The constructor freshly verifies the registration and compares its census identities with the original full preparation baseline. Later checks freshly validate bytes, HEAD, roster/pins, committed sources, interpreter, preparation/composition, runtime and light census against those identities. Transferred census identities are comparison data and never populate a child full-verification cache. CLI launches carry the registration file path; synthetic byte-only callers retain exact registration-byte binding.', '',
@@ -90,6 +97,7 @@ def main():
                 lines.append('  First stop: ' + str(stop))
     lines += ['', 'Capture-to-dispatch seconds: ' + str(capture_to_dispatch) + '.',
         'Peak completed final-callback _observe_event seconds: ' + str(ledger['peak_final_callback_observe_event_seconds']) + '.',
+        threshold,
         'Late advance: ' + json.dumps(ledger['late_advance'], sort_keys=True) + '.',
         'Missing timings are unknown and establish neither owner threshold. Artifact discovery includes ignored and hidden files through Path.rglob.', '',
         'The real-loader canary exercises the unmocked constructor and a real child: the parent still refuses verifier-bootstrap imports while the child reaches fresh registration validation. It is an invalid-input refusal witness; the public case supplies the complete acceptance check. Timeout and reply-replay tests are focused simulations.', '',
