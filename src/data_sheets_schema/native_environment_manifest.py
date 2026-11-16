@@ -886,8 +886,9 @@ def verify(pin, *, mode='full'):
     A full result is reused only in this process for the same pin/interpreter.
     Every reuse still performs the light live census and checks the original
     full result's file identities; a changed payload refuses without rehashing.
+    Prepared mode requires that baseline and never regenerates after capture.
     """
-    if mode not in ('full', 'light'):
+    if mode not in ('full', 'light', 'prepared'):
         raise ValueError('unknown environment verification mode')
     c.file_pin(pin, 'environment manifest pin')
     captured = read_regular(pin['path'], 'environment_manifest', max_bytes=MAX_BYTES).captured
@@ -905,6 +906,8 @@ def verify(pin, *, mode='full'):
     with state['lock']:
         memo = state['full'].get(key)
         if memo is None:
+            if mode == 'prepared':
+                raise ValueError('prepared environment verification requires a process full baseline')
             if len(state['full']) >= 64:
                 raise ValueError('process environment verification pin bound exceeded')
             # Store refusals too: fixing a failed environment requires a new

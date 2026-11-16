@@ -115,9 +115,27 @@ def test_cleanup_attempts_reap_even_if_group_signal_fails(tmp_path, monkeypatch)
     owned = sequence._PreparedStep([], tmp_path / 'worker.json', [], sequence._SequenceSignals())
     reaped = []
     owned.child = SimpleNamespace(pid=123, wait=lambda: reaped.append(True) or 9)
+    owned._exit_status = lambda: None
     def refuse(*args):
         raise PermissionError('synthetic signal refusal')
     monkeypatch.setattr(sequence.os, 'killpg', refuse)
     with pytest.raises(PermissionError, match='synthetic signal refusal'):
         owned.close()
     assert reaped == [True] and owned.step['return_code'] == 9
+
+
+def test_cleanup_never_signals_an_unverifiable_group_after_reaping(tmp_path, monkeypatch):
+    owned = sequence._PreparedStep([], tmp_path / 'worker.json', [], sequence._SequenceSignals())
+    reaped, calls = [], []
+    owned.child = SimpleNamespace(pid=123, wait=lambda: reaped.append(True) or 7)
+    owned._exit_status = lambda: 7
+    def signal_group(pid, signum):
+        calls.append(signum)
+        if signum:
+            raise PermissionError('synthetic group refusal')
+        assert reaped
+    monkeypatch.setattr(sequence.os, 'killpg', signal_group)
+    with pytest.raises(PermissionError, match='synthetic group refusal'):
+        owned.close()
+    assert calls == [signal.SIGKILL, 0]
+    assert owned.step['return_code'] == 7

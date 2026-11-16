@@ -141,14 +141,14 @@ def test_changed_authority_refuses(tmp_path, monkeypatch):
     assert not calls
 
 
-def test_each_recheck_requests_fresh_light_verification(tmp_path, monkeypatch):
+def test_each_recheck_requires_fresh_census_against_prepared_baseline(tmp_path, monkeypatch):
     identity, _, _, calls = identity_fixture(tmp_path, monkeypatch)
     first = identity.recheck()
     first['dependencies'].clear()
     second = identity.recheck()
     assert second['dependencies']
     assert len(calls) == 2
-    assert all(call[0] == b'registration' and call[2] == 'light' for call in calls)
+    assert all(call[0] == b'registration' and call[2] == 'prepared' for call in calls)
 
 
 def test_empty_pinned_package_initializer_is_valid(tmp_path, monkeypatch):

@@ -59,9 +59,9 @@ class PreparedIdentity:
                 raise ValueError('prepared worker authority bytes changed')
         # This reconstructs the live dependency identity (including Git HEAD,
         # package roster/pins and interpreter), checks committed source blobs,
-        # all preparation/composition pins and runtime, and runs a light census.
+        # all preparation/composition pins and runtime, and compares a fresh census to the full preparation baseline.
         value = registration._recheck_verified(self.registration_raw,
-            wire.strict_json(self.value_raw), environment_mode='light')
+            wire.strict_json(self.value_raw), environment_mode='prepared')
         if wire.canonical(value) != self.value_raw:
             raise ValueError('prepared worker registration changed')
         return value

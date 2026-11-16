@@ -740,3 +740,30 @@ def test_manifest_inside_inventory_root_self_inclusion_holds(installed):
     # No output exemption is invented for a third-party root.
     with pytest.raises(ValueError, match='stale'):
         m.write(installed.root / 'manifest.json')
+
+
+
+def test_prepared_verification_requires_existing_full_baseline(installed, tmp_path, monkeypatch):
+    pin = m.write(tmp_path / 'prepared.json')
+    state = m._process_state()
+    state['full'].clear()
+    def forbidden():
+        raise AssertionError('prepared check must not regenerate')
+    monkeypatch.setattr(m, 'generate', forbidden)
+    with pytest.raises(ValueError, match='requires a process full baseline'):
+        m.verify(pin, mode='prepared')
+
+
+def test_prepared_census_rejects_same_size_payload_edit(installed, tmp_path, monkeypatch):
+    pin = m.write(tmp_path / 'prepared.json')
+    original = m.verify(pin)
+    def forbidden():
+        raise AssertionError('prepared check must not regenerate')
+    monkeypatch.setattr(m, 'generate', forbidden)
+    assert m.verify(pin, mode='prepared') == original
+    target = installed.root / 'file.py'
+    before = target.read_bytes()
+    target.write_bytes(before.replace(b'True', b'None'))
+    assert target.stat().st_size == len(before)
+    with pytest.raises(ValueError, match='installed payload changed'):
+        m.verify(pin, mode='prepared')

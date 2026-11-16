@@ -301,15 +301,38 @@ class _PreparedStep:
         result = _step_result('launch', self.output, self.step)
         return result
 
+    def _kill_group(self):
+        try:
+            os.killpg(self.child.pid, signal.SIGKILL)
+            return
+        except ProcessLookupError:
+            return
+        except PermissionError as error:
+            refusal = error
+        # Darwin can refuse a group containing only its zombie leader. Match
+        # the existing transport rule: verify exit before reaping, then only
+        # probe. A remaining or recycled group is a refusal, never a target.
+        if self._exit_status() is None:
+            raise refusal
+        self.child.wait()
+        deadline = time.monotonic() + 2
+        while True:
+            try:
+                os.killpg(self.child.pid, 0)
+            except ProcessLookupError:
+                return
+            except PermissionError:
+                if time.monotonic() < deadline:
+                    time.sleep(0.02)
+                    continue
+            raise refusal
+
     def close(self):
         try:
             if self.child is not None:
                 try:
                     if not self.complete:
-                        try:
-                            os.killpg(self.child.pid, signal.SIGKILL)
-                        except ProcessLookupError:
-                            pass
+                        self._kill_group()
                 finally:
                     self.step['return_code'] = self.child.wait()
         finally:
