@@ -7,7 +7,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-primary, scratch = map(Path, sys.argv[1:3])
+primary, scratch = (Path(value).resolve() for value in sys.argv[1:3])
 root = Path(__file__).resolve().parents[2]
 dry = ['--dry-run'] if '--dry-run' in sys.argv[3:] else []
 focused = [
