@@ -1,7 +1,7 @@
 """Test inputs for D156 fresh modules; preserve verified callable identities."""
 from contextlib import contextmanager
 from datetime import datetime, timezone
-import sys
+from importlib import import_module
 
 
 def configure_prepared_scope(monkeypatch, configure):
@@ -31,7 +31,9 @@ def freeze_subscription_clock(monkeypatch, clock):
     monkeypatch.setattr(guard, 'datetime', FixtureDateTime)
 
     def configure(patch):
-        current = sys.modules['data_sheets_schema.native_subscription_guard_v2']
+        # The prepared scope evicts ambient modules, but this utility may not
+        # be reached until capture. Import through its active verified finder.
+        current = import_module('data_sheets_schema.native_subscription_guard_v2')
         patch.setattr(current, 'datetime', FixtureDateTime)
 
     configure_prepared_scope(monkeypatch, configure)
