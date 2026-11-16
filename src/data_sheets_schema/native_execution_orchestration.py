@@ -406,11 +406,12 @@ def _launch_prepared(registration_raw, *, review_path, ci_path, launch_word_path
         adapter = contract.make_controller(value, registration_raw)
         contract.prewarm_controller(adapter)
     if preparing:
-        from .native_subscription_admission import select_current, preflight_current_selection
         from .native_u4b_policy import registered_policy
         preparation_cleanup.callback(adapter.close_prepared)
         adapter.prepare_before_capture()
         contract.transport_phase_spec(adapter)
+        from .native_subscription_admission import (
+            CurrentSelection, select_current, preflight_current_selection, accept_current_selection)
         # Callback preparation opens a verified package scope that replaces
         # ambient module classes. Bind the identity and exchange in that same
         # lifetime as the capture consumers' exact-class checks.
@@ -446,8 +447,11 @@ def _launch_prepared(registration_raw, *, review_path, ci_path, launch_word_path
         # shared selection route. Its complete reconstruction/equality check is
         # joined to the fresh lease authority below; these input checks retain
         # the shared route's actual _file, _platform and source dependencies.
-        from .native_shared_execution_orchestration import _unchanged_inputs
-        _unchanged_inputs(value, authorization)
+        if prepared_identity is not None:
+            prepared_identity.require_unchanged(value, registration_raw, authorization)
+        else:
+            from .native_shared_execution_orchestration import _unchanged_inputs
+            _unchanged_inputs(value, authorization)
     else:
         _unchanged(value, registration_raw, authorization)
     from .native_subscription_capture import capture_admission_lease

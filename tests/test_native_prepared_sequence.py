@@ -141,7 +141,7 @@ def test_cleanup_never_signals_an_unverifiable_group_after_reaping(tmp_path, mon
     assert owned.step['return_code'] == 7
 
 
-def prepared_scope_case(tmp_path, monkeypatch, *, production):
+def prepared_scope_case(tmp_path, monkeypatch, *, production, through_selection=False):
     """Exercise launch ordering across a real replacement of the worker class."""
     import importlib.util
     from contextlib import ExitStack, nullcontext
@@ -150,12 +150,15 @@ def prepared_scope_case(tmp_path, monkeypatch, *, production):
     from data_sheets_schema import native_sequence_inputs
     from data_sheets_schema import native_runtime_profiles
     from data_sheets_schema import native_u4b_policy
+    from data_sheets_schema import native_u4b_runtime
+    from data_sheets_schema import native_subscription_admission as old_admission
+    from data_sheets_schema import native_subscription_guard_v2 as old_guard
     import data_sheets_schema
 
     raw = b'exact prepared registration'
     value = {'runtime': {}, 'composition_raw_json': '{}'}
     authorization = {'raw': {name: b'authority' for name in ('review', 'ci', 'launch_word')},
-        'inputs': {name: tmp_path / name for name in ('review', 'ci', 'launch_word')}}
+        'inputs': {name: str(tmp_path / name) for name in ('review', 'ci', 'launch_word')}}
     spec = importlib.util.spec_from_file_location(ambient.__name__, ambient.__file__)
     scoped = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(scoped)
@@ -174,12 +177,27 @@ def prepared_scope_case(tmp_path, monkeypatch, *, production):
     class ReachedPreparedConsumer(Exception):
         pass
 
+    def unchanged(self, submitted_value, submitted_raw, submitted_authority):
+        assert submitted_value == value and submitted_raw == raw
+        assert submitted_authority == authorization
+        checks.append('fresh-unchanged')
+        raise ReachedPreparedConsumer()
+
+    if through_selection:
+        for module in (ambient, scoped):
+            monkeypatch.setattr(module.PreparedIdentity, 'require_unchanged', unchanged)
+        for name, path in authorization['inputs'].items():
+            (tmp_path / name).write_bytes(authorization['raw'][name])
+        (tmp_path / 'guard').write_bytes(b'guard')
+
     def consume(identity):
         assert identity.registration_raw == raw
         assert scoped.checked_value(identity, raw) == value
         with pytest.raises(ValueError, match='differs from capture authority'):
             scoped.checked_value(identity, b'foreign registration')
         checks.append('production' if production else 'synthetic')
+        if through_selection:
+            return {'guard_path': str(tmp_path / 'guard'), 'guard_sha256': 'a' * 64}
         raise ReachedPreparedConsumer()
 
     def exchange(directory, *, identity, **kwargs):
@@ -191,6 +209,27 @@ def prepared_scope_case(tmp_path, monkeypatch, *, production):
     def prepare():
         monkeypatch.setitem(sys.modules, ambient.__name__, scoped)
         monkeypatch.setattr(data_sheets_schema, 'native_prepared_worker', scoped)
+        if through_selection:
+            clones = []
+            for old in (old_guard, old_admission):
+                spec = importlib.util.spec_from_file_location(old.__name__, old.__file__)
+                clone = importlib.util.module_from_spec(spec)
+                monkeypatch.setitem(sys.modules, old.__name__, clone)
+                monkeypatch.setattr(data_sheets_schema, old.__name__.split('.')[-1], clone)
+                spec.loader.exec_module(clone)
+                clones.append(clone)
+            guard_module, admission_module = clones
+            for module in (old_admission, admission_module):
+                def load(*args, selected=module.v2, **kwargs):
+                    guard = object.__new__(selected.SubscriptionGuard)
+                    guard._raw, guard._clock = b'guard', selected._now
+                    return guard
+                monkeypatch.setattr(module, 'load_current', load)
+                monkeypatch.setattr(module, 'preflight_current_selection', lambda *args, **kwargs: None)
+            monkeypatch.setattr(admission_module, 'context', lambda *args, **kwargs: (guard_module, {}))
+            monkeypatch.setattr(guard_module.SubscriptionGuard, '__init__',
+                lambda self, *args, **kwargs: checks.append('joined'))
+            monkeypatch.setattr(native_u4b_runtime, 'validate_prepared_runtime', lambda runtime: None)
 
     adapter = SimpleNamespace(prepare_before_capture=prepare, close_prepared=lambda: checks.append('closed'))
     registration = SimpleNamespace(verified=lambda submitted: value,
@@ -214,11 +253,13 @@ def prepared_scope_case(tmp_path, monkeypatch, *, production):
             pin=SimpleNamespace(path=authorization['inputs'][name]), raw=authorization['raw'][name])
             for name in ('review', 'ci', 'launch_word'))))
     with pytest.raises(ReachedPreparedConsumer), ExitStack() as cleanup:
-        engine._launch_prepared(raw, review_path=None, ci_path=None, launch_word_path=None,
+        engine._launch_prepared(raw, review_path=authorization['inputs']['review'],
+            ci_path=authorization['inputs']['ci'], launch_word_path=authorization['inputs']['launch_word'],
             contract=contract, effects=effects, controls=controls, expected_profile='synthetic',
             expected_authority_sha256=None, prepared_directory=tmp_path if production else None,
             prepare_capture=None if production else consume, preparation_cleanup=cleanup)
-    assert checks == ['production' if production else 'synthetic', 'closed']
+    assert checks == ['production' if production else 'synthetic',
+        *(['joined', 'fresh-unchanged'] if through_selection else []), 'closed']
 
 
 def test_synthetic_identity_belongs_to_prepared_callback_scope(tmp_path, monkeypatch):
@@ -227,3 +268,11 @@ def test_synthetic_identity_belongs_to_prepared_callback_scope(tmp_path, monkeyp
 
 def test_production_exchange_belongs_to_prepared_callback_scope(tmp_path, monkeypatch):
     prepared_scope_case(tmp_path, monkeypatch, production=True)
+
+
+def test_synthetic_guard_and_unchanged_check_use_prepared_scope(tmp_path, monkeypatch):
+    prepared_scope_case(tmp_path, monkeypatch, production=False, through_selection=True)
+
+
+def test_production_guard_and_unchanged_check_use_prepared_scope(tmp_path, monkeypatch):
+    prepared_scope_case(tmp_path, monkeypatch, production=True, through_selection=True)
