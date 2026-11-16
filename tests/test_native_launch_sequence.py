@@ -55,6 +55,9 @@ def deny_real_commands(monkeypatch):
     def fixture_exec(code, namespace):
         builtins.exec(code, namespace)
         namespace['_utc_now'] = seq._utc_now
+        # This fixture forbids real command processes. Stub only the prepared
+        # owner's delivery, preserving actual signals sent to the test parent.
+        namespace['_PreparedStep'].send_signal = lambda self, signum: None
     monkeypatch.setattr(entry, 'exec', fixture_exec, raising=False)
 
 
@@ -143,7 +146,6 @@ def fake_commands(monkeypatch, paths, *, mutate=None, fail=None, fail_exception=
     calls = []
     order = (seq.COMMANDS[2], seq.COMMANDS[0], seq.COMMANDS[1])
     monkeypatch.setattr(seq.os, 'killpg', lambda pid, signum: None)
-    monkeypatch.setattr(seq.os, 'kill', lambda pid, signum: None)
     def run(command, **kwargs):
         assert command[:6] == [sys.executable, '-I', '-B', '-c', seq.BOOTSTRAP, str(seq.SOURCE_ROOT / 'src')]
         name = command[6]
