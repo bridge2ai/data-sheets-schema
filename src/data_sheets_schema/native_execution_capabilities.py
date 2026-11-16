@@ -21,7 +21,7 @@ from . import native_shared_controls_orchestration as classifier_loading
 _MEMBERS = MappingProxyType({
     'run_direct_canary': frozenset(('NoProxy', 'model_accounting', 'LIMIT_KEYS', 'observed_efforts')),
     'run_native_canary': frozenset(('execute_child', 'BudgetStop', 'observation_problems',
-                                  '_too_complex', '_PROC_ENVIRON')),
+                                  '_too_complex', '_PROC_ENVIRON', 'denial_problems')),
     'native_readonly': frozenset(('PROGRAMS', 'pipeline_parts', '_literal_arguments', '_paths')),
     'native_command_policy': frozenset(('_simple_command',)),
     'native_control': frozenset(('INIT_ID', 'BLANK_FRAME_TYPE', 'TOOLS', 'control_contract',

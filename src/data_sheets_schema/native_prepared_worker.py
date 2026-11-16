@@ -9,12 +9,61 @@ import math
 import os
 from pathlib import Path
 import secrets
+import signal
+import subprocess
+import sys
 import time
 
 from . import native_subscription_guard as wire
 
 LIMIT = 64 * 1024
 POLL_SECONDS = 0.1
+VERIFY_SECONDS = 300
+
+
+def _full_preparation_baseline(pin):
+    from . import native_environment_manifest as environment
+    state = environment._process_state()
+    key = environment._verification_key(pin)
+    with state['lock']:
+        memo = state['full'].get(key)
+        if memo is None or memo[0] is not None or memo[1] is None:
+            raise ValueError('prepared worker requires its original full census baseline')
+        return memo[1]
+
+
+def _verify(request):
+    """One fresh interpreter, one nonce-bound reply; no verdict survives a call."""
+    request = {**request, 'nonce': secrets.token_hex(32),
+        'import_paths': list(sys.path),
+        'interpreter': [sys.executable, sys.version, sys.implementation.cache_tag]}
+    raw = wire.canonical(request)
+    child = subprocess.Popen([sys.executable, '-I', '-B', '-m',
+        'data_sheets_schema.native_prepared_verifier'], stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True,
+        cwd=Path(__file__).resolve().parents[2])
+    try:
+        stdout, stderr = child.communicate(raw, timeout=VERIFY_SECONDS)
+    except BaseException:
+        try:
+            os.killpg(child.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        finally:
+            child.wait()
+        raise
+    if child.returncode != 0:
+        raise ValueError('prepared fresh verifier refused: ' + stderr.decode(errors='replace')[-4096:])
+    result = wire.strict_json(stdout)
+    baseline = result.get('baseline') if request.get('mode') == 'construct' else None
+    expected = {'nonce': request['nonce'], 'request_sha256': wire.sha(raw), 'passed': True}
+    if request.get('mode') == 'construct':
+        expected['baseline'] = baseline
+        if type(baseline) is not list:
+            raise ValueError('prepared verifier omitted the full census baseline')
+    if stdout != wire.canonical(expected):
+        raise ValueError('prepared fresh verifier returned a foreign result')
+    return baseline
 
 
 class PreparedIdentity:
@@ -25,11 +74,7 @@ class PreparedIdentity:
     """
 
     def __init__(self, registration_raw, value, authorization):
-        from . import native_execution_authority_v2 as authority
-        from . import native_shared_registration_orchestration as registration
         from .native_shared_controller import captured_preparation_body
-        if wire.canonical(registration.verified(registration_raw)) != wire.canonical(value):
-            raise ValueError('prepared worker requires freshly verified registration')
         self.registration_raw = registration_raw
         self.value_raw = wire.canonical(value)
         self.inputs = tuple((path, authorization['raw'][name])
@@ -43,28 +88,28 @@ class PreparedIdentity:
                      for pin in dependencies['base']['modules'].values())
         paths.update((pin['path'], pin['sha256'])
                      for pin in dependencies['additional_modules'].values())
-        self.sources = tuple((authority.ROOT / path, digest)
+        self.sources = tuple((Path(__file__).resolve().parents[2] / path, digest)
                              for path, digest in sorted(paths.items()))
+        self.prepared = None
+        self.registration_path = None
+        self.baseline = None
+        self.baseline = self._verify('construct')
+        if wire.canonical(self.baseline) != wire.canonical(
+                _full_preparation_baseline(preparation['environment_manifest'])):
+            raise ValueError('prepared environment changed since full preparation')
+
+    def _verify(self, mode):
+        return _verify({'mode': mode, 'registration': self.registration_raw.decode(),
+            'value': self.value_raw.decode(),
+            'inputs': [(str(path), raw.decode()) for path, raw in self.inputs],
+            'sources': [(str(path), digest) for path, digest in self.sources],
+            'registration_path': self.registration_path,
+            'baseline': self.baseline,
+            'prepared': self.prepared})
 
     def recheck(self):
-        from . import native_execution_authority_v2 as authority
-        from . import native_shared_registration_orchestration as registration
-        for path, digest in self.sources:
-            try:
-                authority._verified_source_bytes(path, digest)
-            except (OSError, ValueError) as exc:
-                raise ValueError('prepared worker source bytes changed') from exc
-        for path, raw in self.inputs:
-            if wire.read_regular(path, limit=32 * 1024 * 1024) != raw:
-                raise ValueError('prepared worker authority bytes changed')
-        # This reconstructs the live dependency identity (including Git HEAD,
-        # package roster/pins and interpreter), checks committed source blobs,
-        # all preparation/composition pins and runtime, and compares a fresh census to the full preparation baseline.
-        value = registration._recheck_verified(self.registration_raw,
-            wire.strict_json(self.value_raw), environment_mode='prepared')
-        if wire.canonical(value) != self.value_raw:
-            raise ValueError('prepared worker registration changed')
-        return value
+        self._verify('recheck')
+        return wire.strict_json(self.value_raw)
 
     def require_unchanged(self, value, raw, authorization):
         if raw != self.registration_raw or wire.canonical(value) != self.value_raw:
@@ -73,9 +118,7 @@ class PreparedIdentity:
                         for name, path in authorization['inputs'].items())
         if current != self.inputs:
             raise ValueError('prepared worker in-memory authorization changed')
-        self.recheck()
-        from .native_shared_execution_orchestration import _unchanged_inputs
-        _unchanged_inputs(value, authorization)
+        self._verify('unchanged')
 
 
 def checked_value(identity, registration_raw):
@@ -90,6 +133,7 @@ def exchange(directory, *, identity, attempt, max_age_seconds):
         attempt=attempt, max_age_seconds=max_age_seconds,
         source_sha256=identity.source_sha256,
         environment_sha256=identity.environment_sha256)
+    identity.prepared = [str(Path(directory) / 'prepared.json'), raw.decode()]
     result = wait_proceed(directory, prepared_raw=raw,
         registration_raw=identity.registration_raw, attempt=attempt,
         max_age_seconds=max_age_seconds)

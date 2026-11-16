@@ -288,3 +288,12 @@ from tests.test_native_execution_registration_v2 import isolated_modules  # noqa
 import pytest as _origin_pytest  # noqa: E402
 
 pytestmark = _origin_pytest.mark.usefixtures("isolated_modules")
+
+
+def _native_helper_import_environment():
+    from tests.utils.native_helper_environment import helper_environment
+    with helper_environment(authority.ROOT):
+        yield
+
+
+_native_helper_import_environment = pytest.fixture(autouse=True)(_native_helper_import_environment)
