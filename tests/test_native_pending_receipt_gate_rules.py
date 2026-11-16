@@ -247,7 +247,8 @@ def test_recorder_routes_through_real_native_floor_and_preserves_structural_refu
                 'derive_final_core', 'core_schema', 'pair', 'full_schema', 'full_terms', 'audit_evidence'}
     result_document = {'routing_only': 'Invented provenance delivery; no actual recorder acceptance.'}
 
-    def load(path):
+    def load(path, *, _manifest_mode):
+        assert _manifest_mode == 'full'
         assert path == selected.registration.pin.path
         calls.append('load')
         return run
