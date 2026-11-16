@@ -111,7 +111,7 @@ def bound_permission_for(expected, selection, source_raw):
     return probe
 
 
-def authority_for(registration_raw, ci_path, directory):
+def authority_for(registration_raw, ci_path, directory, *, defer_capture=False):
     """Mint fresh labelled review/capture/guard bytes; use genuine saved readers."""
     from data_sheets_schema import native_subscription_capture as capture
     from data_sheets_schema import native_launch_review as review
@@ -131,7 +131,30 @@ def authority_for(registration_raw, ci_path, directory):
     terms = review.validate_bundle(registration_raw, review_raw, word_raw)
     capture.activate_capture_word(registration_raw=registration_raw,
         review_bundle_raw=review_raw, launch_word_raw=word_raw)
-    _, _, _, binding = capture._authority(registration_raw, review_raw, word_raw, capture_root)
+    review_path, word_path, guard_path = (directory / name for name in (
+        'invented-review.json', 'invented-owner.json', 'invented-subscription.json'))
+    for path, raw in ((review_path, review_raw), (word_path, word_raw)):
+        path.write_bytes(raw)
+    def mint(identity):
+        return _mint_capture(registration_raw, value, review_raw, word_raw,
+            terms, capture_root, directory, guard_path, identity)
+    if defer_capture:
+        return {'review_path': review_path, 'ci_path': ci_path,
+            'launch_word_path': word_path, 'prepare_capture': mint}
+    minted = mint(None)
+    return {'review_path': review_path, 'ci_path': ci_path, 'launch_word_path': word_path,
+        'subscription_guard_path': guard_path, 'subscription_guard_sha256': minted['guard_sha256']}
+
+
+def _mint_capture(registration_raw, value, review_raw, word_raw, terms,
+                  capture_root, directory, guard_path, identity):
+    from data_sheets_schema import native_subscription_capture as capture
+    runtime = value['runtime']
+    if identity is None:
+        current = capture._authority(registration_raw, review_raw, word_raw, capture_root)
+    else:
+        current = capture._current_authority(registration_raw, review_raw, word_raw, prepared_identity=identity)
+    _, _, _, binding = current
     reservation = capture_root / 'captures' / c.sha(word_raw)
     reservation.mkdir(parents=True)
     reserve_raw = capture._reservation_raw(reservation, terms['quota_capture'], binding)
@@ -177,15 +200,10 @@ def authority_for(registration_raw, ci_path, directory):
         (slot / name).write_bytes(raw)
     manifest = slot / 'capture.json'
     manifest.write_bytes(c.canonical(result))
-    review_path, word_path, guard_path = (directory / name for name in (
-        'invented-review.json', 'invented-owner.json', 'invented-subscription.json'))
     with capture.current_guard_preparation(manifest, registration_raw=registration_raw,
-            review_bundle_raw=review_raw, launch_word_raw=word_raw) as guard_raw:
+            review_bundle_raw=review_raw, launch_word_raw=word_raw, prepared_identity=identity) as guard_raw:
         guard_path.write_bytes(guard_raw)
-    for path, raw in ((review_path, review_raw), (word_path, word_raw)):
-        path.write_bytes(raw)
     (directory / 'SYNTHETIC-AUTHORITY.txt').write_text(
         'Fabricated software-test review, CI, word, capture and quota declarations.\n'
         'No actual reviewers, native captures, account evidence or launch approval.\n')
-    return {'review_path': review_path, 'ci_path': ci_path, 'launch_word_path': word_path,
-        'subscription_guard_path': guard_path, 'subscription_guard_sha256': c.sha(guard_raw)}
+    return {'guard_path': str(guard_path), 'guard_sha256': c.sha(guard_raw)}

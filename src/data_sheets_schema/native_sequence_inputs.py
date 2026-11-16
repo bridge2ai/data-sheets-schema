@@ -17,7 +17,8 @@ def capture_expected(args):
     names=set(BASE)
     if args.command=='capture-subscription-event': names.add('sequence_start')
     elif args.command=='prepare-subscription-guard-v2': names.add('capture')
-    elif args.command=='launch': names.add('subscription_guard')
+    elif args.command=='launch' and getattr(args, 'prepared_directory', None) is None:
+        names.add('subscription_guard')
     if type(value) is not dict or set(value)!=names:
         raise ValueError('sequence input pins must contain the exact command roster')
     for name in (*BASE, *sorted(names-set(BASE))):

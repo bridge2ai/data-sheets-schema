@@ -128,9 +128,10 @@ def parser():
         prepare_v2.add_argument("--" + name, required=True)
     launch = commands.add_parser("launch", allow_abbrev=False,
         help="LIVE one registered attempt; requires the complete admission chain")
-    for name in ("registration", "review", "ci", "launch-word", "subscription-guard",
-                 "subscription-guard-sha256"):
+    for name in ("registration", "review", "ci", "launch-word"):
         launch.add_argument("--" + name, required=True)
+    for name in ('subscription-guard', 'subscription-guard-sha256', 'prepared-directory'):
+        launch.add_argument('--' + name)
     readback = commands.add_parser("read-final", allow_abbrev=False,
         help="Offline independent saved execution readback; never resumes an attempt")
     readback.add_argument("--registration", required=True)
@@ -267,9 +268,13 @@ def main(argv=None):
         _unchanged(*captures)
         bound_authority = {} if sequence_inputs is None else {'expected_authority_sha256': {
             key: sequence_inputs[key]['sha256'] for key in ('review', 'ci', 'launch_word')}}
+        if args.prepared_directory is None and (args.subscription_guard is None
+                or args.subscription_guard_sha256 is None):
+            raise ValueError('launch needs a guard or a prepared worker directory')
         result = launch(subject_raw, review_path=args.review, ci_path=args.ci,
             launch_word_path=args.launch_word, subscription_guard_path=args.subscription_guard,
-            subscription_guard_sha256=args.subscription_guard_sha256, **bound_authority)
+            subscription_guard_sha256=args.subscription_guard_sha256,
+            prepared_directory=args.prepared_directory, **bound_authority)
         _emit(result, choice_raw, command=args.command)
     else:
         from .native_shared_execution_orchestration import read_final

@@ -224,7 +224,7 @@ def test_slow_power_probe_cannot_age_an_already_checked_reservation_margin(tmp_p
     from data_sheets_schema import native_execution_orchestration as engine
     from data_sheets_schema import native_subscription_guard_v2 as subscription
     monkeypatch.chdir(authority.ROOT)
-    case = make_case(tmp_path / 'slow-power-probe')
+    case = make_case(tmp_path / 'slow-power-probe', defer_capture=False)
     guard = json.loads(Path(case['kwargs']['subscription_guard_path']).read_bytes())
     captured = subscription._timestamp(guard['captured_at'], 'synthetic capture time')
     ticks = [captured + guard['max_age_seconds'] - guard['pre_reservation_margin_seconds'] - 1]
@@ -254,7 +254,7 @@ def test_dispatch_guard_refusal_precedes_stage_activation(tmp_path, monkeypatch,
     from data_sheets_schema import native_execution_orchestration as engine
     from data_sheets_schema import native_subscription_guard_v2 as subscription
     monkeypatch.chdir(authority.ROOT)
-    case = make_case(tmp_path / 'guard-before-activation')
+    case = make_case(tmp_path / 'guard-before-activation', defer_capture=False)
     attempt = Path(case['value']['attempt_directory'])
     stage_paths = [Path(case['selection'].role(role))
                    for role in ('execution_capture', 'started_capture', 'journal')]

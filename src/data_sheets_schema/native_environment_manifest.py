@@ -68,12 +68,36 @@ class _CensusResolver:
         self.directories = {}
         self.identities = {}
         self.links = {}
+        self.statuses = {}
+        self.followed_statuses = {}
+
+    def status(self, path, *, follow=False):
+        key = os.fspath(path)
+        cache = self.followed_statuses if follow else self.statuses
+        if key not in cache:
+            try:
+                cache[key] = os.stat(key) if follow else os.lstat(key)
+            except FileNotFoundError:
+                cache[key] = None
+        info = cache[key]
+        if info is None:
+            raise FileNotFoundError(key)
+        return info
+
+    def begin_second_capture(self):
+        # Full generation deliberately rediscovers metadata and identities.
+        # Preserve ancestor witnesses, but take fresh observations in this pass.
+        self.statuses.clear()
+        self.followed_statuses.clear()
+        self.directories.clear()
 
     def resolve(self, path, *, strict=True, pending=None):
         path = Path(path)
         if not path.is_absolute():
             path = Path.cwd() / path
-        key = str(path)
+        return Path(self._resolve_string(str(path), strict=strict, pending=pending))
+
+    def _resolve_string(self, key, *, strict=True, pending=None):
         if key in self.directories:
             return self.directories[key]
         if pending is None:
@@ -82,13 +106,14 @@ class _CensusResolver:
             raise ValueError('symlink loop during environment census: ' + key)
         pending.add(key)
         try:
-            if path.parent == path:
-                physical = path
+            parent_key, name = os.path.split(key)
+            if parent_key == key:
+                physical = key
             else:
-                parent = self.resolve(path.parent, strict=strict, pending=pending)
-                physical = parent.parent if path.name == '..' else parent / path.name
+                parent = self._resolve_string(parent_key, strict=strict, pending=pending)
+                physical = os.path.dirname(parent) if name == '..' else os.path.join(parent, name)
             try:
-                info = physical.lstat()
+                info = self.status(physical)
             except FileNotFoundError:
                 if strict:
                     raise
@@ -96,21 +121,21 @@ class _CensusResolver:
             if stat.S_ISLNK(info.st_mode):
                 target = os.readlink(physical)
                 identity = (_ancestor_identity(info), target)
-                previous = self.links.setdefault(str(physical), identity)
+                previous = self.links.setdefault(physical, identity)
                 if previous != identity:
-                    raise ValueError('symlink changed during environment census: ' + str(physical))
+                    raise ValueError('symlink changed during environment census: ' + physical)
                 destination = Path(target)
                 if not destination.is_absolute():
-                    destination = physical.parent / destination
-                resolved = self.resolve(destination, strict=strict, pending=pending)
-                if resolved.is_dir():
+                    destination = Path(os.path.dirname(physical)) / destination
+                resolved = self._resolve_string(str(destination), strict=strict, pending=pending)
+                if _path_kind(resolved, stat.S_ISDIR):
                     self.directories[key] = resolved
                 return resolved
             if stat.S_ISDIR(info.st_mode):
                 identity = _ancestor_identity(info)
-                previous = self.identities.setdefault(str(physical), identity)
+                previous = self.identities.setdefault(physical, identity)
                 if previous != identity:
-                    raise ValueError('ancestor changed during environment census: ' + str(physical))
+                    raise ValueError('ancestor changed during environment census: ' + physical)
                 self.directories[key] = physical
             return physical
         finally:
@@ -118,10 +143,10 @@ class _CensusResolver:
 
     def require_stable(self):
         for path, identity in self.identities.items():
-            if _ancestor_identity(Path(path).lstat()) != identity:
+            if _ancestor_identity(os.lstat(path)) != identity:
                 raise ValueError('ancestor changed during environment census: ' + path)
         for path, identity in self.links.items():
-            if (_ancestor_identity(Path(path).lstat()), os.readlink(path)) != identity:
+            if (_ancestor_identity(os.lstat(path)), os.readlink(path)) != identity:
                 raise ValueError('symlink changed during environment census: ' + path)
 
 
@@ -130,6 +155,22 @@ def _resolve(path, *, strict=True):
     if resolver is None:
         return Path(path).resolve(strict=strict)
     return resolver.resolve(path, strict=strict)
+
+
+def _path_status(path):
+    resolver = _census_resolver.get()
+    return os.lstat(path) if resolver is None else resolver.status(path)
+
+
+def _path_kind(path, predicate):
+    try:
+        info = _path_status(path)
+        if stat.S_ISLNK(info.st_mode):
+            resolver = _census_resolver.get()
+            info = os.stat(path) if resolver is None else resolver.status(path, follow=True)
+        return predicate(info.st_mode)
+    except (FileNotFoundError, NotADirectoryError):
+        return False
 
 
 def _run_census(operation, *args):
@@ -211,9 +252,9 @@ def _record_stat_shape(value):
     return _stat_shape({'type': value[0], 'bytes': value[1]})
 
 
-def _lstat(path):
+def _lstat(path, *, fresh=False):
     try:
-        info = Path(path).lstat()
+        info = os.lstat(path) if fresh else _path_status(path)
     except FileNotFoundError:
         # Unhashed RECORD entries have always been explicitly unverified and
         # may be absent. Pin that absence too; a later addition is a change.
@@ -396,7 +437,7 @@ def _verify_payload(path, recorded_hash, recorded_size):
     size = _record_size(recorded_size)
     original = Path(path)
     physical = _resolve(original, strict=True)
-    alias_identity = _file_identity(original.lstat())
+    alias_identity = _file_identity(_path_status(original))
     descriptor = os.open(physical, os.O_RDONLY | os.O_NOFOLLOW)
     with os.fdopen(descriptor, 'rb') as stream:
         before = os.fstat(stream.fileno())
@@ -435,7 +476,7 @@ def _require_stable_payloads(captures):
 def _capture_unowned_file(path):
     """Fresh bounded hash, including stable physical and alias identities."""
     physical = _resolve(path, strict=True)
-    alias_identity = _file_identity(path.lstat())
+    alias_identity = _file_identity(_path_status(path))
     descriptor = os.open(physical, os.O_RDONLY | os.O_NOFOLLOW)
     digest = hashlib.sha256()
     with os.fdopen(descriptor, 'rb') as stream:
@@ -509,13 +550,13 @@ def _capture_distribution(distribution, *, verify_payloads=True, light=False):
     if len(records) != 1:
         raise ValueError('distribution has missing or ambiguous installed RECORD: ' + name)
     path = _resolve(distribution.locate_file(records[0]), strict=True)
-    record_identity = _file_identity(path.lstat())
+    record_identity = _file_identity(_path_status(path))
     raw = read_regular(str(path), 'distribution_record', max_bytes=MAX_RECORD_BYTES).captured.raw
     if not raw:
         raise ValueError('distribution has empty installed RECORD: ' + name)
     direct_url = path.parent / 'direct_url.json'
     installation = None
-    if direct_url.exists():
+    if _path_kind(direct_url, lambda mode: True):
         if light:
             # Metadata parsing still rejects editable installs, but light mode
             # hashes only the manifest and RECORD bytes, never other payloads.
@@ -632,7 +673,7 @@ def _metadata_snapshot(captures):
 
 def _import_paths():
     return list(dict.fromkeys(str(_resolve(p or os.getcwd(), strict=True))
-                             for p in sys.path if Path(p or os.getcwd()).exists()))
+                             for p in sys.path if _path_kind(p or os.getcwd(), lambda mode: True)))
 
 
 def _interpreter_identity():
@@ -690,13 +731,19 @@ def _require_owned_import_roots(paths, captures, *, light_unowned=None):
     pending = [(root, root) for root in sorted(actual - exempt)]
     while pending:
         root, directory = pending.pop()
-        if not directory.is_dir():
+        if not _path_kind(directory, stat.S_ISDIR):
             raise ValueError('unsupported archive or non-directory third-party import root: ' + str(directory))
-        snapshots[directory] = _directory_identity(directory)
+        snapshots[directory] = _file_identity(_path_status(directory))
+        # Shared-parent resolution also follows the independent 8acf20b47
+        # optimization; leaf symlinks still receive strict resolution.
+        physical_directory = _resolve(directory, strict=True)
         with os.scandir(directory) as iterator:
             entries = sorted(iterator, key=lambda entry: entry.name)
         for entry in entries:
-            is_directory = entry.is_dir()
+            # DirEntry can answer ordinary entries from the directory listing;
+            # symlink following shares the census's separate stat observation.
+            is_directory = (_path_kind(entry.path, stat.S_ISDIR)
+                            if entry.is_symlink() else entry.is_dir())
             if not is_directory and entry.name.endswith('.pyc'):
                 continue
             count += 1
@@ -711,15 +758,17 @@ def _require_owned_import_roots(paths, captures, *, light_unowned=None):
                 if path not in actual:
                     pending.append((root, path))
             else:
-                physical = _resolve(path, strict=True)
-                if not path.is_file():
+                info = _path_status(path)
+                physical = (_resolve(path, strict=True) if stat.S_ISLNK(info.st_mode)
+                            else physical_directory / entry.name)
+                if not _path_kind(path, stat.S_ISREG):
                     raise ValueError('unsupported non-regular import-root file: ' + str(path))
                 files[path] = (root, physical)
     total_bytes = sum(capture['row']['verified_files']['bytes'] for capture in captures)
     for path, (root, physical) in sorted(files.items()):
         # A newly added symlink to an owned payload is itself an unowned path:
         # treating its target's ownership as its own would hide new imports.
-        if physical in owned and (not path.is_symlink() or path in owned_spellings):
+        if physical in owned and (not stat.S_ISLNK(_path_status(path).st_mode) or path in owned_spellings):
             continue
         if light_unowned is None:
             captured = _capture_unowned_file(path)
@@ -767,6 +816,7 @@ def _generate():
         # The census may be long. Re-discover the roster, metadata and RECORDs,
         # then recheck every freshly hashed payload identity. Only this call's
         # initial full content verification is reused, never a previous call.
+        _census_resolver.get().begin_second_capture()
         if (_import_paths() != paths or _interpreter_identity() != identity
                 or _metadata_snapshot(_capture_environment(paths, verify_payloads=False)) != _metadata_snapshot(captures)):
             raise ValueError('interpreter, distribution metadata or payload changed during environment census')
@@ -811,7 +861,8 @@ def _light_census(value):
         # Stat identities are only a process-local full-cache invalidation key,
         # never serialized as environment authority or used to hash payloads.
         for path, expected_stat in fingerprints.items():
-            if _lstat(path)[1] != expected_stat:
+            # Deliberate final second look, never served by the census cache.
+            if _lstat(path, fresh=True)[1] != expected_stat:
                 raise ValueError('installed metadata or payload changed during environment census (light)')
         return tuple(sorted(fingerprints.items()))
     except (OSError, UnicodeError, TypeError, AttributeError, csv.Error) as exc:
@@ -835,8 +886,9 @@ def verify(pin, *, mode='full'):
     A full result is reused only in this process for the same pin/interpreter.
     Every reuse still performs the light live census and checks the original
     full result's file identities; a changed payload refuses without rehashing.
+    Prepared mode requires that baseline and never regenerates after capture.
     """
-    if mode not in ('full', 'light'):
+    if mode not in ('full', 'light', 'prepared'):
         raise ValueError('unknown environment verification mode')
     c.file_pin(pin, 'environment manifest pin')
     captured = read_regular(pin['path'], 'environment_manifest', max_bytes=MAX_BYTES).captured
@@ -854,6 +906,8 @@ def verify(pin, *, mode='full'):
     with state['lock']:
         memo = state['full'].get(key)
         if memo is None:
+            if mode == 'prepared':
+                raise ValueError('prepared environment verification requires a process full baseline')
             if len(state['full']) >= 64:
                 raise ValueError('process environment verification pin bound exceeded')
             # Store refusals too: fixing a failed environment requires a new

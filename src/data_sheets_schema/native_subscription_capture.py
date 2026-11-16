@@ -440,12 +440,16 @@ def capture_subscription(*, registration_raw, review_bundle_raw, launch_word_raw
                     registration_raw, review_bundle_raw, launch_word_raw, journal)
 
 
-def _current_authority(registration_raw, review_bundle_raw, launch_word_raw):
+def _current_authority(registration_raw, review_bundle_raw, launch_word_raw, *, prepared_identity=None):
     with pre_timing.step('_current_authority'):
         from .native_launch_review import validate_bundle
         statement = validate_bundle(registration_raw, review_bundle_raw, launch_word_raw, require_current=True)
         if statement['quota_capture']['kind'] != REQUEST_KIND:
             raise ValueError('current capture authority requires the registered v3 protocol')
+        if prepared_identity is not None:
+            from .native_prepared_worker import checked_value
+            return _authority_from_value(checked_value(prepared_identity, registration_raw), registration_raw,
+                review_bundle_raw, launch_word_raw, statement['quota_capture']['directory'])
         return _authority(registration_raw, review_bundle_raw, launch_word_raw,
                           statement['quota_capture']['directory'])
 
@@ -523,7 +527,7 @@ def _require_latest_guard_claim(guard_raw, authority, journal, launch_word_raw):
 
 @contextmanager
 def current_guard_preparation(manifest_path, *, registration_raw, review_bundle_raw, launch_word_raw,
-                              expected_manifest_sha256=None):
+                              expected_manifest_sha256=None, prepared_identity=None):
     """Prepare current guard bytes while retaining the word lock through publication.
 
     RunSpec boundary: validated-caller
@@ -538,7 +542,8 @@ def current_guard_preparation(manifest_path, *, registration_raw, review_bundle_
         from . import native_subscription_guard_v2 as guard
         path, directory, root = _capture_manifest_root(
             manifest_path, registration_raw, review_bundle_raw, launch_word_raw)
-        authority = _current_authority(registration_raw, review_bundle_raw, launch_word_raw)
+        authority = _current_authority(registration_raw, review_bundle_raw, launch_word_raw,
+                                       prepared_identity=prepared_identity)
         value, statement, _, _ = authority
         if root != _path(statement['quota_capture']['directory']):
             raise ValueError('guard capture root differs from reconstructed authority')
@@ -777,11 +782,18 @@ def _read_capture_records_at_root(path, directory, authority, root, *, require_l
 
 
 def _read_capture_with_authority(manifest_path, initial_authority, *, registration_raw,
-                                 review_bundle_raw, launch_word_raw, require_current=False):
+                                 review_bundle_raw, launch_word_raw, require_current=False,
+                                 prepared_identity=None):
     path, directory, root = _capture_manifest_root(
         manifest_path, registration_raw, review_bundle_raw, launch_word_raw)
-    authority = _recheck_authority(
-        initial_authority, registration_raw, review_bundle_raw, launch_word_raw, root)
+    if prepared_identity is None:
+        authority = _recheck_authority(
+            initial_authority, registration_raw, review_bundle_raw, launch_word_raw, root)
+    else:
+        authority = _current_authority(registration_raw, review_bundle_raw, launch_word_raw,
+                                       prepared_identity=prepared_identity)
+        if authority != initial_authority:
+            raise ValueError('capture authority changed during event lookup')
     return _read_capture_records(
         path, directory, authority,
         registration_raw=registration_raw, launch_word_raw=launch_word_raw,
@@ -810,7 +822,8 @@ def read_capture(manifest_path, *, registration_raw, review_bundle_raw, launch_w
 
 
 def read_capture_for_event(directory, *, registration_raw, review_bundle_raw, launch_word_raw,
-                           event_json, event_sha256, captured_at, require_current=False):
+                           event_json, event_sha256, captured_at, require_current=False,
+                           prepared_identity=None):
     """Join a guard to its exact retained capture, without a mutable latest pointer.
 
     Failed/incomplete slots stay spent but cannot supply admission evidence.
@@ -826,7 +839,8 @@ def read_capture_for_event(directory, *, registration_raw, review_bundle_raw, la
     checked by read_capture.
     """
     directory = _path(directory)
-    authority = (_current_authority(registration_raw, review_bundle_raw, launch_word_raw)
+    authority = (_current_authority(registration_raw, review_bundle_raw, launch_word_raw,
+                                    prepared_identity=prepared_identity)
                  if require_current else
                  _authority(registration_raw, review_bundle_raw, launch_word_raw, directory))
     if directory != _path(authority[1]['quota_capture']['directory']):
@@ -851,7 +865,7 @@ def read_capture_for_event(directory, *, registration_raw, review_bundle_raw, la
         matches.append(_read_capture_with_authority(
             path, authority, registration_raw=registration_raw,
             review_bundle_raw=review_bundle_raw, launch_word_raw=launch_word_raw,
-            require_current=require_current))
+            require_current=require_current, prepared_identity=prepared_identity))
     if len(matches) != 1:
         raise ValueError('guard event does not match exactly one retained registered capture')
     return matches[0]

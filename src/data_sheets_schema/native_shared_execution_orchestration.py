@@ -80,7 +80,8 @@ def authorizations(raw, value, *, review_path, ci_path, launch_word_path):
 
 
 def launch(registration_raw, *, review_path, ci_path, launch_word_path,
-           subscription_guard_path, subscription_guard_sha256, expected_authority_sha256=None):
+           subscription_guard_path=None, subscription_guard_sha256=None,
+           expected_authority_sha256=None, prepared_directory=None):
     """    RunSpec boundary: validated-caller
 
     RunSpec precondition: Caller supplies explicit execution registration; registration.verified reconstructs guarded preparation before creating fixed effects or dispatching.
@@ -97,19 +98,24 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
             attempt = Path(value['attempt_directory'])
             if attempt.exists() or attempt.is_symlink():
                 raise ValueError('native attempt must be new; spent identities cannot resume')
-            guard = select_current(subscription_guard_path, subscription_guard_sha256,
-                registration_raw=registration_raw, runtime=value['runtime'],
-                launch_word_path=launch_word_path, review_path=review_path)
-            preflight_current_selection(
-                guard, registration_raw=registration_raw, value=value)
+            guard = None
+            if prepared_directory is None:
+                guard = select_current(subscription_guard_path, subscription_guard_sha256,
+                    registration_raw=registration_raw, runtime=value['runtime'],
+                    launch_word_path=launch_word_path, review_path=review_path)
+                preflight_current_selection(guard, registration_raw=registration_raw, value=value)
+            elif subscription_guard_path is not None or subscription_guard_sha256 is not None:
+                raise ValueError('prepared launch receives its guard only through proceed')
             contract, effects = _engine_bindings(launch_guard=guard)
             return execute(registration_raw, review_path=review_path, ci_path=ci_path,
                 launch_word_path=launch_word_path, contract=contract, effects=effects,
-                expected_authority_sha256=expected_authority_sha256)
+                expected_authority_sha256=expected_authority_sha256,
+                prepared_directory=prepared_directory)
 
 
 def synthetic_launch(registration_raw, *, review_path, ci_path, launch_word_path,
-                     subscription_guard_path, subscription_guard_sha256):
+                     subscription_guard_path=None, subscription_guard_sha256=None,
+                     prepare_capture=None):
     """Run the fixed local software peer through the complete execution engine.
 
     This separate entry cannot accept a real executable/account. Saved authority
@@ -132,15 +138,17 @@ def synthetic_launch(registration_raw, *, review_path, ci_path, launch_word_path
             attempt = Path(value['attempt_directory'])
             if attempt.exists() or attempt.is_symlink():
                 raise ValueError('native attempt must be new; spent identities cannot resume')
-            guard = select_current(subscription_guard_path, subscription_guard_sha256,
-                registration_raw=registration_raw, runtime=value['runtime'],
-                launch_word_path=launch_word_path, review_path=review_path)
-            preflight_current_selection(
-                guard, registration_raw=registration_raw, value=value)
+            guard = None
+            if prepare_capture is None:
+                guard = select_current(subscription_guard_path, subscription_guard_sha256,
+                    registration_raw=registration_raw, runtime=value['runtime'],
+                    launch_word_path=launch_word_path, review_path=review_path)
+                preflight_current_selection(guard, registration_raw=registration_raw, value=value)
             contract, effects = _engine_bindings(launch_guard=guard)
             effects = replace(effects, probe_runtime=_synthetic_runtime_observation)
             return execute(registration_raw, review_path=review_path, ci_path=ci_path,
-                launch_word_path=launch_word_path, contract=contract, effects=effects)
+                launch_word_path=launch_word_path, contract=contract, effects=effects,
+                prepare_capture=prepare_capture)
 
 
 def _synthetic_runtime_observation(value):

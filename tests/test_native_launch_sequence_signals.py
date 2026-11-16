@@ -56,6 +56,8 @@ def test_signal_during_command_ownership_is_forwarded_once_then_synced(tmp_path,
     monkeypatch.setattr(os, 'fsync', sync)
     def spawn(*args, **kwargs):
         child = original_spawn(*args, **kwargs)
+        if args[0][6] == 'launch':
+            return child
         child.send_signal = forwarded.append
         child.returncode = None
         before_sync = len(synced)
@@ -80,12 +82,12 @@ def test_signal_during_command_ownership_is_forwarded_once_then_synced(tmp_path,
     monkeypatch.setattr(seq.subprocess, 'Popen', spawn)
     assert fixture.run_sequence(fixture.argv(paths)) == 1
     saved = fixture.record(paths)
-    assert len(calls) == 1 and waited == [True]
+    assert len(calls) == 2 and waited == [True]
     assert forwarded == [signal.SIGINT]
     assert saved['signals_received'] == [signal.SIGINT, signal.SIGTERM]
     assert saved['stop_reason'] == 'signal ' + str(signal.SIGINT)
-    assert saved['steps'][0]['return_code'] == 23
-    assert Path(saved['steps'][0]['stderr_path']).read_bytes().endswith(b'cleanup completed\n')
+    assert saved['steps'][1]['return_code'] == 23
+    assert Path(saved['steps'][1]['stderr_path']).read_bytes().endswith(b'cleanup completed\n')
     assert not (paths['packet-directory'] / seq.OUTPUTS[1]).exists()
     assert all(signal.getsignal(sig) is handler for sig, handler in previous.items())
 
@@ -145,6 +147,14 @@ def main():
     config = json.loads((auxiliary / 'config.json').read_text())
     with (auxiliary / 'commands.jsonl').open('a') as stream:
         stream.write(json.dumps(name) + '\n'); stream.flush(); os.fsync(stream.fileno())
+    if name == 'launch':
+        from data_sheets_schema import native_prepared_worker as worker
+        raw = Path(flags['--registration']).read_bytes()
+        attempt = json.loads(raw)['registration']['attempt_directory']
+        prepared = worker.publish_prepared(flags['--prepared-directory'], registration_raw=raw,
+            attempt=attempt, source_sha256='a' * 64, environment_sha256='b' * 64, max_age_seconds=1200)
+        worker.wait_proceed(flags['--prepared-directory'], prepared_raw=prepared,
+            registration_raw=raw, attempt=attempt, max_age_seconds=1200)
     if name == config['interrupt_step']:
         received = []
         def receive(signum, frame):
@@ -190,7 +200,8 @@ def copied_signal_package(tmp_path):
     for name in ('native_launch_sequence', 'native_subscription_guard', 'native_sequence_start',
                  'native_launch_entry', 'native_capture_words', 'native_subscription_guard_v2',
                  'native_u4b_policy', 'native_run_limits', 'native_shared_runtime_values',
-                 'native_runtime_profiles', 'native_host_power', 'native_path_identity'):
+                 'native_runtime_profiles', 'native_host_power', 'native_path_identity',
+                 'native_prepared_worker'):
         (package / (name + '.py')).write_bytes((seq.SOURCE_ROOT / 'src/data_sheets_schema' / (name + '.py')).read_bytes())
     (package / 'native_generation.py').write_text(FAKE_COMMAND)
     return root
@@ -249,13 +260,14 @@ raise SystemExit(status)
     assert saved['status'] == 'stopped' and saved['stop_reason'] == 'signal ' + str(signum)
     assert saved['signals_received'] == [signum, repeated]
     assert saved['signal_forwarding_errors'] == []
-    expected = list(seq.COMMANDS[:seq.COMMANDS.index(step) + 1])
+    expected = [seq.COMMANDS[2], *seq.COMMANDS[:min(seq.COMMANDS.index(step) + 1, 2)]]
     assert [json.loads(line) for line in (auxiliary / 'commands.jsonl').read_text().splitlines()] == expected
     assert [item['step'] for item in saved['steps']] == expected
-    assert saved['steps'][-1]['return_code'] == 0
-    assert Path(saved['steps'][-1]['stderr_path']).read_bytes() == b'slow cleanup complete\n'
-    assert json.loads(Path(saved['steps'][-1]['output_path']).read_bytes())['command'] == step
-    for name in seq.OUTPUTS[len(expected):]:
+    interrupted = next(item for item in saved['steps'] if item['step'] == step)
+    assert interrupted['return_code'] == 0
+    assert Path(interrupted['stderr_path']).read_bytes() == b'slow cleanup complete\n'
+    assert json.loads(Path(interrupted['output_path']).read_bytes())['command'] == step
+    for name in (seq.OUTPUTS[2], seq.OUTPUTS[0], seq.OUTPUTS[1])[len(expected):]:
         assert not (paths['packet-directory'] / name).exists()
 
 
@@ -286,7 +298,7 @@ def test_final_signal_cutoff_keeps_status_reason_and_list_consistent(tmp_path, m
     clock_calls_after_result = []
     armed = []
     def produced(name, document):
-        if name == seq.COMMANDS[-1]:
+        if name == seq.COMMANDS[1]:
             armed.append(True)
     fixture.fake_commands(monkeypatch, paths, mutate=produced)
     clock = seq._utc_now
@@ -294,9 +306,8 @@ def test_final_signal_cutoff_keeps_status_reason_and_list_consistent(tmp_path, m
         stamp = clock()
         if armed:
             clock_calls_after_result.append(True)
-            # First call ends the launch command; the second is the final
-            # completion clock immediately before the signal tuple snapshot.
-            if boundary == 'completion_clock' and len(clock_calls_after_result) == 2:
+            # Guard completion, launch completion, then the final clock.
+            if boundary == 'completion_clock' and len(clock_calls_after_result) == 3:
                 os.kill(os.getpid(), signal.SIGINT)
                 os.kill(os.getpid(), signal.SIGTERM)
         return stamp

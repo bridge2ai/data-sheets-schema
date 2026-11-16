@@ -408,7 +408,9 @@ class SubscriptionGuard:
     This helper repeats term equality and chronology, not reviewer authenticity.
     """
     __slots__ = ("_raw", "_expected", "_registration", "_runtime_raw", "_word_raw", "_owner_raw",
-                 "_clock", "_path", "_dispatched", "_dispatched_at", "_stop", "_count", "_windows", "_record_only")
+                 "_clock", "_path", "_dispatched", "_dispatched_at", "_stop", "_count", "_windows", "_record_only",
+                 "_dispatch_time_bound", "_dispatch_authority", "_dispatch_path", "_dispatch_clock",
+                 "_dispatch_checked", "_observation_started")
 
     def __init__(self, raw, *, expected_sha256, registration_raw, runtime,
                  launch_word_raw, owner_statement, clock=None, check_freshness=True):
@@ -422,6 +424,9 @@ class SubscriptionGuard:
             raise ValueError("subscription guard clock must be callable")
         self._path, self._dispatched, self._stop, self._count = None, False, None, 0
         self._dispatched_at = None
+        self._dispatch_time_bound = self._dispatch_authority = None
+        self._dispatch_path = self._dispatch_clock = None
+        self._dispatch_checked = self._observation_started = False
         self._windows = _empty_windows()
         self._record_only = {}
         if check_freshness:
@@ -476,15 +481,82 @@ class SubscriptionGuard:
         if bound["captured"] + bound["max_age"] - now < bound["margin"]:
             raise ValueError("subscription pre-reservation freshness margin is insufficient")
 
+    def _dispatch_memory_authority(self):
+        """Immutable values only: never reconstruct authority or read a path."""
+        if (any(type(value) is not bytes for value in
+                (self._raw, self._registration, self._runtime_raw, self._word_raw, self._owner_raw))
+                or type(self._expected) is not str
+                or type(self._windows) is not dict or type(self._record_only) is not dict):
+            raise ValueError("subscription captured authority changed before process dispatch")
+        return (self._raw, self._expected, self._registration, self._runtime_raw,
+                self._word_raw, self._owner_raw, self._dispatched_at, self._dispatch_time_bound,
+                canonical(self._windows), canonical(self._record_only))
+
     def before_dispatch(self, *, check_only=False):
         if type(check_only) is not bool:
             raise ValueError("subscription dispatch selection must be boolean")
-        _, _, stamp = self._fresh()
+        bound, consumed_at, stamp = self._fresh()
         if not check_only:
             self._dispatched = True
             self._dispatched_at = stamp
+            # Capture validated temporal scalars while the admission alarm is
+            # armed. The final hook must not call _static or resolve paths.
+            self._dispatch_time_bound = (consumed_at, bound["captured"], bound["max_age"],
+                tuple(row["resets_at"] for row in bound["readings"].values()))
+            self._dispatch_authority = self._dispatch_memory_authority()
+            self._dispatch_path = self._path
+            self._dispatch_clock = self._clock
+
+    def before_process_dispatch(self, *, refusal=None):
+        """One final memory/clock check after admission cleanup, before Popen.
+
+        A caller's authority refusal can only stop this attempt. It cannot
+        skip any guard check or permit retry after a refused final boundary.
+        """
+        if self._dispatch_checked is not False:
+            if self._stop is None:
+                self._stop = "subscription process dispatch check already attempted"
+            raise ValueError(self._stop)
+        self._dispatch_checked = True
+        try:
+            if self._stop is not None:
+                raise ValueError(self._stop)
+            if refusal is not None:
+                if type(refusal) is not str or not refusal:
+                    raise ValueError("subscription final dispatch refusal is malformed")
+                raise ValueError(refusal)
+            if self._dispatched is not True or self._dispatch_time_bound is None:
+                raise ValueError("subscription process dispatch requires consumed admission")
+            if self._observation_started or type(self._count) is not int or self._count != 0:
+                raise ValueError("subscription process dispatch follows an observation")
+            if (self._path is not self._dispatch_path or self._clock is not self._dispatch_clock
+                    or self._dispatch_memory_authority() != self._dispatch_authority):
+                raise ValueError("subscription captured authority changed before process dispatch")
+            consumed_at, captured_at, max_age, resets = self._dispatch_time_bound
+            now = self._clock()
+            if type(now) not in (int, float) or not math.isfinite(now):
+                raise ValueError("subscription guard clock is invalid")
+            try:
+                stamp = datetime.fromtimestamp(now, timezone.utc).isoformat().replace("+00:00", "Z")
+                now = _timestamp(stamp, "dispatch time")
+            except (ValueError, OverflowError, OSError) as exc:
+                raise ValueError("subscription guard clock is invalid") from exc
+            if now < consumed_at:
+                raise ValueError("subscription guard clock moved backward before process dispatch")
+            if not 0 <= now - captured_at <= max_age:
+                raise ValueError("subscription observation is stale or future-dated")
+            if any(reset <= now for reset in resets):
+                raise ValueError("subscription window reset since observation")
+        except (ValueError, TypeError, OverflowError, OSError, RecursionError) as exc:
+            if self._stop is None:
+                self._stop = str(exc)
+            raise ValueError(self._stop) from exc
+        # A refused final check retains the earlier valid timestamp and the
+        # immutable consumed marker. Only successful revalidation replaces it.
+        self._dispatched_at = stamp
 
     def observe(self, event):
+        self._observation_started = True
         if type(event) is not dict or event.get("type") != "rate_limit_event":
             return
         # Recheck immutable admission bytes; changes to detached public values

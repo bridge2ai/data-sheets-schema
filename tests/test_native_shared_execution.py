@@ -25,7 +25,7 @@ from tests.utils.native_shared_consumer_scope import command_guidance, observe_c
 from tests.utils.native_synthetic_evidence import runtime_for, bound_permission_for, authority_for
 
 
-def make_case(root, *, fixture='neutral', receipt_origin_version=0):
+def make_case(root, *, fixture='neutral', receipt_origin_version=0, defer_capture=True):
     if fixture == 'neutral':
         builder = build_native_fixture
     elif fixture == 'omission':
@@ -84,7 +84,7 @@ def make_case(root, *, fixture='neutral', receipt_origin_version=0):
                 'details_url': details_url}
             for name in preparation.required_checks(workflow_event)}}
         ci_path = parent / 'invented-ci.json'; ci_path.write_bytes(c.canonical(ci))
-        kwargs = authority_for(raw, ci_path, parent)
+        kwargs = authority_for(raw, ci_path, parent, defer_capture=defer_capture)
     return {**data, 'root': root, 'spec': spec, 'value': value, 'raw': raw,
         'kwargs': kwargs}
 

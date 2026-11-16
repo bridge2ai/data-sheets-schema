@@ -23,6 +23,9 @@ selected = {
     'native_control.py': {'_observe_event', '_classify_frame'},
     'native_execution_orchestration.py': {'_admit_subscription_guard'},
     'native_shared_capture.py': {'at_callback'},
+    'native_shared_registration_orchestration.py': {'verified'},
+    'native_subscription_capture.py': {'_current_authority'},
+    'native_environment_manifest.py': {'_light_live'},
 }
 active = {}
 
@@ -40,6 +43,9 @@ def start(code, offset):
         raise RuntimeError('measurement frame identity mismatch')
     key = (threading.get_ident(), code)
     row = {'file': name, 'function': code.co_name, 'thread': key[0]}
+    if name == 'test_native_shared_execution.py' and code.co_name == 'launch_case':
+        case = frame.f_locals['case']
+        row['guard'] = json.loads(case['kwargs']['subscription_guard_path'].read_bytes())
     event = frame.f_locals.get('event', frame.f_locals.get('frame'))
     if isinstance(event, dict):
         row['event'] = event

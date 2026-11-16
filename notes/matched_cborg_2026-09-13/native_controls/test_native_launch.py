@@ -29,6 +29,44 @@ def executable(path, marker):
     path.chmod(0o700)
 
 
+def test_final_dispatch_refusal_after_admission_teardown_prevents_spawn(tmp_path, monkeypatch):
+    instruction = tmp_path / 'input.txt'
+    instruction.write_text('offline')
+    events = []
+    class Timer:
+        deadline_ns = 10**30
+        def __init__(self, *args, **kwargs):
+            pass
+        def armed(self):
+            class Scope:
+                def __enter__(self):
+                    events.append('armed')
+                def __exit__(self, *error):
+                    events.append('teardown')
+            return Scope()
+        def check(self, *args):
+            pass
+    def final_check():
+        assert events == ['armed', 'verified', 'teardown']
+        events.append('boundary')
+        raise BudgetStop('subscription observation is stale at final boundary')
+    def forbidden_spawn(*args, **kwargs):
+        pytest.fail('final refusal must prevent process creation')
+    monkeypatch.setattr(runner, 'AdmissionTimer', Timer)
+    monkeypatch.setattr(runner, 'exit_check_available', lambda: True)
+    monkeypatch.setattr(runner.subprocess, 'Popen', forbidden_spawn)
+    recorded = []
+    proxy = SimpleNamespace(failed=threading.Event(), failure=None,
+                            close_admission=lambda: None)
+    with pytest.raises(BudgetStop, match='stale at final boundary'):
+        execute_child(['unused'], proxy=proxy, instruction=instruction,
+            attempt=tmp_path, cwd=tmp_path, env={}, deadline_seconds=5,
+            verify_launch=lambda: events.append('verified'),
+            verify_dispatch=final_check, record_stop=recorded.append)
+    assert events[-1] == 'boundary'
+    assert any('stale at final boundary' in reason for reason in recorded)
+
+
 def test_same_version_alias_retarget_cannot_change_launched_bytes(tmp_path):
     one=tmp_path/'one';two=tmp_path/'two';alias=tmp_path/'cli'
     executable(one,'one');executable(two,'two');alias.symlink_to(one)

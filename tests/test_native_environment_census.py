@@ -78,11 +78,11 @@ def test_resolver_stats_distinct_ancestors_once_then_revalidates(tmp_path, monke
     files = [directory / name for name in ('a', 'b', 'c')]
     for path in files:
         path.write_bytes(b'payload')
-    original, calls = Path.lstat, []
+    original, calls = m.os.lstat, []
     def counted(path, *args, **kwargs):
         calls.append(str(path))
         return original(path, *args, **kwargs)
-    monkeypatch.setattr(Path, 'lstat', counted)
+    monkeypatch.setattr(m.os, 'lstat', counted)
     resolver = m._CensusResolver()
     for path in files:
         assert resolver.resolve(path) == path
@@ -223,3 +223,46 @@ def test_census_resolver_is_discarded_on_success_and_failure(installed, monkeypa
     with pytest.raises(ValueError):
         m.generate()
     assert m._census_resolver.get() is None
+
+
+def test_light_census_status_budget_keeps_final_second_look(installed, monkeypatch):
+    from collections import Counter
+    paths = [installed.root / ('payload-' + str(index)) for index in range(200)]
+    for path in paths:
+        path.write_bytes(b'payload')
+        installed.add_file(Path(path.name))
+    value = m.generate()
+    calls = Counter()
+    original_lstat, original_stat = m.os.lstat, m.os.stat
+    def counted_lstat(path, *args, **kwargs):
+        calls[str(path)] += 1
+        return original_lstat(path, *args, **kwargs)
+    def counted_stat(path, *args, **kwargs):
+        calls[str(path)] += 1
+        return original_stat(path, *args, **kwargs)
+    with monkeypatch.context() as patch:
+        patch.setattr(m.os, 'lstat', counted_lstat)
+        patch.setattr(m.os, 'stat', counted_stat)
+        m._light_live(value)
+    # One observation shared by resolution/type/ownership, one final recheck.
+    assert all(calls[str(path)] == 2 for path in paths)
+    assert sum(calls.values()) <= 2 * len(paths) + 100
+
+
+def test_light_census_does_not_reuse_status_between_calls(installed):
+    value = m.generate()
+    m._light_live(value)
+    (installed.root / 'file.py').write_bytes(b'changed size')
+    with pytest.raises(ValueError, match='size or type'):
+        m._light_live(value)
+
+
+def test_light_census_final_payload_second_look_is_fresh(installed, monkeypatch):
+    value = m.generate()
+    check = m._require_stable_payloads
+    def mutate(captures):
+        check(captures)
+        (installed.root / 'file.py').write_bytes(b'SYNTHETIC = None\n')
+    monkeypatch.setattr(m, '_require_stable_payloads', mutate)
+    with pytest.raises(ValueError, match='changed during environment census'):
+        m._light_live(value)

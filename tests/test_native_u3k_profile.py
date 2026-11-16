@@ -206,7 +206,7 @@ def test_neutral_pre_reservation_diagnostic(tmp_path, monkeypatch):
         ('run_api_canary', 'main'), ('budgeted_cborg', 'cborg_client'))}
     monkeypatch.chdir(authority.ROOT)
     with recorder.phase('fixture'):
-        case = make_case(tmp_path / 'u3k-neutral')
+        case = make_case(tmp_path / 'u3k-neutral', defer_capture=False)
     attempt = Path(case['value']['attempt_directory'])
     evidence = Path(case['value']['evidence_directory'])
     guard = json.loads(Path(case['kwargs']['subscription_guard_path']).read_bytes())

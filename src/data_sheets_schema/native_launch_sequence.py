@@ -16,6 +16,7 @@ import signal
 import subprocess
 import sys
 import threading
+import time
 
 from . import native_subscription_guard as guard
 from . import native_host_power as host_power
@@ -215,6 +216,10 @@ def _run_step(command, flags, output, steps, interrupts):
     interrupts.check()
     if step['return_code'] != 0:
         raise ValueError(command + ' exited nonzero; see retained command output')
+    return _step_result(command, output, step)
+
+
+def _step_result(command, output, step):
     raw = guard.read_regular(output, limit=MAX_COMMAND_OUTPUT_BYTES)
     step['output_sha256'] = guard.sha(raw)
     try:
@@ -227,6 +232,125 @@ def _run_step(command, flags, output, steps, interrupts):
     if type(body) is not dict or not body:
         raise ValueError(command + ' output lacks its result object')
     return body
+
+
+class _PreparedStep:
+    """Own the prepared launch process and its output until reaped."""
+
+    def __init__(self, flags, output, steps, interrupts):
+        self.output, self.interrupts = output, interrupts
+        self.child = self.stdout = self.stderr = None
+        self.complete = False
+        argv = [sys.executable, '-I', '-B', '-c', BOOTSTRAP,
+                str(SOURCE_ROOT / 'src'), 'launch', *flags]
+        self.step = {'step': 'launch', 'argv': argv, 'started_at': _utc_now(),
+            'completed_at': None, 'return_code': None, 'output_path': str(output),
+            'stderr_path': str(output.with_suffix('.stderr.txt'))}
+        steps.append(self.step)
+
+    def start(self):
+        self.interrupts.check()
+        self.stdout = _new(self.output)
+        self.stderr = _new(self.output.with_suffix('.stderr.txt'))
+        self.child = subprocess.Popen(self.step['argv'], stdin=subprocess.DEVNULL,
+            stdout=self.stdout, stderr=self.stderr, cwd=SOURCE_ROOT,
+            env=dict(CHILD_ENV), start_new_session=True)
+
+    def ready(self, directory, *, registration_raw, attempt, max_age_seconds):
+        from .native_prepared_worker import require_prepared
+        while True:
+            self.interrupts.check()
+            if self._exit_status() is not None:
+                raise ValueError('prepared launch exited before proceed')
+            if os.path.lexists(directory / 'prepared.json'):
+                return require_prepared(directory, registration_raw=registration_raw,
+                    attempt=attempt, max_age_seconds=max_age_seconds, pid=self.child.pid)
+            time.sleep(COMMAND_WAIT_POLL_SECONDS)
+
+    def _exit_status(self):
+        # Keep the leader unreaped until group cleanup. Its retained PID pins
+        # the group identity even after exit; never signal a recycled PID.
+        status = os.waitid(os.P_PID, self.child.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+        if status is None or status.si_pid == 0:
+            return None
+        return status.si_status if status.si_code == os.CLD_EXITED else -status.si_status
+
+    def send_signal(self, signum):
+        # Popen.send_signal polls (and can reap) first. This owner deliberately
+        # retains the leader until close, so signal its exact retained PID.
+        os.kill(self.child.pid, signum)
+
+    def finish(self):
+        self.interrupts._child = self
+        try:
+            while True:
+                self.interrupts._forward()
+                code = self._exit_status()
+                if code is not None:
+                    self.step['return_code'] = code
+                    break
+                time.sleep(COMMAND_WAIT_POLL_SECONDS)
+        finally:
+            self.interrupts._child = None
+        self.interrupts.check()
+        if self.step['return_code'] != 0:
+            raise ValueError('prepared launch exited nonzero; see retained output')
+        for stream in (self.stdout, self.stderr):
+            stream.flush()
+            os.fsync(stream.fileno())
+        result = _step_result('launch', self.output, self.step)
+        return result
+
+    def _kill_group(self):
+        try:
+            os.killpg(self.child.pid, signal.SIGKILL)
+            return
+        except ProcessLookupError:
+            return
+        except PermissionError as error:
+            refusal = error
+        # Darwin can refuse a group containing only its zombie leader. Match
+        # the existing transport rule: verify exit before reaping, then only
+        # probe. A remaining or recycled group is a refusal, never a target.
+        if self._exit_status() is None:
+            raise refusal
+        self.child.wait()
+        deadline = time.monotonic() + 2
+        while True:
+            try:
+                os.killpg(self.child.pid, 0)
+            except ProcessLookupError:
+                return
+            except PermissionError:
+                if time.monotonic() < deadline:
+                    time.sleep(0.02)
+                    continue
+            raise refusal
+
+    def close(self):
+        try:
+            if self.child is not None:
+                try:
+                    if not self.complete:
+                        self._kill_group()
+                finally:
+                    self.step['return_code'] = self.child.wait()
+        finally:
+            failure = None
+            for stream in (self.stdout, self.stderr):
+                if stream is not None:
+                    try:
+                        try:
+                            stream.flush()
+                            os.fsync(stream.fileno())
+                        finally:
+                            stream.close()
+                    except BaseException as exc:
+                        if failure is None:
+                            failure = exc
+            self.step['completed_at'] = _utc_now()
+            if failure is not None:
+                raise failure
 
 
 def parser():
@@ -252,6 +376,7 @@ def _run_verified(argv, *, verified_script, entry_inputs):
               'host_confirmed_at': args.host_confirmed_at, 'delegation_checked_at': None,
               'script_path': None}
     sequence = None
+    worker = None
     with _SequenceSignals() as interrupts:
         try:
             inputs = {_path(getattr(args, name)): None for name in
@@ -314,6 +439,21 @@ def _run_verified(argv, *, verified_script, entry_inputs):
             _delegation(args.direction_recorded_at, args.host_confirmed_at, record['delegation_checked_at'])
             start_pin = {'path': record['start_claim'],
                          'sha256': guard.sha(guard.read_regular(record['start_claim'], limit=MAX_COMMAND_OUTPUT_BYTES))}
+            from .native_prepared_worker import publish_proceed
+            from .native_u4b_policy import registered_policy
+            registration_raw = inputs[Path(args.registration)]
+            registered = guard.strict_json(registration_raw)['registration']
+            ipc = packet / 'prepared-worker'
+            ipc.mkdir(mode=0o700)
+            worker = _PreparedStep([*bound(), '--ci', args.ci,
+                '--prepared-directory', str(ipc)], outputs[2], record['steps'], interrupts)
+            worker.start()
+            prepared_raw = worker.ready(ipc, registration_raw=registration_raw,
+                attempt=Path(registered['attempt_directory']),
+                max_age_seconds=registered_policy(registered['runtime'])['max_age_seconds'])
+            _unchanged(inputs)
+            record['prepared_at'] = _utc_now()
+            _delegation(args.direction_recorded_at, args.host_confirmed_at, record['prepared_at'])
             captured = _run_step(COMMANDS[0], [*bound({'sequence_start': start_pin}), '--output-directory', str(capture_root)],
                                  outputs[0], record['steps'], interrupts)
             manifest_value = captured.get('capture_manifest')
@@ -338,18 +478,26 @@ def _run_verified(argv, *, verified_script, entry_inputs):
             _unchanged(inputs)
             if guard.read_regular(manifest, limit=MAX_COMMAND_OUTPUT_BYTES) != manifest_raw:
                 raise ValueError('capture manifest changed before launch')
-            final = _run_step(COMMANDS[2], [*bound({'subscription_guard': {'path': str(guard_path), 'sha256': digest}}), '--ci', args.ci, '--subscription-guard', str(guard_path),
-                             '--subscription-guard-sha256', digest], outputs[2], record['steps'], interrupts)
+            publish_proceed(ipc, prepared_raw=prepared_raw, guard_path=guard_path,
+                            guard_sha256=digest)
+            final = worker.finish()
             if (final.get('state') != 'completed_pending_independent_review'
                     or final.get('runtime_gates_passed') is not True):
                 raise ValueError('launch did not report complete runtime gates')
             interrupts.check()
             record['status'] = 'completed'
+            worker.complete = True
         except BaseException as exc:
             # Do not print child stderr, JSON values or arbitrary exception text.
             record['stop_reason'] = type(exc).__name__
             print('native launch sequence stopped; inspect the retained packet', file=sys.stderr)
         finally:
+            if worker is not None:
+                try:
+                    worker.close()
+                except BaseException as cleanup_error:
+                    record['status'] = 'stopped'
+                    record['stop_reason'] = 'worker cleanup ' + type(cleanup_error).__name__
             record['completed_at'] = _utc_now()
             # This single immutable tuple is the outcome's signal cutoff.
             # A signal during later serialization/persistence cannot create

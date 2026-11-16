@@ -107,7 +107,8 @@ def inspect_current_selection(selection, *, registration_raw, runtime, authoriza
         check_freshness=False, **extra)
 
 
-def accept_current_selection(selection, *, registration_raw, runtime, authorization):
+def accept_current_selection(selection, *, registration_raw, runtime, authorization,
+                             prepared_identity=None):
     """Accept the original timestamp only after heavy launch reconstruction.
 
     RunSpec boundary: validated-caller
@@ -119,10 +120,12 @@ def accept_current_selection(selection, *, registration_raw, runtime, authorizat
     _selection_inputs(selection, registration_raw, runtime, authorization)
     return load_current(selection.path, selection.expected_sha256,
         registration_raw=registration_raw, runtime=runtime,
-        launch_word_path=selection.launch_word_path, review_path=selection.review_path)
+        launch_word_path=selection.launch_word_path, review_path=selection.review_path,
+        prepared_identity=prepared_identity)
 
 
-def context(raw, *, registration_raw, runtime, launch_word_raw, review_bundle_raw, current=False):
+def context(raw, *, registration_raw, runtime, launch_word_raw, review_bundle_raw, current=False,
+            prepared_identity=None):
     """RunSpec boundary: validated-caller
 
     RunSpec precondition: Caller supplies execution bytes and the runtime
@@ -151,7 +154,7 @@ def context(raw, *, registration_raw, runtime, launch_word_raw, review_bundle_ra
     capture = read_capture_for_event(Path(terms['quota_capture']['directory']),
         registration_raw=registration_raw, review_bundle_raw=review_bundle_raw,
         launch_word_raw=launch_word_raw,
-        require_current=current,
+        require_current=current, prepared_identity=prepared_identity,
         **{key: value[key] for key in ('event_json', 'event_sha256', 'captured_at')})
     event = capture['selected_event']
     if any(value[key] != event[key] for key in ('event_json', 'event_sha256', 'captured_at')):
@@ -161,7 +164,8 @@ def context(raw, *, registration_raw, runtime, launch_word_raw, review_bundle_ra
     return v2, {'owner_statement': terms}
 
 
-def load_current(path, expected_sha256, *, registration_raw, runtime, launch_word_path, review_path):
+def load_current(path, expected_sha256, *, registration_raw, runtime, launch_word_path, review_path,
+                 prepared_identity=None):
     """RunSpec boundary: validated-caller
 
     RunSpec precondition: Caller supplies paths plus execution bytes/runtime
@@ -172,7 +176,8 @@ def load_current(path, expected_sha256, *, registration_raw, runtime, launch_wor
     raw, word, bundle = (v1.read_regular(path), v1.read_regular(launch_word_path),
                          v1.read_regular(review_path))
     module, extra = context(raw, registration_raw=registration_raw, runtime=runtime,
-        launch_word_raw=word, review_bundle_raw=bundle, current=True)
+        launch_word_raw=word, review_bundle_raw=bundle, current=True,
+        prepared_identity=prepared_identity)
     if module is not v2:
         raise ValueError('current native launch requires subscription guard v2')
     return module.load_guard(path, expected_sha256, registration_raw=registration_raw,
