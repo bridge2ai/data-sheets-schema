@@ -48,6 +48,35 @@ def main():
     with (output / 'events.jsonl').open('x', buffering=1) as events:
         def event(name, **fields):
             events.write(json.dumps({'event': name, 'time': time.time(), 'load': os.getloadavg(), **fields}) + '\n')
+        monitor = sys.monitoring
+        monitor.use_tool_id(4, 'launch-cost-observer')
+        selected = {
+            'native_environment_manifest.py': {'verify', '_light_live'},
+            'native_shared_registration_orchestration.py': {'verified'},
+            'native_subscription_capture.py': {'_current_authority'},
+        }
+        active = {}
+        def started(code, offset):
+            filename = os.path.basename(code.co_filename)
+            if code.co_name not in selected.get(filename, ()):
+                return monitor.DISABLE
+            frame = sys._getframe(1)
+            callers = []
+            while frame is not None:
+                callers.append([frame.f_code.co_filename, frame.f_code.co_name, frame.f_lineno])
+                frame = frame.f_back
+            identity = (threading.get_ident(), code)
+            active.setdefault(identity, []).append(time.monotonic())
+            event('call_start', file=filename, function=code.co_name, phase=phase[0], callers=callers)
+            monitor.set_local_events(4, code, monitor.events.PY_RETURN)
+        def returned(code, offset, value):
+            stack = active.get((threading.get_ident(), code))
+            if stack:
+                event('call_end', file=os.path.basename(code.co_filename), function=code.co_name,
+                      phase=phase[0], seconds=time.monotonic() - stack.pop())
+        monitor.register_callback(4, monitor.events.PY_START, started)
+        monitor.register_callback(4, monitor.events.PY_RETURN, returned)
+        monitor.set_events(4, monitor.events.PY_START)
         case = None
         try:
             event('make_case_start')
@@ -76,6 +105,10 @@ def main():
                 pstats.Stats(profile, stream=stream).sort_stats('cumulative').print_stats(70)
             event('light_profile', seconds=elapsed)
         finally:
+            monitor.set_events(4, 0)
+            for identity in active:
+                monitor.set_local_events(4, identity[1], 0)
+            monitor.free_tool_id(4)
             finished.set()
             worker.join()
             event('finished')
