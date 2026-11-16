@@ -258,6 +258,37 @@ def test_prescribed_draft_denial_is_disqualifying(trace,tmp_path):
     assert not report['additional_gate_passed'] and report['problems']
 
 
+def test_recorded_denial_replays_through_execution_projection(trace, tmp_path, monkeypatch):
+    from data_sheets_schema import native_execution_authority_v2 as authority
+    from data_sheets_schema import native_execution_capabilities as capabilities
+    import sys
+
+    command = json.loads((trace[0] / 'composition.json').read_bytes())['policy']['attribution_command']
+    def change(events):
+        events[-1]['permission_denials'] = [{'tool_name': 'Bash', 'tool_use_id': 'tool-0',
+                                           'tool_input': {'command': command}}]
+    path = _changed_events(trace, tmp_path, change)
+    prepared = results.capture(trace[0] / 'composition.json', path,
+                               trace[0] / 'new-attempt/control.jsonl')
+    # Historical capture imports ordinary aliases; the attested loader must
+    # start without them, just as the execution registration fixtures do.
+    manifest = json.loads((authority.ROOT / authority.neutral.composition.SOURCES_PATH).read_bytes())
+    names = set(manifest['modules']) | set(authority.neutral.ADDITIONAL) | set(authority.ADDITIONAL)
+    with monkeypatch.context() as isolated:
+        for name in names:
+            isolated.delitem(sys.modules, name, raising=False)
+        dependencies = authority.dependency_identity()
+        with capabilities.loaded_capabilities(dependencies) as controls:
+            prepared['controls'] = controls
+            report = results.check_capture(prepared)
+    assert report['checked'] is True
+    assert report['additional_gate_passed'] is False
+    denial = report['denial_classification'][0]
+    assert denial['classification'] == 'prescribed'
+    assert f"denied prescribed call (Bash): {denial['basis']}" in report['problems']
+    assert report['generation_acceptance'] == 'not_assessed'
+
+
 @pytest.mark.parametrize('mode',['same','hardlink','symlink'])
 def test_writer_preserves_all_input_aliases(trace,tmp_path,mode):
     prepared=prepare(trace);source=trace[0]/'new-attempt/transcript.jsonl';before=source.read_bytes()
