@@ -157,3 +157,20 @@ def test_empty_pinned_package_initializer_is_valid(tmp_path, monkeypatch):
     identity.sources = ((source, worker.wire.sha(b'')),)
     identity.recheck()
     assert len(calls) == 1
+
+
+def test_exchange_compares_prepared_hashes_to_fresh_recheck(tmp_path, monkeypatch):
+    identity, _, _, _ = identity_fixture(tmp_path, monkeypatch)
+    monkeypatch.setattr(worker, 'wait_proceed', lambda *args, **kwargs: {'guard_path': 'checked'})
+    for field in ('source_sha256', 'environment_sha256'):
+        ipc = tmp_path / field
+        ipc.mkdir()
+        original = getattr(identity, field)
+        setattr(identity, field, 'c' * 64)
+        with pytest.raises(ValueError, match='source or environment identity changed'):
+            worker.exchange(ipc, identity=identity, attempt=tmp_path / 'attempt', max_age_seconds=60)
+        setattr(identity, field, original)
+    ipc = tmp_path / 'valid'
+    ipc.mkdir()
+    assert worker.exchange(ipc, identity=identity, attempt=tmp_path / 'attempt',
+                           max_age_seconds=60) == {'guard_path': 'checked'}
