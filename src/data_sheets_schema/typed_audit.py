@@ -568,7 +568,9 @@ def _open(packet, *, derivations=None, captured_assets=None, _catalog_lookup=Non
                 _schema_reuse = None
     # Explicit native captures without their private catalog association keep
     # the existing fresh-schema boundary, including its refusal behavior.
-    memo = captured_assets is None or _schema_reuse is not None
+    # Caller-owned derivations are an independent scope, including final checks.
+    # Never read or populate the process memo through that scope.
+    memo = derivations is None and (captured_assets is None or _schema_reuse is not None)
     if memo:
         cached = _OPEN_PACKET_CACHE.get(key, raw_packet)
         if cached is not None:
@@ -836,6 +838,8 @@ def assemble(packet, workers, omission_response, integration_response, *, deriva
 
 def check(assembly, *, derivations=None, captured_assets=None, _catalog_lookup=None):
     """Rebuild independently from captured original/response bytes, not reports."""
+    if derivations is None:
+        derivations = DerivationCache()
     _exact(assembly, {"kind", "packet", "workers", "omission_response", "integration_response", "index",
                       "audit", "lineage", "acceptance", "sha256"}, "assembly")
     if assembly["kind"] != ASSEMBLY or type(assembly["workers"]) is not dict:

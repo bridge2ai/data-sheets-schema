@@ -61,6 +61,36 @@ def test_warm_cache_cannot_cache_packet_or_response_verdicts(supplied, mutation)
             ta.check(assembly, derivations=selected)
 
 
+def test_warm_packet_memo_cannot_serve_or_store_caller_derivations(supplied, monkeypatch):
+    from data_sheets_schema import native_catalog_reuse
+    assert native_catalog_reuse.runtime_token() is not None
+    assert ta._parse_identity() is not None
+    memo = ta._OpenPacketCache()
+    monkeypatch.setattr(ta, '_OPEN_PACKET_CACHE', memo)
+    packet = ta.prepare(**supplied)
+    assembly = roundtrip(packet)
+    calls, original = [], ta._derive_uncached
+
+    def derive(*args, **kwargs):
+        calls.append(1)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(ta, '_derive_uncached', derive)
+    ta._open(packet)
+    assert calls == []  # Preparation/runtime memo is warm.
+
+    def forbidden(*args, **kwargs):
+        pytest.fail('caller derivations must not read or populate the packet memo')
+
+    monkeypatch.setattr(memo, 'get', forbidden)
+    monkeypatch.setattr(memo, 'put', forbidden)
+    checked = ta.check(assembly, derivations=ta.DerivationCache())
+    assert checked['passed'] and checked['independently_reconstructed']
+    assert len(calls) == 1
+    assert ta.check(assembly) == checked
+    assert len(calls) == 2
+
+
 def test_rebuild_keys_cover_captured_schema_inputs_project_and_limits(supplied, monkeypatch):
     packet = ta.prepare(**supplied)
     calls, original = [], ta._derive_uncached
