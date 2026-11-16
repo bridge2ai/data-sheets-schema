@@ -11,6 +11,7 @@ import yaml
 from data_sheets_schema import native_execution_authority_v2 as authority
 from data_sheets_schema import native_shared_contract as c
 from tests.test_native_shared_execution import make_case, launch_case, assert_completed_case
+from tests.test_native_shared_execution import _native_helper_import_environment  # noqa: F401
 
 
 def _report_only_correction(case):

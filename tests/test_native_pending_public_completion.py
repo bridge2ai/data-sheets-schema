@@ -5,6 +5,7 @@ lifetime and saved gate reconstruction run unchanged; no native/provider call
 or scientific acceptance is claimed.
 """
 from tests import test_native_shared_execution as public
+from tests.test_native_shared_execution import _native_helper_import_environment  # noqa: F401
 
 
 def test_pending_floor_public_completion_retains_diagnostic_reading(tmp_path, monkeypatch):
