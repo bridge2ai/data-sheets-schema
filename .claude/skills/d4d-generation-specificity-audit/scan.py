@@ -13048,8 +13048,8 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
     # and the native_control and run_native_canary hashes. These are identity
     # data, not loader logic. The base summary keeps the earlier contract's
     # identity.
-    'src/data_sheets_schema/native_attribution_controller_v2.py': '01e290301af5322b7967f8abb8a8242e9adad54b15fcd9d2322ec1f6d458b956',
-    'src/data_sheets_schema/native_controller_sources_v2.json': '99f189f810c83fd78629dd60667fa9016131847389c44fd401f3be86c2d0e60b',
+    'src/data_sheets_schema/native_attribution_controller_v2.py': '277a7730f8aa47077cd69124cba165ec7af78b41679f046b92ad979d205cb5e1',
+    'src/data_sheets_schema/native_controller_sources_v2.json': 'dffa68b9e199d7d3eb48f7f74f7226f345f1e8d9d38cb4423267d8e09dc9473b',
 }
 
 
@@ -13058,7 +13058,7 @@ _NATIVE_V3_RENDER_SOURCES = {
     # Lead-authorized split, 2026-11-15: v3 retains f865fea7, whose
     # verified loader restores caller import roots before the census.
     # This override prevents the historical v2 pin changing v3 authority.
-    'src/data_sheets_schema/native_execution_authority_v2.py': 'f865fea7736d4c1531742ab5081bfa19b1c43ba123f3d233dc4816d7d5d2b79e',
+    'src/data_sheets_schema/native_execution_authority_v2.py': '7d6c13f8ca6c58be9a322cf5fb8679cf6d5734564227990eb5adac6261eac6e8',
     # New v3 summaries authorized by the lead, 2026-11-14 (D148), after the
     # structural proof. Bind the complete v3 wire vocabulary and fresh v1
     # environment census, including payload verification and unowned files.
@@ -13067,12 +13067,12 @@ _NATIVE_V3_RENDER_SOURCES = {
     # Rotated at the merge into the candidate (lead, 2026-11-15): against
     # f0a21bb7, only CONTROLLER_SOURCES_SHA256 d4ad9c21 -> e500cb15, the
     # controller sources rotated for #6244 (b9192ff75).
-    'src/data_sheets_schema/native_shared_authority_wire.py': 'ef5bd0e1fb248597a53c0ba2973b94708a817abf04c1e13bea30811222797d99',
+    'src/data_sheets_schema/native_shared_authority_wire.py': '8affe5f878119d0d602b5c951e6ce93fe2aa7e03de9a7b20466a3e8e716ddeef',
     # Lead-authorized rotation, 2026-11-15: bind the full/light modes,
     # process-local full verification reuse, and RECORD/size live checks.
     # Rotated (lead, 2026-11-16): the census ruling's call-local ancestor resolver
     # (dev/ino/type identity) and write-seeded full memo, 3aaa19e77 + 14547b766.
-    'src/data_sheets_schema/native_environment_manifest.py': '14a6d87bf6a9c6b49989552a62a0ae7f81eec0673408c43570b0f3ad1df572be',
+    'src/data_sheets_schema/native_environment_manifest.py': '527d0948c0b0bbd808950c3bcd9e28788a30b5067eed155eaec10ffc06fef2d6',
 }
 
 
