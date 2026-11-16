@@ -2,6 +2,7 @@
 import os
 import signal
 import sys
+import time
 from contextlib import contextmanager
 from types import SimpleNamespace
 
@@ -90,3 +91,33 @@ def test_spawn_failure_closes_reserved_streams(tmp_path, monkeypatch):
         owned.close()
     assert owned.child is None
     assert owned.stdout.closed and owned.stderr.closed
+
+
+def test_exited_worker_is_not_reaped_before_failure_group_cleanup(tmp_path):
+    owned = sequence._PreparedStep([], tmp_path / 'worker.json', [], sequence._SequenceSignals())
+    owned.step['argv'] = [sys.executable, '-I', '-c', 'raise SystemExit(7)']
+    try:
+        owned.start()
+        deadline = time.monotonic() + 10
+        while owned._exit_status() is None:
+            assert time.monotonic() < deadline
+            time.sleep(0.01)
+        assert owned._exit_status() == 7
+        assert owned.child.returncode is None
+        # A second WNOWAIT observation succeeds: the PID is still owned.
+        assert owned._exit_status() == 7
+    finally:
+        owned.close()
+    assert owned.child.returncode == 7
+
+
+def test_cleanup_attempts_reap_even_if_group_signal_fails(tmp_path, monkeypatch):
+    owned = sequence._PreparedStep([], tmp_path / 'worker.json', [], sequence._SequenceSignals())
+    reaped = []
+    owned.child = SimpleNamespace(pid=123, wait=lambda: reaped.append(True) or 9)
+    def refuse(*args):
+        raise PermissionError('synthetic signal refusal')
+    monkeypatch.setattr(sequence.os, 'killpg', refuse)
+    with pytest.raises(PermissionError, match='synthetic signal refusal'):
+        owned.close()
+    assert reaped == [True] and owned.step['return_code'] == 9

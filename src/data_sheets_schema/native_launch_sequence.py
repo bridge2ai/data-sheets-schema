@@ -260,15 +260,38 @@ class _PreparedStep:
         from .native_prepared_worker import require_prepared
         while True:
             self.interrupts.check()
-            if self.child.poll() is not None:
+            if self._exit_status() is not None:
                 raise ValueError('prepared launch exited before proceed')
             if os.path.lexists(directory / 'prepared.json'):
                 return require_prepared(directory, registration_raw=registration_raw,
                     attempt=attempt, max_age_seconds=max_age_seconds, pid=self.child.pid)
             time.sleep(COMMAND_WAIT_POLL_SECONDS)
 
+    def _exit_status(self):
+        # Keep the leader unreaped until group cleanup. Its retained PID pins
+        # the group identity even after exit; never signal a recycled PID.
+        status = os.waitid(os.P_PID, self.child.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+        if status is None or status.si_pid == 0:
+            return None
+        return status.si_status if status.si_code == os.CLD_EXITED else -status.si_status
+
+    def send_signal(self, signum):
+        # Popen.send_signal polls (and can reap) first. This owner deliberately
+        # retains the leader until close, so signal its exact retained PID.
+        os.kill(self.child.pid, signum)
+
     def finish(self):
-        self.step['return_code'] = self.interrupts.wait(self.child)
+        self.interrupts._child = self
+        try:
+            while True:
+                self.interrupts._forward()
+                code = self._exit_status()
+                if code is not None:
+                    self.step['return_code'] = code
+                    break
+                time.sleep(COMMAND_WAIT_POLL_SECONDS)
+        finally:
+            self.interrupts._child = None
         self.interrupts.check()
         if self.step['return_code'] != 0:
             raise ValueError('prepared launch exited nonzero; see retained output')
@@ -281,21 +304,30 @@ class _PreparedStep:
     def close(self):
         try:
             if self.child is not None:
-                if not self.complete:
-                    try:
-                        os.killpg(self.child.pid, signal.SIGKILL)
-                    except ProcessLookupError:
-                        pass
-                self.step['return_code'] = self.child.wait()
+                try:
+                    if not self.complete:
+                        try:
+                            os.killpg(self.child.pid, signal.SIGKILL)
+                        except ProcessLookupError:
+                            pass
+                finally:
+                    self.step['return_code'] = self.child.wait()
         finally:
+            failure = None
             for stream in (self.stdout, self.stderr):
                 if stream is not None:
                     try:
-                        stream.flush()
-                        os.fsync(stream.fileno())
-                    finally:
-                        stream.close()
+                        try:
+                            stream.flush()
+                            os.fsync(stream.fileno())
+                        finally:
+                            stream.close()
+                    except BaseException as exc:
+                        if failure is None:
+                            failure = exc
             self.step['completed_at'] = _utc_now()
+            if failure is not None:
+                raise failure
 
 
 def parser():

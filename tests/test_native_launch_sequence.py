@@ -189,6 +189,12 @@ def fake_commands(monkeypatch, paths, *, mutate=None, fail=None, fail_exception=
             if name == 'launch' and code == 0 and not (ipc / 'proceed.json').exists():
                 return None
             return code
+        if name == 'launch':
+            def peek(*args):
+                result = poll()
+                return None if result is None else SimpleNamespace(
+                    si_pid=os.getpid(), si_code=os.CLD_EXITED, si_status=result)
+            monkeypatch.setattr(seq.os, 'waitid', peek)
         return SimpleNamespace(pid=os.getpid(), returncode=code, wait=lambda timeout=None: code, poll=poll,
                                send_signal=lambda signum: None)
     monkeypatch.setattr(seq.subprocess, 'Popen', run)
