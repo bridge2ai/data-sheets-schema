@@ -6,6 +6,7 @@ Outputs: Markdown handoff and printed SHA256. Serves issues 6263 through 6272.
 import hashlib
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -61,9 +62,24 @@ lines = [
     'replaces module classes risks the exact-class lifetime mismatch fixed in '
     'the assigned base. The extended finder lifetime remains fail-closed and '
     'needs a dedicated loader-lifetime change.', '',
+    'Validation interpretation: the initial focused controller checks refuse '
+    'the changed transport bytes because controller pins deliberately remain '
+    'unchanged. Scanner refusals name the changed environment-manifest source. '
+    'Both need the lead pin rotation and a rerun. Initial native-controls '
+    'failures include sandbox denial of local server binding; the loopback '
+    'canary and repeat below use the same offline lane with that restriction '
+    'lifted, still using mocked upstream traffic.', '',
+    'The initial sequence signal failures exposed an overly broad test mock '
+    'introduced here; it is now confined to the synthetic prepared owner. '
+    'An existing start-retry test still expected a single command after D156 '
+    'introduced the prepared worker. It now asserts the exact launch-then-capture '
+    'order, preserving the refusal and journal assertions. Lead issue filing '
+    'needed for that inherited stale test expectation; GitHub writes are forbidden '
+    'for this helper. The sequence rerun below covers both corrections.', '',
     'Saved test evidence:', '',
 ]
-for name in ('canary', 'canary-three-workers', 'focused', 'controls', 'scanners', 'collection'):
+for name in ('canary', 'canary-three-workers', 'focused', 'controls', 'scanners',
+             'collection', 'sequence-rerun', 'controls-loopback-canary', 'controls-loopback'):
     directory = scratch / name
     summary_path = directory / 'lane_summary.json'
     if not summary_path.is_file():
@@ -82,8 +98,12 @@ for name in ('canary', 'canary-three-workers', 'focused', 'controls', 'scanners'
     for step in summary['steps']:
         path = Path(step['log_path'])
         assert path.is_file() and path.stat().st_size
+        if name == 'collection':
+            collected = re.search(r'(\d+) tests collected', path.read_text(errors='replace'))
+            if collected:
+                lines.append('  Full collection: ' + collected.group(1) + ' tests.')
         if step['returncode']:
-            tail = path.read_text(errors='replace').splitlines()[-35:]
+            tail = path.read_text(errors='replace').splitlines()[-10:]
             lines.extend(['', 'Failure evidence from ' + str(path) + ':', '```',
                           *[line.replace(chr(64), '[at]') for line in tail], '```', ''])
 
