@@ -173,6 +173,7 @@ def test_unplug_before_reservation_keeps_attempt_unspent(tmp_path, monkeypatch, 
 @pytest.mark.parametrize('source', ['Battery Power', 'unrecognized', 'probe_failure'])
 def test_unplug_after_reservation_retains_reading_without_consuming_dispatch(tmp_path, monkeypatch, source):
     from tests.utils.native_shared_consumer_scope import observe_consumer_calls
+    from data_sheets_schema import native_pre_dispatch_timing as timing
     from tests.test_native_shared_execution import make_case
     from data_sheets_schema import native_shared_execution_orchestration as execute
     from data_sheets_schema import native_execution_authority_v2 as authority
@@ -180,7 +181,12 @@ def test_unplug_after_reservation_retains_reading_without_consuming_dispatch(tmp
     monkeypatch.chdir(authority.ROOT)
     case = make_case(tmp_path / 'unplug-after-reservation')
     original_execute = engine._execute_child
-    entered = []
+    entered, probes, traces = [], [], []
+    handoff = timing._handoff
+    def remember(trace):
+        traces.append(trace)
+        handoff(trace)
+    monkeypatch.setattr(timing, '_handoff', remember)
     def no_native_dispatch(controls, argv, **kwargs):
         entered.append(True)
         # Keep the actual reviewed transport, timer, verify_launch and error
@@ -194,12 +200,23 @@ def test_unplug_after_reservation_retains_reading_without_consuming_dispatch(tmp
         with monkeypatch.context() as patch:
             patch.setattr(power, '_local', lambda *a, **k: _power_refusal_probe(source))
             patch.setattr(runner.subprocess, 'Popen', popen)
-            return original_execute(controls, argv, **kwargs)
+            # Limit observation to the actual dispatch check. Profiling the
+            # entire source preparation distorts the very deadlines tested.
+            with observe_consumer_calls({('native_host_power', 'dispatch_power'): ()}) as calls:
+                try:
+                    return original_execute(controls, argv, **kwargs)
+                finally:
+                    probes.extend(calls)
     monkeypatch.setattr(engine, '_execute_child', no_native_dispatch)
-    # Observe both real source-loaded calls without replacing their identities.
-    with observe_consumer_calls({('native_host_power', 'dispatch_power'): ()}) as probes:
-        result = execute.synthetic_launch(case['raw'], **case['kwargs'])
-    assert entered == [True] and len(probes) == 2
+    result = execute.synthetic_launch(case['raw'], **case['kwargs'])
+    assert entered == [True] and len(probes) == 1
+    assert len(traces) == 1 and traces[0]._persisted.wait(5)
+    trace = traces[0]
+    rows = [json.loads(line) for line in trace.path.read_bytes().splitlines()]
+    reservation = [row for row in rows if row['trace_id'] == trace.trace_id
+                   and row['boundary'] == 'reservation_power']
+    assert len(reservation) == 1
+    assert reservation[0]['passed'] is True and reservation[0]['source'] == 'ac'
     assert result['state'] == 'failed' and result['child_exit_code'] is None
     prefix = 'dispatch power refused: host power must be positively observed as AC before native launch; reading='
     assert result['first_stop'].startswith(prefix)
