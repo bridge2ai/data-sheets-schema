@@ -139,3 +139,91 @@ def test_cleanup_never_signals_an_unverifiable_group_after_reaping(tmp_path, mon
         owned.close()
     assert calls == [signal.SIGKILL, 0]
     assert owned.step['return_code'] == 7
+
+
+def prepared_scope_case(tmp_path, monkeypatch, *, production):
+    """Exercise launch ordering across a real replacement of the worker class."""
+    import importlib.util
+    from contextlib import ExitStack, nullcontext
+    from data_sheets_schema import native_execution_orchestration as engine
+    from data_sheets_schema import native_prepared_worker as ambient
+    from data_sheets_schema import native_sequence_inputs
+    from data_sheets_schema import native_runtime_profiles
+    from data_sheets_schema import native_u4b_policy
+    import data_sheets_schema
+
+    raw = b'exact prepared registration'
+    value = {'runtime': {}, 'composition_raw_json': '{}'}
+    authorization = {'raw': {name: b'authority' for name in ('review', 'ci', 'launch_word')},
+        'inputs': {name: tmp_path / name for name in ('review', 'ci', 'launch_word')}}
+    spec = importlib.util.spec_from_file_location(ambient.__name__, ambient.__file__)
+    scoped = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(scoped)
+    assert scoped.PreparedIdentity is not ambient.PreparedIdentity
+    checks = []
+
+    def initialize(self, submitted, checked, authorized):
+        assert submitted == raw and checked == value and authorized == authorization
+        self.registration_raw = submitted
+
+    # Isolate heavy source verification; retain the real exact-class/byte gate.
+    for module in (ambient, scoped):
+        monkeypatch.setattr(module.PreparedIdentity, '__init__', initialize)
+        monkeypatch.setattr(module.PreparedIdentity, 'recheck', lambda self: value)
+
+    class ReachedPreparedConsumer(Exception):
+        pass
+
+    def consume(identity):
+        assert identity.registration_raw == raw
+        assert scoped.checked_value(identity, raw) == value
+        with pytest.raises(ValueError, match='differs from capture authority'):
+            scoped.checked_value(identity, b'foreign registration')
+        checks.append('production' if production else 'synthetic')
+        raise ReachedPreparedConsumer()
+
+    def exchange(directory, *, identity, **kwargs):
+        return consume(identity)
+
+    monkeypatch.setattr(scoped, 'exchange', exchange)
+    monkeypatch.setattr(ambient, 'exchange', exchange)
+
+    def prepare():
+        monkeypatch.setitem(sys.modules, ambient.__name__, scoped)
+        monkeypatch.setattr(data_sheets_schema, 'native_prepared_worker', scoped)
+
+    adapter = SimpleNamespace(prepare_before_capture=prepare, close_prepared=lambda: checks.append('closed'))
+    registration = SimpleNamespace(verified=lambda submitted: value,
+        execution_paths_v2=lambda *args, **kwargs: (tmp_path / 'attempt', tmp_path / 'evidence'))
+    contract = SimpleNamespace(registration=registration,
+        composition=SimpleNamespace(verified_composition=lambda raw: {}), authority=None,
+        gates=None, replay=None, shared=None, kind='d4d_native_shared_attempt',
+        make_controller=lambda *args: adapter, prewarm_controller=lambda adapter: None,
+        transport_phase_spec=lambda adapter: None)
+    effects = SimpleNamespace(**{name: None for name in ('file', 'durable_new', 'sync_directory',
+        'mkdir_durable', 'signals', 'now', 'probe_runtime', 'sys', 'launch_guard')},
+        expected_runtime_observation=lambda value: {}, authorizations=lambda *args, **kwargs: authorization,
+        unchanged=lambda *args: None)
+    controls = SimpleNamespace(require_complete=lambda: None, loaded_classifier=lambda: nullcontext(None))
+    monkeypatch.setattr(engine, '_require_launch_profile', lambda *args: None)
+    monkeypatch.setattr(native_sequence_inputs, 'check_authority', lambda *args: None)
+    monkeypatch.setattr(native_runtime_profiles, 'require_synthetic', lambda *args: None)
+    monkeypatch.setattr(native_u4b_policy, 'registered_policy', lambda runtime: {'max_age_seconds': 1200})
+    monkeypatch.setattr(engine.admission, 'admit', lambda *args, **kwargs:
+        SimpleNamespace(registration_raw=raw, evidence=tuple(SimpleNamespace(
+            pin=SimpleNamespace(path=authorization['inputs'][name]), raw=authorization['raw'][name])
+            for name in ('review', 'ci', 'launch_word'))))
+    with pytest.raises(ReachedPreparedConsumer), ExitStack() as cleanup:
+        engine._launch_prepared(raw, review_path=None, ci_path=None, launch_word_path=None,
+            contract=contract, effects=effects, controls=controls, expected_profile='synthetic',
+            expected_authority_sha256=None, prepared_directory=tmp_path if production else None,
+            prepare_capture=None if production else consume, preparation_cleanup=cleanup)
+    assert checks == ['production' if production else 'synthetic', 'closed']
+
+
+def test_synthetic_identity_belongs_to_prepared_callback_scope(tmp_path, monkeypatch):
+    prepared_scope_case(tmp_path, monkeypatch, production=False)
+
+
+def test_production_exchange_belongs_to_prepared_callback_scope(tmp_path, monkeypatch):
+    prepared_scope_case(tmp_path, monkeypatch, production=True)

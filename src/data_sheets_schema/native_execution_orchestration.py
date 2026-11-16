@@ -406,13 +406,16 @@ def _launch_prepared(registration_raw, *, review_path, ci_path, launch_word_path
         adapter = contract.make_controller(value, registration_raw)
         contract.prewarm_controller(adapter)
     if preparing:
-        from .native_prepared_worker import PreparedIdentity, exchange
         from .native_subscription_admission import select_current, preflight_current_selection
         from .native_u4b_policy import registered_policy
-        prepared_identity = PreparedIdentity(registration_raw, value, authorization)
         preparation_cleanup.callback(adapter.close_prepared)
         adapter.prepare_before_capture()
         contract.transport_phase_spec(adapter)
+        # Callback preparation opens a verified package scope that replaces
+        # ambient module classes. Bind the identity and exchange in that same
+        # lifetime as the capture consumers' exact-class checks.
+        from .native_prepared_worker import PreparedIdentity, exchange
+        prepared_identity = PreparedIdentity(registration_raw, value, authorization)
         if prepared_directory is not None:
             selected_guard = exchange(prepared_directory, identity=prepared_identity,
                 attempt=attempt, max_age_seconds=registered_policy(value['runtime'])['max_age_seconds'])
