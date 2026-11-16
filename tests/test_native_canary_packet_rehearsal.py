@@ -177,7 +177,7 @@ def test_three_cli_routes_stop_before_effect_boundary(documents,tmp_path,monkeyp
     elif command=='prepare-subscription-guard-v2':
         assert seen[0]==dict(registration_raw=data['registration'],review_bundle_raw=data['review'],launch_word_raw=data['launch-word'])
     else:
-        assert seen[0]==dict(review_path=str(paths['review']),ci_path=str(paths['ci']),launch_word_path=str(paths['launch-word']),subscription_guard_path=str(paths['subscription-guard']),subscription_guard_sha256=c.sha(data['subscription-guard']))
+        assert seen[0]==dict(review_path=str(paths['review']),ci_path=str(paths['ci']),launch_word_path=str(paths['launch-word']),subscription_guard_path=str(paths['subscription-guard']),subscription_guard_sha256=c.sha(data['subscription-guard']),prepared_directory=None,registration_path=str(paths['registration']))
     assert not (tmp_path/'NEVER-CAPTURE').exists()
     assert not (tmp_path/'NEVER-GUARD.json').exists()
     (tmp_path/'routing-evidence.json').write_text(json.dumps({'scope':LABEL,'command':args,'stopped_before':'capture / guard / launch implementation; no reservation','isolated_gates':['registration.verified','render.validate_metadata','permission.require_u4_runtime'],'passed_gates':['account choice binding','runtime saved-evidence validation for capture/guard','review/word byte binding for capture/guard']},indent=2)+'\n')

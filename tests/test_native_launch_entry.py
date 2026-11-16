@@ -51,7 +51,7 @@ def test_load_a_replace_with_reviewed_b_refuses_before_execution(tmp_path,monkey
 def test_verified_a_is_executed_and_retained_even_if_disk_becomes_b(tmp_path,monkeypatch):
     # A tiny inert body proves the entry uses one captured string for compile
     # and retention. It does not substitute for the real-body test above.
-    a=b"def _run_verified(args, *, verified_script, entry_inputs):\n    return verified_script\n"
+    a=b"class _PreparedStep:\n    pass\ndef _run_verified(args, *, verified_script, entry_inputs):\n    return verified_script\n"
     b=b"raise AssertionError('disk replacement executed')\n"
     p,script=setup_source(tmp_path,monkeypatch,a)
     read=wire.read_regular; seen=[]
