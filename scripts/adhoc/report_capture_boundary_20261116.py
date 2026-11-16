@@ -58,6 +58,8 @@ def main():
     for path in summaries:
         data = json.loads(path.read_text())
         lines.extend([str(path), '```json', json.dumps(data, indent=2), '```'])
+    for path in sorted(SCRATCH.glob('boundary-unit-retry.log')):
+        lines.extend([str(path), '```text', path.read_text().strip(), '```'])
     for path in sorted(SCRATCH.glob('boundary-*/**/*.xml')):
         tree = ET.parse(path).getroot()
         suites = [tree] if tree.tag == 'testsuite' else list(tree.findall('testsuite'))
