@@ -83,12 +83,14 @@ def test_public_declared_runtime_failure_publishes_exact_readback(tmp_path, monk
     from data_sheets_schema import native_host_power as power
     monkeypatch.setattr(power, 'probe', lambda: {'source': 'ac'})
     if observation_failure:
-        write = power._write_new
-        def broken_sidecar(path, value):
-            if path.name == 'host-clock-' + observation_failure + '.json':
+        open_file = power.os.open
+        def broken_sidecar(path, flags, *args, **kwargs):
+            if Path(path).name == 'host-clock-' + observation_failure + '.json' and flags & power.os.O_CREAT:
                 raise OSError('synthetic persistence failure')
-            return write(path, value)
-        monkeypatch.setattr(power, '_write_new', broken_sidecar)
+            return open_file(path, flags, *args, **kwargs)
+        # D156 uses a fresh source-verified power module. Inject at its shared
+        # filesystem boundary without replacing any verified callable.
+        monkeypatch.setattr(power.os, 'open', broken_sidecar)
     monkeypatch.chdir(authority.ROOT)
     case = make_case(tmp_path / 'runtime-validation-failure')
     def invalidate_runtime(value):

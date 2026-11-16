@@ -115,6 +115,7 @@ def _power_refusal_probe(source):
     ('Battery Power', True),
 ])
 def test_unplug_before_reservation_keeps_attempt_unspent(tmp_path, monkeypatch, source, persistence_failure):
+    from tests.utils.native_prepared_test_scope import configure_prepared_scope
     from tests.test_native_shared_execution import make_case
     from data_sheets_schema import native_shared_execution_orchestration as execute
     from data_sheets_schema import native_execution_authority_v2 as authority
@@ -148,8 +149,12 @@ def test_unplug_before_reservation_keeps_attempt_unspent(tmp_path, monkeypatch, 
     monkeypatch.setattr(engine, '_execute_child', forbidden)
     monkeypatch.setattr(execute, '_synthetic_runtime_observation', forbidden)
     monkeypatch.setattr(power, '_local', lambda *a, **k: _power_refusal_probe(source))
-    with pytest.raises(power.DispatchPowerRefused, match='positively observed as AC') as caught:
+    prepared_power = []
+    configure_prepared_scope(monkeypatch, lambda patch: prepared_power.append(
+        sys.modules['data_sheets_schema.native_host_power']))
+    with pytest.raises(ValueError, match='positively observed as AC') as caught:
         execute.synthetic_launch(case['raw'], **case['kwargs'])
+    assert prepared_power and type(caught.value) is prepared_power[-1].DispatchPowerRefused
     assert not attempt.exists() and not evidence.exists()
     assert len(traces) == 1 and traces[0]._persisted.wait(5)
     assert traces[0].disabled is persistence_failure
@@ -167,6 +172,7 @@ def test_unplug_before_reservation_keeps_attempt_unspent(tmp_path, monkeypatch, 
 
 @pytest.mark.parametrize('source', ['Battery Power', 'unrecognized', 'probe_failure'])
 def test_unplug_after_reservation_retains_reading_without_consuming_dispatch(tmp_path, monkeypatch, source):
+    from tests.utils.native_shared_consumer_scope import observe_consumer_calls
     from tests.test_native_shared_execution import make_case
     from data_sheets_schema import native_shared_execution_orchestration as execute
     from data_sheets_schema import native_execution_authority_v2 as authority
@@ -174,17 +180,7 @@ def test_unplug_after_reservation_retains_reading_without_consuming_dispatch(tmp
     monkeypatch.chdir(authority.ROOT)
     case = make_case(tmp_path / 'unplug-after-reservation')
     original_execute = engine._execute_child
-    original_power = power.dispatch_power
-    readings, refusals, entered = [], [], []
-    def observe_power():
-        try:
-            reading = original_power()
-        except power.DispatchPowerRefused as exc:
-            refusals.append(exc)
-            raise
-        readings.append(reading)
-        return reading
-    monkeypatch.setattr(power, 'dispatch_power', observe_power)
+    entered = []
     def no_native_dispatch(controls, argv, **kwargs):
         entered.append(True)
         # Keep the actual reviewed transport, timer, verify_launch and error
@@ -200,11 +196,17 @@ def test_unplug_after_reservation_retains_reading_without_consuming_dispatch(tmp
             patch.setattr(runner.subprocess, 'Popen', popen)
             return original_execute(controls, argv, **kwargs)
     monkeypatch.setattr(engine, '_execute_child', no_native_dispatch)
-    result = execute.synthetic_launch(case['raw'], **case['kwargs'])
-    assert entered == [True] and len(readings) == len(refusals) == 1
-    assert readings[0]['source'] == 'ac'
+    # Observe both real source-loaded calls without replacing their identities.
+    with observe_consumer_calls({('native_host_power', 'dispatch_power'): ()}) as probes:
+        result = execute.synthetic_launch(case['raw'], **case['kwargs'])
+    assert entered == [True] and len(probes) == 2
     assert result['state'] == 'failed' and result['child_exit_code'] is None
-    assert result['first_stop'] == 'dispatch power refused: ' + str(refusals[0])
+    prefix = 'dispatch power refused: host power must be positively observed as AC before native launch; reading='
+    assert result['first_stop'].startswith(prefix)
+    refusal = json.loads(result['first_stop'][len(prefix):])
+    assert refusal['source'] == ('battery' if source == 'Battery Power' else 'unknown')
+    assert refusal['probe_status'] == ('unknown' if source == 'probe_failure' else 'read')
+    assert refusal['probe_reason'] == ('TimeoutError' if source == 'probe_failure' else None)
     assert result['gates']['first_stop'] == {
         'checked': True, 'passed': False, 'reason': result['first_stop']}
     assert result['subscription_guard']['dispatched'] is False

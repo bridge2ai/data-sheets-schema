@@ -6,6 +6,7 @@ import json
 import signal
 import socket
 import subprocess
+import sys
 import pytest
 from tests.test_native_shared_execution import make_case
 from data_sheets_schema import native_shared_execution_orchestration as execute
@@ -22,17 +23,9 @@ def execution_case(tmp_path, monkeypatch):
 
 def readback_case(tmp_path, monkeypatch):
     """Keep invented capture and guard clocks aligned through slow setup."""
-    from tests.utils import native_synthetic_evidence as evidence
-    from data_sheets_schema import native_subscription_guard_v2 as subscription
-
-    now = datetime.now(timezone.utc)
-
-    class FixtureDateTime(datetime):
-        def now(tz=None):
-            return now.astimezone(tz) if tz is not None else now.replace(tzinfo=None)
-
-    monkeypatch.setattr(evidence, 'datetime', FixtureDateTime)
-    monkeypatch.setattr(subscription, '_now', lambda: now.timestamp())
+    from tests.utils.native_prepared_test_scope import freeze_subscription_clock
+    now = datetime.now(timezone.utc).timestamp()
+    freeze_subscription_clock(monkeypatch, lambda: now)
     monkeypatch.chdir(authority.ROOT)
     return make_case(tmp_path / 'v2-readback')
 
@@ -116,12 +109,20 @@ def test_missing_external_gate_refuses_before_reservation_or_probe(tmp_path, mon
 def test_public_pre_dispatch_failure_is_readable_and_cannot_resume(tmp_path, monkeypatch):
     original = subprocess.Popen
     calls = []
-    def git_only(argv, *args, **kwargs):
-        assert isinstance(argv, (list, tuple)) and argv[0] in ('git', '/usr/bin/git'), 'unexpected child dispatch'
-        return original(argv, *args, **kwargs)
+    verifiers = []
+    def preparation_only(argv, *args, **kwargs):
+        assert isinstance(argv, (list, tuple)), 'unexpected child dispatch'
+        verifier = list(argv) == [sys.executable, '-I', '-B', '-m',
+            'data_sheets_schema.native_prepared_verifier']
+        assert argv[0] in ('git', '/usr/bin/git') or verifier, 'unexpected child dispatch'
+        child = original(argv, *args, **kwargs)
+        if verifier:
+            assert kwargs.get('start_new_session') is True
+            verifiers.append(child)
+        return child
     def forbidden(*args, **kwargs):
         pytest.fail('pre-dispatch failure made a network connection')
-    monkeypatch.setattr(subprocess, 'Popen', git_only)
+    monkeypatch.setattr(subprocess, 'Popen', preparation_only)
     monkeypatch.setattr(socket.socket, 'connect', forbidden)
     monkeypatch.chdir(authority.ROOT)
     case = make_case(tmp_path / 'case')
@@ -146,6 +147,11 @@ def test_public_pre_dispatch_failure_is_readable_and_cannot_resume(tmp_path, mon
     attempt = Path(case['value']['attempt_directory'])
     assert (attempt / 'started.json').is_file()
     assert not (attempt / 'transcript.jsonl').exists()
+    assert result['subscription_guard']['dispatched'] is False
+    assert verifiers and all(child.returncode == 0 for child in verifiers)
+    for child in verifiers:
+        with pytest.raises(ProcessLookupError):
+            os.killpg(child.pid, 0)
     assert result['scientific_acceptance'] == 'not_assessed'
 
 
@@ -175,19 +181,21 @@ def test_v2_partial_reservation_stays_spent_without_probe(execution_case, monkey
 
 
 def test_subscription_expiring_during_admission_refuses_before_reservation(execution_case, monkeypatch):
-    from data_sheets_schema import native_execution_registration_v2 as admission
     from data_sheets_schema import native_subscription_guard_v2 as subscription
+    from tests.utils.native_prepared_test_scope import freeze_subscription_clock
     case = execution_case
     now = [subscription._now()]
-    monkeypatch.setattr(subscription, '_now', lambda: now[0])
-    real_admit = admission.admit
+    freeze_subscription_clock(monkeypatch, lambda: now[0])
+    mint = case['kwargs']['prepare_capture']
     completed = []
-    def slow_admission(raw, **kwargs):
-        result = real_admit(raw, **kwargs)
+    def expiring_capture(identity):
+        result = mint(identity)
         completed.append(True)
         now[0] += subscription.MAX_AGE_SECONDS + 1
         return result
-    monkeypatch.setattr(admission, 'admit', slow_admission)
+    # D156 admission precedes capture. Expire the actual selected observation
+    # after it is minted, before any reservation effect can occur.
+    case['kwargs']['prepare_capture'] = expiring_capture
     monkeypatch.setattr(execute, '_synthetic_runtime_observation', lambda value: pytest.fail('expired guard reached probe'))
     monkeypatch.setattr(execute, 'durable_new', lambda *args: pytest.fail('expired guard reached durable write'))
     with pytest.raises(ValueError, match='stale|future-dated'):
