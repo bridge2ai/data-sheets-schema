@@ -213,9 +213,9 @@ def test_expectation_wrapper_preserves_system_bytes_and_verified_consumer_scope(
     composition=tmp_path/'composition.json'; composition.write_bytes(b'SYNTHETIC MOCK')
     system=tmp_path/'system.md'; system.write_bytes(b'SYNTHETIC\r\nexact system\r\n')
     dependencies={'base':{'package_sources':{'SYNTHETIC':'NOT-AUTHORITY'}}}
-    composed={'runtime_raw_json':'{"scope":"SYNTHETIC"}','dependencies':dependencies,'policy':{}}
-    spec=object(); controls=object(); active=[]; calls=[]
-    monkeypatch.setattr(controller,'reconstruct_composition',lambda raw:(composed,spec,None))
+    composed={'runtime_raw_json':'{"scope":"SYNTHETIC"}','dependencies':dependencies,'policy':{},'preparation_raw_json':'SYNTHETIC PREPARATION'}
+    spec=object(); foreign=object(); controls=object(); active=[]; calls=[]
+    monkeypatch.setattr(controller,'reconstruct_composition',lambda raw:(composed,foreign,None))
     @contextmanager
     def inputs(value):
         assert value==dependencies; active.append('controls')
@@ -237,7 +237,13 @@ def test_expectation_wrapper_preserves_system_bytes_and_verified_consumer_scope(
         assert effective=='SYNTHETIC\r\nexact system\r\n\nSYNTHETIC GUIDANCE'
         calls.append(effective)
         return {'scope':LABEL}
-    consumer=SimpleNamespace(policy=SimpleNamespace(command_guidance=guidance),permission_expectation=expectation)
+    def selection(raw, *, preparation_raw, classifier_projection):
+        assert active==['controls','consumer']
+        assert raw==b'SYNTHETIC MOCK' and preparation_raw==b'SYNTHETIC PREPARATION'
+        assert classifier_projection is controls
+        return composed,spec,None,{'scope':'SYNTHETIC'}
+    consumer=SimpleNamespace(policy=SimpleNamespace(command_guidance=guidance),permission_expectation=expectation,
+        _selection=selection)
     monkeypatch.setattr(permission,'loaded_permission_inputs',inputs)
     monkeypatch.setattr(authority,'loaded_verified_package_module',verified)
     monkeypatch.setattr(probe,'require_u4_expectation',lambda value: None)

@@ -47,8 +47,8 @@ def produce(step, data):
         from data_sheets_schema import native_execution_authority_v2 as authority
         from data_sheets_schema.native_shared_permission_orchestration import loaded_permission_inputs
         from data_sheets_schema.native_permission_probe import require_u4_expectation
-        composed, spec, _ = reconstruct_composition(Path(data['composition_path']).read_bytes())
-        runtime = c.strict_json(composed['runtime_raw_json'].encode())
+        composition_raw = Path(data['composition_path']).read_bytes()
+        composed, _, _ = reconstruct_composition(composition_raw)
         system = Path(data['system_path']).read_bytes().decode('utf-8')
         dependencies = composed['dependencies']
         # Mirror registration orchestration's loader scope: an ordinary imported
@@ -56,8 +56,15 @@ def produce(step, data):
         with loaded_permission_inputs(dependencies) as (controls, _), \
                 authority.loaded_verified_package_module('data_sheets_schema.native_shared_registration',
                     package_sources=dependencies['base']['package_sources']) as consumer:
-            effective = system + consumer.policy.command_guidance(composed['policy'], classifier_projection=controls)
-            value = consumer.permission_expectation(runtime, composed, spec, effective,
+            # RunSpec origins belong to this verified package lifetime.
+            selected, spec, _, runtime = consumer._selection(
+                composition_raw,
+                preparation_raw=composed['preparation_raw_json'].encode('utf-8'),
+                classifier_projection=controls)
+            if c.canonical(selected) != c.canonical(composed):
+                raise ValueError('permission expectation composition changed during reconstruction')
+            effective = system + consumer.policy.command_guidance(selected['policy'], classifier_projection=controls)
+            value = consumer.permission_expectation(runtime, selected, spec, effective,
                 Path(data['config_directory']), composed['dependencies'])
         require_u4_expectation(value)
         return {'expectation.json': c.canonical(value)}
