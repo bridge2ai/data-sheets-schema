@@ -19,6 +19,8 @@ sys.path[0] = str(ROOT)
 def main():
     output = Path(sys.argv[1])
     mode = sys.argv[2]
+    if mode not in ('configure', 'light', 'launch') or not output.is_absolute():
+        raise ValueError('expected absolute scratch output path, then configure/light/launch mode')
     if mode == 'configure':
         path = output / 'isolated-venv/lib/python3.13/site-packages/data_sheets_schema.pth'
         backup = path.with_name(path.name + '.bak-launch-cost-20261116')
