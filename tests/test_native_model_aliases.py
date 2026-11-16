@@ -163,6 +163,30 @@ def gate_result(prepared, runtime, projections, controls):
         runtime_authority={'passed': False}, keep_awake={'passed': False})
 
 
+def test_shared_peer_terminal_frame_satisfies_real_gate(tmp_path, pure_gate_members):
+    """Check the peer's actual emitted expression without running its long workflow."""
+    import ast
+    prepared, chosen, projections = current_stream(tmp_path)
+    path = Path(__file__).parent / 'fixtures/native_shared_execution/fake_cli.py'
+    tree = ast.parse(path.read_text())
+    frames = [node.args[0] for node in ast.walk(tree)
+              if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+              and node.func.id == 'send' and node.args
+              and isinstance(node.args[0], ast.Dict)
+              and any(isinstance(key, ast.Constant) and key.value == 'type'
+                      and isinstance(value, ast.Constant) and value.value == 'result'
+                      for key, value in zip(node.args[0].keys, node.args[0].values))]
+    assert len(frames) == 1
+    frame = eval(compile(ast.Expression(frames[0]), str(path), 'eval'),
+                 {'session': prepared['events'][0]['session_id'],
+                  'runtime': chosen, 'denials': []})
+    prepared['events'][-1] = frame
+    result = gate_result(prepared, chosen, projections, pure_gate_members)
+    assert result['terminal']['passed'] is True
+    del frame['subtype']
+    assert gate_result(prepared, chosen, projections, pure_gate_members)['terminal']['passed'] is False
+
+
 def test_real_terminal_and_accounting_gates_keep_alias_roles_separate(tmp_path, pure_gate_members):
     prepared, chosen, projections = current_stream(tmp_path)
     result = gate_result(prepared, chosen, projections, pure_gate_members)

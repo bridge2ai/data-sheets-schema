@@ -348,7 +348,7 @@ def main():
         helper('final_source_inventory')
     write(paths['report'], report)
     helper('draft'); helper('final_evidence'); helper('recorder')
-    send({'type': 'result', 'session_id': session, 'is_error': False, 'terminal_reason': 'completed', 'stop_reason': 'end_turn',
+    send({'type': 'result', 'subtype': 'success', 'session_id': session, 'is_error': False, 'terminal_reason': 'completed', 'stop_reason': 'end_turn',
         'usage': {'input_tokens': 10, 'output_tokens': 2, 'cache_read_input_tokens': 0, 'cache_creation_input_tokens': 0},
         'modelUsage': {runtime['model']: {'inputTokens': 10, 'outputTokens': 2, 'cacheReadInputTokens': 0,
             'cacheCreationInputTokens': 0, **runtime['limits']}}, 'total_cost_usd': 0, 'permission_denials': denials})
