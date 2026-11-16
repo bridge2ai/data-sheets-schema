@@ -143,6 +143,7 @@ def fake_commands(monkeypatch, paths, *, mutate=None, fail=None, fail_exception=
     calls = []
     order = (seq.COMMANDS[2], seq.COMMANDS[0], seq.COMMANDS[1])
     monkeypatch.setattr(seq.os, 'killpg', lambda pid, signum: None)
+    monkeypatch.setattr(seq.os, 'kill', lambda pid, signum: None)
     def run(command, **kwargs):
         assert command[:6] == [sys.executable, '-I', '-B', '-c', seq.BOOTSTRAP, str(seq.SOURCE_ROOT / 'src')]
         name = command[6]

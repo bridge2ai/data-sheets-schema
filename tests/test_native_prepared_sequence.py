@@ -11,6 +11,66 @@ import pytest
 from data_sheets_schema import native_launch_sequence as sequence
 
 
+def test_visible_proceed_publication_failure_waits_for_separate_child_cleanup(tmp_path, monkeypatch):
+    import stat
+    from data_sheets_schema import native_prepared_worker as worker
+    ipc = tmp_path / 'ipc'
+    ipc.mkdir()
+    owned = sequence._PreparedStep([], tmp_path / 'worker.json', [], sequence._SequenceSignals())
+    owned.step['argv'] = [sys.executable, '-I', '-B', str(sequence.SOURCE_ROOT /
+        'scripts/adhoc/synthetic_prepared_cleanup_6263_20261116.py'),
+        str(sequence.SOURCE_ROOT), str(tmp_path)]
+    guard = tmp_path / 'guard'
+    guard.write_bytes(b'guard')
+    original_fsync = worker.os.fsync
+    child_pid = None
+    def fail_after_visible(fd):
+        nonlocal child_pid
+        if stat.S_ISDIR(os.fstat(fd).st_mode):
+            assert (ipc / 'proceed.json').is_file()
+            deadline = time.monotonic() + 20
+            while not (tmp_path / 'child.pid').exists():
+                assert time.monotonic() < deadline
+                assert owned._exit_status() is None
+                time.sleep(0.01)
+            child_pid = int((tmp_path / 'child.pid').read_text())
+            assert os.getpgid(child_pid) == child_pid
+            assert child_pid != owned.child.pid
+            raise OSError('publication persistence failed after visible proceed')
+        return original_fsync(fd)
+    try:
+        owned.start()
+        raw = owned.ready(ipc, registration_raw=b'regression', attempt=tmp_path / 'attempt',
+                          max_age_seconds=60)
+        monkeypatch.setattr(worker.os, 'fsync', fail_after_visible)
+        with pytest.raises(OSError, match='after visible proceed'):
+            owned.proceed(ipc, prepared_raw=raw, guard_path=guard,
+                          guard_sha256=worker.wire.sha(b'guard'))
+    finally:
+        owned.close()
+    assert owned.proceed_possible
+    assert (tmp_path / 'cleanup-completed').read_text() == 'transport cleanup returned'
+    with pytest.raises(ProcessLookupError):
+        os.kill(child_pid, 0)
+    assert owned.child.returncode != -signal.SIGKILL
+
+
+def test_readiness_refuses_dead_or_expired_worker(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    from tests.test_native_prepared_worker import setup_packet
+    ipc, binding, raw, _ = setup_packet(tmp_path, monkeypatch)
+    owned = sequence._PreparedStep([], tmp_path / 'worker.json', [], sequence._SequenceSignals())
+    owned.child = SimpleNamespace(pid=os.getpid())
+    owned._exit_status = lambda: 7
+    with pytest.raises(ValueError, match='exited before proceed'):
+        owned.require_ready(ipc, prepared_raw=raw, **binding)
+    owned._exit_status = lambda: None
+    owned.require_ready(ipc, prepared_raw=raw, **binding)
+    monkeypatch.setattr(sequence.time, 'time', lambda: 1300.0)
+    with pytest.raises(ValueError, match='stale or foreign'):
+        owned.require_ready(ipc, prepared_raw=raw, **binding)
+
+
 def test_prepared_failure_kills_group_and_reaps_leader(tmp_path):
     state = sequence._SequenceSignals()
     steps = []
