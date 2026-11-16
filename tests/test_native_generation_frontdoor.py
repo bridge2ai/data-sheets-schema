@@ -208,6 +208,23 @@ def test_launch_requires_all_authority_arguments_before_any_dispatch(monkeypatch
     assert exc.value.code == 2
 
 
+def test_prepared_directory_route_passes_argument_gate_before_reading(monkeypatch):
+    calls = []
+
+    def refuse_read(*args, **kwargs):
+        calls.append('read')
+        raise ValueError('offline argument-routing sentinel')
+
+    monkeypatch.setattr(cli, '_read', refuse_read)
+    monkeypatch.setattr(execution, 'launch', no_dispatch)
+    argv = ['launch']
+    for name in ('registration', 'review', 'ci', 'launch-word', 'account-choice', 'prepared-directory'):
+        argv += ['--' + name, '/synthetic/' + name]
+    with pytest.raises(ValueError, match='offline argument-routing sentinel'):
+        cli.main(argv)
+    assert calls == ['read']
+
+
 def guard_paths(tmp_path, saved_case, monkeypatch):
     """Routing fixture only: genuine guard, explicitly stubbed E verification."""
     now = 1_800_000_000

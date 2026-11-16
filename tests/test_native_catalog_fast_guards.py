@@ -1,6 +1,8 @@
 """Issue 6260: phase-specific guard plans and immediate dependency refusal."""
 import sys
 import types
+import subprocess
+from pathlib import Path
 
 import pytest
 
@@ -106,7 +108,7 @@ test_each_guard_refuses_and_uses_full_fallback = pytest.mark.parametrize('phase'
         'function_dict', 'encoder_dict', 'encoder_class', 'dumper_dict'])(test_each_guard_refuses_and_uses_full_fallback))
 
 
-def test_loader_transition_with_same_marker_and_empty_slot_cache(monkeypatch):
+def _assert_loader_transition_with_same_marker_and_empty_slot_cache(monkeypatch):
     loader = catalog.views.DupCheckYamlLoader
     if 'yaml_constructors' in vars(loader):
         monkeypatch.delattr(loader, 'yaml_constructors')
@@ -121,6 +123,18 @@ def test_loader_transition_with_same_marker_and_empty_slot_cache(monkeypatch):
         raise AssertionError('accepted loader transition returned to full state')
     monkeypatch.setattr(catalog, '_state', unexpected)
     assert catalog.runtime_token() is marker
+
+
+def test_loader_transition_with_same_marker_and_empty_slot_cache(tmp_path):
+    # The process may already have initialized the loader before catalog import.
+    # Exercise the forward transition from a fresh interpreter, never by
+    # resetting the production cache's captured authority in this process.
+    probe = Path(__file__).resolve().parents[1] / 'scripts/adhoc/cache_test_probe_20261116.py'
+    result = subprocess.run([sys.executable, str(probe)], capture_output=True,
+                            text=True, timeout=60)
+    (tmp_path / 'loader-probe.log').write_text(result.stdout + result.stderr)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stdout.strip() == 'loader transition assertions passed'
 
 
 def test_packet_open_memo_is_private_and_checks_live_packet(packet, monkeypatch):

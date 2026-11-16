@@ -477,14 +477,17 @@ def test_a14_r2_f1_probes_move_descriptor_or_refuse(selected, monkeypatch, tmp_p
         assert sg.descriptor()['stage_contracts']['chunk_projection_probe_sha256'] != base_desc['stage_contracts']['chunk_projection_probe_sha256']
 
     # n04: linkml-runtime json_dumper emitting an extra slot field moves schema_context_trim
+    dumper_state = dict(vars(json_dumper))
     with monkeypatch.context() as mp:
         orig_dumps = json_dumper.dumps
         def altered_dumps(element, *a, **k):
             data = json.loads(orig_dumps(element, *a, **k))
             data['simulated_extra_linkml_field'] = 'v'
             return json.dumps(data)
-        mp.setattr(json_dumper, 'dumps', altered_dumps)
+        # Restore inherited lookup instead of leaving a bound method on the instance.
+        mp.setitem(vars(json_dumper), 'dumps', altered_dumps)
         assert sg.descriptor()['schema_context_trim']['linkml_dumper_probe_sha256'] != base_desc['schema_context_trim']['linkml_dumper_probe_sha256']
+    assert vars(json_dumper) == dumper_state
 
     # n05: D4D_RECEIPT_FULL_MAX_TOKENS is refused in phase_max_tokens and preflight for shared runs, and moves stage_contracts
     with monkeypatch.context() as mp:
