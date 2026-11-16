@@ -17,6 +17,8 @@ focused = [
     'shared_controller', 'attribution_controller', 'environment_census',
 ]
 plans = [
+    ('canary-three-workers', ['--lane', 'unit', '--workers', '3', '--allow-overcommit', '--',
+        'tests/test_native_prepared_sequence.py::test_visible_proceed_publication_failure_waits_for_separate_child_cleanup']),
     ('focused', ['--lane', 'unit', '--workers', '3', '--allow-overcommit', '--',
                  *['tests/test_native_' + name + '.py' for name in focused]]),
     ('controls', ['--lane', 'offline-canary', '--', '-n', '3', '--dist', 'load']),
@@ -32,3 +34,9 @@ for name, flags in plans:
     print('COMMAND: ' + ' '.join(command), flush=True)
     result = subprocess.run(command, cwd=root)
     print('LANE RESULT: ' + name + ' ' + str(result.returncode), flush=True)
+    if name == 'canary-three-workers' and not dry:
+        markers = list((scratch / name / 'basetemp').rglob('cleanup-completed'))
+        report = scratch / name / 'results/unit.xml'
+        if (result.returncode != 0 or not report.is_file() or report.stat().st_size == 0
+                or not any(path.read_text() == 'transport cleanup returned' for path in markers)):
+            raise SystemExit('Canary did not persist successful cleanup evidence; no batch launched')
