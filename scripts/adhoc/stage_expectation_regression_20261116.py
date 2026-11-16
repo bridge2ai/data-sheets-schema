@@ -35,6 +35,10 @@ functions = functions[:functions.index("    expected = b.load(expectation / 'exp
 ending = '''    expected = b.load(expectation / 'expectation.json')
     assert expected and (expectation / 'expectation.json').stat().st_size > 0
     # Run the original invalid handoff against the genuine verified consumer.
+    # Fixture imports needed the test root; production verification needs the
+    # same import census as the standalone prefix and saved-step CLI.
+    sys.path[:] = [str(ROOT / 'src'), str(ROOT / 'scripts'),
+        *(p for p in sys.path if p not in (str(ROOT), str(ROOT / 'src'), str(ROOT / 'scripts')))]
     from data_sheets_schema.native_shared_controller_orchestration import reconstruct_composition
     from data_sheets_schema.native_shared_permission_orchestration import loaded_permission_inputs
     from data_sheets_schema import native_execution_authority_v2 as authority
