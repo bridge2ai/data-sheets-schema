@@ -19,10 +19,10 @@ from tests.test_native_u5_scanner_comparison import require_scanner_inventory
 
 
 FIXTURE = Path(__file__).with_name('fixtures') / 'native_d128_approved.json'
-FIXTURE_SHA256 = '65330131940ca8be1cd4288ed3cca9ca980eafc665faa964fa443e8f44d63399'
-EVIDENCE_SHA256 = '98e6d082db4df2176a452ab60bc83280406333ba339a96e30ae501aeb6957ada'
+FIXTURE_SHA256 = '17fcb892f5aeebf2a85d9db6d992dd9e6a08212abd4bd06df2900d1a6d5b7ed9'
+EVIDENCE_SHA256 = '11baf9cda3b7c558be9ca3d9773d4711ad4b3f4d12a2f519de8996e7d72a7279'
 BASELINE = 'cf50d9a1c059f3b5030103378ccef33619475dde'
-REFERENCE_CANDIDATE = '660b2d884c3032f0eca61fcfd3ae523fcbbe9614'
+REFERENCE_CANDIDATE = 'a1d719a9cea1553f0ccbd63efc0bc2300e39e2ca'
 SKILL = '.claude/skills/d4d-generation-specificity-audit'
 ARRAYS = ('hits', 'violations', 'test_dependencies')
 
@@ -199,10 +199,10 @@ def test_d128_approval_fixture_retains_the_exact_owner_disposition():
     hits, dependencies = value['arrays']['hits'], value['arrays']['test_dependencies']
     assert (hits['before_count'], hits['after_count'], len(hits['exact_matches']),
             len(hits['relocations']), len(hits['changed_fields']), len(hits['added']),
-            len(hits['removed'])) == (5292, 5293, 5229, 57, 6, 1, 0)
+            len(hits['removed'])) == (5292, 5308, 2750, 2530, 6, 22, 6)
     assert (dependencies['before_count'], dependencies['after_count'], len(dependencies['exact_matches']),
-            len(dependencies['added'])) == (101, 103, 101, 2)
-    assert not any(dependencies[key] for key in ('relocations', 'changed_fields', 'removed'))
+            len(dependencies['added'])) == (101, 103, 79, 2)
+    assert tuple(len(dependencies[key]) for key in ('relocations', 'changed_fields', 'removed')) == (22, 0, 0)
     assert len(value['exact_violations']) == 9
 
 
