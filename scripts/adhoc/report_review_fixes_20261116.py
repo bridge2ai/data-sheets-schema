@@ -11,7 +11,7 @@ import subprocess
 import sys
 import xml.etree.ElementTree as ET
 
-scratch, handoff = map(Path, sys.argv[1:])
+scratch, handoff = (Path(value).resolve() for value in sys.argv[1:])
 root = Path(__file__).resolve().parents[2]
 def git(*args):
     return subprocess.check_output(['git', *args], cwd=root, text=True).strip()
@@ -107,6 +107,28 @@ for name in ('canary', 'canary-three-workers', 'focused', 'controls', 'scanners'
             lines.extend(['', 'Failure evidence from ' + str(path) + ':', '```',
                           *[line.replace(chr(64), '[at]') for line in tail], '```', ''])
 
+regressions = {
+    'test_visible_proceed_publication_failure_waits_for_separate_child_cleanup',
+    'test_readiness_refuses_dead_or_expired_worker',
+    'test_worker_death_after_ready_does_not_spend_capture',
+    'test_worker_expiry_after_ready_does_not_spend_capture',
+    'test_exchange_compares_prepared_hashes_to_fresh_recheck',
+    'test_import_root_snapshot_is_fresh_at_enumeration',
+    'test_elapsed_clock_work_precedes_final_subscription_sample',
+    'test_saved_observation_uses_final_boundary_timestamp',
+}
+observed = {}
+for name in ('focused', 'controls', 'sequence-rerun', 'controls-loopback'):
+    for xml in sorted((scratch / name / 'results').glob('*.xml')):
+        for case in ET.parse(xml).getroot().iter('testcase'):
+            if case.get('name') in regressions:
+                status = next((child.tag for child in case
+                               if child.tag in ('failure', 'error', 'skipped')), 'passed')
+                observed[case.get('name')] = status
+lines.extend(['', 'Targeted regression evidence:', '',
+              *['- ' + name + ': ' + observed.get(name, 'not found') + '.'
+                for name in sorted(regressions)]])
+
 proposal_path = scratch / 'pin-proposals.txt'
 proposal = json.loads(proposal_path.read_text())
 lines.extend(['', 'Pin proposals (read-only calculator output):', '',
@@ -130,8 +152,10 @@ lines.extend(['', 'Actual comment-only scanner SHA256 before lead pin rotation: 
     'The runner uses the assigned isolated interpreter, required host gate and '
     'three workers for the native controls suite, with persisted canary cleanup '
     'evidence required before the batch. No public case or Claude binary was run.', '',
-    'Read-only GitHub issue reads failed because api.github.com was unreachable. '
-    'Both assigned local reviews were read. No GitHub write, push or PR was made; '
+    'All assigned GitHub issue bodies and both local reviews were read. '
+    'Initial sandboxed issue reads failed; read-only retries with network '
+    'permission succeeded. Saved issue JSON is in the scratch root. '
+    'No GitHub write, push or PR was made; '
     'the lead owns publication and any review issue filing. '
     'The four protected files were not edited.', '',
     'Helpers committed on this branch: scripts/adhoc/synthetic_prepared_cleanup_6263_20261116.py, '
