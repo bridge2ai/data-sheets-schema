@@ -122,8 +122,10 @@ def identity_fixture(tmp_path, monkeypatch):
         calls.append((raw, current, environment_mode))
         return current
     monkeypatch.setattr(registration, '_recheck_verified', recheck)
+    monkeypatch.setattr(verifier, '_baseline', lambda value, full: [('baseline', (1, 2, 3))])
+    monkeypatch.setattr(worker, '_full_preparation_baseline', lambda pin: [('baseline', (1, 2, 3))])
     def local_verify(request):
-        verifier.verify({**request, 'interpreter': [sys.executable, sys.version,
+        return verifier.verify({**request, 'interpreter': [sys.executable, sys.version,
             sys.implementation.cache_tag]})
     monkeypatch.setattr(worker, '_verify', local_verify)
     identity = worker.PreparedIdentity(b'registration', value,
@@ -154,7 +156,15 @@ def test_each_recheck_requires_fresh_census_against_prepared_baseline(tmp_path, 
     second = identity.recheck()
     assert second['dependencies']
     assert len(calls) == 2
-    assert all(call[0] == b'registration' and call[2] == 'prepared' for call in calls)
+    assert all(call[0] == b'registration' and call[2] == 'light' for call in calls)
+
+
+def test_recheck_rejects_changed_full_census_baseline(tmp_path, monkeypatch):
+    identity, _, _, calls = identity_fixture(tmp_path, monkeypatch)
+    identity.baseline = [('baseline', (1, 2, 4))]
+    with pytest.raises(ValueError, match='changed since full verification'):
+        identity.recheck()
+    assert len(calls) == 1
 
 
 def test_empty_pinned_package_initializer_is_valid(tmp_path, monkeypatch):

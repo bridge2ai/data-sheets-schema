@@ -4,6 +4,27 @@ import sys
 from . import native_subscription_guard as wire
 
 
+def _baseline(value, *, full):
+    from . import native_environment_manifest as environment
+    from .native_shared_controller import captured_preparation_body
+    pin = captured_preparation_body(value['preparation_raw_json'].encode())['environment_manifest']
+    if full:
+        state = environment._process_state()
+        key = environment._verification_key(pin)
+        with state['lock']:
+            error, fingerprints = state['full'][key]
+            if error is not None or fingerprints is None:
+                raise ValueError('prepared verifier lacks a full census baseline')
+            return fingerprints
+    # The preceding registration recheck validates this exact manifest pin.
+    # Compare a fresh light census to the full preparation's identities without
+    # installing transferred data in the process full-verification cache.
+    manifest = wire.read_regular(pin['path'], limit=environment.MAX_BYTES)
+    if wire.sha(manifest) != pin['sha256'] or len(manifest) != pin['bytes']:
+        raise ValueError('prepared environment manifest changed')
+    return environment._light_live(environment.validate(wire.strict_json(manifest)))
+
+
 def verify(request):
     from . import native_execution_authority_v2 as authority
     from . import native_shared_registration_orchestration as registration
@@ -32,11 +53,14 @@ def verify(request):
     if request['mode'] == 'construct':
         current = registration.verified(raw)
     elif request['mode'] in ('recheck', 'unchanged'):
-        current = registration._recheck_verified(raw, value, environment_mode='prepared')
+        current = registration._recheck_verified(raw, value, environment_mode='light')
     else:
         raise ValueError('unknown prepared verification mode')
     if wire.canonical(current) != value_raw:
         raise ValueError('prepared worker registration changed')
+    baseline = _baseline(value, full=request['mode'] == 'construct')
+    if request['mode'] != 'construct' and wire.canonical(baseline) != wire.canonical(request['baseline']):
+        raise ValueError('prepared environment changed since full verification')
     if request['mode'] == 'unchanged':
         from .native_shared_execution_orchestration import _unchanged_inputs
         authorization = {'inputs': {}, 'raw': {}}
@@ -45,6 +69,7 @@ def verify(request):
             authorization['inputs'][name] = path
             authorization['raw'][name] = body.encode()
         _unchanged_inputs(value, authorization)
+    return baseline
 
 
 def main():
@@ -59,9 +84,11 @@ def main():
         raise ValueError('prepared verifier import paths must be exact strings')
     # Census the parent's actual paths, with no inherited modules or finders.
     sys.path[:] = paths
-    verify(request)
-    sys.stdout.buffer.write(wire.canonical({'nonce': request['nonce'],
-        'request_sha256': wire.sha(raw), 'passed': True}))
+    baseline = verify(request)
+    result = {'nonce': request['nonce'], 'request_sha256': wire.sha(raw), 'passed': True}
+    if request['mode'] == 'construct':
+        result['baseline'] = baseline
+    sys.stdout.buffer.write(wire.canonical(result))
 
 
 if __name__ == '__main__':

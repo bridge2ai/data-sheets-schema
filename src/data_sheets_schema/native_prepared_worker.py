@@ -21,6 +21,17 @@ POLL_SECONDS = 0.1
 VERIFY_SECONDS = 300
 
 
+def _full_preparation_baseline(pin):
+    from . import native_environment_manifest as environment
+    state = environment._process_state()
+    key = environment._verification_key(pin)
+    with state['lock']:
+        memo = state['full'].get(key)
+        if memo is None or memo[0] is not None or memo[1] is None:
+            raise ValueError('prepared worker requires its original full census baseline')
+        return memo[1]
+
+
 def _verify(request):
     """One fresh interpreter, one nonce-bound reply; no verdict survives a call."""
     request = {**request, 'nonce': secrets.token_hex(32),
@@ -43,9 +54,16 @@ def _verify(request):
         raise
     if child.returncode != 0:
         raise ValueError('prepared fresh verifier refused: ' + stderr.decode(errors='replace')[-4096:])
+    result = wire.strict_json(stdout)
+    baseline = result.get('baseline') if request.get('mode') == 'construct' else None
     expected = {'nonce': request['nonce'], 'request_sha256': wire.sha(raw), 'passed': True}
+    if request.get('mode') == 'construct':
+        expected['baseline'] = baseline
+        if type(baseline) is not list:
+            raise ValueError('prepared verifier omitted the full census baseline')
     if stdout != wire.canonical(expected):
         raise ValueError('prepared fresh verifier returned a foreign result')
+    return baseline
 
 
 class PreparedIdentity:
@@ -74,14 +92,19 @@ class PreparedIdentity:
                              for path, digest in sorted(paths.items()))
         self.prepared = None
         self.registration_path = None
-        self._verify('construct')
+        self.baseline = None
+        self.baseline = self._verify('construct')
+        if wire.canonical(self.baseline) != wire.canonical(
+                _full_preparation_baseline(preparation['environment_manifest'])):
+            raise ValueError('prepared environment changed since full preparation')
 
     def _verify(self, mode):
-        _verify({'mode': mode, 'registration': self.registration_raw.decode(),
+        return _verify({'mode': mode, 'registration': self.registration_raw.decode(),
             'value': self.value_raw.decode(),
             'inputs': [(str(path), raw.decode()) for path, raw in self.inputs],
             'sources': [(str(path), digest) for path, digest in self.sources],
             'registration_path': self.registration_path,
+            'baseline': self.baseline,
             'prepared': self.prepared})
 
     def recheck(self):
