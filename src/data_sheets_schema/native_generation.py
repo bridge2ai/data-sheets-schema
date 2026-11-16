@@ -153,7 +153,11 @@ def main(argv=None):
     Probe-only branches consume closed runtime/permission values without
     constructing RunSpec.
     """
-    args = parser().parse_args(argv)
+    argument_parser = parser()
+    args = argument_parser.parse_args(argv)
+    if (args.command == 'launch' and args.prepared_directory is None
+            and (args.subscription_guard is None or args.subscription_guard_sha256 is None)):
+        argument_parser.error('launch needs a guard pair or a prepared worker directory')
     from .native_sequence_inputs import capture_expected, check_raw
     sequence_inputs = capture_expected(args)
     from . import native_permission_probe as probe
