@@ -25,7 +25,7 @@ def main():
     lanes = {}
     for name in ('fresh-scope-canary', 'fresh-worker-sequence', 'fresh-worker-final',
                  'fresh-controls-canary', 'fresh-controls', 'fresh-public-correction',
-                 'carrier-canary', 'carrier-worker-final', 'carrier-controls-canary',
+                 'carrier-canary', 'carrier-worker-final', 'carrier-worker-canonical', 'carrier-controls-canary',
                  'carrier-controls', 'carrier-public-correction'):
         folder = SCRATCH / name
         summary = folder / 'lane_summary.json'
@@ -93,6 +93,7 @@ def main():
         'Late advance: ' + json.dumps(ledger['late_advance'], sort_keys=True) + '.',
         'Missing timings are unknown and establish neither owner threshold. Artifact discovery includes ignored and hidden files through Path.rglob.', '',
         'The real-loader canary exercises the unmocked constructor and a real child: the parent still refuses verifier-bootstrap imports while the child reaches fresh registration validation. It is an invalid-input refusal witness; the public case supplies the complete acceptance check. Timeout and reply-replay tests are focused simulations.', '',
+        'The strengthened constructor assertion initially exposed a noncanonical interpreter spelling in the unit command. The child correctly refused the differing executable strings. The canonical-path rerun retains strict interpreter equality and verifies the actual registration-validation frame, rather than accepting any child refusal.', '',
         '## Integration and review', '',
         'Overlapping-file functions touched: native_prepared_worker._full_preparation_baseline, _verify, PreparedIdentity.__init__, PreparedIdentity._verify, PreparedIdentity.recheck, PreparedIdentity.require_unchanged and exchange. No edits to native_launch_sequence.py or run_native_canary.py.', '',
         'Other production functions touched: native_execution_orchestration.launch, _launch and _launch_prepared; native_shared_execution_orchestration.launch; native_generation.main. New module native_prepared_verifier owns _baseline, verify and main.', '',
