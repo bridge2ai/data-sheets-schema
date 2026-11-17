@@ -29,7 +29,7 @@ focused = [
     'native_canary_packet_builder', 'native_execution_registration_v2',
 ]
 parser = argparse.ArgumentParser()
-parser.add_argument('--lane', required=True, choices=['focused', 'native-controls', 'collection'])
+parser.add_argument('--lane', required=True, choices=['focused', 'native-controls', 'corrections', 'collection'])
 parser.add_argument('--run', action='store_true')
 args = parser.parse_args()
 stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
@@ -44,6 +44,17 @@ if args.lane == 'focused':
     command += ['--', *targets]
 elif args.lane == 'collection':
     command += ['--', '--collect-only', '-q', 'tests']
+elif args.lane == 'corrections':
+    targets = [
+        'tests/test_native_prepared_sequence.py::test_readiness_refuses_dead_or_expired_worker',
+        'tests/test_native_run_limits.py::test_canary_same_input_bytes_preserved_but_old_deadline_policy_refuses',
+        'tests/test_native_permission_probe.py::test_denied_group_signal_still_attempts_reap_and_preserves_refusal',
+    ]
+    targets += ['tests/test_native_execution_registration_v2.py::test_execution_prefix_must_match_rederived_preparation_before_consumer['+name+']'
+                for name in ['working_directory', 'composition_digest', 'composition',
+                             'composition_instruction', 'composition_selection', 'composition_runtime']]
+    assert all((root / name.split('::')[0]).is_file() for name in targets)
+    command += ['--', *targets]
 assert runner.is_file() and python.is_file()
 plan = {'lane': args.lane, 'cwd': str(root), 'argv': command, 'scratch': str(destination)}
 if args.run:

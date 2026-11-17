@@ -44,7 +44,7 @@ for log in logs:
         for line in log.read_text(errors='replace').splitlines():
             if 'host/slot gate busy after' in line:
                 lines += ['- Gate refusal in '+str(log)+': '+line]
-for lane in ['focused', 'native-controls', 'collection']:
+for lane in ['focused', 'native-controls', 'corrections', 'collection']:
     summaries = [scratch / lane / 'lane_summary.json', *sorted(scratch.glob('rerun-*/'+lane+'/lane_summary.json'))]
     summaries = [path for path in summaries if path.exists()]
     for summary in summaries:
@@ -61,6 +61,15 @@ for lane in ['focused', 'native-controls', 'collection']:
                         lines += ['  '+kind+': '+case.get('classname', '')+'::'+case.get('name', '')+' — '+failure.get('message', '')]
     if not summaries:
         lines += ['- '+lane+': no completed lane summary yet.']
+classification = evidence / 'test-classification.json'
+if classification.exists():
+    lines += ['', 'Saved per-case failure classification and tracebacks: '+str(classification)]
+    for report in json.loads(classification.read_text()):
+        lines += ['- '+report['xml']+': '+json.dumps(report['categories'], sort_keys=True)]
+    lines += ['The initial five companion-expectation failures were corrected without weakening refusal checks. Six environment verification count-bound errors are separate from source-pin refusals; the unchanged security bound is 64 cached pins per process. The corrections lane retries those six cases in a fresh process along with the five corrected cases.']
+for result in sorted(scratch.glob('rerun-*/*/result.json')):
+    doc = json.loads(result.read_text())
+    lines += ['- Launcher terminal result '+doc['lane']+': '+str(doc['returncode'])+'; '+str(result)]
 if not args.final:
     lock = root.parent / '.d4d-lane-locks/slot-00.lock'
     lines += ['', 'Current shared-slot metadata: '+lock.read_text().strip(), '']
