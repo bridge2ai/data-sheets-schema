@@ -35,12 +35,13 @@ def test_drop_count_survives_until_next_written_row(tmp_path):
     assert rows(trace.path)[0]['dropped_traces_total'] == before + 1
 
 
-def test_exit_join_has_two_second_bound(monkeypatch):
+def test_exit_join_has_four_second_bound(monkeypatch):
+    # D159 doubled the exit-time diagnostic join bound from 2 to 4 seconds.
     from types import SimpleNamespace
     calls = []
     monkeypatch.setattr(timing, '_writer', SimpleNamespace(join=lambda **kw: calls.append(kw)))
     timing._finish_writer()
-    assert calls == [{'timeout': 2}]
+    assert calls == [{'timeout': 4}]
 
 
 def settled(trace):
