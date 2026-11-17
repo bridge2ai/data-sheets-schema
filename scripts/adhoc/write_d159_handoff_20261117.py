@@ -34,23 +34,28 @@ lines = ['# D159 limits: implementation committed; '+('validation results below'
     'Ignore-independent grep inventory: '+str(evidence / 'complete-limit-inventory.txt'), '',
     '## Tests', '']
 lines += ['Focused retry includes the admission, guard, controller, deadline, runtime, sequence, prepared-worker, permission, packet and CI companion suites.', '']
-for name in ['focused.log', 'focused-retry.log', 'native-controls.log', 'collection.log']:
-    log = evidence / name
+logs = sorted(evidence.glob('*.log')) + sorted(scratch.glob('rerun-*/*/launcher.log'))
+for log in logs:
     if log.exists():
         for line in log.read_text(errors='replace').splitlines():
             if 'host/slot gate busy after' in line:
                 lines += ['- Gate refusal in '+str(log)+': '+line]
 for lane in ['focused', 'native-controls', 'collection']:
-    summary = scratch / lane / 'lane_summary.json'
-    if summary.exists():
+    summaries = [scratch / lane / 'lane_summary.json', *sorted(scratch.glob('rerun-*/'+lane+'/lane_summary.json'))]
+    summaries = [path for path in summaries if path.exists()]
+    for summary in summaries:
         doc = json.loads(summary.read_text())
         lines += ['- '+lane+': return code '+str(doc.get('overall_returncode'))+'; '+str(summary)]
-        for xml in sorted((scratch / lane / 'results').glob('*.xml')):
+        for xml in sorted((summary.parent / 'results').glob('*.xml')):
             tree = ET.parse(xml)
             suites = list(tree.getroot().iter('testsuite'))
             counts = {key: sum(int(x.get(key, '0')) for x in suites) for key in ['tests', 'failures', 'errors', 'skipped']}
             lines += ['  '+xml.name+': '+json.dumps(counts, sort_keys=True)]
-    else:
+            for case in tree.getroot().iter('testcase'):
+                for kind in ['failure', 'error']:
+                    for failure in case.findall(kind):
+                        lines += ['  '+kind+': '+case.get('classname', '')+'::'+case.get('name', '')+' — '+failure.get('message', '')]
+    if not summaries:
         lines += ['- '+lane+': no completed lane summary yet.']
 if not args.final:
     lock = root.parent / '.d4d-lane-locks/slot-00.lock'
