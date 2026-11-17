@@ -1162,7 +1162,7 @@ class EventClock:
     more after it."""
     UNDER_SECONDS = 1.0
     #: How long past its registered deadline the controller may stop. It checks its
-    #: deadline once per 0.05 s poll, and the clock runs at the real rate after the
+    #: deadline once per 0.1 s poll, and the clock runs at the real rate after the
     #: jump, so this is scheduling inside the test process, never start-up. A
     #: deadline enforced LATE_SECONDS or more late fails (#2818).
     LATE_SECONDS = 2.0
@@ -1261,7 +1261,7 @@ def _deadline_while_counting(tmp_path, *, record_first, interrupt=None, close_de
     has checked its deadline since the count began, so a deadline enforced more
     than UNDER_SECONDS early would be recorded instead of the interrupt; one less
     early is caught by the deadline tests' own check. A shortfall under one
-    controller poll (0.05 s) is caught only when a deadline check happens to fall
+    controller poll (0.1 s) is caught only when a deadline check happens to fall
     inside it, which depends on the poll's overhead: 30 ms was caught in most runs,
     10 ms in few (#2778, #2793, #2807). `close_delay` holds admission open that
     long inside close_admission, the lateness a negative control injects."""

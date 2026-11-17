@@ -23,6 +23,8 @@ Generated from changes.json by scripts/adhoc/report_d159_limits_20261117.py.
 | notes/matched_cborg_2026-09-13/native_controls/native_proxy.py:609 | def running(self, *, cleanup_timeout=2): | def running(self, *, cleanup_timeout=4): |
 | notes/matched_cborg_2026-09-13/native_controls/native_proxy.py:638 | self.connection.settimeout(20) | self.connection.settimeout(40) |
 | notes/matched_cborg_2026-09-13/native_controls/native_proxy.py:913 | self.thread.join(timeout=2) | self.thread.join(timeout=4) |
+| notes/matched_cborg_2026-09-13/native_controls/probe_native_history.py:101 | elif name in ('selected_slow','selected_reject','legacy_slow'):time.sleep(4.0) | elif name in ('selected_slow','selected_reject','legacy_slow'):time.sleep(8.0) |
+| notes/matched_cborg_2026-09-13/native_controls/probe_native_history.py:162 | if name=='selected_slow':passed=passed and observed[-1]['at']-observed[0]['at']>=4 and times[0]>=observed[-1]['at'] and classified[0]>=observed[-1]['at'] | if name=='selected_slow':passed=passed and observed[-1]['at']-observed[0]['at']>=8 and times[0]>=observed[-1]['at'] and classified[0]>=observed[-1]['at'] |
 | notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py:444 | exited = reap_observed(process, 2) | exited = reap_observed(process, 4) |
 | notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py:445 | deadline = time.monotonic() + 2 | deadline = time.monotonic() + 4 |
 | notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py:454 | time.sleep(0.02) | time.sleep(0.04) |
@@ -31,9 +33,22 @@ Generated from changes.json by scripts/adhoc/report_d159_limits_20261117.py.
 | notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py:576 | if not reap_observed(process, 2): | if not reap_observed(process, 4): |
 | notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py:577 | raise subprocess.TimeoutExpired(process.args, 2) | raise subprocess.TimeoutExpired(process.args, 4) |
 | notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py:682 | time.sleep(0.05) | time.sleep(0.1) |
+| notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py:22 | 'matcher': 'Bash&#124;Read&#124;Write', 'hookCallbackIds': ['d4d_tool_policy_v3'], 'timeout': 125}] | 'matcher': 'Bash&#124;Read&#124;Write', 'hookCallbackIds': ['d4d_tool_policy_v3'], 'timeout': 250}] |
 | notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py:24 | assert control.HISTORY_CONTRACT['observer_timeout_seconds'] == 120 | assert control.HISTORY_CONTRACT['observer_timeout_seconds'] == 240 |
 | notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py:30 | lambda c: c.update(observer_timeout_seconds=121), lambda c: c.update(callback_timeout_seconds=3), | lambda c: c.update(observer_timeout_seconds=241), lambda c: c.update(callback_timeout_seconds=5), |
 | notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py:31 | lambda c: c.update(runtime_callback_timeout_seconds=126), lambda c: c.update(extra=1), | lambda c: c.update(runtime_callback_timeout_seconds=251), lambda c: c.update(extra=1), |
+| notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py:165 | # Advance history by more than the legacy host's 3 seconds; classifier | # Advance history by more than the legacy host's 6 seconds; classifier |
+| notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py:166 | # starts afterwards and retains a separate 2-second completion budget. | # starts afterwards and retains a separate 4-second completion budget. |
+| notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py:170 | clock[0] = 3.25 | clock[0] = 6.25 |
+| notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py:211 | monkeypatch.setattr(control, 'time', SimpleNamespace(monotonic=lambda: started + 121)) | monkeypatch.setattr(control, 'time', SimpleNamespace(monotonic=lambda: started + 241)) |
+| notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py:250 | clock[0] = 2.5  # completed at zero, still inside the distinct host 125s bound | clock[0] = 4.5  # completed at zero, still inside the distinct host 250s bound |
+| notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py:258 | clock[0] = 2.5 | clock[0] = 4.5 |
+| notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py:275 | clock[0] = 126. | clock[0] = 251. |
+| notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py:533 | clock[0] = 126. | clock[0] = 251. |
+| notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py:1165 | #: deadline once per 0.05 s poll, and the clock runs at the real rate after the | #: deadline once per 0.1 s poll, and the clock runs at the real rate after the |
+| notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py:1264 | controller poll (0.05 s) is caught only when a deadline check happens to fall | controller poll (0.1 s) is caught only when a deadline check happens to fall |
+| notes/matched_cborg_2026-09-13/native_controls/test_probe_native_history.py:35 | 'observer_entered':True,'observer_finished':True,'observer_duration_seconds':4.01,'classifier_calls':1, | 'observer_entered':True,'observer_finished':True,'observer_duration_seconds':8.01,'classifier_calls':1, |
+| notes/matched_cborg_2026-09-13/native_controls/test_probe_native_history.py:48 | assert result['cases'][0]['observer_duration_seconds']>=4 | assert result['cases'][0]['observer_duration_seconds']>=8 |
 | scripts/draft_native_probe_packet.py:95 | ('BASH_DEFAULT_TIMEOUT_MS','600000','registered native Bash helper timeout','source'), | ('BASH_DEFAULT_TIMEOUT_MS','1000000','registered native Bash helper timeout','source'), |
 | scripts/draft_native_probe_packet.py:96 | ('BASH_MAX_TIMEOUT_MS','600000','registered native Bash helper maximum timeout','source'), | ('BASH_MAX_TIMEOUT_MS','1000000','registered native Bash helper maximum timeout','source'), |
 | scripts/native_registration_timestamp.py:26 | '-C',str(repository),*arguments],env=env,stderr=subprocess.PIPE,timeout=30).decode().strip() | '-C',str(repository),*arguments],env=env,stderr=subprocess.PIPE,timeout=60).decode().strip() |

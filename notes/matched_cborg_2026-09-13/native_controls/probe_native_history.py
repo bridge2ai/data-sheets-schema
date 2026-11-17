@@ -98,7 +98,7 @@ def run_case(repo,cli,destination,name):
             observed.append({'event':'start','at':time.monotonic()});entered.set()
             try:
                 if name in ('selected_cancel','selected_deadline'):released.wait(20)
-                elif name in ('selected_slow','selected_reject','legacy_slow'):time.sleep(4.0)
+                elif name in ('selected_slow','selected_reject','legacy_slow'):time.sleep(8.0)
                 if name=='selected_reject':raise BudgetStop('synthetic history rejected before execution')
             finally:observed.append({'event':'finish','at':time.monotonic()});finished.set()
     def classify(*args):
@@ -159,7 +159,7 @@ def run_case(repo,cli,destination,name):
     allowed=name in ('legacy_quick','selected_slow')
     passed=(exit_code==0 and len(times)==1 and not error_class) if allowed else (error_class=='BudgetStop' and not times)
     passed=passed and entered.is_set() and all(r['status']=='settled' for r in rows) and proxy.unfinished_handlers==0
-    if name=='selected_slow':passed=passed and observed[-1]['at']-observed[0]['at']>=4 and times[0]>=observed[-1]['at'] and classified[0]>=observed[-1]['at']
+    if name=='selected_slow':passed=passed and observed[-1]['at']-observed[0]['at']>=8 and times[0]>=observed[-1]['at'] and classified[0]>=observed[-1]['at']
     if name=='selected_reject':passed=passed and error_code=='synthetic history rejected before execution' and not classified
     if name=='selected_cancel':passed=passed and len(injected)==1 and counts['cancel']>=1 and not classified
     if name=='selected_deadline':passed=passed and stop_end-start<12 and not classified and bool(stops) and stops[0]['reason']=='native attempt deadline elapsed; retain all incomplete charge reservations'

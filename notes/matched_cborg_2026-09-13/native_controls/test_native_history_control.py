@@ -19,7 +19,7 @@ def test_legacy_initialize_frame_exact():
 def test_selected_initialize_is_exact_and_detached():
     selected = control.control_contract({'pretool_control': deepcopy(control.HISTORY_CONTRACT)})
     assert control.initialize_frame(selected)['request']['hooks']['PreToolUse'] == [{
-        'matcher': 'Bash|Read|Write', 'hookCallbackIds': ['d4d_tool_policy_v3'], 'timeout': 125}]
+        'matcher': 'Bash|Read|Write', 'hookCallbackIds': ['d4d_tool_policy_v3'], 'timeout': 250}]
     selected['observer_timeout_seconds'] = 1
     assert control.HISTORY_CONTRACT['observer_timeout_seconds'] == 240
 
@@ -162,12 +162,12 @@ def blocking_observer(host_factory, *, outcome=None):
 def test_slow_prior_history_is_responsive_and_precedes_every_authorization(host_factory, monkeypatch):
     host, entered, release, observed, calls = blocking_observer(host_factory)
     clock = [0.]
-    # Advance history by more than the legacy host's 3 seconds; classifier
-    # starts afterwards and retains a separate 2-second completion budget.
+    # Advance history by more than the legacy host's 6 seconds; classifier
+    # starts afterwards and retains a separate 4-second completion budget.
     monkeypatch.setattr(control, 'time', SimpleNamespace(monotonic=lambda: clock[0]))
     host.channel._active_work = ('observer', 0., host.channel._active_work[2])
     host.channel._callback_intake = {key: 0. for key in host.channel._callback_intake}
-    clock[0] = 3.25
+    clock[0] = 6.25
     started = time.monotonic(); host.step()
     assert time.monotonic() - started < .3
     assert calls == [] and host.decisions() == [] and len(host.responses) == 2
@@ -208,7 +208,7 @@ def test_cancel_intake_stops_during_history_and_discards_late_outcome(host_facto
 def test_observer_timeout_stops_without_waiting_for_its_history_lock(host_factory, monkeypatch):
     host, _, release, observed, calls = blocking_observer(host_factory)
     kind, started, event = host.channel._active_work
-    monkeypatch.setattr(control, 'time', SimpleNamespace(monotonic=lambda: started + 121))
+    monkeypatch.setattr(control, 'time', SimpleNamespace(monotonic=lambda: started + 241))
     with pytest.raises(BudgetStop, match='observer verification timed out'):
         host.step()
     assert host.channel._stopped.is_set() and not calls and not host.decisions()
@@ -247,7 +247,7 @@ def test_completed_classifier_uses_completion_time_not_delayed_drain(host_factor
     host.emit(*host.frames())
     host.pump(lambda: host.channel._active_work is not None and host.channel._active_work[0] == 'classifier')
     host.channel._work_thread.join(1)
-    clock[0] = 2.5  # completed at zero, still inside the distinct host 125s bound
+    clock[0] = 4.5  # completed at zero, still inside the distinct host 250s bound
     host.pump(lambda: len(host.responses) == 3)
     assert len(host.decisions()) == 1
 
@@ -255,7 +255,7 @@ def test_completed_classifier_uses_completion_time_not_delayed_drain(host_factor
 def test_late_classifier_result_cannot_authorize(host_factory, monkeypatch):
     clock = [0.]
     def classify(*args):
-        clock[0] = 2.5
+        clock[0] = 4.5
         return 'prescribed', 'late result'
     host = host_factory(classify=classify)
     monkeypatch.setattr(control, 'time', SimpleNamespace(monotonic=lambda: clock[0]))
@@ -272,7 +272,7 @@ def test_response_deadline_is_distinct_from_completed_classifier_budget(host_fac
     host.emit(*host.frames())
     host.pump(lambda: host.channel._active_work is not None and host.channel._active_work[0] == 'classifier')
     host.channel._work_thread.join(1)
-    clock[0] = 126.
+    clock[0] = 251.
     with pytest.raises(BudgetStop, match='response window elapsed'):
         host.step()
     assert not host.decisions() and len(host.responses) == 2
@@ -530,7 +530,7 @@ def test_unfinished_input_cannot_extend_queued_reply_response_deadline(host_fact
     monkeypatch.setattr(control.os, 'write', original)
     host.step()
     assert len(host.responses) == 2
-    clock[0] = 126.
+    clock[0] = 251.
     with pytest.raises(BudgetStop, match='response window elapsed'):
         host.step()
     assert len(host.responses) == 2 and host.channel.outgoing == b''

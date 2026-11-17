@@ -114,6 +114,18 @@
     "new": "self.thread.join(timeout=4)"
   },
   {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/probe_native_history.py",
+    "line": 101,
+    "old": "elif name in ('selected_slow','selected_reject','legacy_slow'):time.sleep(4.0)",
+    "new": "elif name in ('selected_slow','selected_reject','legacy_slow'):time.sleep(8.0)"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/probe_native_history.py",
+    "line": 162,
+    "old": "if name=='selected_slow':passed=passed and observed[-1]['at']-observed[0]['at']>=4 and times[0]>=observed[-1]['at'] and classified[0]>=observed[-1]['at']",
+    "new": "if name=='selected_slow':passed=passed and observed[-1]['at']-observed[0]['at']>=8 and times[0]>=observed[-1]['at'] and classified[0]>=observed[-1]['at']"
+  },
+  {
     "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
     "line": 444,
     "old": "exited = reap_observed(process, 2)",
@@ -163,6 +175,12 @@
   },
   {
     "path": "notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py",
+    "line": 22,
+    "old": "'matcher': 'Bash|Read|Write', 'hookCallbackIds': ['d4d_tool_policy_v3'], 'timeout': 125}]",
+    "new": "'matcher': 'Bash|Read|Write', 'hookCallbackIds': ['d4d_tool_policy_v3'], 'timeout': 250}]"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py",
     "line": 24,
     "old": "assert control.HISTORY_CONTRACT['observer_timeout_seconds'] == 120",
     "new": "assert control.HISTORY_CONTRACT['observer_timeout_seconds'] == 240"
@@ -178,6 +196,78 @@
     "line": 31,
     "old": "lambda c: c.update(runtime_callback_timeout_seconds=126), lambda c: c.update(extra=1),",
     "new": "lambda c: c.update(runtime_callback_timeout_seconds=251), lambda c: c.update(extra=1),"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py",
+    "line": 165,
+    "old": "# Advance history by more than the legacy host's 3 seconds; classifier",
+    "new": "# Advance history by more than the legacy host's 6 seconds; classifier"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py",
+    "line": 166,
+    "old": "# starts afterwards and retains a separate 2-second completion budget.",
+    "new": "# starts afterwards and retains a separate 4-second completion budget."
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py",
+    "line": 170,
+    "old": "clock[0] = 3.25",
+    "new": "clock[0] = 6.25"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py",
+    "line": 211,
+    "old": "monkeypatch.setattr(control, 'time', SimpleNamespace(monotonic=lambda: started + 121))",
+    "new": "monkeypatch.setattr(control, 'time', SimpleNamespace(monotonic=lambda: started + 241))"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py",
+    "line": 250,
+    "old": "clock[0] = 2.5  # completed at zero, still inside the distinct host 125s bound",
+    "new": "clock[0] = 4.5  # completed at zero, still inside the distinct host 250s bound"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py",
+    "line": 258,
+    "old": "clock[0] = 2.5",
+    "new": "clock[0] = 4.5"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py",
+    "line": 275,
+    "old": "clock[0] = 126.",
+    "new": "clock[0] = 251."
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py",
+    "line": 533,
+    "old": "clock[0] = 126.",
+    "new": "clock[0] = 251."
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py",
+    "line": 1165,
+    "old": "#: deadline once per 0.05 s poll, and the clock runs at the real rate after the",
+    "new": "#: deadline once per 0.1 s poll, and the clock runs at the real rate after the"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py",
+    "line": 1264,
+    "old": "controller poll (0.05 s) is caught only when a deadline check happens to fall",
+    "new": "controller poll (0.1 s) is caught only when a deadline check happens to fall"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/test_probe_native_history.py",
+    "line": 35,
+    "old": "'observer_entered':True,'observer_finished':True,'observer_duration_seconds':4.01,'classifier_calls':1,",
+    "new": "'observer_entered':True,'observer_finished':True,'observer_duration_seconds':8.01,'classifier_calls':1,"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/test_probe_native_history.py",
+    "line": 48,
+    "old": "assert result['cases'][0]['observer_duration_seconds']>=4",
+    "new": "assert result['cases'][0]['observer_duration_seconds']>=8"
   },
   {
     "path": "scripts/draft_native_probe_packet.py",

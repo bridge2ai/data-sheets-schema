@@ -56,7 +56,16 @@ SPECIAL['tests/test_native_ci_evidence.py'] = [("['attempt_seconds'] == 900", "[
     ("['helper_seconds'] == 180", "['helper_seconds'] == 1000"), ("['runner_seconds'] == 3600", "['runner_seconds'] == 14400")]
 SPECIAL[N+'test_native_history_control.py'] += [('observer_timeout_seconds=121', 'observer_timeout_seconds=241'),
     ('callback_timeout_seconds=3', 'callback_timeout_seconds=5'),
-    ('runtime_callback_timeout_seconds=126', 'runtime_callback_timeout_seconds=251')]
+    ('runtime_callback_timeout_seconds=126', 'runtime_callback_timeout_seconds=251'),
+    ('legacy host\'s 3 seconds', 'legacy host\'s 6 seconds'), ('2-second completion budget', '4-second completion budget'),
+    ('clock[0] = 3.25', 'clock[0] = 6.25'), ('started + 121', 'started + 241'),
+    ('clock[0] = 2.5', 'clock[0] = 4.5'), ('host 125s bound', 'host 250s bound'), ('clock[0] = 126.', 'clock[0] = 251.'),
+    ("'timeout': 125", "'timeout': 250")]
+SPECIAL[N+'probe_native_history.py'] = [('time.sleep(4.0)', 'time.sleep(8.0)'), ("observed[0]['at']>=4", "observed[0]['at']>=8")]
+SPECIAL[N+'test_native_launch.py'] = [('deadline once per 0.05 s poll', 'deadline once per 0.1 s poll'),
+    ('controller poll (0.05 s)', 'controller poll (0.1 s)')]
+SPECIAL[N+'test_probe_native_history.py'] = [("'observer_duration_seconds':4.01", "'observer_duration_seconds':8.01"),
+    ("['observer_duration_seconds']>=4", "['observer_duration_seconds']>=8")]
 SHARED = [S+x+'.py' for x in ['prompt_registry', 'provenance', 'latch_journal', 'historical_digest']]
 
 def transform(path, raw):
