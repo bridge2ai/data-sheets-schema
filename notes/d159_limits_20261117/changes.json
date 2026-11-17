@@ -7,6 +7,12 @@
   },
   {
     "path": ".github/workflows/main.yaml",
+    "line": 175,
+    "old": "timeout-minutes: 45",
+    "new": "timeout-minutes: 60"
+  },
+  {
+    "path": ".github/workflows/main.yaml",
     "line": 224,
     "old": "# Complete synthetic runs have a two-hour attempt budget plus setup.",
     "new": "# Complete synthetic runs have a 160-minute attempt budget plus 20-25 minutes of setup."
@@ -16,6 +22,12 @@
     "line": 225,
     "old": "timeout-minutes: 180",
     "new": "timeout-minutes: 240"
+  },
+  {
+    "path": ".github/workflows/main.yaml",
+    "line": 275,
+    "old": "timeout-minutes: 45",
+    "new": "timeout-minutes: 60"
   },
   {
     "path": "notes/matched_cborg_2026-09-13/budgeted_cborg.py",
@@ -637,9 +649,21 @@
   },
   {
     "path": "tests/test_ci_sharding.py",
+    "line": 222,
+    "old": "assert job[\"timeout-minutes\"] == 45",
+    "new": "assert job[\"timeout-minutes\"] == 60"
+  },
+  {
+    "path": "tests/test_ci_sharding.py",
     "line": 223,
     "old": "assert jobs[\"python-tests\"][\"timeout-minutes\"] == \"${{ github.event_name == 'pull_request' && 45 || 60 }}\"",
     "new": "assert jobs[\"python-tests\"][\"timeout-minutes\"] == \"${{ github.event_name == 'pull_request' && 60 || 80 }}\""
+  },
+  {
+    "path": "tests/test_ci_sharding.py",
+    "line": 400,
+    "old": "(\"native-public-completion\", SHORT_NATIVE_LANES, \"native\", 45),",
+    "new": "(\"native-public-completion\", SHORT_NATIVE_LANES, \"native\", 60),"
   },
   {
     "path": "tests/test_ci_sharding.py",

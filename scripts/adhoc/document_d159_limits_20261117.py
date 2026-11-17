@@ -40,6 +40,8 @@ receive the same deadline increase. The reservation margin stays 300 s;
 the derived latest reservation age is 1800 - 300 = 1500 s.
 
 CI ordinary PR/push shards allow 60/80 min; native-public-long allows 240 min.
+The other native execution CI jobs, native-public-completion and offline-canary,
+increase from 45 to 60 min under the ruling's over-30-minute scale.
 Its 160-minute attempt plus 20-25 minutes setup fits inside that budget.
 Other non-protected native work-time waits and polls below five minutes double;
 the shared upstream read default rises from 1800 to 2700 s. Freshness windows,

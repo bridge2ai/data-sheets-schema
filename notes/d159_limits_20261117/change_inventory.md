@@ -5,8 +5,10 @@ Generated from changes.json by scripts/adhoc/report_d159_limits_20261117.py.
 | Location | Before | After |
 |---|---|---|
 | .github/workflows/main.yaml:25 | timeout-minutes: ${{ github.event_name == 'pull_request' && 45 &#124;&#124; 60 }} | timeout-minutes: ${{ github.event_name == 'pull_request' && 60 &#124;&#124; 80 }} |
+| .github/workflows/main.yaml:175 | timeout-minutes: 45 | timeout-minutes: 60 |
 | .github/workflows/main.yaml:224 | # Complete synthetic runs have a two-hour attempt budget plus setup. | # Complete synthetic runs have a 160-minute attempt budget plus 20-25 minutes of setup. |
 | .github/workflows/main.yaml:225 | timeout-minutes: 180 | timeout-minutes: 240 |
+| .github/workflows/main.yaml:275 | timeout-minutes: 45 | timeout-minutes: 60 |
 | notes/matched_cborg_2026-09-13/budgeted_cborg.py:35 | LEGACY_UPSTREAM_READ_SECONDS = 1800 | LEGACY_UPSTREAM_READ_SECONDS = 2700 |
 | notes/matched_cborg_2026-09-13/budgeted_cborg.py:36 | UPSTREAM_CONNECT_SECONDS = 20 | UPSTREAM_CONNECT_SECONDS = 40 |
 | notes/matched_cborg_2026-09-13/budgeted_cborg.py:39 | POLICY_COUNT_TRY_SECONDS = 120 | POLICY_COUNT_TRY_SECONDS = 240 |
@@ -110,7 +112,9 @@ Generated from changes.json by scripts/adhoc/report_d159_limits_20261117.py.
 | src/data_sheets_schema/provenance.py:373 | r = subprocess.run(cmd, capture_output=True, timeout=15, cwd=str(cwd) if cwd else None, env=env) | r = subprocess.run(cmd, capture_output=True, timeout=30, cwd=str(cwd) if cwd else None, env=env) |
 | tests/native_shared_fixture.py:208 | 'BASH_DEFAULT_TIMEOUT_MS': '600000', 'BASH_MAX_TIMEOUT_MS': '600000', | 'BASH_DEFAULT_TIMEOUT_MS': '1000000', 'BASH_MAX_TIMEOUT_MS': '1000000', |
 | tests/native_shared_omission_fixture.py:243 | 'BASH_DEFAULT_TIMEOUT_MS': '600000', 'BASH_MAX_TIMEOUT_MS': '600000', | 'BASH_DEFAULT_TIMEOUT_MS': '1000000', 'BASH_MAX_TIMEOUT_MS': '1000000', |
+| tests/test_ci_sharding.py:222 | assert job["timeout-minutes"] == 45 | assert job["timeout-minutes"] == 60 |
 | tests/test_ci_sharding.py:223 | assert jobs["python-tests"]["timeout-minutes"] == "${{ github.event_name == 'pull_request' && 45 &#124;&#124; 60 }}" | assert jobs["python-tests"]["timeout-minutes"] == "${{ github.event_name == 'pull_request' && 60 &#124;&#124; 80 }}" |
+| tests/test_ci_sharding.py:400 | ("native-public-completion", SHORT_NATIVE_LANES, "native", 45), | ("native-public-completion", SHORT_NATIVE_LANES, "native", 60), |
 | tests/test_ci_sharding.py:401 | ("native-public-long", LONG_NATIVE_LANES, "native", 180), | ("native-public-long", LONG_NATIVE_LANES, "native", 240), |
 | tests/test_native_admission_failure.py:33 | advanced[0] = 901 * 10**9  # Expire only after verification is entered. | advanced[0] = 1501 * 10**9  # Expire only after verification is entered. |
 | tests/test_native_admission_failure.py:50 | # Keep the real 900-second bound and signal handler. The clock jump | # Keep the real 1500-second bound and signal handler. The clock jump |

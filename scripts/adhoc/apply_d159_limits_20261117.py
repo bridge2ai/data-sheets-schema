@@ -72,6 +72,12 @@ def transform(path, raw):
     text = raw
     for old, new in SPECIAL.get(path, []):
         text = text.replace(old, new)
+    if path == '.github/workflows/main.yaml':
+        for job in ['native-public-completion', 'offline-canary']:
+            text = re.sub(r'(?ms)(^  '+job+r':.*?timeout-minutes:) 45', r'\g<1> 60', text)
+    if path == 'tests/test_ci_sharding.py':
+        text = text.replace('assert job["timeout-minutes"] == 45', 'assert job["timeout-minutes"] == 60')
+        text = text.replace('SHORT_NATIVE_LANES, "native", 45', 'SHORT_NATIVE_LANES, "native", 60')
     native = path.startswith(S+'native_') or path in SHARED + [N+'run_native_canary.py', N+'native_proxy.py', 'scripts/native_registration_timestamp.py']
     if native:
         # Literal execution waits and polling intervals; zero means nonblocking.
