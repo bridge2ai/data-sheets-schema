@@ -120,7 +120,7 @@ def test_legacy_proxy_keeps_original_verification_order_and_wait(tmp_path):
     assert calls == [True, True]
     assert history.result_wait_seconds == 2
     selected, _ = history_proxy(tmp_path)
-    assert selected.result_wait_seconds == 125
+    assert selected.result_wait_seconds == 250  # D159: runtime callback window 125 -> 250 s
 
 
 @pytest.mark.parametrize('snapshot,expected', [

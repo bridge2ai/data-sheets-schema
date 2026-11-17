@@ -29,7 +29,7 @@ def test_runtime_probe_uses_exact_env_and_filters_secrets_without_calling_native
     assert out['auth']==auth and 'SECRET' not in json.dumps(out)
     assert [c[0][1:] for c in calls]==[['--version'],['auth','status','--json']]
     assert all(c[1]['env']==value['environment'] and c[1]['cwd']==value['working_directory']
-               and c[1]['timeout']==30 and c[1]['check'] is True for c in calls)
+               and c[1]['timeout']==60 and c[1]['check'] is True for c in calls)
 
 
 @pytest.mark.parametrize('change',['logged_out','bool_alias','provider','subscription','missing','duplicate','nonfinite',

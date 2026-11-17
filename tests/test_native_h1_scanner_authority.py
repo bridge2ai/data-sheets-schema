@@ -14,7 +14,8 @@ from tests.test_native_u5_scanner import copied_route, RUNNER, scan
 AUTHORITY = 'src/data_sheets_schema/native_execution_authority_v2.py'
 # Lead-authorized review fix, 2026-11-16: include the narrowed pre-import
 # package-root reuse while preserving fresh loader-exit origin checks.
-REVIEWED = '7d6c13f8ca6c58be9a322cf5fb8679cf6d5734564227990eb5adac6261eac6e8'
+# D159 (owner, 2026-11-17): its two git subprocess timeouts 30 -> 60 s; nothing else changed.
+REVIEWED = '9593574b74353be270b47cf866022d09c6c70f329b65e1272a65244d5a72418c'
 HELPER_CACHE = 'src/data_sheets_schema/native_helper_cache.py'
 REVIEWED_HELPER_CACHE = '0934f71630ab45e4670ffa0d14f90c1cfbb23a132a23ca8c6ccfcc0c58a52a95'
 

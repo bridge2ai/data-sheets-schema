@@ -162,7 +162,7 @@ def run_case(repo,cli,destination,name):
     if name=='selected_slow':passed=passed and observed[-1]['at']-observed[0]['at']>=8 and times[0]>=observed[-1]['at'] and classified[0]>=observed[-1]['at']
     if name=='selected_reject':passed=passed and error_code=='synthetic history rejected before execution' and not classified
     if name=='selected_cancel':passed=passed and len(injected)==1 and counts['cancel']>=1 and not classified
-    if name=='selected_deadline':passed=passed and stop_end-start<16 and not classified and bool(stops) and stops[0]['reason']=='native attempt deadline elapsed; retain all incomplete charge reservations'
+    if name=='selected_deadline':passed=passed and stop_end-start<12 and not classified and bool(stops) and stops[0]['reason']=='native attempt deadline elapsed; retain all incomplete charge reservations'
     if name=='legacy_slow':passed=passed and counts['cancel']>=1
     if name in ('selected_cancel','selected_deadline'):
         passed=passed and len(controls)==1 and controls[0].unfinished_control_workers==1 and controls[0].control_shutdown_complete is False
