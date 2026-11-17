@@ -289,6 +289,28 @@ def test_recorded_denial_replays_through_execution_projection(trace, tmp_path, m
     assert report['generation_acceptance'] == 'not_assessed'
 
 
+def test_bash_denial_classifies_through_execution_projection(trace, monkeypatch):
+    """#6290: the shared saved readback classifies Bash denials through the projection."""
+    from data_sheets_schema import native_execution_authority_v2 as authority
+    from data_sheets_schema import native_execution_capabilities as capabilities
+    import sys
+
+    prepared = prepare(trace)
+    native, policy = prepared['controls']['run_native_canary'], prepared['policy']
+    raw = [{'tool_name': 'Bash', 'tool_use_id': 'tool-0', 'tool_input': {'command': 'unexpected program'}}]
+    expected = results.classify_denials(raw, policy, native._classify_command, prepared['controls'],
+                                        prepared['instruction'])
+    manifest = json.loads((authority.ROOT / authority.neutral.composition.SOURCES_PATH).read_bytes())
+    names = set(manifest['modules']) | set(authority.neutral.ADDITIONAL) | set(authority.ADDITIONAL)
+    with monkeypatch.context() as isolated:
+        for name in names:
+            isolated.delitem(sys.modules, name, raising=False)
+        with capabilities.loaded_capabilities(authority.dependency_identity()) as controls:
+            actual = results.classify_denials(raw, policy, native._classify_command, controls,
+                                              prepared['instruction'])
+    assert actual == expected
+    assert [row['classification'] for row in actual] == ['not_prescribed']
+
 @pytest.mark.parametrize('mode',['same','hardlink','symlink'])
 def test_writer_preserves_all_input_aliases(trace,tmp_path,mode):
     prepared=prepare(trace);source=trace[0]/'new-attempt/transcript.jsonl';before=source.read_bytes()
