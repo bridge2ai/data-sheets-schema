@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "source_commit": "9f65349cc941bda7d70cc1dcc22e81e25c4b6ffe",
+  "source_commit": "5dc03d698cfdfa178081869df26905afc1593d53",
   "modules": {
     "budget_amendment": {
       "path": "notes/matched_cborg_2026-09-13/budget_amendment.py",
@@ -8,7 +8,7 @@
     },
     "budgeted_cborg": {
       "path": "notes/matched_cborg_2026-09-13/budgeted_cborg.py",
-      "sha256": "0c407ceb703715b4ff6ea92e3262ded107d6c6aea37aab953a9b5570308a6204"
+      "sha256": "0aef1b59d05fd9a1f7f6e2f83b863800fb48e6c35e22030cbcbcfc373c5375e2"
     },
     "native_command_policy": {
       "path": "notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py",
@@ -48,7 +48,7 @@
     },
     "run_native_canary": {
       "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
-      "sha256": "d2db9eb4d11b96d0cfeec27f73e468dcdf10f33ac0f64f3d70d9168c3a07afcf"
+      "sha256": "0c3c8c9e03d94555c29989bae7b12dad0853b9919b015b801710244eb862b070"
     },
     "prepare_registration_v2": {
       "path": "notes/matched_cborg_2026-09-13/prepare_registration_v2.py",
