@@ -18,7 +18,7 @@ def runner_module():
     return controller.load_controls()['run_native_canary']
 
 
-@pytest.mark.parametrize('seconds', [900, 21600, 43200])
+@pytest.mark.parametrize('seconds', [1500, 28800, 57600])
 @pytest.mark.parametrize('exited_during_sleep', [False, True])
 def test_suspension_expires_every_registered_deadline(tmp_path, monkeypatch, seconds, exited_during_sleep):
     runner = runner_module()
@@ -28,7 +28,7 @@ def test_suspension_expires_every_registered_deadline(tmp_path, monkeypatch, sec
     proxy = SimpleNamespace(failed=threading.Event(), failure=None, close_admission=lambda: closed.append(True))
     instruction = tmp_path / 'instruction'; instruction.write_text('inert fixture')
     def verify():
-        ticks['continuous'] += 899 * 10**9  # Within admission's own bound; excluded from child time.
+        ticks['continuous'] += 1499 * 10**9  # Within admission's own bound; excluded from child time.
     def spawn(*a, **kw):
         ticks['continuous'] += (seconds + 1) * 10**9  # Suspend immediately at dispatch.
         return process
@@ -43,19 +43,19 @@ def test_suspension_expires_every_registered_deadline(tmp_path, monkeypatch, sec
     assert closed and killed == [process]
 
 
-@pytest.mark.parametrize('seconds', [900, 21600, 43200])
+@pytest.mark.parametrize('seconds', [1500, 28800, 57600])
 def test_admission_time_is_excluded_from_child_deadline(tmp_path, monkeypatch, seconds):
     runner = runner_module()
     ticks = {'continuous': 0}
     instruction = tmp_path / 'instruction'; instruction.write_text('inert')
-    def verify(): ticks['continuous'] += 899 * 10**9
+    def verify(): ticks['continuous'] += 1499 * 10**9
     monkeypatch.setattr(runner, 'elapsed_ns', lambda: ticks['continuous'])
     monkeypatch.setattr(runner, 'exit_check_available', lambda: True)
     monkeypatch.setattr(runner, 'leader_exited', lambda p: True)
     def spawn(*args, **kwargs):
         # Correct origin: child is still within its own budget. Wrong entry
         # origin: admission plus child time is one second beyond the deadline.
-        ticks['continuous'] += (seconds - 898) * 10**9
+        ticks['continuous'] += (seconds - 1498) * 10**9
         return object()
     monkeypatch.setattr(runner.subprocess, 'Popen', spawn)
     monkeypatch.setattr(runner, 'terminate_group', lambda p: None)
@@ -65,7 +65,7 @@ def test_admission_time_is_excluded_from_child_deadline(tmp_path, monkeypatch, s
         cwd=tmp_path, env={}, deadline_seconds=seconds, verify_launch=verify) == 0
 
 
-@pytest.mark.parametrize('admission_seconds', [900, 901])
+@pytest.mark.parametrize('admission_seconds', [1500, 1501])
 def test_dispatch_backstop_refuses_without_any_alarm_delivery(tmp_path, monkeypatch, admission_seconds):
     from data_sheets_schema.native_admission_timer import AdmissionExpired
     runner = runner_module()
@@ -91,7 +91,7 @@ def test_dispatch_backstop_refuses_without_any_alarm_delivery(tmp_path, monkeypa
         ticks[0] = admission_seconds * 10**9
     with pytest.raises(AdmissionExpired, match='child was not dispatched'):
         runner.execute_child(['inert'], proxy=proxy, instruction=instruction, attempt=tmp_path,
-            cwd=tmp_path, env={}, deadline_seconds=900, verify_launch=verify)
+            cwd=tmp_path, env={}, deadline_seconds=1500, verify_launch=verify)
     assert spawned == [] and closed
     assert len(opened) == 3 and all(stream.closed for stream in opened)
 

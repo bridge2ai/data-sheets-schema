@@ -22,7 +22,7 @@ jobs:
   python-tests:
     name: Python ${{ matrix.python-version }} / shard ${{ matrix.shard }}
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ github.event_name == 'pull_request' && 45 || 60 }}
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 60 || 80 }}
     strategy:
       fail-fast: false
       matrix:
@@ -172,7 +172,7 @@ jobs:
   native-public-completion:
     name: Python 3.12 / native case ${{ matrix.case }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -221,8 +221,8 @@ jobs:
     if: github.event_name != 'pull_request'
     name: Python 3.12 / native case ${{ matrix.case }}
     runs-on: ubuntu-latest
-    # Complete synthetic runs have a two-hour attempt budget plus setup.
-    timeout-minutes: 180
+    # Complete synthetic runs have a 160-minute attempt budget plus 20-25 minutes of setup.
+    timeout-minutes: 240
     strategy:
       fail-fast: false
       matrix:
@@ -272,7 +272,7 @@ jobs:
   offline-canary:
     name: Python 3.12 / offline canary controls
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - name: Check out repository
         uses: actions/checkout@v5

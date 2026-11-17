@@ -21,7 +21,7 @@ import stat
 KIND = "d4d_native_subscription_guard"
 VERSION = 2
 MAX_BYTES = 65536
-MAX_AGE_SECONDS = 1200
+MAX_AGE_SECONDS = 1800
 WINDOWS = ("five_hour", "seven_day")
 MAX_WINDOWS = 64
 SAFE_STATUSES = ("allowed", "allowed_warning")

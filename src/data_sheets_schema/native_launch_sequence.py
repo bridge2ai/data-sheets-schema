@@ -24,7 +24,7 @@ from . import native_host_power as host_power
 SEQUENCE_KIND = 'd4d_native_launch_sequence'
 SEQUENCE_VERSION = 1
 MAX_COMMAND_OUTPUT_BYTES = 32 * 1024 * 1024
-COMMAND_WAIT_POLL_SECONDS = 0.1
+COMMAND_WAIT_POLL_SECONDS = 0.2
 SOURCE_ROOT = Path(__file__).resolve().parents[2]
 COMMANDS = ('capture-subscription-event', 'prepare-subscription-guard-v2', 'launch')
 OUTPUTS = ('capture-command.json', 'guard-command.json', 'launch-command.json')
@@ -332,7 +332,7 @@ class _PreparedStep:
         if self._exit_status() is None:
             raise refusal
         self.child.wait()
-        deadline = time.monotonic() + 2
+        deadline = time.monotonic() + 4
         while True:
             try:
                 os.killpg(self.child.pid, 0)
@@ -340,7 +340,7 @@ class _PreparedStep:
                 return
             except PermissionError:
                 if time.monotonic() < deadline:
-                    time.sleep(0.02)
+                    time.sleep(0.04)
                     continue
             raise refusal
 

@@ -315,7 +315,7 @@ def _run_observation(invocation, deadline, server, outputs, process_state):
                     raise TimeoutError('observation probe deadline elapsed')
                 if server.failure is not None:
                     raise ValueError('observation scripted provider failed') from server.failure
-                for key, _ in selector.select(timeout=0.02):
+                for key, _ in selector.select(timeout=0.04):
                     remaining = MAX_BYTES - len(outputs[key.data])
                     raw = os.read(key.fd, min(65536, remaining + 1))
                     if not raw:

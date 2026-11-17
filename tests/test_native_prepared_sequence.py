@@ -66,7 +66,7 @@ def test_readiness_refuses_dead_or_expired_worker(tmp_path, monkeypatch):
         owned.require_ready(ipc, prepared_raw=raw, **binding)
     owned._exit_status = lambda: None
     owned.require_ready(ipc, prepared_raw=raw, **binding)
-    monkeypatch.setattr(sequence.time, 'time', lambda: 1300.0)
+    monkeypatch.setattr(sequence.time, 'time', lambda: 1900.0)
     with pytest.raises(ValueError, match='stale or foreign'):
         owned.require_ready(ipc, prepared_raw=raw, **binding)
 
@@ -307,7 +307,7 @@ def prepared_scope_case(tmp_path, monkeypatch, *, production, through_selection=
     monkeypatch.setattr(engine, '_require_launch_profile', lambda *args: None)
     monkeypatch.setattr(native_sequence_inputs, 'check_authority', lambda *args: None)
     monkeypatch.setattr(native_runtime_profiles, 'require_synthetic', lambda *args: None)
-    monkeypatch.setattr(native_u4b_policy, 'registered_policy', lambda runtime: {'max_age_seconds': 1200})
+    monkeypatch.setattr(native_u4b_policy, 'registered_policy', lambda runtime: {'max_age_seconds': 1800})
     monkeypatch.setattr(engine.admission, 'admit', lambda *args, **kwargs:
         SimpleNamespace(registration_raw=raw, evidence=tuple(SimpleNamespace(
             pin=SimpleNamespace(path=authorization['inputs'][name]), raw=authorization['raw'][name])

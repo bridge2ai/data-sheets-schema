@@ -152,9 +152,9 @@ def main():
         raw = Path(flags['--registration']).read_bytes()
         attempt = json.loads(raw)['registration']['attempt_directory']
         prepared = worker.publish_prepared(flags['--prepared-directory'], registration_raw=raw,
-            attempt=attempt, source_sha256='a' * 64, environment_sha256='b' * 64, max_age_seconds=1200)
+            attempt=attempt, source_sha256='a' * 64, environment_sha256='b' * 64, max_age_seconds=1800)
         worker.wait_proceed(flags['--prepared-directory'], prepared_raw=prepared,
-            registration_raw=raw, attempt=attempt, max_age_seconds=1200)
+            registration_raw=raw, attempt=attempt, max_age_seconds=1800)
     if name == config['interrupt_step']:
         received = []
         def receive(signum, frame):

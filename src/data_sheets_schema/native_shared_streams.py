@@ -121,9 +121,9 @@ def read_live_stream(path, role, *, max_bytes, previous=None, identity=None):
             info = get_info()
             if (info.st_dev == raw_stat.st_dev and info.st_ino == raw_stat.st_ino
                     and info.st_size == raw_stat.st_size and info.st_mtime_ns != raw_stat.st_mtime_ns):
-                deadline = time.monotonic() + 0.02
+                deadline = time.monotonic() + 0.04
                 while info.st_size == raw_stat.st_size and time.monotonic() < deadline:
-                    time.sleep(0.0001)
+                    time.sleep(0.0002)
                     info = get_info()
             raw_stat = info
             return evidence._stat(info)

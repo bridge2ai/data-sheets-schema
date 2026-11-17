@@ -54,9 +54,9 @@ def runtime_inputs(tmp_path, *, binary_bytes=b'Inert fingerprint fixture; never 
         'auth': {'loggedIn': True, 'authMethod': 'claude.ai', 'apiProvider': 'firstParty',
                  'subscriptionType': 'max', 'expected_api_key_source': 'none'},
         'environment': {'PATH': '/usr/bin:/bin', 'HOME': str(root / 'runtime-home'),
-                        'BASH_DEFAULT_TIMEOUT_MS': '600000', 'BASH_MAX_TIMEOUT_MS': '600000', 'PYSTOW_HOME': str(root / 'attempt' / 'helper-cache'),
+                        'BASH_DEFAULT_TIMEOUT_MS': '1000000', 'BASH_MAX_TIMEOUT_MS': '1000000', 'PYSTOW_HOME': str(root / 'attempt' / 'helper-cache'),
                         'CLAUDE_SECURESTORAGE_CONFIG_DIR': '', 'CLAUDE_CODE_DISABLE_1M_CONTEXT': '0'},
-        'deadline_seconds': 21600, 'budget_guard_usd': '90',
+        'deadline_seconds': 28800, 'budget_guard_usd': '90',
         'keep_awake': {'policy': 'macos_iokit_ims_v1', 'host_platform': 'darwin',
                        'basis': 'Offline evidence test, not launch authority'}}
     from tests.utils.native_u4b_observation import mint_observation

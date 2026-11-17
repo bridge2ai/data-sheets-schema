@@ -45,7 +45,7 @@ def _note_drop(trace):
 def _finish_writer():
     writer = _writer
     if writer is not None:
-        writer.join(timeout=2)
+        writer.join(timeout=4)
 
 
 atexit.register(_finish_writer)

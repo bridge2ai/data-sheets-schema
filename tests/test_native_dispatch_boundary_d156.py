@@ -20,7 +20,7 @@ def ticking(case, document=None):
 def test_stale_between_consumption_and_process_dispatch_cannot_retry(case):
     value, clock = ticking(case)
     value.before_dispatch()
-    clock[0] += 1201
+    clock[0] += 1801
     with pytest.raises(ValueError, match='stale'):
         value.before_process_dispatch()
     clock[0] = case['now']

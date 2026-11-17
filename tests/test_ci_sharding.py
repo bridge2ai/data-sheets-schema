@@ -219,8 +219,8 @@ def test_offline_canary_retains_complete_commands_and_independent_job_budget():
     jobs = yaml.safe_load((ROOT / ".github/workflows/main.yaml").read_text())["jobs"]
     job = jobs["offline-canary"]
     assert job["runs-on"] == "ubuntu-latest"
-    assert job["timeout-minutes"] == 45
-    assert jobs["python-tests"]["timeout-minutes"] == "${{ github.event_name == 'pull_request' && 45 || 60 }}"
+    assert job["timeout-minutes"] == 60
+    assert jobs["python-tests"]["timeout-minutes"] == "${{ github.event_name == 'pull_request' && 60 || 80 }}"
     assert "if" not in job and "strategy" not in job and "needs" not in job
     steps = job["steps"]
     checkout, submodule, setup = steps[:3]
@@ -397,8 +397,8 @@ def test_dedicated_collect_only_does_not_pass_as_execution(tmp_path, lane):
 @pytest.mark.parametrize("job_name,lanes,artifact,timeout", [
     ("api-completion", API_CASE_LANES, "api", 45),
     ("sg2-completion", SG2_CASE_LANES, "sg2", 45),
-    ("native-public-completion", SHORT_NATIVE_LANES, "native", 45),
-    ("native-public-long", LONG_NATIVE_LANES, "native", 180),
+    ("native-public-completion", SHORT_NATIVE_LANES, "native", 60),
+    ("native-public-long", LONG_NATIVE_LANES, "native", 240),
 ])
 def test_case_workflow_binds_all_lanes_and_retains_budget_setup_and_evidence(job_name, lanes, artifact, timeout):
     jobs = yaml.safe_load((ROOT / ".github/workflows/main.yaml").read_text())["jobs"]

@@ -29,7 +29,7 @@ FULL_SCHEMA_PATH = 'src/data_sheets_schema/schema/data_sheets_schema_all.yaml'
 RUNTIME_VERSION = '1.9.4'
 VOCABULARY_SHA256 = 'e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914'
 _UNIVERSAL = frozenset({'id', 'name', 'description', 'used_software'})
-_GIT_SECONDS = 5.0
+_GIT_SECONDS = 10.0
 _GIT_BLOB_BYTES = 1024 * 1024
 
 
@@ -379,7 +379,7 @@ def _git_output(arguments: list[str], root: Path, limit: int) -> bytes:
         if process.poll() is None:
             process.kill()
         try:
-            process.wait(timeout=1)
+            process.wait(timeout=2)
         finally:
             process.stdout.close()
 

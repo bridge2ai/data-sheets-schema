@@ -109,11 +109,11 @@ def _probe_runtime(value):
     executable = runtime['executable']['path']
     # The subprocess API is a private test seam; there is no public mock route.
     version = subprocess.run([executable, '--version'], cwd=value['working_directory'],
-        env=env, capture_output=True, timeout=30, check=True)
+        env=env, capture_output=True, timeout=60, check=True)
     if len(version.stdout) > 65536 or version.stdout.decode('utf-8').strip() != runtime['executable']['version']:
         raise ValueError('observed native binary version differs from its registered identity')
     auth = subprocess.run([executable, 'auth', 'status', '--json'], cwd=value['working_directory'],
-        env=env, capture_output=True, timeout=30, check=True)
+        env=env, capture_output=True, timeout=60, check=True)
     if len(auth.stdout) > 1024 * 1024:
         raise ValueError('auth response exceeds the bounded observation contract')
     data = draft._json(auth.stdout)

@@ -9,7 +9,7 @@ from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_shared_observations as observed
 
 SESSION='00000000-0000-4000-8000-000000000001'
-POLICY={'pretool_control':{'event':'PreToolUse','callback_id':'fixed','matcher':'Bash|Read|Write','runtime_callback_timeout_seconds':125},
+POLICY={'pretool_control':{'event':'PreToolUse','callback_id':'fixed','matcher':'Bash|Read|Write','runtime_callback_timeout_seconds':250},
         'readonly_lookups':{'repository':'/neutral'}}
 
 
@@ -160,7 +160,7 @@ def initial():
         'executable':{'init_version':'fixture-version'},'auth':{'expected_api_key_source':'none'}}
     sent={'kind':'initialize_sent','policy_sha256':c.sha(json.dumps(policy,sort_keys=True,separators=(',',':')).encode()),
         'frame':{'type':'control_request','request_id':'d4d_initialize_v1','request':{'subtype':'initialize',
-            'hooks':{'PreToolUse':[{'matcher':contract['matcher'],'hookCallbackIds':[contract['callback_id']],'timeout':125}]}}}}
+            'hooks':{'PreToolUse':[{'matcher':contract['matcher'],'hookCallbackIds':[contract['callback_id']],'timeout':250}]}}}}
     ack={'type':'control_response','response':{'subtype':'success','request_id':'d4d_initialize_v1'}}
     init={'type':'system','subtype':'init','session_id':SESSION,'cwd':'/neutral','model':'fixture-model',
         'claude_code_version':'fixture-version','apiKeySource':'none','tools':['Read','Write','Bash']}

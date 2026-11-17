@@ -23,18 +23,18 @@ from native_file_policy import FileAccess
 
 TOOLS = frozenset({'Bash', 'Read', 'Write'})
 CONTRACT = {'version': 2, 'event': 'PreToolUse', 'matcher': 'Bash|Read|Write',
-            'callback_id': 'd4d_tool_policy_v2', 'initialize_timeout_seconds': 30,
-            'callback_timeout_seconds': 2, 'runtime_callback_timeout_seconds': 3}
-# Explicit opt-in; legacy initialization/replay stays byte-identical (#2420).
+            'callback_id': 'd4d_tool_policy_v2', 'initialize_timeout_seconds': 60,
+            'callback_timeout_seconds': 4, 'runtime_callback_timeout_seconds': 6}
+# Explicit opt-in; both contracts use D159 time limits.
 HISTORY_CONTRACT = {'version': 3, 'event': 'PreToolUse', 'matcher': 'Bash|Read|Write',
-                    'callback_id': 'd4d_tool_policy_v3', 'initialize_timeout_seconds': 30,
-                    'callback_timeout_seconds': 2, 'observer_timeout_seconds': 120,
-                    'runtime_callback_timeout_seconds': 125}
+                    'callback_id': 'd4d_tool_policy_v3', 'initialize_timeout_seconds': 60,
+                    'callback_timeout_seconds': 4, 'observer_timeout_seconds': 240,
+                    'runtime_callback_timeout_seconds': 250}
 INIT_ID = 'd4d_initialize_v1'
 MAX_FRAME_BYTES = 16 * 1024 * 1024
 MAX_HISTORY_QUEUE_BYTES = 32 * 1024 * 1024
 MAX_HISTORY_QUEUE_FRAMES = 64
-CONTROL_WORKER_JOIN_SECONDS = .25
+CONTROL_WORKER_JOIN_SECONDS = .5
 BLANK_FRAME_TYPE = 'd4d_blank_native_frame'
 
 
@@ -550,7 +550,7 @@ class NativeControl:
             raise BudgetStop('native history control is stopped')
         if not self.initialized and time.monotonic() - self.started >= self.contract['initialize_timeout_seconds']:
             raise BudgetStop('native control initialization timed out before the prompt')
-        ready = self.selector.select(.05)
+        ready = self.selector.select(.1)
         for key, _ in ready:
             if key.data == 'stdout':
                 self._intake_history()
@@ -622,7 +622,7 @@ class NativeControl:
             self.decided_tools.add(request['request']['input']['tool_use_id'])
             self.classifications[request['request']['input']['tool_use_id']] = classification
             self.send(response)
-        for key, _ in self.selector.select(.05):
+        for key, _ in self.selector.select(.1):
             if key.data == 'stdin':
                 try:
                     count = os.write(key.fd, self.outgoing)

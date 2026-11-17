@@ -1,0 +1,35 @@
+{
+  "review": "Read-only diff and dependency review of D159 implementation before final validation",
+  "date": "2026-11-17",
+  "publication": "No GitHub writes permitted in this helper assignment; lead must file findings as issues when publishing.",
+  "findings": [
+    {"id": "D159-R1", "finding": "Callback teardown comments retained old windows; runbook retained the six-hour conversion and conflated reservation with dispatch freshness.", "disposition": "Addressed: comments, eight-hour conversion and separate reservation/dispatch limits corrected."},
+    {"id": "D159-R2", "finding": "Initial candidate included deterministic_publication validator timeout without an established native execution caller.", "disposition": "Addressed: restored unchanged 180 seconds; listed as unchanged, unclear rather than expanding scope."},
+    {"id": "D159-R3", "finding": "Existing CI evidence metadata still declared 900/180/3600 seconds despite the newer synthetic and workflow limits.", "disposition": "Addressed: records now declare 9600/1000/14400 seconds and preserve historical observed durations."},
+    {"id": "D159-R4", "finding": "Controller leaves and permission contracts change pinned identities; scanner and D128 consumers need downstream rotation.", "disposition": "Deferred to lead: full proposal supplied; no pin changed and protected files retained."},
+    {"id": "D159-R5", "finding": "History callback tests advanced mocked clocks to old timeout boundaries, and the slow-history diagnostic delay no longer exceeded the enlarged legacy response window.", "disposition": "Addressed in follow-up: move mocked clocks beyond the new boundaries and double the slow diagnostic delay; retain every rejection and ordering assertion."},
+    {"id": "D159-R6", "finding": "Prepared-sequence test stub retained the former 1200-second registered usage age.", "disposition": "Addressed: stub now supplies the registered 1800-second age."},
+    {"id": "D159-R7", "finding": "Native short public-case and offline-canary CI jobs retained 45-minute limits outside the explicit table.", "disposition": "Addressed under the ruling's other native work-time clause: both increase to 60 minutes, with matching assertions. Non-native workflow jobs stay unchanged."},
+    {"id": "D159-R8", "finding": "The lead added evaluation Step 9 after the D159 backup; rerunning the initial amendment script from that backup could overwrite later edits.", "disposition": "Addressed: later edits are preserved, default rewriting refuses changed runbooks, inventory-only mode does not rewrite, and the D159-only diff supports selective undo."},
+    {"id": "D159-R9", "finding": "Focused pytest found the prepared-readiness expiry clock still advanced only to 1300 seconds after the age changed to 1800.", "disposition": "Addressed: advance to 1900 and retain the stale-or-foreign refusal assertion."},
+    {"id": "D159-R10", "finding": "Three cleanup refusal cases still asserted the old one-second reap wait.", "disposition": "Addressed: assert two seconds while preserving the original PermissionError identity, signal order and reaping assertions."},
+    {"id": "D159-R11", "finding": "The historical-policy compatibility test assumed the old 21600-second policy would accept the newly authorized 28800-second deadline.", "disposition": "Addressed: retain same-input byte equality and saved-byte preservation, explicitly check historical acceptance of 21600 and refusal of 28800, current refusal of 21600, and current review acceptance of the authorized deadline."},
+    {"id": "D159-R12", "finding": "Six final registration fixtures hit the process environment verification pin bound after the combined 1410-case run.", "disposition": "Deferred to lead: distinct from controller source-pin refusals; retain the security count bound unchanged and list exact cases in saved classification. Retry these cases in a fresh canonical test process."}
+  ],
+  "unchanged": [
+    {"path": "src/data_sheets_schema/api_runner.py", "value": "validator 180 s", "reason": "Protected; measured separately through the native schema closure."},
+    {"path": "src/data_sheets_schema/native_u4b_policy.py", "value": "reservation margin 300 s; validity fourteen days", "reason": "Minimum margin and age rule excluded by ruling."},
+    {"path": "src/data_sheets_schema/native_launch_sequence.py", "value": "delegated-start and host-confirmation ages 1800 s", "reason": "Age rules excluded by ruling."},
+    {"path": "src/data_sheets_schema/native_subscription_guard.py", "value": "legacy v1 MAX_AGE_SECONDS 300", "reason": "Unchanged, unclear: table specifies v2 old value 1200; legacy v1 is not the registered A3 usage policy."},
+    {"path": "src/data_sheets_schema/native_subscription_capture.py", "value": "MAX_DEADLINE_SECONDS 60", "reason": "Unchanged, unclear: explicit capture authorization refusal ceiling, paired with launch-review request validation."},
+    {"path": "src/data_sheets_schema/native_launch_review.py", "value": "capture request deadline ceiling 60", "reason": "Unchanged, unclear: closed authorization refusal ceiling."},
+    {"path": "src/data_sheets_schema/native_permission_probe.py", "value": "MAX_PROBE_SECONDS 600 and binary-check ceiling 60", "reason": "Unchanged, unclear: probe authorization refusal ceilings; default work timeout doubled."},
+    {"path": "src/data_sheets_schema/native_u4b_probe_sequence.py", "value": "observation/permission authorization ceiling 600", "reason": "Unchanged, unclear: explicit authorization refusal bounds."},
+    {"path": "src/data_sheets_schema/native_attempt_supervisor.py", "value": "neutral local deadline ceiling 3600", "reason": "Unchanged, unclear: separate neutral recipe refusal ceiling."},
+    {"path": "src/data_sheets_schema/native_execution_registration.py", "value": "deadline ceiling 86400", "reason": "Refusal bound, not a chosen production deadline."},
+    {"path": "src/data_sheets_schema/native_shared_runtime_values.py", "value": "deadline ceiling 86400", "reason": "Refusal bound, not a chosen production deadline."},
+    {"path": "notes/matched_cborg_2026-09-13/native_controls/transport_probe.py", "value": "CLIENT_MARGIN_SECONDS 120", "reason": "Minimum companion margin; transport timeout derives automatically from changed shared constants."},
+    {"path": "utils/native_shared_acceptance.py", "value": "CHILD_SECONDS 3600; GIT_SECONDS 30; cleanup 5", "reason": "Unchanged, unclear: separate offline diagnostic acceptance wrapper, not the registered native launch path or CI long job."},
+    {"path": "src/data_sheets_schema/deterministic_publication.py", "value": "validator timeout 180", "reason": "Unchanged, unclear: standalone publication validator without an established native execution caller."}
+  ]
+}

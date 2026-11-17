@@ -17,8 +17,8 @@ import time
 from . import native_subscription_guard as wire
 
 LIMIT = 64 * 1024
-POLL_SECONDS = 0.1
-VERIFY_SECONDS = 300
+POLL_SECONDS = 0.2
+VERIFY_SECONDS = 600
 
 
 def _full_preparation_baseline(pin):

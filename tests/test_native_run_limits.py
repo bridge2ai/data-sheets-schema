@@ -34,9 +34,9 @@ def test_whole_pair_survives_observation_and_final_runtime(tmp_path, pair):
     assert sequence.validate_provisional_runtime(provisional) == provisional
 
 
-@pytest.mark.parametrize('pair', [('90',43200),('400',21600),('100',21600),('400',43201),
-                                 ('90.0',21600),('400',43200.0),(90,21600),('90',True),
-                                 (None,21600),('90',None),([],21600)])
+@pytest.mark.parametrize('pair', [('90',57600),('400',28800),('100',28800),('400',57601),
+                                 ('90.0',28800),('400',57600.0),(90,28800),('90',True),
+                                 (None,28800),('90',None),([],28800)])
 def test_mixed_third_and_missing_values_refused_at_each_boundary(tmp_path, pair):
     value, _ = runtime_inputs(tmp_path)
     value.update(zip(('budget_guard_usd', 'deadline_seconds'), pair))
@@ -47,8 +47,8 @@ def test_mixed_third_and_missing_values_refused_at_each_boundary(tmp_path, pair)
         with pytest.raises(ValueError): check(value)
 
 
-@pytest.mark.parametrize('pair', [('90', 43200), ('400', 21600), ('100', 21600),
-                                 ('400', 43201), ('90.0', 21600)])
+@pytest.mark.parametrize('pair', [('90', 57600), ('400', 28800), ('100', 28800),
+                                 ('400', 57601), ('90.0', 28800)])
 def test_provisional_refusal_depends_on_registered_pair_check(tmp_path, monkeypatch, pair):
     value, args = runtime_inputs(tmp_path)
     mint_observation(value, args['probe_init_path'], args['native_request_path'])
@@ -90,7 +90,7 @@ def prior_module(name):
     return module
 
 
-def test_canary_same_input_runtime_and_saved_registration_bytes_unchanged(tmp_path, evidence):
+def test_canary_same_input_bytes_preserved_but_old_deadline_policy_refuses(tmp_path, evidence):
     old_runtime = prior_module('native_u4b_runtime')
     old_policy = prior_module('native_u4b_policy')
     old_review = prior_module('native_launch_review')
@@ -98,11 +98,19 @@ def test_canary_same_input_runtime_and_saved_registration_bytes_unchanged(tmp_pa
     before = old_runtime.prepare_runtime(deepcopy(value), **args)
     after = runtime.prepare_runtime(deepcopy(value), **args)
     assert wire.canonical(before) == wire.canonical(after)
-    old_policy.validate_runtime_terms(before)
+    historical = deepcopy(before)
+    historical['deadline_seconds'] = 21600
+    old_policy.validate_runtime_terms(historical)
+    with pytest.raises(ValueError, match='21600'):
+        old_policy.validate_runtime_terms(before)
+    with pytest.raises(ValueError, match='registered budget/deadline'):
+        policy.validate_runtime_terms(historical)
     policy.validate_runtime_terms(after)
     raw,bundle,word = evidence
     saved = (bytes(raw),bytes(bundle),bytes(word))
-    assert old_review.validate_bundle(*saved) == review.validate_bundle(*saved)
+    with pytest.raises(ValueError, match='owner/runtime deadline differs'):
+        old_review.validate_bundle(*saved)
+    assert review.validate_bundle(*saved)['deadline_seconds'] == limits.CANARY[1]
     assert saved == evidence
     for name, raw_bytes in {
         'canary-runtime-before.json': wire.canonical(before),
@@ -112,5 +120,5 @@ def test_canary_same_input_runtime_and_saved_registration_bytes_unchanged(tmp_pa
         'canary-review.json': saved[1], 'canary-word.json': saved[2],
     }.items():
         (tmp_path / name).write_bytes(raw_bytes)
-    # This is exact saved-registration/parser compatibility, not a claim that
-    # fresh registration source/dependency identities survive a source change.
+    # Same-input preparation and saved bytes remain exact. The historical
+    # deadline policy deliberately refuses the newly authorized deadline.

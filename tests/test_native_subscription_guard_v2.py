@@ -24,7 +24,7 @@ def case(tmp_path):
     runtime = {'auth': {'loggedIn': True, 'authMethod': 'claude.ai', 'apiProvider': 'firstParty',
                        'expected_api_key_source': 'none'},
                'model': 'claude-opus-5[1m]', 'environment': {'CLAUDE_CODE_DISABLE_1M_CONTEXT': '0'},
-               'budget_guard_usd': '90', 'deadline_seconds': 21600,
+               'budget_guard_usd': '90', 'deadline_seconds': 28800,
                'keep_awake': {'policy': 'macos_iokit_ims_v1', 'host_platform': 'darwin',
                              'basis': 'Invented guard component fixture; no host assertion.'}}
     # Minimal declared policy for this parser component; not a prepared runtime

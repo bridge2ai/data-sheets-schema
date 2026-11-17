@@ -1215,7 +1215,7 @@ def _require_package_roster(source_commit, package_sources):
     tree = subprocess.run(
         ['git', '--no-replace-objects', 'ls-tree', '-r', '-t', '-z', '--full-tree',
          source_commit, '--', PACKAGE + '/'],
-        cwd=ROOT, env=git_env(), capture_output=True, timeout=30, check=True)
+        cwd=ROOT, env=git_env(), capture_output=True, timeout=60, check=True)
     expected = _package_roster(tree.stdout)
     current = set(package_sources)
     if expected != current:
@@ -1242,7 +1242,7 @@ def require_committed(identity):
     paths.update({pin['path']: pin['sha256'] for pin in identity['additional_modules'].values()})
     query = ''.join(f"{base['source_commit']}:{path}\n" for path in sorted(paths)).encode()
     proc = subprocess.run(['git', '--no-replace-objects', 'cat-file', '--batch'], cwd=ROOT,
-                          env=git_env(), input=query, capture_output=True, timeout=30, check=True)
+                          env=git_env(), input=query, capture_output=True, timeout=60, check=True)
     offset = 0
     for path in sorted(paths):
         end = proc.stdout.find(b'\n', offset)

@@ -3,8 +3,8 @@
 The canary is a shakedown. Production selects its own registered pair before
 the reference pilot. Validation does not add fields or rewrite declarations.
 """
-CANARY = ('90', 21600)
-PRODUCTION = ('400', 43200)
+CANARY = ('90', 28800)
+PRODUCTION = ('400', 57600)
 REGISTERED_PAIRS = (CANARY, PRODUCTION)
 
 

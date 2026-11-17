@@ -11,7 +11,7 @@ from tests.utils.native_u4b_fixtures import bundle_for
 def evidence(tmp_path):
     value = {'attempt_id': 'synthetic', 'dependencies': {'base': {'source_commit': 'a' * 40}},
         'permission_probe_sha256': 'b' * 64,
-        'runtime': {'budget_guard_usd': '90', 'deadline_seconds': 21600,
+        'runtime': {'budget_guard_usd': '90', 'deadline_seconds': 28800,
             'keep_awake': {'policy': 'macos_iokit_ims_v1', 'host_platform': 'darwin', 'basis': 'fixture on AC power'},
             'model': 'claude-opus-5[1m]',
             'environment': {'CLAUDE_CODE_DISABLE_1M_CONTEXT': '0'}}}

@@ -32,7 +32,7 @@ def test_version_is_checked_on_the_selected_pinned_path(tmp_path,monkeypatch,ver
 def row():
     return {'case':'selected_slow','passed':True,'selected_history_contract':True,'contract':{'version':3},
         'exit_code':0,'error_class':None,'stop_reason_code':'none','tool_executions':1,
-        'observer_entered':True,'observer_finished':True,'observer_duration_seconds':4.01,'classifier_calls':1,
+        'observer_entered':True,'observer_finished':True,'observer_duration_seconds':8.01,'classifier_calls':1,
         'classification_followed_observer':True,'stop_duration_seconds':5.0,'counts':{'callback':1,'cancel':0,'decision':1},
         'fault_injected_cancel_frames':0,'controller_shutdown_snapshots':[{'unfinished_control_workers':0,'control_shutdown_complete':True}],
         'workers_alive_after_fixture_release':0,'ledger_rows':2,'unsettled_rows':0,'unfinished_proxy_handlers':0,
@@ -45,7 +45,7 @@ def test_public_summary_excludes_raw_debug_or_local_paths():
     encoded=json.dumps(result)
     assert result['passed'] is True and result['provider_calls']==0
     assert '/private/' not in encoded and 'PRIVATE' not in encoded and 'raw_request' not in encoded
-    assert result['cases'][0]['observer_duration_seconds']>=4
+    assert result['cases'][0]['observer_duration_seconds']>=8
 
 
 @pytest.mark.parametrize('name',['/private/tmp/example.py','../example.py'])

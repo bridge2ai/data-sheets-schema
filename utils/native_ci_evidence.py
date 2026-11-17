@@ -41,7 +41,7 @@ SOURCE_FILES = (
     'src/data_sheets_schema/native_shared_registration_orchestration.py',
     'src/data_sheets_schema/native_shared_execution_orchestration.py',
 )
-LIMITS = {'attempt_seconds': 900, 'helper_seconds': 180, 'runner_seconds': 3600,
+LIMITS = {'attempt_seconds': 9600, 'helper_seconds': 1000, 'runner_seconds': 14400,
           'basis': 'Selected test/peer source declarations, not measured operation durations.'}
 KNOWN_ARTIFACTS = (
     'actual-result.json', 'authority/runtime.json', 'authority/runtime-execution.json',

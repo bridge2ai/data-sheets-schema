@@ -200,7 +200,7 @@ def test_retained_binary_optional_checks_use_exact_pins_and_isolated_environment
         [str(target), "--version"],
         ["/usr/bin/codesign", "--verify", "--strict", str(target)]]
     for _, kwargs in calls:
-        assert kwargs["timeout"] == 10 and kwargs["stdin"] == probe.subprocess.DEVNULL
+        assert kwargs["timeout"] == 20 and kwargs["stdin"] == probe.subprocess.DEVNULL
         assert kwargs["env"]["ANTHROPIC_BASE_URL"] == "http://127.0.0.1:1"
         assert "ANTHROPIC_AUTH_TOKEN" not in kwargs["env"]
         assert not Path(kwargs["cwd"]).exists()
@@ -373,7 +373,7 @@ def test_denied_group_signal_still_attempts_reap_and_preserves_refusal(
     with pytest.raises(PermissionError) as caught:
         probe._terminate(process)
     assert caught.value is refusal
-    assert calls == [('signal', process.pid, probe.signal.SIGTERM), ('wait', 1)]
+    assert calls == [('signal', process.pid, probe.signal.SIGTERM), ('wait', 2)]
     assert process.reaped is (not wait_times_out)
 
 
@@ -739,7 +739,7 @@ def test_provider_listener_cleanup_is_bounded_even_on_start_failure(monkeypatch,
                 raise RuntimeError('injected start failure')
             self.ident = 1
         def join(self, timeout):
-            assert timeout == 2
+            assert timeout == 4
             events.append('joined')
         def is_alive(self):
             return mode == 'hung_worker'

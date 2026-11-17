@@ -136,7 +136,7 @@ def _ci_git(*args, absent=False):
                GIT_TERMINAL_PROMPT='0', GIT_ALLOW_PROTOCOL='')
     try:
         result = subprocess.run(['git', '--no-replace-objects', '-c', 'core.hooksPath=/dev/null',
-            *args], cwd=authority.ROOT, env=env, capture_output=True, timeout=30, check=False)
+            *args], cwd=authority.ROOT, env=env, capture_output=True, timeout=60, check=False)
     except (OSError, subprocess.TimeoutExpired) as exc:
         raise ValueError('local CI Git identity could not be read') from exc
     if absent and result.returncode == 1:

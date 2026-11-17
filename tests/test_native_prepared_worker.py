@@ -15,7 +15,7 @@ def setup_packet(tmp_path, monkeypatch):
     ipc.mkdir()
     attempt = tmp_path / 'attempt'
     monkeypatch.setattr(worker.time, 'time', lambda: 100.0)
-    binding = dict(registration_raw=b'registration', attempt=attempt, max_age_seconds=1200)
+    binding = dict(registration_raw=b'registration', attempt=attempt, max_age_seconds=1800)
     raw = worker.publish_prepared(ipc, **binding,
         source_sha256='a' * 64, environment_sha256='b' * 64)
     guard = tmp_path / 'guard.json'
@@ -45,7 +45,7 @@ def test_one_use_and_attempt_remains_absent(tmp_path, monkeypatch):
 def test_stale_proceed(tmp_path, monkeypatch):
     ipc, binding, raw, guard = setup_packet(tmp_path, monkeypatch)
     proceed(ipc, raw, guard)
-    monkeypatch.setattr(worker.time, 'time', lambda: 1300.0)
+    monkeypatch.setattr(worker.time, 'time', lambda: 1900.0)
     with pytest.raises(ValueError, match='stale or foreign'):
         worker.wait_proceed(ipc, prepared_raw=raw, **binding)
     assert not (ipc / 'consumed.json').exists()
@@ -53,7 +53,7 @@ def test_stale_proceed(tmp_path, monkeypatch):
 
 def test_timeout_without_proceed(tmp_path, monkeypatch):
     ipc, binding, raw, _ = setup_packet(tmp_path, monkeypatch)
-    ticks = iter([0.0, 1200.0])
+    ticks = iter([0.0, 1800.0])
     monkeypatch.setattr(worker.time, 'monotonic', lambda: next(ticks))
     with pytest.raises(ValueError, match='timed out'):
         worker.wait_proceed(ipc, prepared_raw=raw, **binding)
@@ -99,7 +99,7 @@ def test_foreign_proceed(tmp_path, monkeypatch):
 def test_refuse_attempt_as_ipc(tmp_path):
     with pytest.raises(ValueError, match='overlaps'):
         worker.publish_prepared(tmp_path, registration_raw=b'registration', attempt=tmp_path,
-            max_age_seconds=1200, source_sha256='a' * 64, environment_sha256='b' * 64)
+            max_age_seconds=1800, source_sha256='a' * 64, environment_sha256='b' * 64)
 
 
 def identity_fixture(tmp_path, monkeypatch):

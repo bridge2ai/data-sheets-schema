@@ -32,12 +32,12 @@ STALL_DEBIT_BASIS = "registered_stall_policy_full_reservation_debit"
 
 #: Transport bounds shared by the proxy and the registration validator, so the
 #: validator reasons about the numbers the proxy really uses (#2152, #2155).
-LEGACY_UPSTREAM_READ_SECONDS = 1800
-UPSTREAM_CONNECT_SECONDS = 20
+LEGACY_UPSTREAM_READ_SECONDS = 2700
+UPSTREAM_CONNECT_SECONDS = 40
 #: Under a stall policy one token-count try is bounded, and the pause between
 #: tries is short and ends at once when admission closes (#2152, #2157).
-POLICY_COUNT_TRY_SECONDS = 120
-POLICY_COUNT_PAUSE_SECONDS = 5
+POLICY_COUNT_TRY_SECONDS = 240
+POLICY_COUNT_PAUSE_SECONDS = 10
 
 
 def retryable_count_error(exc):
