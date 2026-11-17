@@ -56,7 +56,8 @@ if not args.final:
     lock = root.parent / '.d4d-lane-locks/slot-00.lock'
     lines += ['', 'Current shared-slot metadata: '+lock.read_text().strip(), '']
 lines += ['', 'Test runner: primary checkout scripts/adhoc/run_lane_20261115.py, isolated scratch interpreter, gate wait 1800 seconds.',
-    'Focused lane waited for an existing exclusive np15-fresh-validation lease; no lock was removed or bypassed.', '',
+    'Focused lane waited for an existing exclusive np15-fresh-validation lease, then a native-public recorder-speed lease; no lock was removed or bypassed.',
+    'Reproduce in order using '+str(root / 'scripts/adhoc/run_d159_checks_20261117.py')+' with --lane focused --run, then --lane native-controls --run, then --lane collection --run. Omitting --run prints the plan. Every invocation creates a fresh scratch directory.', '',
     '## Validator measurement', '',
     'The exact native_execution_gates.schemas closure ran in isolation on the public synthetic fixture seed and its derived core. This is a schema-gate measurement, not a full native launch or a production-sized dataset benchmark.', '']
 for row in timing['measurements']:
