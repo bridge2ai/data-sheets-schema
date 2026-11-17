@@ -21,14 +21,14 @@ def test_selected_initialize_is_exact_and_detached():
     assert control.initialize_frame(selected)['request']['hooks']['PreToolUse'] == [{
         'matcher': 'Bash|Read|Write', 'hookCallbackIds': ['d4d_tool_policy_v3'], 'timeout': 125}]
     selected['observer_timeout_seconds'] = 1
-    assert control.HISTORY_CONTRACT['observer_timeout_seconds'] == 120
+    assert control.HISTORY_CONTRACT['observer_timeout_seconds'] == 240
 
 
 @pytest.mark.parametrize('change', [
     lambda c: c.update(version=True), lambda c: c.update(version=3.0),
     lambda c: c.update(observer_timeout_seconds=True), lambda c: c.update(observer_timeout_seconds=0),
-    lambda c: c.update(observer_timeout_seconds=121), lambda c: c.update(callback_timeout_seconds=3),
-    lambda c: c.update(runtime_callback_timeout_seconds=126), lambda c: c.update(extra=1),
+    lambda c: c.update(observer_timeout_seconds=241), lambda c: c.update(callback_timeout_seconds=5),
+    lambda c: c.update(runtime_callback_timeout_seconds=251), lambda c: c.update(extra=1),
     lambda c: c.pop('observer_timeout_seconds'), lambda c: c.update(callback_id='d4d_tool_policy_v2'),
 ])
 def test_unknown_or_malformed_selected_contract_refuses(change):

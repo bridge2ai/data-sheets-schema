@@ -30,8 +30,8 @@ def test_real_documents_and_registration_commit_rechecked_on_each_validation(evi
     raw, bundle_raw, word_raw = evidence
     body = wire.strict_json(bundle_raw)
     assert {row['reviewer_kind'] for row in body['reviews']} == {'claude', 'codex_cli'}
-    assert review.validate_bundle(raw, bundle_raw, word_raw)['deadline_seconds'] == 21600
-    assert review.validate_bundle(raw, bundle_raw, word_raw)['deadline_seconds'] == 21600
+    assert review.validate_bundle(raw, bundle_raw, word_raw)['deadline_seconds'] == 28800
+    assert review.validate_bundle(raw, bundle_raw, word_raw)['deadline_seconds'] == 28800
     # The immutable bundle and coded word have not changed; the external
     # document did. A subsequent saved-readback validator must re-read it.
     document = Path(body['reviews'][1]['document']['path'])
@@ -102,7 +102,7 @@ def test_reviewed_at_fraction_and_order(evidence):
     assert review.validate_bundle(raw, bundle_raw, wire.canonical(word))
 
 
-@pytest.mark.parametrize('deadline', [True, 0, 60, 900, 21599, 21601, 86400, 21600.0])
+@pytest.mark.parametrize('deadline', [True, 0, 60, 900, 28799, 28801, 86400, 28800.0])
 def test_n1_deadline_is_not_merely_owner_equality(evidence, deadline):
     runtime = deepcopy(review.registration_fields(evidence[0])['runtime'])
     runtime['deadline_seconds'] = deadline
@@ -110,7 +110,7 @@ def test_n1_deadline_is_not_merely_owner_equality(evidence, deadline):
     terms['deadline_seconds'] = deadline
     with pytest.raises(ValueError, match='deadline'):
         review.validate_terms(terms, runtime, word_owner=terms['owner'])
-    with pytest.raises(ValueError, match='21600'):
+    with pytest.raises(ValueError, match='28800'):
         policy.registered_policy(runtime)
 
 
@@ -186,7 +186,7 @@ def test_registration_anchor_reads_objects_not_mutable_worktree_file(evidence):
     anchor = body['registration_commit']
     path = Path(anchor['repository']) / anchor['path']
     path.write_bytes(b'uncommitted and not used as the registration anchor\n')
-    assert review.validate_bundle(*evidence)['deadline_seconds'] == 21600
+    assert review.validate_bundle(*evidence)['deadline_seconds'] == 28800
 
 
 def test_capture_cannot_alias_attempt_directory_case(evidence):

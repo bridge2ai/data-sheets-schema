@@ -41,9 +41,9 @@ def test_failed_case_retains_exact_bytes_modes_and_original_failure(tmp_path):
     assert evidence.snapshot(selected) == original
     assert result['test_outcome'] == FAILED and result['scientific_acceptance'] == 'not_assessed'
     assert result['source'] == SOURCE
-    assert result['declared_limits']['attempt_seconds'] == 900
-    assert result['declared_limits']['helper_seconds'] == 180
-    assert result['declared_limits']['runner_seconds'] == 3600
+    assert result['declared_limits']['attempt_seconds'] == 9600
+    assert result['declared_limits']['helper_seconds'] == 1000
+    assert result['declared_limits']['runner_seconds'] == 14400
     with tarfile.open(tmp_path / 'capture/case.tar.gz') as archive:
         assert archive.extractfile('case/.hidden').read() == b'exact invented bytes\x00'
         assert archive.getmember('case/.hidden').mode == 0o600

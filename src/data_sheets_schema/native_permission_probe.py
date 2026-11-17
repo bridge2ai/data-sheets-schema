@@ -208,7 +208,7 @@ def _bounded_binary_check(argv, *, stdin, capture_output, timeout, check, env, c
             while selector.get_map() or process.poll() is None:
                 if time.monotonic() >= deadline:
                     raise subprocess.TimeoutExpired(argv, timeout)
-                for key, _ in selector.select(timeout=min(0.02, max(0, deadline - time.monotonic()))):
+                for key, _ in selector.select(timeout=min(0.04, max(0, deadline - time.monotonic()))):
                     raw = os.read(key.fd, 4097 - len(output[key.data]))
                     if not raw:
                         selector.unregister(key.fileobj)
@@ -230,7 +230,7 @@ def _bounded_binary_check(argv, *, stdin, capture_output, timeout, check, env, c
 
 def verify_retained_binary(pins, *, allow_resolved_symlink=False,
                            require_macho=True, check_version=False,
-                           check_codesign=False, runner=None, timeout_seconds=10):
+                           check_codesign=False, runner=None, timeout_seconds=20):
     """Verify #4759 retained executable pins without launching by default.
 
     ``pins`` is a registration's runtime.executable block. Static verification
@@ -375,7 +375,7 @@ def _terminate(process):
                 pass
         finally:
             try:
-                process.wait(timeout=1)
+                process.wait(timeout=2)
             except subprocess.TimeoutExpired:
                 pass
     if process.poll() is None:
@@ -413,7 +413,7 @@ def _version(expected, deadline, directory):
             while selector.get_map() or process.poll() is None:
                 if time.monotonic() >= deadline:
                     raise TimeoutError("permission probe deadline elapsed during version check")
-                for key, _ in selector.select(timeout=0.02):
+                for key, _ in selector.select(timeout=0.04):
                     raw = os.read(key.fd, 4096)
                     if not raw:
                         selector.unregister(key.fileobj)
@@ -451,7 +451,7 @@ def _pipe_tail(stream, limit, deadline):
             try:
                 raw = os.read(stream.fileno(), min(65536, limit - len(output) + 1))
             except BlockingIOError:
-                time.sleep(0.001)
+                time.sleep(0.002)
                 continue
             if not raw:
                 return bytes(output), "eof"
@@ -510,7 +510,7 @@ def _run_native(expected, launch, policy, observer, classifier, transport, serve
             finally:
                 try:
                     if process is not None:
-                        drain_deadline = time.monotonic() + 1
+                        drain_deadline = time.monotonic() + 2
                         tail, drainage['stdout'] = _pipe_tail(process.stdout, MAX_STREAM, drain_deadline)
                         extra, drainage['stderr'] = _pipe_tail(
                             process.stderr, max(0, MAX_STREAM - len(stderr)), drain_deadline)

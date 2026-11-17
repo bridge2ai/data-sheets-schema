@@ -48,7 +48,7 @@ def runtime(tmp_path):
             'apiProvider': profiles.SYNTHETIC_PROVIDER, 'subscriptionType': profiles.SYNTHETIC_PROFILE,
             'expected_api_key_source': 'none'},
         'environment': {'PATH': '/usr/bin:/bin', 'HOME': str(home),
-            'BASH_DEFAULT_TIMEOUT_MS': '600000', 'BASH_MAX_TIMEOUT_MS': '600000', 'PYSTOW_HOME': str(root / 'attempt' / 'helper-cache'),
+            'BASH_DEFAULT_TIMEOUT_MS': '1000000', 'BASH_MAX_TIMEOUT_MS': '1000000', 'PYSTOW_HOME': str(root / 'attempt' / 'helper-cache'),
             'CLAUDE_SECURESTORAGE_CONFIG_DIR': '', 'CLAUDE_CODE_DISABLE_1M_CONTEXT': '0'},
         'deadline_seconds': profiles.SYNTHETIC_DEADLINE_SECONDS, 'budget_guard_usd': '1.0',
         'keep_awake': {'policy': 'not_applicable', 'host_platform': sys.platform,
@@ -73,7 +73,7 @@ def test_explicit_synthetic_profile_is_distinct_and_registers_bash_timeout(runti
 
 
 @pytest.mark.parametrize('key', ['BASH_DEFAULT_TIMEOUT_MS', 'BASH_MAX_TIMEOUT_MS'])
-@pytest.mark.parametrize('replacement', [None, '120000', '600001', 600000])
+@pytest.mark.parametrize('replacement', [None, '120000', '1000001', 1000000])
 def test_registered_bash_timeout_is_required_exactly(runtime, key, replacement):
     if replacement is None:
         runtime['environment'].pop(key)
@@ -184,7 +184,7 @@ def test_synthetic_cannot_name_real_account_executable_or_loosen_bounds(runtime,
     elif mutation == 'provider_key':
         changed['auth']['expected_api_key_source'] = 'ANTHROPIC_API_KEY'
     elif mutation == 'deadline':
-        changed['deadline_seconds'] = 21600
+        changed['deadline_seconds'] = 28800
     elif mutation == 'budget':
         changed['budget_guard_usd'] = '90'
     elif mutation == 'auxiliary':
@@ -237,7 +237,7 @@ def test_legacy_production_validation_and_profile_bytes_unchanged(runtime):
     old['limits_basis'] = 'historical declaration'
     old['auth'] = {'loggedIn': True, 'authMethod': 'claude.ai', 'apiProvider': 'firstParty',
         'subscriptionType': 'max', 'expected_api_key_source': 'none'}
-    old['deadline_seconds'] = 21600
+    old['deadline_seconds'] = 28800
     old['budget_guard_usd'] = '90'
     current = deepcopy(old)
     old['environment'].pop('PYSTOW_HOME')

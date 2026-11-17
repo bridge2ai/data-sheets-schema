@@ -113,7 +113,7 @@ def test_unknown_contracts_preserve_refusal_without_legacy_exception_import(hist
     extra = {**control.HISTORY_CONTRACT, 'extra': None}
     missing = deepcopy(control.HISTORY_CONTRACT)
     missing.pop('matcher')
-    wrong_type = {**control.HISTORY_CONTRACT, 'initialize_timeout_seconds': 30.0}
+    wrong_type = {**control.HISTORY_CONTRACT, 'initialize_timeout_seconds': 60.0}
     for contract in ({}, [], 'history', changed, extra, missing, wrong_type,
                      {**control.HISTORY_CONTRACT, 'event': object()}):
         with pytest.raises(BudgetStop, match='^missing or changed native control contract$'):

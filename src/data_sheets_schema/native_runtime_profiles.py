@@ -20,7 +20,7 @@ SYNTHETIC_PROVIDER = 'scripted-local'
 # Software-test budget only (#6094, #6233): a complete public synthetic run is
 # about 50 tool calls with roughly 60 CPU s per reconstructing helper, which
 # 900 s could not hold on any host. Production limits are separate pairs.
-SYNTHETIC_DEADLINE_SECONDS = 7200
+SYNTHETIC_DEADLINE_SECONDS = 9600
 SYNTHETIC_BUDGET = '1.0'
 SYNTHETIC_PEER_SHA256 = 'e9f1e790680387cac7bd74864eb1c9c0f91b9366fb54cb227bb2deee65574615'
 _KINDS = {'d4d_native_u4b_runtime_basis', 'd4d_native_u4b_provisional_runtime_basis'}

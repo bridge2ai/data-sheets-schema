@@ -175,9 +175,9 @@ def require_main_thread():
         raise ValueError('native callback cannot load captures; preload on the main thread at admission')
 
 
-# Match the classifier's existing 2-second window. Teardown is a separate
-# grace period, not an extension of the 120-second observer acceptance window.
-CALLBACK_TEARDOWN_SECONDS = 2.0
+# Match the classifier's D159 4-second window. Teardown is a separate
+# grace period, not an extension of the 240-second observer acceptance window.
+CALLBACK_TEARDOWN_SECONDS = 4.0
 # sys is process-rooted even when a verified loader restores module bindings.
 _POISONED_STACKS = sys.__dict__.setdefault('_d4d_poisoned_callback_stacks', [])
 

@@ -16,14 +16,14 @@ def test_stalled_fifo_open_is_interrupted_and_alarm_is_restored(tmp_path, suspen
     os.mkfifo(fifo)
     ticks = [0]
     clock = (lambda: ticks[0]) if suspend else elapsed_ns
-    timer = AdmissionTimer(clock(), seconds=900 if suspend else .2, clock=clock)
+    timer = AdmissionTimer(clock(), seconds=1500 if suspend else .2, clock=clock)
     previous = signal.getsignal(signal.SIGALRM)
     start = time.monotonic()
     cleaned = []
     with pytest.raises(AdmissionExpired, match='child was not dispatched'):
         with timer.armed():
             if suspend:
-                ticks[0] = 901 * 10**9
+                ticks[0] = 1501 * 10**9
             try:
                 # No writer exists. A post-return deadline check cannot end it.
                 fd = os.open(fifo, os.O_RDONLY)
@@ -40,10 +40,10 @@ def test_stalled_fifo_open_is_interrupted_and_alarm_is_restored(tmp_path, suspen
 
 
 def test_exact_boundary_is_expired_without_waiting_for_alarm_delivery():
-    timer = AdmissionTimer(100, seconds=900)
-    timer.check(900 * 10**9 + 99)
+    timer = AdmissionTimer(100, seconds=1500)
+    timer.check(1500 * 10**9 + 99)
     with pytest.raises(AdmissionExpired):
-        timer.check(900 * 10**9 + 100)
+        timer.check(1500 * 10**9 + 100)
 
 
 def test_existing_signal_handler_is_not_stolen():

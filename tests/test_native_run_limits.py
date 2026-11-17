@@ -34,9 +34,9 @@ def test_whole_pair_survives_observation_and_final_runtime(tmp_path, pair):
     assert sequence.validate_provisional_runtime(provisional) == provisional
 
 
-@pytest.mark.parametrize('pair', [('90',43200),('400',21600),('100',21600),('400',43201),
-                                 ('90.0',21600),('400',43200.0),(90,21600),('90',True),
-                                 (None,21600),('90',None),([],21600)])
+@pytest.mark.parametrize('pair', [('90',57600),('400',28800),('100',28800),('400',57601),
+                                 ('90.0',28800),('400',57600.0),(90,28800),('90',True),
+                                 (None,28800),('90',None),([],28800)])
 def test_mixed_third_and_missing_values_refused_at_each_boundary(tmp_path, pair):
     value, _ = runtime_inputs(tmp_path)
     value.update(zip(('budget_guard_usd', 'deadline_seconds'), pair))
@@ -47,8 +47,8 @@ def test_mixed_third_and_missing_values_refused_at_each_boundary(tmp_path, pair)
         with pytest.raises(ValueError): check(value)
 
 
-@pytest.mark.parametrize('pair', [('90', 43200), ('400', 21600), ('100', 21600),
-                                 ('400', 43201), ('90.0', 21600)])
+@pytest.mark.parametrize('pair', [('90', 57600), ('400', 28800), ('100', 28800),
+                                 ('400', 57601), ('90.0', 28800)])
 def test_provisional_refusal_depends_on_registered_pair_check(tmp_path, monkeypatch, pair):
     value, args = runtime_inputs(tmp_path)
     mint_observation(value, args['probe_init_path'], args['native_request_path'])

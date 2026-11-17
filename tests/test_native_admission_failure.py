@@ -30,7 +30,7 @@ def test_stalled_launch_verification_refuses_dispatch_releases_and_publishes(tmp
         if len(calls) == 3:  # The real verify_launch callback, with IOKit held.
             assert len(active) == 3
             entered.append(True)
-            advanced[0] = 901 * 10**9  # Expire only after verification is entered.
+            advanced[0] = 1501 * 10**9  # Expire only after verification is entered.
             descriptor = os.open(fifo, os.O_RDONLY)
             os.close(descriptor)
             pytest.fail('stalled verification returned')
@@ -47,7 +47,7 @@ def test_stalled_launch_verification_refuses_dispatch_releases_and_publishes(tmp
             return 0
     with authority.loaded_dependencies(case['value']['dependencies']) as modules:
         monkeypatch.setattr(modules['run_direct_canary_awake'], '_IOKit', FakeIOKit)
-        # Keep the real 900-second bound and signal handler. The clock jump
+        # Keep the real 1500-second bound and signal handler. The clock jump
         # avoids aging the expensive fixture/setup under a short test timeout.
         monkeypatch.setattr(modules['run_native_canary'], 'elapsed_ns', lambda: elapsed_ns() + advanced[0])
         result = execute.launch(case['raw'], **case['kwargs'])
@@ -102,7 +102,7 @@ def test_shared_engine_stalled_admission_publishes_and_stops_timing(tmp_path, mo
             # Exercise the actual late registration.verified call sites. If
             # finish() stops sealing the trace, these rows violate the check.
             original_verify()
-            advance[0] = 901 * 10**9
+            advance[0] = 1501 * 10**9
             fd = os.open(fifo, os.O_RDONLY)
             os.close(fd)
             pytest.fail('stalled shared verification returned')

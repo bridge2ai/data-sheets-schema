@@ -606,7 +606,7 @@ class NativeProxy:
             write_new(path, value)
 
     @contextmanager
-    def running(self, *, cleanup_timeout=2):
+    def running(self, *, cleanup_timeout=4):
         owner = self
         class Handler(BaseHTTPRequestHandler):
             protocol_version = "HTTP/1.0"
@@ -635,7 +635,7 @@ class NativeProxy:
                         owner.active_handlers -= 1
                         owner.state.notify_all()
             def _post_serially(self):
-                self.connection.settimeout(20)
+                self.connection.settimeout(40)
                 sent = False
                 buffering = False
                 buffered_bytes = 0
@@ -910,7 +910,7 @@ class NativeProxy:
                 closer.start()
             self.server.shutdown()
             self.server.server_close()
-            self.thread.join(timeout=2)
+            self.thread.join(timeout=4)
             with self.state:
                 self.state.wait_for(lambda: self.active_handlers == 0, timeout=cleanup_timeout)
                 self.unfinished_handlers = self.active_handlers

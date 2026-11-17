@@ -276,7 +276,7 @@ def _git(*args: str, cwd: Path | None = None) -> str | None:
     try:
         from data_sheets_schema.resources import git_env
         out = subprocess.run(["git", *args], capture_output=True, text=True,
-                             timeout=10, cwd=str(cwd) if cwd else None, env=git_env())   # no borrowed GIT_DIR (#1728)
+                             timeout=20, cwd=str(cwd) if cwd else None, env=git_env())   # no borrowed GIT_DIR (#1728)
     except (OSError, subprocess.SubprocessError):
         return None
     return out.stdout if out.returncode == 0 else None

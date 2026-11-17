@@ -12,8 +12,8 @@ import time
 
 from .native_elapsed import elapsed_ns
 
-ADMISSION_SECONDS = 900
-POLL_SECONDS = 0.1
+ADMISSION_SECONDS = 1500
+POLL_SECONDS = 0.2
 
 
 class AdmissionRefused(BaseException):

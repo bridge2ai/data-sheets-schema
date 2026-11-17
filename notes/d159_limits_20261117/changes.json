@@ -1,0 +1,962 @@
+[
+  {
+    "path": ".github/workflows/main.yaml",
+    "line": 25,
+    "old": "timeout-minutes: ${{ github.event_name == 'pull_request' && 45 || 60 }}",
+    "new": "timeout-minutes: ${{ github.event_name == 'pull_request' && 60 || 80 }}"
+  },
+  {
+    "path": ".github/workflows/main.yaml",
+    "line": 224,
+    "old": "# Complete synthetic runs have a two-hour attempt budget plus setup.",
+    "new": "# Complete synthetic runs have a 160-minute attempt budget plus 20-25 minutes of setup."
+  },
+  {
+    "path": ".github/workflows/main.yaml",
+    "line": 225,
+    "old": "timeout-minutes: 180",
+    "new": "timeout-minutes: 240"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/budgeted_cborg.py",
+    "line": 35,
+    "old": "LEGACY_UPSTREAM_READ_SECONDS = 1800",
+    "new": "LEGACY_UPSTREAM_READ_SECONDS = 2700"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/budgeted_cborg.py",
+    "line": 36,
+    "old": "UPSTREAM_CONNECT_SECONDS = 20",
+    "new": "UPSTREAM_CONNECT_SECONDS = 40"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/budgeted_cborg.py",
+    "line": 39,
+    "old": "POLICY_COUNT_TRY_SECONDS = 120",
+    "new": "POLICY_COUNT_TRY_SECONDS = 240"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/budgeted_cborg.py",
+    "line": 40,
+    "old": "POLICY_COUNT_PAUSE_SECONDS = 5",
+    "new": "POLICY_COUNT_PAUSE_SECONDS = 10"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+    "line": 26,
+    "old": "'callback_id': 'd4d_tool_policy_v2', 'initialize_timeout_seconds': 30,",
+    "new": "'callback_id': 'd4d_tool_policy_v2', 'initialize_timeout_seconds': 60,"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+    "line": 27,
+    "old": "'callback_timeout_seconds': 2, 'runtime_callback_timeout_seconds': 3}",
+    "new": "'callback_timeout_seconds': 4, 'runtime_callback_timeout_seconds': 6}"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+    "line": 28,
+    "old": "# Explicit opt-in; legacy initialization/replay stays byte-identical (#2420).",
+    "new": "# Explicit opt-in; both contracts use D159 time limits."
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+    "line": 30,
+    "old": "'callback_id': 'd4d_tool_policy_v3', 'initialize_timeout_seconds': 30,",
+    "new": "'callback_id': 'd4d_tool_policy_v3', 'initialize_timeout_seconds': 60,"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+    "line": 31,
+    "old": "'callback_timeout_seconds': 2, 'observer_timeout_seconds': 120,",
+    "new": "'callback_timeout_seconds': 4, 'observer_timeout_seconds': 240,"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+    "line": 32,
+    "old": "'runtime_callback_timeout_seconds': 125}",
+    "new": "'runtime_callback_timeout_seconds': 250}"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+    "line": 37,
+    "old": "CONTROL_WORKER_JOIN_SECONDS = .25",
+    "new": "CONTROL_WORKER_JOIN_SECONDS = .5"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+    "line": 553,
+    "old": "ready = self.selector.select(.05)",
+    "new": "ready = self.selector.select(.1)"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+    "line": 625,
+    "old": "for key, _ in self.selector.select(.05):",
+    "new": "for key, _ in self.selector.select(.1):"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/native_proxy.py",
+    "line": 609,
+    "old": "def running(self, *, cleanup_timeout=2):",
+    "new": "def running(self, *, cleanup_timeout=4):"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/native_proxy.py",
+    "line": 638,
+    "old": "self.connection.settimeout(20)",
+    "new": "self.connection.settimeout(40)"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/native_proxy.py",
+    "line": 913,
+    "old": "self.thread.join(timeout=2)",
+    "new": "self.thread.join(timeout=4)"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+    "line": 444,
+    "old": "exited = reap_observed(process, 2)",
+    "new": "exited = reap_observed(process, 4)"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+    "line": 445,
+    "old": "deadline = time.monotonic() + 2",
+    "new": "deadline = time.monotonic() + 4"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+    "line": 454,
+    "old": "time.sleep(0.02)",
+    "new": "time.sleep(0.04)"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+    "line": 540,
+    "old": "time.sleep(0.02)",
+    "new": "time.sleep(0.04)"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+    "line": 567,
+    "old": "await_leader_exit(process, 2)",
+    "new": "await_leader_exit(process, 4)"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+    "line": 576,
+    "old": "if not reap_observed(process, 2):",
+    "new": "if not reap_observed(process, 4):"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+    "line": 577,
+    "old": "raise subprocess.TimeoutExpired(process.args, 2)",
+    "new": "raise subprocess.TimeoutExpired(process.args, 4)"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+    "line": 682,
+    "old": "time.sleep(0.05)",
+    "new": "time.sleep(0.1)"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py",
+    "line": 24,
+    "old": "assert control.HISTORY_CONTRACT['observer_timeout_seconds'] == 120",
+    "new": "assert control.HISTORY_CONTRACT['observer_timeout_seconds'] == 240"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py",
+    "line": 30,
+    "old": "lambda c: c.update(observer_timeout_seconds=121), lambda c: c.update(callback_timeout_seconds=3),",
+    "new": "lambda c: c.update(observer_timeout_seconds=241), lambda c: c.update(callback_timeout_seconds=5),"
+  },
+  {
+    "path": "notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py",
+    "line": 31,
+    "old": "lambda c: c.update(runtime_callback_timeout_seconds=126), lambda c: c.update(extra=1),",
+    "new": "lambda c: c.update(runtime_callback_timeout_seconds=251), lambda c: c.update(extra=1),"
+  },
+  {
+    "path": "scripts/draft_native_probe_packet.py",
+    "line": 95,
+    "old": "('BASH_DEFAULT_TIMEOUT_MS','600000','registered native Bash helper timeout','source'),",
+    "new": "('BASH_DEFAULT_TIMEOUT_MS','1000000','registered native Bash helper timeout','source'),"
+  },
+  {
+    "path": "scripts/draft_native_probe_packet.py",
+    "line": 96,
+    "old": "('BASH_MAX_TIMEOUT_MS','600000','registered native Bash helper maximum timeout','source'),",
+    "new": "('BASH_MAX_TIMEOUT_MS','1000000','registered native Bash helper maximum timeout','source'),"
+  },
+  {
+    "path": "scripts/native_registration_timestamp.py",
+    "line": 26,
+    "old": "'-C',str(repository),*arguments],env=env,stderr=subprocess.PIPE,timeout=30).decode().strip()",
+    "new": "'-C',str(repository),*arguments],env=env,stderr=subprocess.PIPE,timeout=60).decode().strip()"
+  },
+  {
+    "path": "src/data_sheets_schema/historical_digest.py",
+    "line": 32,
+    "old": "_GIT_SECONDS = 5.0",
+    "new": "_GIT_SECONDS = 10.0"
+  },
+  {
+    "path": "src/data_sheets_schema/historical_digest.py",
+    "line": 382,
+    "old": "process.wait(timeout=1)",
+    "new": "process.wait(timeout=2)"
+  },
+  {
+    "path": "src/data_sheets_schema/latch_journal.py",
+    "line": 41,
+    "old": "env=env, capture_output=True, text=True, timeout=10)",
+    "new": "env=env, capture_output=True, text=True, timeout=20)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_admission_timer.py",
+    "line": 15,
+    "old": "ADMISSION_SECONDS = 900",
+    "new": "ADMISSION_SECONDS = 1500"
+  },
+  {
+    "path": "src/data_sheets_schema/native_admission_timer.py",
+    "line": 16,
+    "old": "POLL_SECONDS = 0.1",
+    "new": "POLL_SECONDS = 0.2"
+  },
+  {
+    "path": "src/data_sheets_schema/native_execution.py",
+    "line": 112,
+    "old": "env=env, capture_output=True, timeout=30, check=True)",
+    "new": "env=env, capture_output=True, timeout=60, check=True)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_execution.py",
+    "line": 116,
+    "old": "env=env, capture_output=True, timeout=30, check=True)",
+    "new": "env=env, capture_output=True, timeout=60, check=True)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_execution_authority.py",
+    "line": 93,
+    "old": "cwd=ROOT, env=git_env(), capture_output=True, timeout=30, check=True)",
+    "new": "cwd=ROOT, env=git_env(), capture_output=True, timeout=60, check=True)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_execution_authority.py",
+    "line": 119,
+    "old": "input=query, capture_output=True, timeout=30, check=True)",
+    "new": "input=query, capture_output=True, timeout=60, check=True)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_execution_authority_v2.py",
+    "line": 1218,
+    "old": "cwd=ROOT, env=git_env(), capture_output=True, timeout=30, check=True)",
+    "new": "cwd=ROOT, env=git_env(), capture_output=True, timeout=60, check=True)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_execution_authority_v2.py",
+    "line": 1245,
+    "old": "env=git_env(), input=query, capture_output=True, timeout=30, check=True)",
+    "new": "env=git_env(), input=query, capture_output=True, timeout=60, check=True)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_execution_registration_v2.py",
+    "line": 139,
+    "old": "*args], cwd=authority.ROOT, env=env, capture_output=True, timeout=30, check=False)",
+    "new": "*args], cwd=authority.ROOT, env=env, capture_output=True, timeout=60, check=False)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_host_power.py",
+    "line": 23,
+    "old": "def _local(argv, *, limit, timeout=8):",
+    "new": "def _local(argv, *, limit, timeout=16):"
+  },
+  {
+    "path": "src/data_sheets_schema/native_host_power.py",
+    "line": 37,
+    "old": "if not selected.select(min(remaining, 0.1)):",
+    "new": "if not selected.select(min(remaining, 0.2)):"
+  },
+  {
+    "path": "src/data_sheets_schema/native_launch_review.py",
+    "line": 64,
+    "old": "*arguments], env=env, capture_output=True, timeout=10)",
+    "new": "*arguments], env=env, capture_output=True, timeout=20)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_launch_sequence.py",
+    "line": 27,
+    "old": "COMMAND_WAIT_POLL_SECONDS = 0.1",
+    "new": "COMMAND_WAIT_POLL_SECONDS = 0.2"
+  },
+  {
+    "path": "src/data_sheets_schema/native_launch_sequence.py",
+    "line": 335,
+    "old": "deadline = time.monotonic() + 2",
+    "new": "deadline = time.monotonic() + 4"
+  },
+  {
+    "path": "src/data_sheets_schema/native_launch_sequence.py",
+    "line": 343,
+    "old": "time.sleep(0.02)",
+    "new": "time.sleep(0.04)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_permission_probe.py",
+    "line": 211,
+    "old": "for key, _ in selector.select(timeout=min(0.02, max(0, deadline - time.monotonic()))):",
+    "new": "for key, _ in selector.select(timeout=min(0.04, max(0, deadline - time.monotonic()))):"
+  },
+  {
+    "path": "src/data_sheets_schema/native_permission_probe.py",
+    "line": 233,
+    "old": "check_codesign=False, runner=None, timeout_seconds=10):",
+    "new": "check_codesign=False, runner=None, timeout_seconds=20):"
+  },
+  {
+    "path": "src/data_sheets_schema/native_permission_probe.py",
+    "line": 378,
+    "old": "process.wait(timeout=1)",
+    "new": "process.wait(timeout=2)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_permission_probe.py",
+    "line": 416,
+    "old": "for key, _ in selector.select(timeout=0.02):",
+    "new": "for key, _ in selector.select(timeout=0.04):"
+  },
+  {
+    "path": "src/data_sheets_schema/native_permission_probe.py",
+    "line": 454,
+    "old": "time.sleep(0.001)",
+    "new": "time.sleep(0.002)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_permission_probe.py",
+    "line": 513,
+    "old": "drain_deadline = time.monotonic() + 1",
+    "new": "drain_deadline = time.monotonic() + 2"
+  },
+  {
+    "path": "src/data_sheets_schema/native_pre_dispatch_timing.py",
+    "line": 48,
+    "old": "writer.join(timeout=2)",
+    "new": "writer.join(timeout=4)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_prepared_worker.py",
+    "line": 20,
+    "old": "POLL_SECONDS = 0.1",
+    "new": "POLL_SECONDS = 0.2"
+  },
+  {
+    "path": "src/data_sheets_schema/native_prepared_worker.py",
+    "line": 21,
+    "old": "VERIFY_SECONDS = 300",
+    "new": "VERIFY_SECONDS = 600"
+  },
+  {
+    "path": "src/data_sheets_schema/native_probe_provider.py",
+    "line": 32,
+    "old": "handler.connection.settimeout(min(1.0, remaining))",
+    "new": "handler.connection.settimeout(min(2.0, remaining))"
+  },
+  {
+    "path": "src/data_sheets_schema/native_probe_provider.py",
+    "line": 160,
+    "old": "connection.settimeout(min(1.0, remaining))",
+    "new": "connection.settimeout(min(2.0, remaining))"
+  },
+  {
+    "path": "src/data_sheets_schema/native_probe_provider.py",
+    "line": 219,
+    "old": "server.timeout = 0.05",
+    "new": "server.timeout = 0.1"
+  },
+  {
+    "path": "src/data_sheets_schema/native_probe_provider.py",
+    "line": 236,
+    "old": "thread.join(timeout=2)",
+    "new": "thread.join(timeout=4)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_run_limits.py",
+    "line": 6,
+    "old": "CANARY = ('90', 21600)",
+    "new": "CANARY = ('90', 28800)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_run_limits.py",
+    "line": 7,
+    "old": "PRODUCTION = ('400', 43200)",
+    "new": "PRODUCTION = ('400', 57600)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_runtime_profiles.py",
+    "line": 23,
+    "old": "SYNTHETIC_DEADLINE_SECONDS = 7200",
+    "new": "SYNTHETIC_DEADLINE_SECONDS = 9600"
+  },
+  {
+    "path": "src/data_sheets_schema/native_shared_callback_orchestration.py",
+    "line": 178,
+    "old": "# Match the classifier's existing 2-second window. Teardown is a separate",
+    "new": "# Match the classifier's D159 4-second window. Teardown is a separate"
+  },
+  {
+    "path": "src/data_sheets_schema/native_shared_callback_orchestration.py",
+    "line": 179,
+    "old": "# grace period, not an extension of the 120-second observer acceptance window.",
+    "new": "# grace period, not an extension of the 240-second observer acceptance window."
+  },
+  {
+    "path": "src/data_sheets_schema/native_shared_callback_orchestration.py",
+    "line": 180,
+    "old": "CALLBACK_TEARDOWN_SECONDS = 2.0",
+    "new": "CALLBACK_TEARDOWN_SECONDS = 4.0"
+  },
+  {
+    "path": "src/data_sheets_schema/native_shared_permission_protocol.py",
+    "line": 15,
+    "old": "'callback_id': 'd4d_tool_policy_v2', 'initialize_timeout_seconds': 30,",
+    "new": "'callback_id': 'd4d_tool_policy_v2', 'initialize_timeout_seconds': 60,"
+  },
+  {
+    "path": "src/data_sheets_schema/native_shared_permission_protocol.py",
+    "line": 16,
+    "old": "'callback_timeout_seconds': 2, 'runtime_callback_timeout_seconds': 3}",
+    "new": "'callback_timeout_seconds': 4, 'runtime_callback_timeout_seconds': 6}"
+  },
+  {
+    "path": "src/data_sheets_schema/native_shared_permission_protocol.py",
+    "line": 18,
+    "old": "'callback_id': 'd4d_tool_policy_v3', 'initialize_timeout_seconds': 30,",
+    "new": "'callback_id': 'd4d_tool_policy_v3', 'initialize_timeout_seconds': 60,"
+  },
+  {
+    "path": "src/data_sheets_schema/native_shared_permission_protocol.py",
+    "line": 19,
+    "old": "'callback_timeout_seconds': 2, 'observer_timeout_seconds': 120,",
+    "new": "'callback_timeout_seconds': 4, 'observer_timeout_seconds': 240,"
+  },
+  {
+    "path": "src/data_sheets_schema/native_shared_permission_protocol.py",
+    "line": 20,
+    "old": "'runtime_callback_timeout_seconds': 125}",
+    "new": "'runtime_callback_timeout_seconds': 250}"
+  },
+  {
+    "path": "src/data_sheets_schema/native_shared_runtime_values.py",
+    "line": 29,
+    "old": "BASH_TIMEOUT_ENV = {'BASH_DEFAULT_TIMEOUT_MS': '600000', 'BASH_MAX_TIMEOUT_MS': '600000'}",
+    "new": "BASH_TIMEOUT_ENV = {'BASH_DEFAULT_TIMEOUT_MS': '1000000', 'BASH_MAX_TIMEOUT_MS': '1000000'}"
+  },
+  {
+    "path": "src/data_sheets_schema/native_shared_runtime_values.py",
+    "line": 173,
+    "old": "raise ValueError('native Bash timeouts must both be exactly 600000 milliseconds')",
+    "new": "raise ValueError('native Bash timeouts must both be exactly 1000000 milliseconds')"
+  },
+  {
+    "path": "src/data_sheets_schema/native_shared_streams.py",
+    "line": 124,
+    "old": "deadline = time.monotonic() + 0.02",
+    "new": "deadline = time.monotonic() + 0.04"
+  },
+  {
+    "path": "src/data_sheets_schema/native_shared_streams.py",
+    "line": 126,
+    "old": "time.sleep(0.0001)",
+    "new": "time.sleep(0.0002)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_subscription_capture.py",
+    "line": 193,
+    "old": "deadline = time.monotonic() + 2",
+    "new": "deadline = time.monotonic() + 4"
+  },
+  {
+    "path": "src/data_sheets_schema/native_subscription_capture.py",
+    "line": 201,
+    "old": "time.sleep(0.01)",
+    "new": "time.sleep(0.02)"
+  },
+  {
+    "path": "src/data_sheets_schema/native_subscription_capture.py",
+    "line": 223,
+    "old": "for key, _ in selector.select(timeout=0.02):",
+    "new": "for key, _ in selector.select(timeout=0.04):"
+  },
+  {
+    "path": "src/data_sheets_schema/native_subscription_guard_v2.py",
+    "line": 24,
+    "old": "MAX_AGE_SECONDS = 1200",
+    "new": "MAX_AGE_SECONDS = 1800"
+  },
+  {
+    "path": "src/data_sheets_schema/native_supervisor_authority.py",
+    "line": 26,
+    "old": "env=git_env(), text=True, timeout=10).strip()",
+    "new": "env=git_env(), text=True, timeout=20).strip()"
+  },
+  {
+    "path": "src/data_sheets_schema/native_supervisor_authority_v2.py",
+    "line": 26,
+    "old": "env=git_env(), text=True, timeout=10).strip()",
+    "new": "env=git_env(), text=True, timeout=20).strip()"
+  },
+  {
+    "path": "src/data_sheets_schema/native_u4b_policy.py",
+    "line": 16,
+    "old": "'max_age_seconds': 1200,",
+    "new": "'max_age_seconds': 1800,"
+  },
+  {
+    "path": "src/data_sheets_schema/native_u4b_probe_sequence.py",
+    "line": 318,
+    "old": "for key, _ in selector.select(timeout=0.02):",
+    "new": "for key, _ in selector.select(timeout=0.04):"
+  },
+  {
+    "path": "src/data_sheets_schema/prompt_registry.py",
+    "line": 279,
+    "old": "timeout=10, cwd=str(cwd) if cwd else None, env=git_env())   # no borrowed GIT_DIR (#1728)",
+    "new": "timeout=20, cwd=str(cwd) if cwd else None, env=git_env())   # no borrowed GIT_DIR (#1728)"
+  },
+  {
+    "path": "src/data_sheets_schema/provenance.py",
+    "line": 373,
+    "old": "r = subprocess.run(cmd, capture_output=True, timeout=15, cwd=str(cwd) if cwd else None, env=env)",
+    "new": "r = subprocess.run(cmd, capture_output=True, timeout=30, cwd=str(cwd) if cwd else None, env=env)"
+  },
+  {
+    "path": "tests/native_shared_fixture.py",
+    "line": 208,
+    "old": "'BASH_DEFAULT_TIMEOUT_MS': '600000', 'BASH_MAX_TIMEOUT_MS': '600000',",
+    "new": "'BASH_DEFAULT_TIMEOUT_MS': '1000000', 'BASH_MAX_TIMEOUT_MS': '1000000',"
+  },
+  {
+    "path": "tests/native_shared_omission_fixture.py",
+    "line": 243,
+    "old": "'BASH_DEFAULT_TIMEOUT_MS': '600000', 'BASH_MAX_TIMEOUT_MS': '600000',",
+    "new": "'BASH_DEFAULT_TIMEOUT_MS': '1000000', 'BASH_MAX_TIMEOUT_MS': '1000000',"
+  },
+  {
+    "path": "tests/test_ci_sharding.py",
+    "line": 223,
+    "old": "assert jobs[\"python-tests\"][\"timeout-minutes\"] == \"${{ github.event_name == 'pull_request' && 45 || 60 }}\"",
+    "new": "assert jobs[\"python-tests\"][\"timeout-minutes\"] == \"${{ github.event_name == 'pull_request' && 60 || 80 }}\""
+  },
+  {
+    "path": "tests/test_ci_sharding.py",
+    "line": 401,
+    "old": "(\"native-public-long\", LONG_NATIVE_LANES, \"native\", 180),",
+    "new": "(\"native-public-long\", LONG_NATIVE_LANES, \"native\", 240),"
+  },
+  {
+    "path": "tests/test_native_admission_failure.py",
+    "line": 33,
+    "old": "advanced[0] = 901 * 10**9  # Expire only after verification is entered.",
+    "new": "advanced[0] = 1501 * 10**9  # Expire only after verification is entered."
+  },
+  {
+    "path": "tests/test_native_admission_failure.py",
+    "line": 50,
+    "old": "# Keep the real 900-second bound and signal handler. The clock jump",
+    "new": "# Keep the real 1500-second bound and signal handler. The clock jump"
+  },
+  {
+    "path": "tests/test_native_admission_failure.py",
+    "line": 105,
+    "old": "advance[0] = 901 * 10**9",
+    "new": "advance[0] = 1501 * 10**9"
+  },
+  {
+    "path": "tests/test_native_admission_timer.py",
+    "line": 19,
+    "old": "timer = AdmissionTimer(clock(), seconds=900 if suspend else .2, clock=clock)",
+    "new": "timer = AdmissionTimer(clock(), seconds=1500 if suspend else .2, clock=clock)"
+  },
+  {
+    "path": "tests/test_native_admission_timer.py",
+    "line": 26,
+    "old": "ticks[0] = 901 * 10**9",
+    "new": "ticks[0] = 1501 * 10**9"
+  },
+  {
+    "path": "tests/test_native_admission_timer.py",
+    "line": 43,
+    "old": "timer = AdmissionTimer(100, seconds=900)",
+    "new": "timer = AdmissionTimer(100, seconds=1500)"
+  },
+  {
+    "path": "tests/test_native_admission_timer.py",
+    "line": 44,
+    "old": "timer.check(900 * 10**9 + 99)",
+    "new": "timer.check(1500 * 10**9 + 99)"
+  },
+  {
+    "path": "tests/test_native_admission_timer.py",
+    "line": 46,
+    "old": "timer.check(900 * 10**9 + 100)",
+    "new": "timer.check(1500 * 10**9 + 100)"
+  },
+  {
+    "path": "tests/test_native_attempt_deadline.py",
+    "line": 21,
+    "old": "[at]pytest.mark.parametrize('seconds', [900, 21600, 43200])",
+    "new": "[at]pytest.mark.parametrize('seconds', [1500, 28800, 57600])"
+  },
+  {
+    "path": "tests/test_native_attempt_deadline.py",
+    "line": 31,
+    "old": "ticks['continuous'] += 899 * 10**9  # Within admission's own bound; excluded from child time.",
+    "new": "ticks['continuous'] += 1499 * 10**9  # Within admission's own bound; excluded from child time."
+  },
+  {
+    "path": "tests/test_native_attempt_deadline.py",
+    "line": 46,
+    "old": "[at]pytest.mark.parametrize('seconds', [900, 21600, 43200])",
+    "new": "[at]pytest.mark.parametrize('seconds', [1500, 28800, 57600])"
+  },
+  {
+    "path": "tests/test_native_attempt_deadline.py",
+    "line": 51,
+    "old": "def verify(): ticks['continuous'] += 899 * 10**9",
+    "new": "def verify(): ticks['continuous'] += 1499 * 10**9"
+  },
+  {
+    "path": "tests/test_native_attempt_deadline.py",
+    "line": 58,
+    "old": "ticks['continuous'] += (seconds - 898) * 10**9",
+    "new": "ticks['continuous'] += (seconds - 1498) * 10**9"
+  },
+  {
+    "path": "tests/test_native_attempt_deadline.py",
+    "line": 68,
+    "old": "[at]pytest.mark.parametrize('admission_seconds', [900, 901])",
+    "new": "[at]pytest.mark.parametrize('admission_seconds', [1500, 1501])"
+  },
+  {
+    "path": "tests/test_native_attempt_deadline.py",
+    "line": 94,
+    "old": "cwd=tmp_path, env={}, deadline_seconds=900, verify_launch=verify)",
+    "new": "cwd=tmp_path, env={}, deadline_seconds=1500, verify_launch=verify)"
+  },
+  {
+    "path": "tests/test_native_ci_evidence.py",
+    "line": 44,
+    "old": "assert result['declared_limits']['attempt_seconds'] == 900",
+    "new": "assert result['declared_limits']['attempt_seconds'] == 9600"
+  },
+  {
+    "path": "tests/test_native_ci_evidence.py",
+    "line": 45,
+    "old": "assert result['declared_limits']['helper_seconds'] == 180",
+    "new": "assert result['declared_limits']['helper_seconds'] == 1000"
+  },
+  {
+    "path": "tests/test_native_ci_evidence.py",
+    "line": 46,
+    "old": "assert result['declared_limits']['runner_seconds'] == 3600",
+    "new": "assert result['declared_limits']['runner_seconds'] == 14400"
+  },
+  {
+    "path": "tests/test_native_dispatch_boundary_d156.py",
+    "line": 23,
+    "old": "clock[0] += 1201",
+    "new": "clock[0] += 1801"
+  },
+  {
+    "path": "tests/test_native_execution_registration_v2.py",
+    "line": 81,
+    "old": "'BASH_DEFAULT_TIMEOUT_MS': '600000', 'BASH_MAX_TIMEOUT_MS': '600000', 'PYSTOW_HOME': str(tmp_path.resolve() / 'attempt' / 'helper-cache'),",
+    "new": "'BASH_DEFAULT_TIMEOUT_MS': '1000000', 'BASH_MAX_TIMEOUT_MS': '1000000', 'PYSTOW_HOME': str(tmp_path.resolve() / 'attempt' / 'helper-cache'),"
+  },
+  {
+    "path": "tests/test_native_launch_review.py",
+    "line": 14,
+    "old": "'runtime': {'budget_guard_usd': '90', 'deadline_seconds': 21600,",
+    "new": "'runtime': {'budget_guard_usd': '90', 'deadline_seconds': 28800,"
+  },
+  {
+    "path": "tests/test_native_launch_sequence.py",
+    "line": 77,
+    "old": "'runtime': {'budget_guard_usd': '90', 'deadline_seconds': 21600, 'model': 'fixture-model',",
+    "new": "'runtime': {'budget_guard_usd': '90', 'deadline_seconds': 28800, 'model': 'fixture-model',"
+  },
+  {
+    "path": "tests/test_native_launch_sequence.py",
+    "line": 84,
+    "old": "'max_age_seconds': 1200, 'pre_reservation_margin_seconds': 300}})},",
+    "new": "'max_age_seconds': 1800, 'pre_reservation_margin_seconds': 300}})},"
+  },
+  {
+    "path": "tests/test_native_launch_sequence.py",
+    "line": 183,
+    "old": "source_sha256='a' * 64, environment_sha256='b' * 64, max_age_seconds=1200)",
+    "new": "source_sha256='a' * 64, environment_sha256='b' * 64, max_age_seconds=1800)"
+  },
+  {
+    "path": "tests/test_native_launch_sequence.py",
+    "line": 230,
+    "old": "expiry = guard.strict_json(raw)['prepared_at'] + 1200",
+    "new": "expiry = guard.strict_json(raw)['prepared_at'] + 1800"
+  },
+  {
+    "path": "tests/test_native_launch_sequence.py",
+    "line": 440,
+    "old": "attempt=attempt, source_sha256='a' * 64, environment_sha256='b' * 64, max_age_seconds=1200)",
+    "new": "attempt=attempt, source_sha256='a' * 64, environment_sha256='b' * 64, max_age_seconds=1800)"
+  },
+  {
+    "path": "tests/test_native_launch_sequence.py",
+    "line": 442,
+    "old": "registration_raw=raw, attempt=attempt, max_age_seconds=1200)",
+    "new": "registration_raw=raw, attempt=attempt, max_age_seconds=1800)"
+  },
+  {
+    "path": "tests/test_native_launch_sequence_signals.py",
+    "line": 155,
+    "old": "attempt=attempt, source_sha256='a' * 64, environment_sha256='b' * 64, max_age_seconds=1200)",
+    "new": "attempt=attempt, source_sha256='a' * 64, environment_sha256='b' * 64, max_age_seconds=1800)"
+  },
+  {
+    "path": "tests/test_native_launch_sequence_signals.py",
+    "line": 157,
+    "old": "registration_raw=raw, attempt=attempt, max_age_seconds=1200)",
+    "new": "registration_raw=raw, attempt=attempt, max_age_seconds=1800)"
+  },
+  {
+    "path": "tests/test_native_permission_probe.py",
+    "line": 203,
+    "old": "assert kwargs[\"timeout\"] == 10 and kwargs[\"stdin\"] == probe.subprocess.DEVNULL",
+    "new": "assert kwargs[\"timeout\"] == 20 and kwargs[\"stdin\"] == probe.subprocess.DEVNULL"
+  },
+  {
+    "path": "tests/test_native_permission_probe.py",
+    "line": 742,
+    "old": "assert timeout == 2",
+    "new": "assert timeout == 4"
+  },
+  {
+    "path": "tests/test_native_prepared_worker.py",
+    "line": 18,
+    "old": "binding = dict(registration_raw=b'registration', attempt=attempt, max_age_seconds=1200)",
+    "new": "binding = dict(registration_raw=b'registration', attempt=attempt, max_age_seconds=1800)"
+  },
+  {
+    "path": "tests/test_native_prepared_worker.py",
+    "line": 48,
+    "old": "monkeypatch.setattr(worker.time, 'time', lambda: 1300.0)",
+    "new": "monkeypatch.setattr(worker.time, 'time', lambda: 1900.0)"
+  },
+  {
+    "path": "tests/test_native_prepared_worker.py",
+    "line": 56,
+    "old": "ticks = iter([0.0, 1200.0])",
+    "new": "ticks = iter([0.0, 1800.0])"
+  },
+  {
+    "path": "tests/test_native_prepared_worker.py",
+    "line": 102,
+    "old": "max_age_seconds=1200, source_sha256='a' * 64, environment_sha256='b' * 64)",
+    "new": "max_age_seconds=1800, source_sha256='a' * 64, environment_sha256='b' * 64)"
+  },
+  {
+    "path": "tests/test_native_probe_drafts.py",
+    "line": 32,
+    "old": "assert require_registered_pair(candidate)==CANARY==('90',21600)",
+    "new": "assert require_registered_pair(candidate)==CANARY==('90',28800)"
+  },
+  {
+    "path": "tests/test_native_recorder_env.py",
+    "line": 36,
+    "old": "'BASH_DEFAULT_TIMEOUT_MS': '600000', 'BASH_MAX_TIMEOUT_MS': '600000', 'PYSTOW_HOME': str(config.parent / 'helper-cache')}}",
+    "new": "'BASH_DEFAULT_TIMEOUT_MS': '1000000', 'BASH_MAX_TIMEOUT_MS': '1000000', 'PYSTOW_HOME': str(config.parent / 'helper-cache')}}"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 37,
+    "old": "[at]pytest.mark.parametrize('pair', [('90',43200),('400',21600),('100',21600),('400',43201),",
+    "new": "[at]pytest.mark.parametrize('pair', [('90',57600),('400',28800),('100',28800),('400',57601),"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 38,
+    "old": "('90.0',21600),('400',43200.0),(90,21600),('90',True),",
+    "new": "('90.0',28800),('400',57600.0),(90,28800),('90',True),"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 39,
+    "old": "(None,21600),('90',None),([],21600)])",
+    "new": "(None,28800),('90',None),([],28800)])"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 50,
+    "old": "[at]pytest.mark.parametrize('pair', [('90', 43200), ('400', 21600), ('100', 21600),",
+    "new": "[at]pytest.mark.parametrize('pair', [('90', 57600), ('400', 28800), ('100', 28800),"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 51,
+    "old": "('400', 43201), ('90.0', 21600)])",
+    "new": "('400', 57601), ('90.0', 28800)])"
+  },
+  {
+    "path": "tests/test_native_shared_observations.py",
+    "line": 12,
+    "old": "POLICY={'pretool_control':{'event':'PreToolUse','callback_id':'fixed','matcher':'Bash|Read|Write','runtime_callback_timeout_seconds':125},",
+    "new": "POLICY={'pretool_control':{'event':'PreToolUse','callback_id':'fixed','matcher':'Bash|Read|Write','runtime_callback_timeout_seconds':250},"
+  },
+  {
+    "path": "tests/test_native_shared_observations.py",
+    "line": 163,
+    "old": "'hooks':{'PreToolUse':[{'matcher':contract['matcher'],'hookCallbackIds':[contract['callback_id']],'timeout':125}]}}}}",
+    "new": "'hooks':{'PreToolUse':[{'matcher':contract['matcher'],'hookCallbackIds':[contract['callback_id']],'timeout':250}]}}}}"
+  },
+  {
+    "path": "tests/test_native_shared_permission_protocol.py",
+    "line": 116,
+    "old": "wrong_type = {**control.HISTORY_CONTRACT, 'initialize_timeout_seconds': 30.0}",
+    "new": "wrong_type = {**control.HISTORY_CONTRACT, 'initialize_timeout_seconds': 60.0}"
+  },
+  {
+    "path": "tests/test_native_subscription_guard_v2.py",
+    "line": 27,
+    "old": "'budget_guard_usd': '90', 'deadline_seconds': 21600,",
+    "new": "'budget_guard_usd': '90', 'deadline_seconds': 28800,"
+  },
+  {
+    "path": "tests/test_native_synthetic_profiles.py",
+    "line": 51,
+    "old": "'BASH_DEFAULT_TIMEOUT_MS': '600000', 'BASH_MAX_TIMEOUT_MS': '600000', 'PYSTOW_HOME': str(root / 'attempt' / 'helper-cache'),",
+    "new": "'BASH_DEFAULT_TIMEOUT_MS': '1000000', 'BASH_MAX_TIMEOUT_MS': '1000000', 'PYSTOW_HOME': str(root / 'attempt' / 'helper-cache'),"
+  },
+  {
+    "path": "tests/test_native_synthetic_profiles.py",
+    "line": 76,
+    "old": "[at]pytest.mark.parametrize('replacement', [None, '120000', '600001', 600000])",
+    "new": "[at]pytest.mark.parametrize('replacement', [None, '120000', '1000001', 1000000])"
+  },
+  {
+    "path": "tests/test_native_synthetic_profiles.py",
+    "line": 187,
+    "old": "changed['deadline_seconds'] = 21600",
+    "new": "changed['deadline_seconds'] = 28800"
+  },
+  {
+    "path": "tests/test_native_synthetic_profiles.py",
+    "line": 240,
+    "old": "old['deadline_seconds'] = 21600",
+    "new": "old['deadline_seconds'] = 28800"
+  },
+  {
+    "path": "tests/test_native_u4b_a3_policy.py",
+    "line": 22,
+    "old": "'max_age_seconds': 1200,",
+    "new": "'max_age_seconds': 1800,"
+  },
+  {
+    "path": "tests/test_native_u4b_a3_policy.py",
+    "line": 65,
+    "old": "[at]pytest.mark.parametrize('capture_age,permits_reservation', [(899, True), (900, True), (901, False)])",
+    "new": "[at]pytest.mark.parametrize('capture_age,permits_reservation', [(1499, True), (1500, True), (1501, False)])"
+  },
+  {
+    "path": "tests/test_native_u4b_a3_policy.py",
+    "line": 66,
+    "old": "def test_d138_latest_admissible_reservation_age_is_900_seconds(case, capture_age, permits_reservation):",
+    "new": "def test_d138_latest_admissible_reservation_age_is_1500_seconds(case, capture_age, permits_reservation):"
+  },
+  {
+    "path": "tests/test_native_u4b_a3_policy.py",
+    "line": 68,
+    "old": "assert case['owner']['max_age_seconds'] == 1200",
+    "new": "assert case['owner']['max_age_seconds'] == 1800"
+  },
+  {
+    "path": "tests/test_native_u4b_a3_policy.py",
+    "line": 80,
+    "old": "[at]pytest.mark.parametrize('dispatch_age,passes', [(1199, True), (1200, True), (1201, False)])",
+    "new": "[at]pytest.mark.parametrize('dispatch_age,passes', [(1799, True), (1800, True), (1801, False)])"
+  },
+  {
+    "path": "tests/test_native_u4b_a3_policy.py",
+    "line": 82,
+    "old": "clock = [case['now'] + 900]",
+    "new": "clock = [case['now'] + 1500]"
+  },
+  {
+    "path": "tests/test_native_u4b_a4_review.py",
+    "line": 33,
+    "old": "assert review.validate_bundle(raw, bundle_raw, word_raw)['deadline_seconds'] == 21600",
+    "new": "assert review.validate_bundle(raw, bundle_raw, word_raw)['deadline_seconds'] == 28800"
+  },
+  {
+    "path": "tests/test_native_u4b_a4_review.py",
+    "line": 34,
+    "old": "assert review.validate_bundle(raw, bundle_raw, word_raw)['deadline_seconds'] == 21600",
+    "new": "assert review.validate_bundle(raw, bundle_raw, word_raw)['deadline_seconds'] == 28800"
+  },
+  {
+    "path": "tests/test_native_u4b_a4_review.py",
+    "line": 105,
+    "old": "[at]pytest.mark.parametrize('deadline', [True, 0, 60, 900, 21599, 21601, 86400, 21600.0])",
+    "new": "[at]pytest.mark.parametrize('deadline', [True, 0, 60, 900, 28799, 28801, 86400, 28800.0])"
+  },
+  {
+    "path": "tests/test_native_u4b_a4_review.py",
+    "line": 113,
+    "old": "with pytest.raises(ValueError, match='21600'):",
+    "new": "with pytest.raises(ValueError, match='28800'):"
+  },
+  {
+    "path": "tests/test_native_u4b_a4_review.py",
+    "line": 189,
+    "old": "assert review.validate_bundle(*evidence)['deadline_seconds'] == 21600",
+    "new": "assert review.validate_bundle(*evidence)['deadline_seconds'] == 28800"
+  },
+  {
+    "path": "tests/test_native_u4b_probe_sequence.py",
+    "line": 295,
+    "old": "assert invocation['environment']['BASH_DEFAULT_TIMEOUT_MS'] == '600000'",
+    "new": "assert invocation['environment']['BASH_DEFAULT_TIMEOUT_MS'] == '1000000'"
+  },
+  {
+    "path": "tests/test_native_u4b_probe_sequence.py",
+    "line": 296,
+    "old": "assert invocation['environment']['BASH_MAX_TIMEOUT_MS'] == '600000'",
+    "new": "assert invocation['environment']['BASH_MAX_TIMEOUT_MS'] == '1000000'"
+  },
+  {
+    "path": "tests/test_native_u4b_runtime.py",
+    "line": 57,
+    "old": "'BASH_DEFAULT_TIMEOUT_MS': '600000', 'BASH_MAX_TIMEOUT_MS': '600000', 'PYSTOW_HOME': str(root / 'attempt' / 'helper-cache'),",
+    "new": "'BASH_DEFAULT_TIMEOUT_MS': '1000000', 'BASH_MAX_TIMEOUT_MS': '1000000', 'PYSTOW_HOME': str(root / 'attempt' / 'helper-cache'),"
+  },
+  {
+    "path": "tests/test_native_u4b_runtime.py",
+    "line": 59,
+    "old": "'deadline_seconds': 21600, 'budget_guard_usd': '90',",
+    "new": "'deadline_seconds': 28800, 'budget_guard_usd': '90',"
+  },
+  {
+    "path": "tests/utils/native_synthetic_evidence.py",
+    "line": 45,
+    "old": "'HOME': str(home), 'BASH_DEFAULT_TIMEOUT_MS': '600000', 'BASH_MAX_TIMEOUT_MS': '600000', 'PYSTOW_HOME': str(root / 'native-attempt' / 'helper-cache'),",
+    "new": "'HOME': str(home), 'BASH_DEFAULT_TIMEOUT_MS': '1000000', 'BASH_MAX_TIMEOUT_MS': '1000000', 'PYSTOW_HOME': str(root / 'native-attempt' / 'helper-cache'),"
+  },
+  {
+    "path": "utils/native_ci_evidence.py",
+    "line": 44,
+    "old": "LIMITS = {'attempt_seconds': 900, 'helper_seconds': 180, 'runner_seconds': 3600,",
+    "new": "LIMITS = {'attempt_seconds': 9600, 'helper_seconds': 1000, 'runner_seconds': 14400,"
+  }
+]

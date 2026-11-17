@@ -20,7 +20,7 @@ MAX_RECORD_BYTES = 128 * 1024
 CLOCK_TOLERANCE_NS = 1_000_000_000
 
 
-def _local(argv, *, limit, timeout=8):
+def _local(argv, *, limit, timeout=16):
     """Drain at most limit bytes and reap the exact owned local subprocess."""
     child = None
     try:
@@ -34,7 +34,7 @@ def _local(argv, *, limit, timeout=8):
                 remaining = deadline - time.monotonic()
                 if remaining <= 0:
                     raise TimeoutError('local host probe timed out')
-                if not selected.select(min(remaining, 0.1)):
+                if not selected.select(min(remaining, 0.2)):
                     continue
                 part = os.read(child.stdout.fileno(), min(65536, limit + 1 - count))
                 if not part:

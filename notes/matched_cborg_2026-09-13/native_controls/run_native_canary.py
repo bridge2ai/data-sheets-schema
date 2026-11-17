@@ -441,8 +441,8 @@ def _signal_group(process, sig):
         return
     except PermissionError as error:
         refusal = error
-    exited = reap_observed(process, 2)
-    deadline = time.monotonic() + 2
+    exited = reap_observed(process, 4)
+    deadline = time.monotonic() + 4
     while exited:
         try:
             os.killpg(process.pid, 0)         # a probe: delivers nothing (#2708)
@@ -451,7 +451,7 @@ def _signal_group(process, sig):
         except PermissionError:
             if time.monotonic() >= deadline:
                 break
-            time.sleep(0.02)
+            time.sleep(0.04)
             continue
         break                                 # a member we cannot verify: reported, not signalled (#2713)
     raise refusal
@@ -537,7 +537,7 @@ def await_leader_exit(process, timeout):
     while not leader_exited(process):
         if time.monotonic() >= deadline:
             return False
-        time.sleep(0.02)
+        time.sleep(0.04)
     return True
 
 
@@ -564,7 +564,7 @@ def terminate_group(process):
     if not leader_released(process):
         _signal_group(process, signal.SIGTERM)
     if not leader_released(process):          # `_signal_group`'s refusal path reaps
-        await_leader_exit(process, 2)
+        await_leader_exit(process, 4)
     if not leader_released(process):          # nor did anyone else during the wait (#2953)
         # Also remove descendants if the parent exited before them. The leader
         # was unreaped at the last check, so the id named this group (#2714).
@@ -573,8 +573,8 @@ def terminate_group(process):
     # for: its status is what was observed, or unknown, and never Popen's
     # invented 0 (#2984). A leader that has not exited within the bound raises,
     # as on main.
-    if not reap_observed(process, 2):
-        raise subprocess.TimeoutExpired(process.args, 2)
+    if not reap_observed(process, 4):
+        raise subprocess.TimeoutExpired(process.args, 4)
 
 
 #: What an in-flight handler raises when the controller closed admission:
@@ -679,7 +679,7 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                 if control:
                     control.service()
                 else:
-                    time.sleep(0.05)
+                    time.sleep(0.1)
             if control:
                 control.finish()
         if proxy.failed.is_set():

@@ -61,7 +61,7 @@ def _git_read(repository, *arguments):
         result = subprocess.run(['/usr/bin/git', '--no-replace-objects',
                                  '-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/dev/null',
                                  '-c', 'protocol.allow=never', '-C', str(repository),
-                                 *arguments], env=env, capture_output=True, timeout=10)
+                                 *arguments], env=env, capture_output=True, timeout=20)
     except (OSError, subprocess.TimeoutExpired) as exc:
         raise ValueError('registration commit local object read failed') from exc
     if result.returncode:

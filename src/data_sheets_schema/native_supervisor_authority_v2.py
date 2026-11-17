@@ -23,7 +23,7 @@ ADDITIONAL = {
 
 def head():
     return subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT,
-        env=git_env(), text=True, timeout=10).strip()
+        env=git_env(), text=True, timeout=20).strip()
 
 
 def dependency_identity():

@@ -23,7 +23,7 @@ def git(repository, *arguments, author_date=None):
     if author_date is not None: env['GIT_AUTHOR_DATE']=author_date
     return subprocess.check_output(['/usr/bin/git','--no-replace-objects','-c','protocol.allow=never',
         '-c','core.hooksPath=/dev/null','-c','commit.gpgsign=false','-c','core.fsmonitor=false',
-        '-C',str(repository),*arguments],env=env,stderr=subprocess.PIPE,timeout=30).decode().strip()
+        '-C',str(repository),*arguments],env=env,stderr=subprocess.PIPE,timeout=60).decode().strip()
 
 
 def verify(registration_raw, evidence):

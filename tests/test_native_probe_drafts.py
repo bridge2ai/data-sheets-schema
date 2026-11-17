@@ -29,7 +29,7 @@ def test_probe_drafts_are_not_runtime_or_authorization(tmp_path):
     assert not (tmp_path/'invalid').exists()
     candidate=runtime['candidate_runtime']
     from data_sheets_schema.native_run_limits import CANARY, require_registered_pair
-    assert require_registered_pair(candidate)==CANARY==('90',21600)
+    assert require_registered_pair(candidate)==CANARY==('90',28800)
     assert candidate['environment']['PYSTOW_HOME'].startswith('OWNER_INPUT_REQUIRED:')
     with pytest.raises(ValueError): sequence.validate_provisional_runtime(runtime)
     with pytest.raises(ValueError): sequence.authorization(auth,runtime)

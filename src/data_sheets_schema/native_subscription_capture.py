@@ -190,7 +190,7 @@ def _cleanup(process):
     if process is None:
         return {'child_started': False, 'leader_reaped': True, 'group_absent': True}
     _terminate(process)
-    deadline = time.monotonic() + 2
+    deadline = time.monotonic() + 4
     while True:
         try:
             os.killpg(process.pid, 0)
@@ -198,7 +198,7 @@ def _cleanup(process):
             return {'child_started': True, 'leader_reaped': process.poll() is not None, 'group_absent': True}
         if time.monotonic() >= deadline:
             raise RuntimeError('capture process group remains after cleanup')
-        time.sleep(0.01)
+        time.sleep(0.02)
 
 
 def _supervise(invocation, deadline_seconds, outputs, observations, lifecycle):
@@ -220,7 +220,7 @@ def _supervise(invocation, deadline_seconds, outputs, observations, lifecycle):
             while selector.get_map() or process.poll() is None:
                 if max(time.monotonic() - began, time.time() - wall) >= deadline_seconds:
                     raise TimeoutError('registered capture deadline elapsed')
-                for key, _ in selector.select(timeout=0.02):
+                for key, _ in selector.select(timeout=0.04):
                     remaining = MAX_STREAM_BYTES - len(outputs[key.data])
                     raw = os.read(key.fd, min(65536, remaining + 1))
                     if not raw:

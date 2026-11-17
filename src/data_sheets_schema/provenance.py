@@ -370,7 +370,7 @@ def _run_result(cmd: list[str], *, strip: bool = True, cwd: Path | None = None) 
         if cmd and cmd[0] == "git":
             from data_sheets_schema.resources import git_env
             env = git_env()                  # never a borrowed GIT_DIR (#1684, #1728)
-        r = subprocess.run(cmd, capture_output=True, timeout=15, cwd=str(cwd) if cwd else None, env=env)
+        r = subprocess.run(cmd, capture_output=True, timeout=30, cwd=str(cwd) if cwd else None, env=env)
     except Exception:
         return False, ""
     text = r.stdout.decode("utf-8", errors="backslashreplace")

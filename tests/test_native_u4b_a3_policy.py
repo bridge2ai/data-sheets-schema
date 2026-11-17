@@ -19,7 +19,7 @@ from tests.test_native_subscription_guard_v2 import (
 TERMS = {
     'max_starting_weekly_utilization': 0.5,
     'max_starting_five_hour_utilization': 0.25,
-    'max_age_seconds': 1200,
+    'max_age_seconds': 1800,
     'pre_reservation_margin_seconds': 300,
 }
 
@@ -62,10 +62,10 @@ def test_pre_reservation_margin_300_seconds_is_inclusive_without_dispatch(case, 
     assert not value.dispatched and value.observed_events == 0
 
 
-@pytest.mark.parametrize('capture_age,permits_reservation', [(899, True), (900, True), (901, False)])
-def test_d138_latest_admissible_reservation_age_is_900_seconds(case, capture_age, permits_reservation):
+@pytest.mark.parametrize('capture_age,permits_reservation', [(1499, True), (1500, True), (1501, False)])
+def test_d138_latest_admissible_reservation_age_is_1500_seconds(case, capture_age, permits_reservation):
     # Literal owner boundaries must not drift together with the implementation.
-    assert case['owner']['max_age_seconds'] == 1200
+    assert case['owner']['max_age_seconds'] == 1800
     assert case['owner']['pre_reservation_margin_seconds'] == 300
     value = build(case, now=case['now'] + capture_age)
     before = value.snapshot()
@@ -77,9 +77,9 @@ def test_d138_latest_admissible_reservation_age_is_900_seconds(case, capture_age
     assert value.snapshot() == before and not value.dispatched
 
 
-@pytest.mark.parametrize('dispatch_age,passes', [(1199, True), (1200, True), (1201, False)])
+@pytest.mark.parametrize('dispatch_age,passes', [(1799, True), (1800, True), (1801, False)])
 def test_margin_check_does_not_consume_dispatch_or_apply_again_after_preparation(case, dispatch_age, passes):
-    clock = [case['now'] + 900]
+    clock = [case['now'] + 1500]
     value = guard.SubscriptionGuard(case['raw'], expected_sha256=guard.sha(case['raw']),
         registration_raw=case['registration'], runtime=case['runtime'], launch_word_raw=case['word'],
         owner_statement=case['owner'], clock=lambda: clock[0])

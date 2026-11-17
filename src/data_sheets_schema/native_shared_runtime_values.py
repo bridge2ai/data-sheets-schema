@@ -26,7 +26,7 @@ RUNTIME_KEYS = {'route', 'executable', 'model', 'auxiliary_models', 'effort', 'l
 BASE_ENV_KEYS = {'PATH', 'HOME', 'USER', 'SHELL', 'TMPDIR', 'LANG', 'LC_ALL', 'TERM',
                 'CLAUDE_SECURESTORAGE_CONFIG_DIR', 'CLAUDE_CODE_DISABLE_1M_CONTEXT'}
 ENV_REQUIRED = {'PATH', 'HOME', 'CLAUDE_SECURESTORAGE_CONFIG_DIR', 'CLAUDE_CODE_DISABLE_1M_CONTEXT'}
-BASH_TIMEOUT_ENV = {'BASH_DEFAULT_TIMEOUT_MS': '600000', 'BASH_MAX_TIMEOUT_MS': '600000'}
+BASH_TIMEOUT_ENV = {'BASH_DEFAULT_TIMEOUT_MS': '1000000', 'BASH_MAX_TIMEOUT_MS': '1000000'}
 V2_BASE_ENV_KEYS = BASE_ENV_KEYS | {'PYSTOW_HOME'} | set(BASH_TIMEOUT_ENV)
 V2_ENV_REQUIRED = ENV_REQUIRED | {'PYSTOW_HOME'} | set(BASH_TIMEOUT_ENV)
 POLICY_ENV = {'DISABLE_NON_ESSENTIAL_MODEL_CALLS': '1',
@@ -170,7 +170,7 @@ def validate_runtime(value, *, helper_cache=False):
 def require_bash_timeouts(env):
     """Require the registered native Bash budget without inheriting host values."""
     if any(env.get(key) != value for key, value in BASH_TIMEOUT_ENV.items()):
-        raise ValueError('native Bash timeouts must both be exactly 600000 milliseconds')
+        raise ValueError('native Bash timeouts must both be exactly 1000000 milliseconds')
 
 
 def validate_runtime_v2(value):

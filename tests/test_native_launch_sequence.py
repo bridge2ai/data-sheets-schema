@@ -74,14 +74,14 @@ def paths(tmp_path, *, registration_padding=0, attempt_directory_name='NEVER-RES
         'attempt_id': 'sequence-fixture',
         # The canary's registered pair (D143): native_run_limits refuses a
         # deadline without its budget.
-        'runtime': {'budget_guard_usd': '90', 'deadline_seconds': 21600, 'model': 'fixture-model',
+        'runtime': {'budget_guard_usd': '90', 'deadline_seconds': 28800, 'model': 'fixture-model',
             'limits': {'contextWindow': 100, 'maxOutputTokens': 10},
             'keep_awake': {'policy': 'macos_iokit_ims_v1', 'host_platform': 'darwin', 'basis': 'offline fixture'},
             'limits_basis': json.dumps({'kind': 'd4d_native_u4b_runtime_basis', 'version': 3,
                 'admission': {'capture_state_directory': str(base / 'word-state'),
                     'valid_from': '2026-11-05T00:00:00Z', 'valid_until': '2026-11-19T00:00:00Z',
                     'max_starting_weekly_utilization': 0.5, 'max_starting_five_hour_utilization': 0.25,
-                    'max_age_seconds': 1200, 'pre_reservation_margin_seconds': 300}})},
+                    'max_age_seconds': 1800, 'pre_reservation_margin_seconds': 300}})},
         'dependencies': {'base': {'package_sources': {'src/data_sheets_schema/native_launch_sequence.py': digest}}}}})
         + b' ' * registration_padding)
     result['review'].write_bytes(guard.canonical({'kind': 'd4d_native_execution_review_bundle_v3',
@@ -180,7 +180,7 @@ def fake_commands(monkeypatch, paths, *, mutate=None, fail=None, fail_exception=
             ipc = Path(command[command.index('--prepared-directory') + 1])
             worker.publish_prepared(ipc, registration_raw=paths['registration'].read_bytes(),
                 attempt=guard.strict_json(paths['registration'].read_bytes())['registration']['attempt_directory'],
-                source_sha256='a' * 64, environment_sha256='b' * 64, max_age_seconds=1200)
+                source_sha256='a' * 64, environment_sha256='b' * 64, max_age_seconds=1800)
             body = {'state': 'completed_pending_independent_review', 'runtime_gates_passed': True}
         document = {'command': name, 'result': body}
         data = mutate(name, document) if mutate else None
@@ -227,7 +227,7 @@ def test_worker_expiry_after_ready_does_not_spend_capture(tmp_path, monkeypatch)
     require = worker.require_prepared
     def expire_after_ready(*args, **kwargs):
         raw = require(*args, **kwargs)
-        expiry = guard.strict_json(raw)['prepared_at'] + 1200
+        expiry = guard.strict_json(raw)['prepared_at'] + 1800
         monkeypatch.setattr(worker.time, 'time', lambda: expiry)
         return raw
     monkeypatch.setattr(worker, 'require_prepared', expire_after_ready)
@@ -437,9 +437,9 @@ def main():
         raw = Path(flags['--registration']).read_bytes()
         attempt = json.loads(raw)['registration']['attempt_directory']
         prepared = worker.publish_prepared(flags['--prepared-directory'], registration_raw=raw,
-            attempt=attempt, source_sha256='a' * 64, environment_sha256='b' * 64, max_age_seconds=1200)
+            attempt=attempt, source_sha256='a' * 64, environment_sha256='b' * 64, max_age_seconds=1800)
         worker.wait_proceed(flags['--prepared-directory'], prepared_raw=prepared,
-            registration_raw=raw, attempt=attempt, max_age_seconds=1200)
+            registration_raw=raw, attempt=attempt, max_age_seconds=1800)
         body = {'state': 'completed_pending_independent_review', 'runtime_gates_passed': True}
     else:
         raise AssertionError('unexpected command')

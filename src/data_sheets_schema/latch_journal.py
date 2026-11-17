@@ -38,7 +38,7 @@ D41_COMMITTED_AT = "2026-10-25T22:11:01-07:00"
 def _age_git(root, *args):
     env = {**os.environ, "GIT_NO_LAZY_FETCH": "1", "GIT_NO_REPLACE_OBJECTS": "1"}
     return subprocess.run(["git", "--no-replace-objects", "-C", root, *args],
-                          env=env, capture_output=True, text=True, timeout=10)
+                          env=env, capture_output=True, text=True, timeout=20)
 
 
 def _resolve_recorded_commit(commit, root):

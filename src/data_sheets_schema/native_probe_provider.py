@@ -29,7 +29,7 @@ def _read_request(handler, size):
         remaining = handler.server.deadline - time.monotonic()
         if remaining <= 0:
             raise TimeoutError('permission probe deadline elapsed during request')
-        handler.connection.settimeout(min(1.0, remaining))
+        handler.connection.settimeout(min(2.0, remaining))
         part = handler.rfile.read1(min(65536, size - len(raw)))
         if not part:
             raise ValueError('truncated scripted request')
@@ -157,7 +157,7 @@ class _Server(HTTPServer):
             remaining = self.deadline - time.monotonic()
             if remaining <= 0 or self.stop_requested.is_set():
                 raise TimeoutError('permission provider is stopping')
-            connection.settimeout(min(1.0, remaining))
+            connection.settimeout(min(2.0, remaining))
             with self.connection_lock:
                 if self.stop_requested.is_set():
                     raise OSError('permission provider stopped before request')
@@ -216,7 +216,7 @@ def local_provider(*, cases, model, deadline, reply=None, observation_request=No
         server.reply = reply
         server.observation_request = observation_request
         server.failure, server.requests = None, 0
-        server.timeout = 0.05
+        server.timeout = 0.1
         server.active_connection = None
         server.connection_lock = threading.Lock()
         server.stop_requested = threading.Event()
@@ -233,6 +233,6 @@ def local_provider(*, cases, model, deadline, reply=None, observation_request=No
         finally:
             server.server_close()
             if started:
-                thread.join(timeout=2)
+                thread.join(timeout=4)
                 if thread.is_alive():
                     raise RuntimeError("scripted permission provider did not close")
