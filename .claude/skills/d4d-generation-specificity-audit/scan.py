@@ -13022,7 +13022,7 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
     # (a0cffc39) the v2 environment adds exactly two required keys,
     # BASH_DEFAULT_TIMEOUT_MS and BASH_MAX_TIMEOUT_MS at 600000, and the
     # require_bash_timeouts validator. No loader or path logic changed.
-    'src/data_sheets_schema/native_shared_runtime_values.py': '11e2254b2bdc286ac448a52ac03c6e99b4936499d529855f39ca98be2705be87',
+    'src/data_sheets_schema/native_shared_runtime_values.py': '5c5e2d92043141f2f48e9506a18abec6fa44645684695aaa1e3f546547993a9c',
     # Rotated by the lead, 2026-11-14 (#6228, PR 5968 review): against the
     # prior pin (e8a24b22) only SYNTHETIC_PEER_SHA256 changed, because the
     # synthetic peer now emits the explicit permission mode and success that
@@ -13039,7 +13039,7 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
     # the merged peer that keeps the Bash timeout and emits G3b's denials.
     # Rotated again (#6251): against d9e0be6a, only SYNTHETIC_PEER_SHA256, for
     # the peer whose not_prescribed Bash denial targets an unregistered file.
-    'src/data_sheets_schema/native_runtime_profiles.py': '0a0aa121a9406b1e29cf505256ef317fac63187f560c6d6fb58bbaa6240c128f',
+    'src/data_sheets_schema/native_runtime_profiles.py': '58f18bd16839bc0a22143e2204d2e52375137ef0499d86dd4bd3d6873c70afc2',
     'src/data_sheets_schema/native_helper_cache.py': '0934f71630ab45e4670ffa0d14f90c1cfbb23a132a23ca8c6ccfcc0c58a52a95',
     # Controller pin rotation for the issue 6094 timing hooks (lead,
     # 2026-11-13; sources source_commit e648abe2a). Against the prior pins
@@ -13048,8 +13048,8 @@ _NATIVE_V2_INTEGRATED_RENDER_SOURCES = {
     # and the native_control and run_native_canary hashes. These are identity
     # data, not loader logic. The base summary keeps the earlier contract's
     # identity.
-    'src/data_sheets_schema/native_attribution_controller_v2.py': '6baa7e1fcdd64c22442ad54e3554178ee390d64c0e17594bd7e298be3a204247',
-    'src/data_sheets_schema/native_controller_sources_v2.json': '80e6d1febbfe420e1cc3c2900d45a7551b4fbe106bad1bac3d25c84226fd042f',
+    'src/data_sheets_schema/native_attribution_controller_v2.py': '4ff7a2b6e12a21cb7d76cee6dd8bb0424e897389fe884c04ddbbd24f48d67994',
+    'src/data_sheets_schema/native_controller_sources_v2.json': '8436623f0852a4f98c8061006e0fd160952f529b75607fc8171f2dc4658ae1fe',
 }
 
 
@@ -13058,7 +13058,10 @@ _NATIVE_V3_RENDER_SOURCES = {
     # Lead-authorized split, updated 2026-11-16: v3 uses 7d6c13f8, whose
     # verified loader restores caller import roots before the census.
     # This override prevents the historical v2 pin changing v3 authority.
-    'src/data_sheets_schema/native_execution_authority_v2.py': '7d6c13f8ca6c58be9a322cf5fb8679cf6d5734564227990eb5adac6261eac6e8',
+    'src/data_sheets_schema/native_execution_authority_v2.py': '9593574b74353be270b47cf866022d09c6c70f329b65e1272a65244d5a72418c',
+    # D159 (owner, 2026-11-17; lead override): v3 binds the supervisor whose
+    # git rev-parse timeout is 20 s (was 10 s); the historical v2 pin is unchanged.
+    'src/data_sheets_schema/native_supervisor_authority_v2.py': '628ab407e3e507fd28573c99b2c28c0a97c9eb1d8fa818ccf08bc305e126c8b7',
     # New v3 summaries authorized by the lead, 2026-11-14 (D148), after the
     # structural proof. Bind the complete v3 wire vocabulary and fresh v1
     # environment census, including payload verification and unowned files.
@@ -13067,7 +13070,7 @@ _NATIVE_V3_RENDER_SOURCES = {
     # Rotated at the merge into the candidate (lead, 2026-11-15): against
     # f0a21bb7, only CONTROLLER_SOURCES_SHA256 d4ad9c21 -> e500cb15, the
     # controller sources rotated for #6244 (b9192ff75).
-    'src/data_sheets_schema/native_shared_authority_wire.py': '3040f1ba23f14fd89add554c13a017ce4fde095e2ecead82e768fb0d94bac165',
+    'src/data_sheets_schema/native_shared_authority_wire.py': 'e90e613272222a313e405b0449ab548e4f4058ce529fd77c57296b9bded67aa2',
     # Lead-authorized rotation, 2026-11-15: bind the full/light modes,
     # process-local full verification reuse, and RECORD/size live checks.
     # Rotated (lead, 2026-11-16): the census ruling's call-local ancestor resolver

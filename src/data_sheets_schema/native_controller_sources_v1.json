@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source_commit": "6ea43d555676d584d66b20adbe23d2f6aea6b56a",
+  "source_commit": "9f65349cc941bda7d70cc1dcc22e81e25c4b6ffe",
   "modules": {
     "budget_amendment": {
       "path": "notes/matched_cborg_2026-09-13/budget_amendment.py",
@@ -8,7 +8,7 @@
     },
     "budgeted_cborg": {
       "path": "notes/matched_cborg_2026-09-13/budgeted_cborg.py",
-      "sha256": "0aef1b59d05fd9a1f7f6e2f83b863800fb48e6c35e22030cbcbcfc373c5375e2"
+      "sha256": "0c407ceb703715b4ff6ea92e3262ded107d6c6aea37aab953a9b5570308a6204"
     },
     "native_command_policy": {
       "path": "notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py",
@@ -16,7 +16,7 @@
     },
     "native_control": {
       "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
-      "sha256": "25fa83e2bae763fccb378d6a041b1a2d02843c1d03c0e4fef6ded64c63fc2488"
+      "sha256": "fb52da46e41bba0aae98a1d8d88d455bf211935332b751f8349ee59a03032c3e"
     },
     "native_file_policy": {
       "path": "notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py",
@@ -28,7 +28,7 @@
     },
     "native_proxy": {
       "path": "notes/matched_cborg_2026-09-13/native_controls/native_proxy.py",
-      "sha256": "21f2d16e6c9b93f033664c7b95521076b27786a2b1679c008713f2e40bf599b7"
+      "sha256": "e799b08de348847dd51a1c73da5e48a2fbebf6b70ea1b47351cdbe9091e29d3a"
     },
     "native_readonly": {
       "path": "notes/matched_cborg_2026-09-13/native_controls/native_readonly.py",
@@ -48,7 +48,7 @@
     },
     "run_native_canary": {
       "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
-      "sha256": "0c3c8c9e03d94555c29989bae7b12dad0853b9919b015b801710244eb862b070"
+      "sha256": "d2db9eb4d11b96d0cfeec27f73e468dcdf10f33ac0f64f3d70d9168c3a07afcf"
     }
   }
 }
