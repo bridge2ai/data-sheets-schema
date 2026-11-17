@@ -52,9 +52,12 @@ minimum margins and security/refusal bounds remain unchanged except the explicit
 usage max-age amendment. The protected LinkML timeout remains 180 s per the lead.
 Earlier measured timings and explicit offline qualification gates are evidence,
 not new measurements. The delegated-start and host-confirmation age windows
-remain 1800 s. Restore the adjacent .bak-d159-20261117 file to undo this update.
+remain 1800 s. Reverse the D159 amendment against the adjacent
+.bak-d159-20261117 backup to undo it, preserving later lead additions.
 '''
 if '--inventory-only' not in sys.argv:
+    if runbook.read_text() not in (backup.read_text(), text):
+        raise ValueError('Runbook has later edits; use --inventory-only and preserve those edits.')
     runbook.write_text(text)
 result = subprocess.run(['grep', '-rnE', 'timeout|TIMEOUT|deadline|DEADLINE|[Ss][Ee][Cc][Oo][Nn][Dd][Ss]|1200|7200|21600|43200|600000',
     'src', 'notes/matched_cborg_2026-09-13/native_controls', 'tests', 'scripts', 'utils', '.claude', '.github/workflows/main.yaml', str(runbook)],
@@ -69,7 +72,7 @@ for name in subprocess.check_output(['git', 'diff', '--name-only', base], cwd=ro
     rows.append({'path': name, 'diff': clean(''.join(difflib.unified_diff(old.splitlines(True), new.splitlines(True))))})
 (scratch / 'final-changes.json').write_text(json.dumps(rows, indent=2)+'\n')
 (scratch / 'runbook-diff.txt').write_text(clean(''.join(difflib.unified_diff(
-    backup.read_text().splitlines(True), runbook.read_text().splitlines(True),
+    backup.read_text().splitlines(True), text.splitlines(True),
     fromfile=str(backup), tofile=str(runbook)))))
 # Sanitize earlier discovery output too; the lead requested no notification glyphs.
 for name in ['limit-inventory.txt', 'value-locations.txt']:

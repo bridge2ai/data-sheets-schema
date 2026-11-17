@@ -76,8 +76,8 @@ for row in reviews['unchanged']:
     lines += ['- '+row['path']+': '+row['value']+'. '+row['reason']]
 runbook = root.parent / 'plans/native_post_merge_runbook_DRAFT_20261114.md'
 lines += ['', '## Runbook and review', '',
-    'Updated '+str(runbook)+'. Backup: '+str(runbook)+'.bak-d159-20261117. Restore that adjacent backup to undo the amendment.',
-    'Exact runbook changes: '+str(evidence / 'runbook-diff.txt'),
+    'Updated '+str(runbook)+'. Backup: '+str(runbook)+'.bak-d159-20261117. Reverse only the D159 hunks against that backup to undo the amendment; preserve the lead\'s later evaluation Step 9.',
+    'D159-only runbook changes: '+str(evidence / 'runbook-diff.txt'),
     'Read-only review findings and dispositions: '+str(root / 'scripts/adhoc/d159_review_findings_20261117.json')+'. The assignment forbids GitHub writes, so the lead must create any required issue records.',
     'The local commit needed one elevated retry after sandbox index.lock refusal; the retry succeeded.', '',
     'Helper provenance scripts:', '']
