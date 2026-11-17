@@ -26,7 +26,9 @@ pins = json.loads((evidence / 'pin-proposal-compact.txt').read_text())
 timing = json.loads((scratch / 'validator/timing.json').read_text())
 changes = json.loads((root / 'notes/d159_limits_20261117/changes.json').read_text())
 reviews = json.loads((root / 'scripts/adhoc/d159_review_findings_20261117.json').read_text())
-lines = ['# D159 limits: implementation committed; '+('validation results below' if args.final else 'validation in progress'), '',
+completed = list(scratch.glob('*/lane_summary.json')) + list(scratch.glob('rerun-*/*/lane_summary.json'))
+status = 'validation results below' if completed else 'validation blocked by shared test slots'
+lines = ['# D159 limits: implementation committed; '+(status if args.final else 'validation in progress'), '',
     'Implemented the settled ruling on branch codex/d159-limits-20261117. Current commit: '+head+'.',
     'No protected file or pin was changed. No native binary, provider, GitHub write or push was executed.', '',
     'Every changed location and its old/new text: '+str(root / 'notes/d159_limits_20261117/change_inventory.md'),
@@ -34,6 +36,8 @@ lines = ['# D159 limits: implementation committed; '+('validation results below'
     'Ignore-independent grep inventory: '+str(evidence / 'complete-limit-inventory.txt'), '',
     '## Tests', '']
 lines += ['Focused retry includes the admission, guard, controller, deadline, runtime, sequence, prepared-worker, permission, packet and CI companion suites.', '']
+if args.final and not completed:
+    lines += ['The focused attempts could not acquire shared slots. No pytest suite ran. Native-controls and collection remain unexecuted because the assigned order starts with the focused stage. This handoff is not a claim of completed validation. The lead must arrange a free slot and rerun the saved launcher.', '']
 logs = sorted(evidence.glob('*.log')) + sorted(scratch.glob('rerun-*/*/launcher.log'))
 for log in logs:
     if log.exists():
