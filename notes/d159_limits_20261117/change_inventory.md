@@ -1,5 +1,10 @@
 # D159 changed locations
 
+> **Lead corrections after integration (2026-11-17), from the lead's integration review and agy's Gate 4 delta review:**
+> - The legacy v2 contract (`d4d_tool_policy_v2`) is **not** changed. The rows below for `native_control.py:26-28`, and the matching `_CONTRACT` rows for `src/data_sheets_schema/native_shared_permission_protocol.py`, were reverted to 30/2/3 s with the #2420 comment (`9f65349cc` and the follow-up commit), because historical replay must stay byte-identical.
+> - Added: `notes/matched_cborg_2026-09-13/native_controls/probe_native_history.py:165`, the `selected_deadline` elapsed bound `< 12` -> `< 16`. This keeps the 8 s deadline plus the doubled 4 s SIGTERM grace, with a 4 s margin.
+> - The corresponding rows in `changes.json` are superseded by this note.
+
 Generated from changes.json by scripts/adhoc/report_d159_limits_20261117.py.
 
 | Location | Before | After |

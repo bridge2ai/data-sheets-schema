@@ -12,8 +12,8 @@ import json as _json
 
 
 _CONTRACT = {'version': 2, 'event': 'PreToolUse', 'matcher': 'Bash|Read|Write',
-             'callback_id': 'd4d_tool_policy_v2', 'initialize_timeout_seconds': 60,
-             'callback_timeout_seconds': 4, 'runtime_callback_timeout_seconds': 6}
+             'callback_id': 'd4d_tool_policy_v2', 'initialize_timeout_seconds': 30,
+             'callback_timeout_seconds': 2, 'runtime_callback_timeout_seconds': 3}
 _HISTORY_CONTRACT = {'version': 3, 'event': 'PreToolUse', 'matcher': 'Bash|Read|Write',
                      'callback_id': 'd4d_tool_policy_v3', 'initialize_timeout_seconds': 60,
                      'callback_timeout_seconds': 4, 'observer_timeout_seconds': 240,

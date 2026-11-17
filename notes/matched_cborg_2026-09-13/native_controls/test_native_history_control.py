@@ -162,7 +162,7 @@ def blocking_observer(host_factory, *, outcome=None):
 def test_slow_prior_history_is_responsive_and_precedes_every_authorization(host_factory, monkeypatch):
     host, entered, release, observed, calls = blocking_observer(host_factory)
     clock = [0.]
-    # Advance history by more than the legacy host's 6 seconds; classifier
+    # Advance history by more than the legacy host's 3 seconds; classifier
     # starts afterwards and retains a separate 4-second completion budget.
     monkeypatch.setattr(control, 'time', SimpleNamespace(monotonic=lambda: clock[0]))
     host.channel._active_work = ('observer', 0., host.channel._active_work[2])

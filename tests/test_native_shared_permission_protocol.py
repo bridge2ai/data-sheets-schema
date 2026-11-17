@@ -24,6 +24,8 @@ from tests.test_native_execution_authority_v2 import isolated_modules
 # Only the NativeControl class changed; CONTRACT, HISTORY_CONTRACT, INIT_ID, digest,
 # initialize_frame and hook_output, which these tests compare, are byte-identical to
 # the e53f9627 oracle (AST comparison of every top-level definition).
+# D159 (owner, 2026-11-17) then changed HISTORY_CONTRACT's time values only
+# (60/4/240/250 s); the legacy v2 CONTRACT stays byte-identical (#2420).
 CONTROL_SHA = 'fb52da46e41bba0aae98a1d8d88d455bf211935332b751f8349ee59a03032c3e'
 POLICY_SHA = '99db1879752ea73fea0002ea5a3a2d8333365b4e3843abdab3e1a1f0008709cc'
 PROTOCOL_NAME = 'data_sheets_schema.native_shared_permission_protocol'
