@@ -160939,8 +160939,8 @@
   ],
   "kind": "native_d128_finite_scanner_approval",
   "reference_candidate": {
-    "commit": "a1d719a9cea1553f0ccbd63efc0bc2300e39e2ca",
-    "committed_roster_sha256": "991fcb73613d9569aa171aaea07591ec35bd10a5bcad009c6f5d86bc22a8cec2",
+    "commit": "5263d5a002d32695d97a6b5c1fb97c270ece6859",
+    "committed_roster_sha256": "f27777a3d690d30bb7b0df61abee22011ce7966a056f4ecd16d6df62699498e2",
     "physical_input_mask": [
       "src",
       "tests",
@@ -160957,17 +160957,17 @@
       "CLAUDE.local.md",
       "data/preprocessed/source_manifest.yaml"
     ],
-    "physical_inputs_sha256": "e53142d18054c57faa3d103cde84692150535afdda506e403bea28d86f4a1472",
-    "tree": "3463f8c18c80fed7f1297b01bae6843d7d8ff327"
+    "physical_inputs_sha256": "bcdffe5aada6827ef467cdfb2a6d817e4641e9d148650da3835ececb1dcb9367",
+    "tree": "c0a3fb78e945d9ddb919d7c7b37053f4fe28506e"
   },
   "scope": "Only the finite approved objects and occurrence mapping. No normalization, new finding approval, native acceptance, or automatic golden refresh.",
-  "source_evidence_sha256": "11baf9cda3b7c558be9ca3d9773d4711ad4b3f4d12a2f519de8996e7d72a7279",
+  "source_evidence_sha256": "c054fd98651b206b3398afe8c1b6d65c70eea1e66e9cb7808d9b7fc05e476812",
   "tool_assets_sha256": {
     ".claude/skills/d4d-generation-specificity-audit/SKILL.md": "e422b3b635f7330abaea1860b7156644d4a243417024cc4c36d126c4ab75a780",
     ".claude/skills/d4d-generation-specificity-audit/exceptions.yaml": "adb2376d10bf26558c022e31fda983b857311ba872972ccbdfc2ba5d141c9865",
-    ".claude/skills/d4d-generation-specificity-audit/scan.py": "1fb8f73e6a396a740a120a050ee5f6d66cc676488419b6526aee4b9929a9345c",
+    ".claude/skills/d4d-generation-specificity-audit/scan.py": "b8833043c68e4bcb21aa5f7c6aa7b6a7f397b2dd5555b25c7f5326dd4f79a417",
     ".claude/skills/d4d-generation-specificity-audit/tokens.yaml": "5dc373161654f6a1b897b778d0d82a046b59a568d7e57e4436e70975bca8d681"
   },
-  "tool_commit": "a1d719a9cea1553f0ccbd63efc0bc2300e39e2ca",
+  "tool_commit": "5263d5a002d32695d97a6b5c1fb97c270ece6859",
   "version": 1
 }
