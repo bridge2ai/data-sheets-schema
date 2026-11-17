@@ -23,9 +23,9 @@ from native_file_policy import FileAccess
 
 TOOLS = frozenset({'Bash', 'Read', 'Write'})
 CONTRACT = {'version': 2, 'event': 'PreToolUse', 'matcher': 'Bash|Read|Write',
-            'callback_id': 'd4d_tool_policy_v2', 'initialize_timeout_seconds': 60,
-            'callback_timeout_seconds': 4, 'runtime_callback_timeout_seconds': 6}
-# Explicit opt-in; both contracts use D159 time limits.
+            'callback_id': 'd4d_tool_policy_v2', 'initialize_timeout_seconds': 30,
+            'callback_timeout_seconds': 2, 'runtime_callback_timeout_seconds': 3}
+# Explicit opt-in; legacy initialization/replay stays byte-identical (#2420).
 HISTORY_CONTRACT = {'version': 3, 'event': 'PreToolUse', 'matcher': 'Bash|Read|Write',
                     'callback_id': 'd4d_tool_policy_v3', 'initialize_timeout_seconds': 60,
                     'callback_timeout_seconds': 4, 'observer_timeout_seconds': 240,
