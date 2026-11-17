@@ -307,7 +307,7 @@ def prepared_scope_case(tmp_path, monkeypatch, *, production, through_selection=
     monkeypatch.setattr(engine, '_require_launch_profile', lambda *args: None)
     monkeypatch.setattr(native_sequence_inputs, 'check_authority', lambda *args: None)
     monkeypatch.setattr(native_runtime_profiles, 'require_synthetic', lambda *args: None)
-    monkeypatch.setattr(native_u4b_policy, 'registered_policy', lambda runtime: {'max_age_seconds': 1200})
+    monkeypatch.setattr(native_u4b_policy, 'registered_policy', lambda runtime: {'max_age_seconds': 1800})
     monkeypatch.setattr(engine.admission, 'admit', lambda *args, **kwargs:
         SimpleNamespace(registration_raw=raw, evidence=tuple(SimpleNamespace(
             pin=SimpleNamespace(path=authorization['inputs'][name]), raw=authorization['raw'][name])

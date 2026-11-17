@@ -834,6 +834,12 @@
     "new": "assert timeout == 4"
   },
   {
+    "path": "tests/test_native_prepared_sequence.py",
+    "line": 310,
+    "old": "monkeypatch.setattr(native_u4b_policy, 'registered_policy', lambda runtime: {'max_age_seconds': 1200})",
+    "new": "monkeypatch.setattr(native_u4b_policy, 'registered_policy', lambda runtime: {'max_age_seconds': 1800})"
+  },
+  {
     "path": "tests/test_native_prepared_worker.py",
     "line": 18,
     "old": "binding = dict(registration_raw=b'registration', attempt=attempt, max_age_seconds=1200)",

@@ -143,6 +143,7 @@ Generated from changes.json by scripts/adhoc/report_d159_limits_20261117.py.
 | tests/test_native_launch_sequence_signals.py:157 | registration_raw=raw, attempt=attempt, max_age_seconds=1200) | registration_raw=raw, attempt=attempt, max_age_seconds=1800) |
 | tests/test_native_permission_probe.py:203 | assert kwargs["timeout"] == 10 and kwargs["stdin"] == probe.subprocess.DEVNULL | assert kwargs["timeout"] == 20 and kwargs["stdin"] == probe.subprocess.DEVNULL |
 | tests/test_native_permission_probe.py:742 | assert timeout == 2 | assert timeout == 4 |
+| tests/test_native_prepared_sequence.py:310 | monkeypatch.setattr(native_u4b_policy, 'registered_policy', lambda runtime: {'max_age_seconds': 1200}) | monkeypatch.setattr(native_u4b_policy, 'registered_policy', lambda runtime: {'max_age_seconds': 1800}) |
 | tests/test_native_prepared_worker.py:18 | binding = dict(registration_raw=b'registration', attempt=attempt, max_age_seconds=1200) | binding = dict(registration_raw=b'registration', attempt=attempt, max_age_seconds=1800) |
 | tests/test_native_prepared_worker.py:48 | monkeypatch.setattr(worker.time, 'time', lambda: 1300.0) | monkeypatch.setattr(worker.time, 'time', lambda: 1900.0) |
 | tests/test_native_prepared_worker.py:56 | ticks = iter([0.0, 1200.0]) | ticks = iter([0.0, 1800.0]) |

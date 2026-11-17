@@ -7,7 +7,8 @@
     {"id": "D159-R2", "finding": "Initial candidate included deterministic_publication validator timeout without an established native execution caller.", "disposition": "Addressed: restored unchanged 180 seconds; listed as unchanged, unclear rather than expanding scope."},
     {"id": "D159-R3", "finding": "Existing CI evidence metadata still declared 900/180/3600 seconds despite the newer synthetic and workflow limits.", "disposition": "Addressed: records now declare 9600/1000/14400 seconds and preserve historical observed durations."},
     {"id": "D159-R4", "finding": "Controller leaves and permission contracts change pinned identities; scanner and D128 consumers need downstream rotation.", "disposition": "Deferred to lead: full proposal supplied; no pin changed and protected files retained."},
-    {"id": "D159-R5", "finding": "History callback tests advanced mocked clocks to old timeout boundaries, and the slow-history diagnostic delay no longer exceeded the enlarged legacy response window.", "disposition": "Addressed in follow-up: move mocked clocks beyond the new boundaries and double the slow diagnostic delay; retain every rejection and ordering assertion."}
+    {"id": "D159-R5", "finding": "History callback tests advanced mocked clocks to old timeout boundaries, and the slow-history diagnostic delay no longer exceeded the enlarged legacy response window.", "disposition": "Addressed in follow-up: move mocked clocks beyond the new boundaries and double the slow diagnostic delay; retain every rejection and ordering assertion."},
+    {"id": "D159-R6", "finding": "Prepared-sequence test stub retained the former 1200-second registered usage age.", "disposition": "Addressed: stub now supplies the registered 1800-second age."}
   ],
   "unchanged": [
     {"path": "src/data_sheets_schema/api_runner.py", "value": "validator 180 s", "reason": "Protected; measured separately through the native schema closure."},

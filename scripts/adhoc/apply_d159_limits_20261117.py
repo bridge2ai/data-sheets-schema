@@ -90,7 +90,7 @@ def transform(path, raw):
         text = re.sub(r'\b(21599|21600|21601|43200|43201)\b', lambda m: {'21599':'28799', '21600':'28800', '21601':'28801', '43200':'57600', '43201':'57601'}[m[0]], text)
     if native or fixture or path == 'scripts/draft_native_probe_packet.py':
         text = re.sub(r'\b600000\b', '1000000', text)
-    age_tests = ['test_native_u4b_a3_policy.py', 'test_native_launch_sequence.py', 'test_native_launch_sequence_signals.py', 'test_native_prepared_worker.py']
+    age_tests = ['test_native_u4b_a3_policy.py', 'test_native_launch_sequence.py', 'test_native_launch_sequence_signals.py', 'test_native_prepared_worker.py', 'test_native_prepared_sequence.py']
     if Path(path).name in age_tests:
         text = re.sub(r'\b(1199|1200|1201)\b', lambda m: str(int(m[0])+600), text)
     if path == 'tests/test_native_prepared_worker.py':

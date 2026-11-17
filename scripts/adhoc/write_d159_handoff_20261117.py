@@ -49,6 +49,9 @@ lines += ['', 'Test runner: primary checkout scripts/adhoc/run_lane_20261115.py,
     'Focused lane waited for an existing exclusive np15-fresh-validation lease; no lock was removed or bypassed.', '',
     '## Validator measurement', '',
     'The exact native_execution_gates.schemas closure ran in isolation on the public synthetic fixture seed and its derived core. This is a schema-gate measurement, not a full native launch or a production-sized dataset benchmark.', '']
+if not args.final:
+    lock = root.parent / '.d4d-lane-locks/slot-00.lock'
+    lines += ['Current shared-slot metadata: '+lock.read_text().strip(), '']
 for row in timing['measurements']:
     lines += ['- '+row['class']+': '+str(row['record_bytes'])+' bytes, '+str(row['wall_seconds'])+' seconds; protected timeout '+str(row['timeout_seconds'])+' seconds; failure '+str(row['failure'])+'.']
 lines += ['', 'Both records passed. Both are below the lead escalation threshold of about 90 seconds.',
