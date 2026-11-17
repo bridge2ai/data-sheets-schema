@@ -66,7 +66,7 @@ def test_readiness_refuses_dead_or_expired_worker(tmp_path, monkeypatch):
         owned.require_ready(ipc, prepared_raw=raw, **binding)
     owned._exit_status = lambda: None
     owned.require_ready(ipc, prepared_raw=raw, **binding)
-    monkeypatch.setattr(sequence.time, 'time', lambda: 1300.0)
+    monkeypatch.setattr(sequence.time, 'time', lambda: 1900.0)
     with pytest.raises(ValueError, match='stale or foreign'):
         owned.require_ready(ipc, prepared_raw=raw, **binding)
 

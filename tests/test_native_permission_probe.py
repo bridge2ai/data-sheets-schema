@@ -373,7 +373,7 @@ def test_denied_group_signal_still_attempts_reap_and_preserves_refusal(
     with pytest.raises(PermissionError) as caught:
         probe._terminate(process)
     assert caught.value is refusal
-    assert calls == [('signal', process.pid, probe.signal.SIGTERM), ('wait', 1)]
+    assert calls == [('signal', process.pid, probe.signal.SIGTERM), ('wait', 2)]
     assert process.reaped is (not wait_times_out)
 
 

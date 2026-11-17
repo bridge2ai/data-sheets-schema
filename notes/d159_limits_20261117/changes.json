@@ -853,9 +853,21 @@
   },
   {
     "path": "tests/test_native_permission_probe.py",
+    "line": 376,
+    "old": "assert calls == [('signal', process.pid, probe.signal.SIGTERM), ('wait', 1)]",
+    "new": "assert calls == [('signal', process.pid, probe.signal.SIGTERM), ('wait', 2)]"
+  },
+  {
+    "path": "tests/test_native_permission_probe.py",
     "line": 742,
     "old": "assert timeout == 2",
     "new": "assert timeout == 4"
+  },
+  {
+    "path": "tests/test_native_prepared_sequence.py",
+    "line": 69,
+    "old": "monkeypatch.setattr(sequence.time, 'time', lambda: 1300.0)",
+    "new": "monkeypatch.setattr(sequence.time, 'time', lambda: 1900.0)"
   },
   {
     "path": "tests/test_native_prepared_sequence.py",
@@ -928,6 +940,108 @@
     "line": 51,
     "old": "('400', 43201), ('90.0', 21600)])",
     "new": "('400', 57601), ('90.0', 28800)])"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 93,
+    "old": "def test_canary_same_input_runtime_and_saved_registration_bytes_unchanged(tmp_path, evidence):",
+    "new": "def test_canary_same_input_bytes_preserved_but_old_deadline_policy_refuses(tmp_path, evidence):"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 101,
+    "old": "old_policy.validate_runtime_terms(before)",
+    "new": "historical = deepcopy(before)"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 102,
+    "old": "policy.validate_runtime_terms(after)",
+    "new": "historical['deadline_seconds'] = 21600"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 103,
+    "old": "raw,bundle,word = evidence",
+    "new": "old_policy.validate_runtime_terms(historical)"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 104,
+    "old": "saved = (bytes(raw),bytes(bundle),bytes(word))",
+    "new": "with pytest.raises(ValueError, match='21600'):"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 105,
+    "old": "assert old_review.validate_bundle(*saved) == review.validate_bundle(*saved)",
+    "new": "old_policy.validate_runtime_terms(before)"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 106,
+    "old": "assert saved == evidence",
+    "new": "with pytest.raises(ValueError, match='registered budget/deadline'):"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 107,
+    "old": "for name, raw_bytes in {",
+    "new": "policy.validate_runtime_terms(historical)"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 108,
+    "old": "'canary-runtime-before.json': wire.canonical(before),",
+    "new": "policy.validate_runtime_terms(after)"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 109,
+    "old": "'canary-runtime-after.json': wire.canonical(after),",
+    "new": "raw,bundle,word = evidence"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 110,
+    "old": "'canary-registration-before.json': saved[0],",
+    "new": "saved = (bytes(raw),bytes(bundle),bytes(word))"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 111,
+    "old": "'canary-registration-after.json': evidence[0],",
+    "new": "with pytest.raises(ValueError, match='owner/runtime deadline differs'):"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 112,
+    "old": "'canary-review.json': saved[1], 'canary-word.json': saved[2],",
+    "new": "old_review.validate_bundle(*saved)"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 113,
+    "old": "}.items():",
+    "new": "assert review.validate_bundle(*saved)['deadline_seconds'] == limits.CANARY[1]"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 114,
+    "old": "(tmp_path / name).write_bytes(raw_bytes)",
+    "new": "assert saved == evidence"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 115,
+    "old": "# This is exact saved-registration/parser compatibility, not a claim that",
+    "new": "for name, raw_bytes in {"
+  },
+  {
+    "path": "tests/test_native_run_limits.py",
+    "line": 116,
+    "old": "# fresh registration source/dependency identities survive a source change.",
+    "new": "'canary-runtime-before.json': wire.canonical(before),"
   },
   {
     "path": "tests/test_native_shared_observations.py",

@@ -90,7 +90,7 @@ def prior_module(name):
     return module
 
 
-def test_canary_same_input_runtime_and_saved_registration_bytes_unchanged(tmp_path, evidence):
+def test_canary_same_input_bytes_preserved_but_old_deadline_policy_refuses(tmp_path, evidence):
     old_runtime = prior_module('native_u4b_runtime')
     old_policy = prior_module('native_u4b_policy')
     old_review = prior_module('native_launch_review')
@@ -98,11 +98,19 @@ def test_canary_same_input_runtime_and_saved_registration_bytes_unchanged(tmp_pa
     before = old_runtime.prepare_runtime(deepcopy(value), **args)
     after = runtime.prepare_runtime(deepcopy(value), **args)
     assert wire.canonical(before) == wire.canonical(after)
-    old_policy.validate_runtime_terms(before)
+    historical = deepcopy(before)
+    historical['deadline_seconds'] = 21600
+    old_policy.validate_runtime_terms(historical)
+    with pytest.raises(ValueError, match='21600'):
+        old_policy.validate_runtime_terms(before)
+    with pytest.raises(ValueError, match='registered budget/deadline'):
+        policy.validate_runtime_terms(historical)
     policy.validate_runtime_terms(after)
     raw,bundle,word = evidence
     saved = (bytes(raw),bytes(bundle),bytes(word))
-    assert old_review.validate_bundle(*saved) == review.validate_bundle(*saved)
+    with pytest.raises(ValueError, match='owner/runtime deadline differs'):
+        old_review.validate_bundle(*saved)
+    assert review.validate_bundle(*saved)['deadline_seconds'] == limits.CANARY[1]
     assert saved == evidence
     for name, raw_bytes in {
         'canary-runtime-before.json': wire.canonical(before),
@@ -112,5 +120,5 @@ def test_canary_same_input_runtime_and_saved_registration_bytes_unchanged(tmp_pa
         'canary-review.json': saved[1], 'canary-word.json': saved[2],
     }.items():
         (tmp_path / name).write_bytes(raw_bytes)
-    # This is exact saved-registration/parser compatibility, not a claim that
-    # fresh registration source/dependency identities survive a source change.
+    # Same-input preparation and saved bytes remain exact. The historical
+    # deadline policy deliberately refuses the newly authorized deadline.

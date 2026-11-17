@@ -146,7 +146,9 @@ Generated from changes.json by scripts/adhoc/report_d159_limits_20261117.py.
 | tests/test_native_launch_sequence_signals.py:155 | attempt=attempt, source_sha256='a' * 64, environment_sha256='b' * 64, max_age_seconds=1200) | attempt=attempt, source_sha256='a' * 64, environment_sha256='b' * 64, max_age_seconds=1800) |
 | tests/test_native_launch_sequence_signals.py:157 | registration_raw=raw, attempt=attempt, max_age_seconds=1200) | registration_raw=raw, attempt=attempt, max_age_seconds=1800) |
 | tests/test_native_permission_probe.py:203 | assert kwargs["timeout"] == 10 and kwargs["stdin"] == probe.subprocess.DEVNULL | assert kwargs["timeout"] == 20 and kwargs["stdin"] == probe.subprocess.DEVNULL |
+| tests/test_native_permission_probe.py:376 | assert calls == [('signal', process.pid, probe.signal.SIGTERM), ('wait', 1)] | assert calls == [('signal', process.pid, probe.signal.SIGTERM), ('wait', 2)] |
 | tests/test_native_permission_probe.py:742 | assert timeout == 2 | assert timeout == 4 |
+| tests/test_native_prepared_sequence.py:69 | monkeypatch.setattr(sequence.time, 'time', lambda: 1300.0) | monkeypatch.setattr(sequence.time, 'time', lambda: 1900.0) |
 | tests/test_native_prepared_sequence.py:310 | monkeypatch.setattr(native_u4b_policy, 'registered_policy', lambda runtime: {'max_age_seconds': 1200}) | monkeypatch.setattr(native_u4b_policy, 'registered_policy', lambda runtime: {'max_age_seconds': 1800}) |
 | tests/test_native_prepared_worker.py:18 | binding = dict(registration_raw=b'registration', attempt=attempt, max_age_seconds=1200) | binding = dict(registration_raw=b'registration', attempt=attempt, max_age_seconds=1800) |
 | tests/test_native_prepared_worker.py:48 | monkeypatch.setattr(worker.time, 'time', lambda: 1300.0) | monkeypatch.setattr(worker.time, 'time', lambda: 1900.0) |
@@ -159,6 +161,23 @@ Generated from changes.json by scripts/adhoc/report_d159_limits_20261117.py.
 | tests/test_native_run_limits.py:39 | (None,21600),('90',None),([],21600)]) | (None,28800),('90',None),([],28800)]) |
 | tests/test_native_run_limits.py:50 | [at]pytest.mark.parametrize('pair', [('90', 43200), ('400', 21600), ('100', 21600), | [at]pytest.mark.parametrize('pair', [('90', 57600), ('400', 28800), ('100', 28800), |
 | tests/test_native_run_limits.py:51 | ('400', 43201), ('90.0', 21600)]) | ('400', 57601), ('90.0', 28800)]) |
+| tests/test_native_run_limits.py:93 | def test_canary_same_input_runtime_and_saved_registration_bytes_unchanged(tmp_path, evidence): | def test_canary_same_input_bytes_preserved_but_old_deadline_policy_refuses(tmp_path, evidence): |
+| tests/test_native_run_limits.py:101 | old_policy.validate_runtime_terms(before) | historical = deepcopy(before) |
+| tests/test_native_run_limits.py:102 | policy.validate_runtime_terms(after) | historical['deadline_seconds'] = 21600 |
+| tests/test_native_run_limits.py:103 | raw,bundle,word = evidence | old_policy.validate_runtime_terms(historical) |
+| tests/test_native_run_limits.py:104 | saved = (bytes(raw),bytes(bundle),bytes(word)) | with pytest.raises(ValueError, match='21600'): |
+| tests/test_native_run_limits.py:105 | assert old_review.validate_bundle(*saved) == review.validate_bundle(*saved) | old_policy.validate_runtime_terms(before) |
+| tests/test_native_run_limits.py:106 | assert saved == evidence | with pytest.raises(ValueError, match='registered budget/deadline'): |
+| tests/test_native_run_limits.py:107 | for name, raw_bytes in { | policy.validate_runtime_terms(historical) |
+| tests/test_native_run_limits.py:108 | 'canary-runtime-before.json': wire.canonical(before), | policy.validate_runtime_terms(after) |
+| tests/test_native_run_limits.py:109 | 'canary-runtime-after.json': wire.canonical(after), | raw,bundle,word = evidence |
+| tests/test_native_run_limits.py:110 | 'canary-registration-before.json': saved[0], | saved = (bytes(raw),bytes(bundle),bytes(word)) |
+| tests/test_native_run_limits.py:111 | 'canary-registration-after.json': evidence[0], | with pytest.raises(ValueError, match='owner/runtime deadline differs'): |
+| tests/test_native_run_limits.py:112 | 'canary-review.json': saved[1], 'canary-word.json': saved[2], | old_review.validate_bundle(*saved) |
+| tests/test_native_run_limits.py:113 | }.items(): | assert review.validate_bundle(*saved)['deadline_seconds'] == limits.CANARY[1] |
+| tests/test_native_run_limits.py:114 | (tmp_path / name).write_bytes(raw_bytes) | assert saved == evidence |
+| tests/test_native_run_limits.py:115 | # This is exact saved-registration/parser compatibility, not a claim that | for name, raw_bytes in { |
+| tests/test_native_run_limits.py:116 | # fresh registration source/dependency identities survive a source change. | 'canary-runtime-before.json': wire.canonical(before), |
 | tests/test_native_shared_observations.py:12 | POLICY={'pretool_control':{'event':'PreToolUse','callback_id':'fixed','matcher':'Bash&#124;Read&#124;Write','runtime_callback_timeout_seconds':125}, | POLICY={'pretool_control':{'event':'PreToolUse','callback_id':'fixed','matcher':'Bash&#124;Read&#124;Write','runtime_callback_timeout_seconds':250}, |
 | tests/test_native_shared_observations.py:163 | 'hooks':{'PreToolUse':[{'matcher':contract['matcher'],'hookCallbackIds':[contract['callback_id']],'timeout':125}]}}}} | 'hooks':{'PreToolUse':[{'matcher':contract['matcher'],'hookCallbackIds':[contract['callback_id']],'timeout':250}]}}}} |
 | tests/test_native_shared_permission_protocol.py:116 | wrong_type = {**control.HISTORY_CONTRACT, 'initialize_timeout_seconds': 30.0} | wrong_type = {**control.HISTORY_CONTRACT, 'initialize_timeout_seconds': 60.0} |
