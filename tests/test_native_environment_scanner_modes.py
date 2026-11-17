@@ -40,8 +40,11 @@ def test_committed_identity_refuses_changed_mode_forwarding(tmp_path, replacemen
 def historical_v2_root(tmp_path):
     """Copy committed producer bytes as data; never import historical code."""
     root = _native_route_root(tmp_path)
+    # D159 (2026-11-17) changed the live supervisor (git timeout 10 -> 20 s); the
+    # historical v2 envelope keeps the candidate's bytes, which its pin names.
     for relative in ('src/data_sheets_schema/cli/prompt.py',
-                     'src/data_sheets_schema/native_execution_registration_v2.py', AUTHORITY):
+                     'src/data_sheets_schema/native_execution_registration_v2.py', AUTHORITY,
+                     'src/data_sheets_schema/native_supervisor_authority_v2.py'):
         raw = subprocess.run(['git', '--no-replace-objects', '-C', str(ROOT),
                               'show', V2_CANDIDATE + ':' + relative],
                              capture_output=True, check=True, timeout=30).stdout
