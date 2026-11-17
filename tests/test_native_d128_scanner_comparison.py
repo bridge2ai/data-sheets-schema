@@ -19,10 +19,10 @@ from tests.test_native_u5_scanner_comparison import require_scanner_inventory
 
 
 FIXTURE = Path(__file__).with_name('fixtures') / 'native_d128_approved.json'
-FIXTURE_SHA256 = '2ba49e02687cbb216b0dbf7277a102548f88120b05342a6c36abfcff3c069a04'
-EVIDENCE_SHA256 = '6d1aec95f8469f2cb61831295b5cdbad45d9a08f2fe70deed9327f5cb7d36e8c'
+FIXTURE_SHA256 = 'a73539d79ca0ee3e13d6d7ccfbc27c5adf3dfbc3a14303767ede5ae53d030e79'
+EVIDENCE_SHA256 = '05f0036818781061112ab2612645edaf5f36882c81fbe2e747db087981705b94'
 BASELINE = 'cf50d9a1c059f3b5030103378ccef33619475dde'
-REFERENCE_CANDIDATE = '283d95914f5f2cba9f0a63bb3f2ff384a486d6a9'
+REFERENCE_CANDIDATE = '970ecedf5c3ea5d49e4ea0df5b87c39fc33d16ee'
 SKILL = '.claude/skills/d4d-generation-specificity-audit'
 ARRAYS = ('hits', 'violations', 'test_dependencies')
 

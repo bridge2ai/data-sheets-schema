@@ -160939,8 +160939,8 @@
   ],
   "kind": "native_d128_finite_scanner_approval",
   "reference_candidate": {
-    "commit": "283d95914f5f2cba9f0a63bb3f2ff384a486d6a9",
-    "committed_roster_sha256": "6bcf7fc8443849647c091d0473ed217ac80c564f689d0aba0c183753c5ed9db6",
+    "commit": "970ecedf5c3ea5d49e4ea0df5b87c39fc33d16ee",
+    "committed_roster_sha256": "96fb679eb247d49c1af19a120ce4005816e19d8933e9a4ab9e244329d439fccc",
     "physical_input_mask": [
       "src",
       "tests",
@@ -160957,17 +160957,17 @@
       "CLAUDE.local.md",
       "data/preprocessed/source_manifest.yaml"
     ],
-    "physical_inputs_sha256": "3a165f56e07d59cb66172adfaeeae0d77487c8cfb928ede962a79a20b8c6ba24",
-    "tree": "53fd7d2ef2684547e0000c55c54467469e21eb33"
+    "physical_inputs_sha256": "bbae584a1ddc7c0cc0984ae91ebb44ca9b94535f04a07661f4f42d128a4d8114",
+    "tree": "f2bc7ed937f64fd7569acc32862c208f87790fc2"
   },
   "scope": "Only the finite approved objects and occurrence mapping. No normalization, new finding approval, native acceptance, or automatic golden refresh.",
-  "source_evidence_sha256": "6d1aec95f8469f2cb61831295b5cdbad45d9a08f2fe70deed9327f5cb7d36e8c",
+  "source_evidence_sha256": "05f0036818781061112ab2612645edaf5f36882c81fbe2e747db087981705b94",
   "tool_assets_sha256": {
     ".claude/skills/d4d-generation-specificity-audit/SKILL.md": "e422b3b635f7330abaea1860b7156644d4a243417024cc4c36d126c4ab75a780",
     ".claude/skills/d4d-generation-specificity-audit/exceptions.yaml": "adb2376d10bf26558c022e31fda983b857311ba872972ccbdfc2ba5d141c9865",
     ".claude/skills/d4d-generation-specificity-audit/scan.py": "8c3b0a27d345bd4c16e31f899f8dedaf0ab7fab9b8a733bdf3fd5c2b7f177b87",
     ".claude/skills/d4d-generation-specificity-audit/tokens.yaml": "5dc373161654f6a1b897b778d0d82a046b59a568d7e57e4436e70975bca8d681"
   },
-  "tool_commit": "283d95914f5f2cba9f0a63bb3f2ff384a486d6a9",
+  "tool_commit": "970ecedf5c3ea5d49e4ea0df5b87c39fc33d16ee",
   "version": 1
 }
