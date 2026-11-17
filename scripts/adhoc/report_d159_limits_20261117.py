@@ -38,7 +38,7 @@ def cell(s):
     return s.replace('|', '&#124;').replace('`', '&#96;')
 text += ['| '+cell(x['path'])+':'+str(x['line'])+' | '+cell(x['old'])+' | '+cell(x['new'])+' |' for x in rows]
 text += ['', 'Unchanged limits and review findings are recorded in scripts/adhoc/d159_review_findings_20261117.json.',
-    '', 'Inventory includes grep -rnE over src, native_controls, tests, scripts, workflow and runbook; grep does not consult gitignore.',
+    '', 'Inventory includes grep -rnE over src, native_controls, tests, scripts, utils, .claude, workflow and runbook; grep does not consult gitignore.',
     'Historical observed timings, test-controlled short fault deadlines, caller-supplied durations, zero/nonblocking waits,',
     'numeric size/count bounds, minimum floors and age rules are not reinterpreted as production work-time defaults.', '']
 (out / 'change_inventory.md').write_text('\n'.join(text))

@@ -33,7 +33,14 @@ lines = ['# D159 limits: implementation committed; '+('validation results below'
     'Machine-readable change data: '+str(root / 'notes/d159_limits_20261117/changes.json'),
     'Ignore-independent grep inventory: '+str(evidence / 'complete-limit-inventory.txt'), '',
     '## Tests', '']
-for lane in ['focused', 'focused-extra', 'native-controls', 'collection']:
+lines += ['Focused retry includes the admission, guard, controller, deadline, runtime, sequence, prepared-worker, permission, packet and CI companion suites.', '']
+for name in ['focused.log', 'focused-retry.log', 'native-controls.log', 'collection.log']:
+    log = evidence / name
+    if log.exists():
+        for line in log.read_text(errors='replace').splitlines():
+            if 'host/slot gate busy after' in line:
+                lines += ['- Gate refusal in '+str(log)+': '+line]
+for lane in ['focused', 'native-controls', 'collection']:
     summary = scratch / lane / 'lane_summary.json'
     if summary.exists():
         doc = json.loads(summary.read_text())
@@ -45,18 +52,18 @@ for lane in ['focused', 'focused-extra', 'native-controls', 'collection']:
             lines += ['  '+xml.name+': '+json.dumps(counts, sort_keys=True)]
     else:
         lines += ['- '+lane+': no completed lane summary yet.']
+if not args.final:
+    lock = root.parent / '.d4d-lane-locks/slot-00.lock'
+    lines += ['', 'Current shared-slot metadata: '+lock.read_text().strip(), '']
 lines += ['', 'Test runner: primary checkout scripts/adhoc/run_lane_20261115.py, isolated scratch interpreter, gate wait 1800 seconds.',
     'Focused lane waited for an existing exclusive np15-fresh-validation lease; no lock was removed or bypassed.', '',
     '## Validator measurement', '',
     'The exact native_execution_gates.schemas closure ran in isolation on the public synthetic fixture seed and its derived core. This is a schema-gate measurement, not a full native launch or a production-sized dataset benchmark.', '']
-if not args.final:
-    lock = root.parent / '.d4d-lane-locks/slot-00.lock'
-    lines += ['Current shared-slot metadata: '+lock.read_text().strip(), '']
 for row in timing['measurements']:
     lines += ['- '+row['class']+': '+str(row['record_bytes'])+' bytes, '+str(row['wall_seconds'])+' seconds; protected timeout '+str(row['timeout_seconds'])+' seconds; failure '+str(row['failure'])+'.']
 lines += ['', 'Both records passed. Both are below the lead escalation threshold of about 90 seconds.',
     'Timing artifact: '+str(scratch / 'validator/timing.json'), '', '## Pin proposal', '',
-    'Read-only command: python3 P/scripts/adhoc/compute_pin_chain_20261115.py --root W --propose --compact.',
+    'Read-only command: python3 '+str(root.parent.parent / 'data-sheets-schema/scripts/adhoc/compute_pin_chain_20261115.py')+' --root '+str(root)+' --propose --compact.',
     'Full cascade: '+str(evidence / 'pin-proposal-full.json'),
     'Compact cascade: '+str(evidence / 'pin-proposal-compact.txt'), '', '```json', json.dumps(pins, indent=2), '```', '',
     'The synthetic peer is unchanged, so SYNTHETIC_PEER_SHA256 stays '+integrity['synthetic_peer']['sha256']+'.',
@@ -70,6 +77,7 @@ for row in reviews['unchanged']:
 runbook = root.parent / 'plans/native_post_merge_runbook_DRAFT_20261114.md'
 lines += ['', '## Runbook and review', '',
     'Updated '+str(runbook)+'. Backup: '+str(runbook)+'.bak-d159-20261117. Restore that adjacent backup to undo the amendment.',
+    'Exact runbook changes: '+str(evidence / 'runbook-diff.txt'),
     'Read-only review findings and dispositions: '+str(root / 'scripts/adhoc/d159_review_findings_20261117.json')+'. The assignment forbids GitHub writes, so the lead must create any required issue records.',
     'The local commit needed one elevated retry after sandbox index.lock refusal; the retry succeeded.', '',
     'Helper provenance scripts:', '']

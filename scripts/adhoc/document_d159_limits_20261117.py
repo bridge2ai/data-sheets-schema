@@ -4,12 +4,15 @@ Inputs: checkout and sibling plans/runbook. Outputs: ignore-independent inventor
 changed-line JSON, runbook backup and updated runbook. No pins are written.
 """
 import json
+import difflib
 from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 
 root = Path(__file__).resolve().parents[2]
+base = 'bc61c2b5ccf894a50a386044acf50ac5ee34cb54'
 scratch = root.parent / 'scratch-d159-limits-20261117/evidence'
 scratch.mkdir(exist_ok=True)
 def clean(text):
@@ -51,18 +54,23 @@ Earlier measured timings and explicit offline qualification gates are evidence,
 not new measurements. The delegated-start and host-confirmation age windows
 remain 1800 s. Restore the adjacent .bak-d159-20261117 file to undo this update.
 '''
-runbook.write_text(text)
+if '--inventory-only' not in sys.argv:
+    runbook.write_text(text)
 result = subprocess.run(['grep', '-rnE', 'timeout|TIMEOUT|deadline|DEADLINE|[Ss][Ee][Cc][Oo][Nn][Dd][Ss]|1200|7200|21600|43200|600000',
-    'src', 'notes/matched_cborg_2026-09-13/native_controls', 'tests', 'scripts', '.github/workflows/main.yaml', str(runbook)],
+    'src', 'notes/matched_cborg_2026-09-13/native_controls', 'tests', 'scripts', 'utils', '.claude', '.github/workflows/main.yaml', str(runbook)],
     cwd=root, capture_output=True, text=True)
 (scratch / 'complete-limit-inventory.txt').write_text(clean(result.stdout))
 rows = []
-for name in subprocess.check_output(['git', 'diff', '--name-only'], cwd=root, text=True).splitlines():
-    old = subprocess.check_output(['git', 'show', 'HEAD:'+name], cwd=root, text=True)
+for name in subprocess.check_output(['git', 'diff', '--name-only', base], cwd=root, text=True).splitlines():
+    if name.startswith(('scripts/adhoc/', 'notes/d159_limits_20261117/')):
+        continue
+    old = subprocess.check_output(['git', 'show', base+':'+name], cwd=root, text=True)
     new = (root / name).read_text()
-    import difflib
     rows.append({'path': name, 'diff': clean(''.join(difflib.unified_diff(old.splitlines(True), new.splitlines(True))))})
 (scratch / 'final-changes.json').write_text(json.dumps(rows, indent=2)+'\n')
+(scratch / 'runbook-diff.txt').write_text(clean(''.join(difflib.unified_diff(
+    backup.read_text().splitlines(True), runbook.read_text().splitlines(True),
+    fromfile=str(backup), tofile=str(runbook)))))
 # Sanitize earlier discovery output too; the lead requested no notification glyphs.
 for name in ['limit-inventory.txt', 'value-locations.txt']:
     path = scratch / name
