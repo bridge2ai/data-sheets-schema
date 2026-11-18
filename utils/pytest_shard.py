@@ -11,7 +11,8 @@ and case lanes.
 import hashlib
 import json
 import math
-from collections import Counter
+from collections import Counter, deque
+from itertools import groupby
 from pathlib import Path
 from statistics import median
 
@@ -256,6 +257,39 @@ def shard_for(nodeid, total):
     return int.from_bytes(hashlib.sha256(path.encode("utf-8")).digest(), "big") % total + 1
 
 
+def _pair_initial_load_items(config, items, costs, counts):
+    """Separate singleton files in xdist's initial two-item worker queues."""
+    workers = getattr(config, "workerinput", {}).get(
+        "workercount", config.getoption("numprocesses", default=None))
+    if (config.getoption("maxschedchunk", default=None) != 1
+            or type(workers) is not int or workers < 2
+            or len(items) < 2 * workers):
+        return items
+    # Workers clear numprocesses and dist, but retain workercount and the
+    # chunk limit. Small collections use round-robin rather than pairs.
+    groups = deque(deque(group) for _, group in groupby(
+        items, key=lambda item: costs[item.nodeid.split("::", 1)[0]]))
+    paired = []
+    for _ in range(workers):
+        first = groups[0].popleft()
+        paired.append(first)
+        if not groups[0]:
+            groups.popleft()
+        # Use the original selected count, never the remaining queue size:
+        # the final case of a multi-case file is not a singleton file.
+        singleton = counts[first.nodeid.split("::", 1)[0]] == 1
+        group = groups[-1] if singleton else groups[0]
+        paired.append(group.popleft())
+        if not group:
+            if singleton:
+                groups.pop()
+            else:
+                groups.popleft()
+    # Only initial queues change. FIFO groups preserve all equal-cost and
+    # per-file order; the remaining tests retain the original cost sort.
+    return paired + [item for group in groups for item in group]
+
+
 @pytest.hookimpl(trylast=True)
 def pytest_collection_modifyitems(config, items):
     value = config.getoption("--ci-shard")
@@ -288,6 +322,9 @@ def pytest_collection_modifyitems(config, items):
         # check. Stable sorting retains the existing order within each file.
         selected.sort(key=lambda item: -estimates[item.nodeid.split("::", 1)[0]]
                       / counts[item.nodeid.split("::", 1)[0]])
+        selected = _pair_initial_load_items(
+            config, selected, {path: estimates[path] / count for path, count in counts.items()},
+            counts)
     items[:] = selected
     config.hook.pytest_deselected(items=deselected)
     # Preserve pytest's NO_TESTS_COLLECTED exit status for an empty shard.
