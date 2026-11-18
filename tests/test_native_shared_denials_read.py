@@ -1,10 +1,12 @@
 """Issue 6214: synthetic runtime refusals through the public lifetime and replay."""
 from pathlib import Path
 from types import SimpleNamespace
+import json
 
 import pytest
 
 from tests.test_native_shared_execution import make_case, launch_case, authority, execute, c
+from tests.test_native_shared_execution import _native_helper_import_environment  # noqa: F401
 from tests.test_native_execution_registration_v2 import isolated_modules
 
 
@@ -19,7 +21,13 @@ def test_denial_live_and_saved(tmp_path, monkeypatch, classification, denied_too
                                   'denied_tool': denied_tool}))
     result = launch_case(case, monkeypatch)
     if classification == 'not_prescribed':
-        assert result['runtime_gates_passed'], result
+        assert result['runtime_gates_passed'], json.dumps({
+            'first_stop': result.get('first_stop'),
+            'child_exit_code': result.get('child_exit_code'),
+            'capture_problems': result.get('capture_problems', []),
+            'failing_gates': {name: row for name, row in result.get('gates', {}).items()
+                              if row.get('checked') is not True or row.get('passed') is not True},
+        }, indent=2, sort_keys=True)
         assert result['state'] == 'completed_pending_independent_review'
     else:
         assert result['state'] == 'failed'
