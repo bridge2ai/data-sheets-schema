@@ -23,7 +23,7 @@ _MEMBERS = MappingProxyType({
     'run_native_canary': frozenset(('execute_child', 'BudgetStop', 'observation_problems',
                                   '_too_complex', '_PROC_ENVIRON', 'denial_problems', 'classify_denials')),
     'native_readonly': frozenset(('PROGRAMS', 'pipeline_parts', '_literal_arguments', '_paths')),
-    'native_command_policy': frozenset(('_simple_command',)),
+    'native_command_policy': frozenset(('_simple_command', 'classify_program_command')),
     'native_control': frozenset(('INIT_ID', 'BLANK_FRAME_TYPE', 'TOOLS', 'control_contract',
         'initialize_frame', 'digest', 'hook_output', 'input_validation_rejection')),
     'budgeted_cborg': frozenset(('BudgetStop',)),
