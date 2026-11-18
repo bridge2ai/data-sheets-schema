@@ -203,33 +203,67 @@ def pytest_configure(config):
     if timing_path is not None:
         if value is None:
             raise pytest.UsageError("--ci-shard-timings requires --ci-shard")
-        config._d4d_shard_weights = read_weights(timing_path)
+        estimates_path = None
+        repository_timings = Path(__file__).with_name("ci_test_durations.json")
+        if lane == "ordinary" and Path(timing_path).resolve() == repository_timings.resolve():
+            # Only the explicit ordinary lane using this repository's measured
+            # base opts into its bound estimates. Custom inputs stay standalone.
+            estimates_path = repository_timings.with_name("ci_scheduling_estimates.json")
+        config._d4d_shard_weights = read_weights(timing_path, estimates_path=estimates_path)
 
 
-def read_weights(path):
-    def unique(pairs):
-        result = {}
-        for key, value in pairs:
-            if key in result:
-                raise ValueError(f"duplicate timing key: {key}")
-            result[key] = value
-        return result
+def _unique_timing_keys(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate timing key: {key}")
+        result[key] = value
+    return result
+
+
+def _timing_file_seconds(data):
+    if (not isinstance(data, dict) or type(data.get("schema_version")) is not int
+            or data["schema_version"] != 1):
+        raise ValueError("expected timing schema version 1")
+    weights = data.get("file_seconds")
+    if not isinstance(weights, dict) or not weights:
+        raise ValueError("file_seconds must be a nonempty mapping")
+    for name, duration in weights.items():
+        if (not isinstance(name, str) or not name.endswith(".py")
+                or type(duration) not in (int, float)
+                or not math.isfinite(duration) or duration <= 0):
+            raise ValueError(f"invalid file duration: {name}")
+    return weights
+
+
+def read_weights(path, *, estimates_path=None):
+    """Read measured timings, optionally applying their explicitly bound estimates."""
     try:
-        data = json.loads(Path(path).read_text(), object_pairs_hook=unique)
-        if (not isinstance(data, dict) or type(data.get("schema_version")) is not int
-                or data["schema_version"] != 1):
-            raise ValueError("expected timing schema version 1")
-        weights = data.get("file_seconds")
-        if not isinstance(weights, dict) or not weights:
-            raise ValueError("file_seconds must be a nonempty mapping")
-        for name, duration in weights.items():
-            if (not isinstance(name, str) or not name.endswith(".py")
-                    or type(duration) not in (int, float)
-                    or not math.isfinite(duration) or duration <= 0):
-                raise ValueError(f"invalid file duration: {name}")
-        return weights
+        raw = Path(path).read_bytes()
+        data = json.loads(raw, object_pairs_hook=_unique_timing_keys)
+        weights = _timing_file_seconds(data)
     except (OSError, UnicodeError, ValueError, TypeError, OverflowError) as exc:
         raise pytest.UsageError(f"invalid --ci-shard-timings: {exc}") from exc
+    if estimates_path is None:
+        return weights
+    try:
+        estimates = json.loads(Path(estimates_path).read_bytes(),
+                               object_pairs_hook=_unique_timing_keys)
+        if (not isinstance(estimates, dict) or set(estimates) != {
+                "schema_version", "base_sha256", "source", "file_seconds"}):
+            raise ValueError("expected schema_version, base_sha256, source and file_seconds")
+        overlay = _timing_file_seconds(estimates)
+        if estimates["base_sha256"] != hashlib.sha256(raw).hexdigest():
+            raise ValueError("scheduling estimates base SHA-256 mismatch; refresh explicitly")
+        if not isinstance(estimates["source"], dict) or not estimates["source"]:
+            raise ValueError("scheduling estimates require source provenance")
+        for name in overlay:
+            if (Path(name).is_absolute() or ".." in Path(name).parts
+                    or Path(name).as_posix() != name or "\\" in name):
+                raise ValueError(f"invalid scheduling estimate path: {name}")
+        return {**weights, **overlay}
+    except (OSError, UnicodeError, ValueError, TypeError, OverflowError) as exc:
+        raise pytest.UsageError(f"invalid ordinary scheduling estimates: {exc}") from exc
 
 
 def _estimates(paths, weights):

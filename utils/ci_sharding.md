@@ -53,6 +53,21 @@ shard. Sorted file paths and shard indices break ties, so all xdist workers
 produce the same assignment. Every ordinary test in a file remains together; the ten separately scheduled
 API, SG2 and native public-path cases are removed by the explicit lane partition before file balancing.
 
+The ordinary lane explicitly using this repository's
+`utils/ci_test_durations.json` also loads its required sibling
+`utils/ci_scheduling_estimates.json`. This separate document records conservative
+scheduling estimates and their provenance without rewriting measured history.
+Its schema version must be 1 and its `base_sha256` must match the exact measured
+file bytes. Missing or malformed estimates, duplicate keys, invalid durations,
+noncanonical paths, and a stale base digest refuse before tests run. Refresh the
+measured file through the timing updater, then deliberately rederive or review
+the estimates and rebind their digest; a refresh never silently approves them.
+
+The estimates apply only in `--ci-lane=ordinary` with the repository timing path.
+Unlaned sharding and custom timing files retain their standalone behavior.
+Dedicated lanes forbid timing options and cannot activate these estimates.
+No workflow change or additional timing authority is implicit in other modes.
+
 Timings are scheduling hints. They cannot select or omit tests. Newly collected
 files use the median duration of known collected files (one second if none are
 known), and entries for removed files are ignored. Malformed explicitly supplied

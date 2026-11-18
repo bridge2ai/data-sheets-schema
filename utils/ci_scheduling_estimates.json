@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "base_sha256": "7093f862aa04b9674fd6ffb9e9a11bbfca7899a91689f1420b30d3dfc3407a2b",
+  "source": {
+    "issue_6289_20261118": {
+      "date": "2026-11-18",
+      "issue": 6289,
+      "base_commit": "69d86e0fe0bb1f13969cfa0f2a4a12c0087a4629",
+      "runs": [
+        {
+          "run_id": 44204938915,
+          "commit": "69d86e0fe0bb1f13969cfa0f2a4a12c0087a4629",
+          "url": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/44204938915",
+          "metadata": {
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-codex196-fix6289-20261118/ci-evidence/44204938915/run.json",
+            "sha256": "fbf7022c0aef9f26aa751ea733b25cff60033c240278600502d5c4d5cdbcc434",
+            "bytes": 13889
+          }
+        },
+        {
+          "run_id": 44079015886,
+          "commit": "7b985cc94664fd55ec104579c58b42cf49059c56",
+          "url": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/44079015886",
+          "metadata": {
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-codex196-fix6289-20261118/ci-evidence/44079015886/run.json",
+            "sha256": "695922fc5988672be18efd14e13d9f932e57882da001eadcb7b744181966754c",
+            "bytes": 14023
+          }
+        }
+      ],
+      "patch": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-codex196-fix6289-20261118/simulation-inputs-007/file-seconds-patch.json",
+        "sha256": "bd2443c11fda3c27f02943aeed119474021b2fc7d38b5169c2d2c43f3e9d25d5",
+        "bytes": 1419
+      },
+      "derivation": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-codex196-fix6289-20261118/simulation-inputs-007/inputs-provenance.json",
+        "sha256": "e6a3029730cb9d6e1fbea0c642e6bd5187dc98fe8c7e3c1c944a95d92d441dde",
+        "bytes": 83958
+      },
+      "measurements": [
+        {
+          "bytes": 54023753,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-codex196-fix6289-20261118/ci-evidence/44204938915/measurements-junit-10444259a8de2f292d6d19b3660534fa28c9f9345172cc34526e94ddeaa764e1.json",
+          "sha256": "10444259a8de2f292d6d19b3660534fa28c9f9345172cc34526e94ddeaa764e1"
+        },
+        {
+          "bytes": 34044025,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/scratch-codex196-fix6289-20261118/ci-evidence/44079015886/measurements-junit-f21b2b6c04d9217d604d28bdc5ebc6f56924c68eff18dcb5478411d1689c74c9.json",
+          "sha256": "f21b2b6c04d9217d604d28bdc5ebc6f56924c68eff18dcb5478411d1689c74c9"
+        }
+      ],
+      "method": "Targeted conservative scheduling weights from maximum per-node observations across the two saved runs, summed by the current collected file and rounded to three decimal places. Prefer JUnit testcase times where available; retain explicitly identified log-observation intervals where no JUnit time is available. These are scheduling estimates, not certified test runtimes or upper bounds.",
+      "unmeasured_scenarios_seconds": {
+        "each_denial_lifecycle": 2500,
+        "synthetic_packet_rehearsal": 600
+      },
+      "limits": "Cancelled jobs do not establish completion times for the denial lifecycles or synthetic rehearsal. No full-completion lifecycle was rerun for this update. CI acceptance must verify the new layout; two-worker and runtime-variation forecasts remain separate sensitivities.",
+      "previous_file_seconds": {
+        "tests/test_native_admission_failure.py": 11.107,
+        "tests/test_native_canary_packet_rehearsal.py": null,
+        "tests/test_native_environment_dispatch.py": null,
+        "tests/test_native_execution_bridge_v2.py": 49.696,
+        "tests/test_native_execution_registration_v2.py": 56.888,
+        "tests/test_native_generation_frontdoor.py": 355.014,
+        "tests/test_native_model_aliases.py": 127,
+        "tests/test_native_packet_full_chain.py": null,
+        "tests/test_native_permission_probe.py": 212.473,
+        "tests/test_native_permission_projection_derivation.py": 120.062,
+        "tests/test_native_shared_attribution.py": 2912.951,
+        "tests/test_native_shared_attribution_saved.py": null,
+        "tests/test_native_shared_callback_preloading.py": 119.963,
+        "tests/test_native_shared_controller.py": 917,
+        "tests/test_native_shared_denials.py": null,
+        "tests/test_native_shared_denials_bash.py": null,
+        "tests/test_native_shared_denials_prescribed.py": null,
+        "tests/test_native_shared_denials_read.py": null,
+        "tests/test_native_shared_denials_write.py": null,
+        "tests/test_native_shared_permissions.py": 447.204,
+        "tests/test_native_shared_registration.py": 1007.239,
+        "tests/test_native_u3d_prompt_cli.py": 5.14,
+        "tests/test_native_u3f2_construction.py": 80.105,
+        "tests/test_native_u4b_a5_producer_integration.py": 183.542,
+        "tests/test_native_u4b_probe_sequence.py": 182.672
+      },
+      "file_seconds": {
+        "tests/test_native_admission_failure.py": 3066.329,
+        "tests/test_native_canary_packet_rehearsal.py": 600.019,
+        "tests/test_native_environment_dispatch.py": 1121.68,
+        "tests/test_native_execution_bridge_v2.py": 1905.129,
+        "tests/test_native_execution_registration_v2.py": 3055.414,
+        "tests/test_native_generation_frontdoor.py": 1313.85,
+        "tests/test_native_model_aliases.py": 843.176,
+        "tests/test_native_packet_full_chain.py": 7474.632,
+        "tests/test_native_permission_probe.py": 1206.524,
+        "tests/test_native_permission_projection_derivation.py": 917.39,
+        "tests/test_native_shared_attribution.py": 10776.971,
+        "tests/test_native_shared_attribution_saved.py": 5058.407,
+        "tests/test_native_shared_callback_preloading.py": 838.316,
+        "tests/test_native_shared_controller.py": 4881.807,
+        "tests/test_native_shared_denials.py": 2500.02,
+        "tests/test_native_shared_denials_bash.py": 2500.0,
+        "tests/test_native_shared_denials_prescribed.py": 2500.0,
+        "tests/test_native_shared_denials_read.py": 2500.0,
+        "tests/test_native_shared_denials_write.py": 2500.0,
+        "tests/test_native_shared_permissions.py": 1658.059,
+        "tests/test_native_shared_registration.py": 6839.89,
+        "tests/test_native_u3d_prompt_cli.py": 387.007,
+        "tests/test_native_u3f2_construction.py": 495.176,
+        "tests/test_native_u4b_a5_producer_integration.py": 1435.832,
+        "tests/test_native_u4b_probe_sequence.py": 786.524
+      }
+    }
+  },
+  "file_seconds": {
+    "tests/test_native_execution_bridge_v2.py": 1905.129,
+    "tests/test_native_execution_registration_v2.py": 3055.414,
+    "tests/test_native_generation_frontdoor.py": 1313.85,
+    "tests/test_native_permission_probe.py": 1206.524,
+    "tests/test_native_permission_projection_derivation.py": 917.39,
+    "tests/test_native_shared_attribution.py": 10776.971,
+    "tests/test_native_shared_callback_preloading.py": 838.316,
+    "tests/test_native_shared_controller.py": 4881.807,
+    "tests/test_native_u3d_prompt_cli.py": 387.007,
+    "tests/test_native_u3f2_construction.py": 495.176,
+    "tests/test_native_u4b_a5_producer_integration.py": 1435.832,
+    "tests/test_native_u4b_probe_sequence.py": 786.524,
+    "tests/test_native_model_aliases.py": 843.176,
+    "tests/test_native_shared_registration.py": 6839.89,
+    "tests/test_native_admission_failure.py": 3066.329,
+    "tests/test_native_shared_permissions.py": 1658.059,
+    "tests/test_native_canary_packet_rehearsal.py": 600.019,
+    "tests/test_native_environment_dispatch.py": 1121.68,
+    "tests/test_native_packet_full_chain.py": 7474.632,
+    "tests/test_native_shared_attribution_saved.py": 5058.407,
+    "tests/test_native_shared_denials.py": 2500.02,
+    "tests/test_native_shared_denials_bash.py": 2500.0,
+    "tests/test_native_shared_denials_prescribed.py": 2500.0,
+    "tests/test_native_shared_denials_read.py": 2500.0,
+    "tests/test_native_shared_denials_write.py": 2500.0
+  }
+}
