@@ -10,7 +10,7 @@ the time left after a full suite shard (#4466). Four more jobs each run one requ
 45-minute limit (#4517). Three run the SG2 root launches; fifty-six run native
 cases (three public-path launches, seventeen failures and thirty-six capacity
 cases), with the same limit.
-Ordinary shards retain D75's 45-minute PR and 60-minute main/manual limits.
+Ordinary shards run under 90-minute PR and 120-minute main/manual job limits (D75's 45/60 minutes, raised to 60/80 by D159 and to 90/120 for issue 6289).
 There are 78 Python jobs on PRs (12 + 4 + 3 + 56 + 3)
 and 74 on main/manual runs (8 + 4 + 3 + 56 + 3),
 plus the aggregate `test` job. The aggregate
@@ -280,7 +280,7 @@ and `sg2-explicit`. Each runs one root-launch registration case, subject to the
 same no-skip/no-xfail/no-collection-only outcome gate as the API lanes. Their
 `tests-py3.12-sg2-<lane>` artifacts retain JUnit and streamed output for 14 days.
 The aggregate requires both dedicated matrices; D81's 8/6 ordinary shards and
-D75's 45/60-minute limits are unchanged.
+The ordinary limits are now 90/120 minutes (issue 6289).
 
 `refresh_5213_weights_ci_20261105.py` uses retained run 41990198212 artifacts.
 Of 25 local-override files, 18 have CI JUnit sums (the lead's 14 counted only

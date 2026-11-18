@@ -22,7 +22,7 @@ jobs:
   python-tests:
     name: Python ${{ matrix.python-version }} / shard ${{ matrix.shard }}
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ github.event_name == 'pull_request' && 60 || 80 }}
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 90 || 120 }}
     strategy:
       fail-fast: false
       matrix:

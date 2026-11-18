@@ -220,7 +220,7 @@ def test_offline_canary_retains_complete_commands_and_independent_job_budget():
     job = jobs["offline-canary"]
     assert job["runs-on"] == "ubuntu-latest"
     assert job["timeout-minutes"] == 60
-    assert jobs["python-tests"]["timeout-minutes"] == "${{ github.event_name == 'pull_request' && 60 || 80 }}"
+    assert jobs["python-tests"]["timeout-minutes"] == "${{ github.event_name == 'pull_request' && 90 || 120 }}"
     assert "if" not in job and "strategy" not in job and "needs" not in job
     steps = job["steps"]
     checkout, submodule, setup = steps[:3]
