@@ -24,6 +24,7 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     root = args.root
+    assert not subprocess.check_output(['git', 'diff', '--name-only', BASE, '--', 'src'], cwd=root)
     def blob(path, revision=BASE):
         return subprocess.check_output(['git', 'show', revision + ':' + path], cwd=root)
     unchanged = {}
@@ -62,7 +63,7 @@ def main():
     effective = {**measured['file_seconds'], **estimates['file_seconds']}
     before = json.loads(blob('utils/ci_test_durations.json'))['file_seconds']
     result = {'head': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip(),
-        'base': BASE, 'unchanged': unchanged, 'denials': denials,
+        'base': BASE, 'source_tree_unchanged': True, 'unchanged': unchanged, 'denials': denials,
         'measured_sha256': digest(measured_raw), 'estimates_sha256': digest(estimates_raw),
         'effective_matches_7b9497fc1': effective == before,
         'effective_changes_from_7b9497fc1': {name: {'before': before.get(name), 'after': seconds}
