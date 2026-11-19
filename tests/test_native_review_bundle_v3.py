@@ -343,3 +343,99 @@ def test_current_review_never_imports_verifier_bootstrap(current_evidence, monke
         return original(name, globals, locals, fromlist, level)
     monkeypatch.setattr(builtins, '__import__', guarded)
     assert review.validate_bundle(*current_evidence, require_current=True)['account_quiet'] is True
+
+
+def test_current_reviewer_kind_pairs(current_evidence, kinds):
+    raw, bundle_raw, word = current_evidence
+    bundle = wire.strict_json(bundle_raw)
+    for item, kind in zip(bundle['reviews'], kinds):
+        item['reviewer_kind'] = kind
+    changed, token = reword(bundle, word)
+    assert bundle['kind'] == review.CURRENT_KIND and bundle['version'] == 3
+    for require_current in (False, True):
+        terms = review.validate_bundle(raw, changed, token, require_current=require_current)
+        assert terms['kind'] == review.CURRENT_TERMS_KIND
+        assert terms['version'] == 2 and terms['account_quiet'] is True
+    assert wire.strict_json(changed)['reviews'][0]['reviewed_at'] == wire.strict_json(token)['authorized_at']
+
+
+test_current_reviewer_kind_pairs = pytest.mark.parametrize('kinds', [
+    ('codex_cli', 'claude'), ('claude', 'codex_cli'),
+    ('codex_cli', 'agy'), ('agy', 'codex_cli'),
+], ids=['codex-claude', 'claude-codex', 'codex-agy', 'agy-codex'])(test_current_reviewer_kind_pairs)
+
+
+def test_current_reviewer_kind_pair_refusals(current_evidence, kinds):
+    raw, bundle_raw, word = current_evidence
+    bundle = wire.strict_json(bundle_raw)
+    for item, kind in zip(bundle['reviews'], kinds):
+        item['reviewer_kind'] = kind
+    changed, token = reword(bundle, word)
+    message = 'reviewer_kind pairs codex_cli \\+ claude or codex_cli \\+ agy'
+    for require_current in (False, True):
+        with pytest.raises(ValueError, match=message):
+            review.validate_bundle(raw, changed, token, require_current=require_current)
+
+
+test_current_reviewer_kind_pair_refusals = pytest.mark.parametrize('kinds', [
+    ('codex_cli', 'unknown'), ('unknown', 'codex_cli'), ('codex_cli', 'AGY'),
+    ('codex_cli', 'codex_cli'), ('claude', 'claude'), ('agy', 'agy'),
+    ('claude', 'agy'), ('agy', 'claude'),
+    ('codex_cli', None), ('codex_cli', 1), ('codex_cli', ['agy']),
+], ids=['unknown-second', 'unknown-first', 'uppercase-agy', 'two-codex',
+        'two-claude', 'two-agy', 'claude-agy', 'agy-claude', 'null-kind',
+        'integer-kind', 'list-kind'])(test_current_reviewer_kind_pair_refusals)
+
+
+def test_current_agy_pair_preserves_review_invariants(current_evidence, mutation):
+    raw, bundle_raw, word = current_evidence
+    bundle = wire.strict_json(bundle_raw)
+    bundle['reviews'][0]['reviewer_kind'] = 'agy'
+    valid_bundle, valid_word = reword(bundle, word)
+    assert review.validate_bundle(raw, valid_bundle, valid_word, require_current=True)['account_quiet'] is True
+    item = bundle['reviews'][0]
+    if mutation == 'one':
+        bundle['reviews'].pop()
+    elif mutation == 'three':
+        bundle['reviews'].append(deepcopy(bundle['reviews'][1]))
+    elif mutation == 'same':
+        item['reviewer'] = bundle['reviews'][1]['reviewer']
+    elif mutation == 'same_case':
+        item['reviewer'] = bundle['reviews'][1]['reviewer'].upper()
+    elif mutation in ('author', 'operator'):
+        item['reviewer'] = bundle[mutation]
+    elif mutation == 'author_case':
+        item['reviewer'] = bundle['author'].upper()
+    elif mutation == 'review_author':
+        item['author'] = 'different author'
+    elif mutation == 'review_operator':
+        item['operator'] = 'different operator'
+    elif mutation == 'not_independent':
+        item['independent'] = False
+    elif mutation == 'integer_independent':
+        item['independent'] = 1
+    elif mutation == 'decision':
+        item['decision'] = 'changes_requested'
+    elif mutation == 'future':
+        item['reviewed_at'] = '2026-11-09T00:00:00Z'
+    elif mutation == 'document_hash':
+        item['document']['sha256'] = '0' * 64
+    elif mutation == 'document_size':
+        item['document']['bytes'] += 1
+    elif mutation == 'document_bytes':
+        path = Path(item['document']['path'])
+        path.write_bytes(path.read_bytes() + b'Changed synthetic review.\n')
+    changed, token = reword(bundle, valid_word)
+    if mutation == 'word_digest':
+        body = wire.strict_json(token)
+        body['review_sha256'] = '0' * 64
+        token = wire.canonical(body)
+    with pytest.raises(ValueError):
+        review.validate_bundle(raw, changed, token, require_current=True)
+
+
+test_current_agy_pair_preserves_review_invariants = pytest.mark.parametrize('mutation', [
+    'one', 'three', 'same', 'same_case', 'author', 'operator', 'author_case',
+    'review_author', 'review_operator', 'not_independent', 'integer_independent',
+    'decision', 'future', 'document_hash', 'document_size', 'document_bytes', 'word_digest',
+])(test_current_agy_pair_preserves_review_invariants)

@@ -310,6 +310,10 @@ def validate_bundle(registration_raw, review_bundle_raw, launch_word_raw, *, req
     if type(reviews) is not list or len(reviews) != 2:
         raise ValueError('bundle requires exactly two independent reviews')
     excluded = {bundle['author'].casefold(), bundle['operator'].casefold()}
+    # RC-1: current v3 accepts the D160 agy reviewer without changing v2 readback.
+    allowed_kinds = ('claude', 'codex_cli', 'agy') if current else ('claude', 'codex_cli')
+    kind_error = ('reviews require reviewer_kind pairs codex_cli + claude or codex_cli + agy'
+                  if current else 'reviews require exactly one claude and one codex_cli reviewer_kind')
     seen, kinds = set(), set()
     for review in reviews:
         _exact(review, {'reviewer', 'reviewer_kind', 'author', 'operator', 'independent', 'decision',
@@ -324,13 +328,15 @@ def validate_bundle(registration_raw, review_bundle_raw, launch_word_raw, *, req
             raise ValueError('reviewers must differ from author, operator and each other')
         seen.add(identity)
         if (type(review['reviewer_kind']) is not str
-                or review['reviewer_kind'] not in ('claude', 'codex_cli')
+                or review['reviewer_kind'] not in allowed_kinds
                 or review['reviewer_kind'] in kinds):
-            raise ValueError('reviews require exactly one claude and one codex_cli reviewer_kind')
+            raise ValueError(kind_error)
         kinds.add(review['reviewer_kind'])
         if _timestamp(review['reviewed_at'], 'review reviewed_at') > authorized_at:
             raise ValueError('owner word precedes an independent review')
         _review_document(review['document'])
+    if 'codex_cli' not in kinds:
+        raise ValueError(kind_error)
     statement = validate_terms(bundle['owner_statement'], runtime, word_owner=word['owner'],
                                require_current=current)
     if not current and statement['kind'] != TERMS_KIND:

@@ -114,3 +114,19 @@ def test_legacy_capture_terms_are_readable_but_not_silently_upgraded(evidence):
     changed = wire.canonical(body)
     token['review_sha256'] = wire.sha(changed)
     assert review.validate_bundle(raw, changed, wire.canonical(token))['quota_capture']['count'] == 1
+
+
+def test_historical_bundle_rejects_agy_reviewer_kind(evidence):
+    raw, bundle_raw, word_raw = evidence
+    assert review.validate_bundle(*evidence)['version'] == 1
+    for reverse in (False, True):
+        bundle, word = wire.strict_json(bundle_raw), wire.strict_json(word_raw)
+        assert bundle['kind'] == review.KIND and bundle['version'] == 2
+        bundle['reviews'][0]['reviewer_kind'] = 'agy'
+        if reverse:
+            bundle['reviews'].reverse()
+        changed = wire.canonical(bundle)
+        word['review_sha256'] = wire.sha(changed)
+        with pytest.raises(ValueError, match='exactly one claude and one codex_cli'):
+            review.validate_bundle(raw, changed, wire.canonical(word))
+    assert review.validate_bundle(*evidence)['version'] == 1
