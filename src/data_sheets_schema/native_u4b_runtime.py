@@ -8,6 +8,8 @@ not authenticated history; a later updater change does not invalidate the copy.
 Basis v3 takes limits and thinking from the separately authorized observation
 phase, pins its complete saved evidence, and registers admission terms. The
 later permission phase binds this final runtime without a hash back-edge.
+Basis v4 additionally separates the requested CLI alias from its reported
+model label and requires the observed one-million-token context window.
 No probe is run by this code; saved records are supplied evidence.
 """
 from __future__ import annotations
@@ -78,9 +80,10 @@ def _binary_pin(path):
 
 
 def _saved_probe(path, model_pair=None):
-    from .native_model_aliases import REQUESTED, RETURNED, require_frame_models
+    from .native_model_aliases import (
+        REQUESTED, RETURNED, reported_model, require_frame_models, require_model_usage)
     pair = {'requested': REQUESTED, 'returned': RETURNED} if model_pair is None else model_pair
-    model = pair['requested']
+    model = reported_model(pair)
     member = read_regular(path, 'u4b_probe', max_bytes=MAX_PROBE_BYTES)
     raw = member.captured.raw
     rows = raw.splitlines()
@@ -113,10 +116,11 @@ def _saved_probe(path, model_pair=None):
            if event.get('type') in ('assistant', 'user', 'result')):
         raise ValueError('saved probe terminal/messages differ from its init session')
     for _, event in events:
-        if event.get('type') in ('assistant', 'user', 'result'):
+        if 'reported' in pair or event.get('type') in ('assistant', 'user', 'result'):
             require_frame_models(event, pair)
     usage = terminal.get('modelUsage')
     values._closed(usage, {model}, 'saved terminal modelUsage')
+    require_model_usage(terminal, pair)
     own = usage[model]
     if type(own) is not dict:
         raise ValueError('saved terminal modelUsage requires an object')
@@ -230,9 +234,19 @@ def prepare_synthetic(runtime, *, probe_init_path, native_request_path, updater_
 def _prepare(runtime, *, probe_init_path, native_request_path, updater_source, updater_root,
              thinking_setting, thinking_basis, observation_probe_path, admission_policy):
     result = _profile(runtime)
-    from .native_model_aliases import model_aliases, REQUESTED, RETURNED
-    pair = (model_aliases(result) if profiles.profile_name(result) == profiles.SYNTHETIC_PROFILE
-            else {'requested': REQUESTED, 'returned': RETURNED})
+    from .native_model_aliases import model_aliases, PROVISIONAL_KIND, REQUESTED, RETURNED
+    synthetic = profiles.profile_name(result) == profiles.SYNTHETIC_PROFILE
+    declared = (values._json(result['limits_basis'])
+                if result['limits_basis'].lstrip().startswith('{') else None)
+    version = 3
+    if synthetic:
+        pair = model_aliases(result)
+    elif type(declared) is dict and declared.get('kind') in (KIND, PROVISIONAL_KIND):
+        pair = model_aliases(result)
+        if (declared['kind'], declared['version']) in ((KIND, 4), (PROVISIONAL_KIND, 2)):
+            version = 4
+    else:
+        pair = {'requested': REQUESTED, 'returned': RETURNED}
     root = _physical(updater_root, 'updater root')
     if not root.is_dir():
         raise ValueError('updater root must name an existing directory')
@@ -249,12 +263,14 @@ def _prepare(runtime, *, probe_init_path, native_request_path, updater_source, u
         raise ValueError('observed thinking differs from the registered setting')
     observation = validate_observation(observation_probe_path, final_runtime=result,
         transcript_path=probe_init_path, request_path=native_request_path)
-    basis = {'kind': KIND, 'version': 3, 'probe': probe, 'request': request, 'observed': observed,
+    if model_aliases(observation['provisional_runtime']) != pair:
+        raise ValueError('observation provisional model aliases differ from the selected runtime basis')
+    basis = {'kind': KIND, 'version': version, 'probe': probe, 'request': request, 'observed': observed,
              'model_aliases': pair,
              'thinking': {'declared': setting, 'basis': thinking_basis, 'observed': thinking},
              'durable_copy': evidence, 'observation_probe': observation['pin'],
              'admission': validate_policy(admission_policy)}
-    if profiles.profile_name(result) == profiles.SYNTHETIC_PROFILE:
+    if synthetic:
         basis['profile'] = profiles.SYNTHETIC_PROFILE
     result['limits_basis'] = _canonical(basis)
     return validate_prepared_runtime(result)
@@ -273,11 +289,11 @@ def validate_prepared_runtime(runtime):
     basis = values._json(raw)
     profile_keys = {'profile'} if 'profile' in basis else set()
     values._closed(basis, BASIS_KEYS | profile_keys, 'U4b runtime basis')
-    if basis['kind'] != KIND or type(basis['version']) is not int or basis['version'] != 3:
+    if basis['kind'] != KIND or type(basis['version']) is not int or basis['version'] not in (3, 4):
         raise ValueError('unknown U4b runtime basis')
     if _canonical(basis) != raw:
         raise ValueError('U4b runtime basis requires exact canonical JSON')
-    from .native_model_aliases import model_aliases
+    from .native_model_aliases import model_aliases, reported_model
     pair = model_aliases(result)
     values._closed(basis['probe'], {'path', 'sha256', 'bytes', 'init_line', 'init_sha256',
                                  'terminal_line', 'terminal_sha256'}, 'saved probe pin')
@@ -299,15 +315,17 @@ def validate_prepared_runtime(runtime):
         raise ValueError('saved probe differs from the registered observations')
     if _canonical(request) != _canonical(basis['request']):
         raise ValueError('saved request differs from the registered observations')
-    if (result['limits'] != observed['limits'] or result['model'] != observed['model']
+    if (result['limits'] != observed['limits'] or reported_model(pair) != observed['model']
             or result['executable']['init_version'] != observed['init_version']):
         raise ValueError('runtime declarations differ from the saved probe observations')
     values._text(basis['thinking']['basis'], 'declared thinking basis', 512)
     declared = _thinking(basis['thinking']['declared'])
     if _canonical(thinking['value']) != _canonical(declared):
         raise ValueError('observed thinking differs from the registered setting')
-    validate_observation(basis['observation_probe']['path'], expected_pin=basis['observation_probe'],
+    observation = validate_observation(basis['observation_probe']['path'], expected_pin=basis['observation_probe'],
         final_runtime=result, transcript_path=basis['probe']['path'], request_path=basis['request']['path'])
+    if model_aliases(observation['provisional_runtime']) != pair:
+        raise ValueError('observation provisional model aliases differ from the selected runtime basis')
     return result
 
 

@@ -72,8 +72,11 @@ def registered_policy(runtime):
         raise ValueError('registration requires its A3 admission policy')
     basis = _json(runtime['limits_basis'])
     if (type(basis) is not dict or basis.get('kind') != 'd4d_native_u4b_runtime_basis'
-            or type(basis.get('version')) is not int or basis['version'] != 3):
-        raise ValueError('registration requires A3 runtime basis v3')
+            or type(basis.get('version')) is not int or basis['version'] not in (3, 4)):
+        raise ValueError('registration requires A3 runtime basis v3 or v4')
+    if basis['version'] == 4:
+        from .native_model_aliases import model_aliases
+        model_aliases(runtime)
     validate_runtime_terms(runtime)
     return validate_policy(basis.get('admission'))
 

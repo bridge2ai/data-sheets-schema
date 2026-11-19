@@ -813,6 +813,8 @@ def _launch(expected, selection, trace, launch, raw, policy):
     _roots(expected, selection, launch)
     _need(launch['cwd'] == expected['policy']['readonly_lookups']['repository'], 'callback cwd differs')
     _need(_same(launch['argv'], probe_argv(expected, policy)), 'native argv differs')
+    native_model_aliases.require_invocation_model(
+        launch['argv'], native_model_aliases.model_aliases(expected['runtime']))
     _need(_same(launch['executable'], expected['runtime']['executable']), 'executable identity differs')
     _need(raw['version.txt'] == (expected['runtime']['executable']['version'] + '\n').encode(), 'version stdout differs')
     prefix = 'traces/' + trace + '/'
@@ -857,7 +859,10 @@ def _trace_body(expected, selection, trace, raw, controls):
     clean = [{k:v for k,v in row.items() if k != 'at'} for row in records]
     native = _permission_protocol()
     aliases = native_model_aliases.model_aliases(expected['runtime'])
-    model = aliases['requested']
+    model = native_model_aliases.reported_model(aliases)
+    if 'reported' in aliases:
+        for event in events:
+            native_model_aliases.require_frame_models(event, aliases)
     init_id = native.initialization_id()
     ack = {'type': 'control_response', 'response': {'subtype': 'success', 'request_id': init_id}}
     _need(_same(clean[0], {'kind': 'initialize_sent', 'policy_sha256': native.policy_digest(policy),

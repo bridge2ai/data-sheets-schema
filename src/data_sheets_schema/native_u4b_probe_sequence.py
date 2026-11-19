@@ -98,7 +98,7 @@ def validate_provisional_runtime(value):
     _closed(basis, {'kind', 'version', 'model_aliases'} | ({'profile'} if 'profile' in basis else set()),
             'provisional runtime basis')
     if (basis['kind'] != aliases.PROVISIONAL_KIND or type(basis['version']) is not int
-            or basis['version'] != 1):
+            or basis['version'] not in (1, aliases.PROVISIONAL_REPORTED_VERSION)):
         raise ValueError('observation requires the explicit provisional runtime basis')
     aliases.model_aliases(runtime)
     return runtime
@@ -151,11 +151,13 @@ def observation_invocation(runtime, directory, provider_url):
     environment = {**runtime['environment'], **values.POLICY_ENV,
         'CLAUDE_CONFIG_DIR': str(root / 'config'), 'ANTHROPIC_BASE_URL': provider_url,
         'ANTHROPIC_API_KEY': 'd4d-local-permission-probe-token', 'DISABLE_AUTOUPDATER': '1'}
-    return {'argv': [runtime['executable']['path'], *ISOLATION_FLAGS,
+    invocation = {'argv': [runtime['executable']['path'], *ISOLATION_FLAGS,
         '--model', runtime['model'], '--effort', runtime['effort'],
         '--max-budget-usd', runtime['budget_guard_usd'], PROMPT],
         'environment': environment, 'cwd': str(root / 'cwd'), 'stdin': 'DEVNULL',
         'process_limit': 1, 'prompt_sha256': sha(PROMPT.encode())}
+    aliases.require_invocation_model(invocation['argv'], aliases.model_aliases(runtime))
+    return invocation
 
 
 def _observed(transcript_raw, request_raw, runtime):
@@ -177,7 +179,7 @@ def _observed(transcript_raw, request_raw, runtime):
         raise ValueError('observation requires one init and one terminal result')
     begin, initial = init[0]
     end, terminal = terminals[0]
-    if (begin >= end or end != len(events) - 1 or initial.get('model') != pair['requested']
+    if (begin >= end or end != len(events) - 1 or initial.get('model') != aliases.reported_model(pair)
             or terminal.get('is_error') is not False or terminal.get('subtype') != 'success'):
         raise ValueError('observation does not have an ordered successful terminal')
     if initial.get('claude_code_version') != runtime['executable']['init_version']:
@@ -189,12 +191,14 @@ def _observed(transcript_raw, request_raw, runtime):
     session = initial.get('session_id')
     values._text(session, 'observation session')
     for index, event in enumerate(events):
+        if 'reported' in pair:
+            aliases.require_frame_models(event, pair)
         if event.get('type') in ('assistant', 'user', 'result'):
             if index <= begin or event.get('session_id') != session or event.get('parent_tool_use_id') is not None:
                 raise ValueError('observation frame is outside its initialized parent session')
             aliases.require_frame_models(event, pair)
     aliases.require_model_usage(terminal, pair)
-    own = terminal['modelUsage'][pair['requested']]
+    own = terminal['modelUsage'][aliases.reported_model(pair)]
     limits = {key: own.get(key) for key in ('contextWindow', 'maxOutputTokens')}
     if (any(type(value) is not int or value <= 0 for value in limits.values())
             or limits['maxOutputTokens'] > limits['contextWindow']):
@@ -253,6 +257,9 @@ def validate_observation(path, *, expected_pin=None, final_runtime=None,
     provisional = strict_json(provisional_raw)
     claim = _read_pin(manifest['claim'], directory / 'observation-claim.json', limit=16384)
     invocation = _read_pin(manifest['invocation'], directory / 'observation/invocation.json', limit=65536)
+    pair = aliases.model_aliases(provisional)
+    if 'reported' in pair:
+        aliases.require_invocation_model(strict_json(invocation).get('argv'), pair)
     transcript = _read_pin(manifest['transcript'], directory / 'observation/transcript.jsonl')
     request = _read_pin(manifest['request'], directory / 'observation/native_request.json')
     if transcript_path is not None and str(transcript_path) != manifest['transcript']['path']:
@@ -267,6 +274,14 @@ def validate_observation(path, *, expected_pin=None, final_runtime=None,
         raise ValueError('observation manifest differs from freshly derived saved evidence')
     if final_runtime is not None:
         final = values.validate_runtime_v2(final_runtime)
+        raw_basis = final['limits_basis']
+        final_basis = strict_json(raw_basis) if raw_basis.lstrip().startswith('{') else {}
+        new_final = type(final_basis) is dict and (
+            final_basis.get('kind'), final_basis.get('version')) in (
+                (aliases.KIND, aliases.REPORTED_VERSION),
+                (aliases.PROVISIONAL_KIND, aliases.PROVISIONAL_REPORTED_VERSION))
+        if ('reported' in pair or new_final) and pair != aliases.model_aliases(final):
+            raise ValueError('final runtime differs from the provisional model-label declaration')
         omit = {'limits', 'limits_basis'}  # The thinking field is nested in limits_basis.
         if canonical({key: value for key, value in final.items() if key not in omit}) != canonical(
                 {key: value for key, value in provisional.items() if key not in omit}):

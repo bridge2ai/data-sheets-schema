@@ -13,7 +13,9 @@ import sys
 LABEL='DRAFT ONLY — NOT AUTHORIZED — NOT A RUNTIME OR PROBE AUTHORIZATION'
 
 
-def generate(source, binary, output, *, project, source_manifest):
+def generate(source, binary, output, *, project, source_manifest, model_label_version=1):
+    if type(model_label_version) is not int or model_label_version not in (1, 2):
+        raise ValueError('model label version must be an explicit 1 or 2')
     source=Path(source); binary=Path(binary); output=Path(output)
     for path in (source,binary):
         if not path.is_absolute() or path.resolve(strict=True)!=path: raise ValueError('physical absolute input required')
@@ -36,7 +38,7 @@ def generate(source, binary, output, *, project, source_manifest):
                               'source_sha256':hashlib.sha256(path.read_bytes()).hexdigest()})
                 return value
         raise ValueError('missing source constant '+module+'.'+name)
-    def constraint(module,function,field):
+    def constraint(module,function,field,selected=None):
         path=source/'src/data_sheets_schema'/(module+'.py')
         fn=next(n for n in ast.parse(path.read_bytes()).body if isinstance(n,ast.FunctionDef) and n.name==function)
         found=[]
@@ -46,8 +48,20 @@ def generate(source, binary, output, *, project, source_manifest):
                     and len(node.comparators)==1 and isinstance(node.comparators[0],ast.Constant)
                     and isinstance(node.ops[0],(ast.Eq,ast.NotEq))):
                 found.append((node.comparators[0].value,node.lineno))
+            elif (selected is not None and isinstance(node,ast.Compare)
+                    and isinstance(node.left,ast.Subscript)
+                    and isinstance(node.left.slice,ast.Constant) and node.left.slice.value==field
+                    and len(node.comparators)==1 and isinstance(node.comparators[0],ast.Tuple)
+                    and isinstance(node.ops[0],(ast.In,ast.NotIn))):
+                allowed=tuple(constant('native_model_aliases',item.attr)
+                              if isinstance(item,ast.Attribute) and isinstance(item.value,ast.Name)
+                              and item.value.id=='aliases' else ast.literal_eval(item)
+                              for item in node.comparators[0].elts)
+                if selected in allowed: found.append((selected,node.lineno))
         if len({x[0] for x in found})!=1: raise ValueError('ambiguous source constraint '+field)
         value,line=found[0]
+        if selected is not None and value!=selected:
+            raise ValueError('selected source constraint differs for '+field)
         facts.append({'module':module,'function':function,'field':field,'path':str(path),'line':line,'value':value,
                       'source_sha256':hashlib.sha256(path.read_bytes()).hexdigest()})
         return value
@@ -64,7 +78,12 @@ def generate(source, binary, output, *, project, source_manifest):
     stops=constant('native_shared_permissions','STOPS')
     current_kind=constant('native_launch_review','CURRENT_KIND')
     current_terms=constant('native_launch_review','CURRENT_TERMS_KIND')
-    provisional_version=constraint('native_u4b_probe_sequence','validate_provisional_runtime','version')
+    provisional_version=constraint('native_u4b_probe_sequence','validate_provisional_runtime','version',
+                                   selected=model_label_version)
+    declared_aliases={'requested':requested,'returned':returned}
+    if model_label_version==2:
+        declared_aliases['reported']=returned
+    provisional_basis={'kind':basis_kind,'version':provisional_version,'model_aliases':declared_aliases}
     authorization_version=constraint('native_u4b_probe_sequence','authorization','version')
     fields=[]
     def field(name,value,origin,status):
@@ -79,9 +98,12 @@ def generate(source, binary, output, *, project, source_manifest):
         'model':field('runtime.model',requested,'native_model_aliases.REQUESTED','source'),
         'auxiliary_models':field('runtime.auxiliary_models',[],'validate_provisional_runtime requires empty list','source'),
         'effort':field('runtime.effort',effort,'native_permission_probe.U4_EFFORT','source'),
-        'limits':{'contextWindow':field('runtime.limits.contextWindow',owner+': positive provisional integer','owner provisional declaration; observation will replace with terminal limits','owner'),
+        'limits':{'contextWindow':field('runtime.limits.contextWindow',
+                  1000000 if model_label_version==2 else owner+': positive provisional integer',
+                  'new reported-label basis requires exactly 1000000' if model_label_version==2 else 'owner provisional declaration; observation will replace with terminal limits',
+                  'source' if model_label_version==2 else 'owner'),
                   'maxOutputTokens':field('runtime.limits.maxOutputTokens',owner+': positive integer no greater than contextWindow','owner provisional declaration; observation will replace it','owner')},
-        'limits_basis':field('runtime.limits_basis',json.dumps({'kind':basis_kind,'version':provisional_version,'model_aliases':{'requested':requested,'returned':returned}},sort_keys=True,separators=(',',':')),'provisional basis shape checked by validate_provisional_runtime; no observation pin yet','source'),
+        'limits_basis':field('runtime.limits_basis',json.dumps(provisional_basis,sort_keys=True,separators=(',',':')),'provisional basis shape checked by validate_provisional_runtime; no observation pin yet','source'),
         'provider':field('runtime.provider',owner+': explicit registered provider label','owner/runtime declaration; probe transport separately forced to loopback','owner'),
         'auth':{'loggedIn':field('runtime.auth.loggedIn',owner+': confirm true from actual authorized account evidence','validate_runtime requires true; no account queried','owner/later observation'),
                 'authMethod':field('runtime.auth.authMethod','claude.ai','validate_runtime required value; owner must verify account actually matches','owner/later observation'),
@@ -166,4 +188,7 @@ if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--source-root',type=Path,required=True); p.add_argument('--binary',type=Path,required=True); p.add_argument('--output',type=Path,required=True)
     p.add_argument('--project',required=True); p.add_argument('--source-manifest',type=Path,required=True)
-    a=p.parse_args(); generate(a.source_root,a.binary,a.output,project=a.project,source_manifest=a.source_manifest)
+    p.add_argument('--model-label-version',type=int,choices=(1,2),default=1,
+                   help='Explicit provisional alias basis: 1 preserves historical labels; 2 declares the unsuffixed CLI-reported label.')
+    a=p.parse_args(); generate(a.source_root,a.binary,a.output,project=a.project,source_manifest=a.source_manifest,
+                              model_label_version=a.model_label_version)

@@ -143,7 +143,7 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
             results[name] = {'checked': False, 'passed': False, 'reason': f'{type(exc).__name__}: {exc}'}
 
     def terminal_gate():
-        from .native_model_aliases import model_aliases, require_frame_models, require_model_usage
+        from .native_model_aliases import model_aliases, reported_model, require_frame_models, require_model_usage
         aliases = model_aliases(runtime)
         init = [e for e in events if e.get('type') == 'system' and e.get('subtype') == 'init']
         final = [e for e in events if e.get('type') == 'result']
@@ -154,12 +154,14 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
         if (not isinstance(session, str) or not session or one.get('cwd') != prepared['state'].reg['working_directory']
                 or any(e.get('session_id') != session for e in events if e.get('type') in ('assistant', 'user', 'result'))):
             raise ValueError('native stream session or initialization cwd differs from this selected attempt')
-        if (one.get('model') != aliases['requested']
+        if (one.get('model') != reported_model(aliases)
                 or one.get('apiKeySource') != runtime['auth']['expected_api_key_source']
                 or one.get('claude_code_version') != runtime['executable']['init_version']
                 or not isinstance(one.get('tools'), list) or sorted(one['tools']) != ['Bash', 'Read', 'Write']):
             raise ValueError('native initialization differs from the supplied runtime identity')
         for event in events:
+            if 'reported' in aliases:
+                require_frame_models(event, aliases)
             if event.get('type') not in ('assistant', 'user', 'result'):
                 continue
             if event.get('parent_tool_use_id') is not None:
@@ -181,7 +183,7 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
 
     def accounting():
         from decimal import Decimal
-        from .native_model_aliases import model_aliases, require_model_usage
+        from .native_model_aliases import model_aliases, reported_model, require_model_usage
         aliases = model_aliases(runtime)
         finals = [e for e in events if e.get('type') == 'result']
         if len(finals) != 1:
@@ -189,7 +191,7 @@ def check(prepared, projections, runtime, controls, *, kind, exit_code, shutdown
         terminal = finals[0]
         require_model_usage(terminal, aliases)
         own, auxiliary = controls['model_accounting'](terminal, {'model': {
-            'model': runtime['model'], 'auxiliary_models_permitted': runtime['auxiliary_models']}})
+            'model': reported_model(aliases), 'auxiliary_models_permitted': runtime['auxiliary_models']}})
         usage = terminal.get('usage')
         keys = ('input_tokens', 'output_tokens', 'cache_read_input_tokens', 'cache_creation_input_tokens')
         if not isinstance(usage, dict) or any(type(usage.get(k)) is not int or usage[k] < 0 for k in keys):
