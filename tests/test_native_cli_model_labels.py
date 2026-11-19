@@ -140,6 +140,27 @@ def test_new_declaration_is_explicit_and_old_declarations_keep_exact_pair():
                 aliases.model_aliases(runtime)
 
 
+def test_new_reporting_versions_refuse_synthetic_profile_and_old_versions_refuse_three_keys():
+    from data_sheets_schema import native_runtime_profiles as profiles
+    for version, provisional in ((4, False), (2, True)):
+        runtime = selected(version=version, provisional=provisional)
+        runtime['model'] = profiles.SYNTHETIC_REQUESTED
+        basis = json.loads(runtime['limits_basis'])
+        basis['profile'] = profiles.SYNTHETIC_PROFILE
+        basis['model_aliases'] = {'requested': profiles.SYNTHETIC_REQUESTED,
+            'returned': profiles.SYNTHETIC_RETURNED, 'reported': profiles.SYNTHETIC_RETURNED}
+        runtime['limits_basis'] = raw(basis).decode()
+        with pytest.raises(ValueError, match='production profile'):
+            aliases.model_aliases(runtime)
+    for version, provisional in ((2, False), (3, False), (1, True)):
+        runtime = selected(version=version, provisional=provisional)
+        basis = json.loads(runtime['limits_basis'])
+        basis['model_aliases'] = dict(PAIR)
+        runtime['limits_basis'] = raw(basis).decode()
+        with pytest.raises(ValueError, match='closed declaration'):
+            aliases.model_aliases(runtime)
+
+
 def test_new_invocation_requires_exact_requested_alias_once():
     argv = json.loads((FIXTURE / 'invocation.json').read_bytes())['argv']
     aliases.require_invocation_model(argv, PAIR)
@@ -298,6 +319,12 @@ def test_prepared_runtime_roundtrip_declares_final_four_and_refuses_old_provisio
         sequence.validate_observation(old_arguments['observation_probe_path'], final_runtime=wrong_final)
     with pytest.raises(ValueError):
         runtime_reader.prepare_runtime(wrong_final, **old_arguments)
+    old_final_from_new = deepcopy(runtime)
+    old_final_from_new['limits_basis'] = selected(version=3)['limits_basis']
+    with pytest.raises(ValueError, match='provisional model-label declaration'):
+        sequence.validate_observation(arguments['observation_probe_path'], final_runtime=old_final_from_new)
+    with pytest.raises(ValueError):
+        runtime_reader.prepare_runtime(old_final_from_new, **arguments)
 
 
 def test_capture_limits_use_reported_key_and_keep_refusal_evidence():

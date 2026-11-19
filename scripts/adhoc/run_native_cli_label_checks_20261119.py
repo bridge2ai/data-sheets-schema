@@ -10,6 +10,7 @@ import hashlib
 import json
 import os
 import re
+import runpy
 from pathlib import Path
 import subprocess
 import sys
@@ -65,9 +66,16 @@ def main():
         print(json.dumps(dict(package_paths=origins, python=sys.executable, prefix=sys.prefix)))
         return 0
     parser = argparse.ArgumentParser()
-    parser.add_argument('mode', choices=['canary', 'focused', 'native', 'collect', 'd128'])
+    parser.add_argument('mode', choices=['canary', 'focused', 'native-ordinary', 'native-case', 'collect', 'd128'])
     parser.add_argument('--label', required=True)
+    parser.add_argument('--case')
     args = parser.parse_args()
+    case_source = ROOT / 'utils/pytest_shard.py'
+    cases = runpy.run_path(str(case_source))['NATIVE_CASE_LANES']
+    if (args.mode == 'native-case') != (args.case is not None):
+        parser.error('--case is required only for native-case mode')
+    if args.case is not None and args.case not in cases:
+        parser.error('--case must name an existing native CI case lane')
     if not args.label or Path(args.label).name != args.label:
         parser.error('label must be one fresh leaf name')
     out = SCRATCH / args.label
@@ -78,14 +86,16 @@ def main():
         'focused': ['tests/test_native_model_aliases.py', 'tests/test_native_u4b_runtime.py',
                     'tests/test_native_u4b_probe_sequence.py', 'tests/test_native_cli_model_labels.py',
                     'tests/test_native_model_label_producers.py', 'tests/test_native_u4b_a3_policy.py'],
-        'native': sorted(str(path.relative_to(ROOT)) for path in (ROOT / 'tests').glob('test_native*.py')),
+        'native-ordinary': sorted(str(path.relative_to(ROOT)) for path in (ROOT / 'tests').glob('test_native*.py')),
+        'native-case': [cases[args.case]] if args.case else [],
         'collect': ['tests'],
         'd128': ['tests/test_native_d128_scanner_comparison.py'],
     }[args.mode]
     command = [str(python), '-P', '-m', 'pytest', *files, '-q', '-p', 'no:cacheprovider',
                '--basetemp', str(out / 'basetemp'), '--junitxml', str(out / 'junit.xml')]
-    if args.mode == 'native':
+    if args.mode == 'native-ordinary':
         command += ['-n', '4', '--dist', 'load', '--maxschedchunk=1']
+        command += ['--deselect=' + node for node in cases.values()]
     if args.mode == 'collect':
         command += ['--collect-only']
     env = os.environ.copy()
@@ -104,6 +114,12 @@ def main():
                   interpreter=subprocess.check_output([str(python), '--version'], text=True).strip(),
                   source_origins=json.loads(origin),
                   helper_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
+    if args.mode in ('native-ordinary', 'native-case'):
+        record['native_ci_cases'] = cases
+        record['case_source_sha256'] = hashlib.sha256(case_source.read_bytes()).hexdigest()
+        record['selected_case'] = args.case
+        record['scope'] = ('native collection excluding every dedicated native CI case' if
+                           args.mode == 'native-ordinary' else 'one dedicated native CI case')
     (out / 'command.json').write_text(json.dumps(record, indent=2) + '\n')
     started = time.monotonic()
     with (out / 'pytest.log').open('w') as log:
