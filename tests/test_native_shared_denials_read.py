@@ -2,12 +2,22 @@
 from pathlib import Path
 from types import SimpleNamespace
 import json
+import os
 
 import pytest
 
 from tests.test_native_shared_execution import make_case, launch_case, authority, execute, c
 from tests.test_native_shared_execution import _native_helper_import_environment  # noqa: F401
 from tests.test_native_execution_registration_v2 import isolated_modules
+
+# Issue 6289 (owner decision 2026-11-18): this full native lifecycle needs 2-3.5 h and has
+# never completed inside an ordinary CI shard (cancelled at 60 and at 90 minutes). It is
+# skipped on CI, not removed: run it locally end to end. A dedicated long CI lane is the
+# follow-up.
+pytestmark = pytest.mark.skipif(
+    os.environ.get('CI') == 'true',
+    reason='issue 6289: full native lifecycle exceeds the ordinary CI shard budget; '
+           'verified by a local end-to-end run')
 
 
 @pytest.mark.parametrize(('denied_tool', 'classification'), [
