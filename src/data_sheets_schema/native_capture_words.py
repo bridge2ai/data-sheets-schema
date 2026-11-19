@@ -110,8 +110,9 @@ def observed_primary_limits(terminal_raw, runtime):
     if type(event) is not dict or event.get('type') != 'result':
         raise ValueError('capture requires an explicit terminal result')
     usage = event.get('modelUsage')
-    from .native_model_aliases import model_aliases, reported_model
-    model = reported_model(model_aliases(runtime))
+    from .native_model_aliases import reported_model, reporting_aliases
+    pair = reporting_aliases(runtime)
+    model = runtime['model'] if pair is None else reported_model(pair)
     if type(usage) is not dict or model not in usage:
         raise ValueError('capture terminal modelUsage differs from registered model')
     own = usage[model]
@@ -126,13 +127,16 @@ def observed_primary_limits(terminal_raw, runtime):
 def observed_limits(terminal_raw, runtime):
     """Extract exact singleton-model limits for strict terminal success."""
     event, usage, limits = observed_primary_limits(terminal_raw, runtime)
-    from .native_model_aliases import model_aliases, reported_model, require_frame_models, require_model_usage
-    pair = model_aliases(runtime)
+    from .native_model_aliases import reported_model, reporting_aliases, require_frame_models, require_model_usage
+    pair = reporting_aliases(runtime)
+    if pair is None:
+        if set(usage) != {runtime['model']}:
+            raise ValueError('capture terminal modelUsage differs from registered model')
+        return event, usage, limits
     if set(usage) != {reported_model(pair)}:
         raise ValueError('capture terminal modelUsage differs from registered model')
     require_model_usage(event, pair)
-    if 'reported' in pair:
-        require_frame_models(event, pair)
+    require_frame_models(event, pair)
     return event, usage, limits
 
 

@@ -69,6 +69,30 @@ def model_aliases(runtime):
     return dict(aliases)
 
 
+def declares_reported(runtime):
+    """True only when the runtime's basis names a CLI-reporting version; never raises.
+
+    Consumers that did not consult the alias pair before the reporting versions
+    existed use this to keep older runtimes on their exact previous path.
+    """
+    raw = runtime.get('limits_basis') if type(runtime) is dict else None
+    if type(raw) is not str or not raw.lstrip().startswith('{'):
+        return False
+    try:
+        basis = c.strict_json(raw.encode('utf-8'), 'native model alias basis', 4096)
+    except ValueError:
+        return False
+    if type(basis) is not dict or type(basis.get('version')) is not int:
+        return False
+    return (basis.get('kind'), basis['version']) in (
+        (KIND, REPORTED_VERSION), (PROVISIONAL_KIND, PROVISIONAL_REPORTED_VERSION))
+
+
+def reporting_aliases(runtime):
+    """The checked declaration for a CLI-reporting version, else None."""
+    return model_aliases(runtime) if declares_reported(runtime) else None
+
+
 def reported_model(aliases):
     """Read a checked declaration; old pairs keep the requested reporting label."""
     return aliases.get('reported', aliases['requested'])

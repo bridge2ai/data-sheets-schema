@@ -434,3 +434,24 @@ def test_genuine_saved_permission_consumer_rechecks_new_labels(fixture):
         put(changed, 'traces/settled/outcome.json', outcome)
         with pytest.raises(ValueError):
             verify(changed, expected)
+
+
+def test_declares_reported_selects_only_the_reporting_versions():
+    """Consumers that predate the reporting versions keep old runtimes on their old path."""
+    from data_sheets_schema import native_model_aliases as label_aliases
+
+    def runtime(basis):
+        return {'model': label_aliases.REQUESTED, 'limits_basis': basis}
+
+    def basis(kind, version):
+        return json.dumps({'kind': kind, 'version': version}, sort_keys=True)
+
+    assert label_aliases.declares_reported(runtime(basis(label_aliases.KIND, label_aliases.REPORTED_VERSION)))
+    assert label_aliases.declares_reported(runtime(basis(
+        label_aliases.PROVISIONAL_KIND, label_aliases.PROVISIONAL_REPORTED_VERSION)))
+    for old in (basis(label_aliases.KIND, 2), basis(label_aliases.KIND, 3),
+                basis(label_aliases.PROVISIONAL_KIND, 1), basis(label_aliases.KIND, '4'),
+                '{not json', 'opaque text', None):
+        assert not label_aliases.declares_reported(runtime(old))
+        assert label_aliases.reporting_aliases(runtime(old)) is None
+    assert not label_aliases.declares_reported(None)

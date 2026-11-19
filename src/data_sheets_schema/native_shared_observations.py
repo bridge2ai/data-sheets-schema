@@ -447,16 +447,16 @@ def _initialization_from_rows(transcript,control,native,parent,*,policy,runtime)
             or ack['response'].get('request_id')!=identity or ack['response'].get('error') is not None):
         raise ValueError('native initialization does not bind the selected callback policy')
     session=init.get('session_id')
-    aliases=native_model_aliases.model_aliases(runtime)
+    aliases=native_model_aliases.reporting_aliases(runtime)
     if (type(session) is not str or not session or init.get('parent_tool_use_id') is not None
             or init.get('cwd')!=policy['readonly_lookups']['repository']
-            or init.get('model')!=native_model_aliases.reported_model(aliases)
+            or init.get('model')!=(runtime['model'] if aliases is None else native_model_aliases.reported_model(aliases))
             or init.get('claude_code_version')!=runtime['executable']['init_version']
             or init.get('apiKeySource')!=runtime['auth']['expected_api_key_source']
             or type(init.get('tools')) is not list or any(type(tool) is not str for tool in init['tools'])
             or len(init['tools'])!=len(set(init['tools'])) or not {'Bash','Read','Write'}<=set(init['tools'])):
         raise ValueError('native init differs from selected runtime, route or file tools')
-    if 'reported' in aliases:
+    if aliases is not None:
         for _,_,event in native:
             native_model_aliases.require_frame_models(event,aliases)
     if any(row[0]<initialized[0][0] and row[2].get('type') in ('assistant','user','control_request','result') for row in native):
