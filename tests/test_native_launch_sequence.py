@@ -11,6 +11,15 @@ import os
 import signal
 import subprocess
 import sys
+from datetime import datetime, timedelta, timezone
+
+# The fixture's registration window (exactly fourteen days under N1.8) and its launch-word
+# time must contain the real clock: fixed dates made this file fail from 2026-11-19 00:00Z.
+_DAY = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+_STAMP = '%Y-%m-%dT%H:%M:%SZ'
+VALID_FROM = (_DAY - timedelta(days=7)).strftime(_STAMP)
+VALID_UNTIL = (_DAY + timedelta(days=7)).strftime(_STAMP)
+AUTHORIZED_AT = (_DAY - timedelta(days=1)).strftime(_STAMP)
 
 import pytest
 
@@ -79,7 +88,7 @@ def paths(tmp_path, *, registration_padding=0, attempt_directory_name='NEVER-RES
             'keep_awake': {'policy': 'macos_iokit_ims_v1', 'host_platform': 'darwin', 'basis': 'offline fixture'},
             'limits_basis': json.dumps({'kind': 'd4d_native_u4b_runtime_basis', 'version': 3,
                 'admission': {'capture_state_directory': str(base / 'word-state'),
-                    'valid_from': '2026-11-05T00:00:00Z', 'valid_until': '2026-11-19T00:00:00Z',
+                    'valid_from': VALID_FROM, 'valid_until': VALID_UNTIL,
                     'max_starting_weekly_utilization': 0.5, 'max_starting_five_hour_utilization': 0.25,
                     'max_age_seconds': 1800, 'pre_reservation_margin_seconds': 300}})},
         'dependencies': {'base': {'package_sources': {'src/data_sheets_schema/native_launch_sequence.py': digest}}}}})
@@ -90,7 +99,7 @@ def paths(tmp_path, *, registration_padding=0, attempt_directory_name='NEVER-RES
     from data_sheets_schema import native_capture_words as words
     reg_raw = result['registration'].read_bytes()
     value = guard.strict_json(reg_raw)['registration']
-    word = {'authorized_at': '2026-11-11T00:00:00Z', 'attempt_id': value['attempt_id'],
+    word = {'authorized_at': AUTHORIZED_AT, 'attempt_id': value['attempt_id'],
             'registration_sha256': guard.sha(reg_raw), 'review_sha256': guard.sha(result['review'].read_bytes())}
     result['launch-word'].write_bytes(guard.canonical(word))
     with words.locked(value, reg_raw, create=True) as journal:
@@ -498,9 +507,14 @@ def test_own_script_bytes_saved_before_any_command_without_self_hash(tmp_path, m
     (None, None, True),
 ])
 def test_delegated_start_requires_both_independent_windows(tmp_path, monkeypatch, direction, confirmation, accepted):
+    # The parameters are written on 2026-11-12; run them on today's date so the clock stays
+    # inside the fixture's date-relative registration window. Offsets from now are unchanged.
+    today = _DAY.strftime('%Y-%m-%d')
+    direction, confirmation = (None if s is None else s.replace('2026-11-12', today, 1)
+                               for s in (direction, confirmation))
     p = paths(tmp_path)
     capture_before = capture_state_snapshot(p)
-    now = '2026-11-12T12:00:00Z'
+    now = today + 'T12:00:00Z'
     monkeypatch.setattr(seq, '_utc_now', lambda: now)
     calls = fake_commands(monkeypatch, p)
     arguments = argv(p)
