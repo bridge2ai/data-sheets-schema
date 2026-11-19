@@ -8,13 +8,19 @@ from data_sheets_schema import native_sequence_start as start
 from data_sheets_schema import native_capture_words as words
 from tests import test_native_launch_sequence as fixtures
 from tests.test_native_launch_sequence import deny_real_commands
+from datetime import timedelta
+
+# Written for 2026-11-12; run on yesterday's date so every time sits inside the shared
+# fixture's date-relative registration window and after its launch-word time. The fixed
+# window made these tests fail from 2026-11-19 00:00Z. Offsets between times are unchanged.
+DAY = (fixtures._DAY - timedelta(days=1)).strftime('%Y-%m-%d')
 
 
 def test_different_packet_retry_needs_new_direction(tmp_path, monkeypatch):
     p=fixtures.paths(tmp_path)
-    monkeypatch.setattr(seq,'_utc_now',lambda:'2026-11-12T12:00:00Z')
-    flags=['--direction-recorded-at','2026-11-12T11:59:00Z',
-           '--host-confirmed-at','2026-11-12T11:59:00Z']
+    monkeypatch.setattr(seq,'_utc_now',lambda:DAY + 'T12:00:00Z')
+    flags=['--direction-recorded-at',DAY + 'T11:59:00Z',
+           '--host-confirmed-at',DAY + 'T11:59:00Z']
     calls=fixtures.fake_commands(monkeypatch,p,fail=seq.COMMANDS[0])
     assert fixtures.run_sequence([*fixtures.argv(p),*flags])==1
     assert [command[6] for command, _ in calls] == [seq.COMMANDS[2], seq.COMMANDS[0]]
@@ -24,11 +30,11 @@ def test_different_packet_retry_needs_new_direction(tmp_path, monkeypatch):
     p['subscription-guard']=tmp_path/'second-guard.json'
     calls=fixtures.fake_commands(monkeypatch,p)
     # Equivalent UTC spelling and a refreshed host confirmation do not renew it.
-    flags[1]='2026-11-12T11:59:00.000000Z'; flags[3]='2026-11-12T12:00:00Z'
+    flags[1]=DAY + 'T11:59:00.000000Z'; flags[3]=DAY + 'T12:00:00Z'
     assert fixtures.run_sequence([*fixtures.argv(p),*flags])==1
     assert calls==[] and old.read_bytes()==raw
     p['packet-directory']=tmp_path/'third-packet'
-    flags[1]='2026-11-12T11:59:01Z'
+    flags[1]=DAY + 'T11:59:01Z'
     monkeypatch.setattr(fixtures,'manifest',lambda paths:first_manifest.parent.parent/'capture-2/capture.json')
     calls=fixtures.fake_commands(monkeypatch,p)
     assert fixtures.run_sequence([*fixtures.argv(p),*flags])==0
@@ -41,7 +47,7 @@ def test_owner_start_records_are_repeatable(tmp_path):
     p=fixtures.paths(tmp_path)
     capture_before = fixtures.capture_state_snapshot(p)
     args=dict(launch_word_raw=p['launch-word'].read_bytes(), direction=None,confirmation=None,
-              packet=p['packet-directory'],started_at='2026-11-12T12:00:00Z')
+              packet=p['packet-directory'],started_at=DAY + 'T12:00:00Z')
     a=Path(start.claim(p['registration'].read_bytes(),**args))
     b=Path(start.claim(p['registration'].read_bytes(),**args))
     assert a!=b
@@ -67,7 +73,7 @@ def test_sequence_start_accepts_registration_above_quota_event_limit(tmp_path):
 
     event_path = Path(start.claim(registration_raw,
         launch_word_raw=p['launch-word'].read_bytes(), direction=None, confirmation=None,
-        packet=p['packet-directory'], started_at='2026-11-12T12:00:00Z'))
+        packet=p['packet-directory'], started_at=DAY + 'T12:00:00Z'))
 
     event = words.strict_json(event_path.read_bytes())
     assert event['type'] == 'sequence_start'
@@ -94,7 +100,7 @@ def test_sequence_start_rejects_registration_above_input_limit_before_lock(tmp_p
     with pytest.raises(ValueError, match='not bounded JSON bytes'):
         start.claim(registration_raw,
             launch_word_raw=p['launch-word'].read_bytes(), direction=None, confirmation=None,
-            packet=p['packet-directory'], started_at='2026-11-12T12:00:00Z')
+            packet=p['packet-directory'], started_at=DAY + 'T12:00:00Z')
 
     assert {path.relative_to(root): path.read_bytes() for path in root.rglob('*') if path.is_file()} == before
     fixtures.assert_capture_state_preserved(p, capture_before)
@@ -108,19 +114,19 @@ def test_direction_claim_refuses_symlink_state(tmp_path):
     with pytest.raises(ValueError,match='physical'):
         start.claim(p['registration'].read_bytes(), launch_word_raw=p['launch-word'].read_bytes(),
                     direction=None,confirmation=None,
-                    packet=p['packet-directory'],started_at='2026-11-12T12:00:00Z')
+                    packet=p['packet-directory'],started_at=DAY + 'T12:00:00Z')
     assert not list(elsewhere.iterdir())
 
 
 def test_claim_latency_cannot_cross_delegated_start_limit(tmp_path,monkeypatch):
     p=fixtures.paths(tmp_path)
     capture_before = fixtures.capture_state_snapshot(p)
-    moments=iter(['2026-11-12T12:00:00Z','2026-11-12T12:00:00Z',
-                  '2026-11-12T12:00:01Z','2026-11-12T12:00:01Z'])
+    moments=iter([DAY + 'T12:00:00Z',DAY + 'T12:00:00Z',
+                  DAY + 'T12:00:01Z',DAY + 'T12:00:01Z'])
     monkeypatch.setattr(seq,'_utc_now',lambda:next(moments))
     assert fixtures.run_sequence([*fixtures.argv(p),
-        '--direction-recorded-at','2026-11-12T11:30:00Z',
-        '--host-confirmed-at','2026-11-12T11:30:00Z'])==1
+        '--direction-recorded-at',DAY + 'T11:30:00Z',
+        '--host-confirmed-at',DAY + 'T11:30:00Z'])==1
     saved=fixtures.record(p)
     assert Path(saved['start_claim']).is_file() and saved['steps']==[]
     fixtures.assert_capture_state_preserved(p, capture_before, allow_start_events=True)
@@ -143,9 +149,9 @@ def test_missing_or_replaced_word_state_refuses_before_capture(tmp_path, monkeyp
         monkeypatch.setattr(words, '_read', lambda path: (_ for _ in ()).throw(PermissionError('fixture unreadable journal')))
     capture_before = fixtures.capture_state_snapshot(p)
     calls = fixtures.fake_commands(monkeypatch, p)
-    monkeypatch.setattr(seq, '_utc_now', lambda: '2026-11-12T12:00:00Z')
-    assert fixtures.run_sequence([*fixtures.argv(p), '--direction-recorded-at', '2026-11-12T11:59:00Z',
-                                  '--host-confirmed-at', '2026-11-12T11:59:00Z']) == 1
+    monkeypatch.setattr(seq, '_utc_now', lambda: DAY + 'T12:00:00Z')
+    assert fixtures.run_sequence([*fixtures.argv(p), '--direction-recorded-at', DAY + 'T11:59:00Z',
+                                  '--host-confirmed-at', DAY + 'T11:59:00Z']) == 1
     assert calls == []
     fixtures.assert_capture_state_preserved(p, capture_before)
     assert not (tmp_path / '.native-sequence-starts').exists()
@@ -195,7 +201,7 @@ def test_historical_v1_journal_is_read_only(tmp_path):
         assert journal.require(p['launch-word'].read_bytes(), current=False) == row
         with pytest.raises(ValueError, match='historical journal'):
             journal.start(p['launch-word'].read_bytes(), direction=None, confirmation=None,
-                          packet=p['packet-directory'], now=words._timestamp('2026-11-12T12:00:00Z', 'fixture'))
+                          packet=p['packet-directory'], now=words._timestamp(DAY + 'T12:00:00Z', 'fixture'))
         with pytest.raises(ValueError, match='historical journal'):
             journal.activate(p['launch-word'].read_bytes(), p['review'].read_bytes(), value)
     with pytest.raises(ValueError, match='historical journal'):
@@ -209,36 +215,36 @@ def test_known_unanchored_tail_limit_is_shared_with_latch(tmp_path, event_type):
     p = fixtures.paths(tmp_path)
     reg_raw, word_raw = p['registration'].read_bytes(), p['launch-word'].read_bytes()
     value = words.strict_json(reg_raw)['registration']
-    now = words._timestamp('2026-11-12T12:00:00Z', 'fixture')
+    now = words._timestamp(DAY + 'T12:00:00Z', 'fixture')
     with words.locked(value, reg_raw) as journal:
         if event_type == 'sequence_start':
-            row = journal.start(word_raw, direction='2026-11-12T11:59:00Z',
-                confirmation='2026-11-12T11:59:00Z', packet=p['packet-directory'], now=now)
+            row = journal.start(word_raw, direction=DAY + 'T11:59:00Z',
+                confirmation=DAY + 'T11:59:00Z', packet=p['packet-directory'], now=now)
         else:
             terminal = words.canonical({'type': 'result', 'modelUsage': {'fixture-model':
                 {'contextWindow': 101, 'maxOutputTokens': 10}}})
             row = journal.refuse_limits(word_raw, terminal,
                 journal.root / 'captures' / words.sha(word_raw) / 'capture-1/capture.json', now)
         with pytest.raises(ValueError, match='already consumed|permanently refused'):
-            journal.start(word_raw, direction='2026-11-12T11:59:00Z',
-                confirmation='2026-11-12T11:59:00Z', packet=p['packet-directory'], now=now)
+            journal.start(word_raw, direction=DAY + 'T11:59:00Z',
+                confirmation=DAY + 'T11:59:00Z', packet=p['packet-directory'], now=now)
         # Only scratch evidence is removed, to expose rather than hide the limit.
         (journal.root / 'events' / f"{row['index']:06d}.json").unlink()
-        assert journal.start(word_raw, direction='2026-11-12T11:59:00Z',
-            confirmation='2026-11-12T11:59:00Z', packet=p['packet-directory'], now=now)
+        assert journal.start(word_raw, direction=DAY + 'T11:59:00Z',
+            confirmation=DAY + 'T11:59:00Z', packet=p['packet-directory'], now=now)
 
 
 def test_word_renewal_after_start_preserves_registration_wide_direction_claim(tmp_path):
     p = fixtures.paths(tmp_path)
     reg_raw, word_raw = p['registration'].read_bytes(), p['launch-word'].read_bytes()
     value = words.strict_json(reg_raw)['registration']
-    now = words._timestamp('2026-11-12T12:00:00Z', 'fixture')
+    now = words._timestamp(DAY + 'T12:00:00Z', 'fixture')
     with words.locked(value, reg_raw) as journal:
-        args = dict(direction='2026-11-12T11:59:00Z', confirmation='2026-11-12T11:59:00Z',
+        args = dict(direction=DAY + 'T11:59:00Z', confirmation=DAY + 'T11:59:00Z',
                     packet=p['packet-directory'], now=now)
         journal.start(word_raw, **args)
         newer = words.strict_json(word_raw)
-        newer['authorized_at'] = '2026-11-12T11:59:30Z'
+        newer['authorized_at'] = DAY + 'T11:59:30Z'
         new_raw = words.canonical(newer)
         journal.activate(new_raw, p['review'].read_bytes(), value, now)
         with pytest.raises(ValueError, match='already consumed'):
