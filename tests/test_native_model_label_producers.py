@@ -1,25 +1,21 @@
-"""Offline producer/readback coverage for the 2026-11-19 model-label amendment.
+"""Offline draft-producer coverage for the 2026-11-19 model-label amendment.
+
+Operator wrappers (fast path, post-probe chain, envelope comparison) are not
+in this repository; they are updated and checked with the operator tooling
+(issues 6297, 6298).
 
 Inputs are explicit declarations and inert file bytes. Outputs are temporary
 draft packets only; no native executable, account, provider or host gate runs.
 """
-from copy import deepcopy
 import importlib.util
 import json
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
 
 from data_sheets_schema import native_model_aliases as aliases
-from data_sheets_schema import native_runtime_profiles as profiles
 
 ROOT = Path(__file__).resolve().parents[1]
-HELPERS = (
-    'post_merge_fast_path_20261117.py',
-    'run_post_probe_chain_e772_20261119.py',
-    'compare_post_probe_envelopes_e772_20261119.py',
-)
 
 
 def load_script(relative):
@@ -110,63 +106,3 @@ def test_draft_alias_declaration_ignores_imported_checkout(tmp_path, monkeypatch
     assert runtime['model'] == 'claude-opus-5[1m]'
     assert json.loads(runtime['limits_basis'])['model_aliases'] == dict(
         requested='claude-opus-5[1m]', returned='claude-opus-5', reported='claude-opus-5')
-
-
-def runtime_for(version, *, final=False, synthetic=False):
-    requested = profiles.SYNTHETIC_REQUESTED if synthetic else aliases.REQUESTED
-    returned = profiles.SYNTHETIC_RETURNED if synthetic else aliases.RETURNED
-    pair = dict(requested=requested, returned=returned)
-    if version == (4 if final else 2):
-        pair['reported'] = returned
-    basis = dict(kind=aliases.KIND if final else aliases.PROVISIONAL_KIND,
-                 version=version, model_aliases=pair)
-    if synthetic:
-        basis['profile'] = profiles.SYNTHETIC_PROFILE
-    return dict(model=requested, auxiliary_models=[], limits_basis=json.dumps(basis),
-                limits=dict(contextWindow=1000000, maxOutputTokens=64000))
-
-
-def test_all_helper_reads_follow_declared_reported_model_and_preserve_old_profiles():
-    for name in HELPERS:
-        helper = load_script('scripts/adhoc/' + name)
-        for runtime, label in (
-                (runtime_for(1), aliases.REQUESTED),
-                (runtime_for(2), aliases.RETURNED),
-                (runtime_for(2, final=True), aliases.REQUESTED),
-                (runtime_for(3, final=True), aliases.REQUESTED),
-                (runtime_for(4, final=True), aliases.RETURNED),
-                (runtime_for(1, synthetic=True), profiles.SYNTHETIC_REQUESTED),
-                (dict(model='historical-model', limits_basis='historical'), 'historical-model')):
-            usage = dict(contextWindow=1000000, maxOutputTokens=64000)
-            terminal = dict(modelUsage={label: usage})
-            before = deepcopy((runtime, terminal))
-            assert helper.observed_model_usage(runtime, terminal) == usage
-            assert (runtime, terminal) == before
-
-
-def test_all_helper_reads_refuse_label_downgrade_mixing_and_non1m():
-    for name in HELPERS:
-        helper = load_script('scripts/adhoc/' + name)
-        for version, labels, context in (
-                (2, (aliases.REQUESTED,), 1000000),
-                (1, (aliases.RETURNED,), 1000000),
-                (2, (aliases.RETURNED, aliases.REQUESTED), 1000000),
-                (2, (aliases.RETURNED,), 200000)):
-            terminal = dict(modelUsage={label: dict(contextWindow=context, maxOutputTokens=64000)
-                                        for label in labels})
-            with pytest.raises(ValueError):
-                helper.observed_model_usage(runtime_for(version), terminal)
-
-
-def test_fastpath_switch_default_and_reentry_are_explicit():
-    helper = load_script('scripts/adhoc/post_merge_fast_path_20261117.py')
-    helper.A = SimpleNamespace()
-    assert helper.model_label_args() == []
-    helper.A.model_label_version = 1
-    assert helper.model_label_args() == []
-    helper.A.model_label_version = 2
-    assert helper.model_label_args() == ['--model-label-version', '2']
-    helper.A.model_label_version = True
-    with pytest.raises(ValueError, match='explicit 1 or 2'):
-        helper.model_label_args()
-    assert helper.HERE == ROOT / 'scripts/adhoc/post_merge_fast_path_20261117.py'
