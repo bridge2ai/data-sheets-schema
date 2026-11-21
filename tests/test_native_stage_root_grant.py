@@ -29,6 +29,16 @@ def test_exact_grant_preserves_frozen_protocol_and_input_policy():
     assert policy == before
 
 
+def test_verified_consumer_import_graph_keeps_diagnostic_execution_in_host():
+    from data_sheets_schema import native_execution_authority_v2 as authority
+    identity = authority.dependency_identity()
+    graph = authority.refuse_legacy_consumer_imports(Path(permissions.__file__).read_bytes(),
+        name='data_sheets_schema.native_shared_permissions',
+        package_sources=identity['base']['package_sources'])
+    assert 'data_sheets_schema.native_stage_root_diagnostic' in graph
+    assert 'data_sheets_schema.native_permission_probe' not in graph
+
+
 def test_grant_rejects_noncanonical_or_unbounded_directory_spellings():
     invalid = ('/', '', 'relative/stage', '//attempt/stage', '/attempt//stage',
                '/attempt/stage/', '/attempt/./stage', '/attempt/../stage',

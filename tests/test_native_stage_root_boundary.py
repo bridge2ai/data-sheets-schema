@@ -14,6 +14,7 @@ from data_sheets_schema import native_shared_permissions as p
 from data_sheets_schema import native_shared_permission_protocol as protocol
 from data_sheets_schema import native_shared_permission_wire as wire
 from data_sheets_schema import native_stage_root_diagnostic as diagnostic
+from data_sheets_schema import native_permission_probe as probe
 
 
 def pin(raw):
@@ -194,7 +195,7 @@ def test_boundary_observer_blocks_unscripted_effects_before_callback_dispatch():
     for change in ('none', 'call_before_init', 'wrong_tool', 'wrong_path', 'repeated_call',
                    'callback_before_call', 'wrong_callback', 'repeated_callback'):
         _, _, document, events, _ = fabricated_boundary()
-        observer = diagnostic._BoundaryObserver(document['launch'], SimpleNamespace(check=lambda: None))
+        observer = probe._BoundaryObserver(document['launch'], SimpleNamespace(check=lambda: None))
         if change == 'call_before_init':
             with pytest.raises(ValueError):
                 observer(events[3])

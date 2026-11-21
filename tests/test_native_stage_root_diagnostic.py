@@ -14,6 +14,7 @@ from types import SimpleNamespace
 import pytest
 
 from data_sheets_schema import native_stage_root_diagnostic as diagnostic
+from data_sheets_schema import native_permission_probe as probe
 from data_sheets_schema import native_stage_root_grant as grant
 
 
@@ -37,7 +38,7 @@ def _launch(root):
 
 def _captured_case(root):
     launch = _launch(root)
-    capture = diagnostic.GrantCapture(root, launch)
+    capture = probe.GrantCapture(root, launch)
     transcript = b'{"type":"result","result":"OFFLINE_COMPLETE"}\n'
     (root / 'transcript.jsonl').write_bytes(transcript)
     requests = {
@@ -94,20 +95,20 @@ def test_capture_never_overwrites_an_existing_marker(tmp_path, monkeypatch):
     existing.parent.mkdir()
     existing.write_bytes(b'previous evidence\n')
     with pytest.raises(FileExistsError):
-        diagnostic.GrantCapture(tmp_path, launch)
+        probe.GrantCapture(tmp_path, launch)
     assert existing.read_bytes() == b'previous evidence\n'
 
 
 def test_capture_rejects_unknown_endpoint_types_and_bounded_overflow(tmp_path, monkeypatch):
     _block_transports(monkeypatch)
-    capture = diagnostic.GrantCapture(tmp_path, _launch(tmp_path))
+    capture = probe.GrantCapture(tmp_path, _launch(tmp_path))
     for raw, endpoint in ((b'', '/v1/messages'), ('{}', '/v1/messages'),
                           (bytearray(b'{}'), '/v1/messages'), (b'{}', '/other'),
                           (b'x' * (8 * 1024 * 1024 + 1), '/v1/messages')):
         with pytest.raises(ValueError):
             capture.capture(raw, endpoint=endpoint)
     assert capture.requests == []
-    monkeypatch.setattr(diagnostic, 'MAX_CAPTURE', 1)
+    monkeypatch.setattr(probe, 'MAX_CAPTURE', 1)
     with pytest.raises(ValueError):
         capture.capture(b'{}', endpoint='/v1/messages')
     assert capture.requests == []
@@ -116,7 +117,7 @@ def test_capture_rejects_unknown_endpoint_types_and_bounded_overflow(tmp_path, m
 def test_capture_detects_changed_marker_bytes_at_finish(tmp_path, monkeypatch):
     _block_transports(monkeypatch)
     launch = _launch(tmp_path)
-    capture = diagnostic.GrantCapture(tmp_path, launch)
+    capture = probe.GrantCapture(tmp_path, launch)
     transcript = b'{"type":"result","result":"OFFLINE_COMPLETE"}\n'
     (tmp_path / 'transcript.jsonl').write_bytes(transcript)
     raw = b'{"messages":[]}'
@@ -237,7 +238,7 @@ def test_marker_detection_checks_decoded_json_with_fresh_valid_pins(tmp_path, mo
 def test_finish_records_escaped_marker_detection(tmp_path, monkeypatch):
     _block_transports(monkeypatch)
     launch = _launch(tmp_path)
-    capture = diagnostic.GrantCapture(tmp_path, launch)
+    capture = probe.GrantCapture(tmp_path, launch)
     escaped = ''.join('\\u%04x' % ord(character) for character in diagnostic.MARKER)
     raw = ('{"content":"' + escaped + '"}').encode()
     assert diagnostic.MARKER.encode() not in raw
