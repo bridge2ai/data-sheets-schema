@@ -601,9 +601,11 @@ class _RetainedMembers(dict):
 
 
 class _SharedObserver:
-    def __init__(self, p, expected, selected, launch, trace, controls, transport):
+    def __init__(self, p, expected, selected, launch, trace, controls, transport, *,
+                 source_write_read_variant=None):
         self.p, self.expected, self.selected, self.launch = p, expected, selected, launch
         self.trace, self.controls = trace, controls
+        self.source_write_read_variant = source_write_read_variant
         self.transport = transport
         self.session = None
         # None until native init has selected; the provider waits only on None.
@@ -638,7 +640,13 @@ class _SharedObserver:
             all_cases = p.probe_cases(self.expected, self.selected, self.launch, self.session)
             self.members["cases.json"] = canonical([{k: v for k, v in case.items() if k != "input"}
                                                     for case in all_cases])
-            self.cases = p.trace_cases(all_cases, self.trace)
+            self.cases = p.trace_cases(all_cases, self.trace,
+                                      source_write_read_variant=self.source_write_read_variant)
+            if self.trace == 'stop-source_write':
+                classification, _ = p._classification(self.expected, self.selected, self.launch,
+                    self.session, self.cases[0], self.controls, policy=self.policy)
+                if classification[0] != 'prescribed':
+                    raise ValueError('source Read precondition is not admitted by the selected classifier')
         if event.get("type") == "assistant":
             for block in (event.get("message") or {}).get("content", []):
                 if block.get("type") == "tool_use":
@@ -671,7 +679,8 @@ class _SharedObserver:
             self.session, case, self.controls, policy=self.policy)[0]
 
 
-def _trace(expected, directory, deadline, controls, p, selected, transport, trace="settled"):
+def _trace(expected, directory, deadline, controls, p, selected, transport, trace="settled", *,
+           source_write_read_variant=None):
     _remaining(deadline)
     roots = ("config_root", "stub_root", "effect_root", "evidence_root")
     launch = {key: str(directory / key) for key in roots}
@@ -684,7 +693,8 @@ def _trace(expected, directory, deadline, controls, p, selected, transport, trac
     for name, text in stub_sources.items():
         relative = name.removeprefix("stubs/")
         _write_new(Path(launch["stub_root"]) / relative, text.encode())
-    observer = _SharedObserver(p, expected, selected, launch, trace, controls, transport)
+    observer = _SharedObserver(p, expected, selected, launch, trace, controls, transport,
+                               source_write_read_variant=source_write_read_variant)
     classifier, policy = observer.classify, observer.policy
     source_code = p.recipe_sources()["recipe/provider.py"].encode()
     supplier = lambda: observer.cases
@@ -717,16 +727,24 @@ def _trace(expected, directory, deadline, controls, p, selected, transport, trac
     if trace == "settled":
         events = p._rows(result["transcript.jsonl"], "native transcript")
         terminal_hash, parent_hash = sha(canonical(events[-1])), None
-    else:
-        if "parent-stop.json" not in members:
-            raise PermissionObserverStopMissing(
-                "permission stop trace ended without parent-stop.json: " + trace)
+    elif "parent-stop.json" in members:
         terminal_hash, parent_hash = None, sha(members["parent-stop.json"])
-    members["outcome.json"] = canonical({
-        "kind": "native_shared_permission_outcome", "version": 1,
-        "mode": "settled" if trace == "settled" else "observer_stopped",
-        "session_id": observer.session, "terminal_sha256": terminal_hash,
-        "parent_stop_sha256": parent_hash})
+    else:
+        try:
+            source = read_regular(expected['source']['path'], limit=p.MAX_MEMBER)
+            outcome = p.native_refusal_outcome(expected, selected, trace,
+                {name: raw for name, raw in members.items() if name != 'cases.json'}, controls,
+                source_raw=source, source_write_read_variant=source_write_read_variant)
+        except (ValueError, KeyError, IndexError, TypeError) as exc:
+            raise PermissionObserverStopMissing(
+                "permission stop trace ended without parent-stop.json or verified native refusal: " + trace) from exc
+        members['outcome.json'] = canonical(outcome)
+    if 'outcome.json' not in members:
+        members["outcome.json"] = canonical({
+            "kind": "native_shared_permission_outcome", "version": 1,
+            "mode": "settled" if trace == "settled" else "observer_stopped",
+            "session_id": observer.session, "terminal_sha256": terminal_hash,
+            "parent_stop_sha256": parent_hash})
     for name, raw in members.items():
         _write_new(directory / "completed" / name, raw)
     return members

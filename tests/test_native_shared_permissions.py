@@ -336,6 +336,193 @@ def test_stop_read_precondition_requires_exact_callback_decision_and_result(fixt
             verify(value, fixture['expected'])
 
 
+def fabricated_native_refusal(fixture, stopped, *, source_read_succeeded=False):
+    """Independently manufacture binary refusal records; never observations."""
+    value = deepcopy(fixture['manifest'])
+    prefix = 'traces/stop-' + stopped + '/'
+    old = rows(value, prefix + 'transcript.jsonl')
+    read_call, read_callback, read_result, write_call = deepcopy(old[2:6])
+    read = read_call['message']['content'][0]
+    write = write_call['message']['content'][0]
+    session = old[1]['session_id']
+    launch = get(value, prefix + 'launch.json')
+    launch['exit_code'] = 0
+    put(value, prefix + 'launch.json', launch)
+    events = deepcopy(old[:2]) + [read_call, read_callback]
+    if not source_read_succeeded:
+        text = (read['input']['file_path'] + ' is outside ' + launch['cwd']
+                + '; --restricted confines the file tools to the working directory.')
+        events.append({'type': 'system', 'subtype': 'permission_denied', 'session_id': session,
+            'tool_name': 'Read', 'tool_use_id': read['id'], 'decision_reason_type': 'other',
+            'decision_reason': '--restricted: path outside the working directory', 'message': text})
+        read_result = {'type': 'user', 'session_id': session, 'message': {'role': 'user', 'content': [
+            {'type': 'tool_result', 'tool_use_id': read['id'], 'is_error': True, 'content': text}]},
+            'tool_use_result': 'Error: ' + text, 'tool_result_meta': [{'id': read['id'],
+                'non_execution_kind': 'permission-rule', 'permission_decision': {
+                    'decision': 'reject', 'source': 'config', 'reason_type': 'other'}}]}
+    events.extend([read_result, write_call, {'type': 'user', 'session_id': session,
+        'message': {'role': 'user', 'content': [{'type': 'tool_result', 'tool_use_id': write['id'],
+            'is_error': True, 'content': '<tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>'}]},
+        'tool_use_result': 'Error: File has not been read yet. Read it first before writing to it.'},
+        {'type': 'assistant', 'session_id': session, 'message': {'role': 'assistant',
+            'content': [{'type': 'text', 'text': 'OFFLINE_COMPLETE'}]}},
+        {'type': 'result', 'session_id': session, 'subtype': 'success', 'is_error': False,
+            'terminal_reason': 'completed', 'stop_reason': 'end_turn', 'result': 'OFFLINE_COMPLETE',
+            'num_turns': 3, 'safety_stops': 0, 'queued_turn_count': 0, 'result_index': 0,
+            'permission_denials': [] if source_read_succeeded else [{'tool_name': 'Read',
+                'tool_use_id': read['id'], 'tool_input': read['input']}]}])
+    controls = rows(value, prefix + 'control.jsonl')
+    call_index, result_index = len(events) - 4, len(events) - 3
+    controls.append({'kind': 'input_rejected_before_callback', 'tool_use_id': write['id'],
+        'tool': 'Write', 'rejection': 'file_not_read', 'file_path': write['input']['file_path'],
+        'session_id': session, 'call_line': call_index + 1, 'result_line': result_index + 1,
+        'call_sha256': p._sha(encoded(events[call_index])), 'result_sha256': p._sha(encoded(events[result_index]))})
+    put_rows(value, prefix + 'control.jsonl', controls)
+    put_rows(value, prefix + 'transcript.jsonl', events)
+    for name in ('effect-stop.json', 'parent-stop.json'):
+        del value['members'][prefix + name]
+    put(value, prefix + 'outcome.json', {'kind': 'native_shared_permission_outcome', 'version': 1,
+        'mode': 'native_refused_before_callback', 'session_id': session,
+        'terminal_sha256': p._sha(encoded(events[-1])), 'parent_stop_sha256': None, 'protection': 'native_binary'})
+    return value
+
+
+def test_exact_binary_refusal_is_distinct_from_observer_protection(fixture):
+    for stopped, read_succeeded in (('sealed_request_write', False), ('helper_owned_write', False),
+                                    ('source_write', False), ('source_write', True)):
+        value = fabricated_native_refusal(fixture, stopped, source_read_succeeded=read_succeeded)
+        result = verify(value, fixture['expected'])
+        trace = 'stop-' + stopped
+        summary = next(row for row in result['traces'] if row['id'] == trace)
+        assert summary['mode'] == 'native_refused_before_callback'
+        assert summary['protection'] == 'native_binary'
+        observed = [row for row in result['cases'] if row['trace_id'] == trace]
+        assert [row['tool'] for row in observed] == ['Read', 'Write']
+        assert observed[0]['callback_id'] and observed[0]['classification'] == 'prescribed'
+        assert observed[0]['observed_mode'] == ('allowed' if read_succeeded else 'native_denied')
+        assert observed[1]['observed_mode'] == 'native_refused_before_callback'
+        assert observed[1]['callback_id'] is None and observed[1]['stop_sha256'] is None
+        assert observed[1]['protection'] == 'native_binary'
+        assert all(row['result_sha256'] for row in observed)
+
+
+def test_producer_native_refusal_api_uses_same_saved_verification(fixture):
+    value = fabricated_native_refusal(fixture, 'sealed_request_write')
+    prefix = 'traces/stop-sealed_request_write/'
+    local = {name[len(prefix):]: row['text'].encode() for name, row in value['members'].items()
+             if name.startswith(prefix) and name != prefix + 'outcome.json'}
+    with permission_orchestration.loaded_permission_inputs() as (controls, _sources):
+        with loaded_consumer('native_shared_permissions') as consumer:
+            outcome = consumer.native_refusal_outcome(fixture['expected'], fixture['selection'],
+                'stop-sealed_request_write', local, controls, source_raw=fixture['source_raw'])
+            assert outcome == get(value, prefix + 'outcome.json')
+            broken = deepcopy(local)
+            broken['neutral.after.json'] = encoded({})
+            with pytest.raises(ValueError):
+                consumer.native_refusal_outcome(fixture['expected'], fixture['selection'],
+                    'stop-sealed_request_write', broken, controls, source_raw=fixture['source_raw'])
+
+
+def test_native_refusal_mutations_cannot_become_permission_evidence(fixture):
+    changes = ('read_path', 'read_callback', 'read_decision', 'read_error', 'read_metadata',
+        'read_denial', 'missing_read', 'write_path', 'write_payload', 'write_callback', 'write_error',
+        'write_success', 'write_metadata', 'missing_rejection', 'rejection_hash', 'rejection_line',
+        'extra_grant', 'completion', 'terminal_error', 'terminal_denials', 'terminal_turns',
+        'terminal_pending', 'foreign_session', 'extra_result', 'inventory', 'source',
+        'effect_stop', 'parent_stop', 'observer_claim', 'process_exit', 'shutdown', 'init')
+    for change in changes:
+        value = fabricated_native_refusal(fixture, 'helper_owned_write')
+        prefix = 'traces/stop-helper_owned_write/'
+        events = rows(value, prefix + 'transcript.jsonl')
+        controls = rows(value, prefix + 'control.jsonl')
+        if change == 'read_path':
+            events[2]['message']['content'][0]['input']['file_path'] += '.foreign'
+        elif change == 'read_callback':
+            events[3]['request']['input']['tool_input']['file_path'] += '.foreign'
+        elif change == 'read_decision':
+            controls[2]['classification'] = 'not_prescribed'
+        elif change == 'read_error':
+            events[5]['message']['content'][0]['content'] = 'File exceeds maximum allowed size'
+        elif change == 'read_metadata':
+            events[5]['tool_use_result'] += ' foreign'
+        elif change == 'read_denial':
+            events[4]['decision_reason_type'] = 'policy'
+        elif change == 'missing_read':
+            del events[2:6]
+        elif change == 'write_path':
+            events[6]['message']['content'][0]['input']['file_path'] += '.foreign'
+        elif change == 'write_payload':
+            events[6]['message']['content'][0]['input']['content'] = 'foreign overwrite'
+        elif change == 'write_callback':
+            callback = deepcopy(events[3])
+            callback['request_id'] = 'callback-helper_owned_write'
+            callback['request']['input'].update(tool_name='Write', tool_use_id='helper_owned_write',
+                                                tool_input=events[6]['message']['content'][0]['input'])
+            events.insert(7, callback)
+        elif change == 'write_error':
+            events[7]['message']['content'][0]['content'] = 'Some unrelated failure'
+        elif change == 'write_success':
+            events[7]['message']['content'][0]['is_error'] = False
+        elif change == 'write_metadata':
+            events[7]['tool_use_result'] = {}
+        elif change == 'missing_rejection':
+            controls.pop()
+        elif change == 'rejection_hash':
+            controls[3]['call_sha256'] = '0' * 64
+        elif change == 'rejection_line':
+            controls[3]['result_line'] += 1
+        elif change == 'extra_grant':
+            controls.append(deepcopy(controls[2]))
+        elif change == 'completion':
+            events[-2]['message']['content'][0]['text'] = 'KEEP_GOING'
+        elif change == 'terminal_error':
+            events[-1]['is_error'] = True
+        elif change == 'terminal_denials':
+            events[-1]['permission_denials'] = []
+        elif change == 'terminal_turns':
+            events[-1]['num_turns'] = 4
+        elif change == 'terminal_pending':
+            events[-1]['queued_turn_count'] = 1
+        elif change == 'foreign_session':
+            events[7]['session_id'] = str(uuid.UUID(int=999))
+        elif change == 'extra_result':
+            events.insert(-2, deepcopy(events[7]))
+        elif change == 'inventory':
+            put(value, prefix + 'neutral.after.json', {})
+        elif change == 'source':
+            value['members']['source.after'] = member(b'changed source\n')
+        elif change in ('effect_stop', 'parent_stop'):
+            put(value, prefix + change.replace('_', '-') + '.json', {})
+        elif change == 'process_exit':
+            launch = get(value, prefix + 'launch.json'); launch['exit_code'] = -15
+            put(value, prefix + 'launch.json', launch)
+        elif change == 'shutdown':
+            launch = get(value, prefix + 'launch.json'); launch['shutdown']['child_reaped'] = False
+            put(value, prefix + 'launch.json', launch)
+        elif change == 'init':
+            events[1]['tools'] = ['Write']
+        outcome = get(value, prefix + 'outcome.json')
+        outcome['terminal_sha256'] = p._sha(encoded(events[-1]))
+        if change == 'observer_claim':
+            outcome['protection'] = 'observer'
+        put(value, prefix + 'outcome.json', outcome)
+        put_rows(value, prefix + 'transcript.jsonl', events)
+        put_rows(value, prefix + 'control.jsonl', controls)
+        with pytest.raises(ValueError):
+            verify(value, fixture['expected'])
+
+
+def test_source_refusal_rejects_unknown_read_failures(fixture):
+    value = fabricated_native_refusal(fixture, 'source_write', source_read_succeeded=True)
+    prefix = 'traces/stop-source_write/'
+    events = rows(value, prefix + 'transcript.jsonl')
+    events[4]['message']['content'][0].update(is_error=True, content='File exceeds maximum allowed size')
+    events[4]['tool_use_result'] = 'Error: File exceeds maximum allowed size'
+    put_rows(value, prefix + 'transcript.jsonl', events)
+    with pytest.raises(ValueError):
+        verify(value, fixture['expected'])
+
+
 @pytest.mark.parametrize('name', ['source.before','cases.json','recipe/provider.py',
     'traces/stop-source_write/effect-stop.json','traces/stop-source_write/parent-stop.json',
     'traces/settled/transcript.jsonl','traces/stop-stale_response_write/outcome.json'])

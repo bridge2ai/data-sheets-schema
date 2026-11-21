@@ -37,6 +37,9 @@ CONTEXTS = ('receipt', 'worker', 'omission', 'integration')
 STOPS = ('future_response_write', 'sealed_request_write', 'stale_response_write',
          'outside_response_write', 'source_write', 'helper_owned_write')
 TRACES = ('settled',) + tuple('stop-' + name for name in STOPS)
+NATIVE_REFUSAL = 'native_refused_before_callback'
+NATIVE_REFUSAL_TRACES = ('stop-sealed_request_write', 'stop-helper_owned_write', 'stop-source_write')
+SOURCE_WRITE_READ_VARIANT = 'whole'
 NONRESPONSE = ('request_ready', 'receipt_zero_work', 'await_core', 'assembly_complete', 'failed')
 MAX_MEMBER = contract.HARD_LIMITS['permission_member_bytes']
 MAX_RAW = contract.HARD_LIMITS['permission_decoded_total_bytes']
@@ -593,7 +596,7 @@ def probe_cases(expected, selection, launch, session_id, *, policy=None, recipe=
     return cases
 
 
-def trace_cases(all_cases, trace):
+def trace_cases(all_cases, trace, *, source_write_read_variant=None):
     """Script existing targets through Read before their prohibited Write.
 
     Each stop trace starts with fresh neutral files and no responses. The
@@ -601,6 +604,9 @@ def trace_cases(all_cases, trace):
     outside.bin do not. These preconditions do not alter the settled roster.
     """
     _need(trace in TRACES, 'unknown scripted trace')
+    variant = SOURCE_WRITE_READ_VARIANT if source_write_read_variant is None else source_write_read_variant
+    _need(type(variant) is str and variant in ('whole', 'bounded', 'allow_large'),
+          'unknown source Write Read precondition variant')
     if trace == 'settled':
         return [case for case in all_cases if case['mode'] != 'observer_stopped']
     by_id = {case['id']: case for case in all_cases}
@@ -608,7 +614,23 @@ def trace_cases(all_cases, trace):
     prerequisite = {'sealed_request_write': 'request_worker_read',
                     'source_write': 'source_read'}.get(stopped['id'])
     if prerequisite is not None:
-        return [by_id[prerequisite], stopped]
+        read = by_id[prerequisite]
+        if stopped['id'] == 'source_write':
+            read = deepcopy(read)
+            original = read['input']
+            bounded = 'offset' in original or 'limit' in original
+            _need(variant == 'bounded' or not bounded,
+                  'source Read variant violates the registered bounded Read policy')
+            read['input'] = {'file_path': original['file_path']}
+            if variant == 'bounded':
+                limit = original['limit'] if bounded else 12
+                _need(type(limit) is int and 0 < limit <= 12
+                      and (not bounded or original.get('offset') == 1),
+                      'source Read bound differs from the first registered window')
+                read['input'].update(offset=1, limit=limit)
+            elif variant == 'allow_large':
+                read['input']['allow_large'] = True
+        return [read, stopped]
     if stopped['id'] == 'helper_owned_write':
         return [{'id': 'helper_owned_read', 'tool': 'Read',
                  'input': {'file_path': stopped['input']['file_path']},
@@ -705,13 +727,6 @@ def _members(value):
     sources = recipe_sources()
     _need(len(sources) <= MAX_RECIPE, 'fixed recipe exceeds its member bound')
     names.update(sources)
-    for trace in TRACES:
-        for file in ('launch.json', 'config.json', 'projection.json', 'neutral.before.json', 'neutral.after.json',
-                     'transcript.jsonl', 'control.jsonl', 'outcome.json'):
-            names.add('traces/' + trace + '/' + file)
-        if trace != 'settled':
-            names.update('traces/' + trace + '/' + file for file in ('effect-stop.json', 'parent-stop.json'))
-    _object(value, names, 'raw member roster')
     raw, total = {}, 0
     for name, row in value.items():
         _object(row, {'text', 'sha256', 'bytes'}, 'raw member')
@@ -722,6 +737,20 @@ def _members(value):
         total += len(content)
         _need(total <= MAX_RAW, 'decoded aggregate exceeds bound')
         raw[name] = content
+    for trace in TRACES:
+        prefix = 'traces/' + trace + '/'
+        for file in ('launch.json', 'config.json', 'projection.json', 'neutral.before.json', 'neutral.after.json',
+                     'transcript.jsonl', 'control.jsonl', 'outcome.json'):
+            names.add(prefix + file)
+        _need(prefix + 'outcome.json' in raw, 'raw member roster lacks trace outcome')
+        outcome = _json(raw[prefix + 'outcome.json'])
+        _need(type(outcome) is dict, 'trace outcome is not an object')
+        native_refusal = trace in NATIVE_REFUSAL_TRACES and outcome.get('mode') == NATIVE_REFUSAL
+        if trace != 'settled' and not native_refusal:
+            names.update(prefix + file for file in ('effect-stop.json', 'parent-stop.json'))
+    # The mode only selects the roster here. The complete saved lifecycle must
+    # independently prove it in _trace before absent observer artifacts pass.
+    _object(value, names, 'raw member roster')
     for name, text in sources.items():
         _need(raw[name] == text.encode(), 'fixed recipe source differs: ' + name)
     return raw
@@ -765,8 +794,14 @@ def _read_content(case, expected, selection, launch, session, source_raw, *, obs
     if 'limit' in case['input']:
         if policy is None:
             policy = projected_policy(expected, selection, launch['effect_root'])
-        count = policy['readonly_lookups']['bounded_reads'][case['input']['file_path']]
-        _need(count == len(lines), 'bounded Read count contradicts captured raw file')
+        count = policy['readonly_lookups']['bounded_reads'].get(case['input']['file_path'])
+        if count is not None:
+            _need(count == len(lines), 'bounded Read count contradicts captured raw file')
+        else:
+            _need(case['id'] == 'source_read', 'unregistered bounded Read is not the selected source')
+        _need(case['input'].get('offset') == 1 and type(case['input']['limit']) is int
+              and 1 <= case['input']['limit'] <= (12 if case['id'] == 'source_read' else len(lines)),
+              'bounded Read range differs')
         if case['id'] != 'source_read':
             _need(case['input']['limit'] == len(lines), 'current request cannot be completely read in this range')
         selected = lines[:case['input']['limit']]
@@ -869,12 +904,157 @@ def effect_stop(expected, policy, case, view, call, callback, classification):
             'callback_event_sha256': _sha(_encoded(callback))}
 
 
-def _trace(expected, selection, trace, raw, controls):
+def _native_refusal_trace(expected, selection, trace, raw, controls, launch, policy,
+                          recipe, cases, events, clean, session, aliases):
+    """Closed binary-refusal lifecycle; this never claims an observer stopped it."""
+    _need(trace in NATIVE_REFUSAL_TRACES and len(cases) == 2,
+          'native refusal is not an eligible Read then Write trace')
+    prefix = 'traces/' + trace + '/'
+    _need(all(prefix + name not in raw for name in ('effect-stop.json', 'parent-stop.json')),
+          'native refusal cannot contain observer-stop artifacts')
+    _need(len(clean) == 4, 'native refusal control has missing/extra grants or rejection records')
+    native = _permission_protocol()
+    read, write = cases
+    _need(read['tool'] == 'Read' and write['tool'] == 'Write'
+          and read['input']['file_path'] == write['input']['file_path'],
+          'native refusal precondition does not target the attempted Write')
+    build_view = _view_factory(expected, selection, launch, session, policy=policy, recipe=recipe)
+    outcomes = []
+    offset = 2
+    read_refused = False
+    for case in cases:
+        call_index = offset
+        call = events[offset]; offset += 1
+        _need(call.get('type') == 'assistant', 'native refusal call is out of order')
+        _native_scope(call, session, aliases, 'assistant')
+        wanted_call = {'type': 'tool_use', 'id': case['id'], 'name': case['tool'], 'input': case['input']}
+        _need(_same(call.get('message', {}).get('content'), [wanted_call]),
+              'native refusal call differs from exact scripted case')
+        context = case['context'] if case['context'] in CONTEXTS else 'worker'
+        classification, view = _classify_view(case, controls, policy,
+                                               build_view(context, read=case['tool'] == 'Write'))
+        request_id = None
+        if case['tool'] == 'Read':
+            callback = events[offset]; offset += 1
+            request_id = callback.get('request_id')
+            _need(type(request_id) is str and request_id and request_id != native.initialization_id(),
+                  'native refusal Read callback identity differs')
+            wanted = {'type': 'control_request', 'request_id': request_id, 'request': {'subtype': 'hook_callback',
+                'callback_id': policy['pretool_control']['callback_id'], 'input': {'hook_event_name': 'PreToolUse',
+                'tool_name': 'Read', 'tool_use_id': case['id'], 'cwd': launch['cwd'], 'tool_input': case['input']}}}
+            if 'effort' in (callback.get('request') or {}).get('input', {}):
+                wanted['request']['input']['effort'] = expected['runtime']['effort']
+            _need(_same(callback, wanted), 'native refusal Read callback differs')
+            decision = {'kind': 'decision', 'request': callback, 'classification': classification[0],
+                'basis': classification[1], 'response': {'type': 'control_response', 'response': {
+                    'subtype': 'success', 'request_id': request_id, 'response': native.hook_output(*classification)}}}
+            _need(_same(clean[2], decision), 'native refusal Read decision differs')
+            denial = events[offset]
+            if denial.get('type') == 'system':
+                read_refused = True
+                refusal = (case['input']['file_path'] + ' is outside ' + launch['cwd']
+                           + '; --restricted confines the file tools to the working directory.')
+                # permission_denied uses a literal message string, unlike
+                # assistant/user message containers checked by _native_scope.
+                _native_scope({key: value for key, value in denial.items() if key != 'message'}, session, aliases)
+                wanted_denial = {'type': 'system', 'subtype': 'permission_denied', 'tool_name': 'Read',
+                    'tool_use_id': case['id'], 'decision_reason_type': 'other',
+                    'decision_reason': '--restricted: path outside the working directory', 'message': refusal}
+                _need(_same({key: denial.get(key) for key in wanted_denial}, wanted_denial),
+                      'native refusal Read denial differs')
+                offset += 1
+            else:
+                _need(trace == 'stop-source_write', 'existing protected target requires exact restricted Read refusal')
+        result_index = offset
+        result = events[offset]; offset += 1
+        _need(result.get('type') == 'user', 'native refusal contains a Write callback or lacks its result')
+        _native_scope(result, session, aliases, 'user')
+        if case['tool'] == 'Read' and not read_refused:
+            _tool_result(result, case, expected, selection, launch, session, raw['source.before'],
+                         policy=policy, recipe=recipe)
+            _need('tool_result_meta' not in result, 'successful source Read contains refusal metadata')
+        else:
+            text = refusal if case['tool'] == 'Read' else (
+                '<tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>')
+            wanted_result = {'type': 'tool_result', 'tool_use_id': case['id'], 'is_error': True, 'content': text}
+            _need(_same(result.get('message', {}).get('content'), [wanted_result]),
+                  'native refusal result differs from the exact binary error')
+            metadata = ('Error: ' + refusal if case['tool'] == 'Read' else
+                        'Error: File has not been read yet. Read it first before writing to it.')
+            _need(result.get('tool_use_result') == metadata, 'native refusal result metadata differs')
+            if case['tool'] == 'Read':
+                _need(_same(result.get('tool_result_meta'), [{'id': case['id'], 'non_execution_kind': 'permission-rule',
+                    'permission_decision': {'decision': 'reject', 'source': 'config', 'reason_type': 'other'}}]),
+                    'native refusal Read permission metadata differs')
+            else:
+                _need('tool_result_meta' not in result, 'Write read-before-write refusal has permission metadata')
+        if case['tool'] == 'Write':
+            rejected = {'kind': 'input_rejected_before_callback', 'tool_use_id': case['id'], 'tool': 'Write',
+                'rejection': 'file_not_read', 'file_path': case['input']['file_path'], 'session_id': session,
+                'call_line': call_index + 1, 'result_line': result_index + 1,
+                'call_sha256': _sha(_encoded(call)), 'result_sha256': _sha(_encoded(result))}
+            _need(_same(clean[3], rejected), 'native refusal diagnostic rejection record differs')
+        mode = NATIVE_REFUSAL if case['tool'] == 'Write' else ('native_denied' if read_refused else 'allowed')
+        outcomes.append({'id': case['id'], 'trace_id': trace, 'state': view.state, 'tool': case['tool'],
+            'input_sha256': _sha(_encoded(case['input'])), 'classification': classification[0], 'basis': classification[1],
+            'observed_mode': mode, 'call_id': case['id'], 'callback_id': request_id,
+            'result_sha256': _sha(_encoded(result)), 'stop_sha256': None,
+            'protection': 'native_binary' if mode != 'allowed' else None})
+    _need(len(events) == offset + 2, 'native refusal has extra, pending or missing terminal evidence')
+    completion, terminal = events[offset:]
+    _native_scope(completion, session, aliases, 'assistant')
+    _need(completion.get('type') == 'assistant' and _same(completion.get('message', {}).get('content'),
+          [{'type': 'text', 'text': 'OFFLINE_COMPLETE'}]), 'native refusal completion differs')
+    _native_scope(terminal, session, aliases)
+    native_model_aliases.require_model_usage(terminal, aliases)
+    required_terminal = {'type': 'result', 'subtype': 'success', 'is_error': False, 'terminal_reason': 'completed',
+        'stop_reason': 'end_turn', 'result': 'OFFLINE_COMPLETE', 'num_turns': 3, 'safety_stops': 0,
+        'queued_turn_count': 0, 'result_index': 0}
+    _need(_same({key: terminal.get(key) for key in required_terminal}, required_terminal)
+          and terminal.get('error') is None and terminal.get('api_error_status') is None,
+          'native refusal terminal contradicts exact successful completion')
+    denied = [{'tool_name': 'Read', 'tool_use_id': read['id'], 'tool_input': read['input']}] if read_refused else []
+    _need(_same(terminal.get('permission_denials'), denied), 'native refusal terminal denial inventory differs')
+    _need(launch['exit_code'] == 0, 'native refusal requires a successful reaped process')
+    outcome = {'kind': 'native_shared_permission_outcome', 'version': 1, 'mode': NATIVE_REFUSAL,
+        'session_id': session, 'terminal_sha256': _sha(_encoded(terminal)), 'parent_stop_sha256': None,
+        'protection': 'native_binary'}
+    return outcome, outcomes
+
+
+def native_refusal_outcome(expected, selection, trace, members, controls, *, source_raw,
+                           source_write_read_variant=None):
+    """Validate collected bytes with the saved consumer before recording refusal.
+
+    ``members`` contains local trace filenames and bytes, without outcome.json.
+    No native process, selected file, or provider is accessed here.
+    """
+    _need(trace in NATIVE_REFUSAL_TRACES, 'unsupported native refusal trace')
+    _object(members, {'launch.json', 'config.json', 'projection.json', 'neutral.before.json',
+                     'neutral.after.json', 'transcript.jsonl', 'control.jsonl'}, 'native refusal collected members')
+    _pin(expected['source'], source_raw)
+    events = _rows(members['transcript.jsonl'], 'transcript')
+    terminal = events[-1]
+    outcome = {'kind': 'native_shared_permission_outcome', 'version': 1, 'mode': NATIVE_REFUSAL,
+        'session_id': terminal.get('session_id'), 'terminal_sha256': _sha(_encoded(terminal)),
+        'parent_stop_sha256': None, 'protection': 'native_binary'}
+    prefix = 'traces/' + trace + '/'
+    raw = {prefix + name: content for name, content in members.items()}
+    raw.update({name: text.encode() for name, text in recipe_sources().items()})
+    raw.update({'source.before': source_raw, 'source.after': source_raw,
+                'version.txt': (expected['runtime']['executable']['version'] + '\n').encode(),
+                prefix + 'outcome.json': _encoded(outcome)})
+    _trace(expected, selection, trace, raw, controls, source_write_read_variant=source_write_read_variant)
+    return outcome
+
+
+def _trace(expected, selection, trace, raw, controls, *, source_write_read_variant=None):
     with command_policy._policy_digest_scope():
-        return _trace_body(expected, selection, trace, raw, controls)
+        return _trace_body(expected, selection, trace, raw, controls,
+                           source_write_read_variant=source_write_read_variant)
 
 
-def _trace_body(expected, selection, trace, raw, controls):
+def _trace_body(expected, selection, trace, raw, controls, *, source_write_read_variant=None):
     prefix = 'traces/' + trace + '/'
     launch = _json(raw[prefix + 'launch.json'])
     policy = projected_policy(expected, selection, launch['effect_root'])
@@ -913,7 +1093,15 @@ def _trace_body(expected, selection, trace, raw, controls):
                 _inventory(expected, selection, launch, session, completed=trace == 'settled', recipe=recipe)),
           'neutral after inventory shows missing or forbidden effects')
     all_cases = probe_cases(expected, selection, launch, session, policy=policy, recipe=recipe)
-    cases = trace_cases(all_cases, trace)
+    cases = trace_cases(all_cases, trace, source_write_read_variant=source_write_read_variant)
+    outcome = _json(raw[prefix + 'outcome.json'])
+    if outcome.get('mode') == NATIVE_REFUSAL:
+        wanted_outcome, outcomes = _native_refusal_trace(expected, selection, trace, raw, controls, launch, policy,
+            recipe, cases, events, clean, session, aliases)
+        _need(_same(outcome, wanted_outcome), 'trace outcome differs from actual raw lifecycle')
+        summary = _trace_summary(trace, launch, session, projected, raw[prefix + 'outcome.json'], wanted_outcome)
+        summary['protection'] = 'native_binary'
+        return summary, outcomes, launch
     _need(len(clean) == 2 + sum(case['mode'] != 'observer_stopped' for case in cases),
           'control has missing/extra grants')
     offset, request_ids, outcomes = 2, set(), []
@@ -989,13 +1177,17 @@ def _trace_body(expected, selection, trace, raw, controls):
                           'session_id': session, 'terminal_sha256': None,
                           'parent_stop_sha256': _sha(raw[prefix + 'parent-stop.json'])}
     _need(_same(outcome, wanted_outcome), 'trace outcome differs from actual raw lifecycle')
+    return _trace_summary(trace, launch, session, projected, raw[prefix + 'outcome.json'], wanted_outcome), outcomes, launch
+
+
+def _trace_summary(trace, launch, session, projected, outcome_raw, wanted_outcome):
     return {'id': trace, 'mode': wanted_outcome['mode'], 'executable': deepcopy(launch['executable']),
         'cwd': launch['cwd'], 'argv_sha256': _sha(_encoded(launch['argv'])),
         'environment_sha256': _sha(_encoded(launch['environment'])), 'session_id': session,
         'shutdown': deepcopy(launch['shutdown']),
         'projection': {'effect_root': launch['effect_root'], 'states': [
             {'name': state['name'], 'view_sha256': _sha(_encoded(state['view']))} for state in projected['states']]},
-        'outcome_sha256': _sha(raw[prefix + 'outcome.json'])}, outcomes, launch
+        'outcome_sha256': _sha(outcome_raw)}
 
 
 def _derived_controls(expected, selection, launch, session, *, policy=None, recipe=None):

@@ -566,14 +566,14 @@ def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_ca
 
 
 def test_stop_trace_without_parent_stop_has_named_refusal(tmp_path, monkeypatch):
-    """A binary-side tool refusal must never become a completed stop trace."""
+    """An unverified binary refusal must never become a completed stop trace."""
     from data_sheets_schema import native_model_aliases
     monkeypatch.setattr(native_model_aliases, 'model_aliases', lambda _: {'returned': 'invented'})
     monkeypatch.setattr(probe, 'local_provider', mock_provider)
     monkeypatch.setattr(probe, '_inventory', lambda *args: {'unchanged': True})
     observer = SimpleNamespace(policy={}, cases=[], session='invented-session', members={},
                                classify=lambda *args: None)
-    monkeypatch.setattr(probe, '_SharedObserver', lambda *args: observer)
+    monkeypatch.setattr(probe, '_SharedObserver', lambda *args, **kwargs: observer)
     monkeypatch.setattr(probe.subprocess, 'Popen', lambda *args, **kwargs: pytest.fail('no native process'))
     monkeypatch.setattr(probe, '_run_native', lambda *args: {
         'exit_code': 0, 'shutdown': {}, 'transcript.jsonl': b'{"type":"result"}\n',
@@ -592,6 +592,54 @@ def test_stop_trace_without_parent_stop_has_named_refusal(tmp_path, monkeypatch)
     assert 'stop-sealed_request_write' in str(caught.value)
     assert (directory / 'launch.before.json').is_file()
     assert not (directory / 'completed').exists()
+
+
+def test_producer_records_only_a_verified_native_refusal(tmp_path, monkeypatch):
+    """A mocked process result goes through the shared verifier before publish."""
+    from data_sheets_schema import native_model_aliases
+    monkeypatch.setattr(native_model_aliases, 'model_aliases', lambda _: {'returned': 'invented'})
+    monkeypatch.setattr(probe, 'local_provider', mock_provider)
+    monkeypatch.setattr(probe, '_inventory', lambda *args: {'unchanged': True})
+    monkeypatch.setattr(probe.subprocess, 'Popen', lambda *args, **kwargs: pytest.fail('no native process'))
+    source = tmp_path / 'source.txt'
+    source.write_bytes(b'synthetic source\n')
+    observer = SimpleNamespace(policy={}, cases=[], session='invented-session',
+                               members={'cases.json': b'[]', 'projection.json': b'{}',
+                                        'neutral.before.json': b'{"unchanged":true}'},
+                               classify=lambda *args: None)
+    variants = []
+    def observer_factory(*args, **kwargs):
+        variants.append(kwargs['source_write_read_variant'])
+        return observer
+    monkeypatch.setattr(probe, '_SharedObserver', observer_factory)
+    monkeypatch.setattr(probe, '_run_native', lambda *args: {
+        'exit_code': 0, 'shutdown': {}, 'transcript.jsonl': b'{"type":"result"}\n',
+        'control.jsonl': b'{"kind":"initialize_sent"}\n'})
+    observed = []
+    outcome = {'mode': 'native_refused_before_callback', 'protection': 'native_binary'}
+    def verify_refusal(expected, selected, trace, members, controls, *, source_raw,
+                       source_write_read_variant):
+        assert trace == 'stop-source_write'
+        assert set(members) == {'launch.json', 'config.json', 'transcript.jsonl', 'control.jsonl',
+                                'projection.json', 'neutral.before.json', 'neutral.after.json'}
+        assert source_raw == b'synthetic source\n'
+        assert source_write_read_variant == 'bounded'
+        assert not (directory / 'completed').exists()
+        observed.append(True)
+        return outcome
+    consumer = SimpleNamespace(
+        _roots=lambda *args: None, stub_files=lambda: {}, MAX_MEMBER=1024,
+        recipe_sources=lambda: {'recipe/provider.py': 'def reply(cases, number): return None\n'},
+        probe_argv=lambda *args: ['never-run'], native_refusal_outcome=verify_refusal)
+    expected = {'policy': {'readonly_lookups': {'repository': str(tmp_path)}},
+                'source': {'path': str(source)}, 'runtime': {'executable': {}}, 'permission_environment': {}}
+    directory = tmp_path / 'verified-refusal'
+    result = probe._trace(expected, directory, float('inf'), {}, consumer, {}, None,
+                          trace='stop-source_write', source_write_read_variant='bounded')
+    assert observed == [True] and variants == ['bounded']
+    assert result['outcome.json'] == guard.canonical(outcome)
+    assert (directory / 'completed/outcome.json').read_bytes() == guard.canonical(outcome)
+    assert not (directory / 'completed/parent-stop.json').exists()
 
 
 class FakePipe(io.BytesIO):
