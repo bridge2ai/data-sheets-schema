@@ -794,7 +794,7 @@ def _read_content(case, expected, selection, launch, session, source_raw, *, obs
     if 'limit' in case['input']:
         if policy is None:
             policy = projected_policy(expected, selection, launch['effect_root'])
-        count = policy['readonly_lookups']['bounded_reads'].get(case['input']['file_path'])
+        count = policy['readonly_lookups'].get('bounded_reads', {}).get(case['input']['file_path'])
         if count is not None:
             _need(count == len(lines), 'bounded Read count contradicts captured raw file')
         else:

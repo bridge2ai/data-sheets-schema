@@ -135,15 +135,15 @@ def test_source_read_variants_obey_replay_classifier_input_bounds():
 def test_bounded_source_content_uses_captured_source_without_registered_bound():
     lines = ['source line ' + str(number) for number in range(1, 24)]
     source_raw = '\n'.join(lines).encode()
-    policy = {'readonly_lookups': {'bounded_reads': {}}}
     case = consumer.trace_cases(
         cases_with_source_read(), 'stop-source_write', source_write_read_variant='bounded')[0]
-    content, rendered, count, total = consumer._read_content(
-        case, {}, {}, {}, 'synthetic-session', source_raw, policy=policy)
-    assert content == '\n'.join(lines[:12])
-    assert rendered == '\n'.join(str(number) + '\t' + line
-                                 for number, line in enumerate(lines[:12], 1))
-    assert (count, total) == (12, 23)
+    for lookup in ({}, {'bounded_reads': {}}):
+        content, rendered, count, total = consumer._read_content(
+            case, {}, {}, {}, 'synthetic-session', source_raw, policy={'readonly_lookups': lookup})
+        assert content == '\n'.join(lines[:12])
+        assert rendered == '\n'.join(str(number) + '\t' + line
+                                     for number, line in enumerate(lines[:12], 1))
+        assert (count, total) == (12, 23)
 
 
 def test_registered_source_read_count_still_matches_captured_bytes():
