@@ -774,6 +774,91 @@ def test_provider_stopping_closes_active_connection_without_socket():
     assert len(calls) == 2
 
 
+def _fake_case_server(supplier, deadline):
+    return SimpleNamespace(case_supplier=supplier, deadline=deadline,
+                           stop_requested=threading.Event())
+
+
+def test_provider_waits_for_late_case_selection():
+    """Live C12 2026-11-21: the first request preceded init's case selection."""
+    cases = [{"id": "a", "tool": "Read", "input": {"file_path": "/invented"}}]
+    calls = []
+    def supplier():
+        calls.append(1)
+        return cases if len(calls) >= 3 else []
+    server = _fake_case_server(supplier, time.monotonic() + 5)
+    assert provider._selected_cases(server) is cases
+    assert len(calls) == 3
+
+
+def test_provider_case_wait_is_bounded_by_deadline_and_stop(monkeypatch):
+    ticks = [0.0]
+    monkeypatch.setattr(provider.time, 'monotonic', lambda: ticks[0])
+    server = _fake_case_server(lambda: [], 1.0)
+    waits = []
+    def wait(timeout):
+        waits.append(timeout)
+        ticks[0] += 0.4
+        return False
+    server.stop_requested = SimpleNamespace(is_set=lambda: False, wait=wait)
+    with pytest.raises(TimeoutError, match='did not select probe cases'):
+        provider._selected_cases(server)
+    assert waits and all(0 < value <= provider.CASE_SELECTION_POLL_SECONDS for value in waits)
+    stopped = _fake_case_server(lambda: [], time.monotonic() + 5)
+    stopped.stop_requested.set()
+    with pytest.raises(ValueError, match='has not selected probe cases'):
+        provider._selected_cases(stopped)
+
+
+def _fake_handler(server, body):
+    raw = json.dumps(body).encode()
+    handler = object.__new__(provider._Handler)
+    handler.server = server
+    handler.headers = {"Content-Length": str(len(raw))}
+    handler.path = "/v1/messages"
+    handler.rfile = io.BufferedReader(io.BytesIO(raw))
+    handler.connection = SimpleNamespace(settimeout=lambda value: None)
+    handler.wfile = io.BytesIO()
+    handler.request_version = "HTTP/1.1"
+    handler.requestline = "POST /v1/messages HTTP/1.1"
+    handler.command = "POST"
+    handler.client_address = ("127.0.0.1", 0)
+    return handler
+
+
+@pytest.mark.parametrize('late', [False, True])
+def test_provider_request_before_selection_gets_first_scripted_case(late):
+    """No socket: one in-process POST whose cases are selected while it waits."""
+    cases = [{"id": "a", "tool": "Read", "input": {"file_path": "/invented"}}]
+    selected = [] if late else cases
+    server = SimpleNamespace(deadline=time.monotonic() + 5, requests=0, failure=None,
+        model="synthetic", reply=None, observation_request=None,
+        stop_requested=threading.Event(), case_supplier=lambda: selected)
+    handler = _fake_handler(server, {"model": "synthetic", "messages": []})
+    timer = threading.Timer(0.05, lambda: selected.extend(cases)) if late else None
+    if timer:
+        timer.start()
+    try:
+        handler.do_POST()
+    finally:
+        if timer:
+            timer.cancel()
+    assert server.failure is None
+    head, _, payload = handler.wfile.getvalue().partition(b"\r\n\r\n")
+    assert head.startswith(b"HTTP/1.1 200")
+    assert json.loads(payload)["content"][0]["id"] == "a"
+
+
+def test_provider_request_never_selected_is_refused_at_deadline():
+    server = SimpleNamespace(deadline=time.monotonic() + 0.1, requests=0, failure=None,
+        model="synthetic", reply=None, observation_request=None,
+        stop_requested=threading.Event(), case_supplier=lambda: [])
+    handler = _fake_handler(server, {"model": "synthetic", "messages": []})
+    handler.do_POST()
+    assert isinstance(server.failure, TimeoutError)
+    assert b" 400 " in handler.wfile.getvalue().split(b"\r\n", 1)[0]
+
+
 @pytest.mark.parametrize('fail_later', [False, True])
 def test_captured_inputs_survive_later_failure_without_authority_fixture(tmp_path, monkeypatch, fail_later):
     """Mock process/consumer boundaries; exercise real incremental disk writes."""

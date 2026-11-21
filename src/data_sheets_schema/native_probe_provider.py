@@ -16,6 +16,30 @@ from urllib.parse import urlsplit
 from .native_subscription_guard import strict_json
 
 MAX_REQUEST = 8 * 1024 * 1024
+CASE_SELECTION_POLL_SECONDS = 0.01
+
+
+def _selected_cases(server):
+    """Wait, bounded by the probe deadline and provider stop, for case selection.
+
+    The native process writes its init event to stdout and may send its first
+    Messages request before the controller has read that event and selected
+    the cases (observed live 2026-11-21: the request arrived about 0.2 s after
+    initialize_ack, while init handling was still writing its inventory). A
+    request that arrives first waits for the selection; it never receives an
+    unscripted answer. No selection by the deadline, or a provider stop, is
+    still a refusal.
+    """
+    while True:
+        cases = server.case_supplier()
+        if cases:
+            return cases
+        if server.stop_requested.is_set():
+            raise ValueError("native initialization has not selected probe cases")
+        remaining = server.deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError("native initialization did not select probe cases before the deadline")
+        server.stop_requested.wait(min(CASE_SELECTION_POLL_SECONDS, remaining))
 
 
 def _read_request(handler, size):
@@ -127,9 +151,8 @@ class _Handler(BaseHTTPRequestHandler):
                 # This value is a local protocol stub, never calibration.
                 content_type, output = "application/json", b'{"input_tokens":0}'
             else:
-                cases = self.server.case_supplier()
-                if not cases and observer is None:
-                    raise ValueError("native initialization has not selected probe cases")
+                cases = (self.server.case_supplier() if observer is not None
+                         else _selected_cases(self.server))
                 payload = response_payload(body, cases, self.server.model, reply=self.server.reply)
                 content_type, output = encode_response(payload, body.get("stream") is True)
             self.send_response(200)
