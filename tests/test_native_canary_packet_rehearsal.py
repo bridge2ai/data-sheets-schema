@@ -96,7 +96,7 @@ def documents(synthetic,tmp_path):
     coded=c.strict_json(word); coded['ci_sha256']=c.sha(ci); coded['review_sha256']=c.sha(review); word=c.canonical(coded)
     adapter.validate_supplied(registration,review,word)
     choice=c.canonical({'kind':'d4d_native_u4_owner_choice','version':1,'decisions':['D105','D106'],
-        'account_label':'LBL work Claude Max','effort':'high','receipt_instrument':4,
+        'account_label':'claude-personal','effort':'high','receipt_instrument':4,
         'subject_sha256':wire.sha(registration),'runtime_sha256':wire.sha(wire.canonical(runtime))})
     data={'registration':registration,'review':review,'launch-word':word,'ci':ci,'account-choice':choice,
           'capture':c.canonical({'scope':LABEL,'status':'not_captured'}),

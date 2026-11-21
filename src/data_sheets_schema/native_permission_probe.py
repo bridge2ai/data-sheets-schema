@@ -32,7 +32,8 @@ from .native_stage_root_diagnostic import (
 
 MAX_STREAM = 8 * 1024 * 1024
 MAX_PROBE_SECONDS = 600
-U4_ACCOUNT_LABEL = 'LBL work Claude Max'
+# Owner's 2026-11-21 account amendment; this label is not auth observation.
+U4_ACCOUNT_LABEL = 'claude-personal'
 U4_EFFORT = 'high'
 U4_RECEIPT_INSTRUMENT = 4
 
@@ -89,7 +90,7 @@ def require_u4_runtime(runtime):
     """Validate D106's saved selection, without querying an account or binary.
 
     The declaration records selected auth expectations, not authenticated
-    account identity. The external owner-choice record binds the LBL label.
+    account identity. The external owner-choice record binds claude-personal.
     Live account/headroom evidence is still a separately authorized gate.
     """
     from . import native_shared_permissions as permission

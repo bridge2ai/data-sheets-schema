@@ -72,7 +72,7 @@ def saved_case(tmp_path_factory):
 
 def choice_document(subject_raw, runtime):
     return {"kind": cli.CHOICE_KIND, "version": 1, "decisions": ["D105", "D106"],
-        "account_label": "LBL work Claude Max", "effort": "high", "receipt_instrument": 4,
+        "account_label": "claude-personal", "effort": "high", "receipt_instrument": 4,
         "subject_sha256": cli.guard.sha(subject_raw),
         "runtime_sha256": cli.guard.sha(cli.guard.canonical(runtime))}
 
@@ -107,6 +107,7 @@ def test_validate_probe_uses_saved_bytes_and_never_runs_a_producer(saved_case, t
     assert result["result"]["checked"] is result["result"]["passed"] is True
     assert len(result["result"]["traces"]) == 7
     assert result["effort"] == "high" and result["selected_receipt_instrument"] == 4
+    assert result["account_label"] == probe.U4_ACCOUNT_LABEL == "claude-personal"
     assert "receipt_instrument" not in result
     assert result["command"] == "validate-probe"
     assert "receipt-policy bytes, account identity and launch authorization are not established" in result["verification_scope"]
@@ -136,7 +137,8 @@ def test_unknown_expectation_kind_refuses_before_probe_read_or_producer(saved_ca
 
 @pytest.mark.parametrize("field,value", [
     ("kind", "other"), ("version", True), ("version", 2), ("extra", "unknown"),
-    ("account_label", "other account"), ("effort", "default"), ("receipt_instrument", 5),
+    ("account_label", "other account"), ("account_label", "LBL work Claude Max"),
+    ("effort", "default"), ("receipt_instrument", 5),
     ("receipt_instrument", True), ("subject_sha256", "0" * 64),
     ("runtime_sha256", "0" * 64), ("decisions", ["D106"]),
 ])
@@ -270,6 +272,23 @@ def test_prepare_guard_preserves_exact_join_and_never_dispatches(saved_case, tmp
     guarded.before_dispatch()
     with pytest.raises(ValueError, match="already consumed"):
         guarded.before_dispatch()
+
+
+def test_old_work_choice_refuses_before_launch(saved_case, tmp_path, monkeypatch):
+    paths, _ = guard_paths(tmp_path, saved_case, monkeypatch)
+    choice = c.strict_json(paths['account-choice'].read_bytes())
+    choice['account_label'] = 'LBL work Claude Max'
+    paths['account-choice'].write_bytes(c.canonical(choice))
+    monkeypatch.setattr(execution, 'launch', no_dispatch)
+    # The unavailable review, CI and prepared worker must never be read.
+    argv = ['launch', '--registration', str(paths['registration']),
+            '--account-choice', str(paths['account-choice']),
+            '--launch-word', str(paths['launch-word'])]
+    for name in ('review', 'ci', 'prepared-directory'):
+        argv += ['--' + name, str(tmp_path / ('missing-' + name))]
+    with pytest.raises(ValueError, match='account choice'):
+        cli.main(argv)
+    assert not (tmp_path / 'missing-prepared-directory').exists()
 
 
 def test_v4_choice_cannot_bless_rehashed_v5_registration_metadata(saved_case, tmp_path, monkeypatch):

@@ -1,7 +1,8 @@
 """Explicit native front door: saved validation, guard preparation, probe, launch.
 
 U4 preparation, 2026-11-08. D105 retains receipts v4; D106 selects explicit
-high effort and the LBL work first-party Max account. The separately supplied
+high effort. The owner's 2026-11-21 amendment selects claude-personal, whose
+reported subscriptionType remains max. The separately supplied
 account-choice document binds that intent to exact input/runtime bytes. It is
 not an account observation, permission proof, CI/review or launch authority.
 Only explicitly selected probe phases, capture-subscription-event and launch can invoke the
@@ -16,7 +17,8 @@ from . import native_subscription_guard as guard
 
 CHOICE_KIND = "d4d_native_u4_owner_choice"
 CHOICE_VERSION = 1
-ACCOUNT_LABEL = "LBL work Claude Max"
+# Current owner choice; historical work-account records remain unchanged.
+ACCOUNT_LABEL = "claude-personal"
 CHOICE_KEYS = {"kind", "version", "decisions", "account_label", "effort",
                "receipt_instrument", "subject_sha256", "runtime_sha256"}
 CHOICE_LIMIT = 16 * 1024
