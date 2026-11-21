@@ -804,9 +804,8 @@ def produce_stage_root_boundary_diagnostic(expected, directory, *, deadline_seco
     return produce_boundary(expected, directory, deadline_seconds=deadline_seconds)
 
 
-def _produce_captured(expected, directory, deadline, p, controls, controller_sources,
-                      transport, selected, selection_raw):
-    """Host-only producer using already captured, live source-bound inputs."""
+def _require_producer_sources(expected, p):
+    """Bind both public producers to the same retained host source closure."""
     sources = {row["module"]: row for row in expected["production_sources"]}
     transport_source = None
     for name in ("native_permission_probe", "native_probe_provider", "native_subscription_guard"):
@@ -818,6 +817,13 @@ def _produce_captured(expected, directory, deadline, p, controls, controller_sou
             raise ValueError("permission producer source is absent from selected production closure: " + name)
         if name == "native_probe_provider":
             transport_source = raw
+    return transport_source
+
+
+def _produce_captured(expected, directory, deadline, p, controls, controller_sources,
+                      transport, selected, selection_raw):
+    """Host-only producer using already captured, live source-bound inputs."""
+    transport_source = _require_producer_sources(expected, p)
     _identity(expected)
     directory = Path(directory)
     if not directory.is_absolute() or directory.parent.resolve(strict=True) != directory.parent:
@@ -986,6 +992,7 @@ def produce_boundary(expected, directory, *, deadline_seconds):
     deadline = time.monotonic() + deadline_seconds
     with producer._probe_signals(), producer._loaded_probe_inputs(expected) as inputs:
         p, controls, sources, transport, selected, selection_raw = inputs
+        producer._require_producer_sources(expected, p)
         protected = [expected['policy']['readonly_lookups']['repository'], selected['stage_root'],
             expected['source']['path'], expected['selection']['path'],
             expected['runtime']['executable']['path'],

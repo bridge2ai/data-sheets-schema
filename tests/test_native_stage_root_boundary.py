@@ -145,6 +145,24 @@ def test_boundary_pin_byte_lengths_require_integer_json_types():
                 sentinel_before=diagnostic.SENTINEL_BYTES, sentinel_after=diagnostic.SENTINEL_BYTES)
 
 
+def test_boundary_public_entry_refuses_unbound_host_source_before_reservation(tmp_path, monkeypatch):
+    from contextlib import contextmanager
+    def captured(expected):
+        yield SimpleNamespace(MAX_MEMBER=8 * 1024 * 1024), {}, {}, object(), {}, b'{}'
+    def forbidden(*args, **kwargs):
+        pytest.fail('unbound diagnostic source reached a native boundary')
+    monkeypatch.setattr(probe, 'require_u4_expectation', lambda expected: None)
+    monkeypatch.setattr(probe, '_loaded_probe_inputs', contextmanager(captured))
+    monkeypatch.setattr(probe, '_identity', forbidden)
+    monkeypatch.setattr(probe, '_version', forbidden)
+    monkeypatch.setattr(probe, '_run_native', forbidden)
+    directory = tmp_path.resolve() / 'unreserved-boundary'
+    expected = {'runtime': {'deadline_seconds': 60}, 'production_sources': []}
+    with pytest.raises(ValueError, match='producer source is absent'):
+        probe.produce_stage_root_boundary_diagnostic(expected, directory, deadline_seconds=60)
+    assert not directory.exists()
+
+
 def test_boundary_refuses_rehashed_wire_or_authority_deviations():
     changes = ('grant_parent', 'grant_missing', 'init_grant', 'call_path', 'callback_path',
                'observer_denied', 'denial_text', 'result_text', 'result_success',

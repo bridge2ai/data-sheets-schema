@@ -27,6 +27,47 @@ TARGETED = ['tests/test_native_permission_probe.py', 'tests/test_native_shared_p
             'tests/test_native_h1_scanner_authority.py']
 
 
+class SourceProofFailureCapture:
+    """Retain a failing Git proof without modifying the verifier or its inputs."""
+    def __init__(self, directory):
+        self.directory, self.captured = directory, False
+
+    def pytest_exception_interact(self, node, call, report):
+        if self.captured or call.excinfo is None:
+            return
+        error = call.excinfo.value
+        if not str(error).startswith('consumed source is not committed at the reviewed head:'):
+            return
+        self.captured = True
+        try:
+            trace = error.__traceback__
+            while trace is not None:
+                frame, trace = trace.tb_frame, trace.tb_next
+                if frame.f_code.co_name != 'require_committed':
+                    continue
+                values = frame.f_locals
+                proc = values['proc']
+                output = self.directory / 'source-proof-failure'
+                output.mkdir(exist_ok=False)
+                for name, raw in (('stdout', proc.stdout), ('stderr', proc.stderr), ('query', values['query'])):
+                    if type(raw) is not bytes or len(raw) > 64 * 1024 * 1024:
+                        raise ValueError('unexpected source-proof capture size or type')
+                    (output / (name + '.bin')).write_bytes(raw)
+                record = {'nodeid': node.nodeid, 'error': str(error),
+                    'offset': values['offset'], 'path': values['path'],
+                    'header_hex': [part.hex() for part in values['header']],
+                    'stdout_bytes': len(proc.stdout), 'stderr_sha256': hashlib.sha256(proc.stderr).hexdigest(),
+                    'query_sha256': hashlib.sha256(values['query']).hexdigest(),
+                    'source_commit': values['base']['source_commit'], 'root': str(frame.f_globals['ROOT']),
+                    'fullmatch': repr(frame.f_globals['re'].fullmatch),
+                    'subprocess_run': repr(frame.f_globals['subprocess'].run),
+                    'subprocess_popen': repr(frame.f_globals['subprocess'].Popen)}
+                (output / 'failure.json').write_text(json.dumps(record, indent=2) + '\n')
+                return
+        except Exception as exc:
+            (self.directory / 'proof-capture-error.txt').write_text(type(exc).__name__ + ': ' + str(exc) + '\n')
+
+
 def isolated_pytest():
     tree = Path(sys.argv[2]).resolve()
     sys.path[:] = [value for value in sys.path
@@ -40,7 +81,7 @@ def isolated_pytest():
     Path(sys.argv[3]).write_text(json.dumps({'python': sys.executable, 'version': sys.version,
                                           'package_roots': roots}, indent=2) + '\n')
     import pytest
-    return pytest.main(sys.argv[4:])
+    return pytest.main(sys.argv[4:], plugins=[SourceProofFailureCapture(Path(sys.argv[3]).parent)])
 
 
 def main():
