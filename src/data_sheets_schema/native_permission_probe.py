@@ -33,6 +33,10 @@ U4_EFFORT = 'high'
 U4_RECEIPT_INSTRUMENT = 4
 
 
+class PermissionObserverStopMissing(ValueError):
+    """A forbidden-effect trace ended without its required observer stop."""
+
+
 class ProbeStopped(BaseException):
     """Operator stop that cannot be swallowed by ordinary I/O handlers."""
 
@@ -634,9 +638,7 @@ class _SharedObserver:
             all_cases = p.probe_cases(self.expected, self.selected, self.launch, self.session)
             self.members["cases.json"] = canonical([{k: v for k, v in case.items() if k != "input"}
                                                     for case in all_cases])
-            self.cases = ([case for case in all_cases if case["mode"] != "observer_stopped"]
-                          if self.trace == "settled" else
-                          [case for case in all_cases if case["id"] == self.trace[5:]])
+            self.cases = p.trace_cases(all_cases, self.trace)
         if event.get("type") == "assistant":
             for block in (event.get("message") or {}).get("content", []):
                 if block.get("type") == "tool_use":
@@ -716,6 +718,9 @@ def _trace(expected, directory, deadline, controls, p, selected, transport, trac
         events = p._rows(result["transcript.jsonl"], "native transcript")
         terminal_hash, parent_hash = sha(canonical(events[-1])), None
     else:
+        if "parent-stop.json" not in members:
+            raise PermissionObserverStopMissing(
+                "permission stop trace ended without parent-stop.json: " + trace)
         terminal_hash, parent_hash = None, sha(members["parent-stop.json"])
     members["outcome.json"] = canonical({
         "kind": "native_shared_permission_outcome", "version": 1,

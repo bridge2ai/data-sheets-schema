@@ -500,6 +500,23 @@ def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_ca
         for event in events:
             try:
                 observer(event)
+                if event.get('type') == 'system' and event.get('subtype') == 'init':
+                    wanted = {
+                        'stop-sealed_request_write': ['request_worker_read', 'sealed_request_write'],
+                        'stop-source_write': ['source_read', 'source_write'],
+                        'stop-helper_owned_write': ['helper_owned_read', 'helper_owned_write'],
+                    }.get(observer.trace)
+                    if observer.trace == 'settled':
+                        assert len(observer.cases) == 19
+                    else:
+                        assert [case['id'] for case in observer.cases] == (
+                            wanted or [observer.trace.removeprefix('stop-')])
+                        first = observer.cases[0]
+                        target = Path(first['input']['file_path'])
+                        assert target.exists() == bool(wanted)
+                        if wanted:
+                            assert first['tool'] == 'Read'
+                            assert first['input']['file_path'] == observer.cases[-1]['input']['file_path']
                 if fail_later and observer.trace != 'settled' and observer.session:
                     raise TimeoutError('later trace failed')
             except transport.budget_stop:
@@ -534,7 +551,8 @@ def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_ca
     output = probe.produce_saved_probe(expected, directory, deadline_seconds=60)
     reading = verify.verify_saved_probe(output.read_bytes(), expected=expected)
     assert reading["passed"]
-    assert len(reading["cases"]) == len(json.loads(manifest['members']['cases.json']['text']))
+    assert len(reading["cases"]) == 28
+    assert len(json.loads(manifest['members']['cases.json']['text'])) == 25
     assert len(reading["traces"]) == len(p.TRACES)
     assert (directory / "transport-provider.py").read_bytes() == transport_source
     assert all((directory / trace / "evidence_root" / "parent-stop.json").is_file()
@@ -545,6 +563,35 @@ def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_ca
     monkeypatch.setattr(probe, '_version', lambda *a: pytest.fail('spent path started another probe'))
     with pytest.raises(FileExistsError):
         probe.produce_saved_probe(expected, directory, deadline_seconds=60)
+
+
+def test_stop_trace_without_parent_stop_has_named_refusal(tmp_path, monkeypatch):
+    """A binary-side tool refusal must never become a completed stop trace."""
+    from data_sheets_schema import native_model_aliases
+    monkeypatch.setattr(native_model_aliases, 'model_aliases', lambda _: {'returned': 'invented'})
+    monkeypatch.setattr(probe, 'local_provider', mock_provider)
+    monkeypatch.setattr(probe, '_inventory', lambda *args: {'unchanged': True})
+    observer = SimpleNamespace(policy={}, cases=[], session='invented-session', members={},
+                               classify=lambda *args: None)
+    monkeypatch.setattr(probe, '_SharedObserver', lambda *args: observer)
+    monkeypatch.setattr(probe.subprocess, 'Popen', lambda *args, **kwargs: pytest.fail('no native process'))
+    monkeypatch.setattr(probe, '_run_native', lambda *args: {
+        'exit_code': 0, 'shutdown': {}, 'transcript.jsonl': b'{"type":"result"}\n',
+        'control.jsonl': b'{"kind":"initialize_sent"}\n'})
+    consumer = SimpleNamespace(
+        _roots=lambda *args: None, stub_files=lambda: {},
+        recipe_sources=lambda: {'recipe/provider.py': 'def reply(cases, number): return None\n'},
+        probe_argv=lambda *args: ['never-run'])
+    expected = {'policy': {'readonly_lookups': {'repository': str(tmp_path)}},
+                'runtime': {'executable': {}}, 'permission_environment': {}}
+    directory = tmp_path / 'missing-stop'
+    with pytest.raises(ValueError, match='permission stop trace ended without parent-stop.json') as caught:
+        probe._trace(expected, directory, float('inf'), {}, consumer, {}, None,
+                     trace='stop-sealed_request_write')
+    assert type(caught.value).__name__ == 'PermissionObserverStopMissing'
+    assert 'stop-sealed_request_write' in str(caught.value)
+    assert (directory / 'launch.before.json').is_file()
+    assert not (directory / 'completed').exists()
 
 
 class FakePipe(io.BytesIO):

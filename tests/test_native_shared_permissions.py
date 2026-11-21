@@ -97,6 +97,13 @@ def _fabricated_manifest(expected, selected, neutral_root, source_raw, controls,
             files['cases.json'] = encoded([{k:v for k,v in case.items() if k != 'input'} for case in all_cases])
         cases = [x for x in all_cases if x['mode'] != 'observer_stopped'] if trace == 'settled' else [
             x for x in all_cases if x['id'] == trace[5:]]
+        if trace in ('stop-sealed_request_write', 'stop-source_write'):
+            read_id = 'request_worker_read' if trace == 'stop-sealed_request_write' else 'source_read'
+            cases.insert(0, next(case for case in all_cases if case['id'] == read_id))
+        elif trace == 'stop-helper_owned_write':
+            cases.insert(0, {'id': 'helper_owned_read', 'tool': 'Read',
+                'input': {'file_path': str(parent / 'effect_root' / 'journal.json')},
+                'context': 'integration', 'mode': 'allowed'})
         ack = {'type':'control_response','response':{'subtype':'success','request_id':native.initialization_id()}}
         init = {'type':'system','subtype':'init','model':expected['runtime']['model'],
                 'claude_code_version':expected['runtime']['executable']['init_version'],
@@ -132,7 +139,13 @@ def _fabricated_manifest(expected, selected, neutral_root, source_raw, controls,
                                 'argv':shlex.split(case['input']['command'])[3:]}).decode()
                 metadata = {'stdout':text,'stderr':'','interrupted':False}; block = {'is_error': False}
             elif case['tool'] == 'Read':
-                raw_text, text, count, total = p._read_content(case, expected, selected, launch, session, source_raw)
+                if case['id'] == 'helper_owned_read':
+                    raw_text = p._recipe_data(expected, selected, launch, session)[1][case['input']['file_path']].decode()
+                    lines = raw_text.split('\n')
+                    text = '\n'.join(str(i + 1) + '\t' + line for i, line in enumerate(lines))
+                    count = total = len(lines)
+                else:
+                    raw_text, text, count, total = p._read_content(case, expected, selected, launch, session, source_raw)
                 metadata = {'type':'text','file':{'filePath':case['input']['file_path'],'content':raw_text,
                     'numLines':count,'startLine':1,'totalLines':total}}; block = {}
             else:
@@ -243,9 +256,9 @@ def test_complete_seven_trace_observation_is_only_software_verification(fixture)
         result = verify(fixture['manifest'], fixture['expected'])
     assert set(targets) <= {key for key, _ in calls}
     assert result['checked'] is result['passed'] is True
-    assert len(result['cases']) == 25 and len(result['traces']) == 7
+    assert len(result['cases']) == 28 and len(result['traces']) == 7
     modes = [case['observed_mode'] for case in result['cases']]
-    assert modes.count('allowed') == 16 and modes.count('native_denied') == 3 and modes.count('observer_stopped') == 6
+    assert modes.count('allowed') == 19 and modes.count('native_denied') == 3 and modes.count('observer_stopped') == 6
     assert {x['state'] for x in result['derived_nonresponse_checks']} == set(p.NONRESPONSE)
     assert 'observation authenticity' in result['unassessed'] and 'provider billing' in result['unassessed']
     assert len(result['members']) == 74 + len(p.recipe_sources())
@@ -254,6 +267,73 @@ def test_complete_seven_trace_observation_is_only_software_verification(fixture)
         pins=[{'trace_id':name,'sha256':fixture['manifest']['members']['traces/'+name+'/neutral.'+moment+'.json']['sha256']}
               for name in p.TRACES]
         assert result['preservation']['neutral_'+moment+'_sha256']==p._sha(encoded(pins))
+
+
+def test_stop_existing_targets_have_verified_read_preconditions(fixture):
+    manifest = fixture['manifest']
+    result = verify(manifest, fixture['expected'])
+    base = get(manifest, 'cases.json')
+    assert len(base) == 25 and all(case['id'] != 'helper_owned_read' for case in base)
+    settled = [case['id'] for case in base if case['mode'] != 'observer_stopped']
+    assert len(settled) == 19
+    expected = [('settled', identity) for identity in settled]
+    reads = {'sealed_request_write': 'request_worker_read', 'source_write': 'source_read',
+             'helper_owned_write': 'helper_owned_read'}
+    for stopped in p.STOPS:
+        trace = 'stop-' + stopped
+        prefix = 'traces/' + trace + '/'
+        identities = ([reads[stopped]] if stopped in reads else []) + [stopped]
+        expected.extend((trace, identity) for identity in identities)
+        events = rows(manifest, prefix + 'transcript.jsonl')
+        calls = [event['message']['content'][0] for event in events if event['type'] == 'assistant']
+        assert [call['id'] for call in calls] == identities
+        assert calls[-1]['name'] == 'Write'
+        assert len(rows(manifest, prefix + 'control.jsonl')) == 2 + (stopped in reads)
+        assert get(manifest, prefix + 'neutral.before.json') == get(manifest, prefix + 'neutral.after.json')
+        if stopped in reads:
+            assert calls[0]['name'] == 'Read'
+            assert calls[0]['input']['file_path'] == calls[-1]['input']['file_path']
+            observed = next(case for case in result['cases'] if
+                            (case['trace_id'], case['id']) == (trace, reads[stopped]))
+            assert observed['classification'] == 'prescribed' and observed['result_sha256']
+            assert observed['stop_sha256'] is None
+    assert [(case['trace_id'], case['id']) for case in result['cases']] == expected
+
+
+def test_stop_existing_targets_refuse_missing_preceding_read(fixture):
+    for stopped in ('sealed_request_write', 'source_write', 'helper_owned_write'):
+        value = deepcopy(fixture['manifest'])
+        prefix = 'traces/stop-' + stopped + '/'
+        events = rows(value, prefix + 'transcript.jsonl')
+        assert events[2]['message']['content'][0]['name'] == 'Read'
+        del events[2:5]
+        put_rows(value, prefix + 'transcript.jsonl', events)
+        controls = rows(value, prefix + 'control.jsonl')
+        put_rows(value, prefix + 'control.jsonl', controls[:2])
+        with pytest.raises(ValueError, match='control has missing/extra grants'):
+            verify(value, fixture['expected'])
+
+
+def test_stop_read_precondition_requires_exact_callback_decision_and_result(fixture):
+    for change in ('call', 'callback', 'decision', 'result', 'duplicate_grant'):
+        value = deepcopy(fixture['manifest'])
+        prefix = 'traces/stop-helper_owned_write/'
+        events = rows(value, prefix + 'transcript.jsonl')
+        controls = rows(value, prefix + 'control.jsonl')
+        if change == 'call':
+            events[2]['message']['content'][0]['input']['file_path'] += '.foreign'
+        elif change == 'callback':
+            events[3]['request']['input']['tool_input']['file_path'] += '.foreign'
+        elif change == 'decision':
+            controls[2]['classification'] = 'not_prescribed'
+        elif change == 'result':
+            events[4]['tool_use_result']['file']['content'] = 'foreign journal bytes'
+        else:
+            controls.append(deepcopy(controls[2]))
+        put_rows(value, prefix + 'transcript.jsonl', events)
+        put_rows(value, prefix + 'control.jsonl', controls)
+        with pytest.raises(ValueError):
+            verify(value, fixture['expected'])
 
 
 @pytest.mark.parametrize('name', ['source.before','cases.json','recipe/provider.py',

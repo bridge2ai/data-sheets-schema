@@ -547,7 +547,7 @@ def projection(expected, selection, launch, session_id, *, policy=None, recipe=N
 
 
 def probe_cases(expected, selection, launch, session_id, *, policy=None, recipe=None):
-    """Exact twenty-five observed cases and no caller-selected case subset."""
+    """Exact twenty-five base cases; stop traces add fixed Read preconditions."""
     _, _, requests, responses = _recipe_data(expected, selection, launch, session_id) if recipe is None else recipe
     root = _path(launch['effect_root'])
     def row(identity, tool, payload, context, mode):
@@ -591,6 +591,29 @@ def probe_cases(expected, selection, launch, session_id, *, policy=None, recipe=
             count = policy['readonly_lookups']['bounded_reads'][path]
             case['input'].update(offset=1, limit=min(12, count))
     return cases
+
+
+def trace_cases(all_cases, trace):
+    """Script existing targets through Read before their prohibited Write.
+
+    Each stop trace starts with fresh neutral files and no responses. The
+    request, source and helper journal already exist; the response targets and
+    outside.bin do not. These preconditions do not alter the settled roster.
+    """
+    _need(trace in TRACES, 'unknown scripted trace')
+    if trace == 'settled':
+        return [case for case in all_cases if case['mode'] != 'observer_stopped']
+    by_id = {case['id']: case for case in all_cases}
+    stopped = by_id[trace[5:]]
+    prerequisite = {'sealed_request_write': 'request_worker_read',
+                    'source_write': 'source_read'}.get(stopped['id'])
+    if prerequisite is not None:
+        return [by_id[prerequisite], stopped]
+    if stopped['id'] == 'helper_owned_write':
+        return [{'id': 'helper_owned_read', 'tool': 'Read',
+                 'input': {'file_path': stopped['input']['file_path']},
+                 'context': stopped['context'], 'mode': 'allowed'}, stopped]
+    return [stopped]
 
 
 def _inventory(expected, selection, launch, session, *, completed, recipe=None):
@@ -735,7 +758,9 @@ def _read_content(case, expected, selection, launch, session, source_raw, *, obs
     if case['id'] == 'source_read':
         raw = source_raw
     else:
-        raw = (_recipe_data(expected, selection, launch, session) if recipe is None else recipe)[2][case['context']]
+        recipe = _recipe_data(expected, selection, launch, session) if recipe is None else recipe
+        raw = (recipe[1][case['input']['file_path']] if case['id'] == 'helper_owned_read'
+               else recipe[2][case['context']])
     text = raw.decode(); lines = text.split('\n')
     if 'limit' in case['input']:
         if policy is None:
@@ -888,9 +913,9 @@ def _trace_body(expected, selection, trace, raw, controls):
                 _inventory(expected, selection, launch, session, completed=trace == 'settled', recipe=recipe)),
           'neutral after inventory shows missing or forbidden effects')
     all_cases = probe_cases(expected, selection, launch, session, policy=policy, recipe=recipe)
-    cases = [c for c in all_cases if c['mode'] != 'observer_stopped'] if trace == 'settled' else [
-        c for c in all_cases if c['id'] == trace[5:]]
-    _need(len(clean) == (len(cases) + 2 if trace == 'settled' else 2), 'control has missing/extra grants')
+    cases = trace_cases(all_cases, trace)
+    _need(len(clean) == 2 + sum(case['mode'] != 'observer_stopped' for case in cases),
+          'control has missing/extra grants')
     offset, request_ids, outcomes = 2, set(), []
     build_view = _view_factory(expected, selection, launch, session, policy=policy, recipe=recipe)
     for number, case in enumerate(cases):
@@ -1073,14 +1098,17 @@ def _verify_bound(raw_manifest, expected, controls, controller_sources):
         if name == 'settled':
             policy = projected_policy(expected, selection, launch['effect_root'])
             recipe = _recipe_data(expected, selection, launch, summary['session_id'], roots_checked=True)
-            roster = [{k:v for k,v in c.items() if k != 'input'}
-                      for c in probe_cases(expected, selection, launch, summary['session_id'],
-                                           policy=policy, recipe=recipe)]
+            all_cases = probe_cases(expected, selection, launch, summary['session_id'],
+                                    policy=policy, recipe=recipe)
+            roster = [{k:v for k,v in c.items() if k != 'input'} for c in all_cases]
             _need(_same(_json(raw['cases.json']), roster), 'closed case roster differs')
             derived = _derived_controls(expected, selection, launch, summary['session_id'],
                                         policy=policy, recipe=recipe)
         traces.append(summary); cases.extend(outcomes)
-    _need(len(cases) == 25 and len({case['id'] for case in cases}) == 25, 'not every required case was checked once')
+    required = [(name, case['id']) for name in TRACES for case in trace_cases(all_cases, name)]
+    observed = [(case['trace_id'], case['id']) for case in cases]
+    _need(observed == required and len(set(observed)) == len(observed),
+          'not every required case and Read precondition was checked once in its trace')
     # These two digests bind ordered per-trace raw-member hashes; the complete
     # member identities remain individually disclosed in ``members`` below.
     preservation = {'source_sha256': expected['source']['sha256'],
