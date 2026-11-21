@@ -21,10 +21,9 @@ PYTHON = Path('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-sche
 SOURCES = ['src/data_sheets_schema/native_permission_probe.py',
            'src/data_sheets_schema/native_shared_permissions.py']
 TESTS = ['tests/test_native_permission_probe.py', 'tests/test_native_shared_permissions.py',
-         'tests/test_native_model_aliases.py']
+         'tests/test_native_model_aliases.py', 'tests/test_native_permission_projection_derivation.py']
 TARGETED = TESTS + ['tests/test_native_permission_probe_stop_record.py',
                    'tests/test_native_u4b_probe_sequence.py',
-                   'tests/test_native_permission_projection_derivation.py',
                    'tests/test_native_generation_frontdoor.py']
 REGRESSIONS = [
     'tests/test_native_permission_probe.py::test_shared_producer_actual_capture_paths_with_mocked_native_events[False]',
@@ -91,7 +90,9 @@ def main():
         command = [str(PYTHON), '-P', '-s', '-B', str(tree / helper), '--pytest',
                    str(tree), str(out / (label + '-imports.json')), '-q', '-p', 'no:cacheprovider',
                    '--basetemp', str(out / (label + '-pytest'))]
-        command += REGRESSIONS if label == 'baseline' else TARGETED
+        command += (REGRESSIONS if label == 'baseline' else
+                    ['tests/test_native_permission_projection_derivation.py']
+                    if '--projection-only' in sys.argv[2:] else TARGETED)
         started = subprocess.check_output(['date', '-u', '+%Y-%m-%dT%H:%M:%SZ'], text=True).strip()
         with (out / (label + '.log')).open('xb') as log:
             run = subprocess.run(command, cwd=tree, env=env, stdout=log, stderr=subprocess.STDOUT)
