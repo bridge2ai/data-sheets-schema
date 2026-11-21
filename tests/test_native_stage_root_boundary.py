@@ -6,6 +6,7 @@ observation nor qualification evidence. No native binary or provider runs.
 from copy import deepcopy
 import json
 from uuid import UUID
+from types import SimpleNamespace
 
 import pytest
 
@@ -167,3 +168,45 @@ def test_boundary_refuses_rehashed_wire_or_authority_deviations():
             document['sentinel']['after'] = pin(after)
         with pytest.raises(ValueError):
             validate_fabricated(expected, selected, document, events, controls, after=after)
+
+
+def test_boundary_observer_blocks_unscripted_effects_before_callback_dispatch():
+    for change in ('none', 'call_before_init', 'wrong_tool', 'wrong_path', 'repeated_call',
+                   'callback_before_call', 'wrong_callback', 'repeated_callback'):
+        _, _, document, events, _ = fabricated_boundary()
+        observer = diagnostic._BoundaryObserver(document['launch'], SimpleNamespace(check=lambda: None))
+        if change == 'call_before_init':
+            with pytest.raises(ValueError):
+                observer(events[3])
+            continue
+        observer(events[2])
+        assert observer.cases == [diagnostic.boundary_case(document['launch'])]
+        if change == 'callback_before_call':
+            with pytest.raises(ValueError):
+                observer(events[4])
+            continue
+        if change in ('wrong_tool', 'wrong_path'):
+            block = events[3]['message']['content'][0]
+            if change == 'wrong_tool':
+                block['name'] = 'Write'
+            else:
+                block['input']['file_path'] += '-other'
+            with pytest.raises(ValueError):
+                observer(events[3])
+            continue
+        observer(events[3])
+        if change == 'repeated_call':
+            with pytest.raises(ValueError):
+                observer(events[3])
+            continue
+        if change == 'wrong_callback':
+            events[4]['request']['input']['tool_input']['file_path'] += '-other'
+            with pytest.raises(ValueError):
+                observer(events[4])
+            continue
+        observer(events[4])
+        if change == 'repeated_callback':
+            with pytest.raises(ValueError):
+                observer(events[4])
+        else:
+            assert observer.called and observer.callback_seen

@@ -215,6 +215,7 @@ class _BoundaryObserver:
     def __init__(self, launch, transport):
         self.launch, self.transport = launch, transport
         self.cases, self.session = None, None
+        self.called, self.callback_seen = False, False
 
     def __call__(self, event):
         self.transport.check()
@@ -225,6 +226,24 @@ class _BoundaryObserver:
             if not isinstance(self.session, str):
                 raise ValueError('boundary diagnostic lacks session')
             self.cases = [boundary_case(self.launch)]
+        if event.get('type') == 'assistant':
+            content = (event.get('message') or {}).get('content', [])
+            if any(type(block) is dict and block.get('type') == 'tool_use' for block in content):
+                case = boundary_case(self.launch)
+                wanted = [{'type': 'tool_use', 'id': case['id'], 'name': case['tool'], 'input': case['input']}]
+                if self.cases is None or self.called or canonical(content) != canonical(wanted):
+                    raise ValueError('boundary diagnostic contains an unscripted tool call')
+                self.called = True
+        if event.get('type') == 'control_request':
+            request = event.get('request') or {}
+            data = request.get('input') or {}
+            case = boundary_case(self.launch)
+            if (not self.called or self.callback_seen or request.get('subtype') != 'hook_callback'
+                    or request.get('tool_use_id') != case['id'] or data.get('tool_use_id') != case['id']
+                    or data.get('tool_name') != case['tool']
+                    or canonical(data.get('tool_input')) != canonical(case['input'])):
+                raise ValueError('boundary diagnostic contains an unscripted callback')
+            self.callback_seen = True
 
     def classify(self, *args):
         raise ValueError('boundary diagnostic never admits Bash')

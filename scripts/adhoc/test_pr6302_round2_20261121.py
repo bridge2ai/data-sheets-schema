@@ -23,7 +23,8 @@ TARGETED = ['tests/test_native_permission_probe.py', 'tests/test_native_shared_p
             'tests/test_native_generation_frontdoor.py', 'tests/test_native_stage_root_grant.py',
             'tests/test_native_stage_root_diagnostic.py', 'tests/test_native_stage_root_boundary.py',
             'tests/test_native_permission_wire_profile.py', 'tests/test_native_shared_permission_protocol.py',
-            'tests/test_native_shared_permission_split.py', 'tests/test_native_shared_registration.py']
+            'tests/test_native_shared_permission_split.py', 'tests/test_native_shared_registration.py',
+            'tests/test_native_h1_scanner_authority.py']
 
 
 def isolated_pytest():

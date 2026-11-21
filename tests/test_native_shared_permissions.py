@@ -464,6 +464,103 @@ def test_source_variants_require_complete_observer_stop_lifecycle(fixture):
                         verified._trace(fixture['expected'], fixture['selection'], trace, raw, controls)
 
 
+def test_manufactured_modern_wire_keeps_settled_semantics_and_observer_stops(fixture):
+    """Software-only integration, not a native run or an admissible registration."""
+    from tests.test_native_permission_wire_profile import context
+    reference = context()
+    with permission_orchestration.loaded_permission_inputs() as (controls, _sources):
+        with loaded_consumer('native_shared_permissions') as consumer:
+            for trace in ('stop-future_response_write', 'settled'):
+                expected = deepcopy(fixture['expected'])
+                for key in ('executable', 'model', 'auxiliary_models', 'effort', 'limits', 'limits_basis'):
+                    expected['runtime'][key] = deepcopy(reference['runtime'][key])
+                prefix = 'traces/' + trace + '/'
+                raw = {name: row['text'].encode() for name, row in fixture['manifest']['members'].items()}
+                launch = get(fixture['manifest'], prefix + 'launch.json')
+                session = rows(fixture['manifest'], prefix + 'transcript.jsonl')[1]['session_id']
+                policy = consumer.projected_policy(expected, fixture['selection'], launch['effect_root'])
+                launch['executable'] = deepcopy(expected['runtime']['executable'])
+                launch['argv'] = consumer.probe_argv(expected, policy, effect_root=launch['effect_root'])
+                raw['version.txt'] = (expected['runtime']['executable']['version'] + '\n').encode()
+                raw[prefix + 'launch.json'] = encoded(launch)
+                original = rows(fixture['manifest'], prefix + 'transcript.jsonl')
+                old_results = {row['message']['content'][0]['tool_use_id']: row for row in original if row['type'] == 'user'}
+                events = deepcopy(reference['events'][:3])
+                events[0].update(session_id=session, uuid=str(uuid.UUID(int=1000)))
+                events[1]['response']['response']['user_output_styles_dir'] = launch['config_root'] + '/output-styles'
+                events[2].update(cwd=launch['cwd'], original_cwd=launch['cwd'], session_id=session,
+                    uuid=str(uuid.UUID(int=1001)), additional_directories=[launch['effect_root']])
+                native = consumer._permission_protocol()
+                ledger = [{'kind': 'initialize_sent', 'policy_sha256': native.policy_digest(policy),
+                           'frame': native.initialize_frame(policy['pretool_control'])},
+                          {'kind': 'initialize_ack', 'frame': deepcopy(events[1])}]
+                cases = consumer.trace_cases(consumer.probe_cases(expected, fixture['selection'], launch, session), trace)
+                for number, case in enumerate(cases):
+                    call = deepcopy(reference['events'][3])
+                    call.update(session_id=session, uuid=str(uuid.UUID(int=1100 + 2 * number)))
+                    call['message'].update(id='d4d_permission_' + str(number), content=[{
+                        'type': 'tool_use', 'id': case['id'], 'name': case['tool'], 'input': deepcopy(case['input'])}])
+                    callback = deepcopy(reference['events'][4])
+                    callback['request_id'] = str(uuid.UUID(int=2000 + number))
+                    callback['request'].update(callback_id=policy['pretool_control']['callback_id'], tool_use_id=case['id'])
+                    callback['request']['input'].update(session_id=session, cwd=launch['cwd'],
+                        transcript_path=launch['config_root'] + '/projects/' + launch['cwd'].replace('/', '-') + '/' + session + '.jsonl',
+                        tool_name=case['tool'], tool_use_id=case['id'], tool_input=deepcopy(case['input']))
+                    events.extend([call, callback])
+                    classification, view = consumer._classification(expected, fixture['selection'], launch, session, case, controls)
+                    if case['mode'] == 'observer_stopped':
+                        raw[prefix + 'effect-stop.json'] = encoded(consumer.effect_stop(
+                            expected, policy, case, view, call, callback, classification))
+                        parent = get(fixture['manifest'], prefix + 'parent-stop.json')
+                        parent['effect_stop_sha256'] = p._sha(raw[prefix + 'effect-stop.json'])
+                        raw[prefix + 'parent-stop.json'] = encoded(parent)
+                        continue
+                    result = deepcopy(reference['events'][5])
+                    result.update(session_id=session, uuid=str(uuid.UUID(int=1101 + 2 * number)),
+                                  message=deepcopy(old_results[case['id']]['message']),
+                                  tool_use_result=deepcopy(old_results[case['id']]['tool_use_result']))
+                    annotation = {'id': case['id'], 'permission_decision': {'decision': 'accept', 'source': 'config', 'reason_type': 'rule'}}
+                    if case['mode'] == 'native_denied':
+                        text = 'PreToolUse:Bash hook error: Outside the registered tool policy: ' + classification[1]
+                        result['message']['content'][0]['content'] = text
+                        result['tool_use_result'] = 'Error: ' + text
+                        annotation = {'id': case['id'], 'non_execution_kind': 'permission-rule',
+                                      'permission_decision': {'decision': 'reject', 'source': 'hook', 'reason_type': 'hook'}}
+                    elif case['tool'] == 'Bash':
+                        result['tool_use_result'].update(isImage=False, noOutputExpected=False)
+                    result['tool_result_meta'] = [annotation]
+                    events.append(result)
+                    ledger.append({'kind': 'decision', 'request': callback, 'classification': classification[0],
+                        'basis': classification[1], 'response': {'type': 'control_response', 'response': {
+                            'subtype': 'success', 'request_id': callback['request_id'], 'response': native.hook_output(*classification)}}})
+                outcome = get(fixture['manifest'], prefix + 'outcome.json')
+                if trace == 'settled':
+                    completion, terminal = deepcopy(reference['events'][-2:])
+                    completion.update(session_id=session, uuid=str(uuid.UUID(int=3000)))
+                    completion['message']['id'] = 'd4d_permission_' + str(len(cases))
+                    terminal.update(session_id=session, uuid=str(uuid.UUID(int=3001)), num_turns=len(cases) + 1,
+                        permission_denials=[{'tool_name': case['tool'], 'tool_use_id': case['id'], 'tool_input': case['input']}
+                                           for case in cases if case['mode'] == 'native_denied'])
+                    events.extend([completion, terminal])
+                    outcome['terminal_sha256'] = p._sha(encoded(terminal))
+                else:
+                    outcome['parent_stop_sha256'] = p._sha(raw[prefix + 'parent-stop.json'])
+                raw[prefix + 'outcome.json'] = encoded(outcome)
+                raw[prefix + 'transcript.jsonl'] = b''.join(encoded(event) + b'\n' for event in events)
+                raw[prefix + 'control.jsonl'] = b''.join(encoded(row) + b'\n' for row in ledger)
+                summary, observed, _ = consumer._trace(expected, fixture['selection'], trace, raw, controls)
+                assert summary['mode'] == ('settled' if trace == 'settled' else 'observer_stopped')
+                assert len(observed) == len(cases)
+                if trace == 'settled':
+                    assert sum(case['observed_mode'] == 'native_denied' for case in observed) == 3
+                    changed = deepcopy(raw)
+                    broken = deepcopy(events)
+                    next(event for event in broken if event.get('type') == 'user')['message']['content'][0]['content'] = 'foreign read bytes'
+                    changed[prefix + 'transcript.jsonl'] = b''.join(encoded(event) + b'\n' for event in broken)
+                    with pytest.raises(ValueError, match='exact complete captured range'):
+                        consumer._trace(expected, fixture['selection'], trace, changed, controls)
+
+
 def test_native_refusal_mutations_cannot_become_permission_evidence(fixture):
     changes = ('read_path', 'read_callback', 'read_decision', 'read_error', 'read_metadata',
         'read_denial', 'missing_read', 'write_path', 'write_payload', 'write_callback', 'write_error',

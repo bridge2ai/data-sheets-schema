@@ -13058,7 +13058,12 @@ _NATIVE_V3_RENDER_SOURCES = {
     # Lead-authorized split, updated 2026-11-16: v3 uses 7d6c13f8, whose
     # verified loader restores caller import roots before the census.
     # This override prevents the historical v2 pin changing v3 authority.
-    'src/data_sheets_schema/native_execution_authority_v2.py': '9593574b74353be270b47cf866022d09c6c70f329b65e1272a65244d5a72418c',
+    # PR 6302, 2026-11-21: the complete predecessor differs only by adding
+    # native_shared_permission_wire, native_stage_root_grant and
+    # native_stage_root_diagnostic to CONSUMER_OWNED_MODULES. They receive
+    # the existing full-body import restrictions; loader logic is unchanged.
+    # Bind the complete new authority bytes, never waive unreviewed additions.
+    'src/data_sheets_schema/native_execution_authority_v2.py': '822c276651532dd582e30c62f45cf8270cba98edbbc8c4628be44c604f87d7ad',
     # D159 (owner, 2026-11-17; lead override): v3 binds the supervisor whose
     # git rev-parse timeout is 20 s (was 10 s); the historical v2 pin is unchanged.
     'src/data_sheets_schema/native_supervisor_authority_v2.py': '628ab407e3e507fd28573c99b2c28c0a97c9eb1d8fa818ccf08bc305e126c8b7',

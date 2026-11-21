@@ -15,7 +15,9 @@ AUTHORITY = 'src/data_sheets_schema/native_execution_authority_v2.py'
 # Lead-authorized review fix, 2026-11-16: include the narrowed pre-import
 # package-root reuse while preserving fresh loader-exit origin checks.
 # D159 (owner, 2026-11-17): its two git subprocess timeouts 30 -> 60 s; nothing else changed.
-REVIEWED = '9593574b74353be270b47cf866022d09c6c70f329b65e1272a65244d5a72418c'
+# PR 6302, 2026-11-21: three fixed modules join the same consumer restrictions.
+PRE_STAGE_GRANT_REVIEWED = '9593574b74353be270b47cf866022d09c6c70f329b65e1272a65244d5a72418c'
+REVIEWED = '822c276651532dd582e30c62f45cf8270cba98edbbc8c4628be44c604f87d7ad'
 HELPER_CACHE = 'src/data_sheets_schema/native_helper_cache.py'
 REVIEWED_HELPER_CACHE = '0934f71630ab45e4670ffa0d14f90c1cfbb23a132a23ca8c6ccfcc0c58a52a95'
 
@@ -29,6 +31,33 @@ def test_reviewed_authority_preserves_integrated_render_proof(tmp_path):
     assert AUTHORITY in result['evidence']
     assert hashlib.sha256((root / HELPER_CACHE).read_bytes()).hexdigest() == REVIEWED_HELPER_CACHE
     assert HELPER_CACHE in result['evidence']
+
+
+def test_stage_grant_authority_delta_is_only_three_fixed_consumer_modules(tmp_path):
+    root = copied_route(tmp_path)
+    raw = (root / AUTHORITY).read_bytes()
+    current = (
+        b"    'native_shared_permission_protocol', 'native_shared_permission_wire', 'native_stage_root_grant',\n"
+        b"    'native_stage_root_diagnostic',\n"
+        b"    'native_shared_runtime_constants',\n")
+    predecessor = b"    'native_shared_permission_protocol', 'native_shared_runtime_constants',\n"
+    assert raw.count(current) == 1
+    assert hashlib.sha256(raw.replace(current, predecessor, 1)).hexdigest() == PRE_STAGE_GRANT_REVIEWED
+    assert scan._NATIVE_V3_RENDER_SOURCES[AUTHORITY] == REVIEWED
+
+
+def test_stage_grant_consumer_module_drift_refuses_render_proof(tmp_path):
+    for number, module in enumerate(('native_shared_permission_wire', 'native_stage_root_grant',
+                                     'native_stage_root_diagnostic')):
+        root = copied_route(tmp_path / str(number))
+        assert scan.derive_native_shared_route(root, scan._tree(root / RUNNER))['renderer'] == 26
+        path = root / AUTHORITY
+        source = path.read_text()
+        before = repr(module)
+        assert source.count(before) == 1
+        path.write_text(source.replace(before, repr('native_unreviewed_consumer'), 1))
+        with pytest.raises(scan.ConfigError, match='v2 envelope authority source changed: ' + AUTHORITY):
+            scan.derive_native_shared_route(root, scan._tree(root / RUNNER))
 
 
 @pytest.mark.parametrize('before,after', [
