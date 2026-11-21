@@ -427,6 +427,73 @@ def test_producer_native_refusal_api_uses_same_saved_verification(fixture):
                     'stop-sealed_request_write', broken, controls, source_raw=fixture['source_raw'])
 
 
+def test_source_variants_verify_complete_native_refusal_lifecycle(fixture):
+    trace = 'stop-source_write'
+    prefix = 'traces/' + trace + '/'
+    source_path = fixture['expected']['source']['path']
+    lines = fixture['source_raw'].decode().split('\n')
+    variants = {
+        'whole': {'file_path': source_path},
+        'bounded': {'file_path': source_path, 'offset': 1, 'limit': 12},
+        'allow_large': {'file_path': source_path, 'allow_large': True},
+    }
+    with permission_orchestration.loaded_permission_inputs() as (controls, _sources):
+        with loaded_consumer('native_shared_permissions') as verified:
+            for variant, payload in variants.items():
+                value = fabricated_native_refusal(
+                    fixture, 'source_write', source_read_succeeded=True)
+                events = rows(value, prefix + 'transcript.jsonl')
+                ledger = rows(value, prefix + 'control.jsonl')
+                before_count = len(events)
+                rejection = ledger[-1]
+                before_locations = rejection['call_line'], rejection['result_line']
+
+                read_call, read_callback, read_result = events[2:5]
+                read_call['message']['content'][0]['input'] = deepcopy(payload)
+                read_callback['request']['input']['tool_input'] = deepcopy(payload)
+                ledger[2]['request'] = deepcopy(read_callback)
+                selected = lines[:12] if variant == 'bounded' else lines
+                read_result['message']['content'][0]['content'] = '\n'.join(
+                    str(number) + '\t' + line for number, line in enumerate(selected, 1))
+                read_result['tool_use_result'] = {
+                    'type': 'text',
+                    'file': {'filePath': source_path, 'content': '\n'.join(selected),
+                             'numLines': len(selected), 'startLine': 1, 'totalLines': len(lines)},
+                }
+
+                call = events[rejection['call_line'] - 1]
+                result = events[rejection['result_line'] - 1]
+                assert call['message']['content'][0]['id'] == 'source_write'
+                assert result['message']['content'][0]['tool_use_id'] == 'source_write'
+                rejection['call_sha256'] = p._sha(encoded(call))
+                rejection['result_sha256'] = p._sha(encoded(result))
+                assert len(events) == before_count
+                assert (rejection['call_line'], rejection['result_line']) == before_locations
+                put_rows(value, prefix + 'transcript.jsonl', events)
+                put_rows(value, prefix + 'control.jsonl', ledger)
+                raw = {name: member['text'].encode() for name, member in value['members'].items()}
+
+                summary, observed, launch = verified._trace(
+                    fixture['expected'], fixture['selection'], trace, raw, controls,
+                    source_write_read_variant=variant)
+                assert summary['mode'] == 'native_refused_before_callback'
+                assert summary['protection'] == 'native_binary'
+                assert launch['exit_code'] == 0
+                assert [case['observed_mode'] for case in observed] == [
+                    'allowed', 'native_refused_before_callback']
+                assert observed[0]['input_sha256'] == p._sha(encoded(payload))
+                assert observed[0]['result_sha256'] == p._sha(encoded(read_result))
+                assert observed[1]['callback_id'] is None
+                assert observed[1]['protection'] == 'native_binary'
+
+                if variant == 'whole':
+                    assert verified._trace(
+                        fixture['expected'], fixture['selection'], trace, raw, controls)[0] == summary
+                else:
+                    with pytest.raises(ValueError, match='call differs from exact scripted case'):
+                        verified._trace(fixture['expected'], fixture['selection'], trace, raw, controls)
+
+
 def test_native_refusal_mutations_cannot_become_permission_evidence(fixture):
     changes = ('read_path', 'read_callback', 'read_decision', 'read_error', 'read_metadata',
         'read_denial', 'missing_read', 'write_path', 'write_payload', 'write_callback', 'write_error',
