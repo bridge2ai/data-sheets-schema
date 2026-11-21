@@ -369,6 +369,10 @@ def fabricated_native_refusal(fixture, stopped, *, source_read_succeeded=False):
         {'type': 'result', 'session_id': session, 'subtype': 'success', 'is_error': False,
             'terminal_reason': 'completed', 'stop_reason': 'end_turn', 'result': 'OFFLINE_COMPLETE',
             'num_turns': 3, 'safety_stops': 0, 'queued_turn_count': 0, 'result_index': 0,
+            'subagent_stats': {'spawned': 0, 'requested': {'background': 0, 'foreground': 0, 'unset': 0},
+                'started_in_background': 0, 'max_depth': 0, 'spawned_by_subagents': 0, 'completed': 0, 'failed': 0,
+                'killed': {'parent': 0, 'user': 0, 'system': 0},
+                'refused': {'depth_limit': 0, 'concurrency_limit': 0, 'budget': 0}, 'by_type': {}},
             'permission_denials': [] if source_read_succeeded else [{'tool_name': 'Read',
                 'tool_use_id': read['id'], 'tool_input': read['input']}]}])
     controls = rows(value, prefix + 'control.jsonl')
@@ -521,6 +525,57 @@ def test_source_refusal_rejects_unknown_read_failures(fixture):
     put_rows(value, prefix + 'transcript.jsonl', events)
     with pytest.raises(ValueError):
         verify(value, fixture['expected'])
+
+
+def test_native_refusal_requires_transport_compatible_envelopes(fixture):
+    for change in ('observed_metadata', 'write_extra', 'write_message_extra', 'write_role_missing',
+                   'read_extra', 'read_message_extra', 'read_role_missing', 'denial_extra',
+                   'call_role_missing', 'subagent_spawned', 'subagent_background', 'subagent_unknown'):
+        value = fabricated_native_refusal(fixture, 'helper_owned_write')
+        prefix = 'traces/stop-helper_owned_write/'
+        events = rows(value, prefix + 'transcript.jsonl')
+        if change == 'observed_metadata':
+            for index in (4, 5, 7):
+                events[index].update(uuid=str(uuid.UUID(int=100 + index)), parent_tool_use_id=None)
+            for index in (5, 7):
+                events[index]['timestamp'] = '2026-11-21T21:17:32.576Z'
+        elif change == 'write_extra':
+            events[7]['persisted_output'] = {}
+        elif change == 'write_message_extra':
+            events[7]['message']['extra'] = True
+        elif change == 'write_role_missing':
+            del events[7]['message']['role']
+        elif change == 'read_extra':
+            events[5]['persisted_output'] = {}
+        elif change == 'read_message_extra':
+            events[5]['message']['extra'] = True
+        elif change == 'read_role_missing':
+            del events[5]['message']['role']
+        elif change == 'denial_extra':
+            events[4]['permissionDecision'] = 'allow'
+        elif change == 'call_role_missing':
+            del events[6]['message']['role']
+        elif change == 'subagent_spawned':
+            events[-1]['subagent_stats']['spawned'] = 1
+        elif change == 'subagent_background':
+            events[-1]['subagent_stats']['started_in_background'] = 1
+        else:
+            events[-1]['subagent_stats']['pending'] = 1
+        controls = rows(value, prefix + 'control.jsonl')
+        # Recompute evidence digests so rejection depends on the altered
+        # envelope/lifecycle, rather than merely detecting an old hash.
+        controls[3]['call_sha256'] = p._sha(encoded(events[6]))
+        controls[3]['result_sha256'] = p._sha(encoded(events[7]))
+        outcome = get(value, prefix + 'outcome.json')
+        outcome['terminal_sha256'] = p._sha(encoded(events[-1]))
+        put(value, prefix + 'outcome.json', outcome)
+        put_rows(value, prefix + 'control.jsonl', controls)
+        put_rows(value, prefix + 'transcript.jsonl', events)
+        if change == 'observed_metadata':
+            assert verify(value, fixture['expected'])['passed'] is True
+        else:
+            with pytest.raises(ValueError):
+                verify(value, fixture['expected'])
 
 
 @pytest.mark.parametrize('name', ['source.before','cases.json','recipe/provider.py',

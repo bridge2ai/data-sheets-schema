@@ -927,6 +927,7 @@ def _native_refusal_trace(expected, selection, trace, raw, controls, launch, pol
         call = events[offset]; offset += 1
         _need(call.get('type') == 'assistant', 'native refusal call is out of order')
         _native_scope(call, session, aliases, 'assistant')
+        _need(call.get('message', {}).get('role') == 'assistant', 'native refusal call lacks assistant role')
         wanted_call = {'type': 'tool_use', 'id': case['id'], 'name': case['tool'], 'input': case['input']}
         _need(_same(call.get('message', {}).get('content'), [wanted_call]),
               'native refusal call differs from exact scripted case')
@@ -960,7 +961,8 @@ def _native_refusal_trace(expected, selection, trace, raw, controls, launch, pol
                 wanted_denial = {'type': 'system', 'subtype': 'permission_denied', 'tool_name': 'Read',
                     'tool_use_id': case['id'], 'decision_reason_type': 'other',
                     'decision_reason': '--restricted: path outside the working directory', 'message': refusal}
-                _need(_same({key: denial.get(key) for key in wanted_denial}, wanted_denial),
+                _need(not (set(denial) - set(wanted_denial) - {'session_id', 'uuid', 'parent_tool_use_id'})
+                      and _same({key: denial.get(key) for key in wanted_denial}, wanted_denial),
                       'native refusal Read denial differs')
                 offset += 1
             else:
@@ -974,6 +976,13 @@ def _native_refusal_trace(expected, selection, trace, raw, controls, launch, pol
                          policy=policy, recipe=recipe)
             _need('tool_result_meta' not in result, 'successful source Read contains refusal metadata')
         else:
+            allowed_keys = {'type', 'message', 'parent_tool_use_id', 'session_id', 'uuid',
+                            'timestamp', 'tool_use_result'}
+            if case['tool'] == 'Read':
+                allowed_keys.add('tool_result_meta')
+            _need(set(result) <= allowed_keys, 'native refusal result envelope contains unknown fields')
+            _object(result.get('message'), {'role', 'content'}, 'native refusal result message')
+            _need(result['message']['role'] == 'user', 'native refusal result lacks user role')
             text = refusal if case['tool'] == 'Read' else (
                 '<tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>')
             wanted_result = {'type': 'tool_result', 'tool_use_id': case['id'], 'is_error': True, 'content': text}
@@ -1003,7 +1012,8 @@ def _native_refusal_trace(expected, selection, trace, raw, controls, launch, pol
     _need(len(events) == offset + 2, 'native refusal has extra, pending or missing terminal evidence')
     completion, terminal = events[offset:]
     _native_scope(completion, session, aliases, 'assistant')
-    _need(completion.get('type') == 'assistant' and _same(completion.get('message', {}).get('content'),
+    _need(completion.get('type') == 'assistant' and completion.get('message', {}).get('role') == 'assistant'
+          and _same(completion.get('message', {}).get('content'),
           [{'type': 'text', 'text': 'OFFLINE_COMPLETE'}]), 'native refusal completion differs')
     _native_scope(terminal, session, aliases)
     native_model_aliases.require_model_usage(terminal, aliases)
@@ -1013,6 +1023,12 @@ def _native_refusal_trace(expected, selection, trace, raw, controls, launch, pol
     _need(_same({key: terminal.get(key) for key in required_terminal}, required_terminal)
           and terminal.get('error') is None and terminal.get('api_error_status') is None,
           'native refusal terminal contradicts exact successful completion')
+    if 'subagent_stats' in terminal:
+        idle_subagents = {'spawned': 0, 'requested': {'background': 0, 'foreground': 0, 'unset': 0},
+            'started_in_background': 0, 'max_depth': 0, 'spawned_by_subagents': 0, 'completed': 0, 'failed': 0,
+            'killed': {'parent': 0, 'user': 0, 'system': 0},
+            'refused': {'depth_limit': 0, 'concurrency_limit': 0, 'budget': 0}, 'by_type': {}}
+        _need(_same(terminal['subagent_stats'], idle_subagents), 'native refusal terminal reports subagent activity')
     denied = [{'tool_name': 'Read', 'tool_use_id': read['id'], 'tool_input': read['input']}] if read_refused else []
     _need(_same(terminal.get('permission_denials'), denied), 'native refusal terminal denial inventory differs')
     _need(launch['exit_code'] == 0, 'native refusal requires a successful reaped process')
