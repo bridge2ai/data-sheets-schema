@@ -13,8 +13,8 @@ from .native_shared_contract import canonical_path
 def permission_arguments(policy, stage_root):
     """Grant one bound directory without changing the six-function protocol."""
     canonical_path(stage_root, 'stage grant root')
-    if stage_root == '/':
-        raise ValueError('stage grant root cannot be the filesystem root')
+    if stage_root == '/' or stage_root != stage_root.strip():
+        raise ValueError('stage grant root cannot be the filesystem root or have surrounding whitespace')
     arguments = protocol.permission_arguments(policy)
     settings = json.loads(arguments[-1])
     settings['permissions']['additionalDirectories'] = [stage_root]

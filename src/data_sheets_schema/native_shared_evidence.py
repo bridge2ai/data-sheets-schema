@@ -39,7 +39,7 @@ def _stat(info):
 def require_physical_directory(path, *, must_exist):
     """Host-only check of an exact directory identity before grant dispatch."""
     canonical_path(path, 'physical directory')
-    if path == '/' or type(must_exist) is not bool:
+    if path == '/' or path != path.strip() or type(must_exist) is not bool:
         raise ValueError('physical directory requires a bounded root and exact existence choice')
     target = Path(path)
     try:

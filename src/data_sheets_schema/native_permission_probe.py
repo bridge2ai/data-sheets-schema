@@ -728,7 +728,7 @@ def _trace(expected, directory, deadline, controls, p, selected, transport, trac
                 raise ValueError("scripted permission provider failed") from server.failure
     finally:
         if diagnostic and server is not None and (directory / 'transcript.jsonl').is_file():
-            diagnostic.finish(launch, request_count=server.requests)
+            _finish_diagnostic(diagnostic, launch, server)
     launch.update(exit_code=result["exit_code"], shutdown=result["shutdown"])
     members = {"launch.json": canonical(launch), "config.json": b"{}",
                "transcript.jsonl": result["transcript.jsonl"], "control.jsonl": result["control.jsonl"]}
@@ -754,6 +754,23 @@ def _trace(expected, directory, deadline, controls, p, selected, transport, trac
     for name, raw in members.items():
         _write_new(directory / "completed" / name, raw)
     return members
+
+
+def _finish_diagnostic(diagnostic, launch, server):
+    """Retain secondary capture failures without replacing the original cause."""
+    active_failure = sys.exc_info()[1]
+    try:
+        diagnostic.finish(launch, request_count=server.requests)
+    except BaseException as exc:
+        try:
+            _write_new(diagnostic.directory / 'diagnostics' / 'failure.json', canonical({
+                'kind': 'native_stage_root_diagnostic_failure', 'version': 1,
+                'error_type': type(exc).__name__, 'message': str(exc)}))
+        except BaseException:
+            if active_failure is None:
+                raise exc
+        if active_failure is None:
+            raise
 
 
 def produce_saved_probe(expected, directory, *, deadline_seconds):

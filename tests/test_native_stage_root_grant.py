@@ -32,7 +32,8 @@ def test_exact_grant_preserves_frozen_protocol_and_input_policy():
 def test_grant_rejects_noncanonical_or_unbounded_directory_spellings():
     invalid = ('/', '', 'relative/stage', '//attempt/stage', '/attempt//stage',
                '/attempt/stage/', '/attempt/./stage', '/attempt/../stage',
-               '/attempt/stage\n', '/attempt/sta\x00ge', None, True, ['/attempt/stage'])
+               '/attempt/stage\n', '/attempt/stage ', ' /attempt/stage',
+               '/attempt/sta\x00ge', None, True, ['/attempt/stage'])
     for root in invalid:
         with pytest.raises(ValueError):
             grant.permission_arguments({'allowed_tools': ['Read', 'Write']}, root)
@@ -103,3 +104,5 @@ def test_host_check_refuses_file_dangling_alias_and_invalid_choice(tmp_path):
             require_physical_directory(str(root), must_exist=choice)
     with pytest.raises(ValueError):
         require_physical_directory('/', must_exist=True)
+    with pytest.raises(ValueError):
+        require_physical_directory(str(root / 'stage '), must_exist=False)
