@@ -134,9 +134,9 @@ def test_grant_sidecar_mutations_cannot_substitute_capture_or_launch(tmp_path, m
     launch, baseline, transcript, original_requests = _captured_case(tmp_path)
     changes = ('extra', 'fixture_none', 'fixture_integer', 'version_bool', 'cwd', 'stage_root',
         'parent_grant', 'allow_policy', 'marker_before', 'marker_after', 'marker_reorder',
-        'request_hash', 'request_bytes', 'request_endpoint', 'request_reorder', 'request_extra_field',
+        'request_hash', 'request_bytes', 'request_bytes_float', 'request_endpoint', 'request_reorder', 'request_extra_field',
         'request_path', 'request_count', 'request_count_bool', 'request_row_extra', 'request_row_missing',
-        'raw_extra', 'raw_missing', 'raw_substitution', 'transcript_pin', 'transcript_bytes',
+        'raw_extra', 'raw_missing', 'raw_substitution', 'transcript_pin', 'transcript_pin_float', 'transcript_bytes',
         'marker_claim_false', 'marker_claim_integer')
     for change in changes:
         document, requests, seen = deepcopy(baseline), dict(original_requests), transcript
@@ -171,6 +171,8 @@ def test_grant_sidecar_mutations_cannot_substitute_capture_or_launch(tmp_path, m
             document['provider_requests'][0]['sha256'] = '0' * 64
         elif change == 'request_bytes':
             document['provider_requests'][0]['bytes'] += 1
+        elif change == 'request_bytes_float':
+            document['provider_requests'][0]['bytes'] = float(document['provider_requests'][0]['bytes'])
         elif change == 'request_endpoint':
             document['provider_requests'][0]['endpoint'] = '/other'
         elif change == 'request_reorder':
@@ -197,6 +199,8 @@ def test_grant_sidecar_mutations_cannot_substitute_capture_or_launch(tmp_path, m
             requests['requests/000001.json'] = b'{"different":true}'
         elif change == 'transcript_pin':
             document['transcript']['sha256'] = '0' * 64
+        elif change == 'transcript_pin_float':
+            document['transcript']['bytes'] = float(document['transcript']['bytes'])
         elif change == 'transcript_bytes':
             seen += b'{"unexpected":true}\n'
         elif change == 'marker_claim_false':

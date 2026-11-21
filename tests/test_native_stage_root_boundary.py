@@ -124,6 +124,26 @@ def test_boundary_accepts_exact_admitted_callback_then_native_restriction():
         'observer_admitted': True, 'sentinel_unchanged': True}
 
 
+def test_boundary_pin_byte_lengths_require_integer_json_types():
+    for field in ('sentinel_before', 'sentinel_after', 'transcript', 'control'):
+        expected, selected, document, events, controls = fabricated_boundary()
+        transcript = b''.join(p._encoded(row) + b'\n' for row in events)
+        control = b''.join(p._encoded(row) + b'\n' for row in controls)
+        document['transcript'] = {'relative_path': 'transcript.jsonl', **pin(transcript)}
+        document['control'] = {'relative_path': 'control.jsonl', **pin(control)}
+        if field.startswith('sentinel_'):
+            changed_pin = document['sentinel'][field.removeprefix('sentinel_')]
+        else:
+            changed_pin = document[field]
+        # Same numerical value and unchanged SHA/bytes must still refuse an
+        # unsupported JSON type; ordinary dictionary equality accepts it.
+        changed_pin['bytes'] = float(changed_pin['bytes'])
+        with pytest.raises(ValueError):
+            diagnostic.validate_boundary_diagnostic(document, expected=expected, selected=selected,
+                transcript_raw=transcript, control_raw=control,
+                sentinel_before=diagnostic.SENTINEL_BYTES, sentinel_after=diagnostic.SENTINEL_BYTES)
+
+
 def test_boundary_refuses_rehashed_wire_or_authority_deviations():
     changes = ('grant_parent', 'grant_missing', 'init_grant', 'call_path', 'callback_path',
                'observer_denied', 'denial_text', 'result_text', 'result_success',

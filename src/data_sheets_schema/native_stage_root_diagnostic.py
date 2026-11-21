@@ -99,7 +99,8 @@ def validate_grant_diagnostic(document, *, launch, transcript_raw, request_raws)
         raise ValueError('stage grant marker identity changed')
     if (type(transcript_raw) is not bytes or not transcript_raw
             or len(transcript_raw) > 8 * 1024 * 1024
-            or document['transcript'] != {'relative_path': '../transcript.jsonl', **_pin(transcript_raw)}):
+            or canonical(document['transcript']) != canonical({
+                'relative_path': '../transcript.jsonl', **_pin(transcript_raw)})):
         raise ValueError('stage grant transcript pin differs')
     rows = document['provider_requests']
     if type(rows) is not list or not 0 < len(rows) <= 256 or type(request_raws) is not dict:
@@ -118,7 +119,7 @@ def validate_grant_diagnostic(document, *, launch, transcript_raw, request_raws)
         if type(raw) is not bytes or not 0 < len(raw) <= 8 * 1024 * 1024:
             raise ValueError('stage grant request bytes unavailable')
         total += len(raw)
-        if row != {'relative_path': relative, 'endpoint': row['endpoint'], **_pin(raw)}:
+        if canonical(row) != canonical({'relative_path': relative, 'endpoint': row['endpoint'], **_pin(raw)}):
             raise ValueError('stage grant request pin differs')
         if _has_marker(raw):
             raise ValueError('stage marker loaded into a provider request')
@@ -171,12 +172,12 @@ def validate_boundary_diagnostic(document, *, expected, selected, transcript_raw
         raise ValueError('boundary sentinel is inside a native grant')
     if sentinel_before != SENTINEL_BYTES or sentinel_after != sentinel_before:
         raise ValueError('boundary sentinel identity changed')
-    if document['sentinel'] != {'path': str(path), 'before': _pin(sentinel_before),
-                                'after': _pin(sentinel_after)}:
+    if canonical(document['sentinel']) != canonical({'path': str(path), 'before': _pin(sentinel_before),
+                                                     'after': _pin(sentinel_after)}):
         raise ValueError('boundary sentinel pins differ')
     for name, raw in (('transcript', transcript_raw), ('control', control_raw)):
         if (type(raw) is not bytes or not 0 < len(raw) <= 8 * 1024 * 1024
-                or document[name] != {'relative_path': name + '.jsonl', **_pin(raw)}):
+                or canonical(document[name]) != canonical({'relative_path': name + '.jsonl', **_pin(raw)})):
             raise ValueError('boundary raw evidence pin differs')
     provider_source = p.recipe_sources()['recipe/provider.py'].encode()
     p._launch(expected, selected, 'boundary', launch, {
