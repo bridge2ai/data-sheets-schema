@@ -82,7 +82,8 @@ def _fabricated_manifest(expected, selected, neutral_root, source_raw, controls,
         launch = {key: str(parent/key) for key in ('config_root','stub_root','effect_root','evidence_root')}
         probe_policy = p.projected_policy(expected, selected, launch['effect_root'])
         provider = 'http://127.0.0.1:18455'
-        launch.update(cwd=expected['policy']['readonly_lookups']['repository'], argv=p.probe_argv(expected, probe_policy),
+        launch.update(cwd=expected['policy']['readonly_lookups']['repository'], argv=p.probe_argv(
+            expected, probe_policy, effect_root=launch['effect_root']),
             environment={**expected['permission_environment'], 'CLAUDE_CONFIG_DIR': launch['config_root'],
                 'PYTHONPATH': launch['stub_root'], 'ANTHROPIC_BASE_URL': provider,
                 'ANTHROPIC_API_KEY': 'd4d-local-permission-probe-token'}, provider_url=provider,
@@ -391,43 +392,26 @@ def fabricated_native_refusal(fixture, stopped, *, source_read_succeeded=False):
     return value
 
 
-def test_exact_binary_refusal_is_distinct_from_observer_protection(fixture):
+def test_withdrawn_binary_refusal_never_replaces_observer_protection(fixture):
     for stopped, read_succeeded in (('sealed_request_write', False), ('helper_owned_write', False),
                                     ('source_write', False), ('source_write', True)):
         value = fabricated_native_refusal(fixture, stopped, source_read_succeeded=read_succeeded)
-        result = verify(value, fixture['expected'])
-        trace = 'stop-' + stopped
-        summary = next(row for row in result['traces'] if row['id'] == trace)
-        assert summary['mode'] == 'native_refused_before_callback'
-        assert summary['protection'] == 'native_binary'
-        observed = [row for row in result['cases'] if row['trace_id'] == trace]
-        assert [row['tool'] for row in observed] == ['Read', 'Write']
-        assert observed[0]['callback_id'] and observed[0]['classification'] == 'prescribed'
-        assert observed[0]['observed_mode'] == ('allowed' if read_succeeded else 'native_denied')
-        assert observed[1]['observed_mode'] == 'native_refused_before_callback'
-        assert observed[1]['callback_id'] is None and observed[1]['stop_sha256'] is None
-        assert observed[1]['protection'] == 'native_binary'
-        assert all(row['result_sha256'] for row in observed)
+        with pytest.raises(ValueError, match='native refusal outcome is withdrawn'):
+            verify(value, fixture['expected'])
 
 
-def test_producer_native_refusal_api_uses_same_saved_verification(fixture):
+def test_withdrawn_refusal_cannot_pass_private_trace_validation(fixture):
     value = fabricated_native_refusal(fixture, 'sealed_request_write')
     prefix = 'traces/stop-sealed_request_write/'
-    local = {name[len(prefix):]: row['text'].encode() for name, row in value['members'].items()
-             if name.startswith(prefix) and name != prefix + 'outcome.json'}
+    raw = {name: row['text'].encode() for name, row in value['members'].items()}
     with permission_orchestration.loaded_permission_inputs() as (controls, _sources):
         with loaded_consumer('native_shared_permissions') as consumer:
-            outcome = consumer.native_refusal_outcome(fixture['expected'], fixture['selection'],
-                'stop-sealed_request_write', local, controls, source_raw=fixture['source_raw'])
-            assert outcome == get(value, prefix + 'outcome.json')
-            broken = deepcopy(local)
-            broken['neutral.after.json'] = encoded({})
-            with pytest.raises(ValueError):
-                consumer.native_refusal_outcome(fixture['expected'], fixture['selection'],
-                    'stop-sealed_request_write', broken, controls, source_raw=fixture['source_raw'])
+            with pytest.raises(ValueError, match='native refusal outcome is withdrawn'):
+                consumer._trace(fixture['expected'], fixture['selection'],
+                                'stop-sealed_request_write', raw, controls)
 
 
-def test_source_variants_verify_complete_native_refusal_lifecycle(fixture):
+def test_source_variants_require_complete_observer_stop_lifecycle(fixture):
     trace = 'stop-source_write'
     prefix = 'traces/' + trace + '/'
     source_path = fixture['expected']['source']['path']
@@ -440,13 +424,9 @@ def test_source_variants_verify_complete_native_refusal_lifecycle(fixture):
     with permission_orchestration.loaded_permission_inputs() as (controls, _sources):
         with loaded_consumer('native_shared_permissions') as verified:
             for variant, payload in variants.items():
-                value = fabricated_native_refusal(
-                    fixture, 'source_write', source_read_succeeded=True)
+                value = deepcopy(fixture['manifest'])
                 events = rows(value, prefix + 'transcript.jsonl')
                 ledger = rows(value, prefix + 'control.jsonl')
-                before_count = len(events)
-                rejection = ledger[-1]
-                before_locations = rejection['call_line'], rejection['result_line']
 
                 read_call, read_callback, read_result = events[2:5]
                 read_call['message']['content'][0]['input'] = deepcopy(payload)
@@ -461,14 +441,6 @@ def test_source_variants_verify_complete_native_refusal_lifecycle(fixture):
                              'numLines': len(selected), 'startLine': 1, 'totalLines': len(lines)},
                 }
 
-                call = events[rejection['call_line'] - 1]
-                result = events[rejection['result_line'] - 1]
-                assert call['message']['content'][0]['id'] == 'source_write'
-                assert result['message']['content'][0]['tool_use_id'] == 'source_write'
-                rejection['call_sha256'] = p._sha(encoded(call))
-                rejection['result_sha256'] = p._sha(encoded(result))
-                assert len(events) == before_count
-                assert (rejection['call_line'], rejection['result_line']) == before_locations
                 put_rows(value, prefix + 'transcript.jsonl', events)
                 put_rows(value, prefix + 'control.jsonl', ledger)
                 raw = {name: member['text'].encode() for name, member in value['members'].items()}
@@ -476,21 +448,19 @@ def test_source_variants_verify_complete_native_refusal_lifecycle(fixture):
                 summary, observed, launch = verified._trace(
                     fixture['expected'], fixture['selection'], trace, raw, controls,
                     source_write_read_variant=variant)
-                assert summary['mode'] == 'native_refused_before_callback'
-                assert summary['protection'] == 'native_binary'
-                assert launch['exit_code'] == 0
+                assert summary['mode'] == 'observer_stopped'
+                assert launch['exit_code'] != 0
                 assert [case['observed_mode'] for case in observed] == [
-                    'allowed', 'native_refused_before_callback']
+                    'allowed', 'observer_stopped']
                 assert observed[0]['input_sha256'] == p._sha(encoded(payload))
                 assert observed[0]['result_sha256'] == p._sha(encoded(read_result))
-                assert observed[1]['callback_id'] is None
-                assert observed[1]['protection'] == 'native_binary'
+                assert observed[1]['callback_id'] and observed[1]['stop_sha256']
 
                 if variant == 'whole':
                     assert verified._trace(
                         fixture['expected'], fixture['selection'], trace, raw, controls)[0] == summary
                 else:
-                    with pytest.raises(ValueError, match='call differs from exact scripted case'):
+                    with pytest.raises(ValueError, match='call differs from required case'):
                         verified._trace(fixture['expected'], fixture['selection'], trace, raw, controls)
 
 
@@ -638,11 +608,8 @@ def test_native_refusal_requires_transport_compatible_envelopes(fixture):
         put(value, prefix + 'outcome.json', outcome)
         put_rows(value, prefix + 'control.jsonl', controls)
         put_rows(value, prefix + 'transcript.jsonl', events)
-        if change == 'observed_metadata':
-            assert verify(value, fixture['expected'])['passed'] is True
-        else:
-            with pytest.raises(ValueError):
-                verify(value, fixture['expected'])
+        with pytest.raises(ValueError, match='native refusal outcome is withdrawn'):
+            verify(value, fixture['expected'])
 
 
 @pytest.mark.parametrize('name', ['source.before','cases.json','recipe/provider.py',
@@ -767,6 +734,35 @@ def test_rehashed_launch_sources_and_roster_refuse(fixture,change):
     with pytest.raises(ValueError):verify(value,fixture['expected'])
 
 
+def test_saved_grant_must_be_the_single_exact_effect_root(fixture):
+    for change in ('missing', 'parent', 'sibling', 'two', 'lexical_alias', 'extra_settings', 'argv_grant'):
+        value = deepcopy(fixture['manifest'])
+        name = 'traces/settled/launch.json'
+        launch = get(value, name)
+        argv = launch['argv']
+        position = argv.index('--settings') + 1
+        settings = json.loads(argv[position])
+        root = launch['effect_root']
+        if change == 'missing':
+            del settings['permissions']['additionalDirectories']
+        elif change == 'parent':
+            settings['permissions']['additionalDirectories'] = [str(Path(root).parent)]
+        elif change == 'sibling':
+            settings['permissions']['additionalDirectories'] = [root + '-sibling']
+        elif change == 'two':
+            settings['permissions']['additionalDirectories'] = [root, root + '-sibling']
+        elif change == 'lexical_alias':
+            settings['permissions']['additionalDirectories'] = [root + '/nested/..']
+        elif change == 'extra_settings':
+            argv.extend(['--settings', '{}'])
+        else:
+            argv.extend(['--add-dir', root])
+        argv[position] = json.dumps(settings, separators=(',', ':'))
+        put(value, name, launch)
+        with pytest.raises(ValueError, match='native argv differs'):
+            verify(value, fixture['expected'])
+
+
 @pytest.mark.parametrize('raw', [b'{"x":1,"x":2}',b'{"x":NaN}',b'{"x":1e999}',b'"\\ud800"',b'\xff',b'['*65+b'0'+b']'*65])
 def test_strict_raw_parser_rejects_ambiguous_unbounded_or_non_utf8(raw):
     with pytest.raises(ValueError):p._json(raw)
@@ -775,12 +771,13 @@ def test_strict_raw_parser_rejects_ambiguous_unbounded_or_non_utf8(raw):
 @pytest.mark.parametrize('budget', ['0','0.0','1e2','NaN','-1','+1',' 1',1,True,1.0])
 def test_budget_spelling_is_not_normalized(fixture,budget):
     expected=deepcopy(fixture['expected']);expected['runtime']['budget_guard_usd']=budget
-    with pytest.raises(ValueError):permission_orchestration.probe_argv(expected,expected['policy'])
+    with pytest.raises(ValueError):permission_orchestration.probe_argv(
+        expected,expected['policy'], effect_root='/synthetic/probe-effect')
 
 
 def test_budget_spelling_and_absent_null_file_map_are_preserved(fixture):
     expected=deepcopy(fixture['expected']);selected=fixture['selection']
-    argv = permission_orchestration.probe_argv(expected,expected['policy'])
+    argv = permission_orchestration.probe_argv(expected,expected['policy'], effect_root='/synthetic/probe-effect')
     assert argv[argv.index('--max-budget-usd')+1]=='01.50'
     for absent in (True,False):
         if absent:expected['policy']['readonly_lookups'].pop('write_paths',None)

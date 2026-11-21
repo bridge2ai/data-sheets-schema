@@ -581,7 +581,7 @@ def test_stop_trace_without_parent_stop_has_named_refusal(tmp_path, monkeypatch)
     consumer = SimpleNamespace(
         _roots=lambda *args: None, stub_files=lambda: {},
         recipe_sources=lambda: {'recipe/provider.py': 'def reply(cases, number): return None\n'},
-        probe_argv=lambda *args: ['never-run'])
+        probe_argv=lambda expected, policy, *, effect_root: ['never-run'])
     expected = {'policy': {'readonly_lookups': {'repository': str(tmp_path)}},
                 'runtime': {'executable': {}}, 'permission_environment': {}}
     directory = tmp_path / 'missing-stop'
@@ -594,15 +594,13 @@ def test_stop_trace_without_parent_stop_has_named_refusal(tmp_path, monkeypatch)
     assert not (directory / 'completed').exists()
 
 
-def test_producer_records_only_a_verified_native_refusal(tmp_path, monkeypatch):
-    """A mocked process result goes through the shared verifier before publish."""
+def test_producer_refuses_every_stop_trace_without_an_observer_stop(tmp_path, monkeypatch):
+    """Binary refusal cannot replace any required observer stop after the grant."""
     from data_sheets_schema import native_model_aliases
     monkeypatch.setattr(native_model_aliases, 'model_aliases', lambda _: {'returned': 'invented'})
     monkeypatch.setattr(probe, 'local_provider', mock_provider)
     monkeypatch.setattr(probe, '_inventory', lambda *args: {'unchanged': True})
     monkeypatch.setattr(probe.subprocess, 'Popen', lambda *args, **kwargs: pytest.fail('no native process'))
-    source = tmp_path / 'source.txt'
-    source.write_bytes(b'synthetic source\n')
     observer = SimpleNamespace(policy={}, cases=[], session='invented-session',
                                members={'cases.json': b'[]', 'projection.json': b'{}',
                                         'neutral.before.json': b'{"unchanged":true}'},
@@ -615,31 +613,24 @@ def test_producer_records_only_a_verified_native_refusal(tmp_path, monkeypatch):
     monkeypatch.setattr(probe, '_run_native', lambda *args: {
         'exit_code': 0, 'shutdown': {}, 'transcript.jsonl': b'{"type":"result"}\n',
         'control.jsonl': b'{"kind":"initialize_sent"}\n'})
-    observed = []
-    outcome = {'mode': 'native_refused_before_callback', 'protection': 'native_binary'}
-    def verify_refusal(expected, selected, trace, members, controls, *, source_raw,
-                       source_write_read_variant):
-        assert trace == 'stop-source_write'
-        assert set(members) == {'launch.json', 'config.json', 'transcript.jsonl', 'control.jsonl',
-                                'projection.json', 'neutral.before.json', 'neutral.after.json'}
-        assert source_raw == b'synthetic source\n'
-        assert source_write_read_variant == 'bounded'
-        assert not (directory / 'completed').exists()
-        observed.append(True)
-        return outcome
+    def verify_refusal(*args, **kwargs):
+        pytest.fail('withdrawn binary refusal fallback was called')
     consumer = SimpleNamespace(
         _roots=lambda *args: None, stub_files=lambda: {}, MAX_MEMBER=1024,
         recipe_sources=lambda: {'recipe/provider.py': 'def reply(cases, number): return None\n'},
-        probe_argv=lambda *args: ['never-run'], native_refusal_outcome=verify_refusal)
+        probe_argv=lambda expected, policy, *, effect_root: ['never-run'],
+        native_refusal_outcome=verify_refusal)
     expected = {'policy': {'readonly_lookups': {'repository': str(tmp_path)}},
-                'source': {'path': str(source)}, 'runtime': {'executable': {}}, 'permission_environment': {}}
-    directory = tmp_path / 'verified-refusal'
-    result = probe._trace(expected, directory, float('inf'), {}, consumer, {}, None,
-                          trace='stop-source_write', source_write_read_variant='bounded')
-    assert observed == [True] and variants == ['bounded']
-    assert result['outcome.json'] == guard.canonical(outcome)
-    assert (directory / 'completed/outcome.json').read_bytes() == guard.canonical(outcome)
-    assert not (directory / 'completed/parent-stop.json').exists()
+                'runtime': {'executable': {}}, 'permission_environment': {}}
+    for trace in ('stop-sealed_request_write', 'stop-helper_owned_write', 'stop-source_write'):
+        directory = tmp_path / trace
+        variant = 'bounded' if trace == 'stop-source_write' else None
+        with pytest.raises(probe.PermissionObserverStopMissing, match=trace):
+            probe._trace(expected, directory, float('inf'), {}, consumer, {}, None,
+                         trace=trace, source_write_read_variant=variant)
+        assert (directory / 'launch.before.json').is_file()
+        assert not (directory / 'completed').exists()
+    assert variants == [None, None, 'bounded']
 
 
 class FakePipe(io.BytesIO):
@@ -713,7 +704,9 @@ def test_native_boundary_reaps_closes_and_retains_failed_evidence(tmp_path, monk
     monkeypatch.setattr(probe.os, "killpg", lambda pid, sig: signals.append((pid, sig)))
     root = tmp_path / "trace"
     root.mkdir()
-    launch = {"config_root": str(root / "config"), "argv": ["never-run"], "cwd": str(root), "environment": {}}
+    (root / 'effect_root').mkdir()
+    launch = {"config_root": str(root / "config"), "effect_root": str(root / 'effect_root'),
+              "argv": ["never-run"], "cwd": str(root), "environment": {}}
     transport = SimpleNamespace(control=Control, budget_stop=BudgetStop, check=lambda: None)
     call = lambda: probe._run_native({}, launch, {}, lambda e: None, None, transport,
                                      SimpleNamespace(failure=None), float("inf"))
@@ -959,9 +952,10 @@ def _fake_handler(server, body):
     return handler
 
 
-def _fake_post_server(supplier, deadline, observation_request=None, stop_requested=None):
+def _fake_post_server(supplier, deadline, observation_request=None, stop_requested=None,
+                      request_capture=None):
     return SimpleNamespace(deadline=deadline, requests=0, failure=None, model="synthetic",
-        reply=None, observation_request=observation_request,
+        reply=None, observation_request=observation_request, request_capture=request_capture,
         stop_requested=stop_requested or threading.Event(), case_supplier=supplier)
 
 
@@ -992,6 +986,39 @@ def test_provider_request_before_selection_gets_first_scripted_case(late):
     head, _, payload = handler.wfile.getvalue().partition(b"\r\n\r\n")
     assert head.startswith(b"HTTP/1.1 200")
     assert json.loads(payload)["content"][0]["id"] == "a"
+
+
+def test_provider_request_capture_preserves_wait_for_late_cases():
+    """Diagnostic raw capture is not the observation route's empty-case bypass."""
+    holder = {'cases': None}
+    captured = []
+    first_empty_read = threading.Event()
+    def supplier():
+        cases = holder['cases']
+        if cases is None:
+            first_empty_read.set()
+        return cases
+    def publish():
+        if first_empty_read.wait(5):
+            holder['cases'] = list(_CASES)
+    worker = threading.Thread(target=publish, daemon=True)
+    worker.start()
+    body = {'model': 'synthetic', 'messages': []}
+    server = _fake_post_server(supplier, time.monotonic() + 5,
+        request_capture=lambda raw, endpoint: captured.append((raw, endpoint)))
+    handler = _fake_handler(server, body)
+    try:
+        handler.do_POST()
+    finally:
+        worker.join(5)
+    assert not worker.is_alive()
+    assert first_empty_read.is_set() and server.failure is None
+    assert len(captured) == 1
+    raw, endpoint = captured[0]
+    assert type(raw) is bytes and json.loads(raw) == body and endpoint == '/v1/messages'
+    head, _, payload = handler.wfile.getvalue().partition(b'\r\n\r\n')
+    assert head.startswith(b'HTTP/1.1 200')
+    assert json.loads(payload)['content'][0]['id'] == 'a'
 
 
 def test_provider_request_never_selected_is_refused_at_deadline():

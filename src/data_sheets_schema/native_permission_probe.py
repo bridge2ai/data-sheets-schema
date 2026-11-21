@@ -478,6 +478,8 @@ def _run_native(expected, launch, policy, observer, classifier, transport, serve
     tail, drainage = b"", {}
     try:
         _identity(expected)
+        from .native_shared_evidence import require_physical_directory
+        require_physical_directory(launch['effect_root'], must_exist=True)
         if time.monotonic() >= deadline:
             raise TimeoutError("permission probe deadline elapsed before process creation")
         process = subprocess.Popen(launch["argv"], cwd=launch["cwd"], env=launch["environment"],
@@ -680,14 +682,19 @@ class _SharedObserver:
 
 
 def _trace(expected, directory, deadline, controls, p, selected, transport, trace="settled", *,
-           source_write_read_variant=None):
+           source_write_read_variant=None, diagnostic_fixture=None):
     _remaining(deadline)
+    from .native_stage_root_diagnostic import GrantCapture, require_fixture
+    require_fixture(diagnostic_fixture)
     roots = ("config_root", "stub_root", "effect_root", "evidence_root")
     launch = {key: str(directory / key) for key in roots}
     launch["cwd"] = expected["policy"]["readonly_lookups"]["repository"]
     p._roots(expected, selected, launch)
     for key in roots:
         Path(launch[key]).mkdir(parents=True, exist_ok=False)
+    from .native_shared_evidence import require_physical_directory
+    require_physical_directory(launch['effect_root'], must_exist=True)
+    diagnostic = GrantCapture(directory, launch) if diagnostic_fixture is not None else None
     _write_new(Path(launch["config_root"]) / "settings.json", b"{}")
     stub_sources = p.stub_files()
     for name, text in stub_sources.items():
@@ -704,18 +711,24 @@ def _trace(expected, directory, deadline, controls, p, selected, transport, trac
     exec(compile(source_code, "fixed-permission-recipe/provider.py", "exec"), namespace)
     reply = namespace["reply"]
     from .native_model_aliases import model_aliases
-    with local_provider(cases=supplier, model=model_aliases(expected['runtime'])['returned'],
-                        deadline=deadline, reply=reply) as (server, url):
-        launch.update(provider_url=url, provider_source_sha256=sha(source_code),
-            executable=deepcopy(expected["runtime"]["executable"]),
-            environment={**expected["permission_environment"], "CLAUDE_CONFIG_DIR": launch["config_root"],
-                "PYTHONPATH": launch["stub_root"], "ANTHROPIC_BASE_URL": url,
-                "ANTHROPIC_API_KEY": "d4d-local-permission-probe-token"},
-            argv=p.probe_argv(expected, policy))
-        _write_new(directory / "launch.before.json", canonical(launch))
-        result = _run_native(expected, launch, policy, observer, classifier, transport, server, deadline)
-        if server.failure is not None:
-            raise ValueError("scripted permission provider failed") from server.failure
+    capture_options = {'request_capture': diagnostic.capture} if diagnostic else {}
+    server = None
+    try:
+        with local_provider(cases=supplier, model=model_aliases(expected['runtime'])['returned'],
+                            deadline=deadline, reply=reply, **capture_options) as (server, url):
+            launch.update(provider_url=url, provider_source_sha256=sha(source_code),
+                executable=deepcopy(expected["runtime"]["executable"]),
+                environment={**expected["permission_environment"], "CLAUDE_CONFIG_DIR": launch["config_root"],
+                    "PYTHONPATH": launch["stub_root"], "ANTHROPIC_BASE_URL": url,
+                    "ANTHROPIC_API_KEY": "d4d-local-permission-probe-token"},
+                argv=p.probe_argv(expected, policy, effect_root=launch['effect_root']))
+            _write_new(directory / "launch.before.json", canonical(launch))
+            result = _run_native(expected, launch, policy, observer, classifier, transport, server, deadline)
+            if server.failure is not None:
+                raise ValueError("scripted permission provider failed") from server.failure
+    finally:
+        if diagnostic and server is not None and (directory / 'transcript.jsonl').is_file():
+            diagnostic.finish(launch, request_count=server.requests)
     launch.update(exit_code=result["exit_code"], shutdown=result["shutdown"])
     members = {"launch.json": canonical(launch), "config.json": b"{}",
                "transcript.jsonl": result["transcript.jsonl"], "control.jsonl": result["control.jsonl"]}
@@ -730,15 +743,8 @@ def _trace(expected, directory, deadline, controls, p, selected, transport, trac
     elif "parent-stop.json" in members:
         terminal_hash, parent_hash = None, sha(members["parent-stop.json"])
     else:
-        try:
-            source = read_regular(expected['source']['path'], limit=p.MAX_MEMBER)
-            outcome = p.native_refusal_outcome(expected, selected, trace,
-                {name: raw for name, raw in members.items() if name != 'cases.json'}, controls,
-                source_raw=source, source_write_read_variant=source_write_read_variant)
-        except (ValueError, KeyError, IndexError, TypeError) as exc:
-            raise PermissionObserverStopMissing(
-                "permission stop trace ended without parent-stop.json or verified native refusal: " + trace) from exc
-        members['outcome.json'] = canonical(outcome)
+        raise PermissionObserverStopMissing(
+            "permission stop trace ended without parent-stop.json: " + trace)
     if 'outcome.json' not in members:
         members["outcome.json"] = canonical({
             "kind": "native_shared_permission_outcome", "version": 1,
@@ -771,6 +777,11 @@ def produce_saved_probe(expected, directory, *, deadline_seconds):
     deadline = time.monotonic() + deadline_seconds
     with _probe_signals(), _loaded_probe_inputs(expected) as inputs:
         return _produce_captured(expected, directory, deadline, *inputs)
+
+
+def produce_stage_root_boundary_diagnostic(expected, directory, *, deadline_seconds):
+    from .native_stage_root_diagnostic import produce_boundary
+    return produce_boundary(expected, directory, deadline_seconds=deadline_seconds)
 
 
 def _produce_captured(expected, directory, deadline, p, controls, controller_sources,

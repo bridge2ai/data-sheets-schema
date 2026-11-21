@@ -50,8 +50,8 @@ def verify_saved_probe(raw_manifest: bytes, *, expected: dict) -> dict:
             controls=controls, controller_sources=sources)
 
 
-def probe_argv(expected, probe_policy):
+def probe_argv(expected, probe_policy, *, effect_root):
     dependencies = authority.dependency_identity()
     with authority.loaded_verified_package_module('data_sheets_schema.native_shared_permissions',
             package_sources=dependencies['base']['package_sources']) as consumer:
-        return consumer.probe_argv(expected, probe_policy)
+        return consumer.probe_argv(expected, probe_policy, effect_root=effect_root)
