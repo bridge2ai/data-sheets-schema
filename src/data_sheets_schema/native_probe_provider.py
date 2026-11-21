@@ -27,18 +27,24 @@ def _selected_cases(server):
     the cases (observed live 2026-11-21: the request arrived about 0.2 s after
     initialize_ack, while init handling was still writing its inventory). A
     request that arrives first waits for the selection; it never receives an
-    unscripted answer. No selection by the deadline, or a provider stop, is
-    still a refusal.
+    unscripted answer.
+
+    The supplier returns None until initialization has selected, and the
+    selected list afterwards. Only None waits: an initialized empty selection
+    is refused at once, with its own cause. Stop and deadline are checked
+    before every read, so no selection is accepted after either (#6301).
     """
     while True:
-        cases = server.case_supplier()
-        if cases:
-            return cases
         if server.stop_requested.is_set():
             raise ValueError("native initialization has not selected probe cases")
         remaining = server.deadline - time.monotonic()
         if remaining <= 0:
             raise TimeoutError("native initialization did not select probe cases before the deadline")
+        cases = server.case_supplier()
+        if cases is not None:
+            if not cases:
+                raise ValueError("native initialization selected no probe cases")
+            return cases
         server.stop_requested.wait(min(CASE_SELECTION_POLL_SECONDS, remaining))
 
 

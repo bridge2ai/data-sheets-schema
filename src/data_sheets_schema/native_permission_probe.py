@@ -482,10 +482,11 @@ def _run_native(expected, launch, policy, observer, classifier, transport, serve
         control.start(process, _Bounded(transcript, MAX_STREAM), _Bounded(journal, MAX_STREAM),
                       "Execute the scripted local permission cases in order, then finish.")
         while process.poll() is None or not control.stdout_closed or not stderr_closed:
-            if time.monotonic() >= deadline:
-                raise TimeoutError("permission probe deadline elapsed")
+            # A provider refusal keeps its cause even when it coincides with the deadline (#6301).
             if server.failure is not None:
                 raise ValueError("scripted permission provider failed") from server.failure
+            if time.monotonic() >= deadline:
+                raise TimeoutError("permission probe deadline elapsed")
             try:
                 raw = os.read(process.stderr.fileno(), 65536)
                 stderr_closed = not raw
@@ -601,7 +602,8 @@ class _SharedObserver:
         self.trace, self.controls = trace, controls
         self.transport = transport
         self.session = None
-        self.cases, self.members = [], _RetainedMembers(launch["evidence_root"])
+        # None until native init has selected; the provider waits only on None.
+        self.cases, self.members = None, _RetainedMembers(launch["evidence_root"])
         self.calls = {}
         self.expected_stop = False
         self.policy = p.projected_policy(expected, selected, launch["effect_root"])
@@ -641,7 +643,7 @@ class _SharedObserver:
                     self.calls[block["id"]] = event
         if event.get("type") == "control_request":
             identity = event.get("request", {}).get("input", {}).get("tool_use_id")
-            case = next((case for case in self.cases if case["id"] == identity), None)
+            case = next((case for case in self.cases or () if case["id"] == identity), None)
             if case is None:
                 raise ValueError("native callback is outside scripted case roster")
             classification, view = p._classification(self.expected, self.selected, self.launch,
@@ -659,7 +661,7 @@ class _SharedObserver:
 
     def classify(self, command, python, programs, policy):
         self.transport.check()
-        case = next((case for case in self.cases if case["tool"] == "Bash"
+        case = next((case for case in self.cases or () if case["tool"] == "Bash"
                      and case["input"]["command"] == command), None)
         if case is None:
             raise ValueError("native Bash command is outside scripted case roster")
