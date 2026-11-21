@@ -64,7 +64,9 @@ def main():
     archive = out / 'base.tar'
     subprocess.run(['git', '-C', str(ROOT), 'archive', '--output', str(archive), BASE], check=True)
     runs = []
-    for label in ('baseline', 'fixed'):
+    fixed_head = subprocess.check_output(['git', '-C', str(ROOT), 'rev-parse', 'HEAD'], text=True).strip()
+    labels = ('fixed',) if '--fixed-only' in sys.argv[2:] else ('baseline', 'fixed')
+    for label in labels:
         tree = out / label
         tree.mkdir()
         with tarfile.open(archive) as bundle:
@@ -76,9 +78,10 @@ def main():
             text=True).strip()
         subprocess.run(['git', '-C', str(tree), 'init', '-q'], check=True)
         (tree / '.git/objects/info/alternates').write_text(str(Path(common) / 'objects') + '\n')
-        subprocess.run(['git', '-C', str(tree), 'update-ref', 'refs/heads/archive-test', BASE], check=True)
+        source_head = BASE if label == 'baseline' else fixed_head
+        subprocess.run(['git', '-C', str(tree), 'update-ref', 'refs/heads/archive-test', source_head], check=True)
         subprocess.run(['git', '-C', str(tree), 'symbolic-ref', 'HEAD', 'refs/heads/archive-test'], check=True)
-        subprocess.run(['git', '-C', str(tree), 'read-tree', BASE], check=True)
+        subprocess.run(['git', '-C', str(tree), 'read-tree', source_head], check=True)
         for relative in TESTS + (SOURCES if label == 'fixed' else []):
             shutil.copyfile(ROOT / relative, tree / relative)
         helper = Path('scripts/adhoc') / Path(__file__).name
@@ -92,7 +95,7 @@ def main():
         started = subprocess.check_output(['date', '-u', '+%Y-%m-%dT%H:%M:%SZ'], text=True).strip()
         with (out / (label + '.log')).open('xb') as log:
             run = subprocess.run(command, cwd=tree, env=env, stdout=log, stderr=subprocess.STDOUT)
-        row = {'label': label, 'cwd': str(tree), 'command': command,
+        row = {'label': label, 'source_commit': source_head, 'cwd': str(tree), 'command': command,
                'environment': {'PYTHONPATH': env['PYTHONPATH'], 'PYTHONDONTWRITEBYTECODE': '1'},
                'started_utc': started, 'exit_code': run.returncode,
                'input_pins': {relative: pin(tree / relative) for relative in SOURCES + TESTS}}
@@ -102,7 +105,7 @@ def main():
         print((out / (label + '.log')).read_text()[-6000:], flush=True)
         if label == 'fixed' and run.returncode:
             return run.returncode
-    return 0 if runs[0]['exit_code'] == 1 else 1
+    return 0 if labels == ('fixed',) or runs[0]['exit_code'] == 1 else 1
 
 
 if __name__ == '__main__':
