@@ -90,7 +90,10 @@ def test_current_integrated_c_and_d_graphs_are_accepted(tmp_path, isolated_modul
     }
     expected = set(module.C_CONSUMERS) | set(module.D_CONSUMERS) | set(module.D_SUPPORT)
     assert set(result['outcomes']) == expected
-    assert len(result['outcomes']) == 30
+    assert len(result['outcomes']) == 34
+    assert (len(module.C_CONSUMERS), len(module.D_CONSUMERS), len(module.D_SUPPORT)) == (20, 10, 4)
+    assert {'native_shared_permission_wire', 'native_stage_root_grant',
+            'native_stage_root_diagnostic', 'native_wire_2_1_325'} <= set(module.C_CONSUMERS)
     assert set(result['A_closed_owned_roster']) == {'data_sheets_schema.' + name for name in expected}
     assert result['rosters'] == {'C': list(module.C_CONSUMERS),
                                 'D': list(module.D_CONSUMERS), 'D_support': list(module.D_SUPPORT)}
@@ -105,6 +108,32 @@ def test_current_integrated_c_and_d_graphs_are_accepted(tmp_path, isolated_modul
         relative, = (path for path in (stem + '.py', stem + '/__init__.py')
                      if path in manifest['files'])
         assert row['graph'][name] == manifest['files'][relative]['sha256']
+
+
+def test_current_census_refuses_unreviewed_authority_roster_changes():
+    from data_sheets_schema import native_execution_authority_v2 as authority
+    module = helper('census_native_u3c_round4_20261107.py')
+    current = authority.CONSUMER_OWNED_MODULES
+    removed = 'data_sheets_schema.native_wire_2_1_325'
+    extra = 'data_sheets_schema.unreviewed_consumer'
+    # Equal size alone cannot admit a substituted ownership declaration.
+    for changed in (current - {removed}, current | {extra}, (current - {removed}) | {extra}):
+        with pytest.raises(RuntimeError, match='differs from the closed A roster'):
+            module._current_owned_names(changed)
+
+
+def test_current_census_refuses_missing_duplicate_or_substituted_explicit_members(monkeypatch):
+    from data_sheets_schema import native_execution_authority_v2 as authority
+    module = helper('census_native_u3c_round4_20261107.py')
+    current = module.C_CONSUMERS
+    for required in ('native_shared_permission_wire', 'native_stage_root_grant',
+                     'native_stage_root_diagnostic', 'native_wire_2_1_325'):
+        changed = tuple(name for name in current if name != required)
+        for replacement in (changed, changed + (current[0],), changed + ('unreviewed_consumer',)):
+            with monkeypatch.context() as patch:
+                patch.setattr(module, 'C_CONSUMERS', replacement)
+                with pytest.raises(RuntimeError, match='differs from the closed A roster'):
+                    module._current_owned_names(authority.CONSUMER_OWNED_MODULES)
 
 
 def test_current_census_refuses_existing_output_without_overwriting(tmp_path):

@@ -6,6 +6,8 @@ filesystem aliases; saved argv construction must not inspect those paths.
 from copy import deepcopy
 import json
 from pathlib import Path
+import sys
+from types import ModuleType
 
 import pytest
 
@@ -13,6 +15,7 @@ from data_sheets_schema import native_stage_root_grant as grant
 from data_sheets_schema import native_shared_permission_protocol as protocol
 from data_sheets_schema import native_shared_permissions as permissions
 from data_sheets_schema.native_shared_evidence import require_physical_directory
+from tests.test_native_execution_registration_v2 import isolated_modules  # noqa: F401
 
 
 def test_exact_grant_preserves_frozen_protocol_and_input_policy():
@@ -29,14 +32,40 @@ def test_exact_grant_preserves_frozen_protocol_and_input_policy():
     assert policy == before
 
 
-def test_verified_consumer_import_graph_keeps_diagnostic_execution_in_host():
+def _verified_permission_graph():
     from data_sheets_schema import native_execution_authority_v2 as authority
     identity = authority.dependency_identity()
-    graph = authority.refuse_legacy_consumer_imports(Path(permissions.__file__).read_bytes(),
+    return authority.refuse_legacy_consumer_imports(Path(permissions.__file__).read_bytes(),
         name='data_sheets_schema.native_shared_permissions',
         package_sources=identity['base']['package_sources'])
+
+
+def test_verified_consumer_import_graph_keeps_diagnostic_execution_in_host(isolated_modules):
+    graph = _verified_permission_graph()
     assert 'data_sheets_schema.native_stage_root_diagnostic' in graph
     assert 'data_sheets_schema.native_permission_probe' not in graph
+
+
+def test_graph_fixture_removes_prior_alias_but_preserves_real_origin_refusal(tmp_path, monkeypatch, request):
+    """Software ordering control; only the test fixture may clear old aliases."""
+    from data_sheets_schema import native_execution_authority_v2 as authority
+    foreign = ModuleType('prepare_registration')
+    foreign.__file__ = str(tmp_path / 'foreign-prepare-registration.py')
+    monkeypatch.setitem(sys.modules, foreign.__name__, foreign)
+    # Request the actual common fixture after installing prior-test pollution.
+    # Production dependency_identity remains unpatched throughout this control.
+    isolated = request.getfixturevalue('isolated_modules')
+    assert foreign.__name__ in isolated
+    assert sys.modules.get(foreign.__name__) is not foreign
+    graph = _verified_permission_graph()
+    assert 'data_sheets_schema.native_stage_root_diagnostic' in graph
+    assert 'data_sheets_schema.native_permission_probe' not in graph
+    with monkeypatch.context() as patch:
+        patch.setitem(sys.modules, foreign.__name__, foreign)
+        with pytest.raises(ValueError, match='native controller dependency imported from another origin: prepare_registration'):
+            authority.dependency_identity()
+        assert sys.modules[foreign.__name__] is foreign
+    assert _verified_permission_graph() == graph
 
 
 def test_grant_rejects_noncanonical_or_unbounded_directory_spellings():

@@ -20,6 +20,7 @@ PYTHON = Path('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-sche
 SUBMODULE_SOURCE = PYTHON.parent.parent.parent / 'fairscape_models'
 BASE = '5581d57f2476ac1d02270b39e3e4234f0403cff6'
 PLUGIN = 'scripts.adhoc.test_pr6302_round2_20261121'
+CI_REPOSITORY_URL = 'https://github.com/bridge2ai/data-sheets-schema'
 TARGETED = ['tests/test_native_permission_probe.py', 'tests/test_native_shared_permissions.py',
             'tests/test_native_permission_source_read_variants.py', 'tests/test_native_model_aliases.py',
             'tests/test_native_permission_projection_derivation.py',
@@ -435,11 +436,49 @@ def isolated_pytest():
     return pytest.main(sys.argv[4:])
 
 
+def _source_repository_identity():
+    """Verify local source identity before configuring the independent archive."""
+    allowed = {CI_REPOSITORY_URL, CI_REPOSITORY_URL + '.git'}
+    for prefix in ('git' + chr(64) + 'github.com:', 'ssh://git' + chr(64) + 'github.com/'):
+        allowed.update({prefix + 'bridge2ai/data-sheets-schema',
+                        prefix + 'bridge2ai/data-sheets-schema.git'})
+    for key in ('d4d.ciRepositoryUrl', 'remote.origin.url'):
+        result = subprocess.run(['git', '-C', str(ROOT), 'config', '--local', '--no-includes',
+                                 '--get-all', key], capture_output=True)
+        if result.returncode == 1:
+            continue
+        if result.returncode != 0:
+            raise ValueError('cannot verify the source repository local identity')
+        if result.stdout not in {value.encode('utf-8') + b'\n' for value in allowed}:
+            raise ValueError('source repository local identity is not the canonical PR6302 repository')
+        return {'canonical_url': CI_REPOSITORY_URL, 'source_config_key': key,
+            'source_config_value_sha256': hashlib.sha256(result.stdout).hexdigest(),
+            'source_identity_verified': True,
+            'basis': 'Exact local source repository identity; canonical archive-local configuration only. '
+                     'No remote is created, no CI result is supplied, and no network request is made.'}
+    raise ValueError('source repository lacks an explicit local CI repository URL or origin')
+
+
 def main():
     arguments = sys.argv[1:]
     selected = 'HEAD'
-    if arguments[:1] == ['--source-commit']:
-        selected, arguments = arguments[1], arguments[2:]
+    environment_audit = environment_audit_sha256 = None
+    options = set()
+    while arguments and arguments[0] in {'--source-commit', '--disposable-environment'}:
+        option = arguments[0]
+        if option in options:
+            raise ValueError('archive setup option is repeated')
+        options.add(option)
+        if option == '--source-commit':
+            selected, arguments = arguments[1], arguments[2:]
+        else:
+            environment_audit, environment_audit_sha256 = Path(arguments[1]), arguments[2]
+            arguments = arguments[3:]
+            if (not environment_audit.is_absolute() or environment_audit.resolve(strict=True) != environment_audit
+                    or re.fullmatch('[0-9a-f]{64}', environment_audit_sha256) is None
+                    or hashlib.sha256(environment_audit.read_bytes()).hexdigest() != environment_audit_sha256):
+                raise ValueError('disposable environment requires its exact physical audit and SHA256')
+    repository_identity = _source_repository_identity()
     out = Path(arguments[0]).resolve()
     out.mkdir(parents=True, exist_ok=False)
     head = subprocess.check_output(['git', '-C', str(ROOT), 'rev-parse', '--verify', selected + '^{commit}'],
@@ -461,6 +500,14 @@ def main():
     common = subprocess.check_output(
         ['git', '-C', str(ROOT), 'rev-parse', '--path-format=absolute', '--git-common-dir'], text=True).strip()
     subprocess.run(['git', '-C', str(tree), 'init', '-q'], check=True)
+    subprocess.run(['git', '-C', str(tree), 'config', '--local', 'd4d.ciRepositoryUrl',
+                    repository_identity['canonical_url']], check=True)
+    configured_url = subprocess.check_output(['git', '-C', str(tree), 'config', '--local',
+                                             '--no-includes', '--get-all', 'd4d.ciRepositoryUrl'])
+    if configured_url != (CI_REPOSITORY_URL + '\n').encode('utf-8'):
+        raise ValueError('archive-local CI repository URL did not persist exactly')
+    repository_identity.update(archive_config_key='d4d.ciRepositoryUrl',
+                               archive_config_scope='local', archive_readback_verified=True)
     (tree / '.git/objects/info/alternates').write_text(str(Path(common) / 'objects') + '\n')
     subprocess.run(['git', '-C', str(tree), 'update-ref', 'refs/heads/archive-test', head], check=True)
     subprocess.run(['git', '-C', str(tree), 'symbolic-ref', 'HEAD', 'refs/heads/archive-test'], check=True)
@@ -469,23 +516,69 @@ def main():
         ['git', '-C', str(ROOT), 'diff', '--name-only', BASE, head], text=True).splitlines()
     pins = {name: hashlib.sha256((tree / name).read_bytes()).hexdigest() for name in paths}
     helper = tree / 'scripts/adhoc' / Path(__file__).name
+    python, disposable_environment = PYTHON, None
+    if environment_audit is not None:
+        environment_helper = tree / 'scripts/adhoc/pr6302_archive_environment_20261122.py'
+        setup_root = out / 'environment'
+        setup_command = [str(PYTHON), '-I', '-B', str(environment_helper), 'setup',
+            '--source-venv', str(PYTHON.parent.parent), '--tree', str(tree),
+            '--audit', str(environment_audit), '--audit-sha256', environment_audit_sha256,
+            '--output', str(setup_root)]
+        setup_env = {'HOME': str(out), 'TMPDIR': str(out), 'LANG': 'en_US.UTF-8',
+                     'PATH': '/usr/bin:/bin:/usr/sbin:/sbin', 'PYTHONDONTWRITEBYTECODE': '1'}
+        _new_json(out / 'environment-setup-request.json', {'source_commit': head, 'tree': str(tree),
+            'command': setup_command, 'audit_path': str(environment_audit),
+            'audit_sha256': environment_audit_sha256,
+            'helper_sha256': hashlib.sha256(environment_helper.read_bytes()).hexdigest()})
+        with (out / 'environment-setup.log').open('xb') as log:
+            setup_result = subprocess.run(setup_command, cwd=tree, env=setup_env,
+                                          stdout=log, stderr=subprocess.STDOUT)
+        if setup_result.returncode != 0:
+            raise ValueError('disposable environment setup refused; see environment-setup.log')
+        environment_path = setup_root / 'environment.json'
+        environment_raw = environment_path.read_bytes()
+        prepared_environment = json.loads(environment_raw)
+        python = setup_root / 'venv/bin/python'
+        if (prepared_environment.get('passed') is not True
+                or prepared_environment.get('source_commit') != head
+                or prepared_environment.get('tree') != str(tree)
+                or prepared_environment.get('python') != str(python)
+                or prepared_environment.get('source_venv') != str(PYTHON.parent.parent)
+                or prepared_environment.get('source_environment_unchanged') is not True
+                or prepared_environment.get('archive_unchanged') is not True):
+            raise ValueError('disposable environment result does not bind this archive')
+        disposable_environment = {'path': str(environment_path),
+            'sha256': hashlib.sha256(environment_raw).hexdigest(), 'bytes': len(environment_raw),
+            'audit_sha256': environment_audit_sha256, 'python': str(python)}
     env = dict(os.environ, PYTHONPATH=os.pathsep.join((str(tree), str(tree / 'src'), str(tree / 'fairscape_models'))),
                PYTHONDONTWRITEBYTECODE='1')
     for key in tuple(env):
         if key.endswith('_API_KEY') or key in {'ANTHROPIC_AUTH_TOKEN', 'CLAUDE_CODE_OAUTH_TOKEN',
                 'ANTHROPIC_BASE_URL', 'OPENAI_BASE_URL', 'D4D_INSTALL_TESTS', 'PYTEST_ADDOPTS'}:
             env.pop(key)
-    command = [str(PYTHON), '-P', '-s', '-B', str(helper), '--pytest', str(tree), str(out / 'imports.json'),
+    if disposable_environment is not None:
+        env = {'HOME': str(setup_root / 'home'), 'TMPDIR': str(setup_root / 'tmp'),
+            'PATH': str(python.parent) + ':/usr/bin:/bin:/usr/sbin:/sbin',
+            'VIRTUAL_ENV': str(python.parent.parent), 'LANG': 'en_US.UTF-8', 'LC_ALL': 'en_US.UTF-8',
+            'PYTHONPATH': env['PYTHONPATH'], 'PYTHONDONTWRITEBYTECODE': '1', 'PYTHONNOUSERSITE': '1',
+            'PIP_NO_INDEX': '1', 'PIP_CONFIG_FILE': '/dev/null', 'UV_OFFLINE': '1',
+            'GIT_CONFIG_NOSYSTEM': '1', 'GIT_CONFIG_GLOBAL': '/dev/null'}
+        if 'CI' in os.environ:
+            env['CI'] = os.environ['CI']
+    command = [str(python), '-P', '-s', '-B', str(helper), '--pytest', str(tree), str(out / 'imports.json'),
                '-q', '-p', 'no:cacheprovider', '-p', PLUGIN,
                '--pr6302-evidence-root', str(out), '--basetemp', str(out / 'pytest')]
     command += arguments[1:] or TARGETED
     record = {'source_commit': head, 'cwd': str(tree), 'command': command,
+              'ci_repository_identity': repository_identity,
               'environment': {'PYTHONPATH': env['PYTHONPATH'], 'PYTHONDONTWRITEBYTECODE': '1',
                               'CI': env.get('CI')},
               'fairscape_submodule': {'commit': gitlink[2],
                   'archive_sha256': hashlib.sha256(submodule_archive.read_bytes()).hexdigest()},
               'started_utc': subprocess.check_output(['date', '-u', '+%Y-%m-%dT%H:%M:%SZ'], text=True).strip(),
               'changed_file_sha256': pins}
+    if disposable_environment is not None:
+        record['disposable_environment'] = disposable_environment
     (out / 'run.json').write_text(json.dumps(record, indent=2) + '\n')
     with (out / 'pytest.log').open('xb') as log:
         run = subprocess.run(command, cwd=tree, env=env, stdout=log, stderr=subprocess.STDOUT)
