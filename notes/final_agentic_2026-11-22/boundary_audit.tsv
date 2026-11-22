@@ -1,0 +1,17 @@
+project	run	tool_calls	boundary_hits	own_series_filtered_listings	core_derived_by_command	receipts_check_run	examples
+AI_READI	rep1	189	0	1	yes	yes	
+CHORUS	rep1	74	0	0	yes	yes	
+CM4AI	rep1	107	0	0	yes	yes	
+VOICE	rep1	127	0	0	yes	yes	
+VOICE_PEDIATRIC	rep1	118	0	0	yes	yes	
+AI_READI	rep2	147	0	0	yes	yes	
+CHORUS	rep2	73	0	0	yes	yes	
+CM4AI	rep2	133	0	0	yes	yes	
+VOICE	rep2	134	0	0	yes	yes	
+VOICE_PEDIATRIC	rep2	95	0	0	yes	yes	
+AI_READI	rep3	143	0	0	yes	yes	
+CHORUS	rep3	73	0	0	yes	yes	
+CM4AI	rep3	132	0	0	yes	yes	
+VOICE	rep3	124	0	0	yes	yes	
+VOICE_PEDIATRIC	rep3	103	0	0	yes	yes	
+AI_READI	canary	201	0	0	yes	yes	

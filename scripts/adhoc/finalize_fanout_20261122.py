@@ -74,6 +74,11 @@ for rep, W in WORKTREES.items():
         advisor = (re.search(r"advisor calls: (\d+)", gtext) or [None, "?"])[1]
         transcript_ok = "ok" if "TRANSCRIPT: ok" in gtext else "NOT OK"
         _, d = recorded()
+        # Read the repair history from the gate file, so a run repaired before this pass is
+        # still reported as repaired (the first table said "no" for six of seven).
+        gtext = gate.read_text() if gate.is_file() else ""
+        if "RERECORD: PASS" in gtext:
+            repaired = "yes"
         phases_by = "orchestrator" if "attested here by the orchestrator" in gtext else "session"
         ok = (check.returncode == 0 and receipts.returncode == 0 and sha == sent and transcript_ok == "ok"
               and advisor == "0" and repaired != "REPAIR FAILED")
