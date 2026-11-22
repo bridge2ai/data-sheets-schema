@@ -66,12 +66,19 @@ for token in tokens[start + 4:]:
     if token in (";", "|", "&&", "||", "&") or token.startswith((">", "2>", "1>", "<")):
         break
     args.append(token)
+# Optional fourth argument "nospec": also drop --runtime/--provider/--render-spec-json, so the
+# recorder keeps the instruction's hash and file but does not claim a render specification.
+# Needed for these runs because the run specification cannot state the model: the header's
+# model line comes from the shared config, so on a main whose config names another model the
+# spec re-renders to different bytes and the render gate reads "mismatch" (see the PR body).
+NOSPEC = len(sys.argv) > 4 and sys.argv[4] == "nospec"
+DROP = {"--prompt-text", "--prompt-text-env"} | ({"--runtime", "--provider", "--render-spec-json"} if NOSPEC else set())
 cleaned, skip = [], False
 for token in args:
     if skip:
         skip = False
         continue
-    if token in ("--prompt-text", "--prompt-text-env"):
+    if token in DROP:
         skip = True
         continue
     cleaned.append(token)
@@ -112,6 +119,9 @@ if "--phase" not in cleaned:
 command = [PY, "-m", "data_sheets_schema.cli", "provenance", "record", *cleaned,
            "--prompt-text", str(instr.relative_to(W))]
 
+if NOSPEC:
+    notes.append("re-recorded without --runtime/--provider so no render specification is claimed: "
+                 "the specification cannot state the model, and main's config names claude-opus-5")
 out = [f"--- re-record with the instruction as sent ({instr.name})"] + ["note: " + n for n in notes]
 done = subprocess.run(command, cwd=W, capture_output=True, text=True)
 out.append(f"recorder exit {done.returncode}")

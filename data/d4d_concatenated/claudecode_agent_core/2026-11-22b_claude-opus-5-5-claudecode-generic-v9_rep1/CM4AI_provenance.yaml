@@ -3,7 +3,7 @@
 record_version: 1
 record_type: d4d_generation_provenance
 record_mode: live
-record_generated_at: '2026-11-22T06:32:43+00:00'
+record_generated_at: '2026-11-22T19:49:45+00:00'
 run:
   label: 2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1
   project: CM4AI
@@ -37,53 +37,6 @@ prompts:
     bytes: 35507
     note: the instruction as sent, after substitution; the files above are what it
       was built from
-    spec:
-      agentic_artifact_paths:
-        full: data/d4d_concatenated/claudecode_agent/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1/CM4AI_d4d.yaml
-        core: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1/CM4AI_d4d_core.yaml
-        receipt: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1/CM4AI_coverage_receipt.yaml
-        report: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1/CM4AI_reconciliation.md
-      agentic_toolchain:
-        python: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.venv/bin/python
-        resources:
-          src/data_sheets_schema/schema/data_sheets_schema_all.yaml: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/src/data_sheets_schema/schema/data_sheets_schema_all.yaml
-          src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
-          .claude/commands/README.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/commands/README.md
-          .claude/commands/d4d-add-mapping.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/commands/d4d-add-mapping.md
-          .claude/commands/d4d-agent.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/commands/d4d-agent.md
-          .claude/commands/d4d-assistant.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/commands/d4d-assistant.md
-          .claude/commands/d4d-full-core.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/commands/d4d-full-core.md
-          .claude/commands/d4d-input-deep-research.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/commands/d4d-input-deep-research.md
-          .claude/commands/d4d-uniform-rules.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/commands/d4d-uniform-rules.md
-          .claude/commands/d4d-webfetch.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/commands/d4d-webfetch.md
-          .claude/agents/d4d-description-reviewer.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/agents/d4d-description-reviewer.md
-          .claude/agents/d4d-mapper.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/agents/d4d-mapper.md
-          .claude/agents/d4d-provenance-guard.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/agents/d4d-provenance-guard.md
-          .claude/agents/d4d-review-record.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/agents/d4d-review-record.md
-          .claude/agents/d4d-rocrate.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/agents/d4d-rocrate.md
-          .claude/agents/d4d-rubric10-semantic-v5.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/agents/d4d-rubric10-semantic-v5.md
-          .claude/agents/d4d-rubric10-semantic.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/agents/d4d-rubric10-semantic.md
-          .claude/agents/d4d-rubric10.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/agents/d4d-rubric10.md
-          .claude/agents/d4d-rubric20-semantic-v4.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/agents/d4d-rubric20-semantic-v4.md
-          .claude/agents/d4d-rubric20-semantic-v5.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/agents/d4d-rubric20-semantic-v5.md
-          .claude/agents/d4d-rubric20-semantic.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/agents/d4d-rubric20-semantic.md
-          .claude/agents/d4d-rubric20.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/agents/d4d-rubric20.md
-          .claude/agents/d4d-schema-expert.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/agents/d4d-schema-expert.md
-          .claude/agents/d4d-validator.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/agents/d4d-validator.md
-          .claude/agents/schema-stats.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121/.claude/agents/schema-stats.md
-      chunk_check_uses_manifest: true
-      render_version: 7
-      chunk_manifest: data/preprocessed/chunks/CM4AI_chunks.yaml
-      condition: generic_v9
-      arm: BASELINE (input documents only)
-      manifest_line: '# Source manifest: data/preprocessed/source_manifest.yaml'
-      run_date: '2026-11-22'
-      manifest: data/preprocessed/source_manifest.yaml
-      profile: bridge2ai
-      profile_basis: rendered instruction
-      runtime: Claude Code
-      provider: Anthropic
-      bundle: data/preprocessed/concatenated/CM4AI_preprocessed.txt
 playbooks:
   hash_algorithm: sha256
   files:
@@ -103,9 +56,6 @@ playbooks:
     sha256: 851c0911da08bf0747c55a5f84e4578b192bd87616677773f6b58a4771b37b73
     bytes: 24252
     exists: true
-  consumed: true
-  consumed_basis: the runtime opens these files itself, as the launch instruction
-    directs
 phase_log:
   phases:
   - phase: generate_full
@@ -208,20 +158,16 @@ software:
   linkml_runtime: 1.9.4
   python: 3.13.12
 repo:
-  commit: a93fa7ca296db67a9650225186f4701c317bfc48
-  commit_short: a93fa7ca2
+  commit: 32b1b8aecfa9f43ee1e2d22ac6c56d612fa0e831
+  commit_short: 32b1b8aec
   branch: data/agentic-v9-opus55-final-20261122
   resource_root: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121
   resource_kind: checkout
   dirty: true
-  dirty_file_count: 6
+  dirty_file_count: 2
   dirty_paths:
+  - scripts/adhoc/rerecord_instruction_20261122.py
   - .temp/
-  - data/d4d_concatenated/claudecode_agent/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1/
-  - data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1/
-  - scripts/adhoc/count_top_level_slots.py
-  - scripts/adhoc/list_unreceipted_slots.py
-  - scripts/adhoc/sum_file_collections.py
 system:
   platform: macOS-26.7.3-arm64-arm-64bit-Mach-O
   machine: arm64
@@ -727,5 +673,3 @@ canonical:
     2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3: no review block'
   review_policy: reported_only_pending_calibration_v1 (#835)
   selected_by: d4d runs select
-  supersedes:
-  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3

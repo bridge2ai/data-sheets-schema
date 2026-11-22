@@ -3,7 +3,7 @@
 record_version: 1
 record_type: d4d_generation_provenance
 record_mode: live
-record_generated_at: '2026-11-22T06:48:31+00:00'
+record_generated_at: '2026-11-22T19:50:22+00:00'
 run:
   label: 2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2
   project: VOICE
@@ -37,53 +37,6 @@ prompts:
     bytes: 35627
     note: the instruction as sent, after substitution; the files above are what it
       was built from
-    spec:
-      agentic_artifact_paths:
-        full: data/d4d_concatenated/claudecode_agent/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2/VOICE_d4d.yaml
-        core: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2/VOICE_d4d_core.yaml
-        receipt: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2/VOICE_coverage_receipt.yaml
-        report: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2/VOICE_reconciliation.md
-      agentic_toolchain:
-        python: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.venv/bin/python
-        resources:
-          src/data_sheets_schema/schema/data_sheets_schema_all.yaml: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/src/data_sheets_schema/schema/data_sheets_schema_all.yaml
-          src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
-          .claude/commands/README.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/commands/README.md
-          .claude/commands/d4d-add-mapping.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/commands/d4d-add-mapping.md
-          .claude/commands/d4d-agent.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/commands/d4d-agent.md
-          .claude/commands/d4d-assistant.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/commands/d4d-assistant.md
-          .claude/commands/d4d-full-core.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/commands/d4d-full-core.md
-          .claude/commands/d4d-input-deep-research.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/commands/d4d-input-deep-research.md
-          .claude/commands/d4d-uniform-rules.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/commands/d4d-uniform-rules.md
-          .claude/commands/d4d-webfetch.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/commands/d4d-webfetch.md
-          .claude/agents/d4d-description-reviewer.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/agents/d4d-description-reviewer.md
-          .claude/agents/d4d-mapper.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/agents/d4d-mapper.md
-          .claude/agents/d4d-provenance-guard.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/agents/d4d-provenance-guard.md
-          .claude/agents/d4d-review-record.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/agents/d4d-review-record.md
-          .claude/agents/d4d-rocrate.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/agents/d4d-rocrate.md
-          .claude/agents/d4d-rubric10-semantic-v5.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/agents/d4d-rubric10-semantic-v5.md
-          .claude/agents/d4d-rubric10-semantic.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/agents/d4d-rubric10-semantic.md
-          .claude/agents/d4d-rubric10.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/agents/d4d-rubric10.md
-          .claude/agents/d4d-rubric20-semantic-v4.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/agents/d4d-rubric20-semantic-v4.md
-          .claude/agents/d4d-rubric20-semantic-v5.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/agents/d4d-rubric20-semantic-v5.md
-          .claude/agents/d4d-rubric20-semantic.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/agents/d4d-rubric20-semantic.md
-          .claude/agents/d4d-rubric20.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/agents/d4d-rubric20.md
-          .claude/agents/d4d-schema-expert.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/agents/d4d-schema-expert.md
-          .claude/agents/d4d-validator.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/agents/d4d-validator.md
-          .claude/agents/schema-stats.md: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/.claude/agents/schema-stats.md
-      chunk_check_uses_manifest: true
-      render_version: 7
-      chunk_manifest: data/preprocessed/chunks/VOICE_chunks.yaml
-      condition: generic_v9
-      arm: BASELINE (input documents only)
-      manifest_line: '# Source manifest: data/preprocessed/source_manifest.yaml'
-      run_date: '2026-11-22'
-      manifest: data/preprocessed/source_manifest.yaml
-      profile: bridge2ai
-      profile_basis: rendered instruction
-      runtime: Claude Code
-      provider: Anthropic
-      bundle: data/preprocessed/concatenated/VOICE_preprocessed.txt
 playbooks:
   hash_algorithm: sha256
   files:
@@ -103,9 +56,6 @@ playbooks:
     sha256: 851c0911da08bf0747c55a5f84e4578b192bd87616677773f6b58a4771b37b73
     bytes: 24252
     exists: true
-  consumed: true
-  consumed_basis: the runtime opens these files itself, as the launch instruction
-    directs
 phase_log:
   phases:
   - phase: generate_full
@@ -310,6 +260,22 @@ unverified:
     exposes no effort ladder, so the provider default applied. That is not a value
     this run chose, and it is not comparable with a run that named one.'
 notes: null
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2/VOICE_d4d.yaml
+      md5: a4115799a6c7764e178792c798572f98
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2/VOICE_d4d_core.yaml
+      md5: 13209cd423c8b4e31be7554ea2724a9d
+  schema:
+    full_sha256: bc560a3cd5d04c49e95fcbf33fa8ac349171df1a877e7e0882827bd526a95214
+    core_sha256: e174a7a6ec1b5eccef5ee4a8b9f8f773f48243c2d6012ff8a1b846b45a40d088
+  duplicate_keys:
+    full: []
+    core: []
+  recorded_by: d4d runs validate
 pair_consistency:
   ran: true
   consistent: true
@@ -617,7 +583,7 @@ receipts:
       path: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2/VOICE_coverage_receipt.yaml
       sha256: e58d7bb7b5bdb277472900bf5dd7a8d06acb6715c654a22d6b5e159d5c85bef1
     manifest:
-      path: data/preprocessed/chunks/VOICE_chunks.yaml
+      path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/data/preprocessed/chunks/VOICE_chunks.yaml
       sha256: f55de43646d5c4a6d61d6339f4d6f6adb3e50cef86d5dad1cb46a43a91fb38bc
   bundle_basis:
     source: bundle on disk
@@ -630,20 +596,4 @@ receipts:
       carried no measurement of its receipt: the receipt''s history was not read,
       so no snippet is classified'
     transcripts: []
-  recorded_by: d4d receipts check
-validation:
-  passed: true
-  artifacts:
-    full:
-      path: data/d4d_concatenated/claudecode_agent/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2/VOICE_d4d.yaml
-      md5: a4115799a6c7764e178792c798572f98
-    core:
-      path: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2/VOICE_d4d_core.yaml
-      md5: 13209cd423c8b4e31be7554ea2724a9d
-  schema:
-    full_sha256: bc560a3cd5d04c49e95fcbf33fa8ac349171df1a877e7e0882827bd526a95214
-    core_sha256: e174a7a6ec1b5eccef5ee4a8b9f8f773f48243c2d6012ff8a1b846b45a40d088
-  duplicate_keys:
-    full: []
-    core: []
-  recorded_by: d4d runs validate
+  recorded_by: d4d provenance record

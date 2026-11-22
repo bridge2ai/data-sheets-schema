@@ -35,3 +35,20 @@ observed: {'assistant_turns': 89, 'output_tokens': 112674, 'thinking_tokens': 39
 All runs subject to the live-provenance requirement satisfy it.
 runs_check_exit 0
 GATES: PASS
+--- re-record with the instruction as sent (VOICE_2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2.md)
+note: re-recorded without --runtime/--provider so no render specification is claimed: the specification cannot state the model, and main's config names claude-opus-5
+recorder exit 0
+✓ /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2/VOICE_provenance.yaml
+  pair ok · report 0 · ungrounded 0 · british 0 · receipts 22/22 chunks, 345/345 snippets
+  validation: carried forward — the artifacts it names still hash to what it recorded
+⚠️  no request spec recorded for --condition generic_v9: rendering failed: TypeError: replace() argument 2 must be str, not None. Pass --run-date with the date the instruction was rendered under.
+annotate-observed exit 0
+0 valid, 0 invalid, 0 with no provenance record to update
+runs validate exit 0
+1 run(s) checked, 1 subject to the requirement, 0 failing
+All runs subject to the live-provenance requirement satisfy it.
+   ⚠️  VOICE     2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2 unverifiable: request hash recorded without the spec that produced it
+runs_check_exit_after_rerecord 0
+recorded request sha256 37feda783d24f2e71512d364b1910c805123decececdc600f5a894b9fa31e915
+launch file sha256      37feda783d24f2e71512d364b1910c805123decececdc600f5a894b9fa31e915
+RERECORD: PASS
