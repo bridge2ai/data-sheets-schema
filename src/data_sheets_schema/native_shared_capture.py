@@ -6,6 +6,7 @@ Live callers and the saved replay use the same closed observation joins.
 """
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import asdict, dataclass, field, fields, is_dataclass, replace
 from pathlib import Path, PurePosixPath
 import re
@@ -665,11 +666,16 @@ def _prefix_trace(base, transcript, control, init_lines=None, settled_cache=None
     sub = object.__new__(observed.Trace)
     sub.transcript, sub.control = transcript, control
     sub.session, sub.policy = base.session, base.policy
+    sub.runtime = deepcopy(base.runtime)
     sub.calls = {k: v for k, v in base.calls.items() if v[0] <= t_lines}
     sub.callbacks = {k: v for k, v in base.callbacks.items() if v[0] <= t_lines}
     sub.results = {k: v for k, v in base.results.items() if v[0] <= t_lines}
     sub.decisions = {k: v for k, v in base.decisions.items() if v[0] <= c_lines}
     sub.frames = {k: v for k, v in base.frames.items() if k <= t_lines}
+    # Preserve only denials whose verified frame is visible at this prefix.
+    visible_frames = {id(frame) for frame in sub.frames.values()}
+    sub._permission_denials = {k: v for k, v in base._permission_denials.items()
+                              if id(v) in visible_frames}
     sub.terminal = base.terminal if (base.terminal is not None and base.terminal <= t_lines) else None
     return _bind_trace_cache(sub, settled_cache, base=base)
 
