@@ -31,6 +31,8 @@ C_CONSUMERS = frozenset(PACKAGE + name for name in (
     'native_shared_attribution', 'native_shared_capture', 'native_shared_controller',
     'native_shared_authority_wire', 'native_shared_controls', 'native_shared_evidence',
     'native_shared_permission_protocol', 'native_shared_runtime_constants',
+    'native_shared_permission_wire', 'native_stage_root_grant',
+    'native_stage_root_diagnostic', 'native_wire_2_1_325',
     'native_shared_current', 'native_shared_effects', 'native_shared_observations',
     'native_shared_phase', 'native_shared_policy', 'native_shared_receipts',
     'native_shared_stage', 'native_shared_streams',
@@ -76,7 +78,7 @@ def _imports(raw, name):
 
 def test_census_roster_covers_exactly_the_current_c_and_d_consumer_layers():
     assert len(D_CONSUMERS) == 14
-    assert len(C_CONSUMERS) == 16
+    assert len(C_CONSUMERS) == 20
     assert C_CONSUMERS.isdisjoint(D_CONSUMERS)
     assert authority.CONSUMER_OWNED_MODULES == C_CONSUMERS | D_CONSUMERS
 

@@ -103,14 +103,12 @@ def test_profile_requires_all_three_executable_identity_fields():
 
 
 def test_initialization_mutations_do_not_select_a_different_wire_profile():
-    for change in ('missing_ui', 'extra_ui', 'reordered', 'repeated_init', 'ui_kind', 'ui_session',
+    for change in ('extra_ui', 'reordered', 'repeated_init', 'ui_kind', 'ui_session',
                    'ack_join', 'pending', 'payload', 'pid_bool', 'styles_dir', 'tools', 'cwd',
                    'model', 'init_uuid', 'grant', 'unknown_field'):
         value = context()
         events = value['events']
-        if change == 'missing_ui':
-            del events[0]
-        elif change == 'extra_ui':
+        if change == 'extra_ui':
             events.insert(0, deepcopy(events[0]))
         elif change == 'reordered':
             events[0], events[1] = events[1], events[0]
@@ -144,6 +142,39 @@ def test_initialization_mutations_do_not_select_a_different_wire_profile():
             events[2]['additional_directories'] = [str(Path(value['launch']['effect_root']).parent)]
         else:
             events[2]['unreviewed'] = True
+        with pytest.raises(ValueError):
+            begin(value)
+
+
+def test_removed_historical_ui_is_a_constructed_optional_prefix_control():
+    value = context()
+    original_raw = value['raw']
+    del value['events'][0]
+    state = begin(value)
+    assert state.offset == 2 and state.session == value['events'][1]['session_id']
+    case = case_at(value, 2)
+    state.call(value['events'][2], case, 0)
+    state.callback(value['events'][3], case)
+    assert value['raw'] == original_raw
+
+
+def test_present_ui_mutations_are_refused_by_both_readers():
+    from data_sheets_schema import native_wire_2_1_325 as production_wire
+    for change in ('missing_event', 'extra_key', 'wrong_event', 'invalid_uuid', 'bool_session'):
+        value = context()
+        ui = value['events'][0]
+        if change == 'missing_event':
+            del ui['event']
+        elif change == 'extra_key':
+            ui['unknown'] = True
+        elif change == 'wrong_event':
+            ui['event'] = 'ui.other'
+        elif change == 'invalid_uuid':
+            ui['uuid'] = 'not-a-uuid'
+        else:
+            ui['session_id'] = True
+        with pytest.raises(ValueError):
+            production_wire.ui_prefix_session(ui, value['runtime'])
         with pytest.raises(ValueError):
             begin(value)
 

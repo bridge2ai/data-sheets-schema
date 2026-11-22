@@ -80,6 +80,8 @@ def tool_history(prepared):
     result metadata; it does not replace that check or require a fixed recipe.
     """
     spec = prepared['state'].spec
+    from . import native_wire_2_1_325 as wire
+    runtime = prepared.get('value', {}).get('runtime')
     calls, pending, checks = {}, {}, []
     initialized = terminal = False
     for event in prepared['events']:
@@ -91,7 +93,12 @@ def tool_history(prepared):
             if not initialized or terminal or pending:
                 raise ValueError('native terminal precedes settled tool history')
             terminal = True
-        content = event.get('message', {}).get('content', [])
+        if wire.permission_denial(event, runtime):
+            raise ValueError('native tool history contains a permission denial')
+        message = event.get('message', {})
+        if not isinstance(message, dict):
+            raise ValueError('native tool history message is not an object')
+        content = message.get('content', [])
         if not isinstance(content, list):
             continue
         for block in content:
@@ -113,23 +120,68 @@ def tool_history(prepared):
             if identity in prepared.get('denied_tool_ids', ()):
                 if block.get('is_error') is not True:
                     raise ValueError('denied tool has a successful result')
+                if (call.get('name') == 'Bash'
+                        and wire.missing_numeric_bash_failure(event, block, runtime) is not None):
+                    raise ValueError('admitted Bash failure contradicts its classified denial')
                 continue
             if call.get('name') != 'Bash':
+                continue
+            command = call.get('input', {}).get('command')
+            kind = command_kind(command, spec, expected=prepared['state'].commands)
+            failure = wire.missing_numeric_bash_failure(event, block, runtime)
+            if failure is not None:
+                code, merged = failure
+                if kind == 'draft' and code != 1:
+                    raise ValueError('draft checker returned an unusable result')
+                if kind in ('evidence', 'final_evidence', 'source_inventory'):
+                    raise ValueError('terminal evidence or source inventory failed')
+                helpers = prepared.get('policy', {}).get('native_shared_helpers', {})
+                matches = [name for name, selected in helpers.items() if selected == command]
+                if matches == ['advance']:
+                    raise ValueError('advance helper failed without a usable stage settlement')
+                selected_helper = matches[0] if len(matches) == 1 else None
+                phase = prepared.get('phase_report', {})
+                rows = [row for row in phase.get('checks', [])
+                        if type(row) is dict and row.get('tool_use_id') == identity]
+                if (len(matches) > 1 or not matches and kind is not None
+                        or len(rows) != 1 or 'helper' not in rows[0]
+                        or rows[0]['helper'] != selected_helper
+                        or type(rows[0].get('exit_code')) is not int or rows[0]['exit_code'] != code
+                        or 'stdout' not in rows[0] or rows[0]['stdout'] is not None
+                        or rows[0].get('merged_output') != merged
+                        or rows[0].get('status_basis') != wire.FAILURE_STATUS_BASIS
+                        or phase.get('passed') is not True or phase.get('problems') != []):
+                    raise ValueError('adapted Bash failure lacks its exact checked phase result')
+                checks.append({'tool_use_id': identity, 'helper_kind': kind,
+                    'exit_code': code, 'stdout': None, 'merged_output': merged,
+                    'status_basis': wire.FAILURE_STATUS_BASIS})
                 continue
             metadata = event.get('tool_use_result')
             if not isinstance(metadata, dict):
                 raise ValueError('native Bash result lacks explicit exit metadata')
             codes = [metadata[k] for k in ('exitCode', 'exit_code') if k in metadata]
-            if not codes or any(type(code) is not int or code != codes[0] for code in codes):
+            adapted = wire.missing_numeric_bash_success(event, block, runtime)
+            if not adapted and (not codes or any(type(code) is not int or code != codes[0] for code in codes)):
                 raise ValueError('native Bash exit aliases are missing, untyped or contradictory')
-            if (type(block.get('is_error')) is not bool or block['is_error'] is not bool(codes[0])
+            if (type(block.get('is_error')) is not bool
+                    or (not adapted and block['is_error'] is not bool(codes[0]))
                     or any(metadata.get(k) for k in ('interrupted', 'backgroundTaskId', 'background_task_id'))):
                 raise ValueError('native Bash result is contradictory, interrupted or pending')
-            command = call.get('input', {}).get('command')
-            kind = command_kind(command, spec, expected=prepared['state'].commands)
-            if kind == 'draft' and codes[0] not in (0, 1):
+            if adapted:
+                helpers = prepared.get('policy', {}).get('native_shared_helpers', {})
+                matches = [name for name, selected in helpers.items() if selected == command]
+                phase = prepared.get('phase_report', {})
+                rows = [row for row in phase.get('checks', [])
+                        if type(row) is dict and row.get('tool_use_id') == identity]
+                if (len(matches) != 1 or len(rows) != 1 or rows[0].get('helper') != matches[0]
+                        or rows[0].get('exit_code', False) is not None
+                        or rows[0].get('exit_status', False) is not None
+                        or rows[0].get('status_basis') != wire.STATUS_BASIS
+                        or phase.get('passed') is not True or phase.get('problems') != []):
+                    raise ValueError('adapted Bash success lacks its exact checked helper output')
+            if not adapted and kind == 'draft' and codes[0] not in (0, 1):
                 raise ValueError('draft checker returned an unusable result')
-            if kind in ('evidence', 'final_evidence', 'source_inventory') and codes[0] != 0:
+            if not adapted and kind in ('evidence', 'final_evidence', 'source_inventory') and codes[0] != 0:
                 raise ValueError('terminal evidence or source inventory failed')
             if 'stdout' in metadata:
                 content = block.get('content')
@@ -140,7 +192,11 @@ def tool_history(prepared):
                         raise ValueError('draft stdout and tool content disagree')
                 elif content != metadata['stdout']:
                     raise ValueError('native Bash stdout and tool content disagree')
-            checks.append({'tool_use_id': identity, 'helper_kind': kind, 'exit_code': codes[0]})
+            checked = {'tool_use_id': identity, 'helper_kind': kind,
+                       'exit_code': None if adapted else codes[0]}
+            if adapted:
+                checked.update(exit_status=None, status_basis=wire.STATUS_BASIS)
+            checks.append(checked)
     if not initialized or not terminal or pending:
         raise ValueError('native history is incomplete')
     return {'passed': True, 'bash_results': checks,

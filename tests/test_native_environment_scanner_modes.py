@@ -9,6 +9,7 @@ from tests.test_native_u1_scanner_contracts import ROOT, RUNNER, _native_route_r
 
 MANIFEST = 'src/data_sheets_schema/native_environment_manifest.py'
 AUTHORITY = 'src/data_sheets_schema/native_execution_authority_v2.py'
+ATTRIBUTION = 'src/data_sheets_schema/native_attribution_registration_v2.py'
 V2_CANDIDATE = 'f5c7c312f41e555c8023b880eeb3da327aa815cb'
 HISTORICAL_MANIFEST = '13d4d45e0bd375608d3b8c4808af6ea51cb6489d1053e0415fa799e443f46e7c'
 
@@ -42,9 +43,10 @@ def historical_v2_root(tmp_path):
     root = _native_route_root(tmp_path)
     # D159 (2026-11-17) changed the live supervisor (git timeout 10 -> 20 s); the
     # historical v2 envelope keeps the candidate's bytes, which its pin names.
+    # R2-2 changes the current attribution reader; v2 retains its own bytes.
     for relative in ('src/data_sheets_schema/cli/prompt.py',
                      'src/data_sheets_schema/native_execution_registration_v2.py', AUTHORITY,
-                     'src/data_sheets_schema/native_supervisor_authority_v2.py'):
+                     'src/data_sheets_schema/native_supervisor_authority_v2.py', ATTRIBUTION):
         raw = subprocess.run(['git', '--no-replace-objects', '-C', str(ROOT),
                               'show', V2_CANDIDATE + ':' + relative],
                              capture_output=True, check=True, timeout=30).stdout
@@ -56,6 +58,8 @@ def test_same_scanner_derives_historical_v2_and_current_v3(tmp_path):
     assert scan._NATIVE_V2_INTEGRATED_RENDER_SOURCES[AUTHORITY] != scan._NATIVE_V3_RENDER_SOURCES[AUTHORITY]
     root = historical_v2_root(tmp_path)
     assert hashlib.sha256((root / AUTHORITY).read_bytes()).hexdigest() == scan._NATIVE_V2_INTEGRATED_RENDER_SOURCES[AUTHORITY]
+    assert hashlib.sha256((root / ATTRIBUTION).read_bytes()).hexdigest() == scan._NATIVE_V2_INTEGRATED_RENDER_SOURCES[ATTRIBUTION]
+    assert hashlib.sha256((ROOT / ATTRIBUTION).read_bytes()).hexdigest() == scan._NATIVE_V3_RENDER_SOURCES[ATTRIBUTION]
     assert scan.derive_native_shared_route(root, scan._tree(root / RUNNER))['renderer'] == 26
     assert scan.derive_native_shared_route(ROOT, scan._tree(ROOT / RUNNER))['renderer'] == 26
 

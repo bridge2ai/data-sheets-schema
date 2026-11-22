@@ -11,6 +11,7 @@ from uuid import UUID
 
 from . import native_model_aliases
 from . import native_shared_permission_protocol as protocol
+from . import native_wire_2_1_325 as production_wire
 
 
 VERSION = '2.1.325 (Claude Code)'
@@ -620,18 +621,23 @@ class TraceWire:
     """Trace-local identity checks over original parsed frames and raw indices."""
 
     def __init__(self, events, clean, runtime, launch, policy, additional_directories):
-        _need(len(events) >= 3 and len(clean) >= 2, 'initialization is incomplete')
+        _need(len(events) >= 2 and len(clean) >= 2, 'initialization is incomplete')
         self.runtime, self.launch, self.policy = runtime, launch, policy
         self.aliases = native_model_aliases.model_aliases(runtime)
         self.frame_ids, self.callback_ids = set(), set()
         self.prompt_id = None
-        self.offset = 3
-        ui, ack, init = events[:3]
+        ui = events[0] if (type(events[0]) is dict and events[0].get('type') == 'system'
+                          and events[0].get('subtype') == 'ui_invalidate') else None
+        prefix = int(ui is not None)
+        self.offset = prefix + 2
+        _need(len(events) >= self.offset, 'initialization is incomplete')
+        ack, init = events[prefix:self.offset]
+        _need(type(ack) is dict and type(init) is dict, 'initialization is not object frames')
         self.session = _uuid(init.get('session_id'), 'session')
-        _keys(ui, {'type', 'subtype', 'event', 'uuid', 'session_id'}, 'UI prefix')
-        _need(ui['type'] == 'system' and ui['subtype'] == 'ui_invalidate' and ui['event'] == 'ui.render',
-              'unknown leading frame')
-        self._scope(ui)
+        if ui is not None:
+            _need(production_wire.ui_prefix_session(ui, runtime) == self.session,
+                  'UI prefix session differs from initialization')
+            self._scope(ui)
         self._ack(ack)
         _need(_same(clean[0], {'kind': 'initialize_sent', 'policy_sha256': protocol.policy_digest(policy),
               'frame': protocol.initialize_frame(policy['pretool_control'])}), 'initialization sent differs')

@@ -147,25 +147,29 @@ def validate_boundary_diagnostic(document, *, expected, selected, transcript_raw
     events = p._rows(transcript_raw, 'boundary transcript')
     records = p._rows(control_raw, 'boundary control')
     clean = [{key: value for key, value in row.items() if key != 'at'} for row in records]
-    if len(events) != 9 or len(clean) != 3:
+    if len(clean) != 3:
         raise ValueError('boundary trace has extra or missing events')
     state = wire.begin_trace(events, clean, expected['runtime'], launch, policy,
                              additional_directories=[launch['effect_root']])
+    offset = state.offset
+    if len(events) != offset + 6:
+        raise ValueError('boundary trace has extra or missing events')
     if clean[0] != {'kind': 'initialize_sent', 'policy_sha256': protocol.policy_digest(policy),
                     'frame': protocol.initialize_frame(policy['pretool_control'])}:
         raise ValueError('boundary initialization policy differs')
-    state.call(events[3], case, 0)
-    state.callback(events[4], case)
+    state.call(events[offset], case, 0)
+    callback = events[offset + 1]
+    state.callback(callback, case)
     basis = 'a registered input the instruction reads'
-    decision = {'kind': 'decision', 'request': events[4], 'classification': 'prescribed',
+    decision = {'kind': 'decision', 'request': callback, 'classification': 'prescribed',
                 'basis': basis, 'response': {'type': 'control_response', 'response': {
-                    'subtype': 'success', 'request_id': events[4]['request_id'],
+                    'subtype': 'success', 'request_id': callback['request_id'],
                     'response': protocol.hook_output('prescribed', basis)}}}
     if clean[2] != decision:
         raise ValueError('boundary Read was not independently admitted by controller')
-    state.permission_denied(events[5], case)
-    state.restricted_read_result(events[6], case)
-    state.completion(events[7], 1)
-    state.terminal(events[8], [case])
+    state.permission_denied(events[offset + 2], case)
+    state.restricted_read_result(events[offset + 3], case)
+    state.completion(events[offset + 4], 1)
+    state.terminal(events[offset + 5], [case])
     return {'checked': True, 'native_refused': True, 'observer_admitted': True,
             'sentinel_unchanged': True}

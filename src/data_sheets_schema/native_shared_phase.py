@@ -14,6 +14,7 @@ import re
 import shlex
 
 from . import native_shared_contract as c
+from . import native_wire_2_1_325 as wire
 
 
 COMMAND_NAMES = frozenset((
@@ -57,7 +58,7 @@ class PhaseState:
     """
 
     def __init__(self, commands, *, full_path, core_path, report_path, receipt_path,
-                 working_directory):
+                 working_directory, runtime=None):
         _require(type(commands) is dict and set(commands) == COMMAND_NAMES,
                  'native phase requires the exact eighteen helper names')
         self.commands = {}
@@ -66,6 +67,8 @@ class PhaseState:
                      'native phase helper argv must be a nonempty tuple of text')
             self.commands[shlex.join(argv)] = name
         _require(len(self.commands) == len(COMMAND_NAMES), 'native helper commands must be distinct')
+        self._command_argv = deepcopy(commands)
+        self.runtime = deepcopy(runtime)
         c.canonical_path(working_directory, 'phase working directory')
         self.working_directory = working_directory
         self.paths = {'full': full_path, 'core': core_path, 'report': report_path, 'receipt': receipt_path}
@@ -82,6 +85,9 @@ class PhaseState:
         self._checks = []
         self._terminal_failures = []
         self._session = None
+        self._prefix_session = None
+        self._prefix_ack = False
+        self._runtime_denials = {}
         self._native_terminal = False
         self._phase1_sealed = self._core_sealed = self._assembly_complete = False
         self._binding = None
@@ -317,13 +323,18 @@ class PhaseState:
         identity = item.get('tool_use_id')
         _require(type(identity) is str and identity in self._pending, 'tool result has no unique pending call')
         row = self._pending.pop(identity)
+        failure = (wire.missing_numeric_bash_failure(event, item, self.runtime)
+                   if row['name'] == 'Bash' else None)
         if identity in denials:
             denial = denials[identity]
+            _require(failure is None, 'admitted Bash failure contradicts a classified denial')
             _require(item.get('is_error') is True, 'denied tool has a successful result')
             _require(denial['classification'] == 'not_prescribed',
                      'denied {} call ({}): {}'.format(denial['classification'],
                          row['name'], denial['basis']))
             return ()
+        _require(identity not in self._runtime_denials,
+                 'native permission denial lacks a classified failed result')
         # Native file results omit is_error on success. Their complete result
         # metadata is checked by the observation layer; an explicitly supplied
         # flag must still be boolean. Bash keeps its explicit outcome contract.
@@ -331,13 +342,25 @@ class PhaseState:
         _require(type(outcome) is bool, 'tool result lacks explicit boolean outcome')
         success = not outcome
         kind = row['kind']
-        if row['name'] == 'Bash':
+        if row['name'] == 'Bash' and failure is not None:
+            exit_code, merged_output = failure
+            # The native error wrapper reports merged output. It supplies no
+            # stdout channel and cannot confer JSON-helper or success credit.
+            self._checks.append({'tool_use_id': identity, 'helper': kind,
+                'exit_code': exit_code, 'stdout': None, 'merged_output': merged_output,
+                'status_basis': wire.FAILURE_STATUS_BASIS,
+                'call_event': row['event'], 'result_event': self._index})
+            if kind == 'draft':
+                _require(exit_code == 1, 'draft checker returned an unusable exit')
+            _require(kind != 'advance', 'advance settled with failed stage state')
+        elif row['name'] == 'Bash':
             meta = event.get('tool_use_result')
             _require(type(meta) is dict, 'Bash result lacks explicit exit metadata')
             codes = [meta[k] for k in ('exitCode', 'exit_code') if k in meta]
-            _require(codes and all(type(x) is int and x == codes[0] for x in codes),
+            adapted = wire.missing_numeric_bash_success(event, item, self.runtime)
+            _require(adapted or codes and all(type(x) is int and x == codes[0] for x in codes),
                      'Bash exit aliases are missing, untyped or contradictory')
-            _require(item['is_error'] is bool(codes[0]) and not any(meta.get(k) for k in (
+            _require((adapted or item['is_error'] is bool(codes[0])) and not any(meta.get(k) for k in (
                 'interrupted', 'backgroundTaskId', 'background_task_id')),
                 'Bash result is contradictory, interrupted or pending')
             _require(type(item.get('content')) is str and type(meta.get('stdout')) is str,
@@ -370,10 +393,19 @@ class PhaseState:
                              and 'floor_acceptance_claimed' not in lines
                              and '· native receipt stage: final' in lines,
                              'final receipts require strict output, not structural JSON')
+                elif adapted:
+                    wire.helper_stdout(kind, meta['stdout'], self._command_argv, self.paths)
+            if adapted:
+                _require(kind is not None and meta['stderr'] == '',
+                         'numeric-less success requires an exact helper and empty stderr')
             if kind == 'draft':
-                _require(codes[0] in (0, 1), 'draft checker returned an unusable exit')
-            self._checks.append({'tool_use_id': identity, 'helper': kind, 'exit_code': codes[0],
-                                 'call_event': row['event'], 'result_event': self._index})
+                _require(adapted or codes[0] in (0, 1), 'draft checker returned an unusable exit')
+            check = {'tool_use_id': identity, 'helper': kind,
+                     'exit_code': None if adapted else codes[0],
+                     'call_event': row['event'], 'result_event': self._index}
+            if adapted:
+                check.update(exit_status=None, status_basis=wire.STATUS_BASIS)
+            self._checks.append(check)
         if kind in _TERMINAL_HELPERS and not success:
             self._terminal_failures.append({'tool_use_id': identity, 'helper': kind, 'event': self._index})
             raise ValueError('terminal source inventory or evidence helper failed')
@@ -398,14 +430,39 @@ class PhaseState:
         actions = []
         try:
             _require(type(event) is dict, 'native event must be an object')
+            if event.get('type') == 'system' and event.get('subtype') == 'ui_invalidate':
+                _require(self._index == 1 and self._session is None and self._prefix_session is None,
+                         'native UI prefix is repeated or out of order')
+                self._prefix_session = wire.ui_prefix_session(event, self.runtime)
+                return ()
             if event.get('type') == 'system' and event.get('subtype') == 'init':
                 session = event.get('session_id')
                 _require(self._session is None and not self._seen and type(session) is str and session,
                          'native initialization lacks a unique session')
+                _require(self._prefix_session is None or (self._index == 3 and self._prefix_ack
+                         and session == self._prefix_session),
+                         'native init differs from the leading UI session or order')
                 self._session = session
+                return ()
+            if self._prefix_session is not None and self._session is None:
+                response = event.get('response')
+                _require(self._index == 2 and event.get('type') == 'control_response'
+                         and type(response) is dict and response.get('subtype') == 'success'
+                         and response.get('request_id') == 'd4d_initialize_v1'
+                         and response.get('error') is None,
+                         'native UI prefix is not followed by the initialization acknowledgement')
+                self._prefix_ack = True
                 return ()
             if 'session_id' in event:
                 _require(event['session_id'] == self._session, 'native event belongs to another session')
+            if wire.permission_denial(event, self.runtime):
+                identity = event['tool_use_id']
+                _require(self._session is not None and not self._native_terminal
+                         and identity in self._pending and identity not in self._runtime_denials
+                         and self._pending[identity]['name'] == event['tool_name'],
+                         'native permission denial lacks its unique pending call')
+                self._runtime_denials[identity] = deepcopy(event)
+                return ()
             if event.get('type') == 'result':
                 for denial in (denials or {}).values():
                     _require(denial['classification'] == 'not_prescribed',

@@ -518,7 +518,8 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
         paths = frozen._agentic_artifact_paths
         phase = modules['native_shared_phase'].PhaseState(rendered_commands,
             full_path=paths['full'], core_path=paths['core'], report_path=paths['report'],
-            receipt_path=paths['receipt'], working_directory=composition['working_directory'])
+            receipt_path=paths['receipt'], working_directory=composition['working_directory'],
+            runtime=execution['runtime'])
         state = modules['native_shared_attribution_orchestration']._LiveAttribution(
             current, execution_raw=registration_raw, spec=frozen, composition_raw=composition_raw,
             _admission=admitted)

@@ -160,6 +160,8 @@ class _Attribution(inherited.NativeAttributionState):
     def __init__(self, selection, *, execution_raw, spec, composition_raw, _admission=None):
         doc, commands, directory, paths, inputs, maximum = _joined(
             selection, execution_raw, spec, composition_raw, _admission=_admission)
+        from .native_shared_controller import captured_execution_body
+        self.runtime = captured_execution_body(execution_raw)['runtime']
         self.spec = spec
         self.reg = {'max_draft_checks': maximum, 'inputs': inputs, 'working_directory': directory}
         self.registration_raw = execution_raw

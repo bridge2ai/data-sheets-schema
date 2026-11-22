@@ -950,6 +950,10 @@ def test_loaded_fixed_source_cannot_be_replaced_by_an_advertised_pin(fixture, mo
         verify(changed,expected)
 
 
+def test_loaded_production_wire_source_cannot_be_replaced_by_an_advertised_pin(fixture):
+    test_loaded_fixed_source_cannot_be_replaced_by_an_advertised_pin(fixture, 'native_wire_2_1_325')
+
+
 def test_recorder_mapping_pins_actual_module_execution_entrypoint(fixture):
     row=next(x for x in fixture['expected']['probe_recipe']['module_map'] if x['module']=='data_sheets_schema.cli')
     actual=Path(p.__file__).parent/'cli/__main__.py'

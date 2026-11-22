@@ -18,6 +18,7 @@ from . import native_shared_streams as live_streams
 from . import native_shared_observations as observed
 from . import native_shared_stage as stage
 from . import native_shared_receipts as receipt_api
+from . import native_wire_2_1_325 as wire
 
 _DYNAMIC = {'record': ('journal_records_root', 'json', 'history_records', 0),
             'request': ('requests_root', 'json', 'submissions', 1),
@@ -895,7 +896,10 @@ def _require_initial_seal_identity(run, report, full, receipt):
     """Bind the checked helper result to the exact original bytes, live or saved."""
     from .native_shared_phase import initial_input_identity
     checks = [row for row in report['checks']
-              if row['helper'] == 'phase1_receipts' and row['exit_code'] == 0]
+              if row['helper'] == 'phase1_receipts' and (row['exit_code'] == 0
+                  or wire.profile(run.value['runtime']) and row['exit_code'] is None
+                  and 'exit_status' in row and row['exit_status'] is None
+                  and row.get('status_basis') == wire.STATUS_BASIS)]
     if not checks:
         raise ValueError('original seal lacks a successful initial receipt helper')
     trace = run.trace()
@@ -916,7 +920,8 @@ def phase_replay(run, *, complete=False):
     from .native_shared_render import commands
     paths = run.spec._agentic_artifact_paths
     phase = PhaseState(commands(run.spec), full_path=paths['full'], core_path=paths['core'],
-        report_path=paths['report'], receipt_path=paths['receipt'], working_directory=run.binding.working_directory)
+        report_path=paths['report'], receipt_path=paths['receipt'],
+        working_directory=run.binding.working_directory, runtime=run.value['runtime'])
     catalog, advance_before, advance_after, visible, seal_observations = _chronology(run)
     actions = {}
     previous = None
@@ -946,7 +951,8 @@ def phase_replay(run, *, complete=False):
         digest = None
         if count >= 3:
             digest = _journal_prefix_digest(run, count)[0]
-        blocks = frame.get('message', {}).get('content', [])
+        message = frame.get('message')
+        blocks = message.get('content', []) if type(message) is dict else []
         for block in blocks if type(blocks) is list else ():
             if type(block) is not dict:
                 continue

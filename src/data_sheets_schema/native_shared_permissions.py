@@ -24,6 +24,7 @@ from data_sheets_schema import native_model_aliases
 from data_sheets_schema import native_shared_permission_wire as wire_profile
 from data_sheets_schema import native_stage_root_grant
 from data_sheets_schema import native_stage_root_diagnostic
+from data_sheets_schema import native_wire_2_1_325
 
 KIND = contract.KINDS['permission']
 EXPECTED_KIND = contract.KINDS['permission_expected']
@@ -271,6 +272,7 @@ def _source_closure(expected):
                          ('data_sheets_schema.native_helper_cache', helper_cache.__file__),
                          ('data_sheets_schema.native_model_aliases', native_model_aliases.__file__),
                          ('data_sheets_schema.native_shared_permission_wire', wire_profile.__file__),
+                         ('data_sheets_schema.native_wire_2_1_325', native_wire_2_1_325.__file__),
                          ('data_sheets_schema.native_stage_root_grant', native_stage_root_grant.__file__),
                          ('data_sheets_schema.native_stage_root_diagnostic', native_stage_root_diagnostic.__file__),
                          ('data_sheets_schema.native_shared_permission_protocol', _permission_protocol().__file__)]:
@@ -872,7 +874,7 @@ def _tool_result(event, case, expected, selection, launch, session, source_raw, 
         _need(metadata.get('originalFile') is None and metadata.get('userModified', False) is False,
               'Write was not a new unchanged response')
         _need(metadata.get('structuredPatch', []) == [], 'Write patch contradicts creation')
-        _need(text == 'File created successfully at: ' + case['input']['file_path'],
+        _need(native_wire_2_1_325.write_success_text(text, case['input']['file_path'], expected.get('runtime')),
               'Write success names another path')
 
 

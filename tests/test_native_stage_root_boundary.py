@@ -125,6 +125,52 @@ def test_boundary_accepts_exact_admitted_callback_then_native_restriction():
         'observer_admitted': True, 'sentinel_unchanged': True}
 
 
+def test_constructed_boundary_accepts_absent_optional_ui_prefix():
+    """Remove only an invented UI row; this is not new native boundary evidence."""
+    expected, selected, document, events, controls = fabricated_boundary()
+    tail = b''.join(p._encoded(row) + b'\n' for row in events[1:])
+    original_controls = deepcopy(controls)
+    events.pop(0)
+    assert validate_fabricated(expected, selected, document, events, controls) == {
+        'checked': True, 'native_refused': True, 'observer_admitted': True,
+        'sentinel_unchanged': True}
+    assert len(events) == 8
+    assert b''.join(p._encoded(row) + b'\n' for row in events) == tail
+    assert document['transcript'] == {'relative_path': 'transcript.jsonl', **pin(tail)}
+    assert controls == original_controls
+
+
+def test_constructed_boundary_refuses_malformed_or_misplaced_ui_prefix():
+    changes = ('missing_event', 'extra_field', 'wrong_event', 'invalid_uuid',
+               'foreign_session', 'repeated', 'after_ack', 'after_init',
+               'after_call', 'trailing', 'unknown_system')
+    for change in changes:
+        expected, selected, document, events, controls = fabricated_boundary()
+        if change == 'missing_event':
+            events[0].pop('event')
+        elif change == 'extra_field':
+            events[0]['unknown'] = True
+        elif change == 'wrong_event':
+            events[0]['event'] = 'ui.other'
+        elif change == 'invalid_uuid':
+            events[0]['uuid'] = 'not-a-uuid'
+        elif change == 'foreign_session':
+            events[0]['session_id'] = identity(99)
+        elif change == 'repeated':
+            repeated = deepcopy(events[0])
+            repeated['uuid'] = identity(99)
+            events.insert(1, repeated)
+        elif change == 'unknown_system':
+            events[0]['subtype'] = 'unknown'
+        else:
+            prefix = events.pop(0)
+            position = {'after_ack': 1, 'after_init': 2, 'after_call': 3,
+                        'trailing': len(events)}[change]
+            events.insert(position, prefix)
+        with pytest.raises(ValueError):
+            validate_fabricated(expected, selected, document, events, controls)
+
+
 def test_boundary_pin_byte_lengths_require_integer_json_types():
     for field in ('sentinel_before', 'sentinel_after', 'transcript', 'control'):
         expected, selected, document, events, controls = fabricated_boundary()
@@ -163,7 +209,7 @@ def test_boundary_public_entry_refuses_unbound_host_source_before_reservation(tm
     assert not directory.exists()
 
 
-def test_boundary_refuses_rehashed_wire_or_authority_deviations():
+def test_boundary_refuses_rehashed_wire_or_authority_deviations(prefix_present):
     changes = ('grant_parent', 'grant_missing', 'init_grant', 'call_path', 'callback_path',
                'observer_denied', 'denial_text', 'result_text', 'result_success',
                'duplicate_uuid', 'terminal_denials', 'extra_event', 'extra_control', 'sentinel')
@@ -205,8 +251,16 @@ def test_boundary_refuses_rehashed_wire_or_authority_deviations():
         else:
             after = b'changed sentinel'
             document['sentinel']['after'] = pin(after)
+        # Apply the same independent mutation before choosing the constructed
+        # prefix layout, so neither layout skips any authority or refusal check.
+        if not prefix_present:
+            events.pop(0)
         with pytest.raises(ValueError):
             validate_fabricated(expected, selected, document, events, controls, after=after)
+
+
+test_boundary_refuses_rehashed_wire_or_authority_deviations = pytest.mark.parametrize(
+    'prefix_present', [True, False])(test_boundary_refuses_rehashed_wire_or_authority_deviations)
 
 
 def test_boundary_observer_blocks_unscripted_effects_before_callback_dispatch():
