@@ -1,0 +1,2867 @@
+{
+  "rubric": "rubric20-semantic",
+  "version": "3.0",
+  "d4d_file": "data/d4d_concatenated/claudecode_agent/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2/CM4AI_d4d.yaml",
+  "project": "CM4AI",
+  "method": "claudecode_agent",
+  "run_label": "2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2",
+  "evaluation_timestamp": "2026-11-22T08:53:47Z",
+  "model": {
+    "name": "claude-opus-5-5",
+    "evaluator_model": "claude-opus-5-5",
+    "temperature": null,
+    "temperature_note": "Not exposed by this runtime; no deterministic-score guarantee",
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "overall_score": {
+    "total_points": 29,
+    "max_points": 88,
+    "excluded_max_points": 0,
+    "adjusted_max_points": 88,
+    "normalized_percentage": 32.95,
+    "fixed_percentage": 32.95,
+    "questions_not_applicable": 0,
+    "excluded_item_ids": []
+  },
+  "categories": [
+    {
+      "name": "Structural Completeness",
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "description": "Proportion of mandatory schema fields populated including core identification, hierarchical structure, governance, and c",
+          "score_type": "numeric",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Absent (<=40% populated per release unit)",
+          "evidence": "Each release unit populates id, title, description and doi (4 of 14 listed fields, ~29%); keywords, license_and_use_terms (only a bare `license` string), page, creators, purposes, instances, resources, parent_datasets, variables and confidentiality_level are not populated at release level.",
+          "quality_note": "Collection interpretation: the record has no class declaration and four resources, so each release is scored on its own fields; top-level metadata is not inherited.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 0,
+              "evidence": "March 2025 release: 4/14 fields (id, title, description, doi); license is a bare string, not license_and_use_terms.",
+              "cited": [
+                {
+                  "path": "/id"
+                },
+                {
+                  "path": "/title"
+                },
+                {
+                  "path": "/description"
+                },
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "keywords"
+                },
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "page"
+                },
+                {
+                  "path": "creators"
+                },
+                {
+                  "path": "purposes"
+                },
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "resources"
+                },
+                {
+                  "path": "parent_datasets"
+                },
+                {
+                  "path": "variables"
+                },
+                {
+                  "path": "regulatory_restrictions.confidentiality_level"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 0,
+              "evidence": "June 2025 release: 4/14 fields (id, title, description, doi); license is a bare string, not license_and_use_terms.",
+              "cited": [
+                {
+                  "path": "/id"
+                },
+                {
+                  "path": "/title"
+                },
+                {
+                  "path": "/description"
+                },
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "keywords"
+                },
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "page"
+                },
+                {
+                  "path": "creators"
+                },
+                {
+                  "path": "purposes"
+                },
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "resources"
+                },
+                {
+                  "path": "parent_datasets"
+                },
+                {
+                  "path": "variables"
+                },
+                {
+                  "path": "regulatory_restrictions.confidentiality_level"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 0,
+              "evidence": "October 2025 release: 4/14 fields (id, title, description, doi); license is a bare string, not license_and_use_terms.",
+              "cited": [
+                {
+                  "path": "/id"
+                },
+                {
+                  "path": "/title"
+                },
+                {
+                  "path": "/description"
+                },
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "keywords"
+                },
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "page"
+                },
+                {
+                  "path": "creators"
+                },
+                {
+                  "path": "purposes"
+                },
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "resources"
+                },
+                {
+                  "path": "parent_datasets"
+                },
+                {
+                  "path": "variables"
+                },
+                {
+                  "path": "regulatory_restrictions.confidentiality_level"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 0,
+              "evidence": "June 2026 release: 4/14 fields (id, title, description, doi); license is a bare string, not license_and_use_terms.",
+              "cited": [
+                {
+                  "path": "/id"
+                },
+                {
+                  "path": "/title"
+                },
+                {
+                  "path": "/description"
+                },
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "keywords"
+                },
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "page"
+                },
+                {
+                  "path": "creators"
+                },
+                {
+                  "path": "purposes"
+                },
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "resources"
+                },
+                {
+                  "path": "parent_datasets"
+                },
+                {
+                  "path": "variables"
+                },
+                {
+                  "path": "regulatory_restrictions.confidentiality_level"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "description": "Checks whether narrative fields (e.g., description, purposes) have meaningful content length.",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (one adequate narrative field, purposes absent)",
+          "evidence": "Release descriptions are [335, 470, 454, 455] characters long, but no release unit has purposes; averaged over the two narrative fields the length falls near the 200-character boundary.",
+          "quality_note": "Descriptions are substantive (modalities, cell lines, treatments); purposes is missing in every unit, so the 5 band is not reached.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "March 2025 description 335 chars; purposes absent.",
+              "cited": [
+                {
+                  "path": "/description"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "purposes"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "June 2025 description 470 chars; purposes absent.",
+              "cited": [
+                {
+                  "path": "/description"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "purposes"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "October 2025 description 454 chars; purposes absent.",
+              "cited": [
+                {
+                  "path": "/description"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "purposes"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "June 2026 description 455 chars; purposes absent.",
+              "cited": [
+                {
+                  "path": "/description"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "purposes"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "description": "Number of distinct keywords describing the dataset. Domain-specific controlled terms or condition lists may supply addit",
+          "score_type": "numeric",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Absent (<3 keywords per release unit)",
+          "evidence": "No release unit carries keywords; the 29 top-level keywords belong to the collection mapping and are not inherited.",
+          "quality_note": "Release-level discoverability terms are missing.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 0,
+              "evidence": "March 2025: no keywords.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "keywords"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/title"
+              ]
+            },
+            {
+              "path": "#/resources/1",
+              "score": 0,
+              "evidence": "June 2025: no keywords.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "keywords"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/title"
+              ]
+            },
+            {
+              "path": "#/resources/2",
+              "score": 0,
+              "evidence": "October 2025: no keywords.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "keywords"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/title"
+              ]
+            },
+            {
+              "path": "#/resources/3",
+              "score": 0,
+              "evidence": "June 2026: no keywords.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "keywords"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/title"
+              ]
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "description": "Number and variety of documented distribution formats and file types. Modalities may occur within one resource or in sep",
+          "score_type": "numeric",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Absent for the October 2025 and June 2026 units (ZIP only)",
+          "evidence": "March 2025: JSON + ZIP (2 types); June 2025: HTML + JSON + ZIP (3 types); October 2025 and June 2026: every listed file is ZIP (1 type). Item score is the minimum across units.",
+          "quality_note": "ZIP is a container; the formats of the images, mass-spec and sequence files inside are not documented for the two latest releases.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "6 files: ro-crate-metadata.json (JSON) x3, IF image ZIPs x3.",
+              "cited": [
+                {
+                  "path": "/file_collections/0/file_count"
+                },
+                {
+                  "path": "/file_collections/0/resources/0/format",
+                  "quote": "JSON"
+                },
+                {
+                  "path": "/file_collections/0/resources/2/format",
+                  "quote": "ZIP"
+                }
+              ],
+              "absent": [],
+              "counts": [
+                {
+                  "path": "/file_collections/0/resources",
+                  "claimed": 6
+                }
+              ],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "10 of 21 files listed: HTML datasheet/provenance graphs, JSON RO-Crate metadata, IF image ZIPs.",
+              "cited": [
+                {
+                  "path": "/file_collections/0/file_count"
+                },
+                {
+                  "path": "/file_collections/0/resources/0/format",
+                  "quote": "HTML"
+                },
+                {
+                  "path": "/file_collections/0/resources/1/format",
+                  "quote": "JSON"
+                },
+                {
+                  "path": "/file_collections/0/resources/2/format",
+                  "quote": "ZIP"
+                },
+                {
+                  "path": "/file_collections/0/description",
+                  "quote": "the captured page shows the first 10"
+                }
+              ],
+              "absent": [],
+              "counts": [
+                {
+                  "path": "/file_collections/0/resources",
+                  "claimed": 10
+                }
+              ],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 0,
+              "evidence": "8 files, all ZIP archives.",
+              "cited": [
+                {
+                  "path": "/file_collections/0/file_count"
+                },
+                {
+                  "path": "/file_collections/0/resources/0/format",
+                  "quote": "ZIP"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "total_file_count"
+                }
+              ],
+              "counts": [
+                {
+                  "path": "/file_collections/0/resources",
+                  "claimed": 8
+                }
+              ],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 0,
+              "evidence": "10 files, all ZIP archives; no descriptions of contents.",
+              "cited": [
+                {
+                  "path": "/file_collections/0/file_count"
+                },
+                {
+                  "path": "/file_collections/0/resources/0/format",
+                  "quote": "ZIP"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "total_file_count"
+                }
+              ],
+              "counts": [
+                {
+                  "path": "/file_collections/0/resources",
+                  "claimed": 10
+                }
+              ],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "description": "Presence of file size or dimensional metadata (bytes, instance counts, data splits).",
+          "score_type": "pass_fail",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail (June 2026 unit has no size or instance metadata)",
+          "evidence": "No unit gives bytes. March/June/October 2025 file descriptions give protein or gene counts (563, 464 proteins; 11,739 genes); the June 2026 unit gives only file_count 10 and no dimensional metadata.",
+          "quality_note": "A file count is not a size or instance count; minimum across units is fail.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 1,
+              "evidence": "File descriptions state 563 proteins of interest per IF archive.",
+              "cited": [
+                {
+                  "path": "/file_collections/0/resources/2/description",
+                  "quote": "563 proteins of interest"
+                }
+              ],
+              "absent": [],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 1,
+              "evidence": "File descriptions state 464 proteins of interest per IF archive.",
+              "cited": [
+                {
+                  "path": "/file_collections/0/resources/2/description",
+                  "quote": "464 proteins of interest"
+                }
+              ],
+              "absent": [],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 1,
+              "evidence": "Perturb-seq atlas file states 11,739 targeted genes.",
+              "cited": [
+                {
+                  "path": "/file_collections/0/resources/2/description",
+                  "quote": "11,739 targeted genes"
+                }
+              ],
+              "absent": [],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 0,
+              "evidence": "Only file_count 10; no bytes, instances, splits or subpopulations.",
+              "cited": [
+                {
+                  "path": "/file_collections/0/file_count"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "total_size_bytes"
+                },
+                {
+                  "path": "file_collections.total_bytes"
+                },
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "splits"
+                },
+                {
+                  "path": "subpopulations"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        }
+      ],
+      "category_score": 3,
+      "category_max": 21
+    },
+    {
+      "name": "Metadata Quality & Content",
+      "questions": [
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "description": "Presence of unique identifiers such as DOI, RRID, or persistent URLs, AND hosting platform identification (publisher or ",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "Each release has a DataCite DOI under prefix 10.18130 (University of Virginia Dataverse). publisher is absent in every unit; the June 2026 citation names the University of Virginia Dataverse.",
+          "quality_note": "Persistent identifiers present; hosting platform only implicit except in the June 2026 citation.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 1,
+              "evidence": "March 2025 DOI 10.18130/V3/B35XWX.",
+              "cited": [
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/id"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "publisher"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 1,
+              "evidence": "June 2025 DOI 10.18130/V3/F3TD5R.",
+              "cited": [
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/id"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "publisher"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 1,
+              "evidence": "October 2025 DOI 10.18130/V3/K7TGEM.",
+              "cited": [
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/id"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "publisher"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 1,
+              "evidence": "DOI 10.18130/V3/HIGT4C; citation names University of Virginia Dataverse.",
+              "cited": [
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/id"
+                },
+                {
+                  "path": "/citation",
+                  "quote": "University of Virginia Dataverse"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "publisher"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ],
+          "no_issue_reason": "Maximum score reached."
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "description": "Checks presence of funding sources, grants, institutional sponsors, and creator affiliations.",
+          "score_type": "numeric",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Absent (no funding data in release units)",
+          "evidence": "No release unit has funders or creators. The June 2026 citation lists author names without affiliations; the NIH award (1OT2OD032742-01) appears only at collection level.",
+          "quality_note": "Collection-level funders/creators are not inherited by the release datasets.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 0,
+              "evidence": "March 2025: no funders or creators.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "funders"
+                },
+                {
+                  "path": "creators"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 0,
+              "evidence": "June 2025: no funders or creators.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "funders"
+                },
+                {
+                  "path": "creators"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 0,
+              "evidence": "October 2025: no funders or creators.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "funders"
+                },
+                {
+                  "path": "creators"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 0,
+              "evidence": "No funders; author names only inside the citation string, no affiliations.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "funders"
+                },
+                {
+                  "path": "creators"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/citation"
+              ]
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "description": "Ethical oversight and privacy safeguards appropriate to the dataset, including consent, deidentification, privacy risks,",
+          "score_type": "numeric",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Absent (no ethics fields in release units)",
+          "evidence": "No release unit populates ethical_reviews, human_subject_research, is_deidentified, informed_consent or data_protection_impacts. The collection-level 'Human Subjects: No' statement is not inherited and is not a caller declaration.",
+          "quality_note": "human_subjects is unknown, so the item stays scored.",
+          "applicable": true,
+          "applicability_status": "unknown",
+          "applicability_evidence": "human_subjects: not declared by the caller (no context supplied); unknown, retained in the denominator",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 0,
+              "evidence": "March 2025: no ethics or privacy fields.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "ethical_reviews"
+                },
+                {
+                  "path": "human_subject_research"
+                },
+                {
+                  "path": "is_deidentified"
+                },
+                {
+                  "path": "participant_privacy"
+                },
+                {
+                  "path": "informed_consent"
+                },
+                {
+                  "path": "data_protection_impacts"
+                },
+                {
+                  "path": "at_risk_populations"
+                },
+                {
+                  "path": "participant_compensation"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 0,
+              "evidence": "June 2025: no ethics or privacy fields.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "ethical_reviews"
+                },
+                {
+                  "path": "human_subject_research"
+                },
+                {
+                  "path": "is_deidentified"
+                },
+                {
+                  "path": "participant_privacy"
+                },
+                {
+                  "path": "informed_consent"
+                },
+                {
+                  "path": "data_protection_impacts"
+                },
+                {
+                  "path": "at_risk_populations"
+                },
+                {
+                  "path": "participant_compensation"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 0,
+              "evidence": "October 2025: no ethics or privacy fields.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "ethical_reviews"
+                },
+                {
+                  "path": "human_subject_research"
+                },
+                {
+                  "path": "is_deidentified"
+                },
+                {
+                  "path": "participant_privacy"
+                },
+                {
+                  "path": "informed_consent"
+                },
+                {
+                  "path": "data_protection_impacts"
+                },
+                {
+                  "path": "at_risk_populations"
+                },
+                {
+                  "path": "participant_compensation"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 0,
+              "evidence": "June 2026: no ethics or privacy fields.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "ethical_reviews"
+                },
+                {
+                  "path": "human_subject_research"
+                },
+                {
+                  "path": "is_deidentified"
+                },
+                {
+                  "path": "participant_privacy"
+                },
+                {
+                  "path": "informed_consent"
+                },
+                {
+                  "path": "data_protection_impacts"
+                },
+                {
+                  "path": "at_risk_populations"
+                },
+                {
+                  "path": "participant_compensation"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements and Governance Documentation",
+          "description": "Documentation of access and license terms, intellectual-property restrictions, applicable regulatory obligations, confid",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (license only)",
+          "evidence": "Every release states license 'CC BY-NC-SA 4.0'; no ip_restrictions, regulatory_restrictions, confidentiality level or governance contact at release level.",
+          "quality_note": "License only matches the 3 band.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "March 2025: license CC BY-NC-SA 4.0 only.",
+              "cited": [
+                {
+                  "path": "/license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "ip_restrictions"
+                },
+                {
+                  "path": "regulatory_restrictions"
+                },
+                {
+                  "path": "data_protection_impacts"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "June 2025: license CC BY-NC-SA 4.0 only.",
+              "cited": [
+                {
+                  "path": "/license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "ip_restrictions"
+                },
+                {
+                  "path": "regulatory_restrictions"
+                },
+                {
+                  "path": "data_protection_impacts"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "October 2025: license CC BY-NC-SA 4.0 only.",
+              "cited": [
+                {
+                  "path": "/license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "ip_restrictions"
+                },
+                {
+                  "path": "regulatory_restrictions"
+                },
+                {
+                  "path": "data_protection_impacts"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "June 2026: license CC BY-NC-SA 4.0 only.",
+              "cited": [
+                {
+                  "path": "/license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "ip_restrictions"
+                },
+                {
+                  "path": "regulatory_restrictions"
+                },
+                {
+                  "path": "data_protection_impacts"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "Interoperability, Standardization, and Cross-Platform Integration",
+          "description": "Documentation of standard formats, schema or ontology conformance, typed dataset relationships and integration procedure",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (standard formats, no schema conformance declared)",
+          "evidence": "Files carry standard formats and IANA media types (JSON, HTML, ZIP with compression zip); March/June 2025 list RO-Crate metadata files, but no unit declares conforms_to or related_datasets.",
+          "quality_note": "RO-Crate conformance is declared only at collection level.",
+          "applicable": true,
+          "applicability_status": "unknown",
+          "applicability_evidence": "shared_dataset: not declared by the caller (no context supplied); unknown, retained in the denominator",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "JSON/ZIP media types; RO-Crate metadata files described.",
+              "cited": [
+                {
+                  "path": "/file_collections/0/resources/0/media_type",
+                  "quote": "application/json"
+                },
+                {
+                  "path": "/file_collections/0/resources/0/description",
+                  "quote": "RO-Crate metadata"
+                },
+                {
+                  "path": "/file_collections/0/resources/2/compression",
+                  "quote": "zip"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "conforms_to"
+                },
+                {
+                  "path": "conforms_to_schema"
+                },
+                {
+                  "path": "related_datasets"
+                },
+                {
+                  "path": "external_resources"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "Release RO-Crate with pointers to sub-RO-Crates; HTML/JSON/ZIP media types.",
+              "cited": [
+                {
+                  "path": "/file_collections/0/resources/1/description",
+                  "quote": "Release RO-Crate with pointers to sub-RO-Crates"
+                },
+                {
+                  "path": "/file_collections/0/resources/2/compression",
+                  "quote": "zip"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "conforms_to"
+                },
+                {
+                  "path": "conforms_to_schema"
+                },
+                {
+                  "path": "related_datasets"
+                },
+                {
+                  "path": "external_resources"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "ZIP archives (application/zip, compression zip) only.",
+              "cited": [
+                {
+                  "path": "/file_collections/0/resources/0/media_type",
+                  "quote": "application/zip"
+                },
+                {
+                  "path": "/file_collections/0/resources/0/compression",
+                  "quote": "zip"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "conforms_to"
+                },
+                {
+                  "path": "conforms_to_schema"
+                },
+                {
+                  "path": "related_datasets"
+                },
+                {
+                  "path": "external_resources"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "ZIP archives (application/zip, compression zip) only.",
+              "cited": [
+                {
+                  "path": "/file_collections/0/resources/0/media_type",
+                  "quote": "application/zip"
+                },
+                {
+                  "path": "/file_collections/0/resources/0/compression",
+                  "quote": "zip"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "conforms_to"
+                },
+                {
+                  "path": "conforms_to_schema"
+                },
+                {
+                  "path": "related_datasets"
+                },
+                {
+                  "path": "external_resources"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        }
+      ],
+      "category_score": 7,
+      "category_max": 21
+    },
+    {
+      "name": "Technical Documentation",
+      "questions": [
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "description": "Documentation of preprocessing, cleaning, labeling, annotation and imputation, including relevant software names, versio",
+          "score_type": "numeric",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Absent (no processing strategy or tool in release units)",
+          "evidence": "No release unit documents preprocessing, cleaning, labeling or annotation; the MuSIC pipeline appears only at collection level and is stated not to apply to the released files. June 2025 lists provenance-graph HTML files without describing their content.",
+          "quality_note": "data_processing is unknown, so the item stays scored.",
+          "applicable": true,
+          "applicability_status": "unknown",
+          "applicability_evidence": "data_processing: not declared by the caller (no context supplied); unknown, retained in the denominator",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 0,
+              "evidence": "March 2025: no processing documentation.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "preprocessing_strategies"
+                },
+                {
+                  "path": "cleaning_strategies"
+                },
+                {
+                  "path": "labeling_strategies"
+                },
+                {
+                  "path": "machine_annotation_tools"
+                },
+                {
+                  "path": "imputation_protocols"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/description"
+              ]
+            },
+            {
+              "path": "#/resources/1",
+              "score": 0,
+              "evidence": "June 2025: no processing documentation.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "preprocessing_strategies"
+                },
+                {
+                  "path": "cleaning_strategies"
+                },
+                {
+                  "path": "labeling_strategies"
+                },
+                {
+                  "path": "machine_annotation_tools"
+                },
+                {
+                  "path": "imputation_protocols"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/description"
+              ]
+            },
+            {
+              "path": "#/resources/2",
+              "score": 0,
+              "evidence": "October 2025: no processing documentation.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "preprocessing_strategies"
+                },
+                {
+                  "path": "cleaning_strategies"
+                },
+                {
+                  "path": "labeling_strategies"
+                },
+                {
+                  "path": "machine_annotation_tools"
+                },
+                {
+                  "path": "imputation_protocols"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/description"
+              ]
+            },
+            {
+              "path": "#/resources/3",
+              "score": 0,
+              "evidence": "June 2026: no processing documentation.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "preprocessing_strategies"
+                },
+                {
+                  "path": "cleaning_strategies"
+                },
+                {
+                  "path": "labeling_strategies"
+                },
+                {
+                  "path": "machine_annotation_tools"
+                },
+                {
+                  "path": "imputation_protocols"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/description"
+              ]
+            }
+          ]
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "description": "Evaluates description completeness of data collection mechanisms, acquisition methods, data collectors, collection timef",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (partial: assay/mechanism named in descriptions)",
+          "evidence": "Release descriptions and file descriptions name assays (ICC-IF confocal microscopy, SEC-MS, Perturb-seq, AP-MS) and, for 2025 releases, the producing labs; no collection fields, timeframes or raw sources at release level. created_on 2025-02-27 is the only date.",
+          "quality_note": "Mechanism-only description matches the 3 band.",
+          "applicable": true,
+          "applicability_status": "unknown",
+          "applicability_evidence": "data_collection: not declared by the caller (no context supplied); unknown, retained in the denominator",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "ICC-IF confocal microscopy in the Lundberg Lab; SEC-MS in the Krogan lab.",
+              "cited": [
+                {
+                  "path": "/file_collections/0/resources/4/description",
+                  "quote": "Lundberg Lab at Stanford University"
+                },
+                {
+                  "path": "/file_collections/0/resources/5/description",
+                  "quote": "Nevan Krogan laboratory"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "collection_mechanisms"
+                },
+                {
+                  "path": "data_collectors"
+                },
+                {
+                  "path": "collection_timeframes"
+                },
+                {
+                  "path": "raw_data_sources"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/description",
+                "/created_on"
+              ]
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "IF images by ICC-IF and confocal microscopy.",
+              "cited": [
+                {
+                  "path": "/file_collections/0/resources/2/description",
+                  "quote": "imaged by ICC-IF and confocal microscopy"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "collection_mechanisms"
+                },
+                {
+                  "path": "data_collectors"
+                },
+                {
+                  "path": "collection_timeframes"
+                },
+                {
+                  "path": "raw_data_sources"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/description",
+                "/created_on"
+              ]
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "SEC-MS generated in the Nevan Krogan laboratory.",
+              "cited": [
+                {
+                  "path": "/file_collections/0/resources/0/description",
+                  "quote": "generated in the Nevan Krogan laboratory"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "collection_mechanisms"
+                },
+                {
+                  "path": "data_collectors"
+                },
+                {
+                  "path": "collection_timeframes"
+                },
+                {
+                  "path": "raw_data_sources"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/description",
+                "/created_on"
+              ]
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "Description names Perturb-seq, SEC-MS, AP-MS and IF image modalities only.",
+              "cited": [
+                {
+                  "path": "/description",
+                  "quote": "AP-MS data for treated MDA-MB-468 cells"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "collection_mechanisms"
+                },
+                {
+                  "path": "data_collectors"
+                },
+                {
+                  "path": "collection_timeframes"
+                },
+                {
+                  "path": "raw_data_sources"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/created_on"
+              ]
+            }
+          ]
+        },
+        {
+          "id": 13,
+          "name": "Version History, Maintenance, and Sustainability",
+          "description": "Documentation of version identifiers, change history, maintenance and preservation plans, responsible contacts and durab",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (version + DOI, no sustainability plan)",
+          "evidence": "Each release has a version string and DOI; June 2025 describes its revision changes; no maintainers, update plan or preservation commitment at release level (the quarterly plan and Dataverse preservation are collection-level only).",
+          "quality_note": "Version labels conflict with citation version numbers (e.g. 1.4 vs V1), as the record itself notes.",
+          "applicable": true,
+          "applicability_status": "unknown",
+          "applicability_evidence": "shared_dataset: not declared by the caller (no context supplied); unknown, retained in the denominator",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "March 2025: version 1.4, DOI 10.18130/V3/B35XWX.",
+              "cited": [
+                {
+                  "path": "/version"
+                },
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/issued"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "maintainers"
+                },
+                {
+                  "path": "updates"
+                },
+                {
+                  "path": "errata"
+                },
+                {
+                  "path": "version_access"
+                },
+                {
+                  "path": "publisher"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/source_caveats",
+                "/description"
+              ]
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "June 2025: version 2.1, DOI 10.18130/V3/F3TD5R.",
+              "cited": [
+                {
+                  "path": "/version"
+                },
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/issued"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "maintainers"
+                },
+                {
+                  "path": "updates"
+                },
+                {
+                  "path": "errata"
+                },
+                {
+                  "path": "version_access"
+                },
+                {
+                  "path": "publisher"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/source_caveats",
+                "/description"
+              ]
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "October 2025: version 2.1, DOI 10.18130/V3/K7TGEM.",
+              "cited": [
+                {
+                  "path": "/version"
+                },
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/issued"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "maintainers"
+                },
+                {
+                  "path": "updates"
+                },
+                {
+                  "path": "errata"
+                },
+                {
+                  "path": "version_access"
+                },
+                {
+                  "path": "publisher"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/source_caveats",
+                "/description"
+              ]
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "June 2026: version 2.0, DOI 10.18130/V3/HIGT4C.",
+              "cited": [
+                {
+                  "path": "/version"
+                },
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/issued"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "maintainers"
+                },
+                {
+                  "path": "updates"
+                },
+                {
+                  "path": "errata"
+                },
+                {
+                  "path": "version_access"
+                },
+                {
+                  "path": "publisher"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/source_caveats",
+                "/description"
+              ]
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "description": "Citation, identifiers and documentation links that let a reader identify the dataset and related publications or resourc",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (one distinct reference)",
+          "evidence": "March/June/October 2025 units give only their DOI (one reference). The June 2026 unit adds a formal citation, but it identifies the same DOI, so it is still one distinct reference; no external_resources at release level.",
+          "quality_note": "Two distinct references plus a formal citation are needed for 5.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "March 2025: bare DOI only.",
+              "cited": [
+                {
+                  "path": "/doi"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "citation"
+                },
+                {
+                  "path": "external_resources"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "June 2025: bare DOI only.",
+              "cited": [
+                {
+                  "path": "/doi"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "citation"
+                },
+                {
+                  "path": "external_resources"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "October 2025: bare DOI only.",
+              "cited": [
+                {
+                  "path": "/doi"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "citation"
+                },
+                {
+                  "path": "external_resources"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "Formal citation with authors, title, DOI and Dataverse; same resource as the DOI.",
+              "cited": [
+                {
+                  "path": "/citation",
+                  "quote": "https://doi.org/10.18130/V3/HIGT4C"
+                },
+                {
+                  "path": "/doi"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "external_resources"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "description": "Documentation of human participant or population representation, recruitment, sampling and relevant subgroups.",
+          "score_type": "numeric",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Absent (no human population information in release units)",
+          "evidence": "Release units name cell lines (MDA-MB-468, KOLF2.1J iPSCs) and treatment conditions but give no donor/population representation, instances or subpopulations; the donor descriptions exist only at collection level.",
+          "quality_note": "human_subjects is unknown, so the item stays scored.",
+          "applicable": true,
+          "applicability_status": "unknown",
+          "applicability_evidence": "human_subjects: not declared by the caller (no context supplied); unknown, retained in the denominator",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 0,
+              "evidence": "March 2025: cell-line names only; no population fields.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "subpopulations"
+                },
+                {
+                  "path": "at_risk_populations"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/description"
+              ]
+            },
+            {
+              "path": "#/resources/1",
+              "score": 0,
+              "evidence": "June 2025: cell-line names only; no population fields.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "subpopulations"
+                },
+                {
+                  "path": "at_risk_populations"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/description"
+              ]
+            },
+            {
+              "path": "#/resources/2",
+              "score": 0,
+              "evidence": "October 2025: cell-line names only; no population fields.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "subpopulations"
+                },
+                {
+                  "path": "at_risk_populations"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/description"
+              ]
+            },
+            {
+              "path": "#/resources/3",
+              "score": 0,
+              "evidence": "June 2026: cell-line names only; no population fields.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "subpopulations"
+                },
+                {
+                  "path": "at_risk_populations"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "/description"
+              ]
+            }
+          ]
+        }
+      ],
+      "category_score": 9,
+      "category_max": 25
+    },
+    {
+      "name": "FAIRness & Accessibility",
+      "questions": [
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "description": "Dataset includes persistent URLs, DOI, and identifier for access and documentation.",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "Each release has a resolvable DOI (10.18130/...); the June 2026 citation includes https://doi.org/10.18130/V3/HIGT4C. Unit ids for the doi-prefixed releases are CURIEs; file ids are synthetic cm4ai.org fragment URIs.",
+          "quality_note": "No page or download_url at release level, but DOIs provide persistent links.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 1,
+              "evidence": "March 2025 DOI 10.18130/V3/B35XWX.",
+              "cited": [
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/id"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "page"
+                },
+                {
+                  "path": "download_url"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 1,
+              "evidence": "June 2025 DOI 10.18130/V3/F3TD5R.",
+              "cited": [
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/id"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "page"
+                },
+                {
+                  "path": "download_url"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 1,
+              "evidence": "October 2025 DOI 10.18130/V3/K7TGEM.",
+              "cited": [
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/id"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "page"
+                },
+                {
+                  "path": "download_url"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 1,
+              "evidence": "June 2026 DOI 10.18130/V3/HIGT4C.",
+              "cited": [
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/id"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "page"
+                },
+                {
+                  "path": "download_url"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ],
+          "no_issue_reason": "Maximum score reached."
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "description": "Describes how users can obtain the dataset (download URL, distribution formats, access policy).",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (partially described)",
+          "evidence": "DOI-resolved Dataverse records, licensed CC BY-NC-SA 4.0, with file formats and MD5 checksums; no download_url, access tier (open download vs registration) or embargo handling at release level.",
+          "quality_note": "Partially described access path.",
+          "applicable": true,
+          "applicability_status": "unknown",
+          "applicability_evidence": "shared_dataset: not declared by the caller (no context supplied); unknown, retained in the denominator",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "March 2025: DOI + license + per-file format/md5.",
+              "cited": [
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/license",
+                  "quote": "CC BY-NC-SA 4.0"
+                },
+                {
+                  "path": "/file_collections/0/resources/0/md5"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "download_url"
+                },
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "distribution_formats"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "June 2025: DOI + license + per-file format/md5.",
+              "cited": [
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/license",
+                  "quote": "CC BY-NC-SA 4.0"
+                },
+                {
+                  "path": "/file_collections/0/resources/0/md5"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "download_url"
+                },
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "distribution_formats"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "October 2025: DOI + license + per-file format/md5.",
+              "cited": [
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/license",
+                  "quote": "CC BY-NC-SA 4.0"
+                },
+                {
+                  "path": "/file_collections/0/resources/0/md5"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "download_url"
+                },
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "distribution_formats"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "June 2026: DOI + license + per-file format/md5.",
+              "cited": [
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/license",
+                  "quote": "CC BY-NC-SA 4.0"
+                },
+                {
+                  "path": "/file_collections/0/resources/0/md5"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "download_url"
+                },
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "distribution_formats"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 18,
+          "name": "Reusability, Use Guidance, and Social Impact",
+          "description": "License is clearly defined with explicit use guidance including intended uses, prohibited uses, discouraged uses, AND co",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (license conveys basic non-commercial/share-alike terms)",
+          "evidence": "Each release names CC BY-NC-SA 4.0, whose identifier conveys basic non-commercial and share-alike terms; no intended, prohibited or discouraged uses or future-use impacts at release level.",
+          "quality_note": "Borderline between 0 and 3: a license is present, so the 0 anchor (no license) does not fit; no explicit use guidance.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "March 2025: license only.",
+              "cited": [
+                {
+                  "path": "/license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "intended_uses"
+                },
+                {
+                  "path": "prohibited_uses"
+                },
+                {
+                  "path": "discouraged_uses"
+                },
+                {
+                  "path": "future_use_impacts"
+                },
+                {
+                  "path": "license_and_use_terms"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "June 2025: license only.",
+              "cited": [
+                {
+                  "path": "/license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "intended_uses"
+                },
+                {
+                  "path": "prohibited_uses"
+                },
+                {
+                  "path": "discouraged_uses"
+                },
+                {
+                  "path": "future_use_impacts"
+                },
+                {
+                  "path": "license_and_use_terms"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "October 2025: license only.",
+              "cited": [
+                {
+                  "path": "/license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "intended_uses"
+                },
+                {
+                  "path": "prohibited_uses"
+                },
+                {
+                  "path": "discouraged_uses"
+                },
+                {
+                  "path": "future_use_impacts"
+                },
+                {
+                  "path": "license_and_use_terms"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "June 2026: license only.",
+              "cited": [
+                {
+                  "path": "/license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "intended_uses"
+                },
+                {
+                  "path": "prohibited_uses"
+                },
+                {
+                  "path": "discouraged_uses"
+                },
+                {
+                  "path": "future_use_impacts"
+                },
+                {
+                  "path": "license_and_use_terms"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity, Provenance Graph, and Quality",
+          "description": "Presence of version access, errata, update plans, source derivation, parent dataset linkages, missing data documentation",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (version history only)",
+          "evidence": "Release units carry version numbers, issue dates and supersession notes (June 2025 describes its revision: RGB images added, RO-Crate metadata corrected). June 2025 lists provenance-graph HTML files, but no lineage (was_derived_from, parent_datasets, raw_data_sources) is represented in the record.",
+          "quality_note": "Version history without a represented provenance graph matches the 3 band.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "March 2025: version 1.4; issued 2025-03-03.",
+              "cited": [
+                {
+                  "path": "/version"
+                },
+                {
+                  "path": "/issued"
+                },
+                {
+                  "path": "/source_caveats"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "version_access"
+                },
+                {
+                  "path": "errata"
+                },
+                {
+                  "path": "updates"
+                },
+                {
+                  "path": "was_derived_from"
+                },
+                {
+                  "path": "parent_datasets"
+                },
+                {
+                  "path": "raw_data_sources"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "June 2025: version 2.1; issued 2025-07-01.",
+              "cited": [
+                {
+                  "path": "/version"
+                },
+                {
+                  "path": "/issued"
+                },
+                {
+                  "path": "/source_caveats"
+                },
+                {
+                  "path": "/file_collections/0/resources/5/name",
+                  "quote": "Images-paclitaxel-provenance-graph.html"
+                },
+                {
+                  "path": "/description",
+                  "quote": "correcting RO-Crate metadata"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "version_access"
+                },
+                {
+                  "path": "errata"
+                },
+                {
+                  "path": "updates"
+                },
+                {
+                  "path": "was_derived_from"
+                },
+                {
+                  "path": "parent_datasets"
+                },
+                {
+                  "path": "raw_data_sources"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "October 2025: version 2.1; issued 2025-10-31.",
+              "cited": [
+                {
+                  "path": "/version"
+                },
+                {
+                  "path": "/issued"
+                },
+                {
+                  "path": "/source_caveats"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "version_access"
+                },
+                {
+                  "path": "errata"
+                },
+                {
+                  "path": "updates"
+                },
+                {
+                  "path": "was_derived_from"
+                },
+                {
+                  "path": "parent_datasets"
+                },
+                {
+                  "path": "raw_data_sources"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "June 2026: version 2.0; issued 2026-06-17.",
+              "cited": [
+                {
+                  "path": "/version"
+                },
+                {
+                  "path": "/issued"
+                },
+                {
+                  "path": "/source_caveats"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "version_access"
+                },
+                {
+                  "path": "errata"
+                },
+                {
+                  "path": "updates"
+                },
+                {
+                  "path": "was_derived_from"
+                },
+                {
+                  "path": "parent_datasets"
+                },
+                {
+                  "path": "raw_data_sources"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 20,
+          "name": "Bias Documentation and Responsible AI Alignment",
+          "description": "Documentation of known biases, limitations and potential effects on intended or foreseeable uses.",
+          "score_type": "numeric",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Absent (no bias documentation in release units)",
+          "evidence": "No release unit populates known_biases or future_use_impacts; the collection-level biases are not inherited.",
+          "quality_note": "No release-level bias documentation.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 0,
+              "evidence": "March 2025: no bias fields.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "known_biases"
+                },
+                {
+                  "path": "future_use_impacts"
+                },
+                {
+                  "path": "known_limitations"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 0,
+              "evidence": "June 2025: no bias fields.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "known_biases"
+                },
+                {
+                  "path": "future_use_impacts"
+                },
+                {
+                  "path": "known_limitations"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 0,
+              "evidence": "October 2025: no bias fields.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "known_biases"
+                },
+                {
+                  "path": "future_use_impacts"
+                },
+                {
+                  "path": "known_limitations"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 0,
+              "evidence": "June 2026: no bias fields.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "known_biases"
+                },
+                {
+                  "path": "future_use_impacts"
+                },
+                {
+                  "path": "known_limitations"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        }
+      ],
+      "category_score": 10,
+      "category_max": 21
+    }
+  ],
+  "semantic_analysis": {
+    "issues_detected": [
+      {
+        "id": "I1",
+        "type": "completeness",
+        "category": "variables_metadata",
+        "score_effect": "lowered",
+        "item_ids": [
+          "Q1",
+          "Q2",
+          "Q3"
+        ],
+        "description": "Release datasets lack keywords, purposes, creators, page and composition fields; descriptive metadata lives only on the undeclared top-level mapping, which is not inherited under the collection interpretation.",
+        "severity": "high",
+        "fields_involved": [
+          "keywords",
+          "purposes",
+          "creators",
+          "page",
+          "resources"
+        ],
+        "recommendation": "Declare the top-level record as a Dataset (conforms_to_class) or repeat keywords, purposes and creators on each release."
+      },
+      {
+        "id": "I2",
+        "type": "completeness",
+        "category": "format_access",
+        "score_effect": "lowered",
+        "item_ids": [
+          "Q4",
+          "Q5",
+          "Q17"
+        ],
+        "description": "October 2025 and June 2026 releases list only ZIP archives with no inner formats, byte sizes or download URLs; June 2026 files carry no descriptions or dimensional metadata.",
+        "severity": "medium",
+        "fields_involved": [
+          "file_collections",
+          "total_size_bytes",
+          "download_url"
+        ],
+        "recommendation": "List inner file formats, byte sizes and download URLs for each release archive."
+      },
+      {
+        "id": "I3",
+        "type": "completeness",
+        "category": "attribution",
+        "score_effect": "lowered",
+        "item_ids": [
+          "Q7",
+          "Q14"
+        ],
+        "description": "No release records funders or creators with affiliations; the June 2026 citation and DOI identify the same resource, so no release documents a second distinct reference.",
+        "severity": "high",
+        "fields_involved": [
+          "funders",
+          "creators",
+          "citation",
+          "external_resources"
+        ],
+        "recommendation": "Record funders/creators with affiliations and the related preprints on each release."
+      },
+      {
+        "id": "I4",
+        "type": "completeness",
+        "category": "consent_ethics",
+        "score_effect": "lowered",
+        "item_ids": [
+          "Q8",
+          "Q15"
+        ],
+        "description": "No release records ethics review, human-subject status, deidentification or cell-line donor/population information.",
+        "severity": "high",
+        "fields_involved": [
+          "ethical_reviews",
+          "human_subject_research",
+          "is_deidentified",
+          "subpopulations"
+        ],
+        "recommendation": "Carry the ethics, deidentification and cell-line donor statements onto each release."
+      },
+      {
+        "id": "I5",
+        "type": "completeness",
+        "category": "license_use_terms",
+        "score_effect": "lowered",
+        "item_ids": [
+          "Q9",
+          "Q18"
+        ],
+        "description": "Releases give only a bare license string; no IP restrictions, confidentiality classification, governance contact or intended/prohibited uses at release level.",
+        "severity": "medium",
+        "fields_involved": [
+          "license",
+          "license_and_use_terms",
+          "ip_restrictions",
+          "intended_uses",
+          "prohibited_uses"
+        ],
+        "recommendation": "Use license_and_use_terms with full terms, IP holders and use guidance per release."
+      },
+      {
+        "id": "I6",
+        "type": "completeness",
+        "category": "processing_provenance",
+        "score_effect": "lowered",
+        "item_ids": [
+          "Q10",
+          "Q11",
+          "Q12",
+          "Q19"
+        ],
+        "description": "Releases declare no schema conformance, processing tools, collection fields, timeframes or lineage; provenance-graph files in June 2025 are listed but not represented.",
+        "severity": "medium",
+        "fields_involved": [
+          "conforms_to",
+          "preprocessing_strategies",
+          "collection_mechanisms",
+          "was_derived_from"
+        ],
+        "recommendation": "Declare RO-Crate conformance and collection/processing lineage on each release."
+      },
+      {
+        "id": "I7",
+        "type": "completeness",
+        "category": "temporal_version",
+        "score_effect": "lowered",
+        "item_ids": [
+          "Q13"
+        ],
+        "description": "Release units have version and DOI but no maintainers, update plan or preservation commitment.",
+        "severity": "medium",
+        "fields_involved": [
+          "maintainers",
+          "updates",
+          "version_access"
+        ],
+        "recommendation": "Add maintainers and the maintenance/preservation plan to each release."
+      },
+      {
+        "id": "I8",
+        "type": "completeness",
+        "category": "bias_quality",
+        "score_effect": "lowered",
+        "item_ids": [
+          "Q20"
+        ],
+        "description": "No release-level known_biases or future_use_impacts.",
+        "severity": "medium",
+        "fields_involved": [
+          "known_biases",
+          "future_use_impacts"
+        ],
+        "recommendation": "Record release-specific biases and limitations."
+      },
+      {
+        "id": "I9",
+        "type": "consistency",
+        "category": "temporal_version",
+        "score_effect": "noted_only",
+        "item_ids": [],
+        "description": "Version strings disagree with citation versions (1.4 vs V1; 2.1 vs V2 in two releases); all four releases share created_on 2025-02-27; the data-releases page and Dataverse disagree on the June 2026 release year (record documents and resolves it).",
+        "severity": "low",
+        "fields_involved": [
+          "version",
+          "created_on",
+          "issued"
+        ],
+        "recommendation": "Use the Dataverse citation version consistently and give release-specific creation dates."
+      },
+      {
+        "id": "I10",
+        "type": "consistency",
+        "category": "count_size",
+        "score_effect": "noted_only",
+        "item_ids": [],
+        "description": "IF protein counts differ across releases and summaries (563, 464, 523); the June 2025 file_count 21 exceeds the 10 files listed. Both are acknowledged in source_caveats.",
+        "severity": "low",
+        "fields_involved": [
+          "file_collections",
+          "file_count"
+        ],
+        "recommendation": "List all files or state the unlisted ones explicitly."
+      },
+      {
+        "id": "I11",
+        "type": "correctness",
+        "category": "persistent_identifier",
+        "score_effect": "noted_only",
+        "item_ids": [],
+        "description": "File ids are minted cm4ai.org fragment URIs (e.g. https://cm4ai.org/#release-2026-06-files) that are not resolvable identifiers; release DOIs (10.18130, UVA Dataverse) are well formed.",
+        "severity": "low",
+        "fields_involved": [
+          "id"
+        ],
+        "recommendation": "Use resolvable Dataverse file identifiers where available."
+      },
+      {
+        "id": "I12",
+        "type": "semantic_understanding",
+        "category": "privacy_regulatory",
+        "score_effect": "noted_only",
+        "item_ids": [],
+        "description": "At collection level, 'derived from commercially available de-identified human cell lines' is recorded as a known bias although it is a provenance statement; deidentification is asserted while human-subject involvement is false. Neither affects release-unit scores.",
+        "severity": "low",
+        "fields_involved": [
+          "known_biases",
+          "is_deidentified",
+          "human_subject_research"
+        ],
+        "recommendation": "Move provenance statements out of known_biases."
+      },
+      {
+        "id": "I13",
+        "type": "content_accuracy",
+        "category": "attribution",
+        "score_effect": "noted_only",
+        "item_ids": [],
+        "description": "Creator name 'Ballllosero Navarro F' (also in the June 2026 citation) appears to contain a transcription error; not verifiable from the record.",
+        "severity": "low",
+        "fields_involved": [
+          "creators",
+          "citation"
+        ],
+        "recommendation": "Check the creator name against the Dataverse author list."
+      }
+    ],
+    "semantic_insights": [
+      "The record has no conforms_to_class and four nonempty resources, so it is scored as a collection of four release datasets; the rich top-level metadata (creators, funders, ethics, uses, biases, collection protocol) is not inherited, which drives most low scores.",
+      "Each item score is the minimum across the four releases; the October 2025 and June 2026 releases are the weakest units (ZIP-only file lists, June 2026 without file descriptions).",
+      "Top-level content (not scored here) is detailed and well caveated: NIH award 1OT2OD032742-01 matches the NIH OT2 pattern, ORCIDs are well formed, and release DOIs share the 10.18130 Dataverse prefix.",
+      "Declaring the top level as a Dataset (conforms_to_class) or repeating key metadata on each release would let the documentation be credited under this instrument."
+    ],
+    "consistency_checks": {
+      "passed": 3,
+      "failed": 0,
+      "warnings": 4
+    },
+    "correctness_validations": {
+      "doi_format": "valid (10.18130/V3/... for all four releases)",
+      "grant_number_format": "not present in release units; top-level 1OT2OD032742-01 matches NIH OT2 pattern",
+      "rrid_format": "not present in release units",
+      "url_validity": "DOI URL in June 2026 citation well formed; file ids are non-resolvable fragment URIs"
+    }
+  },
+  "applicability_context": {},
+  "evaluation_scope": {
+    "policy": "minimum_per_item_across_all_resource_datasets_v1",
+    "units": [
+      {
+        "path": "#/resources/0",
+        "id": "doi:10.18130/V3/B35XWX"
+      },
+      {
+        "path": "#/resources/1",
+        "id": "doi:10.18130/V3/F3TD5R"
+      },
+      {
+        "path": "#/resources/2",
+        "id": "doi:10.18130/V3/K7TGEM"
+      },
+      {
+        "path": "#/resources/3",
+        "id": "doi:10.18130/V3/HIGT4C"
+      }
+    ],
+    "collection_metadata_inherited": false
+  },
+  "metadata": {
+    "instrument_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+    "evidence_authority_sha256": "0605c742c61f2cc4e13de907f8e09752bde5ebd08d173b31d837c273a4bf3872",
+    "rubric_sha256": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
+    "input_sha256": "34a3b3c9cefda00c57b9bda9358b6ee8c109f469f754cd4c334317cdda28eec4",
+    "context_sha256": "fca403729b83dda36a67c4b749455b0fd864ba992e0e40b9a0f5c65bc039bfad",
+    "evaluator_model": "claude-opus-5-5",
+    "builder_script": "scripts/adhoc/build_rubric20_semantic_v3_cm4ai_2026_11_22b_rep2.py"
+  }
+}

@@ -1,0 +1,2838 @@
+{
+  "rubric": "rubric20-semantic",
+  "version": "3.0",
+  "d4d_file": "data/d4d_concatenated/claudecode_agent/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3/CM4AI_d4d.yaml",
+  "project": "CM4AI",
+  "method": "claudecode_agent",
+  "label": "2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3",
+  "evaluation_timestamp": "2026-11-22T08:53:44Z",
+  "model": {
+    "name": "claude-opus-5-5",
+    "evaluator_model": "claude-opus-5-5",
+    "temperature": null,
+    "temperature_note": "Not exposed by this runtime; no deterministic-score guarantee",
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "overall_score": {
+    "total_points": 35,
+    "max_points": 88,
+    "excluded_max_points": 0,
+    "adjusted_max_points": 88,
+    "normalized_percentage": 39.77,
+    "fixed_percentage": 39.77,
+    "questions_not_applicable": 0,
+    "excluded_item_ids": []
+  },
+  "categories": [
+    {
+      "name": "Structural Completeness",
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "description": "Proportion of mandatory schema fields populated including core identification, hierarchical structure, governance, and c",
+          "score_type": "numeric",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Absent (<=40% of declared fields)",
+          "evidence": "Each resource populates id, title, description and doi (4 of 14 declared fields, 29%); keywords, license_and_use_terms, page, creators, purposes, instances, resources, parent_datasets, variables and confidentiality_level are absent at every resource.",
+          "quality_note": "The parent mapping is rich, but under the collection policy each Dataverse release is a scored unit and none carries the core descriptive fields itself.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). Populated: id, title, description, doi (4/14).",
+              "cited": [
+                {
+                  "path": "id"
+                },
+                {
+                  "path": "title"
+                },
+                {
+                  "path": "description"
+                },
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/B35XWX"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "keywords"
+                },
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "page"
+                },
+                {
+                  "path": "creators"
+                },
+                {
+                  "path": "purposes"
+                },
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "resources"
+                },
+                {
+                  "path": "parent_datasets"
+                },
+                {
+                  "path": "variables"
+                },
+                {
+                  "path": "regulatory_restrictions"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). Populated: id, title, description, doi (4/14).",
+              "cited": [
+                {
+                  "path": "id"
+                },
+                {
+                  "path": "title"
+                },
+                {
+                  "path": "description"
+                },
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/F3TD5R"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "keywords"
+                },
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "page"
+                },
+                {
+                  "path": "creators"
+                },
+                {
+                  "path": "purposes"
+                },
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "resources"
+                },
+                {
+                  "path": "parent_datasets"
+                },
+                {
+                  "path": "variables"
+                },
+                {
+                  "path": "regulatory_restrictions"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). Populated: id, title, description, doi (4/14).",
+              "cited": [
+                {
+                  "path": "id"
+                },
+                {
+                  "path": "title"
+                },
+                {
+                  "path": "description"
+                },
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/K7TGEM"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "keywords"
+                },
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "page"
+                },
+                {
+                  "path": "creators"
+                },
+                {
+                  "path": "purposes"
+                },
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "resources"
+                },
+                {
+                  "path": "parent_datasets"
+                },
+                {
+                  "path": "variables"
+                },
+                {
+                  "path": "regulatory_restrictions"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). Populated: id, title, description, doi (4/14).",
+              "cited": [
+                {
+                  "path": "id"
+                },
+                {
+                  "path": "title"
+                },
+                {
+                  "path": "description"
+                },
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/HIGT4C"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "keywords"
+                },
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "page"
+                },
+                {
+                  "path": "creators"
+                },
+                {
+                  "path": "purposes"
+                },
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "resources"
+                },
+                {
+                  "path": "parent_datasets"
+                },
+                {
+                  "path": "variables"
+                },
+                {
+                  "path": "regulatory_restrictions"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "description": "Checks whether narrative fields (e.g., description, purposes) have meaningful content length.",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (50-200 average)",
+          "evidence": "Each resource description exceeds 200 characters (release content summary), but purposes is absent at every resource, so the narrative-field average falls in the middle band.",
+          "quality_note": "Descriptions are specific (assays, cell lines, conditions) but no resource states a purpose.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "description has 319 characters; purposes absent.",
+              "cited": [
+                {
+                  "path": "description",
+                  "quote": "Historical release. This Beta release includes perturb-seq data"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "purposes"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "description has 511 characters; purposes absent.",
+              "cited": [
+                {
+                  "path": "description",
+                  "quote": "A revision of the June 2025 Data Release"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "purposes"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "description has 396 characters; purposes absent.",
+              "cited": [
+                {
+                  "path": "description",
+                  "quote": "Superseded release."
+                }
+              ],
+              "absent": [
+                {
+                  "path": "purposes"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "description has 452 characters; purposes absent.",
+              "cited": [
+                {
+                  "path": "description",
+                  "quote": "Current release."
+                }
+              ],
+              "absent": [
+                {
+                  "path": "purposes"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "description": "Number of distinct keywords describing the dataset. Domain-specific controlled terms or condition lists may supply addit",
+          "score_type": "numeric",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Absent (<3 keywords)",
+          "evidence": "No resource has keywords.",
+          "quality_note": "Keywords exist only on the parent mapping, which is not inherited.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). keywords absent.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "keywords"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "title"
+              ]
+            },
+            {
+              "path": "#/resources/1",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). keywords absent.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "keywords"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "title"
+              ]
+            },
+            {
+              "path": "#/resources/2",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). keywords absent.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "keywords"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "title"
+              ]
+            },
+            {
+              "path": "#/resources/3",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). keywords absent.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "keywords"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "title"
+              ]
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "description": "Number and variety of documented distribution formats and file types. Modalities may occur within one resource or in sep",
+          "score_type": "numeric",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Absent (1 file type at worst resource)",
+          "evidence": "March 2025: JSON + ZIP (2 types); June 2025: JSON + HTML + ZIP (3); October 2025 and June 2026: ZIP only (1 type). Minimum across resources is the single-type band.",
+          "quality_note": "The current release enumerates ten ZIP archives with md5 checksums, but only one container type is documented; inner file types of the archives are not described.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "Four file collections listing ro-crate-metadata.json (JSON) and three IF image ZIPs; total_file_count 6.",
+              "cited": [
+                {
+                  "path": "file_collections.resources.format",
+                  "quote": "JSON"
+                },
+                {
+                  "path": "file_collections.resources.format",
+                  "quote": "ZIP"
+                },
+                {
+                  "path": "total_file_count",
+                  "quote": "6"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "distribution_formats"
+                }
+              ],
+              "counts": [
+                {
+                  "path": "file_collections",
+                  "claimed": 4
+                }
+              ],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "Three collections: HTML datasheet/provenance graphs, JSON RO-Crate metadata, ZIP image archives; total_file_count 21 but only 10 described.",
+              "cited": [
+                {
+                  "path": "file_collections.resources.format",
+                  "quote": "HTML"
+                },
+                {
+                  "path": "file_collections.resources.format",
+                  "quote": "JSON"
+                },
+                {
+                  "path": "file_collections.resources.format",
+                  "quote": "ZIP"
+                },
+                {
+                  "path": "total_file_count",
+                  "quote": "21"
+                },
+                {
+                  "path": "source_caveats",
+                  "quote": "only those 10 are described in file_collections"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "distribution_formats"
+                }
+              ],
+              "counts": [
+                {
+                  "path": "file_collections",
+                  "claimed": 3
+                }
+              ],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 0,
+              "evidence": "All eight listed files are ZIP archives; one file type.",
+              "cited": [
+                {
+                  "path": "file_collections.resources.format",
+                  "quote": "ZIP"
+                },
+                {
+                  "path": "total_file_count",
+                  "quote": "8"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "distribution_formats"
+                }
+              ],
+              "counts": [
+                {
+                  "path": "file_collections",
+                  "claimed": 2
+                }
+              ],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 0,
+              "evidence": "Ten ZIP archives only; one file type.",
+              "cited": [
+                {
+                  "path": "file_collections.resources.format",
+                  "quote": "ZIP"
+                },
+                {
+                  "path": "total_file_count",
+                  "quote": "10"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "distribution_formats"
+                }
+              ],
+              "counts": [
+                {
+                  "path": "file_collections",
+                  "claimed": 1
+                },
+                {
+                  "path": "/file_collections/0/resources",
+                  "claimed": 10
+                }
+              ],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "description": "Presence of file size or dimensional metadata (bytes, instance counts, data splits).",
+          "score_type": "pass_fail",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail",
+          "evidence": "No resource gives byte sizes or instance counts; only total_file_count is given.",
+          "quality_note": "A file count is neither a size nor an instance count; the parent's instance counts and 21.4 TB volume are not inherited.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). No bytes or instance count; total_file_count 6 only.",
+              "cited": [
+                {
+                  "path": "total_file_count",
+                  "quote": "6"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "total_size_bytes"
+                },
+                {
+                  "path": "file_collections.total_bytes"
+                },
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "splits"
+                },
+                {
+                  "path": "subpopulations"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). No bytes or instance count; total_file_count 21 only.",
+              "cited": [
+                {
+                  "path": "total_file_count",
+                  "quote": "21"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "total_size_bytes"
+                },
+                {
+                  "path": "file_collections.total_bytes"
+                },
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "splits"
+                },
+                {
+                  "path": "subpopulations"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). No bytes or instance count; total_file_count 8 only.",
+              "cited": [
+                {
+                  "path": "total_file_count",
+                  "quote": "8"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "total_size_bytes"
+                },
+                {
+                  "path": "file_collections.total_bytes"
+                },
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "splits"
+                },
+                {
+                  "path": "subpopulations"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). No bytes or instance count; total_file_count 10 only.",
+              "cited": [
+                {
+                  "path": "total_file_count",
+                  "quote": "10"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "total_size_bytes"
+                },
+                {
+                  "path": "file_collections.total_bytes"
+                },
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "splits"
+                },
+                {
+                  "path": "subpopulations"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        }
+      ],
+      "category_score": 3,
+      "category_max": 21
+    },
+    {
+      "name": "Metadata Quality & Content",
+      "questions": [
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "description": "Presence of unique identifiers such as DOI, RRID, or persistent URLs, AND hosting platform identification (publisher or ",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "Every resource carries a DataCite DOI with the 10.18130 (University of Virginia Dataverse) prefix as doi and id.",
+          "quality_note": "Publisher is not a field of the resources, but the citation names University of Virginia Dataverse.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 1,
+              "evidence": "doi 10.18130/V3/B35XWX; citation names University of Virginia Dataverse.",
+              "cited": [
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/B35XWX"
+                },
+                {
+                  "path": "id"
+                },
+                {
+                  "path": "citation",
+                  "quote": "University of Virginia Dataverse"
+                }
+              ],
+              "absent": [],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 1,
+              "evidence": "doi 10.18130/V3/F3TD5R; citation names University of Virginia Dataverse.",
+              "cited": [
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/F3TD5R"
+                },
+                {
+                  "path": "id"
+                },
+                {
+                  "path": "citation",
+                  "quote": "University of Virginia Dataverse"
+                }
+              ],
+              "absent": [],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 1,
+              "evidence": "doi 10.18130/V3/K7TGEM; citation names University of Virginia Dataverse.",
+              "cited": [
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/K7TGEM"
+                },
+                {
+                  "path": "id"
+                },
+                {
+                  "path": "citation",
+                  "quote": "University of Virginia Dataverse"
+                }
+              ],
+              "absent": [],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 1,
+              "evidence": "doi 10.18130/V3/HIGT4C; citation names University of Virginia Dataverse.",
+              "cited": [
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/HIGT4C"
+                },
+                {
+                  "path": "id"
+                },
+                {
+                  "path": "citation",
+                  "quote": "University of Virginia Dataverse"
+                }
+              ],
+              "absent": [],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "description": "Checks presence of funding sources, grants, institutional sponsors, and creator affiliations.",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (creator info without funding/affiliations)",
+          "evidence": "Resources have no funders or creators fields; each citation names authors (Clark T; Parker J; Al Manir S; et al.; Ideker T) without affiliations or grants.",
+          "quality_note": "Creator information is present only as an abbreviated citation author list; no funding data.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). Authors only in the citation string; funders and creators absent.",
+              "cited": [
+                {
+                  "path": "citation",
+                  "quote": "Parker"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "funders"
+                },
+                {
+                  "path": "creators"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). Authors only in the citation string; funders and creators absent.",
+              "cited": [
+                {
+                  "path": "citation",
+                  "quote": "Parker"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "funders"
+                },
+                {
+                  "path": "creators"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). Authors only in the citation string; funders and creators absent.",
+              "cited": [
+                {
+                  "path": "citation",
+                  "quote": "Parker"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "funders"
+                },
+                {
+                  "path": "creators"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). Authors only in the citation string; funders and creators absent.",
+              "cited": [
+                {
+                  "path": "citation",
+                  "quote": "Parker"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "funders"
+                },
+                {
+                  "path": "creators"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "description": "Ethical oversight and privacy safeguards appropriate to the dataset, including consent, deidentification, privacy risks,",
+          "score_type": "numeric",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Absent",
+          "evidence": "No resource carries any ethics or privacy declaration.",
+          "quality_note": "The parent's human_subject_research (false), de-identification statement and ethics contacts are not inherited; human_subjects is undeclared, so the item stays applicable.",
+          "applicable": true,
+          "applicability_status": "unknown",
+          "applicability_evidence": "human_subjects: not declared; retained in the denominator",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). No ethics/privacy fields.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "ethical_reviews"
+                },
+                {
+                  "path": "human_subject_research"
+                },
+                {
+                  "path": "is_deidentified"
+                },
+                {
+                  "path": "participant_privacy"
+                },
+                {
+                  "path": "informed_consent"
+                },
+                {
+                  "path": "data_protection_impacts"
+                },
+                {
+                  "path": "at_risk_populations"
+                },
+                {
+                  "path": "participant_compensation"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "description"
+              ]
+            },
+            {
+              "path": "#/resources/1",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). No ethics/privacy fields.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "ethical_reviews"
+                },
+                {
+                  "path": "human_subject_research"
+                },
+                {
+                  "path": "is_deidentified"
+                },
+                {
+                  "path": "participant_privacy"
+                },
+                {
+                  "path": "informed_consent"
+                },
+                {
+                  "path": "data_protection_impacts"
+                },
+                {
+                  "path": "at_risk_populations"
+                },
+                {
+                  "path": "participant_compensation"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "description"
+              ]
+            },
+            {
+              "path": "#/resources/2",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). No ethics/privacy fields.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "ethical_reviews"
+                },
+                {
+                  "path": "human_subject_research"
+                },
+                {
+                  "path": "is_deidentified"
+                },
+                {
+                  "path": "participant_privacy"
+                },
+                {
+                  "path": "informed_consent"
+                },
+                {
+                  "path": "data_protection_impacts"
+                },
+                {
+                  "path": "at_risk_populations"
+                },
+                {
+                  "path": "participant_compensation"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "description"
+              ]
+            },
+            {
+              "path": "#/resources/3",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). No ethics/privacy fields.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "ethical_reviews"
+                },
+                {
+                  "path": "human_subject_research"
+                },
+                {
+                  "path": "is_deidentified"
+                },
+                {
+                  "path": "participant_privacy"
+                },
+                {
+                  "path": "informed_consent"
+                },
+                {
+                  "path": "data_protection_impacts"
+                },
+                {
+                  "path": "at_risk_populations"
+                },
+                {
+                  "path": "participant_compensation"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "description"
+              ]
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements and Governance Documentation",
+          "description": "Documentation of access and license terms, intellectual-property restrictions, applicable regulatory obligations, confid",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (license only)",
+          "evidence": "Each resource states license CC BY-NC-SA 4.0; no ip_restrictions, regulatory_restrictions or confidentiality classification.",
+          "quality_note": "The noncommercial restriction is implied by the license name only; access tier is not described.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "license CC BY-NC-SA 4.0; no restrictions or confidentiality level.",
+              "cited": [
+                {
+                  "path": "license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "ip_restrictions"
+                },
+                {
+                  "path": "regulatory_restrictions"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "license CC BY-NC-SA 4.0; no restrictions or confidentiality level.",
+              "cited": [
+                {
+                  "path": "license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "ip_restrictions"
+                },
+                {
+                  "path": "regulatory_restrictions"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "license CC BY-NC-SA 4.0; no restrictions or confidentiality level.",
+              "cited": [
+                {
+                  "path": "license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "ip_restrictions"
+                },
+                {
+                  "path": "regulatory_restrictions"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "license CC BY-NC-SA 4.0; no restrictions or confidentiality level.",
+              "cited": [
+                {
+                  "path": "license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "ip_restrictions"
+                },
+                {
+                  "path": "regulatory_restrictions"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "Interoperability, Standardization, and Cross-Platform Integration",
+          "description": "Documentation of standard formats, schema or ontology conformance, typed dataset relationships and integration procedure",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (standard formats, no schema reference)",
+          "evidence": "Resources list standard formats (ZIP, JSON, HTML with media types); RO-Crate metadata files appear in the March and June 2025 file lists, but no resource declares conforms_to or conforms_to_schema.",
+          "quality_note": "Standard container formats; schema conformance and integration capability are not declared per release.",
+          "applicable": true,
+          "applicability_status": "unknown",
+          "applicability_evidence": "shared_dataset: not declared; retained in the denominator",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "ZIP/JSON formats; ro-crate-metadata.json files listed but no declared conformance.",
+              "cited": [
+                {
+                  "path": "file_collections.resources.media_type",
+                  "quote": "application/json"
+                },
+                {
+                  "path": "file_collections.resources.name",
+                  "quote": "ro-crate-metadata.json"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "conforms_to"
+                },
+                {
+                  "path": "conforms_to_schema"
+                },
+                {
+                  "path": "external_resources"
+                },
+                {
+                  "path": "related_datasets"
+                },
+                {
+                  "path": "distribution_formats"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "ZIP/JSON/HTML; release RO-Crate described but no declared conformance.",
+              "cited": [
+                {
+                  "path": "file_collections.resources.description",
+                  "quote": "Release RO-Crate with pointers to sub RO-Crates."
+                }
+              ],
+              "absent": [
+                {
+                  "path": "conforms_to"
+                },
+                {
+                  "path": "conforms_to_schema"
+                },
+                {
+                  "path": "external_resources"
+                },
+                {
+                  "path": "related_datasets"
+                },
+                {
+                  "path": "distribution_formats"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "ZIP archives (application/zip); no schema reference.",
+              "cited": [
+                {
+                  "path": "file_collections.resources.media_type",
+                  "quote": "application/zip"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "conforms_to"
+                },
+                {
+                  "path": "conforms_to_schema"
+                },
+                {
+                  "path": "external_resources"
+                },
+                {
+                  "path": "related_datasets"
+                },
+                {
+                  "path": "distribution_formats"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "ZIP archives (application/zip); no schema reference.",
+              "cited": [
+                {
+                  "path": "file_collections.resources.media_type",
+                  "quote": "application/zip"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "conforms_to"
+                },
+                {
+                  "path": "conforms_to_schema"
+                },
+                {
+                  "path": "external_resources"
+                },
+                {
+                  "path": "related_datasets"
+                },
+                {
+                  "path": "distribution_formats"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        }
+      ],
+      "category_score": 10,
+      "category_max": 21
+    },
+    {
+      "name": "Technical Documentation",
+      "questions": [
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "description": "Documentation of preprocessing, cleaning, labeling, annotation and imputation, including relevant software names, versio",
+          "score_type": "numeric",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Absent",
+          "evidence": "No resource documents preprocessing, cleaning, labeling or annotation tools.",
+          "quality_note": "The parent's MuSIC and FAIRSCAPE descriptions are not inherited; the June 2025 description mentions metadata corrections and renaming without naming a tool.",
+          "applicable": true,
+          "applicability_status": "unknown",
+          "applicability_evidence": "data_processing: not declared; retained in the denominator",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). No processing strategies or tools.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "preprocessing_strategies"
+                },
+                {
+                  "path": "cleaning_strategies"
+                },
+                {
+                  "path": "labeling_strategies"
+                },
+                {
+                  "path": "machine_annotation_tools"
+                },
+                {
+                  "path": "annotation_analyses"
+                },
+                {
+                  "path": "imputation_protocols"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "description"
+              ]
+            },
+            {
+              "path": "#/resources/1",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). No processing strategies or tools.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "preprocessing_strategies"
+                },
+                {
+                  "path": "cleaning_strategies"
+                },
+                {
+                  "path": "labeling_strategies"
+                },
+                {
+                  "path": "machine_annotation_tools"
+                },
+                {
+                  "path": "annotation_analyses"
+                },
+                {
+                  "path": "imputation_protocols"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "description"
+              ]
+            },
+            {
+              "path": "#/resources/2",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). No processing strategies or tools.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "preprocessing_strategies"
+                },
+                {
+                  "path": "cleaning_strategies"
+                },
+                {
+                  "path": "labeling_strategies"
+                },
+                {
+                  "path": "machine_annotation_tools"
+                },
+                {
+                  "path": "annotation_analyses"
+                },
+                {
+                  "path": "imputation_protocols"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "description"
+              ]
+            },
+            {
+              "path": "#/resources/3",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). No processing strategies or tools.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "preprocessing_strategies"
+                },
+                {
+                  "path": "cleaning_strategies"
+                },
+                {
+                  "path": "labeling_strategies"
+                },
+                {
+                  "path": "machine_annotation_tools"
+                },
+                {
+                  "path": "annotation_analyses"
+                },
+                {
+                  "path": "imputation_protocols"
+                }
+              ],
+              "counts": [],
+              "considered": [
+                "description"
+              ]
+            }
+          ]
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "description": "Evaluates description completeness of data collection mechanisms, acquisition methods, data collectors, collection timef",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (partial protocol)",
+          "evidence": "Resources name assays (Perturb-seq, SEC-MS, AP-MS, IF imaging) and, in file descriptions, the Lundberg and Krogan laboratories; no collection timeframes or structured collection fields.",
+          "quality_note": "Mechanism and collector names appear only in narrative; timeframes are missing.",
+          "applicable": true,
+          "applicability_status": "unknown",
+          "applicability_evidence": "data_collection: not declared; retained in the denominator",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "Mechanism (ICC-IF confocal microscopy) and collector (Lundberg Lab) in file description.",
+              "cited": [
+                {
+                  "path": "file_collections.description",
+                  "quote": "immunofluorescence-based staining (ICC-IF) and confocal microscopy in the Lundberg Lab"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "collection_timeframes"
+                },
+                {
+                  "path": "acquisition_methods"
+                },
+                {
+                  "path": "collection_mechanisms"
+                },
+                {
+                  "path": "data_collectors"
+                },
+                {
+                  "path": "raw_data_sources"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "Mechanisms named in release description; no collectors or timeframes.",
+              "cited": [
+                {
+                  "path": "description",
+                  "quote": "SEC-MS data in undifferentiated"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "collection_timeframes"
+                },
+                {
+                  "path": "acquisition_methods"
+                },
+                {
+                  "path": "collection_mechanisms"
+                },
+                {
+                  "path": "data_collectors"
+                },
+                {
+                  "path": "raw_data_sources"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "SEC-MS by the Krogan laboratory in file descriptions; no timeframes.",
+              "cited": [
+                {
+                  "path": "file_collections.resources.description",
+                  "quote": "in the Nevan Krogan laboratory"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "collection_timeframes"
+                },
+                {
+                  "path": "acquisition_methods"
+                },
+                {
+                  "path": "collection_mechanisms"
+                },
+                {
+                  "path": "data_collectors"
+                },
+                {
+                  "path": "raw_data_sources"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "Assay types named only in the release description.",
+              "cited": [
+                {
+                  "path": "description",
+                  "quote": "AP-MS data for MDA-MB-468 breast cancer cells + treatment"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "collection_timeframes"
+                },
+                {
+                  "path": "acquisition_methods"
+                },
+                {
+                  "path": "collection_mechanisms"
+                },
+                {
+                  "path": "data_collectors"
+                },
+                {
+                  "path": "raw_data_sources"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 13,
+          "name": "Version History, Maintenance, and Sustainability",
+          "description": "Documentation of version identifiers, change history, maintenance and preservation plans, responsible contacts and durab",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (version + persistent ID)",
+          "evidence": "Each resource gives a version, issued date, DOI and release status (historical/superseded/current); no maintainers, update plan, errata or version_access at resource level.",
+          "quality_note": "Version header vs citation version mismatches are disclosed in source_caveats (e.g. 2.1 vs V2).",
+          "applicable": true,
+          "applicability_status": "unknown",
+          "applicability_evidence": "shared_dataset: not declared; retained in the denominator",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "version 1.4; doi 10.18130/V3/B35XWX; no maintenance or sustainability fields.",
+              "cited": [
+                {
+                  "path": "version",
+                  "quote": "1.4"
+                },
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/B35XWX"
+                },
+                {
+                  "path": "issued"
+                },
+                {
+                  "path": "source_caveats",
+                  "quote": "while the citation reads"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "maintainers"
+                },
+                {
+                  "path": "updates"
+                },
+                {
+                  "path": "errata"
+                },
+                {
+                  "path": "version_access"
+                },
+                {
+                  "path": "publisher"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "version 2.1; doi 10.18130/V3/F3TD5R; no maintenance or sustainability fields.",
+              "cited": [
+                {
+                  "path": "version",
+                  "quote": "2.1"
+                },
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/F3TD5R"
+                },
+                {
+                  "path": "issued"
+                },
+                {
+                  "path": "source_caveats",
+                  "quote": "while the citation reads"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "maintainers"
+                },
+                {
+                  "path": "updates"
+                },
+                {
+                  "path": "errata"
+                },
+                {
+                  "path": "version_access"
+                },
+                {
+                  "path": "publisher"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "version 2.1; doi 10.18130/V3/K7TGEM; no maintenance or sustainability fields.",
+              "cited": [
+                {
+                  "path": "version",
+                  "quote": "2.1"
+                },
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/K7TGEM"
+                },
+                {
+                  "path": "issued"
+                },
+                {
+                  "path": "source_caveats",
+                  "quote": "while the citation reads"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "maintainers"
+                },
+                {
+                  "path": "updates"
+                },
+                {
+                  "path": "errata"
+                },
+                {
+                  "path": "version_access"
+                },
+                {
+                  "path": "publisher"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "version 2.0; doi 10.18130/V3/HIGT4C; no maintenance or sustainability fields.",
+              "cited": [
+                {
+                  "path": "version",
+                  "quote": "2.0"
+                },
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/HIGT4C"
+                },
+                {
+                  "path": "issued"
+                },
+                {
+                  "path": "source_caveats",
+                  "quote": "while the citation reads"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "maintainers"
+                },
+                {
+                  "path": "updates"
+                },
+                {
+                  "path": "errata"
+                },
+                {
+                  "path": "version_access"
+                },
+                {
+                  "path": "publisher"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "description": "Citation, identifiers and documentation links that let a reader identify the dataset and related publications or resourc",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (one distinct reference + formal citation)",
+          "evidence": "Each resource has a formal Dataverse citation (authors, year, title, DOI URL, publisher, version); the DOI and citation identify the same resource, and no external_resources are given at resource level.",
+          "quality_note": "Formal dataset citation present, but only one distinct reference per resource.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "Formal citation present; DOI counts as the same reference; no external resources.",
+              "cited": [
+                {
+                  "path": "citation",
+                  "quote": "https://doi.org/10.18130/V3/B35XWX"
+                },
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/B35XWX"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "external_resources"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "Formal citation present; DOI counts as the same reference; no external resources.",
+              "cited": [
+                {
+                  "path": "citation",
+                  "quote": "https://doi.org/10.18130/V3/F3TD5R"
+                },
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/F3TD5R"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "external_resources"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "Formal citation present; DOI counts as the same reference; no external resources.",
+              "cited": [
+                {
+                  "path": "citation",
+                  "quote": "https://doi.org/10.18130/V3/K7TGEM"
+                },
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/K7TGEM"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "external_resources"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "Formal citation present; DOI counts as the same reference; no external resources.",
+              "cited": [
+                {
+                  "path": "citation",
+                  "quote": "https://doi.org/10.18130/V3/HIGT4C"
+                },
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/HIGT4C"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "external_resources"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "description": "Documentation of human participant or population representation, recruitment, sampling and relevant subgroups. Evaluate ",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (general human-derived material, no demographics)",
+          "evidence": "Resources name human-derived cell lines (MDA-MB-468 breast cancer cells, KOLF2.1J iPSCs and derived NPCs, neurons, cardiomyocytes) and treatment conditions, without donor demographics or selection criteria.",
+          "quality_note": "Population characterization is limited to cell-line names and conditions; the parent's RRID and donor descriptions are in subpopulations, which is not inherited.",
+          "applicable": true,
+          "applicability_status": "unknown",
+          "applicability_evidence": "human_subjects: not declared; retained in the denominator",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "Cell lines and conditions named; no demographics or subgroup fields.",
+              "cited": [
+                {
+                  "path": "description",
+                  "quote": "KOLF2.1J iPSCs"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "subpopulations"
+                },
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "at_risk_populations"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "Cell lines and conditions named; no demographics or subgroup fields.",
+              "cited": [
+                {
+                  "path": "description",
+                  "quote": "MDA-MB-468 breast cancer cells"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "subpopulations"
+                },
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "at_risk_populations"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "Cell lines and conditions named; no demographics or subgroup fields.",
+              "cited": [
+                {
+                  "path": "description",
+                  "quote": "MDA-MB-468 breast cancer cells"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "subpopulations"
+                },
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "at_risk_populations"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "Cell lines and conditions named; no demographics or subgroup fields.",
+              "cited": [
+                {
+                  "path": "description",
+                  "quote": "KOLF2.1J iPSCs"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "subpopulations"
+                },
+                {
+                  "path": "instances"
+                },
+                {
+                  "path": "at_risk_populations"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        }
+      ],
+      "category_score": 12,
+      "category_max": 25
+    },
+    {
+      "name": "FAIRness & Accessibility",
+      "questions": [
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "description": "Dataset includes persistent URLs, DOI, and identifier for access and documentation.",
+          "score_type": "pass_fail",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass",
+          "evidence": "Each resource has a resolvable DOI and a https://doi.org/ URL in its citation.",
+          "quality_note": "DOI prefix 10.18130 matches the University of Virginia Dataverse registrant.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 1,
+              "evidence": "doi 10.18130/V3/B35XWX.",
+              "cited": [
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/B35XWX"
+                },
+                {
+                  "path": "id"
+                }
+              ],
+              "absent": [],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 1,
+              "evidence": "doi 10.18130/V3/F3TD5R.",
+              "cited": [
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/F3TD5R"
+                },
+                {
+                  "path": "id"
+                }
+              ],
+              "absent": [],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 1,
+              "evidence": "doi 10.18130/V3/K7TGEM.",
+              "cited": [
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/K7TGEM"
+                },
+                {
+                  "path": "id"
+                }
+              ],
+              "absent": [],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 1,
+              "evidence": "doi 10.18130/V3/HIGT4C.",
+              "cited": [
+                {
+                  "path": "doi",
+                  "quote": "10.18130/V3/HIGT4C"
+                },
+                {
+                  "path": "id"
+                }
+              ],
+              "absent": [],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "description": "Describes how users can obtain the dataset (download URL, distribution formats, access policy). Note: \"Public\" does not ",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (partial access mechanism)",
+          "evidence": "Resources give license, ZIP formats and a DOI landing page via the citation; no download_url, registration or agreement steps.",
+          "quality_note": "Access tier (open download vs registration) is not stated per release.",
+          "applicable": true,
+          "applicability_status": "unknown",
+          "applicability_evidence": "shared_dataset: not declared; retained in the denominator",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "License and formats present; access path only implied by Dataverse DOI.",
+              "cited": [
+                {
+                  "path": "license",
+                  "quote": "CC BY-NC-SA 4.0"
+                },
+                {
+                  "path": "file_collections.resources.media_type",
+                  "quote": "application/zip"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "download_url"
+                },
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "distribution_formats"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "License and formats present; access path only implied by Dataverse DOI.",
+              "cited": [
+                {
+                  "path": "license",
+                  "quote": "CC BY-NC-SA 4.0"
+                },
+                {
+                  "path": "file_collections.resources.media_type",
+                  "quote": "application/zip"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "download_url"
+                },
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "distribution_formats"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "License and formats present; access path only implied by Dataverse DOI.",
+              "cited": [
+                {
+                  "path": "license",
+                  "quote": "CC BY-NC-SA 4.0"
+                },
+                {
+                  "path": "file_collections.resources.media_type",
+                  "quote": "application/zip"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "download_url"
+                },
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "distribution_formats"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "License and formats present; access path only implied by Dataverse DOI.",
+              "cited": [
+                {
+                  "path": "license",
+                  "quote": "CC BY-NC-SA 4.0"
+                },
+                {
+                  "path": "file_collections.resources.media_type",
+                  "quote": "application/zip"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "download_url"
+                },
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "distribution_formats"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 18,
+          "name": "Reusability, Use Guidance, and Social Impact",
+          "description": "License is clearly defined with explicit use guidance including intended uses, prohibited uses, discouraged uses, AND co",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (license without explicit use guidance)",
+          "evidence": "Each resource names CC BY-NC-SA 4.0; intended, prohibited and discouraged uses and future-use impacts are absent at resource level.",
+          "quality_note": "The license name conveys noncommercial/share-alike terms; no explicit use guidance or impact analysis.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "license only; no use guidance or social impact fields.",
+              "cited": [
+                {
+                  "path": "license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "intended_uses"
+                },
+                {
+                  "path": "prohibited_uses"
+                },
+                {
+                  "path": "discouraged_uses"
+                },
+                {
+                  "path": "future_use_impacts"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "license only; no use guidance or social impact fields.",
+              "cited": [
+                {
+                  "path": "license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "intended_uses"
+                },
+                {
+                  "path": "prohibited_uses"
+                },
+                {
+                  "path": "discouraged_uses"
+                },
+                {
+                  "path": "future_use_impacts"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "license only; no use guidance or social impact fields.",
+              "cited": [
+                {
+                  "path": "license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "intended_uses"
+                },
+                {
+                  "path": "prohibited_uses"
+                },
+                {
+                  "path": "discouraged_uses"
+                },
+                {
+                  "path": "future_use_impacts"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "license only; no use guidance or social impact fields.",
+              "cited": [
+                {
+                  "path": "license",
+                  "quote": "CC BY-NC-SA 4.0"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "license_and_use_terms"
+                },
+                {
+                  "path": "intended_uses"
+                },
+                {
+                  "path": "prohibited_uses"
+                },
+                {
+                  "path": "discouraged_uses"
+                },
+                {
+                  "path": "future_use_impacts"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity, Provenance Graph, and Quality",
+          "description": "Presence of version access, errata, update plans, source derivation, parent dataset linkages, missing data documentation",
+          "score_type": "numeric",
+          "score": 3,
+          "max_score": 5,
+          "score_label": "Good (version information, no provenance graph)",
+          "evidence": "Resources give version numbers, issue dates and release status; the June 2025 release describes its revision and lists per-condition provenance-graph HTML files, but no resource documents entity-activity-agent lineage.",
+          "quality_note": "Version history is fragmentary per release; provenance graphs are referenced as files, not represented.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 3,
+              "evidence": "version 1.4, historical release; no derivation fields.",
+              "cited": [
+                {
+                  "path": "version",
+                  "quote": "1.4"
+                },
+                {
+                  "path": "description",
+                  "quote": "Historical release."
+                }
+              ],
+              "absent": [
+                {
+                  "path": "version_access"
+                },
+                {
+                  "path": "errata"
+                },
+                {
+                  "path": "updates"
+                },
+                {
+                  "path": "was_derived_from"
+                },
+                {
+                  "path": "parent_datasets"
+                },
+                {
+                  "path": "raw_data_sources"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 3,
+              "evidence": "Revision notes and provenance-graph files listed; graph content not documented.",
+              "cited": [
+                {
+                  "path": "description",
+                  "quote": "adds RGB immunofluorescent images, corrects RO-Crate metadata, and changes naming conventions"
+                },
+                {
+                  "path": "file_collections.resources.name",
+                  "quote": "Images-paclitaxel-provenance-graph.html"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "version_access"
+                },
+                {
+                  "path": "errata"
+                },
+                {
+                  "path": "updates"
+                },
+                {
+                  "path": "was_derived_from"
+                },
+                {
+                  "path": "parent_datasets"
+                },
+                {
+                  "path": "raw_data_sources"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 3,
+              "evidence": "version 2.1, superseded release.",
+              "cited": [
+                {
+                  "path": "version",
+                  "quote": "2.1"
+                },
+                {
+                  "path": "description",
+                  "quote": "Superseded release."
+                }
+              ],
+              "absent": [
+                {
+                  "path": "version_access"
+                },
+                {
+                  "path": "errata"
+                },
+                {
+                  "path": "updates"
+                },
+                {
+                  "path": "was_derived_from"
+                },
+                {
+                  "path": "parent_datasets"
+                },
+                {
+                  "path": "raw_data_sources"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 3,
+              "evidence": "version 2.0, current release; created_on and issued dates.",
+              "cited": [
+                {
+                  "path": "version",
+                  "quote": "2.0"
+                },
+                {
+                  "path": "created_on"
+                },
+                {
+                  "path": "issued"
+                }
+              ],
+              "absent": [
+                {
+                  "path": "version_access"
+                },
+                {
+                  "path": "errata"
+                },
+                {
+                  "path": "updates"
+                },
+                {
+                  "path": "was_derived_from"
+                },
+                {
+                  "path": "parent_datasets"
+                },
+                {
+                  "path": "raw_data_sources"
+                },
+                {
+                  "path": "missing_data_documentation"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        },
+        {
+          "id": 20,
+          "name": "Bias Documentation and Responsible AI Alignment",
+          "description": "Documentation of known biases, limitations and potential effects on intended or foreseeable uses. Every dataset has a sc",
+          "score_type": "numeric",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Absent",
+          "evidence": "No resource documents known biases or future-use impacts.",
+          "quality_note": "The parent's two known_biases entries are not inherited.",
+          "applicable": true,
+          "applicability_status": "applicable",
+          "applicability_evidence": "This item applies to every dataset",
+          "unit_scores": [
+            {
+              "path": "#/resources/0",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). known_biases and future_use_impacts absent.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "known_biases"
+                },
+                {
+                  "path": "future_use_impacts"
+                },
+                {
+                  "path": "known_limitations"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/1",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). known_biases and future_use_impacts absent.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "known_biases"
+                },
+                {
+                  "path": "future_use_impacts"
+                },
+                {
+                  "path": "known_limitations"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/2",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). known_biases and future_use_impacts absent.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "known_biases"
+                },
+                {
+                  "path": "future_use_impacts"
+                },
+                {
+                  "path": "known_limitations"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            },
+            {
+              "path": "#/resources/3",
+              "score": 0,
+              "evidence": "Scored on this resource's own fields; the parent mapping's metadata is not inherited (collection_metadata_inherited: false). known_biases and future_use_impacts absent.",
+              "cited": [],
+              "absent": [
+                {
+                  "path": "known_biases"
+                },
+                {
+                  "path": "future_use_impacts"
+                },
+                {
+                  "path": "known_limitations"
+                }
+              ],
+              "counts": [],
+              "considered": []
+            }
+          ]
+        }
+      ],
+      "category_score": 10,
+      "category_max": 21
+    }
+  ],
+  "semantic_analysis": {
+    "issues_detected": [
+      {
+        "type": "completeness",
+        "category": "scope_drift",
+        "severity": "high",
+        "score_effect": "lowered",
+        "item_ids": [
+          "Q1",
+          "Q3",
+          "Q5",
+          "Q7",
+          "Q8",
+          "Q11",
+          "Q20"
+        ],
+        "description": "The record is an undeclared mapping whose four Dataverse releases sit under resources, so each release is a scored unit; the descriptive, funding, ethics, processing and bias metadata live only on the parent mapping and are not inherited by any release.",
+        "fields_involved": [
+          "resources",
+          "keywords",
+          "creators",
+          "funders",
+          "ethical_reviews",
+          "known_biases",
+          "preprocessing_strategies",
+          "instances"
+        ],
+        "recommendation": "Declare the record as a Dataset (conforms_to_class) if the series is the dataset to score, or give each release its own descriptive, governance and bias metadata."
+      },
+      {
+        "type": "completeness",
+        "category": "format_access",
+        "severity": "medium",
+        "score_effect": "lowered",
+        "item_ids": [
+          "Q4",
+          "Q10",
+          "Q17"
+        ],
+        "description": "The October 2025 and June 2026 releases list only ZIP archives with no inner file types, conformance declaration or download/access steps.",
+        "fields_involved": [
+          "file_collections",
+          "distribution_formats",
+          "conforms_to",
+          "download_url"
+        ],
+        "recommendation": "Document the file types inside each archive, the RO-Crate conformance and the access path."
+      },
+      {
+        "type": "completeness",
+        "category": "temporal_version",
+        "severity": "medium",
+        "score_effect": "lowered",
+        "item_ids": [
+          "Q13",
+          "Q19"
+        ],
+        "description": "Release-level versioning is limited to a version number and dates; maintenance, errata and derivation links between successive releases are not recorded on the releases.",
+        "fields_involved": [
+          "version",
+          "version_access",
+          "errata",
+          "was_derived_from",
+          "updates"
+        ],
+        "recommendation": "Record per-release change notes, derivation from the prior release and maintainers."
+      },
+      {
+        "type": "completeness",
+        "category": "license_use_terms",
+        "severity": "medium",
+        "score_effect": "lowered",
+        "item_ids": [
+          "Q9",
+          "Q18"
+        ],
+        "description": "Each release gives only the license name; no restrictions, confidentiality level or explicit use guidance.",
+        "fields_involved": [
+          "license",
+          "license_and_use_terms",
+          "ip_restrictions",
+          "intended_uses"
+        ],
+        "recommendation": "Attach license_and_use_terms, ip_restrictions and use guidance to each release."
+      },
+      {
+        "type": "completeness",
+        "category": "processing_provenance",
+        "severity": "low",
+        "score_effect": "lowered",
+        "item_ids": [
+          "Q2",
+          "Q12",
+          "Q14",
+          "Q15"
+        ],
+        "description": "Release descriptions are specific but no release states a purpose, collection timeframe, second reference or donor characterization.",
+        "fields_involved": [
+          "purposes",
+          "collection_timeframes",
+          "external_resources",
+          "subpopulations"
+        ],
+        "recommendation": "Add purposes, collection timeframes, related publications and cell-line characterization per release."
+      },
+      {
+        "type": "consistency",
+        "category": "source_conflict",
+        "severity": "low",
+        "score_effect": "noted_only",
+        "item_ids": [],
+        "description": "Version headers disagree with citation versions (1.4 vs V1, 2.1 vs V2, 2.0 vs V2), and the June 2026 release date conflicts between cm4ai.org (2025) and Dataverse (2026); both are disclosed in source_caveats.",
+        "fields_involved": [
+          "version",
+          "citation",
+          "issued",
+          "source_caveats"
+        ],
+        "recommendation": "Keep the disclosed caveats; prefer the repository's version identifier consistently."
+      },
+      {
+        "type": "consistency",
+        "category": "count_size",
+        "severity": "low",
+        "score_effect": "noted_only",
+        "item_ids": [],
+        "description": "The June 2025 release declares 21 files but describes only 10 (disclosed); image-protein counts differ across releases (563, 464).",
+        "fields_involved": [
+          "total_file_count",
+          "file_collections"
+        ],
+        "recommendation": "Enumerate all files or state the omission in total_file_count context."
+      }
+    ],
+    "semantic_insights": [
+      "Scope: the input has no Dataset/CoreDataset declaration and four nonempty resources, so the four Dataverse releases are the scored units and each item score is the minimum across them.",
+      "The parent mapping documents creators with ORCIDs, NIH award OT2OD032742, ethics contacts, governance, intended/prohibited uses, known biases and processing pipelines; none of this is scored because it is not inherited by the releases.",
+      "Release-level DOIs (10.18130 prefix, UVA Dataverse) are well-formed and match formal citations.",
+      "human_subjects, shared_dataset, data_collection and data_processing are undeclared by the caller, so Q8, Q10-Q13, Q15 and Q17 stay applicable."
+    ],
+    "consistency_checks": {
+      "passed": 3,
+      "failed": 0,
+      "warnings": 2
+    },
+    "correctness_validations": {
+      "doi_format": "valid",
+      "grant_number_format": "not_present",
+      "rrid_format": "not_present",
+      "url_validity": "all_valid"
+    }
+  },
+  "assessment": {
+    "strengths": [
+      "Every release has a DOI, version, issue date and formal citation",
+      "Release file lists carry md5 checksums and media types"
+    ],
+    "weaknesses": [
+      "Releases carry no descriptive, funding, ethics, use-guidance or bias metadata of their own",
+      "Recent releases document only ZIP containers"
+    ],
+    "recommendations": [
+      "Declare the series as a Dataset or populate per-release metadata",
+      "Describe archive contents, sizes and conformance per release"
+    ]
+  },
+  "applicability_context": {},
+  "evaluation_scope": {
+    "policy": "minimum_per_item_across_all_resource_datasets_v1",
+    "units": [
+      {
+        "path": "#/resources/0",
+        "id": "doi:10.18130/V3/B35XWX"
+      },
+      {
+        "path": "#/resources/1",
+        "id": "doi:10.18130/V3/F3TD5R"
+      },
+      {
+        "path": "#/resources/2",
+        "id": "doi:10.18130/V3/K7TGEM"
+      },
+      {
+        "path": "#/resources/3",
+        "id": "doi:10.18130/V3/HIGT4C"
+      }
+    ],
+    "collection_metadata_inherited": false
+  },
+  "metadata": {
+    "instrument_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+    "evidence_authority_sha256": "0605c742c61f2cc4e13de907f8e09752bde5ebd08d173b31d837c273a4bf3872",
+    "rubric_sha256": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
+    "input_sha256": "6187d3887931fc9f7a67096f3f2810a7c5e50089f8668bd5eade2e29be39e223",
+    "context_sha256": "fca403729b83dda36a67c4b749455b0fd864ba992e0e40b9a0f5c65bc039bfad"
+  }
+}
