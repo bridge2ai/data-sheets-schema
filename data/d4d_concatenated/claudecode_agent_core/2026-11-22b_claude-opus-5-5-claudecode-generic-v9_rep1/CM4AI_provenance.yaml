@@ -695,3 +695,37 @@ receipts:
       so no snippet is classified'
     transcripts: []
   recorded_by: d4d provenance record
+canonical:
+  criterion: full and core both validate against the current schema, then most slots,
+    then lowest label
+  selected_from:
+  - label: 2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1
+    slots: 41
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: null
+    review_not_evidence: no review block
+  - label: 2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2
+    slots: 37
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: null
+    review_not_evidence: no review block
+  - label: 2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3
+    slots: 35
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: null
+    review_not_evidence: no review block
+  margin_over_runner_up: 4
+  runtime: agentic
+  supersedes_runtimes: agentic
+  reviews_applied: false
+  reviews_not_applied_because: 'report-only (#835): calibrated selection rule not
+    established; 2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1: no review
+    block; 2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2: no review block;
+    2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3: no review block'
+  review_policy: reported_only_pending_calibration_v1 (#835)
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
