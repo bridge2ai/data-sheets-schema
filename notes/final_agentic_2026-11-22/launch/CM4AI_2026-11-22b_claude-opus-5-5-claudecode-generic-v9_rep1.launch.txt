@@ -1,0 +1,16 @@
+Launch record: final agentic D4D, series 2026-11-22b (headless, advisor off, no MCP servers)
+launched_at_utc: 2026-11-22T05:43:51Z  (date -u)
+project: CM4AI   replicate: 1   label: 2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1
+condition: generic_v9   method: claudecode_agent   arm: baseline
+instruction: .temp/launch/CM4AI_2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1.md
+instruction_sha256: 46d7977cebf48d8dad061c2b7c3b31b6fc99a4b743c17cddafdcbefb7c92c1ea (35507 bytes)
+worktree: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121   commit: a93fa7ca296db67a9650225186f4701c317bfc48   tree dirty paths: 6
+schema: version: 3.2.1
+bundle: data/preprocessed/concatenated/CM4AI_preprocessed.txt sha256 5f81bb53f43f9ec6debc3ab7297bb3897d30c675888eefeaf840ebbbaca9ecc4
+model: claude-opus-5-5   effort: high (CLI flag; asserted by the launcher)
+claude code: 2.1.330 (Claude Code)
+account: claude-personal (CLAUDE_CONFIG_DIR unset, as the owner's claude-personal function does)
+advisor tool: disabled with CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1
+MCP servers: none (--strict-mcp-config with no config)
+delivery: the instruction file's text is the single prompt of a headless session (claude -p)
+owner's word (nonhelper session, 2026-11-22): advisor off: "yes"; "three replicates of all five"; "rerun it with the advisor off"

@@ -1,0 +1,1506 @@
+bundle_md5: 50037fc631eafda807e19f83f6579818
+slots:
+  addressing_gaps[0]:
+    receipts:
+    - chunk: c014
+      snippet: In genomics and precision medicine, machine learning models are often
+    - chunk: c014
+      snippet: predicting phenotypes from genotypes without understanding the mechanisms
+        by
+    - chunk: c014
+      snippet: creating a library of large-scale maps of cellular structure/function
+        across
+    core_path: addressing_gaps[0]
+  collection_mechanisms[0]:
+    receipts:
+    - chunk: c010
+      snippet: CM4AI input data streams are generated using immunofluorescence (IF)
+        subcellular
+    - chunk: c010
+      snippet: completed spatial proteomics mapping of 100 chromatin regulators in
+        the MDA-MB-
+    core_path: collection_mechanisms[0]
+  collection_mechanisms[1]:
+    receipts:
+    - chunk: c010
+      snippet: microscopy for spatial proteomics data; affinity purification mass
+        spectroscopy (AP-MS)
+    - chunk: c010
+      snippet: We have endogenously tagged 17 genes in MDA-MB-468 and
+    - chunk: c015
+      snippet: three complementary mapping approaches – proteomic mass spectrometry,
+        cellular imaging, and genetic perturbation via CRISPR/Cas9
+    core_path: collection_mechanisms[1]
+  collection_mechanisms[2]:
+    receipts:
+    - chunk: c010
+      snippet: and size exclusion mass spectroscopy (SEC-MS) methods for protein-protein
+    - chunk: c010
+      snippet: SEC-MS has also been performed in KOLF2 iPSCs
+    core_path: collection_mechanisms[2]
+  collection_mechanisms[3]:
+    receipts:
+    - chunk: c010
+      snippet: interaction (PPI) data; and single-cell CRISPR-Cas perturbation screens
+        by cell type.
+    - chunk: c010
+      snippet: Single-cell CRISPR screens of 100 chromatin regulators (+/– drug) in
+    - chunk: c010
+      snippet: Genomics 3’HT kit. The resulting data are currently being QCed.
+    core_path: collection_mechanisms[3]
+  conforms_to:
+    receipts:
+    - chunk: c010
+      snippet: datasets in RO-Crate format3,4 using an extended, client-server version
+        of the
+    - chunk: c018
+      snippet: CM4AI output data are packaged with provenance graphs and rich metadata
+        as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework.
+    core_path: conforms_to
+  conforms_to_standard:
+    receipts:
+    - chunk: c010
+      snippet: datasets in RO-Crate format3,4 using an extended, client-server version
+        of the
+    core_path: conforms_to_standard
+  creators[0]:
+    receipts:
+    - chunk: c026
+      snippet: Clark T https://ror.org/0153tk833 ORCID https://orcid.org/0000-0003-4060-7360
+    core_path: creators[0]
+  creators[10]:
+    receipts:
+    - chunk: c026
+      snippet: Forget A University of California San Francisco ORCID https://orcid.org/0000-0003-0223-0312
+    core_path: creators[10]
+  creators[11]:
+    receipts:
+    - chunk: c026
+      snippet: Gao J University of California San Diego ORCID https://orcid.org/0000-0002-6311-3526
+    core_path: creators[11]
+  creators[12]:
+    receipts:
+    - chunk: c026
+      snippet: Hansen JN Stanford University ORCID https://orcid.org/0000-0002-4650-9094
+    core_path: creators[12]
+  creators[13]:
+    receipts:
+    - chunk: c026
+      snippet: Hu M University of California San Diego https://orcid.org/0000-0002-1571-8029
+    core_path: creators[13]
+  creators[14]:
+    receipts:
+    - chunk: c026
+      snippet: Johannesson A KTH - Royal Institute of Technology Khaliq H
+    core_path: creators[14]
+  creators[15]:
+    receipts:
+    - chunk: c026
+      snippet: Khaliq H University of California San Diego Lee YH
+    core_path: creators[15]
+  creators[16]:
+    receipts:
+    - chunk: c026
+      snippet: Lee YH University of California San Diego ORCID https://orcid.org/0000-0003-0917-355X
+    core_path: creators[16]
+  creators[17]:
+    receipts:
+    - chunk: c026
+      snippet: Lenkiewicz J University of California San Diego https://orcid.org/0000-0001-7252-8638
+    core_path: creators[17]
+  creators[18]:
+    receipts:
+    - chunk: c026
+      snippet: Levinson MA https://ror.org/0153tk833 ORCID https://orcid.org/0000-0003-0384-8499
+    core_path: creators[18]
+  creators[19]:
+    receipts:
+    - chunk: c026
+      snippet: Marquez C University of California San Diego ORCID 0000-0003-3960-420X
+    core_path: creators[19]
+  creators[1]:
+    receipts:
+    - chunk: c026
+      snippet: Parker J University of California, San Diego ORCID https://orcid.org/0000-0003-4535-3486
+    core_path: creators[1]
+  creators[20]:
+    receipts:
+    - chunk: c026
+      snippet: 0000-0003-3960-420X Metallo C
+    - chunk: c027
+      snippet: University of California San Diego ORCID https://orcid.org/0000-0003-2404-3040
+        Muralidharan M
+    core_path: creators[20]
+  creators[21]:
+    receipts:
+    - chunk: c027
+      snippet: Muralidharan M University of California San Francisco
+    core_path: creators[21]
+  creators[22]:
+    receipts:
+    - chunk: c027
+      snippet: Nourreddine S University of California San Diego https://orcid.org/0000-0003-3881-7588
+    core_path: creators[22]
+  creators[23]:
+    receipts:
+    - chunk: c027
+      snippet: Niestroy J https://ror.org/0153tk833 ORCID https://orcid.org/0000-0002-1103-3882
+    core_path: creators[23]
+  creators[24]:
+    receipts:
+    - chunk: c027
+      snippet: Obernier K University of California San Francisco ORCID https://orcid.org/0000-0002-4025-1299
+    core_path: creators[24]
+  creators[25]:
+    receipts:
+    - chunk: c027
+      snippet: Pan E University of California San Diego Polacco B
+    core_path: creators[25]
+  creators[26]:
+    receipts:
+    - chunk: c027
+      snippet: Polacco B University of California San Francisco Pratt D
+    core_path: creators[26]
+  creators[27]:
+    receipts:
+    - chunk: c027
+      snippet: Pratt D University of California San Diego ORCID https://orcid.org/0000-0002-1471-9513
+    core_path: creators[27]
+  creators[28]:
+    receipts:
+    - chunk: c027
+      snippet: Qian G University of California San Diego ORCID https://orcid.org/0009-0005-4217-2745
+    core_path: creators[28]
+  creators[29]:
+    receipts:
+    - chunk: c027
+      snippet: Schaffer L University of California San Diego ORCID https://orcid.org/0000-0001-6339-9141
+    core_path: creators[29]
+  creators[2]:
+    receipts:
+    - chunk: c026
+      snippet: Al Manir S https://ror.org/0153tk833 ORCID https://orcid.org/0000-0003-4647-3877
+    core_path: creators[2]
+  creators[30]:
+    receipts:
+    - chunk: c027
+      snippet: Sigaeva A KTH Royal Institute of Technology ORCID https://orcid.org/0000-0003-3361-3797
+    core_path: creators[30]
+  creators[31]:
+    receipts:
+    - chunk: c027
+      snippet: Thaker S University of Alabama at Birmingham ORCID https://orcid.org/0000-0001-6730-2773
+    core_path: creators[31]
+  creators[32]:
+    receipts:
+    - chunk: c027
+      snippet: Zhang Y University of California San Diego Bélisle-Pipon JC
+    core_path: creators[32]
+  creators[33]:
+    receipts:
+    - chunk: c027
+      snippet: Bélisle-Pipon JC Simon Fraser University ORCID https://orcid.org/0000-0002-8965-8153
+    core_path: creators[33]
+  creators[34]:
+    receipts:
+    - chunk: c027
+      snippet: Brandt C Yale University ORCID https://orcid.org/0000-0001-8179-1796
+    core_path: creators[34]
+  creators[35]:
+    receipts:
+    - chunk: c027
+      snippet: Chen JY The University of Alabama at Birmingham ORCID https://orcid.org/0000-0002-6112-415X
+    core_path: creators[35]
+  creators[36]:
+    receipts:
+    - chunk: c027
+      snippet: Ding Y University of Texas at Austin ORCID https://orcid.org/0000-0003-2567-2009
+    core_path: creators[36]
+  creators[37]:
+    receipts:
+    - chunk: c027
+      snippet: Fodeh S Yale University ORCID https://orcid.org/0000-0003-4664-3143
+    core_path: creators[37]
+  creators[38]:
+    receipts:
+    - chunk: c027
+      snippet: Krogan N University of California San Francisco ORCID https://orcid.org/0000-0003-4902-337X
+    core_path: creators[38]
+  creators[39]:
+    receipts:
+    - chunk: c027
+      snippet: Lundberg E Stanford University ORCID https://orcid.org/0000-0001-7034-0850
+    core_path: creators[39]
+  creators[3]:
+    receipts:
+    - chunk: c026
+      snippet: Axelsson U KTH Royal Institute of Technology,
+    core_path: creators[3]
+  creators[40]:
+    receipts:
+    - chunk: c027
+      snippet: Mali P University of California San Diego https://orcid.org/0000-0002-3383-1287
+    core_path: creators[40]
+  creators[41]:
+    receipts:
+    - chunk: c027
+      snippet: Payne-Foster P University of Alabama ORCID https://orcid.org/0000-0002-3508-3577
+    core_path: creators[41]
+  creators[42]:
+    receipts:
+    - chunk: c027
+      snippet: Ratcliffe S https://ror.org/0153tk833 ORCID https://orcid.org/0000-0002-6644-8284
+    core_path: creators[42]
+  creators[43]:
+    receipts:
+    - chunk: c027
+      snippet: Ravitsky V University of Montreal ORCID https://orcid.org/0000-0002-7080-8801
+    core_path: creators[43]
+  creators[44]:
+    receipts:
+    - chunk: c027
+      snippet: Sali A University of California San Diego ORCID https://orcid.org/0000-0003-0435-6197
+    core_path: creators[44]
+  creators[45]:
+    receipts:
+    - chunk: c027
+      snippet: Schulz W Yale University ORCID https://orcid.org/0000-0002-2048-4028
+    core_path: creators[45]
+  creators[46]:
+    receipts:
+    - chunk: c027
+      snippet: Ideker T University of California San Diego ORCID https://orcid.org/0000-0002-1708-8454
+    - chunk: c027
+      snippet: Point of Contact Use email button above to contact. Ideker Trey (University
+        of California San Diego)
+    core_path: creators[46]
+  creators[46].principal_investigator:
+    receipts:
+    - chunk: c014
+      snippet: 'Principal investigator: IDEKER, TREY'
+    core_path: creators[46].principal_investigator
+  creators[4]:
+    receipts:
+    - chunk: c026
+      snippet: Ballllosero Navarro F Stanford University ORCID https://orcid.org/0000-0002-4180-422X
+    core_path: creators[4]
+  creators[5]:
+    receipts:
+    - chunk: c026
+      snippet: Chinn B University of California San Diego Churas CP
+    core_path: creators[5]
+  creators[6]:
+    receipts:
+    - chunk: c026
+      snippet: Churas CP University of California San Diego https://orcid.org/0000-0001-9998-705X
+    core_path: creators[6]
+  creators[7]:
+    receipts:
+    - chunk: c026
+      snippet: Dailamy A University of California, San Diego ORCID https://orcid.org/0000-0002-6711-8260
+    core_path: creators[7]
+  creators[8]:
+    receipts:
+    - chunk: c026
+      snippet: Doctor Y University of California, San Diego ORCID https://orcid.org/0009-0009-0483-7506
+    core_path: creators[8]
+  creators[9]:
+    receipts:
+    - chunk: c026
+      snippet: Fall J KTH - Royal Institute of Technology Forget A
+    core_path: creators[9]
+  data_collectors[0]:
+    receipts:
+    - chunk: c023
+      snippet: as imaged by immunofluorescence-based staining (ICC-IF) and confocal
+        microscopy in the Lundberg Lab at Stanford University
+    core_path: data_collectors[0]
+  data_collectors[1]:
+    receipts:
+    - chunk: c023
+      snippet: size exclusion chromatography-mass spectroscopy (SEC-MS) on undifferentiated
+        KOLF2.1J human induced pluripotent stem cells (hiPSCs), in the Nevan Krogan
+        laboratory at the University of California San Francisco.
+    core_path: data_collectors[1]
+  data_governance:
+    receipts:
+    - chunk: c011
+      snippet: develop a plan for ethical preparation, licensing, dissemination, and
+        Data Access
+    - chunk: c011
+      snippet: supervision of CM4AI datasets. This plan balances the openness of the
+        data produced,
+    - chunk: c012
+      snippet: A Data Access Committee will supervise ethical matters related to dataset
+    core_path: data_governance
+  data_governance.committee_contact:
+    receipts:
+    - chunk: c026
+      snippet: 'Data Governance Committee: Jillian Parker (jillianparker@health.ucsd.edu)'
+    core_path: data_governance.committee_contact
+  description:
+    receipts:
+    - chunk: c011
+      snippet: The Data Module completed parallel maps of protein-protein interactions,
+        protein
+    - chunk: c015
+      snippet: Data volume 21.4 TB
+    - chunk: c016
+      snippet: CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UT Austin,
+        UA Birmingham, Simon Fraser University, and the Hastings Center, as part of
+        the NIH Bridge2AI program.
+    - chunk: c026
+      snippet: CM4AI is generating multi-modal data including protein-protein interaction
+        (PPI), spatial localization, and genetic perturbation data in MDA-MB-468 breast
+        cancer cells (+/- paclitaxel or vorinostat) and iPSCs (+/- differentiation).
+    - chunk: c027
+      snippet: Production Location University of California San Diego; University
+        of California San Francisco; Stanford University; University of Virginia
+    core_path: description
+  distribution_dates[0]:
+    receipts:
+    - chunk: c018
+      snippet: Publication Date 2025-03-03
+    - chunk: c020
+      snippet: Publication Date 2025-07-01
+    - chunk: c023
+      snippet: Publication Date 2025-10-31
+    - chunk: c026
+      snippet: Publication Date 2026-06-17
+    core_path: distribution_dates[0]
+  ethical_reviews[0]:
+    receipts:
+    - chunk: c026
+      snippet: 'Ethical Review: Vardit Ravitsky (ravitskyv@thehastingscenter.org)'
+    core_path: ethical_reviews[0]
+  ethical_reviews[1]:
+    receipts:
+    - chunk: c026
+      snippet: Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)
+    core_path: ethical_reviews[1]
+  external_resources[0]:
+    receipts:
+    - chunk: c012
+      snippet: 'Intelligence: AI-Ready Maps of Human Cell Architecture from  Disease-Relevant'
+    - chunk: c026
+      snippet: 'Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell
+        Architecture from Disease-Relevant Cell Lines. 2024.doi: http://doi.org/10.1101/2024.05.21.589311'
+    core_path: external_resources[0]
+  external_resources[1]:
+    receipts:
+    - chunk: c026
+      snippet: 'CRISPRi Perturbation Atlas of iPSCs: Figshare'
+    core_path: external_resources[1]
+  external_resources[2]:
+    receipts:
+    - chunk: c026
+      snippet: 'SEC-MS data in KOLF2.1J iPSCs (undifferentiated, NPC, neuron, and
+        cardiomyocyte): MassIVE Repository'
+    core_path: external_resources[2]
+  external_resources[3]:
+    receipts:
+    - chunk: c026
+      snippet: 'SEC-MS data in MDA-MB-468 breast cancer cells (+/- treatment): MassIVE
+        Repository AP-MS data'
+    core_path: external_resources[3]
+  external_resources[4]:
+    receipts:
+    - chunk: c026
+      snippet: 'AP-MS data in MDA-MB-468 breast cancer cells (treated with paclitaxel):
+        MassIVE Repository'
+    core_path: external_resources[4]
+  external_resources[5]:
+    receipts:
+    - chunk: c026
+      snippet: 'AP-MS data in MDA-MB-468 breast cancer cells (treated with vorinostat):
+        MassIVE Repository'
+    core_path: external_resources[5]
+  external_resources[6]:
+    receipts:
+    - chunk: c027
+      snippet: 'A PERTURBATION CELL ATLAS OF HUMAN INDUCED PLURIPOTENT STEM CELLS.
+        bioRxiv. 2024 Nov 4;2024.11.03.621734. PMCID: PMC11580897 doi https://doi.org/10.1101/2024.11.03.621734'
+    core_path: external_resources[6]
+  funders[0]:
+    receipts:
+    - chunk: c027
+      snippet: 'Funding Information National Institutes of Health: 1OT2OD032742-01'
+    core_path: funders[0]
+  funders[0].grants[0]:
+    receipts:
+    - chunk: c014
+      snippet: 'Core project number: OT2OD032742'
+    - chunk: c014
+      snippet: 'Title: Bridge2AI: Cell Maps for AI (CM4AI) Data Generation Project'
+    - chunk: c014
+      snippet: 'Project number: 3OT2OD032742-01S2'
+    - chunk: c014
+      snippet: 'Project start: 2022-09-01T00:00:00 Project end: 2026-08-31T00:00:00'
+    - chunk: c015
+      snippet: 'NIH funding award number: 1OT2OD032742-01'
+    - chunk: c027
+      snippet: 'National Institutes of Health: 1OT2OD032742-01'
+    core_path: funders[0].grants[0]
+  human_subject_research:
+    receipts:
+    - chunk: c010
+      snippet: CM4AI data are distinctive within Bridge2AI in that they are non-clinical
+        (from tissue
+    - chunk: c026
+      snippet: 'Data Governance & Ethics Human Subjects: No'
+    - chunk: c026
+      snippet: 'FDA Regulated: No'
+    core_path: human_subject_research
+  id:
+    receipts:
+    - chunk: c015
+      snippet: 'Source URL: https://cm4ai.org/'
+    core_path: id
+  instances[0]:
+    receipts:
+    - chunk: c015
+      snippet: Immunofluorescent Images 53,788
+    core_path: instances[0]
+  instances[1]:
+    receipts:
+    - chunk: c015
+      snippet: Protein Interactions 1,374
+    core_path: instances[1]
+  instances[2]:
+    receipts:
+    - chunk: c015
+      snippet: Total Proteins Investigated 7,023
+    core_path: instances[2]
+  instances[3]:
+    receipts:
+    - chunk: c015
+      snippet: genes targeted 11,739
+    core_path: instances[3]
+  intended_uses[0]:
+    receipts:
+    - chunk: c026
+      snippet: 'This dataset is intended for: AI-ready datasets to support research
+        in functional genomics'
+    core_path: intended_uses[0]
+  intended_uses[1]:
+    receipts:
+    - chunk: c026
+      snippet: AI model training
+    core_path: intended_uses[1]
+  intended_uses[2]:
+    receipts:
+    - chunk: c026
+      snippet: Cellular process analysis
+    core_path: intended_uses[2]
+  intended_uses[3]:
+    receipts:
+    - chunk: c026
+      snippet: Cell architectural changes and interactions in presence of specific
+        disease processes, treatment conditions, or genetic perturbations
+    core_path: intended_uses[3]
+  intended_uses[4]:
+    receipts:
+    - chunk: c014
+      snippet: project will generate a resource of matched data and tools to enable
+        the creation of
+    - chunk: c014
+      snippet: ML systems, which are not black boxes but are built directly on knowledge
+    core_path: intended_uses[4]
+  ip_restrictions:
+    receipts:
+    - chunk: c012
+      snippet: Copyright © 2024 to these datasets is held by the Regents of the University
+        of
+    - chunk: c012
+      snippet: Raw image data for spatial proteomics is
+    - chunk: c018
+      snippet: This data is Copyright (c) 2025 The Regents of the University of California
+        except where otherwise noted. Spatial proteomics raw image data is copyright
+        (c) 2025 The Board of Trustees of the Leland Stanford Junior University.
+    core_path: ip_restrictions
+  is_deidentified:
+    receipts:
+    - chunk: c010
+      snippet: cultures) and are considered to be de-identified as they cannot be
+        matched, with current
+    - chunk: c026
+      snippet: 'De-identified Samples: Yes'
+    core_path: is_deidentified
+  keywords:
+    receipts:
+    - chunk: c026
+      snippet: AI, affinity purification, AP-MS, artificial intelligence, breast cancer,
+        Bridge2AI, cardiomyocyte, CM4AI, CRISPR/Cas9, induced pluripotent stem cell,
+        iPSC, KOLF2.1J, machine learning, mass spectroscopy, MDA-MB-468, neural progenitor
+        cell, NPC, neuron, paclitaxel, perturb-seq, perturbation sequencing, protein-protein
+        interaction, protein localization, single-cell RNA sequencing, scRNAseq, SEC-MS,
+        size exclusion chromatography, subcellular imaging, vorinostat
+    core_path: keywords
+  known_biases[0]:
+    receipts:
+    - chunk: c026
+      snippet: Data in this release was derived from commercially available de-identified
+        human cell lines
+    core_path: known_biases[0]
+  known_biases[1]:
+    receipts:
+    - chunk: c026
+      snippet: Does not represent all biological variants which may be seen in the
+        population at large
+    core_path: known_biases[1]
+  known_limitations[0]:
+    receipts:
+    - chunk: c026
+      snippet: 'Perturb-seq data in MDA-MB-468 breast cancer cells (+/- treatment):
+        Embargoed'
+    - chunk: c026
+      snippet: Some datasets are under temporary pre-publication embargo
+    core_path: known_limitations[0]
+  known_limitations[1]:
+    receipts:
+    - chunk: c026
+      snippet: Protein-protein interaction (SEC-MS), protein localization (IF imaging),
+        and CRISPRi perturbSeq data interrogate sets of proteins which incompletely
+        overlap
+    core_path: known_limitations[1]
+  known_limitations[2]:
+    receipts:
+    - chunk: c026
+      snippet: Computed cell maps not included in this release
+    - chunk: c026
+      snippet: Does not contain predicted cell maps, which will be added in future
+        releases
+    core_path: known_limitations[2]
+  known_limitations[3]:
+    receipts:
+    - chunk: c026
+      snippet: 'Researchers should be aware of inherent limitations: This is an interim
+        release'
+    core_path: known_limitations[3]
+  known_limitations[4]:
+    receipts:
+    - chunk: c026
+      snippet: The current release is most suitable for bioinformatics analysis of
+        the individual datasets
+    core_path: known_limitations[4]
+  known_limitations[5]:
+    receipts:
+    - chunk: c026
+      snippet: Requires domain expertise for meaningful analysis
+    core_path: known_limitations[5]
+  labeling_strategies[0]:
+    receipts:
+    - chunk: c011
+      snippet: Cell maps are annotated in a two pronged approach. First, cell maps
+        are aligned to
+    - chunk: c011
+      snippet: language model (LLM) approach that we developed to name sets of proteins
+        and assign
+    core_path: labeling_strategies[0]
+  license:
+    receipts:
+    - chunk: c017
+      snippet: Attribution-NonCommercial-ShareAlike 4.0 International CC BY-NC-SA
+        4.0
+    - chunk: c026
+      snippet: License/Data Use Agreement CC BY-NC-SA 4.0
+    core_path: license
+  license_and_use_terms:
+    receipts:
+    - chunk: c012
+      snippet: Data packages are licensed under Creative Commons CC-BY-NC-SA 4.0 license
+        terms31, which include a requirement for
+    - chunk: c012
+      snippet: Commercial use requires a separate license negotiation with the copyright
+    - chunk: c012
+      snippet: Attribution requirements for these datasets include attribution to
+        the copyright holders
+    - chunk: c017
+      snippet: You must give appropriate credit , provide a link to the license, and
+        indicate if changes were made
+    - chunk: c017
+      snippet: NonCommercial — You may not use the material for commercial purposes
+    - chunk: c017
+      snippet: ShareAlike — If you remix, transform, or build upon the material, you
+        must distribute your contributions under the same license as the original.
+    - chunk: c027
+      snippet: Community Norms as well as good scientific practices expect that proper
+        credit is given via citation. Please use the data citation shown on the dataset
+        page.
+    core_path: license_and_use_terms
+  name:
+    receipts:
+    - chunk: c016
+      snippet: Cell Maps for Artificial Intelligence (CM4AI) will deliver
+    core_path: name
+  page:
+    receipts:
+    - chunk: c016
+      snippet: 'Source URL: https://cm4ai.org/data-releases/'
+    core_path: page
+  preprocessing_strategies[0]:
+    receipts:
+    - chunk: c010
+      snippet: Input data streams are integrated via the multi-scale integrated cell
+        (MuSIC) software
+    - chunk: c010
+      snippet: Cell maps are produced by integrating these localization and interaction
+        data using self-
+    core_path: preprocessing_strategies[0]
+  preprocessing_strategies[1]:
+    receipts:
+    - chunk: c011
+      snippet: Downloaded PPI networks are processed using the node2vec deep learning
+        model31
+    - chunk: c011
+      snippet: IF images are processed using a Human Protein Atlas deep learning model32
+        to
+    core_path: preprocessing_strategies[1]
+  preprocessing_strategies[2]:
+    receipts:
+    - chunk: c011
+      snippet: The PPI and image embeddings are integrated to obtain a co-embedding
+        for each
+    core_path: preprocessing_strategies[2]
+  preprocessing_strategies[3]:
+    receipts:
+    - chunk: c011
+      snippet: Community detection is performed based on the all-by-all similarities
+        of pairs of
+    - chunk: c011
+      snippet: The resulting hierarchy of protein communities is
+    core_path: preprocessing_strategies[3]
+  prohibited_uses[0]:
+    receipts:
+    - chunk: c026
+      snippet: These laboratory data are not to be used in clinical decision-making
+        or in any context involving patient care without appropriate regulatory oversight
+        and approval
+    core_path: prohibited_uses[0]
+  purposes[0]:
+    receipts:
+    - chunk: c010
+      snippet: Its overarching mission is to produce ethical, AI-ready datasets of
+        cell architecture, inferred from multimodal data
+    core_path: purposes[0]
+  purposes[1]:
+    receipts:
+    - chunk: c010
+      snippet: CM4AI’s objective is to deliver machine-readable hierarchical maps
+        of cell architecture
+    - chunk: c010
+      snippet: as AI-Ready data produced from multimodal interrogation of 100 chromatin
+        modifiers
+    - chunk: c016
+      snippet: will deliver machine-readable hierarchical maps of cell architecture
+        as AI-ready data, together with quarterly data releases of map-input data
+        streams
+    core_path: purposes[1]
+  purposes[2]:
+    receipts:
+    - chunk: c014
+      snippet: the CM4AI data generation project seeks to map the spatiotemporal architecture
+        of human cells and use these maps toward the grand challenge of interpretable
+        genotype-phenotype learning
+    - chunk: c015
+      snippet: data generation project seeks to map the spatiotemporal architecture
+        of human cells and use these maps toward the grand challenge of interpretable
+        genotype-phenotype learning
+    core_path: purposes[2]
+  raw_data_sources[0]:
+    receipts:
+    - chunk: c011
+      snippet: PPI networks for the cell line and conditions are downloaded from the
+        Krogan
+    core_path: raw_data_sources[0]
+  raw_data_sources[1]:
+    receipts:
+    - chunk: c011
+      snippet: IF images for the cell line and conditions are downloaded from the
+        Lundberg
+    core_path: raw_data_sources[1]
+  resources[0].created_on:
+    receipts:
+    - chunk: c018
+      snippet: Data Creation Date 2025-02-27
+    core_path: resources[0].created_on
+  resources[0].description:
+    receipts:
+    - chunk: c018
+      snippet: This Beta release includes perturb-seq data in undifferentiated KOLF2.1J
+        iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs,
+        neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells
+        in the presence and absence of chemotherapy (vorinostat and paclitaxel).
+    core_path: resources[0].description
+  resources[0].doi:
+    receipts:
+    - chunk: c018
+      snippet: Persistent Identifier doi:10.18130/V3/B35XWX
+    core_path: resources[0].doi
+  resources[0].file_collections[0].file_count:
+    receipts:
+    - chunk: c018
+      snippet: 1 to 6 of 6 Files
+    core_path: resources[0].distributions[0].file_count
+  resources[0].file_collections[0].resources[0]:
+    receipts:
+    - chunk: c018
+      snippet: ro-crate-metadata.json CRISPR Perturbation Cell Atlas/ JSON - 31.1
+        KB Published Mar 3, 2025
+    core_path: resources[0].distributions[1]
+  resources[0].file_collections[0].resources[0].description:
+    receipts:
+    - chunk: c018
+      snippet: This dataset represents an expressed genome-scale CRISPRi Perturbation
+        Cell Atlas in undifferentiated KOLF2.1J human induced pluripotent stem cells
+        (hiPSCs) mapping transcriptional and fitness phenotypes associated with 11,739
+        targeted genes
+    core_path: resources[0].distributions[1].description
+  resources[0].file_collections[0].resources[0].md5:
+    receipts:
+    - chunk: c018
+      snippet: 'MD5: cbdb263b1c099396d75e16f00a79a818'
+    core_path: resources[0].distributions[1].md5
+  resources[0].file_collections[0].resources[1]:
+    receipts:
+    - chunk: c018
+      snippet: ro-crate-metadata.json CRISPR Perturbation RNA Sequences - Raw Sequences/
+        JSON - 1000.1 KB
+    core_path: resources[0].distributions[2]
+  resources[0].file_collections[0].resources[1].description:
+    receipts:
+    - chunk: c018
+      snippet: This dataset represents raw sequence data from an expressed genome-scale
+        CRISPRi Perturbation Cell Atlas in KOLF2.1J human induced pluripotent stem
+        cells (hiPSCs)
+    core_path: resources[0].distributions[2].description
+  resources[0].file_collections[0].resources[1].md5:
+    receipts:
+    - chunk: c018
+      snippet: 'MD5: 1cafefa32a897998e3e2ba0a29a3ef5c'
+    core_path: resources[0].distributions[2].md5
+  resources[0].file_collections[0].resources[2]:
+    receipts:
+    - chunk: c018
+      snippet: cm4ai-v0.6-beta-if-images-paclitaxel.zip Protein Localization Subcellular
+        Images/ ZIP Archive - 2.6 GB
+    core_path: resources[0].distributions[3]
+  resources[0].file_collections[0].resources[2].description:
+    receipts:
+    - chunk: c018
+      snippet: This data set displays the spatial localization of 563 proteins of
+        interest in cells of the breast cancer cell line MDA-MB-468 treated with paclitaxel
+    core_path: resources[0].distributions[3].description
+  resources[0].file_collections[0].resources[2].md5:
+    receipts:
+    - chunk: c018
+      snippet: 'MD5: 9422486c80bc9e1d35b2fbbc72a5f043'
+    core_path: resources[0].distributions[3].md5
+  resources[0].file_collections[0].resources[3]:
+    receipts:
+    - chunk: c018
+      snippet: cm4ai-v0.6-beta-if-images-untreated.zip Protein Localization Subcellular
+        Images/ ZIP Archive - 3.2 GB
+    core_path: resources[0].distributions[4]
+  resources[0].file_collections[0].resources[3].description:
+    receipts:
+    - chunk: c018
+      snippet: This data set displays the spatial localization of 563 proteins of
+        interest in untreated cells of the breast cancer cell line MDA-MB-468
+    core_path: resources[0].distributions[4].description
+  resources[0].file_collections[0].resources[3].md5:
+    receipts:
+    - chunk: c018
+      snippet: 'MD5: 0b4d129f5fbc3bb7f7ea564cd032cef7'
+    core_path: resources[0].distributions[4].md5
+  resources[0].file_collections[0].resources[4]:
+    receipts:
+    - chunk: c018
+      snippet: cm4ai-v0.6-beta-if-images-vorinostat.zip Protein Localization Subcellular
+        Images/ ZIP Archive - 2.8 GB
+    core_path: resources[0].distributions[5]
+  resources[0].file_collections[0].resources[4].description:
+    receipts:
+    - chunk: c018
+      snippet: breast cancer cell line MDA-MB-468 treated with vorinostat as imaged
+        by immunofluorescence-based staining (ICC-IF) and confocal microscopy in the
+        Lundberg Lab at Stanford University
+    core_path: resources[0].distributions[5].description
+  resources[0].file_collections[0].resources[4].md5:
+    receipts:
+    - chunk: c018
+      snippet: 'MD5: ac577109a41a9806978461157b777d52'
+    core_path: resources[0].distributions[5].md5
+  resources[0].file_collections[0].resources[5]:
+    receipts:
+    - chunk: c018
+      snippet: ro-crate-metadata.json Protein-protein Interaction SEC-MS/ JSON - 2.9
+        KB
+    core_path: resources[0].distributions[6]
+  resources[0].file_collections[0].resources[5].description:
+    receipts:
+    - chunk: c018
+      snippet: This dataset was generated by size exclusion chromatography-mass spectroscopy
+        (SEC-MS) on undifferentiated KOLF2.1J human induced pluripotent stem cells
+        (hiPSCs), in the Nevan Krogan laboratory at the University of California San
+        Francisco
+    core_path: resources[0].distributions[6].description
+  resources[0].file_collections[0].resources[5].md5:
+    receipts:
+    - chunk: c018
+      snippet: 'MD5: cb67e7749b15ce87b9042a9feba9d032'
+    core_path: resources[0].distributions[6].md5
+  resources[0].id:
+    receipts:
+    - chunk: c018
+      snippet: Persistent Identifier doi:10.18130/V3/B35XWX
+    core_path: resources[0].id
+  resources[0].issued:
+    receipts:
+    - chunk: c018
+      snippet: Publication Date 2025-03-03
+    core_path: resources[0].issued
+  resources[0].license:
+    receipts:
+    - chunk: c018
+      snippet: License/Data Use Agreement CC BY-NC-SA 4.0
+    core_path: resources[0].license
+  resources[0].title:
+    receipts:
+    - chunk: c018
+      snippet: Title Cell Maps for Artificial Intelligence - March 2025 Data Release
+        (Beta)
+    core_path: resources[0].title
+  resources[0].version:
+    receipts:
+    - chunk: c018
+      snippet: Version 1.4
+    core_path: resources[0].version
+  resources[1].created_on:
+    receipts:
+    - chunk: c021
+      snippet: Data Creation Date 2025-02-27
+    core_path: resources[1].created_on
+  resources[1].description:
+    receipts:
+    - chunk: c020
+      snippet: This revision includes adding RGB immunofluorescent images, corrections
+        to ro-crate metadata, and changes to naming conventions.
+    - chunk: c020
+      snippet: SEC-MS data in undifferentiated KOLF2.1J iPSCs, iPSC-derived NPCs,
+        neurons, cardiomyocytes, and treated and untreated MDA-MB468 breast cancer
+        cells
+    core_path: resources[1].description
+  resources[1].doi:
+    receipts:
+    - chunk: c020
+      snippet: Persistent Identifier doi:10.18130/V3/F3TD5R
+    core_path: resources[1].doi
+  resources[1].file_collections[0].description:
+    receipts:
+    - chunk: c020
+      snippet: 1 to 10 of 21 Files
+    core_path: resources[1].distributions[0].description
+  resources[1].file_collections[0].file_count:
+    receipts:
+    - chunk: c020
+      snippet: 1 to 10 of 21 Files
+    core_path: resources[1].distributions[0].file_count
+  resources[1].file_collections[0].resources[0]:
+    receipts:
+    - chunk: c020
+      snippet: release-ro-crate-datasheet.html HTML - 89.5 KB Published Jul 1, 2025
+    core_path: resources[1].distributions[1]
+  resources[1].file_collections[0].resources[0].description:
+    receipts:
+    - chunk: c020
+      snippet: HTML datasheet summarizing key release information.
+    core_path: resources[1].distributions[1].description
+  resources[1].file_collections[0].resources[0].md5:
+    receipts:
+    - chunk: c020
+      snippet: 'MD5: 599c9ece9b88b3ce797b82463b4a1eb4'
+    core_path: resources[1].distributions[1].md5
+  resources[1].file_collections[0].resources[1]:
+    receipts:
+    - chunk: c020
+      snippet: release-ro-crate-metadata.json RO-Crate metadata - 35.0 KB
+    core_path: resources[1].distributions[2]
+  resources[1].file_collections[0].resources[1].description:
+    receipts:
+    - chunk: c020
+      snippet: Release RO-Crate with pointers to sub ro-crates.
+    core_path: resources[1].distributions[2].description
+  resources[1].file_collections[0].resources[1].md5:
+    receipts:
+    - chunk: c020
+      snippet: 'MD5: 99f9e00053bff3020fd9832a3a518bbb'
+    core_path: resources[1].distributions[2].md5
+  resources[1].file_collections[0].resources[2]:
+    receipts:
+    - chunk: c020
+      snippet: cm4ai_ifimages_MDA-MB-468_paclitaxel.zip Images/ ZIP Archive - 3.8
+        GB Published Oct 22, 2025
+    core_path: resources[1].distributions[3]
+  resources[1].file_collections[0].resources[2].description:
+    receipts:
+    - chunk: c020
+      snippet: This data set displays the spatial localization of 464 proteins of
+        interest in cells of the breast cancer cell line MDA-MB-468 treated with paclitaxel
+    core_path: resources[1].distributions[3].description
+  resources[1].file_collections[0].resources[2].md5:
+    receipts:
+    - chunk: c020
+      snippet: 'MD5: 0d972b80744344ddeede516a0cf6e3d7'
+    core_path: resources[1].distributions[3].md5
+  resources[1].file_collections[0].resources[3]:
+    receipts:
+    - chunk: c020
+      snippet: cm4ai_ifimages_MDA-MB-468_untreated.zip Images/ ZIP Archive - 4.6 GB
+        Published Oct 22, 2025
+    core_path: resources[1].distributions[4]
+  resources[1].file_collections[0].resources[3].description:
+    receipts:
+    - chunk: c020
+      snippet: This data set displays the spatial localization of 464 proteins of
+        interest in cells of the breast cancer cell line MDA-MB-468 treated as imaged
+    core_path: resources[1].distributions[4].description
+  resources[1].file_collections[0].resources[3].md5:
+    receipts:
+    - chunk: c020
+      snippet: 'MD5: a98affcc05429650c6bb3906cd836d55'
+    core_path: resources[1].distributions[4].md5
+  resources[1].file_collections[0].resources[4]:
+    receipts:
+    - chunk: c020
+      snippet: cm4ai_ifimages_MDA-MB-468_vorinostat.zip Images/ ZIP Archive - 4.2
+        GB Published Oct 22, 2025
+    core_path: resources[1].distributions[5]
+  resources[1].file_collections[0].resources[4].description:
+    receipts:
+    - chunk: c020
+      snippet: 464 proteins of interest in cells of the breast cancer cell line MDA-MB-468
+        treated with vorinostat
+    core_path: resources[1].distributions[5].description
+  resources[1].file_collections[0].resources[4].md5:
+    receipts:
+    - chunk: c020
+      snippet: 'MD5: ad4e68ccc14b0f3349dad3321e7b81b2'
+    core_path: resources[1].distributions[5].md5
+  resources[1].file_collections[0].resources[5]:
+    receipts:
+    - chunk: c020
+      snippet: Images-paclitaxel-provenance-graph.html Images/paclitaxel/ HTML - 39.2
+        KB
+    core_path: resources[1].distributions[6]
+  resources[1].file_collections[0].resources[5].md5:
+    receipts:
+    - chunk: c020
+      snippet: 'MD5: e38e63e4c8dfc5808a5ffa2d7829fc38'
+    core_path: resources[1].distributions[6].md5
+  resources[1].file_collections[0].resources[6]:
+    receipts:
+    - chunk: c020
+      snippet: Images-untreated-provenance-graph.html Images/untreated/ HTML - 39.2
+        KB
+    core_path: resources[1].distributions[7]
+  resources[1].file_collections[0].resources[6].md5:
+    receipts:
+    - chunk: c020
+      snippet: 'MD5: 1a3b510f74d3f8647e07c6559ce64ee8'
+    core_path: resources[1].distributions[7].md5
+  resources[1].file_collections[0].resources[7]:
+    receipts:
+    - chunk: c020
+      snippet: Images-vorinostat-provenance-graph.html Images/vorinostat/ HTML - 39.2
+        KB
+    core_path: resources[1].distributions[8]
+  resources[1].file_collections[0].resources[7].md5:
+    receipts:
+    - chunk: c020
+      snippet: 'MD5: 58935fe4e254b31d33fed019f24c7668'
+    core_path: resources[1].distributions[8].md5
+  resources[1].file_collections[0].resources[8]:
+    receipts:
+    - chunk: c020
+      snippet: mass-spec-cancer-cells-provenance-graph.html mass-spec/cancer-cells/
+        HTML - 41.7 KB
+    core_path: resources[1].distributions[9]
+  resources[1].file_collections[0].resources[8].md5:
+    receipts:
+    - chunk: c020
+      snippet: 'MD5: 931ad9b552562024cb84ebe62d1f1838'
+    core_path: resources[1].distributions[9].md5
+  resources[1].file_collections[0].resources[9]:
+    receipts:
+    - chunk: c020
+      snippet: mass-spec-cancer-cells-ro-crate-metadata.json mass-spec/cancer-cells/
+        JSON - 343.4 KB
+    core_path: resources[1].distributions[10]
+  resources[1].file_collections[0].resources[9].md5:
+    receipts:
+    - chunk: c020
+      snippet: 'MD5: 3a7063bb391ea5e05a32ba5da5f4b2f8'
+    core_path: resources[1].distributions[10].md5
+  resources[1].id:
+    receipts:
+    - chunk: c020
+      snippet: Persistent Identifier doi:10.18130/V3/F3TD5R
+    core_path: resources[1].id
+  resources[1].issued:
+    receipts:
+    - chunk: c020
+      snippet: Publication Date 2025-07-01
+    core_path: resources[1].issued
+  resources[1].license:
+    receipts:
+    - chunk: c020
+      snippet: License/Data Use Agreement CC BY-NC-SA 4.0
+    core_path: resources[1].license
+  resources[1].title:
+    receipts:
+    - chunk: c020
+      snippet: Title Cell Maps for Artificial Intelligence - June 2025 Data Release
+        (Beta)
+    core_path: resources[1].title
+  resources[1].version:
+    receipts:
+    - chunk: c020
+      snippet: Version 2.1
+    core_path: resources[1].version
+  resources[2].created_on:
+    receipts:
+    - chunk: c024
+      snippet: Data Creation Date 2025-02-27
+    core_path: resources[2].created_on
+  resources[2].description:
+    receipts:
+    - chunk: c023
+      snippet: Perturb-seq data for MDA-MB-468 breast cancer cells +/- treatment and
+        undifferentiated (parental) KOLF2.1J iPSCs
+    - chunk: c023
+      snippet: SEC-MS data for MDA-MB-468 breast cancer cells +/- treatment, undifferentiated
+        KOLF2.1J iPSCs, and iPSC-derived neuron progenitor cells (NPCs), neurons,
+        and cardiomyocytes
+    - chunk: c023
+      snippet: IF images in MDA-MB-468 breast cancer cells +/- treatment
+    - chunk: c024
+      snippet: 'Perturb-seq data in KOLF2.1J iPSCs (undifferentiated): Embargoed'
+    core_path: resources[2].description
+  resources[2].doi:
+    receipts:
+    - chunk: c023
+      snippet: Persistent Identifier doi:10.18130/V3/K7TGEM
+    core_path: resources[2].doi
+  resources[2].file_collections[0].file_count:
+    receipts:
+    - chunk: c023
+      snippet: 1 to 8 of 8 Files
+    core_path: resources[2].distributions[0].file_count
+  resources[2].file_collections[0].resources[0]:
+    receipts:
+    - chunk: c023
+      snippet: cm4ai_mass-spec_KOLF2.zip ZIP Archive - 23.8 MB Published Oct 31, 2025
+    core_path: resources[2].distributions[1]
+  resources[2].file_collections[0].resources[0].description:
+    receipts:
+    - chunk: c023
+      snippet: This dataset was generated by size exclusion chromatography-mass spectroscopy
+        (SEC-MS) on undifferentiated KOLF2.1J human induced pluripotent stem cells
+        (hiPSCs), in the Nevan Krogan laboratory at the University of California San
+        Francisco.
+    core_path: resources[2].distributions[1].description
+  resources[2].file_collections[0].resources[0].md5:
+    receipts:
+    - chunk: c023
+      snippet: 'MD5: fb04933a21e4395cce56930a014c6b4e'
+    core_path: resources[2].distributions[1].md5
+  resources[2].file_collections[0].resources[1]:
+    receipts:
+    - chunk: c023
+      snippet: cm4ai_mass-spec_MDA-MB-468.zip ZIP Archive - 23.0 MB
+    core_path: resources[2].distributions[2]
+  resources[2].file_collections[0].resources[1].description:
+    receipts:
+    - chunk: c023
+      snippet: following the treatment of vorinostat or paclitaxel on MDA-MB468 human
+        breast cancer cells, in the Nevan Krogan laboratory
+    core_path: resources[2].distributions[2].description
+  resources[2].file_collections[0].resources[1].md5:
+    receipts:
+    - chunk: c023
+      snippet: 'MD5: 662d62ced9d379f7024e5c6d55859fbb'
+    core_path: resources[2].distributions[2].md5
+  resources[2].file_collections[0].resources[2]:
+    receipts:
+    - chunk: c023
+      snippet: cm4ai_perturb-seq_KOLF2_cell_atlas.zip ZIP Archive - 24.6 KB
+    core_path: resources[2].distributions[3]
+  resources[2].file_collections[0].resources[2].description:
+    receipts:
+    - chunk: c023
+      snippet: This dataset represents an expressed genome-scale CRISPRi Perturbation
+        Cell Atlas in KOLF2.1J human induced pluripotent stem cells (hiPSCs) mapping
+        transcriptional and fitness phenotypes associated with 11,739 targeted genes.
+    core_path: resources[2].distributions[3].description
+  resources[2].file_collections[0].resources[2].md5:
+    receipts:
+    - chunk: c023
+      snippet: 'MD5: 15dc59312466dbfac85f59b57d27eee6'
+    core_path: resources[2].distributions[3].md5
+  resources[2].file_collections[0].resources[3]:
+    receipts:
+    - chunk: c023
+      snippet: cm4ai_perturb-seq_KOLF2_raw_sra.zip ZIP Archive - 79.6 KB Published
+        Dec 22, 2025
+    core_path: resources[2].distributions[4]
+  resources[2].file_collections[0].resources[3].description:
+    receipts:
+    - chunk: c023
+      snippet: This dataset represents raw sequence data from an expressed genome-scale
+        CRISPRi Perturbation Cell Atlas in KOLF2.1J human induced pluripotent stem
+        cells (hiPSCs)
+    core_path: resources[2].distributions[4].description
+  resources[2].file_collections[0].resources[3].md5:
+    receipts:
+    - chunk: c023
+      snippet: 'MD5: 1cfc4e8e2ead7513a035cc7730046ebb'
+    core_path: resources[2].distributions[4].md5
+  resources[2].file_collections[0].resources[4]:
+    receipts:
+    - chunk: c023
+      snippet: cm4ai_release_metadata.zip ZIP Archive - 203.5 KB Published Dec 22,
+        2025
+    core_path: resources[2].distributions[5]
+  resources[2].file_collections[0].resources[4].md5:
+    receipts:
+    - chunk: c023
+      snippet: 'MD5: c14cc7aaaa0e7231a0d3ec296ff58518'
+    core_path: resources[2].distributions[5].md5
+  resources[2].file_collections[0].resources[5]:
+    receipts:
+    - chunk: c023
+      snippet: cm4ai_ifimages_MDA-MB-468_paclitaxel.zip Images/ ZIP Archive - 3.8
+        GB Published Oct 31, 2025
+    core_path: resources[2].distributions[6]
+  resources[2].file_collections[0].resources[5].description:
+    receipts:
+    - chunk: c023
+      snippet: This data set displays the spatial localization of 464 proteins of
+        interest in cells of the breast cancer cell line MDA-MB-468 treated with paclitaxel
+    core_path: resources[2].distributions[6].description
+  resources[2].file_collections[0].resources[5].md5:
+    receipts:
+    - chunk: c023
+      snippet: 'MD5: 0d972b80744344ddeede516a0cf6e3d7'
+    core_path: resources[2].distributions[6].md5
+  resources[2].file_collections[0].resources[6]:
+    receipts:
+    - chunk: c023
+      snippet: cm4ai_ifimages_MDA-MB-468_untreated.zip Images/ ZIP Archive - 4.6 GB
+        Published Oct 31, 2025
+    core_path: resources[2].distributions[7]
+  resources[2].file_collections[0].resources[6].description:
+    receipts:
+    - chunk: c023
+      snippet: This data set displays the spatial localization of 464 proteins of
+        interest in cells of the breast cancer cell line MDA-MB-468 treated as imaged
+    core_path: resources[2].distributions[7].description
+  resources[2].file_collections[0].resources[6].md5:
+    receipts:
+    - chunk: c023
+      snippet: 'MD5: a98affcc05429650c6bb3906cd836d55'
+    core_path: resources[2].distributions[7].md5
+  resources[2].file_collections[0].resources[7]:
+    receipts:
+    - chunk: c023
+      snippet: cm4ai_ifimages_MDA-MB-468_vorinostat.zip Images/ ZIP Archive - 4.2
+        GB Published Oct 31, 2025
+    core_path: resources[2].distributions[8]
+  resources[2].file_collections[0].resources[7].description:
+    receipts:
+    - chunk: c023
+      snippet: 464 proteins of interest in cells of the breast cancer cell line MDA-MB-468
+        treated with vorinostat as imaged
+    core_path: resources[2].distributions[8].description
+  resources[2].file_collections[0].resources[7].md5:
+    receipts:
+    - chunk: c023
+      snippet: 'MD5: ad4e68ccc14b0f3349dad3321e7b81b2'
+    core_path: resources[2].distributions[8].md5
+  resources[2].id:
+    receipts:
+    - chunk: c023
+      snippet: Persistent Identifier doi:10.18130/V3/K7TGEM
+    core_path: resources[2].id
+  resources[2].issued:
+    receipts:
+    - chunk: c023
+      snippet: Publication Date 2025-10-31
+    core_path: resources[2].issued
+  resources[2].license:
+    receipts:
+    - chunk: c023
+      snippet: License/Data Use Agreement CC BY-NC-SA 4.0
+    core_path: resources[2].license
+  resources[2].title:
+    receipts:
+    - chunk: c023
+      snippet: Title Cell Maps for Artificial Intelligence - October 2025 Data Release
+        (Beta)
+    core_path: resources[2].title
+  resources[2].version:
+    receipts:
+    - chunk: c023
+      snippet: Cell Maps for Artificial Intelligence - October 2025 Data Release (Beta)
+        Version 2.1
+    core_path: resources[2].version
+  resources[3].citation:
+    receipts:
+    - chunk: c026
+      snippet: Ideker T, 2026, "Cell Maps for Artificial Intelligence - June 2026
+        Data Release (Beta)", https://doi.org/10.18130/V3/HIGT4C , University of Virginia
+        Dataverse, V2
+    core_path: resources[3].citation
+  resources[3].created_on:
+    receipts:
+    - chunk: c027
+      snippet: Data Creation Date 2025-02-27
+    core_path: resources[3].created_on
+  resources[3].description:
+    receipts:
+    - chunk: c026
+      snippet: This dataset is the June 2026 Data Release of Cell Maps for Artificial
+        Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in
+        the NIH Bridge2AI program.
+    - chunk: c026
+      snippet: AP-MS data for MDA-MB-468 breast cancer cells + treatment
+    - chunk: c026
+      snippet: Perturb-seq data for MDA-MB-468 breast cancer cells +/- treatment and
+        undifferentiated (parental) KOLF2.1J iPSCs
+    core_path: resources[3].description
+  resources[3].doi:
+    receipts:
+    - chunk: c026
+      snippet: Persistent Identifier doi:10.18130/V3/HIGT4C
+    core_path: resources[3].doi
+  resources[3].file_collections[0].file_count:
+    receipts:
+    - chunk: c026
+      snippet: 1 to 10 of 10 Files
+    core_path: resources[3].distributions[0].file_count
+  resources[3].file_collections[0].resources[0]:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_apms_MDA-MB-468_paclitaxel.zip ZIP Archive - 113.3 KB Published
+        Jun 17, 2026
+    core_path: resources[3].distributions[1]
+  resources[3].file_collections[0].resources[0].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: 8642317c321126213240af4837030a53'
+    core_path: resources[3].distributions[1].md5
+  resources[3].file_collections[0].resources[1]:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_apms_MDA-MB-468_vorinostat.zip ZIP Archive - 135.8 KB Published
+        Jun 17, 2026
+    core_path: resources[3].distributions[2]
+  resources[3].file_collections[0].resources[1].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: b941f28d6f19c563d1222f7aff0c57b6'
+    core_path: resources[3].distributions[2].md5
+  resources[3].file_collections[0].resources[2]:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_ifimages_MDA-MB-468_paclitaxel.zip ZIP Archive - 3.8 GB Published
+        Jul 15, 2026
+    core_path: resources[3].distributions[3]
+  resources[3].file_collections[0].resources[2].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: 6c1a86520eec2696ec19444eb8a8b428'
+    core_path: resources[3].distributions[3].md5
+  resources[3].file_collections[0].resources[3]:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_ifimages_MDA-MB-468_untreated.zip ZIP Archive - 4.6 GB Published
+        Jul 15, 2026
+    core_path: resources[3].distributions[4]
+  resources[3].file_collections[0].resources[3].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: 6d066e6b9d762284c6aa5d0b44565568'
+    core_path: resources[3].distributions[4].md5
+  resources[3].file_collections[0].resources[4]:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_ifimages_MDA-MB-468_vorinostat.zip ZIP Archive - 4.2 GB Published
+        Jul 15, 2026
+    core_path: resources[3].distributions[5]
+  resources[3].file_collections[0].resources[4].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: df79632753989ef23b0a3df6604d4af1'
+    core_path: resources[3].distributions[5].md5
+  resources[3].file_collections[0].resources[5]:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_mass-spec_KOLF2.zip ZIP Archive - 171.8 KB Published Jun 17,
+        2026
+    core_path: resources[3].distributions[6]
+  resources[3].file_collections[0].resources[5].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: f250bf0b04f516f7462d30432441fc0e'
+    core_path: resources[3].distributions[6].md5
+  resources[3].file_collections[0].resources[6]:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_mass-spec_MDA-MB-468.zip ZIP Archive - 93.9 KB Published Jun
+        17, 2026
+    core_path: resources[3].distributions[7]
+  resources[3].file_collections[0].resources[6].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: 9aed30b6e8a91b151155316aae657ea5'
+    core_path: resources[3].distributions[7].md5
+  resources[3].file_collections[0].resources[7]:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_perturb-seq_KOLF2_cell_atlas.zip ZIP Archive - 30.2 KB Published
+        Jun 17, 2026
+    core_path: resources[3].distributions[8]
+  resources[3].file_collections[0].resources[7].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: 291a362842a176a4fcccaf2cdc1dedde'
+    core_path: resources[3].distributions[8].md5
+  resources[3].file_collections[0].resources[8]:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_perturb-seq_KOLF2_raw_sra.zip ZIP Archive - 73.3 KB Published
+        Jun 17, 2026
+    core_path: resources[3].distributions[9]
+  resources[3].file_collections[0].resources[8].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: 8bb3f365f01fb8bbbd2ac6a535059305'
+    core_path: resources[3].distributions[9].md5
+  resources[3].file_collections[0].resources[9]:
+    receipts:
+    - chunk: c026
+      snippet: cm4ai_release_metadata.zip ZIP Archive - 1.1 MB Published Jun 17, 2026
+    core_path: resources[3].distributions[10]
+  resources[3].file_collections[0].resources[9].md5:
+    receipts:
+    - chunk: c026
+      snippet: 'MD5: 318deb7c5edab0d2fa55e26fcb67b440'
+    core_path: resources[3].distributions[10].md5
+  resources[3].id:
+    receipts:
+    - chunk: c026
+      snippet: Persistent Identifier doi:10.18130/V3/HIGT4C
+    core_path: resources[3].id
+  resources[3].issued:
+    receipts:
+    - chunk: c026
+      snippet: Publication Date 2026-06-17
+    core_path: resources[3].issued
+  resources[3].license:
+    receipts:
+    - chunk: c026
+      snippet: License/Data Use Agreement CC BY-NC-SA 4.0
+    core_path: resources[3].license
+  resources[3].title:
+    receipts:
+    - chunk: c026
+      snippet: Title Cell Maps for Artificial Intelligence - June 2026 Data Release
+        (Beta)
+    core_path: resources[3].title
+  resources[3].version:
+    receipts:
+    - chunk: c026
+      snippet: Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta)
+        Version 2.0
+    core_path: resources[3].version
+  retention_limit:
+    receipts:
+    - chunk: c026
+      snippet: Long term preservation in the University of Virginia Dataverse, supported
+        by committed institutional funds
+    core_path: retention_limit
+  source_caveats:
+    receipts:
+    - chunk: c016
+      snippet: This repository is under review for potential modification in compliance
+        with Administration directives.
+    core_path: source_caveats
+  subpopulations[0]:
+    receipts:
+    - chunk: c010
+      snippet: MDA-MB-468 (RRID:CVCL_0419) is a triple negative breast cancer cell
+        line established
+    - chunk: c010
+      snippet: from a metastatic site pleural effusion of a 51-year-old black female
+        with a metastatic
+    - chunk: c016
+      snippet: 'Curated datasets for TNBC cells under untreated (DMSO control), vorinostat,
+        and paclitaxel conditions include:'
+    - chunk: c016
+      snippet: IF images for 523 proteins
+    - chunk: c016
+      snippet: Perturb-seq of 200 genes
+    - chunk: c016
+      snippet: AP-MS interactomes ( coming soon!
+    core_path: subpopulations[0]
+  subpopulations[1]:
+    receipts:
+    - chunk: c010
+      snippet: The KOLF2.1J (RRID:CVCL_B5P3) iPSCs cell line was derived from a healthy
+        male
+    - chunk: c010
+      snippet: Northern European donor, available from the Human Induced Pluripotent
+        Stem Cells
+    - chunk: c016
+      snippet: 'Curated dataset for undifferentiated (parental) iPSCs and iPSC-derived
+        neural progenitor cells (NPCs), neurons, and cardiomyocytes include:'
+    - chunk: c016
+      snippet: Perturb-seq of >11,000 genes (whole-genome)
+    - chunk: c016
+      snippet: IF images ( coming soon!
+    core_path: subpopulations[1]
+  title:
+    receipts:
+    - chunk: c016
+      snippet: Cell Maps for Artificial Intelligence (CM4AI) will deliver
+    core_path: title
+  updates:
+    receipts:
+    - chunk: c016
+      snippet: CM4AI releases data quarterly, ensuring continuous updates to the cell
+        maps and input data streams.
+    - chunk: c026
+      snippet: Dataset will be regularly updated and augmented through the end of
+        the project in November 2026
+    - chunk: c026
+      snippet: Updates on a quarterly basis
+    core_path: updates
+  version_access:
+    receipts:
+    - chunk: c012
+      snippet: https://doi.org/10.18130/V3/DXWOS5, University of
+    - chunk: c016
+      snippet: May 2024 Data Release March 2025 Data Release June 2025 Data Release
+        October 2025 Data Release
+    - chunk: c016
+      snippet: June 2026 Data Release (Beta) doi.org/10.18130/V3/HIGT4C
+    - chunk: c016
+      snippet: 'Released on: June 17, 2025'
+    core_path: version_access
+  version_access.latest_version_doi:
+    receipts:
+    - chunk: c026
+      snippet: Persistent Identifier doi:10.18130/V3/HIGT4C
+    core_path: version_access.latest_version_doi

@@ -1,0 +1,38 @@
+Gates for VOICE 2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3   session exit 0   2026-11-22T06:29:05Z -> 2026-11-22T06:49:21Z
+transcript models: {'claude-opus-5-5': 207}
+transcript tools: {'Bash': 48, 'Read': 25, 'Write': 3, 'Edit': 48}
+transcript advisor calls: 0
+transcript Read of other d4d_concatenated paths: []
+transcript result: success | is_error False | turns 125 | minutes 20.2 | models used ['claude-opus-5-5']
+TRANSCRIPT: ok
+file ok: data/d4d_concatenated/claudecode_agent/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3/VOICE_d4d.yaml (40941 bytes)
+file ok: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3/VOICE_d4d_core.yaml (37828 bytes)
+file ok: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3/VOICE_coverage_receipt.yaml (53073 bytes)
+file ok: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3/VOICE_reconciliation.md (16682 bytes)
+file ok: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3/VOICE_provenance.yaml (21555 bytes)
+--- validate full
+No issues found
+validate_full_exit 0
+--- validate core
+No issues found
+validate_core_exit 0
+--- receipts check --strict
+   chunks 22/22 reviewed · snippets 403/403 verified (1 bearing on no token of their value) · slots 321/321 with a receipt (32 exempt)
+   · not checked here: that a chunk marked nothing_relevant truly held nothing for the record — a judgement; sample by chunk id in review
+   · not checked here: that a verified snippet supports the value it is attached to — a snippet can be real and irrelevant; sample by slot path in review
+receipts_exit 0
+--- scope check
+2 record(s) checked against the declaration
+   ✓ none is about a dataset its project declares distinct
+   (checked on the record's `id`; prose that discusses a related dataset is legitimate and not inspected)
+scope_exit 0
+--- observed (transcript) annotation
+✓ data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3/VOICE_provenance.yaml
+observed_exit 0
+observed: {'assistant_turns': 79, 'output_tokens': 131809, 'thinking_tokens': 53297, 'receipt_chunks_unopened': 0, 'receipt_chunks_total': 22, 'bundle_lines_read': 5742, 'bundle_lines_total': 5742}
+--- runs check --strict
+1 run(s) checked, 1 subject to the requirement, 0 failing
+All runs subject to the live-provenance requirement satisfy it.
+   ⚠️  VOICE     2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3 unverifiable: request hash recorded without the spec that produced it
+runs_check_exit 0
+GATES: PASS

@@ -1,0 +1,1478 @@
+bundle_md5: 0350223711484a63c21b2dd57af6f4c9
+slots:
+  addressing_gaps[0].response:
+    receipts:
+    - chunk: c002
+      snippet: These factors have contributed to the lack of publicly/open access/
+        available pediatric data sets that enable machine learning for pediatric voice
+        analysis
+    - chunk: c002
+      snippet: Data collection in pediatric populations introduces/poses unique challenges
+        such as privacy issues, consent processes, the need for developmentally appropriate
+        tasks.
+    core_path: addressing_gaps[0].response
+  addressing_gaps[1].response:
+    receipts:
+    - chunk: c004
+      snippet: The literature is sparser in terms of pediatric voice and speech analysis
+        partly due to ethical concerns and challenges in data acquisition for this
+        cohort
+    core_path: addressing_gaps[1].response
+  at_risk_populations.assent_procedures:
+    receipts:
+    - chunk: c005
+      snippet: When children will be participating in the research, parents or guardians
+        will provide consent, and children will provide verbal assent where appropriate.
+    - chunk: c005
+      snippet: Where young children cannot reasonably be asked to assent (due to limitations
+        in understanding due to age and development) they will not be asked to do
+        so. This typically holds for children under seven years of age.
+    core_path: at_risk_populations.assent_procedures
+  at_risk_populations.description:
+    receipts:
+    - chunk: c002
+      snippet: collected from 300 participants aged 2-18
+    core_path: at_risk_populations.description
+  at_risk_populations.guardian_consent:
+    receipts:
+    - chunk: c002
+      snippet: parental or participant consent was obtained prior to data collection
+        and data sharing
+    - chunk: c004
+      snippet: in the case of pediatric participants, not receiving consent from a
+        parent or guardian
+    - chunk: c005
+      snippet: Parental permission will be obtained from one or both parents; this
+        research is minimal risk and does not require permission from both parents
+        or legal guardians.
+    core_path: at_risk_populations.guardian_consent
+  at_risk_populations.special_protections:
+    receipts:
+    - chunk: c004
+      snippet: Pediatric patients will be enrolled ONLY through the pediatric sites
+        and not at USF.
+    - chunk: c004
+      snippet: Checklist HRP-416 for children under 21 has been completed and is appended
+        to this protocol.
+    - chunk: c005
+      snippet: Data Collection for Pediatric cohorts will ONLY be performed at the
+        pediatric participating institutions.
+    core_path: at_risk_populations.special_protections
+  citation:
+    receipts:
+    - chunk: c002
+      snippet: Bridge2AI-Voice Pediatric Dataset (version 1.1.0).
+    core_path: citation
+  cleaning_strategies[0].cleaning_details:
+    receipts:
+    - chunk: c003
+      snippet: releasing audio features for all free speech tasks that were manually
+        checked for presence of unconsented speakers and PII
+    core_path: cleaning_strategies[0].cleaning_details
+  cleaning_strategies[1].cleaning_details:
+    receipts:
+    - chunk: c004
+      snippet: 'In the event where the caregiver''s voice is recorded inadvertently,
+        these clips can be discarded by 2 means: Rerecord manually during data collection
+        or during data audit and postprocessing.'
+    core_path: cleaning_strategies[1].cleaning_details
+  collection_consents[0].consent_details:
+    receipts:
+    - chunk: c002
+      snippet: parental or participant consent was obtained prior to data collection
+        and data sharing
+    core_path: collection_consents[0].consent_details
+  collection_mechanisms[0].description:
+    receipts:
+    - chunk: c002
+      snippet: The protocol included the collection of demographic information, voice
+        and speech related questionnaires, and questionnaires inquiring about medical
+        history.
+    - chunk: c007
+      snippet: 'Ready For School
+
+        Recalling a typical day preparing for School
+
+        Peds'
+    - chunk: c007
+      snippet: 'Long Sounds
+
+        Sustained /ee/ and /ah/ sounds
+
+        Peds'
+    - chunk: c007
+      snippet: 'Caterpillar Passage (Pediatrics)
+
+        validated passage
+
+        Peds'
+    - chunk: c007
+      snippet: 'Silly Sounds
+
+        /PUH/ /TUH/ /KUH/ /PUH TUH KUH/
+
+        Peds'
+    core_path: collection_mechanisms[0].description
+  collection_mechanisms[0].mechanism_details:
+    receipts:
+    - chunk: c002
+      snippet: All data was collected through customized software –
+    - chunk: c002
+      snippet: A headset was used to record for most participants, while the remaining
+        recordings utilized the built-in tablet microphone
+    - chunk: c006
+      snippet: 'For Pediatrics, all data is collected using
+
+        reproschema-ui
+
+        with the Bridge2AI-Voice pediatric protocol.'
+    core_path: collection_mechanisms[0].mechanism_details
+  collection_mechanisms[0].used_software[0]:
+    receipts:
+    - chunk: c002
+      snippet: 'All data was collected through customized software –
+
+        reproschema-ui –'
+    core_path: collection_mechanisms[0].used_software[0]
+  consent_revocations[0].revocation_details:
+    receipts:
+    - chunk: c005
+      snippet: If participants withdraw during or before the voice data collection
+        is completed their data will not be included in the database.
+    - chunk: c005
+      snippet: If participants withdraw from the study after they complete the voice
+        data collection the data they have provided will be kept until completion
+        of study.
+    core_path: consent_revocations[0].revocation_details
+  creators[0]:
+    receipts:
+    - chunk: c002
+      snippet: Yael Bensoussan
+    core_path: creators[0]
+  creators[0].affiliations[0].name:
+    receipts:
+    - chunk: c007
+      snippet: Dr. Yaël Bensoussan, MD, MSc, from USF Health Morsani College of Medicine
+    core_path: creators[0].affiliations[0].name
+  creators[0].principal_investigator:
+    receipts:
+    - chunk: c007
+      snippet: who are co-principal investigators for the project
+    - chunk: c010
+      snippet: 'Principal investigator: BENSOUSSAN, YAEL EMILIE'
+    core_path: creators[0].principal_investigator
+  creators[0].principal_investigator.affiliation[0].name:
+    receipts:
+    - chunk: c004
+      snippet: Department of Otolaryngology- Head and Neck Surgery
+    core_path: creators[0].principal_investigator.affiliation[0].name
+  creators[0].principal_investigator.email:
+    receipts:
+    - chunk: c004
+      snippet: yaelbensoussan@usf.edu
+    core_path: creators[0].principal_investigator.email
+  creators[0].principal_investigator.name:
+    receipts:
+    - chunk: c004
+      snippet: Yael Bensoussan, MD MSc, FRCSC
+    core_path: creators[0].principal_investigator.name
+  creators[100]:
+    receipts:
+    - chunk: c002
+      snippet: Elizabeth Silberholz
+    core_path: creators[100]
+  creators[101]:
+    receipts:
+    - chunk: c002
+      snippet: John Stark
+    core_path: creators[101]
+  creators[102]:
+    receipts:
+    - chunk: c002
+      snippet: Su, Lala and
+    core_path: creators[102]
+  creators[103]:
+    receipts:
+    - chunk: c002
+      snippet: Shrramana Ganesh Sudhakar
+    core_path: creators[103]
+  creators[104]:
+    receipts:
+    - chunk: c002
+      snippet: Duncan Sutherland
+    core_path: creators[104]
+  creators[105]:
+    receipts:
+    - chunk: c002
+      snippet: Venkata Swarna Mukhi
+    core_path: creators[105]
+  creators[106]:
+    receipts:
+    - chunk: c002
+      snippet: Jeffrey Tang
+    core_path: creators[106]
+  creators[107]:
+    receipts:
+    - chunk: c002
+      snippet: Luka Taylor
+    core_path: creators[107]
+  creators[108]:
+    receipts:
+    - chunk: c002
+      snippet: Jamie Toghranegar
+    core_path: creators[108]
+  creators[109]:
+    receipts:
+    - chunk: c002
+      snippet: Tu, Julie and
+    core_path: creators[109]
+  creators[10]:
+    receipts:
+    - chunk: c002
+      snippet: Stephanie Watts
+    core_path: creators[10]
+  creators[110]:
+    receipts:
+    - chunk: c002
+      snippet: Megan Urbano
+    core_path: creators[110]
+  creators[111]:
+    receipts:
+    - chunk: c002
+      snippet: Gavin Victor
+    core_path: creators[111]
+  creators[112]:
+    receipts:
+    - chunk: c002
+      snippet: Kimberly Vinson
+    core_path: creators[112]
+  creators[113]:
+    receipts:
+    - chunk: c002
+      snippet: Jordan Wilke
+    core_path: creators[113]
+  creators[114]:
+    receipts:
+    - chunk: c002
+      snippet: Claire Wilson
+    core_path: creators[114]
+  creators[115]:
+    receipts:
+    - chunk: c002
+      snippet: Madeleine Zanin
+    core_path: creators[115]
+  creators[116]:
+    receipts:
+    - chunk: c002
+      snippet: Xijie Zeng
+    core_path: creators[116]
+  creators[117]:
+    receipts:
+    - chunk: c002
+      snippet: Theresa Zesiewicz
+    core_path: creators[117]
+  creators[118]:
+    receipts:
+    - chunk: c002
+      snippet: Robin Zhao
+    core_path: creators[118]
+  creators[119]:
+    receipts:
+    - chunk: c002
+      snippet: Pantelis Zisimopoulos
+    core_path: creators[119]
+  creators[11]:
+    receipts:
+    - chunk: c002
+      snippet: Donald Bolser
+    core_path: creators[11]
+  creators[120]:
+    receipts:
+    - chunk: c002
+      snippet: Satrajit Ghosh
+    core_path: creators[120]
+  creators[120].affiliations[0].name:
+    receipts:
+    - chunk: c007
+      snippet: Satrajit Ghosh, PhD (Massachusetts Institute of Technology)
+    core_path: creators[120].affiliations[0].name
+  creators[12]:
+    receipts:
+    - chunk: c002
+      snippet: Jennifer Siu
+    core_path: creators[12]
+  creators[13]:
+    receipts:
+    - chunk: c002
+      snippet: Jordan Lerner-Ellis
+    core_path: creators[13]
+  creators[13].affiliations[0].name:
+    receipts:
+    - chunk: c007
+      snippet: Jordan Lerner-Ellis, PhD (Sinai Health)
+    core_path: creators[13].affiliations[0].name
+  creators[14]:
+    receipts:
+    - chunk: c002
+      snippet: Frank Rudzicz
+    core_path: creators[14]
+  creators[14].affiliations[0].name:
+    receipts:
+    - chunk: c004
+      snippet: "University of Toronto (UofT)\tFrank Rudzicz, PhD"
+    core_path: creators[14].affiliations[0].name
+  creators[15]:
+    receipts:
+    - chunk: c002
+      snippet: Micah Boyer
+    core_path: creators[15]
+  creators[16]:
+    receipts:
+    - chunk: c002
+      snippet: Yassmeen Abdel-Aty
+    core_path: creators[16]
+  creators[17]:
+    receipts:
+    - chunk: c002
+      snippet: Toufeeq Ahmed Syed
+    core_path: creators[17]
+  creators[18]:
+    receipts:
+    - chunk: c002
+      snippet: Dona Amraei
+    core_path: creators[18]
+  creators[19]:
+    receipts:
+    - chunk: c002
+      snippet: James Anibal
+    core_path: creators[19]
+  creators[1]:
+    receipts:
+    - chunk: c002
+      snippet: Alexandros Sigaras
+    core_path: creators[1]
+  creators[1].affiliations[0].name:
+    receipts:
+    - chunk: c007
+      snippet: Alexandros Sigaras, MSc and Anaïs Rameau, MD, MPhil (Weill Cornell
+        Medicine)
+    core_path: creators[1].affiliations[0].name
+  creators[20]:
+    receipts:
+    - chunk: c002
+      snippet: Stephen Aradi
+    core_path: creators[20]
+  creators[21]:
+    receipts:
+    - chunk: c002
+      snippet: Kirollos Armosh
+    core_path: creators[21]
+  creators[22]:
+    receipts:
+    - chunk: c002
+      snippet: Ana Sophia Martinez
+    core_path: creators[22]
+  creators[23]:
+    receipts:
+    - chunk: c002
+      snippet: Shaheen Awan
+    core_path: creators[23]
+  creators[24]:
+    receipts:
+    - chunk: c002
+      snippet: Steven Bedrick
+    core_path: creators[24]
+  creators[25]:
+    receipts:
+    - chunk: c002
+      snippet: Helena Beltran
+    core_path: creators[25]
+  creators[26]:
+    receipts:
+    - chunk: c002
+      snippet: Alexander Bernier
+    core_path: creators[26]
+  creators[27]:
+    receipts:
+    - chunk: c002
+      snippet: Moroni Berrios
+    core_path: creators[27]
+  creators[28]:
+    receipts:
+    - chunk: c002
+      snippet: Isaac Bevers
+    core_path: creators[28]
+  creators[29]:
+    receipts:
+    - chunk: c002
+      snippet: Alden Blatter
+    core_path: creators[29]
+  creators[2]:
+    receipts:
+    - chunk: c002
+      snippet: Anais Rameau
+    core_path: creators[2]
+  creators[2].affiliations[0].name:
+    receipts:
+    - chunk: c007
+      snippet: Alexandros Sigaras, MSc and Anaïs Rameau, MD, MPhil (Weill Cornell
+        Medicine)
+    core_path: creators[2].affiliations[0].name
+  creators[30]:
+    receipts:
+    - chunk: c002
+      snippet: Rahul Brito
+    core_path: creators[30]
+  creators[31]:
+    receipts:
+    - chunk: c002
+      snippet: Brown, Amy and
+    core_path: creators[31]
+  creators[32]:
+    receipts:
+    - chunk: c002
+      snippet: Johnathan Brown
+    core_path: creators[32]
+  creators[33]:
+    receipts:
+    - chunk: c002
+      snippet: Léo Cadillac
+    core_path: creators[33]
+  creators[34]:
+    receipts:
+    - chunk: c002
+      snippet: Selina Casalino
+    core_path: creators[34]
+  creators[35]:
+    receipts:
+    - chunk: c002
+      snippet: John Costello
+    core_path: creators[35]
+  creators[36]:
+    receipts:
+    - chunk: c002
+      snippet: Abhijeet Dalal
+    core_path: creators[36]
+  creators[37]:
+    receipts:
+    - chunk: c002
+      snippet: Iris De Santiago
+    core_path: creators[37]
+  creators[38]:
+    receipts:
+    - chunk: c002
+      snippet: Enrique Diaz-Ocampo
+    core_path: creators[38]
+  creators[39]:
+    receipts:
+    - chunk: c002
+      snippet: Amanda Doherty-Kirby
+    core_path: creators[39]
+  creators[3]:
+    receipts:
+    - chunk: c002
+      snippet: Olivier Elemento
+    core_path: creators[3]
+  creators[3].affiliations[0].name:
+    receipts:
+    - chunk: c007
+      snippet: Olivier Elemento, PhD, from Weill Cornell Medicine
+    core_path: creators[3].affiliations[0].name
+  creators[3].principal_investigator:
+    receipts:
+    - chunk: c007
+      snippet: Olivier Elemento, PhD, from Weill Cornell Medicine, who are co-principal
+        investigators for the project
+    core_path: creators[3].principal_investigator
+  creators[40]:
+    receipts:
+    - chunk: c002
+      snippet: Mohamed Ebraheem
+    core_path: creators[40]
+  creators[41]:
+    receipts:
+    - chunk: c002
+      snippet: Ellie Eiseman
+    core_path: creators[41]
+  creators[42]:
+    receipts:
+    - chunk: c002
+      snippet: Mahmoud Elmahdy
+    core_path: creators[42]
+  creators[43]:
+    receipts:
+    - chunk: c002
+      snippet: Renee English
+    core_path: creators[43]
+  creators[44]:
+    receipts:
+    - chunk: c002
+      snippet: Emily Evangelista
+    core_path: creators[44]
+  creators[45]:
+    receipts:
+    - chunk: c002
+      snippet: Kenneth Fletcher
+    core_path: creators[45]
+  creators[46]:
+    receipts:
+    - chunk: c002
+      snippet: Hortense Gallois
+    core_path: creators[46]
+  creators[47]:
+    receipts:
+    - chunk: c002
+      snippet: Gaelyn Garrett
+    core_path: creators[47]
+  creators[48]:
+    receipts:
+    - chunk: c002
+      snippet: Alexander Gelbard
+    core_path: creators[48]
+  creators[49]:
+    receipts:
+    - chunk: c002
+      snippet: Omar Ghaffar
+    core_path: creators[49]
+  creators[4]:
+    receipts:
+    - chunk: c002
+      snippet: Maria Powell
+    core_path: creators[4]
+  creators[4].affiliations[0].name:
+    receipts:
+    - chunk: c007
+      snippet: Maria Powell, CCC-SLP, PhD (Vanderbilt University Medical Center)
+    core_path: creators[4].affiliations[0].name
+  creators[50]:
+    receipts:
+    - chunk: c002
+      snippet: Anna Goldenberg
+    core_path: creators[50]
+  creators[51]:
+    receipts:
+    - chunk: c002
+      snippet: Karim Hanna
+    core_path: creators[51]
+  creators[52]:
+    receipts:
+    - chunk: c002
+      snippet: William Hersh
+    core_path: creators[52]
+  creators[53]:
+    receipts:
+    - chunk: c002
+      snippet: Jennifer Jain
+    core_path: creators[53]
+  creators[54]:
+    receipts:
+    - chunk: c002
+      snippet: Lochana Jayachandran
+    core_path: creators[54]
+  creators[55]:
+    receipts:
+    - chunk: c002
+      snippet: Kaley Jenney
+    core_path: creators[55]
+  creators[56]:
+    receipts:
+    - chunk: c002
+      snippet: Kathy Jenkins
+    core_path: creators[56]
+  creators[57]:
+    receipts:
+    - chunk: c002
+      snippet: Jo, Stacy and
+    core_path: creators[57]
+  creators[58]:
+    receipts:
+    - chunk: c002
+      snippet: Alistair Johnson
+    core_path: creators[58]
+  creators[58].affiliations[0].name:
+    receipts:
+    - chunk: c004
+      snippet: "Hospital for Sick Children (HSC)\tAlistair Johnson, DPhil"
+    core_path: creators[58].affiliations[0].name
+  creators[59]:
+    receipts:
+    - chunk: c002
+      snippet: Ayush Kalia
+    core_path: creators[59]
+  creators[5]:
+    receipts:
+    - chunk: c002
+      snippet: David Dorr
+    core_path: creators[5]
+  creators[5].affiliations[0].name:
+    receipts:
+    - chunk: c007
+      snippet: David Dorr, MD (Oregon Health & Science University)
+    core_path: creators[5].affiliations[0].name
+  creators[60]:
+    receipts:
+    - chunk: c002
+      snippet: Megha Kalia
+    core_path: creators[60]
+  creators[61]:
+    receipts:
+    - chunk: c002
+      snippet: Zoha Khawa
+    core_path: creators[61]
+  creators[62]:
+    receipts:
+    - chunk: c002
+      snippet: Kenji Kobayashi
+    core_path: creators[62]
+  creators[63]:
+    receipts:
+    - chunk: c002
+      snippet: Cindy Kostelnik
+    core_path: creators[63]
+  creators[64]:
+    receipts:
+    - chunk: c002
+      snippet: Alisa Krause
+    core_path: creators[64]
+  creators[65]:
+    receipts:
+    - chunk: c002
+      snippet: Andrea Krussel
+    core_path: creators[65]
+  creators[66]:
+    receipts:
+    - chunk: c002
+      snippet: Elisa Lapadula
+    core_path: creators[66]
+  creators[67]:
+    receipts:
+    - chunk: c002
+      snippet: Genelle Leo
+    core_path: creators[67]
+  creators[68]:
+    receipts:
+    - chunk: c002
+      snippet: Justin Levinsky
+    core_path: creators[68]
+  creators[69]:
+    receipts:
+    - chunk: c002
+      snippet: Chloe Loewith
+    core_path: creators[69]
+  creators[6]:
+    receipts:
+    - chunk: c002
+      snippet: Philip Payne
+    core_path: creators[6]
+  creators[6].affiliations[0].name:
+    receipts:
+    - chunk: c007
+      snippet: Philip Payne, PhD (Washington University in St. Louis)
+    core_path: creators[6].affiliations[0].name
+  creators[70]:
+    receipts:
+    - chunk: c002
+      snippet: Radhika Mahajan
+    core_path: creators[70]
+  creators[71]:
+    receipts:
+    - chunk: c002
+      snippet: Vrishni Maharaj
+    core_path: creators[71]
+  creators[72]:
+    receipts:
+    - chunk: c002
+      snippet: Siyu Miao
+    core_path: creators[72]
+  creators[73]:
+    receipts:
+    - chunk: c002
+      snippet: LeAnn Michaels
+    core_path: creators[73]
+  creators[74]:
+    receipts:
+    - chunk: c002
+      snippet: Matthew Mifsud
+    core_path: creators[74]
+  creators[75]:
+    receipts:
+    - chunk: c002
+      snippet: Marian Mikhael
+    core_path: creators[75]
+  creators[76]:
+    receipts:
+    - chunk: c002
+      snippet: Elijah Moothedan
+    core_path: creators[76]
+  creators[77]:
+    receipts:
+    - chunk: c002
+      snippet: Yosef Nafii
+    core_path: creators[77]
+  creators[78]:
+    receipts:
+    - chunk: c002
+      snippet: Tempestt Neal
+    core_path: creators[78]
+  creators[79]:
+    receipts:
+    - chunk: c002
+      snippet: Karlee Newberry
+    core_path: creators[79]
+  creators[7]:
+    receipts:
+    - chunk: c002
+      snippet: Vardit Ravitsky
+    core_path: creators[7]
+  creators[7].affiliations[0].name:
+    receipts:
+    - chunk: c007
+      snippet: Vardit Ravitsky, PhD (The Hastings Center)
+    core_path: creators[7].affiliations[0].name
+  creators[80]:
+    receipts:
+    - chunk: c002
+      snippet: Ng, Evan and
+    core_path: creators[80]
+  creators[81]:
+    receipts:
+    - chunk: c002
+      snippet: Christopher Nickel
+    core_path: creators[81]
+  creators[82]:
+    receipts:
+    - chunk: c002
+      snippet: Amanda Peltier
+    core_path: creators[82]
+  creators[83]:
+    receipts:
+    - chunk: c002
+      snippet: Trevor Pharr
+    core_path: creators[83]
+  creators[84]:
+    receipts:
+    - chunk: c002
+      snippet: Michaela Pnacekova
+    core_path: creators[84]
+  creators[85]:
+    receipts:
+    - chunk: c002
+      snippet: Matthew Pontell
+    core_path: creators[85]
+  creators[86]:
+    receipts:
+    - chunk: c002
+      snippet: Jaiden Potter
+    core_path: creators[86]
+  creators[87]:
+    receipts:
+    - chunk: c002
+      snippet: Claire Premi-Bortolotto
+    core_path: creators[87]
+  creators[88]:
+    receipts:
+    - chunk: c002
+      snippet: Parnaz Rafatjou
+    core_path: creators[88]
+  creators[89]:
+    receipts:
+    - chunk: c002
+      snippet: Rahman, JM and
+    core_path: creators[89]
+  creators[8]:
+    receipts:
+    - chunk: c002
+      snippet: Jean-Christophe Bélisle-Pipon
+    core_path: creators[8]
+  creators[8].affiliations[0].name:
+    receipts:
+    - chunk: c007
+      snippet: Jean-Christophe Bélisle-Pipon, PhD (Simon Fraser University)
+    core_path: creators[8].affiliations[0].name
+  creators[90]:
+    receipts:
+    - chunk: c002
+      snippet: Gayathiri Rajkumar
+    core_path: creators[90]
+  creators[91]:
+    receipts:
+    - chunk: c002
+      snippet: John Ramos
+    core_path: creators[91]
+  creators[92]:
+    receipts:
+    - chunk: c002
+      snippet: Michael de Riesthal
+    core_path: creators[92]
+  creators[93]:
+    receipts:
+    - chunk: c002
+      snippet: Sarah Rohde
+    core_path: creators[93]
+  creators[94]:
+    receipts:
+    - chunk: c002
+      snippet: Jillian Rossi
+    core_path: creators[94]
+  creators[95]:
+    receipts:
+    - chunk: c002
+      snippet: Laurie Russell
+    core_path: creators[95]
+  creators[96]:
+    receipts:
+    - chunk: c002
+      snippet: Samantha Salvi Cruz
+    core_path: creators[96]
+  creators[97]:
+    receipts:
+    - chunk: c002
+      snippet: Joyce Samuel
+    core_path: creators[97]
+  creators[98]:
+    receipts:
+    - chunk: c002
+      snippet: Suketu Shah
+    core_path: creators[98]
+  creators[99]:
+    receipts:
+    - chunk: c002
+      snippet: Ahmed Shawkat
+    core_path: creators[99]
+  creators[9]:
+    receipts:
+    - chunk: c002
+      snippet: Ruth Bahr
+    core_path: creators[9]
+  creators[9].affiliations[0].name:
+    receipts:
+    - chunk: c007
+      snippet: Ruth Bahr, CCC-SLP, PhD (USF Health Morsani College of Medicine)
+    core_path: creators[9].affiliations[0].name
+  data_collectors[0].collector_details:
+    receipts:
+    - chunk: c004
+      snippet: Hospital for Sick Children, Toronto, Ontario, Canada (HSC)
+    - chunk: c004
+      snippet: Alistair Johnson, DPhil
+    - chunk: c005
+      snippet: "HSC\tAlistair Johnson\tLead – data integration"
+    core_path: data_collectors[0].collector_details
+  data_collectors[0].description:
+    receipts:
+    - chunk: c002
+      snippet: Patients/healthy volunteers at the Hospital for Sick Children were
+        considered for enrollment in the study.
+    core_path: data_collectors[0].description
+  data_collectors[0].name:
+    receipts:
+    - chunk: c002
+      snippet: Patients/healthy volunteers at the Hospital for Sick Children
+    core_path: data_collectors[0].name
+  data_governance.access_review_process:
+    receipts:
+    - chunk: c002
+      snippet: 'Please reach out to the access committee if you are interested in
+        access: DACO@b2ai-voice.org'
+    - chunk: c007
+      snippet: The feature-only and raw audio datasets are available under distinct
+        agreements appropriate for the sensitivity of their respective content.
+    - chunk: c007
+      snippet: Register on PhysioNet and confirm your identity (
+    - chunk: c007
+      snippet: Sign the Bridge2AI-Voice Registered Access Agreement, which outlines
+        the terms and conditions for data use.
+    - chunk: c007
+      snippet: Complete the Data Access Request Form (DARF)
+    - chunk: c007
+      snippet: Upon approval, ensure a Data Use and Transfer Agreement (DTUA) is signed
+        by an authorized official at your institution.
+    - chunk: c011
+      snippet: 'This Agreement shall only be effective upon the review and subject
+        ot the approval of the Data Access Compliance
+
+        Office (“DACO”) requiring a distinct application.'
+    core_path: data_governance.access_review_process
+  data_governance.committee_name:
+    receipts:
+    - chunk: c007
+      snippet: Submit your application to the Data Access Compliance Office for review
+    core_path: data_governance.committee_name
+  description:
+    receipts:
+    - chunk: c002
+      snippet: Bridge2AI-Voice Pediatric Dataset v1.1.0 contains derived audio features
+        for 23,533 recordings collected from 300 participants aged 2-18.
+    - chunk: c002
+      snippet: Detailed demographic, clinical, and validated questionnaire data are
+        also made available.
+    core_path: description
+  direct_collection[0].collection_details:
+    receipts:
+    - chunk: c002
+      snippet: All participants completed the recording and demographic data collection
+        in one session.
+    - chunk: c002
+      snippet: parents or decision-makers completed the survey during the recording
+        on a separate tablet
+    core_path: direct_collection[0].collection_details
+  distribution_dates[0].release_dates:
+    receipts:
+    - chunk: c003
+      snippet: '1.0.0
+
+        Dec. 17, 2025'
+    - chunk: c003
+      snippet: '1.1.0
+
+        May 1, 2026'
+    core_path: distribution_dates[0].release_dates
+  doi:
+    receipts:
+    - chunk: c002
+      snippet: doi = {10.13026/h995-bt35}
+    core_path: doi
+  ethical_reviews[0].review_details:
+    receipts:
+    - chunk: c004
+      snippet: Canadian Institutions (MSH, SickKids and UofT) do not abide to the
+        SINGLE IRB process and will apply for a separate REB
+    core_path: ethical_reviews[0].review_details
+  ethical_reviews[0].reviewing_organization:
+    receipts:
+    - chunk: c003
+      snippet: Data collection and sharing was approved by the Research Ethics Board
+        at the Hospital for Sick Children.
+    core_path: ethical_reviews[0].reviewing_organization
+  external_resources[0].external_resources:
+    receipts:
+    - chunk: c003
+      snippet: 'Project Website:
+
+        https://b2ai-voice.org/'
+    core_path: external_resources[0].external_resources
+  file_collections[0]:
+    receipts:
+    - chunk: c002
+      snippet: The dataset contains both derived audio data features (under features)
+    core_path: distributions[0]
+  file_collections[0].description:
+    receipts:
+    - chunk: c002
+      snippet: Binary files are made available as Parquet, an open-source column-oriented
+        data file format.
+    - chunk: c002
+      snippet: All of the above files are associated with a data dictionary file which
+        has the same file stem and a JSON suffixes
+    - chunk: c002
+      snippet: The description value in the data dictionary provides a one sentence
+        summary of the respective column.
+    core_path: distributions[0].description
+  file_collections[0].resources[0]:
+    receipts:
+    - chunk: c002
+      snippet: torchaudio_spectrograms.parquet (n=23533) contains spectrograms of
+        dimension 201xT generated using the short-time Fast Fourier Transform (FFT)
+        with a 25ms window size, 10ms hop length, and a 400-point FFT.
+    core_path: distributions[1]
+  file_collections[0].resources[10]:
+    receipts:
+    - chunk: c002
+      snippet: There is also metrics related to audio quality derived from the recordings
+        present in the audio_quality_metrics.tsv file.
+    core_path: distributions[11]
+  file_collections[0].resources[1]:
+    receipts:
+    - chunk: c002
+      snippet: torchaudio_mel_spectrograms.parquet (n=23533) contains Mel spectrograms
+        of dimension 60xT generated with a 25ms window size, 10ms hop length, a 400-point
+        FFT and 60 Mel bins.
+    core_path: distributions[2]
+  file_collections[0].resources[2]:
+    receipts:
+    - chunk: c002
+      snippet: torchaudio_mfcc.parquet (n=23533) contains Mel-frequency cepstrum coefficients
+        of dimension 60xT using the same parameters as the mel spectrograms.
+    core_path: distributions[3]
+  file_collections[0].resources[3]:
+    receipts:
+    - chunk: c002
+      snippet: torchaudio_pitch.parquet (n=23533) contains the detected pitch (fundamental
+        frequency) over time and is of dimension T with a min and max pitch of 80
+        and 500 respectively.
+    core_path: distributions[4]
+  file_collections[0].resources[4]:
+    receipts:
+    - chunk: c002
+      snippet: sparc_ema.parquet (n=23532) contains the estimated electromagnetic
+        articulography (EMA) using a deep learning model with dimensions Tx12
+    core_path: distributions[5]
+  file_collections[0].resources[5]:
+    receipts:
+    - chunk: c002
+      snippet: sparc_loudness.parquet (n=23532) contains the estimated loudness based
+        on the average absolute amplitude of the audio waveform of size T, using 20ms
+        windows.
+    core_path: distributions[6]
+  file_collections[0].resources[6]:
+    receipts:
+    - chunk: c002
+      snippet: sparc_periodicity.parquet (n=23532) contains the estimated periodicity
+        (confidence of pitch presence) derived from the audio using 20ms windows of
+        dimension T.
+    core_path: distributions[7]
+  file_collections[0].resources[7]:
+    receipts:
+    - chunk: c002
+      snippet: sparc_pitch.parquet (n=23532) contains the estimated fundamental frequency
+        (F0) of the audio signal using a different algorithm than before with a range
+        of 50-550Hz and dimension T.
+    core_path: distributions[8]
+  file_collections[0].resources[8]:
+    receipts:
+    - chunk: c002
+      snippet: ppgs.parquet (n=23533) contains the phonetic posteriorgram probabilities
+        across 40 phoneme categories giving a dimension of 40xT with a frame rate
+        of 100Hz.
+    core_path: distributions[9]
+  file_collections[0].resources[9]:
+    receipts:
+    - chunk: c002
+      snippet: Each feature is present in the static_features.tsv file.
+    core_path: distributions[10]
+  file_collections[1]:
+    receipts:
+    - chunk: c002
+      snippet: phenotypic information acquired during data collection (under phenotype)
+    core_path: distributions[12]
+  file_collections[2]:
+    receipts:
+    - chunk: c002
+      snippet: metadata information for the recordings (available under metadata)
+    core_path: distributions[13]
+  funders[0]:
+    receipts:
+    - chunk: c003
+      snippet: This project was funded by NIH project number 3OT2OD032720-01S1
+    core_path: funders[0]
+  funders[0].description:
+    receipts:
+    - chunk: c006
+      snippet: Bridge2AI-Voice is a Precision Public Health grand challenge project
+        funded by the NIH Common Fund Bridge2AI Program.
+    core_path: funders[0].description
+  funders[0].grantor:
+    receipts:
+    - chunk: c003
+      snippet: This project was funded by NIH project number
+    core_path: funders[0].grantor
+  funders[0].grants[0].grant_number:
+    receipts:
+    - chunk: c003
+      snippet: NIH project number 3OT2OD032720-01S1
+    core_path: funders[0].grants[0].grant_number
+  funders[0].grants[0].name:
+    receipts:
+    - chunk: c003
+      snippet: 'Bridge2AI: Voice as a Biomarker of Health - Building an ethically
+        sourced, bioaccoustic database to understand disease like never before'
+    core_path: funders[0].grants[0].name
+  funders[0].source_caveats:
+    receipts:
+    - chunk: c010
+      snippet: 'Project number: 3OT2OD032720-01S3'
+    - chunk: c010
+      snippet: 'Core project number: OT2OD032720'
+    core_path: funders[0].source_caveats
+  human_subject_research.ethics_review_board:
+    receipts:
+    - chunk: c003
+      snippet: approved by the Research Ethics Board at the Hospital for Sick Children
+    core_path: human_subject_research.ethics_review_board
+  human_subject_research.involves_human_subjects:
+    receipts:
+    - chunk: c002
+      snippet: Following confirmation of eligibility, parental or participant consent
+        was obtained
+    core_path: human_subject_research.involves_human_subjects
+  human_subject_research.special_populations:
+    receipts:
+    - chunk: c002
+      snippet: inclusion criteria of 2 to 18 years of age
+    core_path: human_subject_research.special_populations
+  id:
+    receipts:
+    - chunk: c002
+      snippet: doi = {10.13026/h995-bt35}
+    core_path: id
+  informed_consent[0].consent_obtained:
+    receipts:
+    - chunk: c002
+      snippet: parental or participant consent was obtained prior to data collection
+        and data sharing
+    core_path: informed_consent[0].consent_obtained
+  informed_consent[0].consent_scope:
+    receipts:
+    - chunk: c002
+      snippet: obtained prior to data collection and data sharing
+    core_path: informed_consent[0].consent_scope
+  informed_consent[0].consent_type:
+    receipts:
+    - chunk: c002
+      snippet: parental or participant consent was obtained
+    core_path: informed_consent[0].consent_type
+  instances[0]:
+    receipts:
+    - chunk: c002
+      snippet: Bridge2AI-Voice Pediatric Dataset v1.1.0 contains derived audio features
+        for 23,533 recordings
+    core_path: instances[0]
+  instances[0].counts:
+    receipts:
+    - chunk: c002
+      snippet: contains derived audio features for 23,533 recordings
+    core_path: instances[0].counts
+  instances[0].description:
+    receipts:
+    - chunk: c002
+      snippet: but not the original voice recordings
+    core_path: instances[0].description
+  instances[1]:
+    receipts:
+    - chunk: c002
+      snippet: 23,533 recordings collected from 300 participants aged 2-18
+    core_path: instances[1]
+  instances[1].counts:
+    receipts:
+    - chunk: c002
+      snippet: collected from 300 participants aged 2-18
+    core_path: instances[1].counts
+  intended_uses[0]:
+    receipts:
+    - chunk: c002
+      snippet: Resources such as this project are intended to enable study of developmental
+        norms
+    core_path: intended_uses[0]
+  intended_uses[1]:
+    receipts:
+    - chunk: c002
+      snippet: create AI-driven tools for early screening
+    core_path: intended_uses[1]
+  intended_uses[2]:
+    receipts:
+    - chunk: c002
+      snippet: and support clinical insight.
+    core_path: intended_uses[2]
+  issued:
+    receipts:
+    - chunk: c002
+      snippet: 'Published: May 1, 2026.'
+    core_path: issued
+  keywords:
+    receipts:
+    - chunk: c003
+      snippet: 'Topics:
+
+        health
+
+        pediatric
+
+        biomarkers
+
+        bridge2ai
+
+        voice'
+    core_path: keywords
+  license:
+    receipts:
+    - chunk: c003
+      snippet: Bridge2AI Voice Registered Access License
+    core_path: license
+  license_and_use_terms.license_terms:
+    receipts:
+    - chunk: c003
+      snippet: Only credentialed users who sign the DUA can access the files.
+    - chunk: c003
+      snippet: Bridge2AI Voice Registered Access Agreement
+    - chunk: c003
+      snippet: 'Required training:
+
+        No training required'
+    - chunk: c003
+      snippet: 'This is a restricted-access resource. To access the files, you must
+        fulfill all of the following requirements:'
+    - chunk: c006
+      snippet: The adult and pediatric datasets are available through separate PhysioNet
+        links under registered access. Credentialed users must be approved and sign
+        DUA.
+    core_path: license_and_use_terms.license_terms
+  missing_data_documentation[0].missing_data_causes:
+    receipts:
+    - chunk: c002
+      snippet: some files, whether due to length or other issues, could not generate
+        certain features and so are not included in the bundled data.
+    core_path: missing_data_documentation[0].missing_data_causes
+  missing_data_documentation[0].missing_data_patterns:
+    receipts:
+    - chunk: c002
+      snippet: Spectrograms, Mel Spectrograms, MFC coefficients, PPGs, and EMAs for
+        sensitive records and audio checks have been removed from v1.1.
+    core_path: missing_data_documentation[0].missing_data_patterns
+  name:
+    receipts:
+    - chunk: c002
+      snippet: Bridge2AI-Voice Pediatric Dataset v1.1.0
+    core_path: name
+  page:
+    receipts:
+    - chunk: c002
+      snippet: 'Source URL: https://physionet.org/content/b2ai-voice-pediatric/1.1.0/'
+    core_path: page
+  participant_compensation[0].description:
+    receipts:
+    - chunk: c005
+      snippet: Compensation will be provided to the adult population only.
+    core_path: participant_compensation[0].description
+  participant_privacy[0].privacy_techniques:
+    receipts:
+    - chunk: c002
+      snippet: This PhysioNet project does not contain raw audios.
+    - chunk: c006
+      snippet: Raw audio data is disseminated through controlled access only to protect
+        participants’ privacy.
+    core_path: participant_privacy[0].privacy_techniques
+  participant_privacy[0].reidentification_risk:
+    receipts:
+    - chunk: c005
+      snippet: it is always possible even if unlikely that at some point someone could
+        recognize the participant’s voice since we can never full deidentify one’s
+        voice
+    core_path: participant_privacy[0].reidentification_risk
+  preprocessing_strategies[0].preprocessing_details:
+    receipts:
+    - chunk: c002
+      snippet: Data were exported and converted to tab delimited values using an open
+        source library developed by our team [4].
+    - chunk: c008
+      snippet: Pediatric data collected through ReproSchema-UI is extracted and transformed
+        into REDCap format, and subsequently converted to the Brain Imaging Data Structure
+        (BIDS).
+    core_path: preprocessing_strategies[0].preprocessing_details
+  preprocessing_strategies[1].preprocessing_details:
+    receipts:
+    - chunk: c002
+      snippet: The code used to preprocess the raw audio waveforms into the parquet
+        file and to merge the source data into the phenotype files has been made open
+        source in the
+    core_path: preprocessing_strategies[1].preprocessing_details
+  preprocessing_strategies[1].used_software[0]:
+    receipts:
+    - chunk: c003
+      snippet: Bridge2AI Data Processing Library (Version 3.0.0) [Computer software].
+    core_path: preprocessing_strategies[1].used_software[0]
+  preprocessing_strategies[1].used_software[0].license:
+    receipts:
+    - chunk: c009
+      snippet: 'Description: The code used to preprocess the raw audio waveforms into
+        the parquet file and to merge the source data into the phenotype files.
+
+        License: Apache-2.0'
+    core_path: preprocessing_strategies[1].used_software[0].license
+  preprocessing_strategies[1].used_software[0].url:
+    receipts:
+    - chunk: c003
+      snippet: https://github.com/sensein/b2aiprep
+    core_path: preprocessing_strategies[1].used_software[0].url
+  preprocessing_strategies[2].preprocessing_details:
+    receipts:
+    - chunk: c002
+      snippet: features derived from the open-source Speech and Music Interpretation
+        by Large-space Extraction (openSMILE [5]), Praat [6], parselmouth [7], and
+        torchaudio [8, 9] are provided.
+    core_path: preprocessing_strategies[2].preprocessing_details
+  preprocessing_strategies[2].used_software[0]:
+    receipts:
+    - chunk: c002
+      snippet: (openSMILE [5])
+    core_path: preprocessing_strategies[2].used_software[0]
+  preprocessing_strategies[2].used_software[1]:
+    receipts:
+    - chunk: c002
+      snippet: Praat [6], parselmouth [7]
+    core_path: preprocessing_strategies[2].used_software[1]
+  preprocessing_strategies[2].used_software[2]:
+    receipts:
+    - chunk: c002
+      snippet: parselmouth [7], and torchaudio
+    core_path: preprocessing_strategies[2].used_software[2]
+  preprocessing_strategies[2].used_software[3]:
+    receipts:
+    - chunk: c002
+      snippet: and torchaudio [8, 9] are provided
+    core_path: preprocessing_strategies[2].used_software[3]
+  purposes[0].response:
+    receipts:
+    - chunk: c002
+      snippet: The Bridge2AI-Voice project seeks to create an ethically sourced flagship
+        dataset to enable future research in artificial intelligence and support critical
+        insights into the use of voice as a biomarker of health.
+    core_path: purposes[0].response
+  purposes[1].response:
+    receipts:
+    - chunk: c004
+      snippet: To build a large multi-institutional database of human voices, speech
+        and respiratory sounds that is ethically sourced, diverse, and linked to multimodal
+        health biomarkers to fuel voice AI research
+    core_path: purposes[1].response
+  raw_sources[0]:
+    receipts:
+    - chunk: c002
+      snippet: Raw Audio Data Access for Bridge2AI Voice Pediatric Cohort is via Synapse
+    core_path: raw_sources[0]
+  raw_sources[0].access_url:
+    receipts:
+    - chunk: c002
+      snippet: https://www.synapse.org/Synapse:syn73617068
+    core_path: raw_sources[0].access_url
+  raw_sources[0].raw_data_details:
+    receipts:
+    - chunk: c002
+      snippet: This PhysioNet project does not contain raw audios.
+    - chunk: c002
+      snippet: Accessing raw audio is a more involved process and requires institutional
+        sign off.
+    - chunk: c006
+      snippet: Raw audio data is disseminated through controlled access only to protect
+        participants’ privacy.
+    - chunk: c006
+      snippet: B2AI-Voice v3.1.0 adult dataset and v1.1.0 pediatric dataset now available
+        (with voice upon request)
+    core_path: raw_sources[0].raw_data_details
+  retention_limit.retention_details:
+    receipts:
+    - chunk: c005
+      snippet: Identifiable data and datasheets linking participant numbers to participant
+        information will be kept in each institution on local cloud storage for a
+        maximum of 10 years after study completion.
+    core_path: retention_limit.retention_details
+  sampling_strategies[0].strategies:
+    receipts:
+    - chunk: c002
+      snippet: Patients were considered eligible for the study if they fulfilled the
+        inclusion criteria of 2 to 18 years of age, and English proficiency.
+    - chunk: c002
+      snippet: Exclusion criteria included participants over 18 years of age, and
+        individuals who were non-verbal.
+    - chunk: c002
+      snippet: Non-patients, recruited through research postings, were evaluated for
+        eligibility
+    - chunk: c006
+      snippet: Pediatric participants are recruited strictly from the Hospital for
+        Sick Children (SickKids) and are grouped by age.
+    core_path: sampling_strategies[0].strategies
+  sensitive_elements[0].sensitivity_details:
+    receipts:
+    - chunk: c002
+      snippet: The release contains data considered low risk, including derivations
+        such as spectrograms but not the original voice recordings.
+    core_path: sensitive_elements[0].sensitivity_details
+  source_caveats:
+    receipts:
+    - chunk: c002
+      snippet: 'Note that the Bridge2AI-Voice Adult Dataset is also available on PhysioNet:'
+    - chunk: c002
+      snippet: https://physionet.org/content/b2ai-voice/
+    - chunk: c003
+      snippet: You must be logged in to view the contact information.
+    - chunk: c003
+      snippet: No new participants released in this minor update
+    - chunk: c006
+      snippet: The pediatric dataset v1.0 is now available containing data from 300
+        participants.
+    - chunk: c007
+      snippet: Jennifer Sui, MD (Hospital for Sick Children)
+    - chunk: c007
+      snippet: The current v.2.0.0 dataset contains only adult populations.
+    - chunk: c007
+      snippet: There are currently around 833 instances.
+    - chunk: c008
+      snippet: Participants were compensated for their time through electronic gift
+        cards.
+    - chunk: c008
+      snippet: Methods of De-identification for v3.0.0
+    core_path: source_caveats
+  subpopulations[0].description:
+    receipts:
+    - chunk: c006
+      snippet: 'Peds 10+
+
+        Peds 6-10
+
+        Peds 4-6
+
+        Peds 2-4'
+    core_path: subpopulations[0].description
+  subpopulations[0].identification:
+    receipts:
+    - chunk: c006
+      snippet: Pediatric participants are recruited strictly from the Hospital for
+        Sick Children (SickKids) and are grouped by age.
+    core_path: subpopulations[0].identification
+  title:
+    receipts:
+    - chunk: c002
+      snippet: title = {{Bridge2AI-Voice Pediatric Dataset}}
+    core_path: title
+  variables[0]:
+    receipts:
+    - chunk: c002
+      snippet: a unique identifier for the participant (participant_id)
+    core_path: variables[0]
+  variables[1]:
+    receipts:
+    - chunk: c002
+      snippet: a unique identifier for the recording session (session_id)
+    core_path: variables[1]
+  variables[2]:
+    receipts:
+    - chunk: c002
+      snippet: the task performed (task_name)
+    core_path: variables[2]
+  variables[3]:
+    receipts:
+    - chunk: c002
+      snippet: the number of time frames associated with that feature (n_frames)
+    core_path: variables[3]
+  version:
+    receipts:
+    - chunk: c002
+      snippet: note = {Version 1.1.0}
+    core_path: version
+  version_access.latest_version_doi:
+    receipts:
+    - chunk: c003
+      snippet: 'DOI (latest version):'
+    - chunk: c003
+      snippet: https://doi.org/10.13026/mf9s-5r03
+    core_path: version_access.latest_version_doi
+  version_access.version_details:
+    receipts:
+    - chunk: c003
+      snippet: 'b2ai-voice-pediatric v1.1: No new participants released in this minor
+        update'
+    - chunk: c003
+      snippet: Additionally, releases new metrics related to the audio quality of
+        the recordings and per recording metadata information.
+    - chunk: c003
+      snippet: 'b2ai-voice-pediatric v1.0: This was the first release of the Bridge2AI-Voice
+        Pediatric dataset.'
+    core_path: version_access.version_details
+  version_access.versions_available:
+    receipts:
+    - chunk: c003
+      snippet: 'b2ai-voice-pediatric v1.0: This was the first release of the Bridge2AI-Voice
+        Pediatric dataset.'
+    - chunk: c003
+      snippet: 'b2ai-voice-pediatric v1.1: No new participants released in this minor
+        update'
+    core_path: version_access.versions_available

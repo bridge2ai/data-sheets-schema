@@ -1,0 +1,38 @@
+Gates for AI_READI 2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1   session exit 0   2026-11-22T04:53:38Z -> 2026-11-22T05:29:41Z
+transcript models: {'claude-opus-5-5': 308}
+transcript tools: {'Bash': 62, 'Read': 30, 'Write': 6, 'Edit': 91}
+transcript advisor calls: 0
+transcript Read of other d4d_concatenated paths: []
+transcript result: success | is_error False | turns 190 | minutes 36.0 | models used ['claude-opus-5-5']
+TRANSCRIPT: ok
+file ok: data/d4d_concatenated/claudecode_agent/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1/AI_READI_d4d.yaml (67797 bytes)
+file ok: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1/AI_READI_d4d_core.yaml (62325 bytes)
+file ok: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1/AI_READI_coverage_receipt.yaml (71149 bytes)
+file ok: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1/AI_READI_reconciliation.md (13094 bytes)
+file ok: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1/AI_READI_provenance.yaml (23679 bytes)
+--- validate full
+No issues found
+validate_full_exit 0
+--- validate core
+No issues found
+validate_core_exit 0
+--- receipts check --strict
+   chunks 25/25 reviewed · snippets 552/552 verified (13 bearing on no token of their value) (36 entry receipt(s) overlapping one leaf) · slots 602/602 with a receipt (45 exempt)
+   · not checked here: that a chunk marked nothing_relevant truly held nothing for the record — a judgement; sample by chunk id in review
+   · not checked here: that a verified snippet supports the value it is attached to — a snippet can be real and irrelevant; sample by slot path in review
+receipts_exit 0
+--- scope check
+
+2 record(s) checked against the declaration
+   ✓ none is about a dataset its project declares distinct
+scope_exit 0
+--- observed (transcript) annotation
+✓ data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1/AI_READI_provenance.yaml
+observed_exit 0
+observed: {'assistant_turns': 103, 'output_tokens': 175838, 'thinking_tokens': 57246, 'receipt_chunks_unopened': 0, 'receipt_chunks_total': 25, 'bundle_lines_read': 6424, 'bundle_lines_total': 6424}
+--- runs check --strict
+1 run(s) checked, 1 subject to the requirement, 0 failing
+All runs subject to the live-provenance requirement satisfy it.
+   ⚠️  AI_READI  2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1 unverifiable: request hash recorded without the spec that produced it
+runs_check_exit 0
+GATES: PASS
