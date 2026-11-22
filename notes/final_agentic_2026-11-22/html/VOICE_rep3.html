@@ -1,0 +1,691 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="datasheet-common.css">
+    <title>VOICE d4d - Datasheet for Dataset</title>
+</head>
+<body>
+    <div class="header">
+        <h1>VOICE d4d</h1>
+        <p class="subtitle">Datasheet for Dataset - Human Readable Format</p>
+    </div>
+    
+    
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🎯</span>
+                    <div>
+                        <h2 class="section-title">Motivation</h2>
+                        <p class="section-description">For what purpose was the dataset created?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Purposes
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Response</th><th>Source Caveats</th></tr></thead><tbody><tr><td><div class="long-description">The Bridge2AI-Voice consortium aims to generate a large-scale, ethically sourced voice, speech, and cough database linked to health metadata in order to support AI-driven research.</div></td><td></td></tr><tr><td><div class="long-description">Bridge2AI-Voice seeks to create a flagship, standardized, and ethically sourced dataset of 10,000 voices linked to health information to fuel research and discovery in voice biomarkers (a stated target, not a count of the current release).</div></td><td><div class="long-description">Target sizes differ across sources. The project documentation (manifest tier 2) states a flagship dataset of 10,000 voices; the IRB protocol (also tier 2) states a sample size of 30 000 participants; the JAMA Otolaryngology viewpoint (tier 3) states a primary deliverable of a publicly available database of 30 000 human voices. The two tier-2 sources share a rank and are targets stated at different times, so both are recorded rather than one selected. Version 3.1 contains data for 833 participants.</div></td></tr><tr><td><div class="long-description">Specific Aim 1 of the NIH project: to build a multi-modal, multi-institutional, large scale, diverse and ethically sourced human voice database linked to other biomarkers of health that is AI/ML friendly to fuel voice AI research.</div></td><td></td></tr><tr><td><div class="long-description">To facilitate the use of voice as a non-invasive, cost-effective biomarker for the screening, diagnosis, and monitoring of a wide range of health conditions.</div></td><td></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Funders
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Grantor</th><th>Grant Name</th><th>Grant Number</th></tr></thead><tbody><tr><td>-</td><td>-</td><td>-</td></tr></tbody></table></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📊</span>
+                    <div>
+                        <h2 class="section-title">Composition</h2>
+                        <p class="section-description">What do the instances that comprise the dataset represent?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Instances
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>Instance Type</dt><dd>person</dd><dt>Counts</dt><dd>833</dd><dt>Label</dt><dd>True</dd><dt>Label Description</dt><dd><div class="long-description">Labels include diagnostic categories such as vocal pathologies, neurological disorders, psychiatric conditions, and respiratory disorders.</div></dd><dt>Notes</dt><dd><div class="long-description">A subset of participants required multiple sessions to complete the data collection, so there may be more than one session per participant; there is no requirement the participant provide the same response for each visit, so participant information for the same data element may vary across the data file.</div></dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Subpopulations
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Identification</dt><dd>Age, Gender, Sex, Ethnicity, Socioeconomic status</dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Participant Privacy
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Privacy Techniques</dt><dd><div class="long-description">Dates rebased and/or replaced by integers; geographic information removed or generalized; narrative text fields removed (project documentation de-identification checklist).</div></dd><dt>Reidentification Risk</dt><dd><div class="long-description">The project documentation states the dataset does not achieve K-anonymization (k>=2). The IRB protocol states that it is always possible, even if unlikely, that someone could recognize a participant's voice, since a voice can never be fully de-identified.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Participant Compensation
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>Compensation Provided</dt><dd>True</dd><dt>Compensation Type</dt><dd>Electronic gift cards</dd><dt>Compensation Amount</dt><dd><div class="long-description">$40 for a data collection session that takes less than 90 minutes and $80 for a session that takes over 90 minutes, for no more than a total of 3 sessions and maximum compensation of $120.</div></dd><dt>Notes</dt><dd>Per the IRB protocol, compensation is provided to the adult population only.</dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Distribution Dates
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Release Dates</dt><dd><ul class='formatted-list'><li>1.1: 2025-01-17</li><li>2.0.0: 2025-04-16</li><li>2.0.1: 2025-08-18</li><li>3.0.0: 2025-12-16</li><li>3.1.0: 2026-05-01</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔍</span>
+                    <div>
+                        <h2 class="section-title">Collection Process</h2>
+                        <p class="section-description">How was the data associated with each instance acquired?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            ID
+                        </label>
+                        <div class="item-value"><a href="https://doi.org/10.13026/37yb-1t42" target="_blank">doi:10.13026/37yb-1t42</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Name
+                        </label>
+                        <div class="item-value">Bridge2AI-Voice</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Title
+                        </label>
+                        <div class="item-value"><div class="long-description">Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information</div></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Description
+                        </label>
+                        <div class="item-value"><div class="long-description">A large, ethically sourced, and demographically diverse voice dataset linked to health information, released by the NIH Bridge2AI initiative. Version 3.1.0 contains data for 833 participants across five sites in North America; the healthsheet names the countries of data collection as the USA and Canada and states that five recording sites are included. The release contains data considered low risk, including derived audio features such as spectrograms but not the original voice recordings, together with detailed demographic, clinical, and validated questionnaire data and metadata related to the specific audio task and recording. The underlying samples come from conventional acoustic tasks including respiratory sounds, cough sounds, and free speech prompts.</div></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Page
+                        </label>
+                        <div class="item-value"><a href="https://physionet.org/content/b2ai-voice/3.1.0/" target="_blank">https://physionet.org/content/b2ai-voice/3.1.0/</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Issued
+                        </label>
+                        <div class="item-value">2026-05-01T00:00:00Z</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Language
+                        </label>
+                        <div class="item-value">English</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Source Caveats
+                        </label>
+                        <div class="item-value"><div class="long-description">Language: the healthsheet states English was used for communication with study participants and that the only language option for v2.0.0 is English, with Spanish versions of the protocol under development; the IRB protocol revision of February 10, 2025 (V11) was updated to include data collection from Spanish language speakers. No source states whether release 3.1.0 contains any Spanish-language data.</div></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Keywords
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li>health</li><li>biomarkers</li><li>bridge2ai</li><li>voice</li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Citation
+                        </label>
+                        <div class="item-value"><div class="long-description">Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr, D., Payne, P., Ravitsky, V., Bélisle-Pipon, J., Bahr, R., Watts, S., Bolser, D., Siu, J., Lerner-Ellis, J., Rudzicz, F., Boyer, M., Abdel-Aty, Y., Ahmed Syed, T., Anibal, J., ... Ghosh, S. (2026). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 3.1.0). PhysioNet. RRID:SCR_007345. https://doi.org/10.13026/8xbn-nq66</div></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Research Gaps Addressed
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Response</th></tr></thead><tbody><tr><td><div class="long-description">Existing literature has studied voice only in small- to medium-sized data sets with limited data outside of acoustic measures, not linked to multi-modal health data.</div></td></tr><tr><td><div class="long-description">Comparing studies and pooling data is challenging due to a lack of existing standards in how voice and other acoustics are measured and collected.</div></td></tr><tr><td><div class="long-description">The dataset was created to address a gap in the availability of large-scale, diverse, and well-documented voice data for use in clinical machine-learning applications; previous studies&#x27; sample sizes were too small, or they lacked the key metadata needed for training robust, clinically useful models.</div></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Creators
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Role</th><th>Name</th><th>ORCID</th><th>Affiliation</th></tr></thead><tbody><tr><td>Principal Investigator</td><td>Yael Bensoussan</td><td>doi:10.13026/37yb-1t42#person-yael-bensoussan</td><td>-</td></tr><tr><td>Contributor</td><td>Alexandros Sigaras</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Anais Rameau</td><td>-</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Olivier Elemento</td><td>doi:10.13026/37yb-1t42#person-olivier-elemento</td><td>-</td></tr><tr><td>Contributor</td><td>Maria Powell</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>David Dorr</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Philip Payne</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Vardit Ravitsky</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Jean-Christophe Bélisle-Pipon</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Ruth Bahr</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Stephanie Watts</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Donald Bolser</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Jennifer Siu</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Jordan Lerner-Ellis</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Frank Rudzicz</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Micah Boyer</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Yassmeen Abdel-Aty</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Toufeeq Ahmed Syed</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>James Anibal</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Dona Amraei</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Stephen Aradi</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Kirollos Armosh</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Ana Sophia Martinez</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Shaheen Awan</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Steven Bedrick</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Helena Beltran</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Alexander Bernier</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Moroni Berrios</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Isaac Bevers</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Alden Blatter</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Rahul Brito</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Amy Brown</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Johnathan Brown</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Léo Cadillac</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Selina Casalino</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>John Costello</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Abhijeet Dalal</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Iris De Santiago</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Enrique Diaz-Ocampo</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Amanda Doherty-Kirby</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Mohamed Ebraheem</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Ellie Eiseman</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Mahmoud Elmahdy</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Renee English</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Emily Evangelista</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Kenneth Fletcher</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Hortense Gallois</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Gaelyn Garrett</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Alexander Gelbard</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Omar Ghaffar</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Amer Ghavanini</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Anna Goldenberg</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Karim Hanna</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>William Hersh</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Jennifer Jain</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Lochana Jayachandran</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Kaley Jenney</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Kathy Jenkins</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Stacy Jo</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Alistair Johnson</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Ayush Kalia</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Megha Kalia</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Zoha Khawa</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Kenji Kobayashi</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Cindy Kostelnik</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Alisa Krause</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Andrea Krussel</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Elisa Lapadula</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Genelle Leo</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Justin Levinsky</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Chloe Loewith</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Radhika Mahajan</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Vrishni Maharaj</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Siyu Miao</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>LeAnn Michaels</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Matthew Mifsud</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Marian Mikhael</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Elijah Moothedan</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Yosef Nafii</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Tempestt Neal</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Karlee Newberry</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Evan Ng</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Christopher Nickel</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Amanda Peltier</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Trevor Pharr</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Michaela Pnacekova</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Matthew Pontell</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Jaiden Potter</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Claire Premi-Bortolotto</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Parnaz Rafatjou</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>JM Rahman</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Gayathiri Rajkumar</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>John Ramos</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Michael de Riesthal</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Sarah Rohde</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Jillian Rossi</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Laurie Russell</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Samantha Salvi Cruz</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Joyce Samuel</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Suketu Shah</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Ahmed Shawkat</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Elizabeth Silberholz</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>John Stark</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Lala Su</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Shrramana Ganesh Sudhakar</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Duncan Sutherland</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Venkata Swarna Mukhi</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Jeffrey Tang</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Luka Taylor</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Jamie Toghranegar</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Julie Tu</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Megan Urbano</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Gavin Victor</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Kimberly Vinson</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Jordan Wilke</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Claire Wilson</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Madeleine Zanin</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Xijie Zeng</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Theresa Zesiewicz</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Robin Zhao</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Pantelis Zisimopoulos</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Satrajit Ghosh</td><td>-</td><td>-</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Collection Mechanisms
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>Mechanism Details</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">A novel smartphone application created to collect standardized recordings of acoustic tasks, validated patient questionnaires, and validated patient reported outcomes; data collection is performed via the app, which is linked to electronic health records (EHR).</div></td><td><div class="long-description">The app collects breathing sounds and voice, speech, and linguistic tasks, along with health information through surveys and validated questionnaires. A total of 22 acoustic tasks are recorded through the app. Detailed demographic data and surveys about confounding factors such as smoking and drinking history are collected through the app. The healthsheet states the data were collected using an iPad app; the PhysioNet release states data collection was conducted using a custom application on a tablet with a headset used when possible.</div></td><td>Bridge2AI-Voice App</td></tr><tr><td></td><td><div class="long-description">Data is collected on iPads (9th or 10th generation) and iPad Air (5th generation) using an Avid AE-36 microphone and an Apple dongle to connect it to the iPad.</div></td><td>Recording hardware</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Data Collectors
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd><div class="long-description">Data is collected in the clinic with the assistance of a trained research assistant.</div></dd><dt>Collector Details</dt><dd><div class="long-description">Research teams, which may include medical, graduate, or undergraduate students, coordinated with clinicians/doctors to identify appropriate participants.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Direct Collection
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Is Direct</dt><dd>True</dd><dt>Collection Details</dt><dd><div class="long-description">Voice samples are collected prospectively using a custom software application (the Bridge2AI-Voice App) with the Bridge2AI-Voice protocols; the healthsheet states the data were collected from the individuals directly.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Collection Timeframes
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Timeframe Details</dt><dd>The healthsheet states the data was collected over a period of 12 months.</dd><dt>Source Caveats</dt><dd><div class="long-description">The healthsheet answer is not tied to a named release, and no collection start or end date is stated for release 3.1.0.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Acquisition Methods
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>Was Directly Observed</dt><dd>True</dd><dt>Was Reported By Subjects</dt><dd>True</dd><dt>Was Validated Verified</dt><dd>True</dd><dt>Acquisition Details</dt><dd><div class="long-description">The data was directly observable and reported by subjects. Clinical validation is performed by a qualified physician or practitioner based on established gold standards for diagnosis; clinical diagnoses were verified by clinicians reviewing audio and/or imaging data, looking at electronic health records, or medication prescriptions.</div></dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Sampling Strategies
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>Sample</dt><dd>True</dd><dt>Random Sampling</dt><dd>False</dd><dt>Representative Sample</dt><dd>False</dd><dt>Strategies</dt><dd>Non-probability sample</dd><dt>Why Not Representative</dt><dd><div class="long-description">The data is not representative because it was collected at a limited number of geographic locations.</div></dd><dt>Description</dt><dd><div class="long-description">A sample of a larger, ongoing collection. Participants were selected based on known conditions which manifest within the voice waveform, including voice disorders, neurological disorders, mood disorders, and respiratory disorders. Participants are recruited across different academic institutions from high volume expert clinics (outpatient clinics within hospital systems or academic institutions that have developed an expertise in a specific disease area and see more than 50 patients per month from the same disease category), based on diagnosis and inclusion/exclusion criteria. Patients presenting at the given clinic were screened for inclusion and exclusion criteria prior to their visit by the project investigators. The project documentation's study metadata state a minimum age of 18 years, a maximum age of 120 years, and that healthy volunteers are accepted; its exclusion criteria include not reading or speaking English, and its disease-cohort table and the IRB protocol exclude having had a surgical intervention significantly altering the symptoms of the disease studied.</div></dd><dt>Source Caveats</dt><dd><div class="long-description">The English-only exclusion is from the project documentation; the IRB protocol revision of February 10, 2025 (V11) was updated to include data collection from Spanish language speakers, so the language criterion applied to release 3.1.0 participants is not established.</div></dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Missing Data Documentation
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Missing Data Causes</dt><dd><div class="long-description">Some questions are optional, and data collection irregularities may have caused some information to be missing from individual instances.</div></dd><dt>Missing Data Patterns</dt><dd><div class="long-description">Each individual answered a common set of questions and then responded to additional questions relevant to their primary diagnostic category.</div></dd><dt>Handling Strategy</dt><dd><div class="long-description">Phenotype data files only contain rows for a participant if at least one column is not missing.</div></dd></dl></li><li><dl class='nested-dict'><dt>Missing Data Causes</dt><dd><div class="long-description">Some files, whether due to length or other issues, could not generate certain features and so are not included in the bundled data.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Anomalies
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Anomaly Details</dt><dd><div class="long-description">Different sites have different collection configurations, and the collection protocol changed over the course of the study.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Known Biases
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Bias Description</th><th>Mitigation Strategy</th></tr></thead><tbody><tr><td><div class="long-description">Groups that have less trust in the medical system, AI, or are less proximal to the collection sites would have been less likely to be recruited.</div></td><td></td></tr><tr><td><div class="long-description">Participants were screened for different disorders based on site, so they also had their data collected with different devices.</div></td><td></td></tr><tr><td><div class="long-description">The dataset has skews based on disorder category, site, and other demographic factors.</div></td><td><div class="long-description">Users should consider the multivariate distribution when assessing utility for different questions.</div></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Known Limitations
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Limitation Description</th></tr></thead><tbody><tr><td><div class="long-description">The public data releases do not contain an equal distribution of the disease categories.</div></td></tr><tr><td><div class="long-description">Certain aspects of the data (e.g., transcription) were generated using off-the-shelf models that have not been audited for correctness.</div></td></tr><tr><td><div class="long-description">Distinct iPad devices were used at each site, and the data were recorded with a head-mounted headset with a microphone that could be at slightly different distances.</div></td></tr><tr><td><div class="long-description">Changes in diagnostic criteria or practices could be a source of distribution shift.</div></td></tr><tr><td><div class="long-description">Confounding factors that might be present in the data: noise artifacts, variations in diagnostic practices, inaccurate questionnaire responses, and underreporting.</div></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Content Warnings
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Warnings</dt><dd><ul class='formatted-list'><li><div class="long-description">The healthsheet states the dataset includes the transcription of free speech tasks; while the inclusion of offensive, threatening, or otherwise unsafe content of that type is unlikely, it cannot be completely avoided, as research participants are responsible for their choice of language.</div></li></ul></dd><dt>Source Caveats</dt><dd><div class="long-description">The same project documentation states that transcriptions from open-response prompts are removed from the feature-only dataset, the v1.1 release notes state transcripts of free speech audio were removed, and the PhysioNet 3.1.0 file description names no transcript file; whether release 3.1.0 contains any transcriptions is not established by the sources.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Sensitive Elements
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Sensitive Elements Present</th><th>Sensitivity Details</th></tr></thead><tbody><tr><td>True</td><td>The dataset includes race information.</td></tr><tr><td>True</td><td>The dataset includes sexual orientation information.</td></tr><tr><td>True</td><td>The dataset includes socioeconomic and health information.</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Deidentification
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Method</dt><dd><div class="long-description">HIPAA Safe Harbor identifiers were removed; the project documentation states the dataset applies the HIPAA de-identification rules, and that it was de-identified through removal of all audio data and certain sensitive fields identified by a team of ethicists.</div></dd><dt>Identifiers Removed</dt><dd><div class="long-description">All direct identifiers, including name, civic address, and social security numbers; state and province (country of data collection was retained).</div></dd><dt>Deidentification Details</dt><dd><div class="long-description">Identifiable information (under HIPAA and the Common Rule), as well as data considered sensitive, have been removed. Indirect identifiers were removed where these created a significant risk of participant re-identification. All raw voice data was removed, as this data has the potential to cause individual re-identification or to be used for illicit or unauthorized purposes. Raw audio transcripts were reviewed, and any audio recordings that contained potentially identifying information and external voices were removed from the release. Spectrograms and similar features were excluded if the audio contained free speech; static and other features which do not encode the sensitive information were retained. Spectrograms, Mel spectrograms, MFC coefficients, PPGs, and EMAs for sensitive records and audio checks have been removed from v3.1. The documentation also states that spectrograms, MFCCs, Mel spectrograms, transcriptions, EMAs, and PPGs from open-response prompts are removed from the feature-only dataset.</div></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Collection Notifications
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Notification Details</dt><dd>Participants went through an IRB-approved consent process.</dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Ethical Reviews
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Reviewing Organization</dt><dd>University of South Florida Institutional Review Board</dd><dt>Review Details</dt><dd><div class="long-description">Data collection and sharing was approved by the University of South Florida Institutional Review Board; the project documentation states the study was submitted and approved by the USF Single IRB and subsite IRBs through the Single IRB process.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Preprocessing Strategies
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>Preprocessing Details</th><th>Used Software</th></tr></thead><tbody><tr><td><div class="long-description">Features were extracted from the raw audio to limit re-identification, and only the extracted features are released with the dataset.</div></td><td><div class="long-description">Data were exported and converted from REDCap using an open source library developed by the team.</div></td><td>{&#x27;id&#x27;: &#x27;https://github.com/sensein/b2aiprep&#x27;, &#x27;name&#x27;: &#x27;b2aiprep&#x27;, &#x27;url&#x27;: &#x27;https://github.com/sensein/b2aiprep&#x27;, &#x27;version&#x27;: &#x27;3.0.0&#x27;, &#x27;description&#x27;: &#x27;Organizing and preprocessing the dataset; release 3.1.0 was generated with b2aiprep v3.0.0.&#x27;}, {&#x27;id&#x27;: &#x27;https://github.com/sensein/senselab&#x27;, &#x27;name&#x27;: &#x27;SenseLab&#x27;, &#x27;url&#x27;: &#x27;https://github.com/sensein/senselab&#x27;, &#x27;description&#x27;: &#x27;Processing audio files for research tasks.&#x27;}</td></tr><tr><td><div class="long-description">The feature-only dataset provides AI-ready derivations from the raw audio (project documentation).</div></td><td><div class="long-description">Features extracted include OpenSmile eGeMaps features per audio file; Parselmouth/Praat speech features for any speech tasks; Torchaudio-based pitch contour, spectrograms, mel spectrogram, and MFCCs; Speech Articulatory Coding (sparc)-based features including electromagnetic articulography (EMA) estimates, plus loudness, periodicity, and pitch measures; and phonetic posteriorgrams (PPGs). Waveform-derived features are stored in a fixed feature format of static features extracted from the entire waveform and a temporal format that varies for each audio file depending on the length of recording.</div></td><td></td></tr><tr><td><div class="long-description">Raw audio was preprocessed by converting to monaural and resampling to 16 kHz with a Butterworth anti-aliasing filter applied (PhysioNet release 3.1.0).</div></td><td><div class="long-description">Spectrograms were computed using the short-time Fast Fourier Transform with a 25ms window size, 10ms hop length, and a 400-point FFT, and further downsampled by a factor of two in the time domain. 60 MFCCs were extracted from the spectrograms. Mel spectrograms were computed with the same parameters and 60 Mels. Articulatory features were generated with the Speech Articulatory Coding (sparc) package at 50Hz. Acoustic features were extracted using OpenSMILE. Phonetic and prosodic features were computed using Parselmouth and Praat. Phonetic posteriorgrams at 100Hz were generated via the ppgs package.</div></td><td></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Cleaning Strategies
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd><div class="long-description">The dataset has been audited internally for missingness and consistency by the data release team; a missingness table is included with the dataset.</div></dd><dt>Cleaning Details</dt><dd><div class="long-description">Audit protocol: generate missingness tables; check distributions and outliers; for categorical responses, check against schema; for audio tasks, run quality control metrics.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Labeling Strategies
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>Labeling Details</dt><dd><div class="long-description">Diagnostic labels are the result of a clinical assessment of the participant. At each site, a local clinician provided the diagnosis based on a clinical interview and appropriate work-up. For the psychiatric disorders cohort, this assessment was determined by using the participant's EHR record or using an active prescription. A gold standard label is available in the data (diagnosed by a clinician).</div></dd><dt>Annotations Per Item</dt><dd>1</dd><dt>Annotator Demographics</dt><dd><ul class='formatted-list'><li><div class="long-description">Typically, the clinician at site of data collection, or external to (for prior diagnostic assessment)</div></li></ul></dd><dt>Data Annotation Protocol</dt><dd>Per Bridge2AI Protocols and ICD-10 codes.</dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Machine Annotation Tools
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Tools</dt><dd><ul class='formatted-list'><li>OpenAI Whisper Large unknown</li></ul></dd><dt>Tool Descriptions</dt><dd>Transcriptions were generated using OpenAI's Whisper Large model.</dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Raw Sources
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Raw audio recordings</dd><dt>Description</dt><dd><div class="long-description">The published Bridge2AI-Voice Adult Dataset contains derived features from the audio waveforms; the PhysioNet project does not contain raw audio. Raw audio is available under a controlled access mechanism.</div></dd><dt>Raw Data Details</dt><dd><div class="long-description">Raw audio data is disseminated through controlled access only to protect participants' privacy. The healthsheet states the raw data is saved and is not accessible publicly. Accessing raw audio requires institutional sign off; requests go to the access committee (DACO@b2ai-voice.org), and data will be made available via Synapse. The raw audio files and questionnaire data were converted to be compliant with the Brain Imaging Data Structure v1.9.0.</div></dd><dt>Access URL</dt><dd><a href="https://www.synapse.org/Synapse:syn72370534/" target="_blank">https://www.synapse.org/Synapse:syn72370534/</a></dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Intellectual Property Restrictions
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Restrictions</dt><dd><ul class='formatted-list'><li><div class="long-description">Intellectual property protections, database rights, or related rights may not be used in a manner that restricts or limits access to any part of the dataset or to any conclusions derived from it.</div></li><li>Sale of all or part of the Data on any media is not permitted.</li><li>Users agree not to make intellectual property claims on the Data.</li><li>Users agree to respect the Fort Lauderdale Agreement.</li></ul></dd><dt>Notes</dt><dd>There are no fees associated with these restrictions.</dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Data Governance
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Committee Name</dt><dd>Data Access Compliance Office (DACO)</dd><dt>Access Review Process</dt><dd><div class="long-description">The feature-only and raw audio datasets are available under distinct agreements appropriate for the sensitivity of their content. Controlled access to raw audio data: complete the Data Access Request Form (DARF) and the Data Use Agreement (DUA), submit the application to the Data Access Compliance Office for review, and upon approval ensure a Data Use and Transfer Agreement (DTUA) is signed by an authorized official at the requesting institution. Collaborators at other research organizations, and other research teams at the same organization, must apply independently and sign their own DTUA.</div></dd><dt>Notes</dt><dd><div class="long-description">Per the DTUA template, the agreement ends two years after the start date, upon completion of the project, upon expiration of the applicable ethics approval, or on termination by the provider institution, whichever occurs first.</div></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Regulatory Restrictions
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Other Compliance</dt><dd><div class="long-description">Certificate of Confidentiality (the DTUA template marks the data as covered under a Certificate of Confidentiality).</div></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Third Party Sharing
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Is Shared</dt><dd>True</dd><dt>Description</dt><dd><div class="long-description">The dataset will be distributed broadly to individuals outside of the entity who created the dataset.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Retention Limit
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Retention Details</dt><dd><div class="long-description">Once data is contributed, the data will be retained as long as it is useful for research purposes, possibly indefinitely.</div></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Errata
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Erratum Details</dt><dd>Release 3.1.0 fixed broken parquet files from the previous release.</dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Extension Mechanism
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Description</dt><dd><div class="long-description">Others may publish a derivative dataset on the Health Data Nexus which references the original source.</div></dd><dt>Extension Details</dt><dd><div class="long-description">The open-source preprocessing repository has a pull-request mechanism for contributing improvements to the data preprocessing code.</div></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            External Resources
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>External Resources</th></tr></thead><tbody><tr><td><div class="long-description">Data acquisition protocols, REDCap data dictionary, metadata, and instrument PDFs.</div></td><td>https://github.com/eipm/bridge2ai-redcap, https://zenodo.org/doi/10.5281/zenodo.12760724</td></tr><tr><td><div class="long-description">Publication: The Bridge2AI-voice application: initial feasibility study of voice data acquisition through mobile health (Front Digit Health, 2025).</div></td><td>10.3389/fdgth.2025.1514971</td></tr><tr><td><div class="long-description">Publication describing protocol development: Developing Multi-Disorder Voice Protocols: A team science approach involving clinical expertise, bioethics, standards, and DEI (Proc. Interspeech 2024).</div></td><td>https://www.isca-archive.org/interspeech_2024/bensoussan24_interspeech.html</td></tr><tr><td><div class="long-description">Source code for the project documentation (Docs for the Bridge2AI Voice Project).</div></td><td>https://zenodo.org/doi/10.5281/zenodo.13834653</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Related Datasets
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>Relationship Type</dt><dd>references</dd><dt>Target Dataset</dt><dd><a href="https://doi.org/10.13026/mf9s-5r03" target="_blank">https://doi.org/10.13026/mf9s-5r03</a></dd><dt>Name</dt><dd>Bridge2AI-Voice Pediatric Dataset</dd><dt>Description</dt><dd><div class="long-description">A separate PhysioNet project (version 1.1.0, https://doi.org/10.13026/h995-bt35) containing derived audio features for 23,533 recordings collected from 300 participants aged 2-18 at the Hospital for Sick Children, with data collection and sharing approved by the Research Ethics Board at the Hospital for Sick Children.</div></dd><dt>Notes</dt><dd><div class="long-description">The relation type records that the adult release page points readers to the pediatric dataset on PhysioNet; no source states a stronger relation between the two datasets.</div></dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            File Collections
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Collection Type</th><th>Description</th><th>ID</th><th>Name</th><th>Path</th><th>Resources</th><th>Source Caveats</th></tr></thead><tbody><tr><td></td><td><div class="long-description">Derived audio data features. Binary files are made available as Parquet, an open-source column-oriented data file format; each parquet element contains a participant identifier, a recording session identifier, the task performed, the number of time frames, and the tensor data for the feature. All files are associated with a data dictionary file which has the same file stem and a JSON suffix.</div></td><td>doi:10.13026/37yb-1t42#features</td><td>features</td><td>features</td><td>{&#x27;id&#x27;: &#x27;doi:10.13026/37yb-1t42#file-ppgs.parquet&#x27;, &#x27;name&#x27;: &#x27;ppgs.parquet&#x27;, &#x27;description&#x27;: &#x27;Phonetic posteriorgram probabilities across 40 phoneme categories (40xT, 100Hz frame rate); n=29289.&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.13026/37yb-1t42#file-sparc_ema.parquet&#x27;, &#x27;name&#x27;: &#x27;sparc_ema.parquet&#x27;, &#x27;description&#x27;: &#x27;Estimated electromagnetic articulography (EMA) from a deep learning model, dimensions Tx12 (X/Y positions of six articulators); n=28640.&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.13026/37yb-1t42#file-sparc_loudness.parquet&#x27;, &#x27;name&#x27;: &#x27;sparc_loudness.parquet&#x27;, &#x27;description&#x27;: &#x27;Estimated loudness based on the average absolute amplitude of the audio waveform, 20ms windows; n=31855.&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.13026/37yb-1t42#file-sparc_periodicity.parquet&#x27;, &#x27;name&#x27;: &#x27;sparc_periodicity.parquet&#x27;, &#x27;description&#x27;: &#x27;Estimated periodicity (confidence of pitch presence), 20ms windows; n=31872.&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.13026/37yb-1t42#file-sparc_pitch.parquet&#x27;, &#x27;name&#x27;: &#x27;sparc_pitch.parquet&#x27;, &#x27;description&#x27;: &#x27;Estimated fundamental frequency (F0), range 50-550Hz; n=31872.&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.13026/37yb-1t42#file-torchaudio_spectrogram.parquet&#x27;, &#x27;name&#x27;: &#x27;torchaudio_spectrogram.parquet&#x27;, &#x27;description&#x27;: &#x27;Spectrograms of dimension 201xT (short-time FFT, 25ms window, 10ms hop, 400-point FFT); n=29278.&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.13026/37yb-1t42#file-torchaudio_mfcc.parquet&#x27;, &#x27;name&#x27;: &#x27;torchaudio_mfcc.parquet&#x27;, &#x27;description&#x27;: &#x27;Mel-frequency cepstrum coefficients of dimension 60xT; n=29278.&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.13026/37yb-1t42#file-torchaudio_pitch.parquet&#x27;, &#x27;name&#x27;: &#x27;torchaudio_pitch.parquet&#x27;, &#x27;description&#x27;: &#x27;Detected pitch (fundamental frequency) over time, dimension T, min and max pitch of 80 and 500; n=32522.&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.13026/37yb-1t42#file-torchaudio_mel_spectrogram.parquet&#x27;, &#x27;name&#x27;: &#x27;torchaudio_mel_spectrogram.parquet&#x27;, &#x27;description&#x27;: &#x27;Mel spectrograms of dimension 60xT (25ms window, 10ms hop, 400-point FFT, 60 Mel bins); n=29278.&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.13026/37yb-1t42#file-audio_quality_metrics.tsv&#x27;, &#x27;name&#x27;: &#x27;audio_quality_metrics.tsv&#x27;, &#x27;format&#x27;: &#x27;TSV&#x27;, &#x27;media_type&#x27;: &#x27;text/tab-separated-values&#x27;, &#x27;description&#x27;: &#x27;One feature per audio recording derived from the raw audio related to quality control metrics.&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.13026/37yb-1t42#file-static_features.tsv&#x27;, &#x27;name&#x27;: &#x27;static_features.tsv&#x27;, &#x27;format&#x27;: &#x27;TSV&#x27;, &#x27;media_type&#x27;: &#x27;text/tab-separated-values&#x27;, &#x27;description&#x27;: &#x27;Features derived from the raw audio (openSMILE, Praat, parselmouth, torchaudio), with one row per unique recording.&#x27;}</td><td><div class="long-description">The directory listing names torchaudio_spectrogram.parquet and torchaudio_mel_spectrogram.parquet, while the per-file descriptions name them torchaudio_spectrograms.parquet and torchaudio_mel_spectrograms.parquet; the listing names are recorded.</div></td></tr><tr><td>metadata</td><td><div class="long-description">A binary file made available as Parquet and its corresponding data dictionary, with specific information about each recording, including task instructions and prompts and information about the microphone used and its gain.</div></td><td>doi:10.13026/37yb-1t42#metadata</td><td>metadata</td><td>metadata</td><td></td><td></td></tr><tr><td></td><td><div class="long-description">Organized information collected from the participant or other individual during their encounter, in TSV data files with JSON data dictionaries, under the subfolders confounders, demographics, diagnosis, enrollment, questionnaire, and task. Dictionary entries give a one-sentence description of each column, the question (if any) that was asked the participant to prompt the answer, and the data type of the response.</div></td><td>doi:10.13026/37yb-1t42#phenotype</td><td>phenotype</td><td>phenotype</td><td></td><td></td></tr></tbody></table></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🚀</span>
+                    <div>
+                        <h2 class="section-title">Uses</h2>
+                        <p class="section-description">Has the dataset been used for any tasks already?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Tasks
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Response</dt><dd><div class="long-description">The tasks are primarily designed for training machine-learning models for disease detection and classification using voice data.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Intended Uses
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>Examples</th></tr></thead><tbody><tr><td><div class="long-description">Development, benchmarking, or validation of clinically applicable machine-learning models for diagnosing a wide range of health conditions using voice data.</div></td><td>AI model pretraining, fine-tuning, benchmarking, validation</td></tr><tr><td><div class="long-description">Clinical research in disease screening, diagnosis, and monitoring through voice biomarkers.</div></td><td></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Prohibited Uses
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>Prohibition Reason</th></tr></thead><tbody><tr><td><div class="long-description">Attempting to re-identify research participants, or any actions that could reasonably lead to re-identification (restriction of the Registered Data Access Agreement).</div></td><td><div class="long-description">The restrictions reflect the B2AI-Voice Consortium&#x27;s commitment to advancing ethical and trustworthy research practices that respect and protect the rights and interests of research participants.</div></td></tr><tr><td><div class="long-description">Any purpose that could foreseeably cause harm or stigmatization to research participants, their families, communities, or specific populations (restriction of the Registered Data Access Agreement).</div></td><td><div class="long-description">The restrictions reflect the B2AI-Voice Consortium&#x27;s commitment to advancing ethical and trustworthy research practices that respect and protect the rights and interests of research participants.</div></td></tr><tr><td><div class="long-description">Under the Data Transfer and Use Agreement template for controlled-access data, the recipient will not use the data, alone or with other information, to make any effort to contact individuals who are the subjects of the data without appropriate IRB approval, specific written approval from the provider, and informed consent from the individual where required.</div></td><td></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Discouraged Uses
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd><div class="long-description">Non-research applications such as hiring decisions, insurance premium adjustments, or any form of surveillance that could lead to discrimination or harm.</div></dd><dt>Notes</dt><dd><div class="long-description">These limitations are intended to prevent unethical or biased outcomes that could negatively impact individuals based on their health conditions or voice characteristics.</div></dd><dt>Source Caveats</dt><dd><div class="long-description">The healthsheet states this restriction twice with different wording: once as "non-research applications" and once as "non-clinical applications", with the same examples. Both statements come from the same documentation source.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            License and Use Terms
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>License Terms</dt><dd><div class="long-description">Only credentialed users who sign the DUA can access the files. Access requires registration on PhysioNet and signing the Bridge2AI Voice Registered Access Agreement, which outlines the terms and conditions for data use; no training is required. The dataset is intended solely for commercial and non-commercial research purposes by Authorized Researchers.</div></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Existing Uses
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd><div class="long-description">A restricted version of the dataset containing raw audio has been used in the Bridge2AI Summer School and hackathon.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📤</span>
+                    <div>
+                        <h2 class="section-title">Distribution</h2>
+                        <p class="section-description">Will the dataset be distributed to third parties outside of the entity on behalf of which it was created?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            DOI
+                        </label>
+                        <div class="item-value">10.13026/37yb-1t42</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            License
+                        </label>
+                        <div class="item-value">Bridge2AI Voice Registered Access License</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Version Access
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Latest Version DOI</dt><dd><a href="https://doi.org/10.13026/37yb-1t42" target="_blank">doi:10.13026/37yb-1t42</a></dd><dt>Versions Available</dt><dd><ul class='formatted-list'><li><div class="long-description">1.0: initial release, 12,523 recordings for 306 participants collected across five sites in North America; Health Data Nexus, https://doi.org/10.57764/qb6h-em84</div></li><li>1.1: https://doi.org/10.13026/249v-w155</li><li><div class="long-description">3.0.0: 833 participants across five sites in North America; https://doi.org/10.13026/k81f-qr68</div></li><li>3.1.0: https://doi.org/10.13026/8xbn-nq66</li></ul></dd><dt>Version Details</dt><dd><div class="long-description">Release notes: v1.1 added Mel-frequency cepstral coefficients (MFCCs); v2.0 provided data for an additional 136 new participants; v2.0.1 made corrections in the authorship list; v3.0.0 was a major update with new data for an additional 391 participants; v3.1.0 was a minor update with no new participants but some additional data released for certain participants, adding files related to audio quality metrics and per-audio metadata, updated validated diagnosis information with back-filled information, and some phenotypic files rearranged and gold standard variables renamed. An earlier version of the feature-only dataset is available on Health Data Nexus, which provides cloud compute alongside the dataset rather than allowing data downloads. The healthsheet, which describes distribution through the Health Data Nexus platform, states the data was published and made available at the end of November 2024. By default, older versions continue to be supported, hosted, and made available, each version has a unique DOI, and the publishers reserve the right to remove access to older versions. A changelog for each dataset version is published online with the dataset metadata.</div></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔄</span>
+                    <div>
+                        <h2 class="section-title">Maintenance</h2>
+                        <p class="section-description">Who will be supporting, hosting, or maintaining the dataset?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Version
+                        </label>
+                        <div class="item-value">3.1.0</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Updates
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Frequency</dt><dd>semi-annual (twice a year)</dd><dt>Update Details</dt><dd><div class="long-description">The dataset is released as static versions rather than dynamically updated. The project documentation states further releases will contain additional data, and the healthsheet states further versions will be released on a semi-annual basis.</div></dd><dt>Source Caveats</dt><dd><div class="long-description">The healthsheet states updates will be distributed as new versions on the Health Data Nexus platform, whereas releases 1.1 through 3.1.0 are on PhysioNet.</div></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">👥</span>
+                    <div>
+                        <h2 class="section-title">Human Subjects</h2>
+                        <p class="section-description">Does the dataset relate to people?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Informed Consent
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Role</th><th>Name</th><th>ORCID</th><th>Affiliation</th></tr></thead><tbody><tr><td>Contributor</td><td></td><td>-</td><td>-</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Consent Revocations
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Revocation Details</dt><dd><div class="long-description">Consenting participants are informed that they may withdraw from the study at any point. If a participant chooses to withdraw during or before the voice data collection, their data will not be included in the database. Research data (including voice recordings) cannot be removed from the database once the voice data collection process is completed.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Human Subject Research
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Involves Human Subjects</dt><dd>True</dd><dt>IRB Approval</dt><dd><ul class='formatted-list'><li><div class="long-description">Submitted and approved by the USF Single IRB and subsite IRBs through the Single IRB process.</div></li></ul></dd><dt>Description</dt><dd><div class="long-description">The IRB protocol describes a prospective cohort study; the project documentation's study metadata describe an observational study with a cohort observation model and a cross-sectional time perspective.</div></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+    
+    
+    
+    <div class="section">
+        <div class="section-header">How this datasheet was generated</div>
+        <div class="section-content">
+            <p>This record was produced by an automated pipeline. The fields
+            below come from its provenance record, which is kept as a separate
+            file because embedding it would not validate against the schema.</p>
+            <table class="provenance">
+            
+                <tr><th>Generated</th><td>2026-11-22T06:48:25+00:00</td></tr>
+            
+                <tr><th>Run label</th><td>2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3</td></tr>
+            
+                <tr><th>Provenance mode</th><td>live</td></tr>
+            
+                <tr><th>Model</th><td>claude-opus-5-5</td></tr>
+            
+                <tr><th>Runtime</th><td>Claude Code</td></tr>
+            
+                <tr><th>Provider</th><td>Anthropic</td></tr>
+            
+                <tr><th>Input bundle</th><td>data/preprocessed/concatenated/VOICE_preprocessed.txt</td></tr>
+            
+                <tr><th>Input bundle md5</th><td>9193c3cbe60b62a2fc0f704a2c4d23a3</td></tr>
+            
+                <tr><th>Source manifest</th><td>data/preprocessed/source_manifest.yaml</td></tr>
+            
+                <tr><th>Schema digest</th><td>c807b62f37e927c5d49addf273957a34</td></tr>
+            
+                <tr><th>Prompt files</th><td>src/download/prompts/d4d_generic_arm_prompt_v9.md</td></tr>
+            
+                <tr><th>Validated</th><td>True</td></tr>
+            
+                <tr><th>Provenance record</th><td>data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3/VOICE_provenance.yaml</td></tr>
+            
+            </table>
+            
+            <p><strong>Recorded but not observed.</strong> The run states these
+            values and nothing measured them, so they are reported rather than
+            relied on:</p>
+            <ul>
+            
+                <li><code>inputs.bundle_md5</code> — the selected file was hashed, but no admitted matching bundle digest establishes the bytes consumed; absolute input paths alone are not byte evidence; this recorder does not consult usage ledgers or progress journals</li>
+            
+                <li><code>inputs.chunks.sha256</code> — the selected chunk manifest matches the caller's bundle, but its earlier bytes and consumption by the run are not independently verified</li>
+            
+                <li><code>inputs.source_manifest.md5</code> — the caller-selected source manifest was hashed; the bytes consumed by the run are not independently verified</li>
+            
+                <li><code>model.temperature</code> — the header declares that the native runtime's temperature was not observed; neither a prompt example nor the shared API configuration supplies an observed setting</li>
+            
+                <li><code>model.reasoning_effort</code> — no effort is recorded: the header carries none and the route 'claude-opus-5-5' exposes no effort ladder, so the provider default applied. That is not a value this run chose, and it is not comparable with a run that named one.</li>
+            
+            </ul>
+            
+        </div>
+    </div>
+    
+
+    <div class="timestamp">
+        Generated on 2026-11-22 00:20:58 using Datasheets for Datasets
+    </div>
+</body>
+</html>
