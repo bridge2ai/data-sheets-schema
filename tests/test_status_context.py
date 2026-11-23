@@ -1568,6 +1568,17 @@ JOINED_BEFORE_3043 = [
     ("claudecode_api", "2026-09-04f_claude-opus-5-api-generic-v8_rep2", "VOICE"),
 ]
 
+#: Receipts committed after #3043 whose snippets the corpus walk locates
+#: only through the linewrap-joined form, with how many each holds. Added
+#: with the agentic generic-v9 records of 2026-11-22: the AI_READI canary's
+#: receipt has four (informed_consent[0].consent_documentation,
+#: data_collectors[2], known_biases[0], collection_mechanisms[5]; chunks
+#: c002/c003), all verified. A registry of the committed corpus, kept apart
+#: from the five above, which each hold exactly one.
+JOINED_AFTER_3043 = {
+    ("claudecode_agent", "2026-11-22_claude-opus-5-5-claudecode-generic-v9_rep1", "AI_READI"): 4,
+}
+
 
 CONCAT = ROOT / "data" / "d4d_concatenated"
 
@@ -2166,8 +2177,9 @@ def test_the_committed_corpus_locates_every_snippet_and_names_the_five_joined_on
     t = out["totals"]
     assert t["checked"] == t["receipts"], [u for p in out["projects"].values() for u in p["unchecked"]]
     assert (t["unlocated"], t["indeterminate"]) == (0, 0)
+    # 5 before #3043 and 4 in the 2026-11-22 AI_READI canary's receipt.
     assert {f: n for f, n in t["located_by_form"].items() if f != "plain"} == {
-        "linewrap-joined": 5, "artifact-line-elided": 0, "joined-elided": 0}
+        "linewrap-joined": 9, "artifact-line-elided": 0, "joined-elided": 0}
     assert sum(t["located_by_form"].values()) == t["located"]
     # #3822: every snippet is accounted for, per project and in the totals;
     # the 472 not located were skipped before their context was read, and
@@ -2175,11 +2187,21 @@ def test_the_committed_corpus_locates_every_snippet_and_names_the_five_joined_on
     for tally in [t, *out["projects"].values()]:
         assert _conserved(tally), tally
         assert tally["verified"] + tally["not_verified"] == tally["snippets"]
+    # The 16 agentic generic-v9 receipts of 2026-11-22 add 5,160 snippets,
+    # every one located and verified (9770 -> 14930, 9298 -> 14458); the
+    # not-verified and unresolved counts are those of the earlier corpus.
     assert (t["snippets"], t["located"], t["not_verified"], t["value_unresolved"], t["malformed_entries"]) == (
-        9770, 9298, 466, 6, 0)
+        14930, 14458, 466, 6, 0)
     joined = sorted((u["receipt"].split("/")[0][:-len("_core")], u["receipt"].split("/")[1],
                      u["receipt"].split("/")[2][:-len("_coverage_receipt.yaml")])
                     for p in out["projects"].values() for u in p["form_located_snippets"])
-    assert joined == sorted(JOINED_BEFORE_3043)
+    assert joined == sorted(JOINED_BEFORE_3043 + [key for key, n in JOINED_AFTER_3043.items()
+                                                  for _ in range(n)])
     _assert_the_snippets_unlocated_before_3043_report_the_joined_form(walk["runs"])
+    for (method, label, project), n in JOINED_AFTER_3043.items():
+        got = walk["runs"][f"{method}_core/{label}/{project}_coverage_receipt.yaml"]
+        assert got["checked"] and got["counts"]["unlocated"] == 0, label
+        assert {f: k for f, k in got["counts"]["located_by_form"].items() if f != "plain"} == {
+            "linewrap-joined": n, "artifact-line-elided": 0, "joined-elided": 0}, label
+        assert f"({n} only through a joined or elided form: linewrap-joined {n})" in got["summary"], label
     _assert_a_memo_hit_reads_what_a_fresh_view_reads(walk)
