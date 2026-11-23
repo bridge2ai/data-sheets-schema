@@ -20,6 +20,10 @@ model:
   mode: four-phase project agent, generic-v9 prompt
   temperature: null
   temperature_basis: not observed from the agent runtime
+  reasoning_effort: high
+  reasoning_effort_basis: asserted by the launcher (the Claude Code command line was
+    given --effort high, as the committed launch file states), not observed; added
+    after the run because the recorder call omitted --reasoning-effort
   shared_config:
     path: .github/workflows/d4d_assistant_deterministic.config
     name: claude-opus-5-5
@@ -252,10 +256,13 @@ unverified:
     neither a prompt example nor the shared API configuration supplies an observed
     setting
 - field: model.reasoning_effort
-  value: null
-  reason: 'no effort is recorded: the header carries none and the route ''claude-opus-5-5''
-    exposes no effort ladder, so the provider default applied. That is not a value
-    this run chose, and it is not comparable with a run that named one.'
+  value: high
+  reason: 'the launcher passed --effort high to the Claude Code command line and the
+    committed launch file notes/final_agentic_2026-11-22/launch/AI_READI_2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2.launch.txt
+    says so; neither the record header nor the model route carries it, so nothing
+    here observed it. The recorder call omitted --reasoning-effort and wrote that
+    the provider default applied; this entry replaces that statement (scripts/adhoc/assert_launcher_effort_2026-11-22.py,
+    review of PR #6309).'
 notes: null
 pair_consistency:
   ran: true
