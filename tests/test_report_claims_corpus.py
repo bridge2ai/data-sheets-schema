@@ -26,13 +26,23 @@ def registered_schema_pairs() -> list[dict]:
             for r in releases]
 
 
-def assert_measurement_matches(stored, fresh, context, expected_origin, *, schemas=None):
+#: The marker `d4d provenance record` writes on the check blocks it computes
+#: inline for an agentic run (cli/provenance.py). Admitted only for the
+#: inventory entries that name it (the 2026-11-22 extension of
+#: tests/data/report_claims_origins.json), never by default.
+PROVENANCE_RECORD_ORIGIN = "d4d provenance record"
+
+
+def assert_measurement_matches(stored, fresh, context, expected_origin, *, schemas=None,
+                               allowed_origins=(None, bc.RECORDED_BY)):
     """Compare measurements without recasting original-run checks as backfills.
 
     The runner omits recorded_by; compute() necessarily adds its own origin.
     Only this documented difference is allowed. The stored origin must match
     the frozen path inventory, and every other value and key must reproduce.
     Work on a copy so even an in-memory comparison preserves the attestation.
+    `allowed_origins` names the origins an inventory entry may hold; the
+    default is the original-run (absent) and backfill markers only.
 
     With `schemas` (the registered release pairs, newest last) the `schema`
     block is compared against the registry instead of byte-for-byte: the
@@ -42,7 +52,7 @@ def assert_measurement_matches(stored, fresh, context, expected_origin, *, schem
     compared exactly, like every other field.
     """
     assert fresh.get("recorded_by") == bc.RECORDED_BY, context
-    assert expected_origin in (None, bc.RECORDED_BY), context
+    assert expected_origin in allowed_origins, context
     if expected_origin is None:
         assert "recorded_by" not in stored, context
     else:
@@ -72,7 +82,7 @@ def test_original_run_and_backfill_measurements_reproduce_without_mutation(backf
     assert stored == original
 
 
-@pytest.mark.parametrize("origin", [None, "", "unknown", "api_runner.execute"])
+@pytest.mark.parametrize("origin", [None, "", "unknown", "api_runner.execute", PROVENANCE_RECORD_ORIGIN])
 @pytest.mark.parametrize("side", ["stored", "fresh"])
 def test_unknown_report_origins_are_rejected(origin, side):
     stored = {"checked": True}
@@ -181,11 +191,26 @@ def test_all_report_measurements_reproduce_with_the_registered_aggregate():
     v8_origins = manifest["v8_origins"]
     blocks = []
     v8_blocks = []
+    recorded_v8_blocks = []
     seen = set()
     v8_seen = set()
     for path in sorted(Path("data/d4d_concatenated").rglob("*_provenance.yaml")):
         stored = (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get("report_claims") or {}
         if not stored.get("checked"):
+            continue
+        if v8_origins.get(str(path)) == PROVENANCE_RECORD_ORIGIN:
+            # 2026-11-22 extension: an agentic run whose v8 block
+            # `d4d provenance record` computed inline, under the run's
+            # recorded schema (#4062). Replayed exactly as that command
+            # computes it (`bc.compute` defaults: v8, recorded policy, the
+            # run's own declared slots and ranges), not as a legacy replay.
+            assert stored["instrument"] == rc.REPORT_CLAIMS_INSTRUMENT
+            fresh = bc.compute(path, only={"report_claims"}, report_claims_version=8,
+                               schema_policy="recorded")["report_claims"]
+            assert_measurement_matches(stored, fresh, str(path), PROVENANCE_RECORD_ORIGIN,
+                                       schemas=schemas, allowed_origins=(PROVENANCE_RECORD_ORIGIN,))
+            recorded_v8_blocks.append(fresh)
+            v8_seen.add(str(path))
             continue
         if str(path) in v8_origins:
             assert stored["instrument"] == rc.REPORT_CLAIMS_INSTRUMENT
@@ -231,3 +256,14 @@ def test_all_report_measurements_reproduce_with_the_registered_aggregate():
     assert sum(b["prose_retention_claims"] for b in v8_blocks) == 0
     assert sum(b.get("removals_unrecorded_count") or 0 for b in v8_blocks) == 0
     assert sum(b["snapshot_checked"] for b in v8_blocks) == 0
+    # 2026-11-22: the 16 agentic generic-v9 records (the AI_READI canary and
+    # 2026-11-22b reps 1-3 of five projects) carry v8 blocks recorded by
+    # `d4d provenance record`: no findings, 9 claims, 4 prose-retention
+    # claims, no unrecorded removals and no checked phase-1 snapshot (the
+    # agentic path writes none). Kept apart from the 278 and the legacy v8 set.
+    assert len(recorded_v8_blocks) == 16
+    assert Counter(f["kind"] for b in recorded_v8_blocks for f in b["findings"]) == {}
+    assert sum(b["claims_checked"] for b in recorded_v8_blocks) == 9
+    assert sum(b["prose_retention_claims"] for b in recorded_v8_blocks) == 4
+    assert sum(b.get("removals_unrecorded_count") or 0 for b in recorded_v8_blocks) == 0
+    assert sum(b["snapshot_checked"] for b in recorded_v8_blocks) == 0
