@@ -26,6 +26,14 @@ def registered_schema_pairs() -> list[dict]:
             for r in releases]
 
 
+#: The marker `d4d provenance record` writes on the check blocks it computes
+#: inline for an agentic run (cli/provenance.py). Admitted only for the
+#: inventory entries that name it (the 2026-11-22 extension of
+#: tests/data/report_claims_origins.json), and compared by
+#: `assert_recorded_schema_replay_matches`, never by the default comparison.
+PROVENANCE_RECORD_ORIGIN = "d4d provenance record"
+
+
 def assert_measurement_matches(stored, fresh, context, expected_origin, *, schemas=None):
     """Compare measurements without recasting original-run checks as backfills.
 
@@ -59,6 +67,80 @@ def assert_measurement_matches(stored, fresh, context, expected_origin, *, schem
     assert {k: v for k, v in fresh.items() if k != "schema"} == expected, context
 
 
+def assert_recorded_schema_replay_matches(stored, fresh, context, *, schemas):
+    """Compare a block `d4d provenance record` wrote with its replay under
+    the run's own recorded schema (`schema_policy="recorded"`, #4062).
+
+    Unlike a `legacy_current` replay, this one is not recomputed under
+    today's schema: its hashes describe the bytes the run itself used. So
+    the fresh pair must equal the stored pair, and the stored pair must be
+    a registered release, whichever release is newest. The basis is
+    compared on what it identifies (path and hash); its `source` says where
+    the bytes were recovered from, which moves from "on disk" to a git blob
+    at the next release, and must never be the today's-schema fallback.
+    Every other key and value must reproduce exactly.
+    """
+    from data_sheets_schema.run_schema import TODAY
+    assert fresh.get("recorded_by") == bc.RECORDED_BY, context
+    assert stored.get("recorded_by") == PROVENANCE_RECORD_ORIGIN, context
+    assert stored["schema"] in schemas, f"{context}: unregistered schema attested"
+    assert fresh["schema"] == stored["schema"], f"{context}: replay is not under the run's own schema"
+    assert set(fresh["schema_basis"]) == set(stored["schema_basis"]) == {"full", "core"}, context
+    for kind in ("full", "core"):
+        was, now = stored["schema_basis"][kind], fresh["schema_basis"][kind]
+        for basis in (was, now):
+            assert basis["source"] != TODAY and basis["source"].startswith("the run's schema"), \
+                f"{context}: {kind} schema fell back to today's"
+        assert (now["path"], now["sha256"]) == (was["path"], was["sha256"]), context
+        assert now["sha256"] == stored["schema"][f"{kind}_sha256"], context
+    apart = {"schema", "schema_basis", "recorded_by"}
+    assert ({k: v for k, v in fresh.items() if k not in apart}
+            == {k: v for k, v in stored.items() if k not in apart}), context
+
+
+def _recorded_replay_pair():
+    pair = {"full_sha256": "a" * 64, "core_sha256": "b" * 64}
+    basis = {kind: {"source": "the run's schema, on disk", "path": f"{kind}.yaml",
+                    "sha256": pair[f"{kind}_sha256"]} for kind in ("full", "core")}
+    stored = {"checked": True, "claims_checked": 3, "findings": [], "schema": dict(pair),
+              "schema_basis": basis, "recorded_by": PROVENANCE_RECORD_ORIGIN}
+    fresh = {**deepcopy(stored), "recorded_by": bc.RECORDED_BY}
+    return pair, stored, fresh
+
+
+def test_a_recorded_schema_replay_survives_a_later_release():
+    """Review of #6309 (F5): the replay was compared with the newest release,
+    which holds only while the run's release is the newest one."""
+    pair, stored, fresh = _recorded_replay_pair()
+    assert_recorded_schema_replay_matches(stored, fresh, "synthetic", schemas=[pair])
+    later = {"full_sha256": "c" * 64, "core_sha256": "d" * 64}
+    for kind in ("full", "core"):
+        fresh["schema_basis"][kind]["source"] = "the run's schema, a git blob"
+        fresh["schema_basis"][kind]["commit"] = "0" * 40
+    assert_recorded_schema_replay_matches(stored, fresh, "synthetic", schemas=[pair, later])
+
+
+@pytest.mark.parametrize("defect", ["unregistered", "other_schema", "today_fallback",
+                                    "other_bytes", "measurement", "origin"])
+def test_a_recorded_schema_replay_that_differs_is_rejected(defect):
+    pair, stored, fresh = _recorded_replay_pair()
+    schemas = [pair]
+    if defect == "unregistered":
+        schemas = [{"full_sha256": "c" * 64, "core_sha256": "d" * 64}]
+    elif defect == "other_schema":
+        fresh["schema"] = {"full_sha256": "c" * 64, "core_sha256": "d" * 64}
+    elif defect == "today_fallback":
+        fresh["schema_basis"]["core"]["source"] = "today's schema"
+    elif defect == "other_bytes":
+        fresh["schema_basis"]["full"]["sha256"] = "c" * 64
+    elif defect == "measurement":
+        fresh["claims_checked"] = 4
+    else:
+        stored["recorded_by"] = bc.RECORDED_BY
+    with pytest.raises(AssertionError):
+        assert_recorded_schema_replay_matches(stored, fresh, "synthetic", schemas=schemas)
+
+
 @pytest.mark.parametrize("backfilled", [False, True])
 def test_original_run_and_backfill_measurements_reproduce_without_mutation(backfilled):
     stored = {"checked": True, "claims_checked": 25, "findings": [],
@@ -72,7 +154,7 @@ def test_original_run_and_backfill_measurements_reproduce_without_mutation(backf
     assert stored == original
 
 
-@pytest.mark.parametrize("origin", [None, "", "unknown", "api_runner.execute"])
+@pytest.mark.parametrize("origin", [None, "", "unknown", "api_runner.execute", PROVENANCE_RECORD_ORIGIN])
 @pytest.mark.parametrize("side", ["stored", "fresh"])
 def test_unknown_report_origins_are_rejected(origin, side):
     stored = {"checked": True}
@@ -181,11 +263,25 @@ def test_all_report_measurements_reproduce_with_the_registered_aggregate():
     v8_origins = manifest["v8_origins"]
     blocks = []
     v8_blocks = []
+    recorded_v8_blocks = []
     seen = set()
     v8_seen = set()
     for path in sorted(Path("data/d4d_concatenated").rglob("*_provenance.yaml")):
         stored = (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get("report_claims") or {}
         if not stored.get("checked"):
+            continue
+        if v8_origins.get(str(path)) == PROVENANCE_RECORD_ORIGIN:
+            # 2026-11-22 extension: an agentic run whose v8 block
+            # `d4d provenance record` computed inline, under the run's
+            # recorded schema (#4062). Replayed exactly as that command
+            # computes it (`bc.compute` defaults: v8, recorded policy, the
+            # run's own declared slots and ranges), not as a legacy replay.
+            assert stored["instrument"] == rc.REPORT_CLAIMS_INSTRUMENT
+            fresh = bc.compute(path, only={"report_claims"}, report_claims_version=8,
+                               schema_policy="recorded")["report_claims"]
+            assert_recorded_schema_replay_matches(stored, fresh, str(path), schemas=schemas)
+            recorded_v8_blocks.append(fresh)
+            v8_seen.add(str(path))
             continue
         if str(path) in v8_origins:
             assert stored["instrument"] == rc.REPORT_CLAIMS_INSTRUMENT
@@ -231,3 +327,14 @@ def test_all_report_measurements_reproduce_with_the_registered_aggregate():
     assert sum(b["prose_retention_claims"] for b in v8_blocks) == 0
     assert sum(b.get("removals_unrecorded_count") or 0 for b in v8_blocks) == 0
     assert sum(b["snapshot_checked"] for b in v8_blocks) == 0
+    # 2026-11-22: the 16 agentic generic-v9 records (the AI_READI canary and
+    # 2026-11-22b reps 1-3 of five projects) carry v8 blocks recorded by
+    # `d4d provenance record`: no findings, 9 claims, 4 prose-retention
+    # claims, no unrecorded removals and no checked phase-1 snapshot (the
+    # agentic path writes none). Kept apart from the 278 and the legacy v8 set.
+    assert len(recorded_v8_blocks) == 16
+    assert Counter(f["kind"] for b in recorded_v8_blocks for f in b["findings"]) == {}
+    assert sum(b["claims_checked"] for b in recorded_v8_blocks) == 9
+    assert sum(b["prose_retention_claims"] for b in recorded_v8_blocks) == 4
+    assert sum(b.get("removals_unrecorded_count") or 0 for b in recorded_v8_blocks) == 0
+    assert sum(b["snapshot_checked"] for b in recorded_v8_blocks) == 0

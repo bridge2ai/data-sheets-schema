@@ -1,0 +1,55 @@
+Gates for CHORUS 2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2   session exit 0   2026-11-22T05:55:38Z -> 2026-11-22T06:07:55Z
+transcript models: {'claude-opus-5-5': 129}
+transcript tools: {'Bash': 41, 'Read': 11, 'Write': 4, 'Edit': 17}
+transcript advisor calls: 0
+transcript Read of other d4d_concatenated paths: []
+transcript result: success | is_error False | turns 74 | minutes 12.2 | models used ['claude-opus-5-5']
+TRANSCRIPT: ok
+file ok: data/d4d_concatenated/claudecode_agent/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2/CHORUS_d4d.yaml (18298 bytes)
+file ok: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2/CHORUS_d4d_core.yaml (15115 bytes)
+file ok: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2/CHORUS_coverage_receipt.yaml (16070 bytes)
+file ok: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2/CHORUS_reconciliation.md (13504 bytes)
+file ok: data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2/CHORUS_provenance.yaml (19604 bytes)
+--- validate full
+No issues found
+validate_full_exit 0
+--- validate core
+No issues found
+validate_core_exit 0
+--- receipts check --strict
+   chunks 8/8 reviewed · snippets 140/140 verified (1 entry receipt(s) overlapping one leaf) · slots 84/96 with a receipt (9 exempt)
+   · not checked here: that a chunk marked nothing_relevant truly held nothing for the record — a judgement; sample by chunk id in review
+   · not checked here: that a verified snippet supports the value it is attached to — a snippet can be real and irrelevant; sample by slot path in review
+receipts_exit 0
+--- scope check
+
+2 record(s) checked against the declaration
+   ✓ none is about a dataset its project declares distinct
+scope_exit 0
+--- observed (transcript) annotation
+Error: the record has no phase_log — a run that attested no phases has no account for this observation to annotate. Have the run re-record with --phase first (an agentic run; an API record would have been refused above).
+observed_exit 1
+observed: {'assistant_turns': 61, 'output_tokens': 71971, 'thinking_tokens': 27743, 'receipt_chunks_unopened': 0, 'receipt_chunks_total': 8, 'bundle_lines_read': 1698, 'bundle_lines_total': 1698}
+--- runs check --strict
+1 run(s) checked, 1 subject to the requirement, 1 failing
+runs_check_exit 1
+GATES: FAIL
+--- re-record with the instruction as sent (CHORUS_2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2.md)
+note: added --prompt (the condition's prompt file)
+note: added --condition generic_v9
+note: added --receipt-expected
+note: the session passed no --phase: five phases attested here by the orchestrator from the artifacts on disk and the core header's 'Phase 4 reconciliation: completed' line; no iteration counts or repair phases are claimed
+recorder exit 0
+✓ /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2/data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2/CHORUS_provenance.yaml
+  pair ok · report 0 · ungrounded 0 · british 0 · receipts 8/8 chunks, 140/140 snippets
+⚠️  no request spec recorded for --condition generic_v9: rendering failed: TypeError: replace() argument 2 must be str, not None. Pass --run-date with the date the instruction was rendered under.
+annotate-observed exit 0
+1 run(s) checked, 1 subject to the requirement, 1 failing
+   ⚠️  CHORUS    2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2 unverifiable: request hash recorded without the spec that produced it
+runs_check_exit_after_rerecord 1
+recorded request sha256 0e03fc8fcee8ef3399c8934f88098ccd5e5e09bc928711a9472e6606449f5795
+launch file sha256      0e03fc8fcee8ef3399c8934f88098ccd5e5e09bc928711a9472e6606449f5795
+RERECORD: FAIL
+--- validation block recorded afterwards (2026-11-22T06:34:37Z): d4d runs validate --method claudecode_agent --label 2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2 --project CHORUS -> 1 valid, 0 invalid
+runs_check_exit_after_validate 0
+RERECORD: PASS (after runs validate; the RERECORD: FAIL line above predates it)

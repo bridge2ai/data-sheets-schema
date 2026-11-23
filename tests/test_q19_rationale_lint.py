@@ -1800,6 +1800,13 @@ _EMPTY_IN_A_NEIGHBOURING_CLAUSE = {
      "and the schema's own derivation slots"): "was_derived_from and parent_datasets - are empty",
     ("reference_2026-09-12_cborg_runtime/AI_READI_v8_rep1_r20_rating1_evaluation.json",
      "was_derived_from"): "(was_derived_from, parent_datasets, errata) are all empty",
+    # Added 2026-11-22 with the general_context_v3 ratings: the Q19 quality
+    # note reads "Some provenance metadata exists, but no version history,
+    # errata, updates, parent datasets, was_derived_from or
+    # entity-activity-agent structure."; the "no" governs the whole list.
+    ("2026-11-22_general_context_v3/CHORUS_2026-11-22b_rep1_evaluation.json",
+     "was_derived_from or entity-activity-agent structure."):
+        "no version history, errata, updates, parent datasets, was_derived_from",
 }
 
 
@@ -1812,19 +1819,26 @@ def test_every_empty_slot_reason_in_the_committed_ratings_is_said_to_be_empty():
     hand-read lists above whose emptiness a neighbouring clause states. A
     credit clause naming a populated slot is neither, so it fails here, as
     CHORUS 2026-09-04f API rep1's did before a sentence naming no gap went
-    unread where nothing says why."""
+    unread where nothing says why.
+
+    Extended 2026-11-22: the 15 general_context_v3 ratings of the
+    2026-11-22b agentic records make 148 committed ratings and 89 empty-slot
+    reasons; one of the new reasons (CHORUS 2026-11-22b rep1) names
+    was_derived_from in a list whose emptiness a neighbouring clause states,
+    the eleventh hand-read entry above. The module docstring's 2026-09-30
+    figures (133, 88, 10) describe the corpus before that extension."""
     listed = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z", "data/evaluation_llm"],
                             capture_output=True, text=True, check=True).stdout.split("\0")
     ratings = [ROOT / f for f in listed if f.endswith("_evaluation.json")
                and json.loads((ROOT / f).read_text(encoding="utf-8")).get("rubric")
                == "rubric20-semantic"]
-    assert len(ratings) == 133
+    assert len(ratings) == 148
     empty = re.compile(r"\b(?:empty|absent|unpopulated|unused|no|not|none|nor|neither|lacks?"
                        r"|lacking|missing|without|null)\b", re.I)
     base = ROOT / "data/evaluation_llm/rubric20_semantic"
     reasons = [(path.relative_to(base).as_posix(), r) for path in ratings
                for r in lint_file(path).reasons if r.concern == "empty_slot"]
-    assert len(reasons) == 88
+    assert len(reasons) == 89
     elsewhere = {(path, r.clause): r.sentence for path, r in reasons if not empty.search(r.clause)}
     assert set(elsewhere) == set(_EMPTY_IN_A_NEIGHBOURING_CLAUSE)
     for key, said in _EMPTY_IN_A_NEIGHBOURING_CLAUSE.items():
@@ -2223,6 +2237,29 @@ _RECOMMENDATIONS_READ = {
     ],
 }
 
+# Added 2026-11-22: the five recommendations the general_context_v3
+# evaluations of the 2026-11-22b records add, read by the same ordered test
+# against their own ratings. None names an absence as a noun or state (step
+# 1); none says where the content of a slot it asks for is now (step 2:
+# "structured" and "dedicated" name the target form, not another holder);
+# none names a populated value it objects to (step 3: every slot it names is
+# listed absent in its rating). Requests, like "Express the conversion and QC
+# chain as PROV-O" above.
+#
+# Kept apart from `_RECOMMENDATIONS_READ` on purpose: that dictionary is the
+# first reading of the 122 sentences in the #3831 packet, which two blind
+# second readings cover (tests/test_q19_blind_second_reading.py requires it
+# to be exactly the packet). These five have this one reading and no second.
+_RECOMMENDATIONS_READ_2026_11_22 = {
+    "request": [
+        "Add structured derivation links (raw audio and REDCap sources",
+        "Add top-level resources/parent_datasets links and a confidentiality_level",
+        "Populate regulatory_restrictions.confidentiality_level and link",
+        "Populate the dedicated fields where source information exists",
+        "Record a confidentiality classification, IP restrictions",
+    ],
+}
+
 
 def _pinned(fragment, sentences):
     """The sentences a fragment pins: the one it is, else those holding it."""
@@ -2246,7 +2283,18 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     in `_RECOMMENDATIONS_READ` to the class the module docstring's ordered
     test gives it (#3829, #3836). 95 of the 277 state an absence the list
     misses.
-    The list is main's; this measures it and changes nothing (#3544)."""
+    The list is main's; this measures it and changes nothing (#3544).
+
+    Extended 2026-11-22: the 30 general_context_v3 evaluations of the
+    2026-11-22b agentic records make 148 ratings with 122 Q19 slot
+    sentences (the two unmarked unchanged) and 1,131 distinct slot
+    sentences outside the Q19 fields, of which 849 carry an `_EMPTINESS`
+    word; of the 85 new outside sentences, 80 carry one and five open with
+    a recommendation verb, read by hand as requests (127 recommendations,
+    45 requests) and pinned in `_RECOMMENDATIONS_READ_2026_11_22`, apart from
+    the 122 the #3831 blind second reading covers. The 155 read sentences and
+    their classes are unchanged.
+    The module docstring's figures are the 2026-09-30 measurement."""
     from data_sheets_schema import q19_rationale_lint as lint
     listed = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z", "data/evaluation_llm"],
                             capture_output=True, text=True, check=True).stdout.split("\0")
@@ -2259,10 +2307,10 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
                 continue
     slot = lint.REPRESENTATION_CONCERNS["empty_slot"]
     ratings = [d for d in documents if isinstance(d, dict) and d.get("rubric") == "rubric20-semantic"]
-    assert len(ratings) == 133
+    assert len(ratings) == 148
     q19 = [s for d in ratings for _, s in lint._sentences(q19_item(d)) if slot.search(s)]
     unmarked = [s for s in q19 if not lint._EMPTINESS.search(s)]
-    assert (len(q19), len(unmarked)) == (121, 2)
+    assert (len(q19), len(unmarked)) == (122, 2)
     assert all("was_derived_from" in s and ("explicit rather than implied" in s or "populated" in s)
                for s in unmarked)
 
@@ -2288,21 +2336,24 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     marked = [s for s in outside if lint._EMPTINESS.search(s)]
     rest = [s for s in outside if not lint._EMPTINESS.search(s)]
     recommendations = [s for s in rest if recommendation.match(s)]
-    assert (len(outside), len(marked), len(recommendations)) == (1046, 769, 122)
+    assert (len(outside), len(marked), len(recommendations)) == (1131, 849, 127)
     read = [s for s in rest if not recommendation.match(s)]
     assert len(read) == 155
-    # The regex sorts by the first word only; the 122 are read by hand like
-    # the 155, and every one is pinned by one fragment to one class (#3747).
+    # The regex sorts by the first word only; the 127 (122 of 2026-09-30 and
+    # five of 2026-11-22) are read by hand like the 155, and every one is
+    # pinned by one fragment to one class (#3747). The five are pinned in
+    # `_RECOMMENDATIONS_READ_2026_11_22`; no blind second reading covers them.
     sorted_ = {}
-    for kind, fragments in _RECOMMENDATIONS_READ.items():
-        for fragment in fragments:
-            hits = _pinned(fragment, recommendations)
-            assert len(hits) == 1, (kind, fragment)
-            assert hits[0] not in sorted_, (kind, fragment)
-            sorted_[hits[0]] = kind
+    for pins in (_RECOMMENDATIONS_READ, _RECOMMENDATIONS_READ_2026_11_22):
+        for kind, fragments in pins.items():
+            for fragment in fragments:
+                hits = _pinned(fragment, recommendations)
+                assert len(hits) == 1, (kind, fragment)
+                assert hits[0] not in sorted_, (kind, fragment)
+                sorted_[hits[0]] = kind
     assert set(sorted_) == set(recommendations)
     assert Counter(sorted_.values()) == {"named_absence": 1, "placement": 63, "criticism": 18,
-                                         "request": 40}
+                                         "request": 45}
     # The 64 misses are misses: in a Q19 note the gate reads none of them
     # as an empty-slot reason, as on main.
     for sentence, kind in sorted_.items():
