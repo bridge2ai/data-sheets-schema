@@ -29,20 +29,18 @@ def registered_schema_pairs() -> list[dict]:
 #: The marker `d4d provenance record` writes on the check blocks it computes
 #: inline for an agentic run (cli/provenance.py). Admitted only for the
 #: inventory entries that name it (the 2026-11-22 extension of
-#: tests/data/report_claims_origins.json), never by default.
+#: tests/data/report_claims_origins.json), and compared by
+#: `assert_recorded_schema_replay_matches`, never by the default comparison.
 PROVENANCE_RECORD_ORIGIN = "d4d provenance record"
 
 
-def assert_measurement_matches(stored, fresh, context, expected_origin, *, schemas=None,
-                               allowed_origins=(None, bc.RECORDED_BY)):
+def assert_measurement_matches(stored, fresh, context, expected_origin, *, schemas=None):
     """Compare measurements without recasting original-run checks as backfills.
 
     The runner omits recorded_by; compute() necessarily adds its own origin.
     Only this documented difference is allowed. The stored origin must match
     the frozen path inventory, and every other value and key must reproduce.
     Work on a copy so even an in-memory comparison preserves the attestation.
-    `allowed_origins` names the origins an inventory entry may hold; the
-    default is the original-run (absent) and backfill markers only.
 
     With `schemas` (the registered release pairs, newest last) the `schema`
     block is compared against the registry instead of byte-for-byte: the
@@ -52,7 +50,7 @@ def assert_measurement_matches(stored, fresh, context, expected_origin, *, schem
     compared exactly, like every other field.
     """
     assert fresh.get("recorded_by") == bc.RECORDED_BY, context
-    assert expected_origin in allowed_origins, context
+    assert expected_origin in (None, bc.RECORDED_BY), context
     if expected_origin is None:
         assert "recorded_by" not in stored, context
     else:
@@ -67,6 +65,80 @@ def assert_measurement_matches(stored, fresh, context, expected_origin, *, schem
         assert fresh["schema"] == schemas[-1], f"{context}: recompute is not under the newest release"
     expected = {k: v for k, v in expected.items() if k != "schema"}
     assert {k: v for k, v in fresh.items() if k != "schema"} == expected, context
+
+
+def assert_recorded_schema_replay_matches(stored, fresh, context, *, schemas):
+    """Compare a block `d4d provenance record` wrote with its replay under
+    the run's own recorded schema (`schema_policy="recorded"`, #4062).
+
+    Unlike a `legacy_current` replay, this one is not recomputed under
+    today's schema: its hashes describe the bytes the run itself used. So
+    the fresh pair must equal the stored pair, and the stored pair must be
+    a registered release, whichever release is newest. The basis is
+    compared on what it identifies (path and hash); its `source` says where
+    the bytes were recovered from, which moves from "on disk" to a git blob
+    at the next release, and must never be the today's-schema fallback.
+    Every other key and value must reproduce exactly.
+    """
+    from data_sheets_schema.run_schema import TODAY
+    assert fresh.get("recorded_by") == bc.RECORDED_BY, context
+    assert stored.get("recorded_by") == PROVENANCE_RECORD_ORIGIN, context
+    assert stored["schema"] in schemas, f"{context}: unregistered schema attested"
+    assert fresh["schema"] == stored["schema"], f"{context}: replay is not under the run's own schema"
+    assert set(fresh["schema_basis"]) == set(stored["schema_basis"]) == {"full", "core"}, context
+    for kind in ("full", "core"):
+        was, now = stored["schema_basis"][kind], fresh["schema_basis"][kind]
+        for basis in (was, now):
+            assert basis["source"] != TODAY and basis["source"].startswith("the run's schema"), \
+                f"{context}: {kind} schema fell back to today's"
+        assert (now["path"], now["sha256"]) == (was["path"], was["sha256"]), context
+        assert now["sha256"] == stored["schema"][f"{kind}_sha256"], context
+    apart = {"schema", "schema_basis", "recorded_by"}
+    assert ({k: v for k, v in fresh.items() if k not in apart}
+            == {k: v for k, v in stored.items() if k not in apart}), context
+
+
+def _recorded_replay_pair():
+    pair = {"full_sha256": "a" * 64, "core_sha256": "b" * 64}
+    basis = {kind: {"source": "the run's schema, on disk", "path": f"{kind}.yaml",
+                    "sha256": pair[f"{kind}_sha256"]} for kind in ("full", "core")}
+    stored = {"checked": True, "claims_checked": 3, "findings": [], "schema": dict(pair),
+              "schema_basis": basis, "recorded_by": PROVENANCE_RECORD_ORIGIN}
+    fresh = {**deepcopy(stored), "recorded_by": bc.RECORDED_BY}
+    return pair, stored, fresh
+
+
+def test_a_recorded_schema_replay_survives_a_later_release():
+    """Review of #6309 (F5): the replay was compared with the newest release,
+    which holds only while the run's release is the newest one."""
+    pair, stored, fresh = _recorded_replay_pair()
+    assert_recorded_schema_replay_matches(stored, fresh, "synthetic", schemas=[pair])
+    later = {"full_sha256": "c" * 64, "core_sha256": "d" * 64}
+    for kind in ("full", "core"):
+        fresh["schema_basis"][kind]["source"] = "the run's schema, a git blob"
+        fresh["schema_basis"][kind]["commit"] = "0" * 40
+    assert_recorded_schema_replay_matches(stored, fresh, "synthetic", schemas=[pair, later])
+
+
+@pytest.mark.parametrize("defect", ["unregistered", "other_schema", "today_fallback",
+                                    "other_bytes", "measurement", "origin"])
+def test_a_recorded_schema_replay_that_differs_is_rejected(defect):
+    pair, stored, fresh = _recorded_replay_pair()
+    schemas = [pair]
+    if defect == "unregistered":
+        schemas = [{"full_sha256": "c" * 64, "core_sha256": "d" * 64}]
+    elif defect == "other_schema":
+        fresh["schema"] = {"full_sha256": "c" * 64, "core_sha256": "d" * 64}
+    elif defect == "today_fallback":
+        fresh["schema_basis"]["core"]["source"] = "today's schema"
+    elif defect == "other_bytes":
+        fresh["schema_basis"]["full"]["sha256"] = "c" * 64
+    elif defect == "measurement":
+        fresh["claims_checked"] = 4
+    else:
+        stored["recorded_by"] = bc.RECORDED_BY
+    with pytest.raises(AssertionError):
+        assert_recorded_schema_replay_matches(stored, fresh, "synthetic", schemas=schemas)
 
 
 @pytest.mark.parametrize("backfilled", [False, True])
@@ -207,8 +279,7 @@ def test_all_report_measurements_reproduce_with_the_registered_aggregate():
             assert stored["instrument"] == rc.REPORT_CLAIMS_INSTRUMENT
             fresh = bc.compute(path, only={"report_claims"}, report_claims_version=8,
                                schema_policy="recorded")["report_claims"]
-            assert_measurement_matches(stored, fresh, str(path), PROVENANCE_RECORD_ORIGIN,
-                                       schemas=schemas, allowed_origins=(PROVENANCE_RECORD_ORIGIN,))
+            assert_recorded_schema_replay_matches(stored, fresh, str(path), schemas=schemas)
             recorded_v8_blocks.append(fresh)
             v8_seen.add(str(path))
             continue
