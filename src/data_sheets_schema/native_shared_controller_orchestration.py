@@ -208,13 +208,17 @@ class CallbackAdapter:
         self.policy = deepcopy(self.value['policy'])
         paths = self.spec._agentic_artifact_paths
         self.phase = PhaseState(render.commands(self.spec), full_path=paths['full'], core_path=paths['core'],
-            report_path=paths['report'], receipt_path=paths['receipt'], working_directory=self.value['working_directory'])
+            report_path=paths['report'], receipt_path=paths['receipt'], working_directory=self.value['working_directory'],
+            runtime=self.execution['runtime'])
         self.state = attribution.live(self.selection, execution_raw=registration_raw, spec=self.spec, composition_raw=composition_raw)
         self.failure = self.final_evidence = self.recorder_identity = None
         self._stream_diagnostic_json = None
         self.recorder_call = None
         self.recorder_done = False
+        self._recorder_status = None
         self._activated = self._initialized = False
+        self._native_event_count = 0
+        self._prefix_session = self._observed_session = None
         self._stream_prefixes = {}
         self._stream_files = {}
         self._stream_members = ()
@@ -464,13 +468,33 @@ class CallbackAdapter:
             if not self._activated:
                 raise ValueError('native observation precedes consumed execution activation')
             endpoints = self._observed_endpoint(event)
+            from . import native_wire_2_1_325 as wire
+            runtime = self.execution.get('runtime')
+            ordinal = getattr(self, '_native_event_count', 0)
+            self._native_event_count = ordinal + 1
+            if event.get('type') == 'system' and event.get('subtype') == 'ui_invalidate':
+                session = wire.ui_prefix_session(event, runtime)
+                if ordinal != 0 or self._initialized or getattr(self, '_prefix_session', None) is not None:
+                    raise ValueError('native UI prefix must occur once as the first frame')
+                self._prefix_session = session
+                self.phase.observe(event)
+                self.state.observe(event)
+                return
             if event.get('type') == 'system' and event.get('subtype') == 'init':
                 if self._initialized:
                     raise ValueError('native initialization repeated')
+                if (getattr(self, '_prefix_session', None) is not None
+                        and event.get('session_id') != self._prefix_session):
+                    raise ValueError('native initialization differs from the UI prefix session')
                 capture.initialize(self.selection.registration.pin.path,
                     transcript_bytes=endpoints[0], control_bytes=endpoints[1], stream_files=self._stream_files,
                     observed_prefixes=self._stream_prefixes, **admission)
                 self._initialized = True
+                self._observed_session = event.get('session_id')
+            if wire.permission_denial(event, runtime):
+                if not self._initialized or event.get('session_id') != getattr(self, '_observed_session', None):
+                    raise ValueError('native permission denial lies outside its initialized session')
+                raise ValueError('native permission denial observed')
             if not self._initialized:
                 if event.get('type') != 'control_response':
                     raise ValueError('native effects precede actual initialization binding')
@@ -478,7 +502,10 @@ class CallbackAdapter:
                 self.state.observe(event)
                 return
             run, decision = self._phase_state(endpoints)
-            content = event.get('message', {}).get('content', [])
+            message = event.get('message', {})
+            if type(message) is not dict:
+                raise ValueError('native message must be an object')
+            content = message.get('content', [])
             content = content if type(content) is list else ()
             denials = run.trace().terminal_denials() if event.get('type') == 'result' else {}
             for block in content:
@@ -494,6 +521,8 @@ class CallbackAdapter:
                     continue
                 call = run.trace().calls.get(block.get('tool_use_id'))
                 if call and block.get('tool_use_id') not in denials and call[2].get('input', {}).get('command') == self.policy['native_shared_helpers']['advance']:
+                    if wire.missing_numeric_bash_failure(event, block, runtime) is not None:
+                        raise ValueError('advance helper failed without a usable stage settlement')
                     run = self._run(endpoints)
                     capture.observe_advance_settled(run, block['tool_use_id'])
                     run, decision = self._phase_state(endpoints, refresh=True)
@@ -568,8 +597,15 @@ class CallbackAdapter:
                         run, decision = self._phase_state(endpoints, refresh=True)
                         metadata = event.get('tool_use_result', {})
                         codes = [metadata[k] for k in ('exitCode', 'exit_code') if k in metadata]
-                        if not codes or any(type(code) is not int or code != 0 for code in codes) or block.get('is_error') is not False:
+                        adapted = wire.missing_numeric_bash_success(event, block, runtime)
+                        if ((not adapted and (not codes or any(type(code) is not int or code != 0 for code in codes)))
+                                or block.get('is_error') is not False):
                             raise ValueError('selected final recorder did not settle successfully')
+                        if adapted:
+                            stdout = metadata['stdout']
+                            if (block['content'] != stdout or not stdout.splitlines()
+                                    or stdout.splitlines()[0] != '✓ ' + self.policy['post_final_recorder']['destination']):
+                                raise ValueError('adapted recorder stdout differs from the selected provenance path')
                         item = evidence.read_regular(self.policy['post_final_recorder']['destination'], 'provenance', max_bytes=c.HARD_LIMITS['request_bytes']).captured
                         if resources is not None:
                             _mapping = resources.mapping
@@ -580,6 +616,9 @@ class CallbackAdapter:
                             raise ValueError('recorder did not preserve exact native selected stage lineage')
                         self.recorder_done = True
                         self.recorder_identity = {'path': item.pin.path, 'sha256': item.pin.sha256}
+                        if adapted:
+                            self._recorder_status = {'exit_code': None, 'exit_status': None,
+                                                     'status_basis': wire.STATUS_BASIS}
             for action in actions:
                 # These fixed side effects independently replay the settled
                 # phase boundary before creating any original seal.
@@ -651,6 +690,8 @@ class CallbackAdapter:
                 diagnostic['stream_diagnostic'] = live_streams.diagnostic_document(self._stream_diagnostic_json)
             except Exception:
                 pass  # Existing failed reports remain available without it.
+        if getattr(self, '_recorder_status', None) is not None:
+            diagnostic['recorder_status'] = deepcopy(self._recorder_status)
         return {**out, 'execution': EXECUTION, 'composition_sha256': c.sha(self.raw),
             'controller_stop': self.failure, 'final_evidence': deepcopy(self.final_evidence),
             'recorder_completed': self.recorder_done, 'recorder_identity': deepcopy(self.recorder_identity),

@@ -268,10 +268,14 @@ def check_capture(prepared, *, controls):
     draft, final, recorder = inherited._saved_draft(
         {**prepared, 'readonly': _CapturedReadonly(policy, prepared['snapshot'], controls)}, classify)
     problems = [*control['problems'], *lifecycle['problems'], *draft['problems']]
-    from . import native_shared_policy, native_shared_effects
+    from . import native_shared_policy, native_shared_effects, native_wire_2_1_325
     draft_seen = False
     for line, _, frame in observed.rows(run.transcript):
-        for block in frame.get('message', {}).get('content', ()):
+        if native_wire_2_1_325.permission_denial(frame, run.value['runtime']):
+            raise ValueError('saved native capture contains a permission denial')
+        message = frame.get('message')
+        blocks = message.get('content', ()) if type(message) is dict else ()
+        for block in blocks:
             if (type(block) is dict and block.get('type') == 'tool_use' and block.get('name') == 'Bash'
                     and block.get('input', {}).get('command') == policy['native_shared_helpers']['draft']):
                 draft_seen = True

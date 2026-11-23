@@ -13,6 +13,7 @@ import base64
 import csv
 from contextlib import contextmanager
 from contextvars import ContextVar
+import errno
 import hashlib
 import io
 from importlib import metadata
@@ -709,6 +710,17 @@ def _owned_files(captures):
     return {Path(path) for capture in captures for path in capture['owned']}
 
 
+def _sorted_directory_entries(directory):
+    """Retry only an interrupted listing; never consume a partial inventory."""
+    for attempt in range(3):
+        try:
+            with os.scandir(directory) as iterator:
+                return sorted(iterator, key=lambda entry: entry.name)
+        except InterruptedError as error:
+            if error.errno != errno.EINTR or attempt == 2:
+                raise
+
+
 def _require_owned_import_roots(paths, captures, *, light_unowned=None):
     """Inventory every unowned file within the explicitly declared scope.
 
@@ -739,8 +751,7 @@ def _require_owned_import_roots(paths, captures, *, light_unowned=None):
         # Directory stability covers this enumeration, not an earlier cached
         # resolver observation made before unrelated entry activity.
         snapshots[directory] = _file_identity(os.lstat(directory))
-        with os.scandir(directory) as iterator:
-            entries = sorted(iterator, key=lambda entry: entry.name)
+        entries = _sorted_directory_entries(directory)
         for entry in entries:
             # DirEntry can answer ordinary entries from the directory listing;
             # symlink following shares the census's separate stat observation.

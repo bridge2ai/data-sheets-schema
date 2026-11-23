@@ -6,10 +6,12 @@ native messages, prove model attention, or authorize any filesystem operation.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from copy import deepcopy
 import json
 
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_model_aliases
+from data_sheets_schema import native_wire_2_1_325 as wire
 from data_sheets_schema.native_shared_evidence import (
     _EVENT_HASH_CACHE,
     _line_raw,
@@ -108,6 +110,7 @@ class Trace:
             raise ValueError('observation streams have exchanged roles')
         self.transcript,self.control=transcript,control
         self.session,self.policy=session_id,policy
+        self.runtime=deepcopy(runtime)
         # Decode in initialization's original order, then reuse only this
         # constructor's rows for indexing. No parsed state survives in a cache.
         native=list(rows(transcript));parent=list(rows(control))
@@ -120,6 +123,7 @@ class Trace:
         self.frames={};self.terminal=None
         self._req_cache={};self._adm_cache={};self._set_cache={}
         self._callback_ids=set()
+        self._permission_denials={}
         self._identity=c.canonical((session_id,policy,runtime))
         self._native_lines=len(native);self._control_lines=len(parent)
         self._append(native,parent,runtime)
@@ -150,17 +154,19 @@ class Trace:
                     raise ValueError('native observed row is not an object')
                 if (old.stream=='control' and value.get('kind') in ('initialize_sent','initialize_ack')
                         or old.stream=='transcript' and (value.get('type')=='control_response'
-                            or value.get('type')=='system' and value.get('subtype')=='init')):
+                            or value.get('type')=='system' and (value.get('subtype')=='init'
+                                or value.get('subtype')=='ui_invalidate' and wire.profile(runtime)))):
                     raise ValueError('native initialization is missing, duplicate or contradictory')
                 values.append((number,raw,value))
             decoded.append(values)
         result=Trace.__new__(Trace)
         result.transcript,result.control=transcript,control
         result.session,result.policy=session_id,policy
+        result.runtime=deepcopy(runtime)
         result._identity=prior._identity
         result.terminal=prior.terminal
         for name in ('calls','callbacks','results','decisions','frames',
-                     '_req_cache','_adm_cache','_set_cache'):
+                     '_req_cache','_adm_cache','_set_cache','_permission_denials'):
             setattr(result,name,getattr(prior,name).copy())
         result._callback_ids=prior._callback_ids.copy()
         result._native_lines=prior._native_lines+len(decoded[0])
@@ -183,6 +189,14 @@ class Trace:
                 raise ValueError('native events appear after terminal completion')
             if kind=='control_cancel_request':
                 raise ValueError('native callback cancellation is terminal')
+            if wire.permission_denial(value,runtime):
+                identity=value['tool_use_id']
+                call=self.calls.get(identity)
+                if (value['session_id']!=self.session or call is None
+                        or value['tool_name']!=call[2]['name'] or identity in self.results
+                        or identity in self._permission_denials):
+                    raise ValueError('native permission denial lacks its unique pending call')
+                self._permission_denials[identity]=value
             if kind=='result':
                 if 'reported' in aliases:
                     native_model_aliases.require_model_usage(value,aliases)
@@ -300,12 +314,33 @@ class Trace:
         decision = self.decisions.get(identity)
         refused = decision is not None and decision[1]['classification'] == 'not_prescribed'
         text = result.get('content')
+        call = self.calls[identity][2]
+        metadata = self.frames[line].get('tool_use_result', {})
+        if wire.profile(self.runtime) and type(metadata) is str:
+            if call['name'] == 'Bash' and wire.missing_numeric_bash_failure(
+                    self.frames[line], result, self.runtime) is not None:
+                if identity in self._permission_denials:
+                    raise ValueError('native Bash failure conflicts with a permission denial')
+                # A failed admitted helper is not a refusal. Preserve its
+                # original call/callback/decision/result joins; no success or
+                # parsed helper payload is inferred from the merged output.
+                self.settled(identity)
+                return None
+            if not wire.denied_tool_result(self.frames[line], result, self.runtime,
+                    tool_name=call['name'], tool_use_id=identity,
+                    basis=decision[1]['basis'] if decision else None,
+                    permission_denied=self._permission_denials.get(identity)):
+                raise ValueError('native refusal lacks its reviewed result wrapper')
+            return {'tool_use_id': identity, 'tool': call['name'],
+                'classification': decision[1]['classification'] if decision else 'unclassifiable',
+                'basis': decision[1]['basis'] if decision else 'denial lacks a classified callback'}
         runtime_refusal = (type(text) is str and
             (text.startswith('Outside the registered tool policy') or
+             wire.profile(self.runtime) and text.startswith('PreToolUse:')
+                 and ' hook error: Outside the registered tool policy: ' in text or
              text.startswith('Permission to use ') and 'denied' in text))
         if not refused and not runtime_refusal:
             return None
-        metadata = self.frames[line].get('tool_use_result', {})
         if (result.get('is_error') is not True or type(text) is not str or not text
                 or type(metadata) is not dict or metadata.get('error') is not None
                 or any(metadata.get(k) for k in ('interrupted', 'backgroundTaskId',
@@ -315,7 +350,6 @@ class Trace:
         if (any(type(code) is not int or code == 0 for code in exits)
                 or len(set(exits)) > 1 or 'stdout' in metadata and metadata['stdout'] != text):
             raise ValueError('denied tool has contradictory exit metadata')
-        call = self.calls[identity][2]
         return {'tool_use_id': identity, 'tool': call['name'],
             'classification': decision[1]['classification'] if decision else 'unclassifiable',
             'basis': decision[1]['basis'] if decision else 'denial lacks a classified callback'}
@@ -402,7 +436,7 @@ def first_response_write(trace,evidence,response,*,intent_input_json):
     if (metadata.get('type')!='create' or metadata.get('filePath')!=response.pin.path
             or metadata.get('content')!=expected['content'] or metadata.get('originalFile') is not None
             or metadata.get('userModified',False) is not False or metadata.get('structuredPatch',[])!=[]
-            or block.get('content')!='File created successfully at: '+response.pin.path):
+            or not wire.write_success_text(block.get('content'),response.pin.path,trace.runtime)):
         raise ValueError('response was not the exact successful first file creation')
     return evidence
 
@@ -447,6 +481,17 @@ def _initialization_from_rows(transcript,control,native,parent,*,policy,runtime)
             or ack['response'].get('request_id')!=identity or ack['response'].get('error') is not None):
         raise ValueError('native initialization does not bind the selected callback policy')
     session=init.get('session_id')
+    prefixes=[row for row in native if row[2].get('type')=='system'
+              and row[2].get('subtype')=='ui_invalidate']
+    if prefixes and wire.profile(runtime):
+        if (len(prefixes)!=1 or prefixes[0][0]!=1 or replies[0][0]!=2
+                or initialized[0][0]!=3
+                or wire.ui_prefix_session(prefixes[0][2],runtime)!=session):
+            raise ValueError('native UI prefix differs from the initialized session or physical order')
+    if wire.profile(runtime):
+        allowed_before={replies[0][0]}|{row[0] for row in prefixes}
+        if any(number<initialized[0][0] and number not in allowed_before for number,_,_ in native):
+            raise ValueError('unreviewed native startup frame precedes initialization')
     aliases=native_model_aliases.reporting_aliases(runtime)
     if (type(session) is not str or not session or init.get('parent_tool_use_id') is not None
             or init.get('cwd')!=policy['readonly_lookups']['repository']

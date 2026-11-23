@@ -14,7 +14,7 @@ from . import native_shared_controller as composition
 from . import native_shared_policy as policy
 from . import native_shared_controls as pure_controls
 from .native_shared_runtime_values import validate_runtime_v2 as validate_runtime, POLICY_ENV, FLAGS
-from .native_shared_evidence import read_regular
+from .native_shared_evidence import read_regular, require_physical_directory
 from .native_execution_engine import GATES
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -44,12 +44,12 @@ def environment(runtime, selected, spec, config_directory):
 
 def command(runtime, selected, effective_system, attempt_id):
     """Compose argv only; the execution engine owns independently gated dispatch."""
-    from .native_shared_permissions import _permission_protocol
-    protocol = _permission_protocol()
+    from .native_stage_root_grant import permission_arguments
+    stage_root = c.parse_selection(selected['selection_raw_json'].encode('utf-8'))['stage_root']
     return [runtime['executable']['path'], *FLAGS, '--effort', runtime['effort'],
         '--model', runtime['model'], '--name', attempt_id,
         '--max-budget-usd', runtime['budget_guard_usd'],
-        *protocol.permission_arguments(selected['policy']),
+        *permission_arguments(selected['policy'], stage_root),
         '--system-prompt', effective_system]
 
 
@@ -188,6 +188,7 @@ def permission_expectation(runtime, selected, spec, effective_system, config_dir
 def _paths(value, selected, *, fresh, extra_protected=()):
     """Actual static envelope, including separate new stage reservation."""
     doc = c.parse_selection(selected['selection_raw_json'].encode('utf-8'))
+    require_physical_directory(doc['stage_root'], must_exist=False)
     outputs = sorted({Path(p) for p in selected['policy']['readonly_lookups']['output_directories']})
     reserved = [Path(value[k]) for k in ('attempt_directory', 'evidence_directory')] + outputs
     protected = [Path(value[k]) for k in ('composition', 'system_path', 'permission_probe')]

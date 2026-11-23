@@ -31,7 +31,7 @@ def test_all_30_actual_merged_consumers_pass_the_unmodified_guard(isolated_modul
         except ValueError as error:
             refused[name] = str(error)
     record_property('actual_merged_30_graphs', json.dumps({'accepted': outcomes, 'refused': refused}, sort_keys=True))
-    assert len(authority.CONSUMER_OWNED_MODULES) == 30
+    assert len(authority.CONSUMER_OWNED_MODULES) == 34
     assert refused == {}
     assert set(outcomes) == set(authority.CONSUMER_OWNED_MODULES)
 

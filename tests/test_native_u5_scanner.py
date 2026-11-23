@@ -174,6 +174,7 @@ def test_v3_preparer_manifest_field_and_fresh_checks_are_exact(tmp_path, produce
     ('native_shared_authority_wire.py', "value['controller_sources_sha256'] != CONTROLLER_SOURCES_SHA256",
      "value['controller_sources_sha256'] == CONTROLLER_SOURCES_SHA256"),
     ('native_environment_manifest.py', '\nVERSION = 1', '\nVERSION = 2'),
+    ('native_environment_manifest.py', 'for attempt in range(3):', 'for attempt in range(4):'),
 ])
 def test_v3_wire_and_manifest_callees_are_source_bound(tmp_path, relative, before, after):
     root = copied_route(tmp_path)

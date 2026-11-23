@@ -201,6 +201,27 @@ def command_kind(command, spec, *, expected=None):
     return None  # other commands are outside this adapter's permission scope
 
 
+def _adapted_helper_output(kind, item, metadata):
+    """Check successful helper stdout before crediting an absent numeric exit."""
+    payload = _json(item['content'])
+    if type(payload) is not dict or _encoded(_json(metadata['stdout'])) != _encoded(payload):
+        raise ValueError('adapted helper stdout and tool content disagree')
+    if kind in ('evidence', 'final_evidence'):
+        if payload.get('checked') is not True or payload.get('findings') != []:
+            raise ValueError('adapted evidence result is not a successful helper output')
+    elif kind == 'source_inventory':
+        digest = payload.get('sha256')
+        if (set(payload) != {'artifact', 'sha256', 'values'}
+                or payload['artifact'] not in ('original_full', 'final_full')
+                or type(digest) is not str or len(digest) != 64
+                or any(character not in '0123456789abcdef' for character in digest)
+                or type(payload['values']) is not list):
+            raise ValueError('adapted source inventory is not an expected helper output')
+    elif kind != 'draft':
+        raise ValueError('adapted status requires an identified helper output')
+    return payload
+
+
 class NativeAttributionState:
     """One ordered draft state machine for offline replay and callback observation.
 
@@ -225,6 +246,7 @@ class NativeAttributionState:
         report = Path(paths['report']).resolve()
 
         self.spec, self.reg, self.registration_raw = spec, reg, registration_raw
+        self.runtime = None
         self.live = live
         self.problems, self.observations = problems, observations
         self.pending, self.seen = pending, seen
@@ -240,6 +262,7 @@ class NativeAttributionState:
 
     def observe(self, event, *, preserved_shell_commands=()):
         from data_sheets_schema import source_attribution_preflight as preflight
+        from data_sheets_schema import native_wire_2_1_325 as wire
         spec, reg = self.spec, self.reg
         problems, observations = self.problems, self.observations
         pending, seen = self.pending, self.seen
@@ -255,6 +278,14 @@ class NativeAttributionState:
             for event in (event,):
                 if not isinstance(event, dict):
                     problem(index, 'event is not a mapping'); continue
+                try:
+                    denied = wire.permission_denial(event, getattr(self, 'runtime', None))
+                except (TypeError, ValueError, KeyError) as exc:
+                    terminal = True; accepted = None
+                    problem(index, str(exc)); continue
+                if denied:
+                    terminal = True; accepted = None
+                    problem(index, 'native permission denial observed'); continue
                 message = event.get('message')
                 if message is None:
                     continue  # init/status events have no tool obligations
@@ -319,9 +350,43 @@ class NativeAttributionState:
                         # would let False/0.0 impersonate an integer zero (#4305).
                         exits = [meta[k] for k in ('exitCode', 'exit_code') if k in meta]
                         explicit = bool(exits) and all(type(code) is int and code == exit_code for code in exits)
-                        failed = (not explicit or exit_code != 0 or item.get('is_error') is not False
+                        try:
+                            failure = wire.missing_numeric_bash_failure(
+                                event, item, getattr(self, 'runtime', None))
+                            if failure is not None:
+                                exit_code, merged_output = failure
+                                observation = {'tool_use_id': item['tool_use_id'], **row,
+                                    'result_event': index, 'exit_code': exit_code, 'stdout': None,
+                                    'merged_output': merged_output, 'status_basis': wire.FAILURE_STATUS_BASIS}
+                                accepted = None
+                                if kind == 'draft':
+                                    observation.update(reported_passed=False,
+                                        verified_against_current_saved_bytes=False)
+                                observations.append(observation)
+                                if kind != 'draft':
+                                    terminal = True
+                                    problem(index, 'terminal evidence/source-inventory check failed or has unusable result')
+                                elif exit_code != 1:
+                                    terminal = True
+                                    problem(index, 'draft checker returned an unusable exit')
+                                # Merged output is not parsed as checker JSON.
+                                # A later success must pass every existing
+                                # selected-input and current-file proof below.
+                                continue
+                            adapted = wire.missing_numeric_bash_success(event, item, getattr(self, 'runtime', None))
+                            if adapted:
+                                _adapted_helper_output(kind, item, meta)
+                        except (TypeError, ValueError, KeyError) as exc:
+                            terminal = True; accepted = None
+                            problem(index, str(exc))
+                            continue
+                        failed = (not (adapted or explicit and exit_code == 0) or item.get('is_error') is not False
                                   or any(meta.get(k) for k in ('interrupted', 'backgroundTaskId', 'background_task_id')))
                         if kind != 'draft':
+                            if adapted:
+                                observations.append({'tool_use_id': item['tool_use_id'], **row,
+                                    'result_event': index, 'exit_code': None, 'exit_status': None,
+                                    'status_basis': wire.STATUS_BASIS})
                             if failed:
                                 terminal = True; accepted = None
                                 problem(index, 'terminal evidence/source-inventory check failed or has unusable result')
@@ -329,6 +394,8 @@ class NativeAttributionState:
                         observation = {'tool_use_id': item['tool_use_id'], **row, 'result_event': index,
                                        'exit_code': exit_code, 'reported_passed': False,
                                        'verified_against_current_saved_bytes': False}
+                        if adapted:
+                            observation.update(exit_status=None, status_basis=wire.STATUS_BASIS)
                         observations.append(observation)
                         try:
                             payload = _json(item.get('content'))
@@ -338,13 +405,16 @@ class NativeAttributionState:
                                 raise ValueError('tool output and stdout disagree')
                             if type(payload.get('checked')) is not bool or type(payload.get('passed')) is not bool:
                                 raise ValueError('draft result lacks strict checked/passed states')
-                            if not explicit or exit_code not in (0, 1) or payload['checked'] is not True:
+                            if not (adapted or explicit and exit_code in (0, 1)) or payload['checked'] is not True:
                                 raise ValueError('unusable draft result')
-                            if exit_code != preflight.exit_status(payload) or item.get('is_error') is not bool(exit_code):
+                            expected_status = preflight.exit_status(payload)
+                            if ((adapted and expected_status != 0)
+                                    or (not adapted and (exit_code != expected_status
+                                        or item.get('is_error') is not bool(exit_code)))):
                                 raise ValueError('draft tool status contradicts its checker result')
                             if any(meta.get(k) for k in ('interrupted', 'backgroundTaskId', 'background_task_id')):
                                 raise ValueError('draft result is interrupted or pending')
-                            if exit_code == 0:
+                            if adapted or exit_code == 0:
                                 hashes = payload.get('input_sha256')
                                 required = {'report', 'final_full'} | set(reg['inputs'])
                                 if (not isinstance(hashes, dict) or set(hashes) != required

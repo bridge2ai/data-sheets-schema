@@ -1,8 +1,8 @@
 """D128's finite generation-specificity-audit comparison, not a count waiver.
 
-The fixture comes only from the approved U3-H evidence. New source heads must
-reproduce those exact ordered arrays and occurrence mappings. A new difference
-requires review; this test never updates its expectations from a new scan.
+The historical fixture remains the approved U3-H evidence. A separately reviewed
+PR6302 successor may select new exact ordered arrays and occurrence mappings.
+This test never updates its expectations from a new scan.
 """
 from copy import deepcopy
 import hashlib
@@ -15,6 +15,7 @@ import sys
 import pytest
 
 from scripts.adhoc import native_u5_inputs_20261108 as inputs
+from scripts.adhoc import compare_pr6302_d128_successor_20261122 as successor
 from tests.test_native_u5_scanner_comparison import require_scanner_inventory
 
 
@@ -25,6 +26,9 @@ BASELINE = 'cf50d9a1c059f3b5030103378ccef33619475dde'
 REFERENCE_CANDIDATE = '1de1d0ff67f8e622ce14862effcba9050d5147c2'
 SKILL = '.claude/skills/d4d-generation-specificity-audit'
 ARRAYS = ('hits', 'violations', 'test_dependencies')
+SUCCESSOR_FIXTURE = FIXTURE.with_name('native_d128_pr6302_successor.json')
+# Filled only after independent review of the complete PR6302 successor ledger.
+SUCCESSOR_SHA256 = '0d5a59ec6ad085be920c7d742315cfcaf56b6fd1c9ea36a3d14f60f2bc7bbbc0'
 
 
 def encoded(value):
@@ -147,6 +151,10 @@ def scan(source, manifest, tool, assets, output):
 
 def test_d128_final_composition_has_only_the_finite_approved_scanner_differences(tmp_path, monkeypatch):
     approved = approval()
+    active_fixture_sha = FIXTURE_SHA256
+    if SUCCESSOR_SHA256 is not None:
+        approved = successor.require_successor(SUCCESSOR_FIXTURE.read_bytes(), SUCCESSOR_SHA256, approved)
+        active_fixture_sha = SUCCESSOR_SHA256
     candidate_head = inputs.git('rev-parse', '--verify', 'HEAD^{commit}').decode().strip()
     exports = tmp_path / 'exports'
     exports.mkdir()
@@ -169,9 +177,12 @@ def test_d128_final_composition_has_only_the_finite_approved_scanner_differences
     names = inputs.git('ls-tree', '-r', '--name-only', candidate_head, '--', SKILL).decode().splitlines()
     assets = {name: hashlib.sha256((candidate / name).read_bytes()).hexdigest() for name in names}
     require(assets == approved['tool_assets_sha256'], 'D128 requires the exact approved scanner assets')
-    evidence = dict(decision='D128', baseline=BASELINE, candidate=candidate_head,
-                    approved_reference_candidate=REFERENCE_CANDIDATE,
-                    approval_fixture_sha256=FIXTURE_SHA256, runs={}, status='incomplete')
+    evidence = dict(decision='D128' if SUCCESSOR_SHA256 is None else 'PR6302_D128_SUCCESSOR',
+                    baseline=BASELINE, candidate=candidate_head,
+                    approved_reference_candidate=approved['reference_candidate']['commit'],
+                    approval_fixture_sha256=active_fixture_sha,
+                    historical_approval_fixture_sha256=FIXTURE_SHA256,
+                    runs={}, status='incomplete')
     try:
         arrays = {}
         for name in ('before', 'after'):

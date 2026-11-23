@@ -13058,7 +13058,20 @@ _NATIVE_V3_RENDER_SOURCES = {
     # Lead-authorized split, updated 2026-11-16: v3 uses 7d6c13f8, whose
     # verified loader restores caller import roots before the census.
     # This override prevents the historical v2 pin changing v3 authority.
-    'src/data_sheets_schema/native_execution_authority_v2.py': '9593574b74353be270b47cf866022d09c6c70f329b65e1272a65244d5a72418c',
+    # PR 6302, 2026-11-21: the complete predecessor differs only by adding
+    # native_shared_permission_wire, native_stage_root_grant and
+    # native_stage_root_diagnostic and native_wire_2_1_325 to CONSUMER_OWNED_MODULES. They receive
+    # the existing full-body import restrictions; loader logic is unchanged.
+    # Bind the complete new authority bytes, never waive unreviewed additions.
+    'src/data_sheets_schema/native_execution_authority_v2.py': '3ebc9277c40c2ca76f16bb8830d2d268391936f5778a7fda0042d9a4c81fa970',
+    # R2-2 production readers: the inherited attribution method selects the
+    # exact binary wire predicate; bind that complete pure implementation too.
+    # Reviewed P1 correction: admitted nonzero error wrappers retain observed
+    # exit codes and merged output; draft retries gain no success credit.
+    'src/data_sheets_schema/native_attribution_registration_v2.py': '073b79e897c827b0304f9abfbb55cd4587b2ce4ddfe06e2ac4b9dcce4dcb8527',
+    # A2-SOURCE-1, 2026-11-22: the exact current-context Write suffix is
+    # selected only by the existing complete 2.1.325 executable identity.
+    'src/data_sheets_schema/native_wire_2_1_325.py': '8b6ad8726495a7c65f6ee3743d33be0a8999edac7def687393ed2039388df084',
     # D159 (owner, 2026-11-17; lead override): v3 binds the supervisor whose
     # git rev-parse timeout is 20 s (was 10 s); the historical v2 pin is unchanged.
     'src/data_sheets_schema/native_supervisor_authority_v2.py': '628ab407e3e507fd28573c99b2c28c0a97c9eb1d8fa818ccf08bc305e126c8b7',
@@ -13075,7 +13088,10 @@ _NATIVE_V3_RENDER_SOURCES = {
     # process-local full verification reuse, and RECORD/size live checks.
     # Rotated (lead, 2026-11-16): the census ruling's call-local ancestor resolver
     # (dev/ino/type identity) and write-seeded full memo, 3aaa19e77 + 14547b766.
-    'src/data_sheets_schema/native_environment_manifest.py': '054f6dd80b4b5b38888699a32b8ecf5b0d4ec5076588d2a02de175e6bdc71fa0',
+    # Lead-approved PR6302 round-3 correction, 2026-11-22: only interrupted
+    # directory opening/enumeration retries, at most three attempts. The
+    # original directory snapshot and every census validation remain intact.
+    'src/data_sheets_schema/native_environment_manifest.py': '85433bfa45a38aa8036a52c1064ac3fd6800ba4f6f0777608b9878ab411092e3',
 }
 
 

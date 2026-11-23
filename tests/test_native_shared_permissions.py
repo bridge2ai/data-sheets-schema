@@ -82,7 +82,8 @@ def _fabricated_manifest(expected, selected, neutral_root, source_raw, controls,
         launch = {key: str(parent/key) for key in ('config_root','stub_root','effect_root','evidence_root')}
         probe_policy = p.projected_policy(expected, selected, launch['effect_root'])
         provider = 'http://127.0.0.1:18455'
-        launch.update(cwd=expected['policy']['readonly_lookups']['repository'], argv=p.probe_argv(expected, probe_policy),
+        launch.update(cwd=expected['policy']['readonly_lookups']['repository'], argv=p.probe_argv(
+            expected, probe_policy, effect_root=launch['effect_root']),
             environment={**expected['permission_environment'], 'CLAUDE_CONFIG_DIR': launch['config_root'],
                 'PYTHONPATH': launch['stub_root'], 'ANTHROPIC_BASE_URL': provider,
                 'ANTHROPIC_API_KEY': 'd4d-local-permission-probe-token'}, provider_url=provider,
@@ -97,6 +98,13 @@ def _fabricated_manifest(expected, selected, neutral_root, source_raw, controls,
             files['cases.json'] = encoded([{k:v for k,v in case.items() if k != 'input'} for case in all_cases])
         cases = [x for x in all_cases if x['mode'] != 'observer_stopped'] if trace == 'settled' else [
             x for x in all_cases if x['id'] == trace[5:]]
+        if trace in ('stop-sealed_request_write', 'stop-source_write'):
+            read_id = 'request_worker_read' if trace == 'stop-sealed_request_write' else 'source_read'
+            cases.insert(0, next(case for case in all_cases if case['id'] == read_id))
+        elif trace == 'stop-helper_owned_write':
+            cases.insert(0, {'id': 'helper_owned_read', 'tool': 'Read',
+                'input': {'file_path': str(parent / 'effect_root' / 'journal.json')},
+                'context': 'integration', 'mode': 'allowed'})
         ack = {'type':'control_response','response':{'subtype':'success','request_id':native.initialization_id()}}
         init = {'type':'system','subtype':'init','model':expected['runtime']['model'],
                 'claude_code_version':expected['runtime']['executable']['init_version'],
@@ -132,7 +140,13 @@ def _fabricated_manifest(expected, selected, neutral_root, source_raw, controls,
                                 'argv':shlex.split(case['input']['command'])[3:]}).decode()
                 metadata = {'stdout':text,'stderr':'','interrupted':False}; block = {'is_error': False}
             elif case['tool'] == 'Read':
-                raw_text, text, count, total = p._read_content(case, expected, selected, launch, session, source_raw)
+                if case['id'] == 'helper_owned_read':
+                    raw_text = p._recipe_data(expected, selected, launch, session)[1][case['input']['file_path']].decode()
+                    lines = raw_text.split('\n')
+                    text = '\n'.join(str(i + 1) + '\t' + line for i, line in enumerate(lines))
+                    count = total = len(lines)
+                else:
+                    raw_text, text, count, total = p._read_content(case, expected, selected, launch, session, source_raw)
                 metadata = {'type':'text','file':{'filePath':case['input']['file_path'],'content':raw_text,
                     'numLines':count,'startLine':1,'totalLines':total}}; block = {}
             else:
@@ -243,9 +257,9 @@ def test_complete_seven_trace_observation_is_only_software_verification(fixture)
         result = verify(fixture['manifest'], fixture['expected'])
     assert set(targets) <= {key for key, _ in calls}
     assert result['checked'] is result['passed'] is True
-    assert len(result['cases']) == 25 and len(result['traces']) == 7
+    assert len(result['cases']) == 28 and len(result['traces']) == 7
     modes = [case['observed_mode'] for case in result['cases']]
-    assert modes.count('allowed') == 16 and modes.count('native_denied') == 3 and modes.count('observer_stopped') == 6
+    assert modes.count('allowed') == 19 and modes.count('native_denied') == 3 and modes.count('observer_stopped') == 6
     assert {x['state'] for x in result['derived_nonresponse_checks']} == set(p.NONRESPONSE)
     assert 'observation authenticity' in result['unassessed'] and 'provider billing' in result['unassessed']
     assert len(result['members']) == 74 + len(p.recipe_sources())
@@ -254,6 +268,445 @@ def test_complete_seven_trace_observation_is_only_software_verification(fixture)
         pins=[{'trace_id':name,'sha256':fixture['manifest']['members']['traces/'+name+'/neutral.'+moment+'.json']['sha256']}
               for name in p.TRACES]
         assert result['preservation']['neutral_'+moment+'_sha256']==p._sha(encoded(pins))
+
+
+def test_stop_existing_targets_have_verified_read_preconditions(fixture):
+    manifest = fixture['manifest']
+    result = verify(manifest, fixture['expected'])
+    base = get(manifest, 'cases.json')
+    assert len(base) == 25 and all(case['id'] != 'helper_owned_read' for case in base)
+    settled = [case['id'] for case in base if case['mode'] != 'observer_stopped']
+    assert len(settled) == 19
+    expected = [('settled', identity) for identity in settled]
+    reads = {'sealed_request_write': 'request_worker_read', 'source_write': 'source_read',
+             'helper_owned_write': 'helper_owned_read'}
+    for stopped in p.STOPS:
+        trace = 'stop-' + stopped
+        prefix = 'traces/' + trace + '/'
+        identities = ([reads[stopped]] if stopped in reads else []) + [stopped]
+        expected.extend((trace, identity) for identity in identities)
+        events = rows(manifest, prefix + 'transcript.jsonl')
+        calls = [event['message']['content'][0] for event in events if event['type'] == 'assistant']
+        assert [call['id'] for call in calls] == identities
+        assert calls[-1]['name'] == 'Write'
+        assert len(rows(manifest, prefix + 'control.jsonl')) == 2 + (stopped in reads)
+        assert get(manifest, prefix + 'neutral.before.json') == get(manifest, prefix + 'neutral.after.json')
+        if stopped in reads:
+            assert calls[0]['name'] == 'Read'
+            assert calls[0]['input']['file_path'] == calls[-1]['input']['file_path']
+            observed = next(case for case in result['cases'] if
+                            (case['trace_id'], case['id']) == (trace, reads[stopped]))
+            assert observed['classification'] == 'prescribed' and observed['result_sha256']
+            assert observed['stop_sha256'] is None
+    assert [(case['trace_id'], case['id']) for case in result['cases']] == expected
+
+
+def test_stop_existing_targets_refuse_missing_preceding_read(fixture):
+    for stopped in ('sealed_request_write', 'source_write', 'helper_owned_write'):
+        value = deepcopy(fixture['manifest'])
+        prefix = 'traces/stop-' + stopped + '/'
+        events = rows(value, prefix + 'transcript.jsonl')
+        assert events[2]['message']['content'][0]['name'] == 'Read'
+        del events[2:5]
+        put_rows(value, prefix + 'transcript.jsonl', events)
+        controls = rows(value, prefix + 'control.jsonl')
+        put_rows(value, prefix + 'control.jsonl', controls[:2])
+        with pytest.raises(ValueError, match='control has missing/extra grants'):
+            verify(value, fixture['expected'])
+
+
+def test_stop_read_precondition_requires_exact_callback_decision_and_result(fixture):
+    for change in ('call', 'callback', 'decision', 'result', 'duplicate_grant'):
+        value = deepcopy(fixture['manifest'])
+        prefix = 'traces/stop-helper_owned_write/'
+        events = rows(value, prefix + 'transcript.jsonl')
+        controls = rows(value, prefix + 'control.jsonl')
+        if change == 'call':
+            events[2]['message']['content'][0]['input']['file_path'] += '.foreign'
+        elif change == 'callback':
+            events[3]['request']['input']['tool_input']['file_path'] += '.foreign'
+        elif change == 'decision':
+            controls[2]['classification'] = 'not_prescribed'
+        elif change == 'result':
+            events[4]['tool_use_result']['file']['content'] = 'foreign journal bytes'
+        else:
+            controls.append(deepcopy(controls[2]))
+        put_rows(value, prefix + 'transcript.jsonl', events)
+        put_rows(value, prefix + 'control.jsonl', controls)
+        with pytest.raises(ValueError):
+            verify(value, fixture['expected'])
+
+
+def fabricated_native_refusal(fixture, stopped, *, source_read_succeeded=False):
+    """Independently manufacture binary refusal records; never observations."""
+    value = deepcopy(fixture['manifest'])
+    prefix = 'traces/stop-' + stopped + '/'
+    old = rows(value, prefix + 'transcript.jsonl')
+    read_call, read_callback, read_result, write_call = deepcopy(old[2:6])
+    read = read_call['message']['content'][0]
+    write = write_call['message']['content'][0]
+    session = old[1]['session_id']
+    launch = get(value, prefix + 'launch.json')
+    launch['exit_code'] = 0
+    put(value, prefix + 'launch.json', launch)
+    events = deepcopy(old[:2]) + [read_call, read_callback]
+    if not source_read_succeeded:
+        text = (read['input']['file_path'] + ' is outside ' + launch['cwd']
+                + '; --restricted confines the file tools to the working directory.')
+        events.append({'type': 'system', 'subtype': 'permission_denied', 'session_id': session,
+            'tool_name': 'Read', 'tool_use_id': read['id'], 'decision_reason_type': 'other',
+            'decision_reason': '--restricted: path outside the working directory', 'message': text})
+        read_result = {'type': 'user', 'session_id': session, 'message': {'role': 'user', 'content': [
+            {'type': 'tool_result', 'tool_use_id': read['id'], 'is_error': True, 'content': text}]},
+            'tool_use_result': 'Error: ' + text, 'tool_result_meta': [{'id': read['id'],
+                'non_execution_kind': 'permission-rule', 'permission_decision': {
+                    'decision': 'reject', 'source': 'config', 'reason_type': 'other'}}]}
+    events.extend([read_result, write_call, {'type': 'user', 'session_id': session,
+        'message': {'role': 'user', 'content': [{'type': 'tool_result', 'tool_use_id': write['id'],
+            'is_error': True, 'content': '<tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>'}]},
+        'tool_use_result': 'Error: File has not been read yet. Read it first before writing to it.'},
+        {'type': 'assistant', 'session_id': session, 'message': {'role': 'assistant',
+            'content': [{'type': 'text', 'text': 'OFFLINE_COMPLETE'}]}},
+        {'type': 'result', 'session_id': session, 'subtype': 'success', 'is_error': False,
+            'terminal_reason': 'completed', 'stop_reason': 'end_turn', 'result': 'OFFLINE_COMPLETE',
+            'num_turns': 3, 'safety_stops': 0, 'queued_turn_count': 0, 'result_index': 0,
+            'subagent_stats': {'spawned': 0, 'requested': {'background': 0, 'foreground': 0, 'unset': 0},
+                'started_in_background': 0, 'max_depth': 0, 'spawned_by_subagents': 0, 'completed': 0, 'failed': 0,
+                'killed': {'parent': 0, 'user': 0, 'system': 0},
+                'refused': {'depth_limit': 0, 'concurrency_limit': 0, 'budget': 0}, 'by_type': {}},
+            'permission_denials': [] if source_read_succeeded else [{'tool_name': 'Read',
+                'tool_use_id': read['id'], 'tool_input': read['input']}]}])
+    controls = rows(value, prefix + 'control.jsonl')
+    call_index, result_index = len(events) - 4, len(events) - 3
+    controls.append({'kind': 'input_rejected_before_callback', 'tool_use_id': write['id'],
+        'tool': 'Write', 'rejection': 'file_not_read', 'file_path': write['input']['file_path'],
+        'session_id': session, 'call_line': call_index + 1, 'result_line': result_index + 1,
+        'call_sha256': p._sha(encoded(events[call_index])), 'result_sha256': p._sha(encoded(events[result_index]))})
+    put_rows(value, prefix + 'control.jsonl', controls)
+    put_rows(value, prefix + 'transcript.jsonl', events)
+    for name in ('effect-stop.json', 'parent-stop.json'):
+        del value['members'][prefix + name]
+    put(value, prefix + 'outcome.json', {'kind': 'native_shared_permission_outcome', 'version': 1,
+        'mode': 'native_refused_before_callback', 'session_id': session,
+        'terminal_sha256': p._sha(encoded(events[-1])), 'parent_stop_sha256': None, 'protection': 'native_binary'})
+    return value
+
+
+def test_withdrawn_binary_refusal_never_replaces_observer_protection(fixture):
+    for stopped, read_succeeded in (('sealed_request_write', False), ('helper_owned_write', False),
+                                    ('source_write', False), ('source_write', True)):
+        value = fabricated_native_refusal(fixture, stopped, source_read_succeeded=read_succeeded)
+        with pytest.raises(ValueError, match='native refusal outcome is withdrawn'):
+            verify(value, fixture['expected'])
+
+
+def test_withdrawn_refusal_cannot_pass_private_trace_validation(fixture):
+    value = fabricated_native_refusal(fixture, 'sealed_request_write')
+    prefix = 'traces/stop-sealed_request_write/'
+    raw = {name: row['text'].encode() for name, row in value['members'].items()}
+    with permission_orchestration.loaded_permission_inputs() as (controls, _sources):
+        with loaded_consumer('native_shared_permissions') as consumer:
+            with pytest.raises(ValueError, match='native refusal outcome is withdrawn'):
+                consumer._trace(fixture['expected'], fixture['selection'],
+                                'stop-sealed_request_write', raw, controls)
+
+
+def test_source_variants_require_complete_observer_stop_lifecycle(fixture):
+    trace = 'stop-source_write'
+    prefix = 'traces/' + trace + '/'
+    source_path = fixture['expected']['source']['path']
+    lines = fixture['source_raw'].decode().split('\n')
+    variants = {
+        'whole': {'file_path': source_path},
+        'bounded': {'file_path': source_path, 'offset': 1, 'limit': 12},
+        'allow_large': {'file_path': source_path, 'allow_large': True},
+    }
+    with permission_orchestration.loaded_permission_inputs() as (controls, _sources):
+        with loaded_consumer('native_shared_permissions') as verified:
+            for variant, payload in variants.items():
+                value = deepcopy(fixture['manifest'])
+                events = rows(value, prefix + 'transcript.jsonl')
+                ledger = rows(value, prefix + 'control.jsonl')
+
+                read_call, read_callback, read_result = events[2:5]
+                read_call['message']['content'][0]['input'] = deepcopy(payload)
+                read_callback['request']['input']['tool_input'] = deepcopy(payload)
+                ledger[2]['request'] = deepcopy(read_callback)
+                selected = lines[:12] if variant == 'bounded' else lines
+                read_result['message']['content'][0]['content'] = '\n'.join(
+                    str(number) + '\t' + line for number, line in enumerate(selected, 1))
+                read_result['tool_use_result'] = {
+                    'type': 'text',
+                    'file': {'filePath': source_path, 'content': '\n'.join(selected),
+                             'numLines': len(selected), 'startLine': 1, 'totalLines': len(lines)},
+                }
+
+                put_rows(value, prefix + 'transcript.jsonl', events)
+                put_rows(value, prefix + 'control.jsonl', ledger)
+                raw = {name: member['text'].encode() for name, member in value['members'].items()}
+
+                summary, observed, launch = verified._trace(
+                    fixture['expected'], fixture['selection'], trace, raw, controls,
+                    source_write_read_variant=variant)
+                assert summary['mode'] == 'observer_stopped'
+                assert launch['exit_code'] != 0
+                assert [case['observed_mode'] for case in observed] == [
+                    'allowed', 'observer_stopped']
+                assert observed[0]['input_sha256'] == p._sha(encoded(payload))
+                assert observed[0]['result_sha256'] == p._sha(encoded(read_result))
+                assert observed[1]['callback_id'] and observed[1]['stop_sha256']
+
+                if variant == 'whole':
+                    assert verified._trace(
+                        fixture['expected'], fixture['selection'], trace, raw, controls)[0] == summary
+                else:
+                    with pytest.raises(ValueError, match='call differs from required case'):
+                        verified._trace(fixture['expected'], fixture['selection'], trace, raw, controls)
+
+
+def test_manufactured_modern_wire_keeps_settled_semantics_and_observer_stops(fixture):
+    """Software-only integration, not a native run or an admissible registration."""
+    from tests.test_native_permission_wire_profile import context
+    reference = context()
+    with permission_orchestration.loaded_permission_inputs() as (controls, _sources):
+        with loaded_consumer('native_shared_permissions') as consumer:
+            for trace in ('stop-future_response_write', 'settled'):
+                expected = deepcopy(fixture['expected'])
+                for key in ('executable', 'model', 'auxiliary_models', 'effort', 'limits', 'limits_basis'):
+                    expected['runtime'][key] = deepcopy(reference['runtime'][key])
+                prefix = 'traces/' + trace + '/'
+                raw = {name: row['text'].encode() for name, row in fixture['manifest']['members'].items()}
+                launch = get(fixture['manifest'], prefix + 'launch.json')
+                session = rows(fixture['manifest'], prefix + 'transcript.jsonl')[1]['session_id']
+                policy = consumer.projected_policy(expected, fixture['selection'], launch['effect_root'])
+                launch['executable'] = deepcopy(expected['runtime']['executable'])
+                launch['argv'] = consumer.probe_argv(expected, policy, effect_root=launch['effect_root'])
+                raw['version.txt'] = (expected['runtime']['executable']['version'] + '\n').encode()
+                raw[prefix + 'launch.json'] = encoded(launch)
+                original = rows(fixture['manifest'], prefix + 'transcript.jsonl')
+                old_results = {row['message']['content'][0]['tool_use_id']: row for row in original if row['type'] == 'user'}
+                events = deepcopy(reference['events'][:3])
+                events[0].update(session_id=session, uuid=str(uuid.UUID(int=1000)))
+                events[1]['response']['response']['user_output_styles_dir'] = launch['config_root'] + '/output-styles'
+                events[2].update(cwd=launch['cwd'], original_cwd=launch['cwd'], session_id=session,
+                    uuid=str(uuid.UUID(int=1001)), additional_directories=[launch['effect_root']])
+                native = consumer._permission_protocol()
+                ledger = [{'kind': 'initialize_sent', 'policy_sha256': native.policy_digest(policy),
+                           'frame': native.initialize_frame(policy['pretool_control'])},
+                          {'kind': 'initialize_ack', 'frame': deepcopy(events[1])}]
+                cases = consumer.trace_cases(consumer.probe_cases(expected, fixture['selection'], launch, session), trace)
+                for number, case in enumerate(cases):
+                    call = deepcopy(reference['events'][3])
+                    call.update(session_id=session, uuid=str(uuid.UUID(int=1100 + 2 * number)))
+                    call['message'].update(id='d4d_permission_' + str(number), content=[{
+                        'type': 'tool_use', 'id': case['id'], 'name': case['tool'], 'input': deepcopy(case['input'])}])
+                    callback = deepcopy(reference['events'][4])
+                    callback['request_id'] = str(uuid.UUID(int=2000 + number))
+                    callback['request'].update(callback_id=policy['pretool_control']['callback_id'], tool_use_id=case['id'])
+                    callback['request']['input'].update(session_id=session, cwd=launch['cwd'],
+                        transcript_path=launch['config_root'] + '/projects/' + launch['cwd'].replace('/', '-') + '/' + session + '.jsonl',
+                        tool_name=case['tool'], tool_use_id=case['id'], tool_input=deepcopy(case['input']))
+                    events.extend([call, callback])
+                    classification, view = consumer._classification(expected, fixture['selection'], launch, session, case, controls)
+                    if case['mode'] == 'observer_stopped':
+                        raw[prefix + 'effect-stop.json'] = encoded(consumer.effect_stop(
+                            expected, policy, case, view, call, callback, classification))
+                        parent = get(fixture['manifest'], prefix + 'parent-stop.json')
+                        parent['effect_stop_sha256'] = p._sha(raw[prefix + 'effect-stop.json'])
+                        raw[prefix + 'parent-stop.json'] = encoded(parent)
+                        continue
+                    result = deepcopy(reference['events'][5])
+                    result.update(session_id=session, uuid=str(uuid.UUID(int=1101 + 2 * number)),
+                                  message=deepcopy(old_results[case['id']]['message']),
+                                  tool_use_result=deepcopy(old_results[case['id']]['tool_use_result']))
+                    annotation = {'id': case['id'], 'permission_decision': {'decision': 'accept', 'source': 'config', 'reason_type': 'rule'}}
+                    if case['mode'] == 'native_denied':
+                        text = 'PreToolUse:Bash hook error: Outside the registered tool policy: ' + classification[1]
+                        result['message']['content'][0]['content'] = text
+                        result['tool_use_result'] = 'Error: ' + text
+                        annotation = {'id': case['id'], 'non_execution_kind': 'permission-rule',
+                                      'permission_decision': {'decision': 'reject', 'source': 'hook', 'reason_type': 'hook'}}
+                    elif case['tool'] == 'Bash':
+                        result['tool_use_result'].update(isImage=False, noOutputExpected=False)
+                    result['tool_result_meta'] = [annotation]
+                    events.append(result)
+                    ledger.append({'kind': 'decision', 'request': callback, 'classification': classification[0],
+                        'basis': classification[1], 'response': {'type': 'control_response', 'response': {
+                            'subtype': 'success', 'request_id': callback['request_id'], 'response': native.hook_output(*classification)}}})
+                outcome = get(fixture['manifest'], prefix + 'outcome.json')
+                if trace == 'settled':
+                    completion, terminal = deepcopy(reference['events'][-2:])
+                    completion.update(session_id=session, uuid=str(uuid.UUID(int=3000)))
+                    completion['message']['id'] = 'd4d_permission_' + str(len(cases))
+                    terminal.update(session_id=session, uuid=str(uuid.UUID(int=3001)), num_turns=len(cases) + 1,
+                        permission_denials=[{'tool_name': case['tool'], 'tool_use_id': case['id'], 'tool_input': case['input']}
+                                           for case in cases if case['mode'] == 'native_denied'])
+                    events.extend([completion, terminal])
+                    outcome['terminal_sha256'] = p._sha(encoded(terminal))
+                else:
+                    outcome['parent_stop_sha256'] = p._sha(raw[prefix + 'parent-stop.json'])
+                raw[prefix + 'outcome.json'] = encoded(outcome)
+                raw[prefix + 'transcript.jsonl'] = b''.join(encoded(event) + b'\n' for event in events)
+                raw[prefix + 'control.jsonl'] = b''.join(encoded(row) + b'\n' for row in ledger)
+                summary, observed, _ = consumer._trace(expected, fixture['selection'], trace, raw, controls)
+                assert summary['mode'] == ('settled' if trace == 'settled' else 'observer_stopped')
+                assert len(observed) == len(cases)
+                if trace == 'settled':
+                    assert sum(case['observed_mode'] == 'native_denied' for case in observed) == 3
+                    changed = deepcopy(raw)
+                    broken = deepcopy(events)
+                    next(event for event in broken if event.get('type') == 'user')['message']['content'][0]['content'] = 'foreign read bytes'
+                    changed[prefix + 'transcript.jsonl'] = b''.join(encoded(event) + b'\n' for event in broken)
+                    with pytest.raises(ValueError, match='exact complete captured range'):
+                        consumer._trace(expected, fixture['selection'], trace, changed, controls)
+
+
+def test_native_refusal_mutations_cannot_become_permission_evidence(fixture):
+    changes = ('read_path', 'read_callback', 'read_decision', 'read_error', 'read_metadata',
+        'read_denial', 'missing_read', 'write_path', 'write_payload', 'write_callback', 'write_error',
+        'write_success', 'write_metadata', 'missing_rejection', 'rejection_hash', 'rejection_line',
+        'extra_grant', 'completion', 'terminal_error', 'terminal_denials', 'terminal_turns',
+        'terminal_pending', 'foreign_session', 'extra_result', 'inventory', 'source',
+        'effect_stop', 'parent_stop', 'observer_claim', 'process_exit', 'shutdown', 'init')
+    for change in changes:
+        value = fabricated_native_refusal(fixture, 'helper_owned_write')
+        prefix = 'traces/stop-helper_owned_write/'
+        events = rows(value, prefix + 'transcript.jsonl')
+        controls = rows(value, prefix + 'control.jsonl')
+        if change == 'read_path':
+            events[2]['message']['content'][0]['input']['file_path'] += '.foreign'
+        elif change == 'read_callback':
+            events[3]['request']['input']['tool_input']['file_path'] += '.foreign'
+        elif change == 'read_decision':
+            controls[2]['classification'] = 'not_prescribed'
+        elif change == 'read_error':
+            events[5]['message']['content'][0]['content'] = 'File exceeds maximum allowed size'
+        elif change == 'read_metadata':
+            events[5]['tool_use_result'] += ' foreign'
+        elif change == 'read_denial':
+            events[4]['decision_reason_type'] = 'policy'
+        elif change == 'missing_read':
+            del events[2:6]
+        elif change == 'write_path':
+            events[6]['message']['content'][0]['input']['file_path'] += '.foreign'
+        elif change == 'write_payload':
+            events[6]['message']['content'][0]['input']['content'] = 'foreign overwrite'
+        elif change == 'write_callback':
+            callback = deepcopy(events[3])
+            callback['request_id'] = 'callback-helper_owned_write'
+            callback['request']['input'].update(tool_name='Write', tool_use_id='helper_owned_write',
+                                                tool_input=events[6]['message']['content'][0]['input'])
+            events.insert(7, callback)
+        elif change == 'write_error':
+            events[7]['message']['content'][0]['content'] = 'Some unrelated failure'
+        elif change == 'write_success':
+            events[7]['message']['content'][0]['is_error'] = False
+        elif change == 'write_metadata':
+            events[7]['tool_use_result'] = {}
+        elif change == 'missing_rejection':
+            controls.pop()
+        elif change == 'rejection_hash':
+            controls[3]['call_sha256'] = '0' * 64
+        elif change == 'rejection_line':
+            controls[3]['result_line'] += 1
+        elif change == 'extra_grant':
+            controls.append(deepcopy(controls[2]))
+        elif change == 'completion':
+            events[-2]['message']['content'][0]['text'] = 'KEEP_GOING'
+        elif change == 'terminal_error':
+            events[-1]['is_error'] = True
+        elif change == 'terminal_denials':
+            events[-1]['permission_denials'] = []
+        elif change == 'terminal_turns':
+            events[-1]['num_turns'] = 4
+        elif change == 'terminal_pending':
+            events[-1]['queued_turn_count'] = 1
+        elif change == 'foreign_session':
+            events[7]['session_id'] = str(uuid.UUID(int=999))
+        elif change == 'extra_result':
+            events.insert(-2, deepcopy(events[7]))
+        elif change == 'inventory':
+            put(value, prefix + 'neutral.after.json', {})
+        elif change == 'source':
+            value['members']['source.after'] = member(b'changed source\n')
+        elif change in ('effect_stop', 'parent_stop'):
+            put(value, prefix + change.replace('_', '-') + '.json', {})
+        elif change == 'process_exit':
+            launch = get(value, prefix + 'launch.json'); launch['exit_code'] = -15
+            put(value, prefix + 'launch.json', launch)
+        elif change == 'shutdown':
+            launch = get(value, prefix + 'launch.json'); launch['shutdown']['child_reaped'] = False
+            put(value, prefix + 'launch.json', launch)
+        elif change == 'init':
+            events[1]['tools'] = ['Write']
+        outcome = get(value, prefix + 'outcome.json')
+        outcome['terminal_sha256'] = p._sha(encoded(events[-1]))
+        if change == 'observer_claim':
+            outcome['protection'] = 'observer'
+        put(value, prefix + 'outcome.json', outcome)
+        put_rows(value, prefix + 'transcript.jsonl', events)
+        put_rows(value, prefix + 'control.jsonl', controls)
+        with pytest.raises(ValueError):
+            verify(value, fixture['expected'])
+
+
+def test_source_refusal_rejects_unknown_read_failures(fixture):
+    value = fabricated_native_refusal(fixture, 'source_write', source_read_succeeded=True)
+    prefix = 'traces/stop-source_write/'
+    events = rows(value, prefix + 'transcript.jsonl')
+    events[4]['message']['content'][0].update(is_error=True, content='File exceeds maximum allowed size')
+    events[4]['tool_use_result'] = 'Error: File exceeds maximum allowed size'
+    put_rows(value, prefix + 'transcript.jsonl', events)
+    with pytest.raises(ValueError):
+        verify(value, fixture['expected'])
+
+
+def test_native_refusal_requires_transport_compatible_envelopes(fixture):
+    for change in ('observed_metadata', 'write_extra', 'write_message_extra', 'write_role_missing',
+                   'read_extra', 'read_message_extra', 'read_role_missing', 'denial_extra',
+                   'call_role_missing', 'subagent_spawned', 'subagent_background', 'subagent_unknown'):
+        value = fabricated_native_refusal(fixture, 'helper_owned_write')
+        prefix = 'traces/stop-helper_owned_write/'
+        events = rows(value, prefix + 'transcript.jsonl')
+        if change == 'observed_metadata':
+            for index in (4, 5, 7):
+                events[index].update(uuid=str(uuid.UUID(int=100 + index)), parent_tool_use_id=None)
+            for index in (5, 7):
+                events[index]['timestamp'] = '2026-11-21T21:17:32.576Z'
+        elif change == 'write_extra':
+            events[7]['persisted_output'] = {}
+        elif change == 'write_message_extra':
+            events[7]['message']['extra'] = True
+        elif change == 'write_role_missing':
+            del events[7]['message']['role']
+        elif change == 'read_extra':
+            events[5]['persisted_output'] = {}
+        elif change == 'read_message_extra':
+            events[5]['message']['extra'] = True
+        elif change == 'read_role_missing':
+            del events[5]['message']['role']
+        elif change == 'denial_extra':
+            events[4]['permissionDecision'] = 'allow'
+        elif change == 'call_role_missing':
+            del events[6]['message']['role']
+        elif change == 'subagent_spawned':
+            events[-1]['subagent_stats']['spawned'] = 1
+        elif change == 'subagent_background':
+            events[-1]['subagent_stats']['started_in_background'] = 1
+        else:
+            events[-1]['subagent_stats']['pending'] = 1
+        controls = rows(value, prefix + 'control.jsonl')
+        # Recompute evidence digests so rejection depends on the altered
+        # envelope/lifecycle, rather than merely detecting an old hash.
+        controls[3]['call_sha256'] = p._sha(encoded(events[6]))
+        controls[3]['result_sha256'] = p._sha(encoded(events[7]))
+        outcome = get(value, prefix + 'outcome.json')
+        outcome['terminal_sha256'] = p._sha(encoded(events[-1]))
+        put(value, prefix + 'outcome.json', outcome)
+        put_rows(value, prefix + 'control.jsonl', controls)
+        put_rows(value, prefix + 'transcript.jsonl', events)
+        with pytest.raises(ValueError, match='native refusal outcome is withdrawn'):
+            verify(value, fixture['expected'])
 
 
 @pytest.mark.parametrize('name', ['source.before','cases.json','recipe/provider.py',
@@ -378,6 +831,35 @@ def test_rehashed_launch_sources_and_roster_refuse(fixture,change):
     with pytest.raises(ValueError):verify(value,fixture['expected'])
 
 
+def test_saved_grant_must_be_the_single_exact_effect_root(fixture):
+    for change in ('missing', 'parent', 'sibling', 'two', 'lexical_alias', 'extra_settings', 'argv_grant'):
+        value = deepcopy(fixture['manifest'])
+        name = 'traces/settled/launch.json'
+        launch = get(value, name)
+        argv = launch['argv']
+        position = argv.index('--settings') + 1
+        settings = json.loads(argv[position])
+        root = launch['effect_root']
+        if change == 'missing':
+            del settings['permissions']['additionalDirectories']
+        elif change == 'parent':
+            settings['permissions']['additionalDirectories'] = [str(Path(root).parent)]
+        elif change == 'sibling':
+            settings['permissions']['additionalDirectories'] = [root + '-sibling']
+        elif change == 'two':
+            settings['permissions']['additionalDirectories'] = [root, root + '-sibling']
+        elif change == 'lexical_alias':
+            settings['permissions']['additionalDirectories'] = [root + '/nested/..']
+        elif change == 'extra_settings':
+            argv.extend(['--settings', '{}'])
+        else:
+            argv.extend(['--add-dir', root])
+        argv[position] = json.dumps(settings, separators=(',', ':'))
+        put(value, name, launch)
+        with pytest.raises(ValueError, match='native argv differs'):
+            verify(value, fixture['expected'])
+
+
 @pytest.mark.parametrize('raw', [b'{"x":1,"x":2}',b'{"x":NaN}',b'{"x":1e999}',b'"\\ud800"',b'\xff',b'['*65+b'0'+b']'*65])
 def test_strict_raw_parser_rejects_ambiguous_unbounded_or_non_utf8(raw):
     with pytest.raises(ValueError):p._json(raw)
@@ -386,12 +868,13 @@ def test_strict_raw_parser_rejects_ambiguous_unbounded_or_non_utf8(raw):
 @pytest.mark.parametrize('budget', ['0','0.0','1e2','NaN','-1','+1',' 1',1,True,1.0])
 def test_budget_spelling_is_not_normalized(fixture,budget):
     expected=deepcopy(fixture['expected']);expected['runtime']['budget_guard_usd']=budget
-    with pytest.raises(ValueError):permission_orchestration.probe_argv(expected,expected['policy'])
+    with pytest.raises(ValueError):permission_orchestration.probe_argv(
+        expected,expected['policy'], effect_root='/synthetic/probe-effect')
 
 
 def test_budget_spelling_and_absent_null_file_map_are_preserved(fixture):
     expected=deepcopy(fixture['expected']);selected=fixture['selection']
-    argv = permission_orchestration.probe_argv(expected,expected['policy'])
+    argv = permission_orchestration.probe_argv(expected,expected['policy'], effect_root='/synthetic/probe-effect')
     assert argv[argv.index('--max-budget-usd')+1]=='01.50'
     for absent in (True,False):
         if absent:expected['policy']['readonly_lookups'].pop('write_paths',None)
@@ -465,6 +948,10 @@ def test_loaded_fixed_source_cannot_be_replaced_by_an_advertised_pin(fixture, mo
     expected['probe_recipe']=p.recipe(expected);changed['binding']=deepcopy(expected)
     with pytest.raises(ValueError,match='loaded fixed source differs'):
         verify(changed,expected)
+
+
+def test_loaded_production_wire_source_cannot_be_replaced_by_an_advertised_pin(fixture):
+    test_loaded_fixed_source_cannot_be_replaced_by_an_advertised_pin(fixture, 'native_wire_2_1_325')
 
 
 def test_recorder_mapping_pins_actual_module_execution_entrypoint(fixture):

@@ -416,10 +416,12 @@ def test_trace_and_derived_reuse_keeps_all_views_classifiers_and_exact_bytes(inp
     previous, old_counts, old_factories = run(previous_factory)
     current, counts, factories = run(actual_factory)
     assert current == previous and counts == old_counts
-    assert counts['classify'] == 25
-    assert counts['construct'] == 13 * len(p.TRACES) + 25 + 9
-    assert counts['post_init'] == counts['validate_view'] == 251
-    assert counts['effect'] > 25 and counts['bash'] > 0
+    assert counts['classify'] == 28
+    assert counts['construct'] == 13 * len(p.TRACES) + 28 + 9
+    # The source Read adds construction/routing checks; each of the two
+    # stage Reads also revalidates the view in its effect classifier.
+    assert counts['post_init'] == counts['validate_view'] == 251 + 2 + 3 + 3
+    assert counts['effect'] > 28 and counts['bash'] > 0
     assert len(factories) == 2 * len(p.TRACES) + 1
     assert [(row['session'], row['root'], row['calls']) for row in factories] == [
         (row['session'], row['root'], row['calls']) for row in old_factories]
@@ -428,7 +430,8 @@ def test_trace_and_derived_reuse_keeps_all_views_classifiers_and_exact_bytes(inp
         session = get(fixture['manifest'], f'traces/{trace}/outcome.json')['session_id']
         assert projected['session'] == classified['session'] == session
         assert len(projected['calls']) == 13
-        assert len(classified['calls']) == (25 - len(p.STOPS) if trace == 'settled' else 1)
+        prerequisites = {'stop-sealed_request_write', 'stop-source_write', 'stop-helper_owned_write'}
+        assert len(classified['calls']) == (19 if trace == 'settled' else 1 + (trace in prerequisites))
     assert factories[-1]['calls'] == [
         ('worker', state, False) for state in p.NONRESPONSE
     ] + [(context, 'awaiting_response', True) for context in p.CONTEXTS]

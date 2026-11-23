@@ -36,6 +36,24 @@ def _stat(info):
         'mtime_ns':info.st_mtime_ns}
 
 
+def require_physical_directory(path, *, must_exist):
+    """Host-only check of an exact directory identity before grant dispatch."""
+    canonical_path(path, 'physical directory')
+    if path == '/' or path != path.strip() or type(must_exist) is not bool:
+        raise ValueError('physical directory requires a bounded root and exact existence choice')
+    target = Path(path)
+    try:
+        if target.resolve(strict=must_exist) != target:
+            raise ValueError('stage grant root uses a filesystem alias')
+        if target.is_symlink() or (target.exists() and not target.is_dir()):
+            raise ValueError('stage grant root is not a physical directory')
+        if must_exist and not target.is_dir():
+            raise ValueError('stage grant root is missing')
+    except (OSError, RuntimeError) as exc:
+        raise ValueError('stage grant root cannot be resolved as a physical directory') from exc
+    return path
+
+
 def read_regular(path, role, *, max_bytes):
     """Capture one regular file through limit+1 reads and stable open metadata.
 

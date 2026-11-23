@@ -32,6 +32,9 @@ C_CONSUMERS = (
     'native_shared_controls', 'native_shared_authority_wire',
     'native_shared_permission_protocol', 'native_shared_runtime_constants',
     'native_shared_evidence',
+    # C support owns wire interpretation, grant construction and grant diagnostics.
+    'native_shared_permission_wire', 'native_stage_root_grant',
+    'native_stage_root_diagnostic', 'native_wire_2_1_325',
 )
 HISTORICAL_D8_HEAD = '3ab9fbc189f647d0abf00a50ab4c35634fe5228e'
 OLD_BOOTSTRAP = ('consumer cannot import verifier bootstrap boundary: '
@@ -100,6 +103,14 @@ def _project_origins():
     return origins
 
 
+def _current_owned_names(authority_owned):
+    names = (*C_CONSUMERS, *D_CONSUMERS, *D_SUPPORT)
+    owned = {'data_sheets_schema.' + name for name in names}
+    if len(names) != 34 or len(owned) != 34 or owned != authority_owned:
+        raise RuntimeError('current C/D census roster differs from the closed A roster')
+    return names
+
+
 def inspect_current(out):
     """Run A's actual graph guard against the current complete package closure.
 
@@ -122,10 +133,8 @@ def inspect_current(out):
     pins = identity['base']['package_sources']
     if pins != {name: sha(raw) for name, raw in original.items()}:
         raise RuntimeError('A dependency pins do not cover the exact current source inventory')
-    names = (*C_CONSUMERS, *D_CONSUMERS, *D_SUPPORT)
+    names = _current_owned_names(authority.CONSUMER_OWNED_MODULES)
     owned = {'data_sheets_schema.' + name for name in names}
-    if len(names) != 30 or len(owned) != 30 or owned != authority.CONSUMER_OWNED_MODULES:
-        raise RuntimeError('current C/D census roster differs from the closed A roster')
     imported_before = {name: sys.modules[name] for name in owned if name in sys.modules}
     save(out / 'manifest.json', {
         'kind': 'current_integrated_consumer_graph_census', 'version': 1,

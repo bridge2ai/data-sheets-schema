@@ -91,6 +91,14 @@ def test_closed_registration_checks_actual_selected_policy_and_does_not_reserve(
     assert value['max_draft_checks'] == selected['max_draft_checks'] == 2
     assert value['runtime'] == c.strict_json(selected['runtime_raw_json'].encode())
     assert value['argv'].count('--input-format') == 1
+    assert value['argv'].count('--settings') == 1
+    settings = c.strict_json(value['argv'][value['argv'].index('--settings') + 1].encode())
+    stage_root = c.parse_selection(selected['selection_raw_json'].encode())['stage_root']
+    assert settings == {'permissions': {'allow': selected['policy']['allowed_tools'],
+                                       'additionalDirectories': [stage_root]}}
+    assert all(value['argv'].count(flag) == 1 for flag in (
+        '--restricted', '--safe-mode', '--strict-mcp-config', '--disable-slash-commands'))
+    assert '--add-dir' not in value['argv']
     assert any(row['module'] == 'data_sheets_schema.cli.__main__' for row in expected['production_sources'])
     assert any(row['module'] == 'data_sheets_schema.native_shared_policy' for row in expected['production_sources'])
     assert not args['attempt_directory'].exists() and not args['evidence_directory'].exists()

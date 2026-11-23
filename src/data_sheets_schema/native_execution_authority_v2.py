@@ -59,7 +59,9 @@ _TRUSTED_CONSUMER_BOUNDARIES = frozenset((
 CONSUMER_OWNED_MODULES = frozenset('data_sheets_schema.' + name for name in (
     'native_shared_attribution', 'native_shared_capture', 'native_shared_controller',
     'native_shared_authority_wire', 'native_shared_controls', 'native_shared_evidence',
-    'native_shared_permission_protocol', 'native_shared_runtime_constants',
+    'native_shared_permission_protocol', 'native_shared_permission_wire', 'native_stage_root_grant',
+    'native_stage_root_diagnostic', 'native_wire_2_1_325',
+    'native_shared_runtime_constants',
     'native_shared_current', 'native_shared_effects', 'native_shared_observations',
     'native_shared_phase', 'native_shared_policy', 'native_shared_receipts',
     'native_shared_stage', 'native_shared_streams', 'native_shared_execution',

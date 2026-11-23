@@ -31,6 +31,9 @@ VALIDATOR_MODULES = frozenset('data_sheets_schema.' + name for name in (
     'native_shared_evidence', 'native_shared_observations', 'native_shared_phase',
     'native_shared_policy', 'native_shared_receipts', 'native_shared_render',
     'native_shared_selection', 'native_shared_stage', 'native_shared_streams',
+    # The reviewed production wire predicates are reached by capture/phase.
+    # Keep their aliases, callables and semantic constants in this closed guard.
+    'native_wire_2_1_325',
     'profiles', 'receipt_completion_policy', 'receipts', 'registry', 'resources',
     'schema_snapshot', 'schema_view', 'support_targets', 'typed_audit',
     'source_metadata', 'source_review', 'bc1_context'))
@@ -110,7 +113,8 @@ class _ValidatorGuard:
             for name, value in sorted(vars(module).items()):
                 private_contract = name in ('_DYNAMIC', '_LIMITS', '_OBSERVATION_KEYS',
                     '_OBSERVATION_PAYLOADS', '_METADATA', '_COMPOSITION_KEYS',
-                    '_REQUIRED', '_OPTIONAL', '_TERMINAL_HELPERS', '_JSON_HELPERS', '_ADVANCE_KEYS')
+                    '_REQUIRED', '_OPTIONAL', '_TERMINAL_HELPERS', '_JSON_HELPERS', '_ADVANCE_KEYS',
+                    '_DERIVATION_RULE')
                 private_limit = name.startswith('_') and any(token in name for token in (
                     'LIMIT', 'MAX_', 'CEILING', '_BYTES', '_ENTRIES', '_SECONDS'))
                 grammar = hasattr(value, 'pattern') and hasattr(value, 'flags')
@@ -518,7 +522,8 @@ def preloaded_callbacks(composition, spec, selected, execution, registration_raw
         paths = frozen._agentic_artifact_paths
         phase = modules['native_shared_phase'].PhaseState(rendered_commands,
             full_path=paths['full'], core_path=paths['core'], report_path=paths['report'],
-            receipt_path=paths['receipt'], working_directory=composition['working_directory'])
+            receipt_path=paths['receipt'], working_directory=composition['working_directory'],
+            runtime=execution['runtime'])
         state = modules['native_shared_attribution_orchestration']._LiveAttribution(
             current, execution_raw=registration_raw, spec=frozen, composition_raw=composition_raw,
             _admission=admitted)

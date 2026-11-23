@@ -564,11 +564,44 @@ class TestProvenanceModeReportingAndArchive(unittest.TestCase):
 
     def test_dry_run_moves_nothing(self):
         from data_sheets_schema.runs import archive_runs
-        before = sorted(Path("data/d4d_concatenated").rglob("*_d4d.yaml"))
-        archive_runs(["2026-07-27_claude-opus-5_rep1"], reason="t",
-                     dry_run=True, allow_partial_labels=True)
-        self.assertEqual(before,
-                         sorted(Path("data/d4d_concatenated").rglob("*_d4d.yaml")))
+        # Shared corpus method directories can disappear during other fixtures'
+        # cleanup. This mechanics check owns every source and archive path.
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            concat, attic = root / "concat", root / "attic"
+            selected = {
+                concat / "m" / "L" / "P_d4d.yaml": b"id: x\nname: X\n",
+                concat / "m_core" / "L" / "P_d4d_core.yaml": b"id: x\n",
+                concat / "m_core" / "L" / "P_reconciliation.md": b"# report\n",
+            }
+            files = {
+                **selected,
+                concat / "m" / "other" / "Q_d4d.yaml": b"id: untouched\n",
+                attic / "d4d_concatenated_archived" / "README.md": b"prior archive note\n",
+            }
+            for path, raw in files.items():
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(raw)
+
+            def snapshot():
+                return (
+                    {path.relative_to(root).as_posix(): path.read_bytes()
+                     for path in root.rglob("*") if path.is_file()},
+                    {path.relative_to(root).as_posix()
+                     for path in root.rglob("*") if path.is_dir()},
+                )
+
+            before = snapshot()
+            result = archive_runs(["L"], reason="t", concat_dir=concat, attic=attic,
+                                  dry_run=True, allow_partial_labels=True)
+            self.assertTrue(result["dry_run"])
+            self.assertFalse(result["matched_nothing"])
+            self.assertEqual(result["count"], 3)
+            self.assertEqual(set(result["moved"]), {
+                (str(path), str(attic / "d4d_concatenated_archived" / path.relative_to(concat)))
+                for path in selected
+            })
+            self.assertEqual(before, snapshot())
 
     def test_archive_roundtrips(self):
         import tempfile

@@ -500,6 +500,23 @@ def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_ca
         for event in events:
             try:
                 observer(event)
+                if event.get('type') == 'system' and event.get('subtype') == 'init':
+                    wanted = {
+                        'stop-sealed_request_write': ['request_worker_read', 'sealed_request_write'],
+                        'stop-source_write': ['source_read', 'source_write'],
+                        'stop-helper_owned_write': ['helper_owned_read', 'helper_owned_write'],
+                    }.get(observer.trace)
+                    if observer.trace == 'settled':
+                        assert len(observer.cases) == 19
+                    else:
+                        assert [case['id'] for case in observer.cases] == (
+                            wanted or [observer.trace.removeprefix('stop-')])
+                        first = observer.cases[0]
+                        target = Path(first['input']['file_path'])
+                        assert target.exists() == bool(wanted)
+                        if wanted:
+                            assert first['tool'] == 'Read'
+                            assert first['input']['file_path'] == observer.cases[-1]['input']['file_path']
                 if fail_later and observer.trace != 'settled' and observer.session:
                     raise TimeoutError('later trace failed')
             except transport.budget_stop:
@@ -534,7 +551,8 @@ def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_ca
     output = probe.produce_saved_probe(expected, directory, deadline_seconds=60)
     reading = verify.verify_saved_probe(output.read_bytes(), expected=expected)
     assert reading["passed"]
-    assert len(reading["cases"]) == len(json.loads(manifest['members']['cases.json']['text']))
+    assert len(reading["cases"]) == 28
+    assert len(json.loads(manifest['members']['cases.json']['text'])) == 25
     assert len(reading["traces"]) == len(p.TRACES)
     assert (directory / "transport-provider.py").read_bytes() == transport_source
     assert all((directory / trace / "evidence_root" / "parent-stop.json").is_file()
@@ -545,6 +563,74 @@ def test_shared_producer_actual_capture_paths_with_mocked_native_events(saved_ca
     monkeypatch.setattr(probe, '_version', lambda *a: pytest.fail('spent path started another probe'))
     with pytest.raises(FileExistsError):
         probe.produce_saved_probe(expected, directory, deadline_seconds=60)
+
+
+def test_stop_trace_without_parent_stop_has_named_refusal(tmp_path, monkeypatch):
+    """An unverified binary refusal must never become a completed stop trace."""
+    from data_sheets_schema import native_model_aliases
+    monkeypatch.setattr(native_model_aliases, 'model_aliases', lambda _: {'returned': 'invented'})
+    monkeypatch.setattr(probe, 'local_provider', mock_provider)
+    monkeypatch.setattr(probe, '_inventory', lambda *args: {'unchanged': True})
+    observer = SimpleNamespace(policy={}, cases=[], session='invented-session', members={},
+                               classify=lambda *args: None)
+    monkeypatch.setattr(probe, '_SharedObserver', lambda *args, **kwargs: observer)
+    monkeypatch.setattr(probe.subprocess, 'Popen', lambda *args, **kwargs: pytest.fail('no native process'))
+    monkeypatch.setattr(probe, '_run_native', lambda *args: {
+        'exit_code': 0, 'shutdown': {}, 'transcript.jsonl': b'{"type":"result"}\n',
+        'control.jsonl': b'{"kind":"initialize_sent"}\n'})
+    consumer = SimpleNamespace(
+        _roots=lambda *args: None, stub_files=lambda: {},
+        recipe_sources=lambda: {'recipe/provider.py': 'def reply(cases, number): return None\n'},
+        probe_argv=lambda expected, policy, *, effect_root: ['never-run'])
+    expected = {'policy': {'readonly_lookups': {'repository': str(tmp_path)}},
+                'runtime': {'executable': {}}, 'permission_environment': {}}
+    directory = tmp_path / 'missing-stop'
+    with pytest.raises(ValueError, match='permission stop trace ended without parent-stop.json') as caught:
+        probe._trace(expected, directory, float('inf'), {}, consumer, {}, None,
+                     trace='stop-sealed_request_write')
+    assert type(caught.value).__name__ == 'PermissionObserverStopMissing'
+    assert 'stop-sealed_request_write' in str(caught.value)
+    assert (directory / 'launch.before.json').is_file()
+    assert not (directory / 'completed').exists()
+
+
+def test_producer_refuses_every_stop_trace_without_an_observer_stop(tmp_path, monkeypatch):
+    """Binary refusal cannot replace any required observer stop after the grant."""
+    from data_sheets_schema import native_model_aliases
+    monkeypatch.setattr(native_model_aliases, 'model_aliases', lambda _: {'returned': 'invented'})
+    monkeypatch.setattr(probe, 'local_provider', mock_provider)
+    monkeypatch.setattr(probe, '_inventory', lambda *args: {'unchanged': True})
+    monkeypatch.setattr(probe.subprocess, 'Popen', lambda *args, **kwargs: pytest.fail('no native process'))
+    observer = SimpleNamespace(policy={}, cases=[], session='invented-session',
+                               members={'cases.json': b'[]', 'projection.json': b'{}',
+                                        'neutral.before.json': b'{"unchanged":true}'},
+                               classify=lambda *args: None)
+    variants = []
+    def observer_factory(*args, **kwargs):
+        variants.append(kwargs['source_write_read_variant'])
+        return observer
+    monkeypatch.setattr(probe, '_SharedObserver', observer_factory)
+    monkeypatch.setattr(probe, '_run_native', lambda *args: {
+        'exit_code': 0, 'shutdown': {}, 'transcript.jsonl': b'{"type":"result"}\n',
+        'control.jsonl': b'{"kind":"initialize_sent"}\n'})
+    def verify_refusal(*args, **kwargs):
+        pytest.fail('withdrawn binary refusal fallback was called')
+    consumer = SimpleNamespace(
+        _roots=lambda *args: None, stub_files=lambda: {}, MAX_MEMBER=1024,
+        recipe_sources=lambda: {'recipe/provider.py': 'def reply(cases, number): return None\n'},
+        probe_argv=lambda expected, policy, *, effect_root: ['never-run'],
+        native_refusal_outcome=verify_refusal)
+    expected = {'policy': {'readonly_lookups': {'repository': str(tmp_path)}},
+                'runtime': {'executable': {}}, 'permission_environment': {}}
+    for trace in ('stop-sealed_request_write', 'stop-helper_owned_write', 'stop-source_write'):
+        directory = tmp_path / trace
+        variant = 'bounded' if trace == 'stop-source_write' else None
+        with pytest.raises(probe.PermissionObserverStopMissing, match=trace):
+            probe._trace(expected, directory, float('inf'), {}, consumer, {}, None,
+                         trace=trace, source_write_read_variant=variant)
+        assert (directory / 'launch.before.json').is_file()
+        assert not (directory / 'completed').exists()
+    assert variants == [None, None, 'bounded']
 
 
 class FakePipe(io.BytesIO):
@@ -618,7 +704,9 @@ def test_native_boundary_reaps_closes_and_retains_failed_evidence(tmp_path, monk
     monkeypatch.setattr(probe.os, "killpg", lambda pid, sig: signals.append((pid, sig)))
     root = tmp_path / "trace"
     root.mkdir()
-    launch = {"config_root": str(root / "config"), "argv": ["never-run"], "cwd": str(root), "environment": {}}
+    (root / 'effect_root').mkdir()
+    launch = {"config_root": str(root / "config"), "effect_root": str(root / 'effect_root'),
+              "argv": ["never-run"], "cwd": str(root), "environment": {}}
     transport = SimpleNamespace(control=Control, budget_stop=BudgetStop, check=lambda: None)
     call = lambda: probe._run_native({}, launch, {}, lambda e: None, None, transport,
                                      SimpleNamespace(failure=None), float("inf"))
@@ -864,9 +952,10 @@ def _fake_handler(server, body):
     return handler
 
 
-def _fake_post_server(supplier, deadline, observation_request=None, stop_requested=None):
+def _fake_post_server(supplier, deadline, observation_request=None, stop_requested=None,
+                      request_capture=None):
     return SimpleNamespace(deadline=deadline, requests=0, failure=None, model="synthetic",
-        reply=None, observation_request=observation_request,
+        reply=None, observation_request=observation_request, request_capture=request_capture,
         stop_requested=stop_requested or threading.Event(), case_supplier=supplier)
 
 
@@ -897,6 +986,39 @@ def test_provider_request_before_selection_gets_first_scripted_case(late):
     head, _, payload = handler.wfile.getvalue().partition(b"\r\n\r\n")
     assert head.startswith(b"HTTP/1.1 200")
     assert json.loads(payload)["content"][0]["id"] == "a"
+
+
+def test_provider_request_capture_preserves_wait_for_late_cases():
+    """Diagnostic raw capture is not the observation route's empty-case bypass."""
+    holder = {'cases': None}
+    captured = []
+    first_empty_read = threading.Event()
+    def supplier():
+        cases = holder['cases']
+        if cases is None:
+            first_empty_read.set()
+        return cases
+    def publish():
+        if first_empty_read.wait(5):
+            holder['cases'] = list(_CASES)
+    worker = threading.Thread(target=publish, daemon=True)
+    worker.start()
+    body = {'model': 'synthetic', 'messages': []}
+    server = _fake_post_server(supplier, time.monotonic() + 5,
+        request_capture=lambda raw, endpoint: captured.append((raw, endpoint)))
+    handler = _fake_handler(server, body)
+    try:
+        handler.do_POST()
+    finally:
+        worker.join(5)
+    assert not worker.is_alive()
+    assert first_empty_read.is_set() and server.failure is None
+    assert len(captured) == 1
+    raw, endpoint = captured[0]
+    assert type(raw) is bytes and json.loads(raw) == body and endpoint == '/v1/messages'
+    head, _, payload = handler.wfile.getvalue().partition(b'\r\n\r\n')
+    assert head.startswith(b'HTTP/1.1 200')
+    assert json.loads(payload)['content'][0]['id'] == 'a'
 
 
 def test_provider_request_never_selected_is_refused_at_deadline():

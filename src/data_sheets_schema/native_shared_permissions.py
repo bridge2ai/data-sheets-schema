@@ -21,6 +21,10 @@ from data_sheets_schema import native_shared_contract as contract
 from data_sheets_schema import native_shared_policy as command_policy
 from data_sheets_schema import native_shared_runtime_values as runtime_values
 from data_sheets_schema import native_model_aliases
+from data_sheets_schema import native_shared_permission_wire as wire_profile
+from data_sheets_schema import native_stage_root_grant
+from data_sheets_schema import native_stage_root_diagnostic
+from data_sheets_schema import native_wire_2_1_325
 
 KIND = contract.KINDS['permission']
 EXPECTED_KIND = contract.KINDS['permission_expected']
@@ -37,6 +41,8 @@ CONTEXTS = ('receipt', 'worker', 'omission', 'integration')
 STOPS = ('future_response_write', 'sealed_request_write', 'stale_response_write',
          'outside_response_write', 'source_write', 'helper_owned_write')
 TRACES = ('settled',) + tuple('stop-' + name for name in STOPS)
+NATIVE_REFUSAL = 'native_refused_before_callback'
+SOURCE_WRITE_READ_VARIANT = 'whole'
 NONRESPONSE = ('request_ready', 'receipt_zero_work', 'await_core', 'assembly_complete', 'failed')
 MAX_MEMBER = contract.HARD_LIMITS['permission_member_bytes']
 MAX_RAW = contract.HARD_LIMITS['permission_decoded_total_bytes']
@@ -265,6 +271,10 @@ def _source_closure(expected):
                          ('data_sheets_schema.native_runtime_profiles', profiles.__file__),
                          ('data_sheets_schema.native_helper_cache', helper_cache.__file__),
                          ('data_sheets_schema.native_model_aliases', native_model_aliases.__file__),
+                         ('data_sheets_schema.native_shared_permission_wire', wire_profile.__file__),
+                         ('data_sheets_schema.native_wire_2_1_325', native_wire_2_1_325.__file__),
+                         ('data_sheets_schema.native_stage_root_grant', native_stage_root_grant.__file__),
+                         ('data_sheets_schema.native_stage_root_diagnostic', native_stage_root_diagnostic.__file__),
                          ('data_sheets_schema.native_shared_permission_protocol', _permission_protocol().__file__)]:
         raw = Path(file).read_bytes()
         wanted = {'module': module, 'path': str(Path(file).resolve()), 'bytes': len(raw), 'sha256': _sha(raw)}
@@ -425,15 +435,16 @@ def _roots(expected, selection, launch):
     return roots
 
 
-def probe_argv(expected, probe_policy):
+def probe_argv(expected, probe_policy, *, effect_root):
     """Exact recorded argv from C's pure protocol; never executed here."""
+    from .native_stage_root_grant import permission_arguments
     runtime = expected['runtime']
     return [runtime['executable']['path'], '--print', '--safe-mode', '--restricted',
             '--strict-mcp-config', '--no-session-persistence', '--model', runtime['model'],
             '--effort', runtime['effort'], '--disable-slash-commands', '--max-budget-usd',
             _budget(runtime['budget_guard_usd']), '--prompt-suggestions', 'false', '--output-format',
             'stream-json', '--verbose', '--permission-mode', 'dontAsk', '--tools', 'Read,Write,Bash',
-            *_permission_protocol().permission_arguments(probe_policy), '--system-prompt', SYSTEM]
+            *permission_arguments(probe_policy, effect_root), '--system-prompt', SYSTEM]
 
 
 def _artifact(role, path, raw):
@@ -547,7 +558,7 @@ def projection(expected, selection, launch, session_id, *, policy=None, recipe=N
 
 
 def probe_cases(expected, selection, launch, session_id, *, policy=None, recipe=None):
-    """Exact twenty-five observed cases and no caller-selected case subset."""
+    """Exact twenty-five base cases; stop traces add fixed Read preconditions."""
     _, _, requests, responses = _recipe_data(expected, selection, launch, session_id) if recipe is None else recipe
     root = _path(launch['effect_root'])
     def row(identity, tool, payload, context, mode):
@@ -591,6 +602,48 @@ def probe_cases(expected, selection, launch, session_id, *, policy=None, recipe=
             count = policy['readonly_lookups']['bounded_reads'][path]
             case['input'].update(offset=1, limit=min(12, count))
     return cases
+
+
+def trace_cases(all_cases, trace, *, source_write_read_variant=None):
+    """Script existing targets through Read before their prohibited Write.
+
+    Each stop trace starts with fresh neutral files and no responses. The
+    request, source and helper journal already exist; the response targets and
+    outside.bin do not. These preconditions do not alter the settled roster.
+    """
+    _need(trace in TRACES, 'unknown scripted trace')
+    variant = SOURCE_WRITE_READ_VARIANT if source_write_read_variant is None else source_write_read_variant
+    _need(type(variant) is str and variant in ('whole', 'bounded', 'allow_large'),
+          'unknown source Write Read precondition variant')
+    if trace == 'settled':
+        return [case for case in all_cases if case['mode'] != 'observer_stopped']
+    by_id = {case['id']: case for case in all_cases}
+    stopped = by_id[trace[5:]]
+    prerequisite = {'sealed_request_write': 'request_worker_read',
+                    'source_write': 'source_read'}.get(stopped['id'])
+    if prerequisite is not None:
+        read = by_id[prerequisite]
+        if stopped['id'] == 'source_write':
+            read = deepcopy(read)
+            original = read['input']
+            bounded = 'offset' in original or 'limit' in original
+            _need(variant == 'bounded' or not bounded,
+                  'source Read variant violates the registered bounded Read policy')
+            read['input'] = {'file_path': original['file_path']}
+            if variant == 'bounded':
+                limit = original['limit'] if bounded else 12
+                _need(type(limit) is int and 0 < limit <= 12
+                      and (not bounded or original.get('offset') == 1),
+                      'source Read bound differs from the first registered window')
+                read['input'].update(offset=1, limit=limit)
+            elif variant == 'allow_large':
+                read['input']['allow_large'] = True
+        return [read, stopped]
+    if stopped['id'] == 'helper_owned_write':
+        return [{'id': 'helper_owned_read', 'tool': 'Read',
+                 'input': {'file_path': stopped['input']['file_path']},
+                 'context': stopped['context'], 'mode': 'allowed'}, stopped]
+    return [stopped]
 
 
 def _inventory(expected, selection, launch, session, *, completed, recipe=None):
@@ -682,13 +735,6 @@ def _members(value):
     sources = recipe_sources()
     _need(len(sources) <= MAX_RECIPE, 'fixed recipe exceeds its member bound')
     names.update(sources)
-    for trace in TRACES:
-        for file in ('launch.json', 'config.json', 'projection.json', 'neutral.before.json', 'neutral.after.json',
-                     'transcript.jsonl', 'control.jsonl', 'outcome.json'):
-            names.add('traces/' + trace + '/' + file)
-        if trace != 'settled':
-            names.update('traces/' + trace + '/' + file for file in ('effect-stop.json', 'parent-stop.json'))
-    _object(value, names, 'raw member roster')
     raw, total = {}, 0
     for name, row in value.items():
         _object(row, {'text', 'sha256', 'bytes'}, 'raw member')
@@ -699,6 +745,18 @@ def _members(value):
         total += len(content)
         _need(total <= MAX_RAW, 'decoded aggregate exceeds bound')
         raw[name] = content
+    for trace in TRACES:
+        prefix = 'traces/' + trace + '/'
+        for file in ('launch.json', 'config.json', 'projection.json', 'neutral.before.json', 'neutral.after.json',
+                     'transcript.jsonl', 'control.jsonl', 'outcome.json'):
+            names.add(prefix + file)
+        _need(prefix + 'outcome.json' in raw, 'raw member roster lacks trace outcome')
+        outcome = _json(raw[prefix + 'outcome.json'])
+        _need(type(outcome) is dict, 'trace outcome is not an object')
+        _need(outcome.get('mode') != NATIVE_REFUSAL, 'native refusal outcome is withdrawn pending reviewed round-two evidence')
+        if trace != 'settled':
+            names.update(prefix + file for file in ('effect-stop.json', 'parent-stop.json'))
+    _object(value, names, 'raw member roster')
     for name, text in sources.items():
         _need(raw[name] == text.encode(), 'fixed recipe source differs: ' + name)
     return raw
@@ -735,13 +793,21 @@ def _read_content(case, expected, selection, launch, session, source_raw, *, obs
     if case['id'] == 'source_read':
         raw = source_raw
     else:
-        raw = (_recipe_data(expected, selection, launch, session) if recipe is None else recipe)[2][case['context']]
+        recipe = _recipe_data(expected, selection, launch, session) if recipe is None else recipe
+        raw = (recipe[1][case['input']['file_path']] if case['id'] == 'helper_owned_read'
+               else recipe[2][case['context']])
     text = raw.decode(); lines = text.split('\n')
     if 'limit' in case['input']:
         if policy is None:
             policy = projected_policy(expected, selection, launch['effect_root'])
-        count = policy['readonly_lookups']['bounded_reads'][case['input']['file_path']]
-        _need(count == len(lines), 'bounded Read count contradicts captured raw file')
+        count = policy['readonly_lookups'].get('bounded_reads', {}).get(case['input']['file_path'])
+        if count is not None:
+            _need(count == len(lines), 'bounded Read count contradicts captured raw file')
+        else:
+            _need(case['id'] == 'source_read', 'unregistered bounded Read is not the selected source')
+        _need(case['input'].get('offset') == 1 and type(case['input']['limit']) is int
+              and 1 <= case['input']['limit'] <= (12 if case['id'] == 'source_read' else len(lines)),
+              'bounded Read range differs')
         if case['id'] != 'source_read':
             _need(case['input']['limit'] == len(lines), 'current request cannot be completely read in this range')
         selected = lines[:case['input']['limit']]
@@ -755,7 +821,12 @@ def _read_content(case, expected, selection, launch, session, source_raw, *, obs
     return text, '\n'.join(str(i+1) + '\t' + line for i,line in enumerate(selected)), len(selected), len(lines)
 
 
-def _tool_result(event, case, expected, selection, launch, session, source_raw, *, policy=None, recipe=None):
+def _tool_result(event, case, expected, selection, launch, session, source_raw, *, policy=None, recipe=None,
+                 wire=None, classification=None):
+    if wire is not None:
+        wire.result(event, case, classification)
+        if case['mode'] == 'native_denied':
+            return
     content = event.get('message', {}).get('content')
     _need(type(content) is list and len(content) == 1 and type(content[0]) is dict, 'one unique tool result required')
     item = content[0]
@@ -803,7 +874,7 @@ def _tool_result(event, case, expected, selection, launch, session, source_raw, 
         _need(metadata.get('originalFile') is None and metadata.get('userModified', False) is False,
               'Write was not a new unchanged response')
         _need(metadata.get('structuredPatch', []) == [], 'Write patch contradicts creation')
-        _need(text == 'File created successfully at: ' + case['input']['file_path'],
+        _need(native_wire_2_1_325.write_success_text(text, case['input']['file_path'], expected.get('runtime')),
               'Write success names another path')
 
 
@@ -812,7 +883,8 @@ def _launch(expected, selection, trace, launch, raw, policy):
                      'provider_url', 'provider_source_sha256', 'exit_code', 'shutdown', 'executable'}, 'launch')
     _roots(expected, selection, launch)
     _need(launch['cwd'] == expected['policy']['readonly_lookups']['repository'], 'callback cwd differs')
-    _need(_same(launch['argv'], probe_argv(expected, policy)), 'native argv differs')
+    _need(_same(launch['argv'], probe_argv(expected, policy, effect_root=launch['effect_root'])),
+          'native argv differs')
     native_model_aliases.require_invocation_model(
         launch['argv'], native_model_aliases.model_aliases(expected['runtime']))
     _need(_same(launch['executable'], expected['runtime']['executable']), 'executable identity differs')
@@ -844,12 +916,13 @@ def effect_stop(expected, policy, case, view, call, callback, classification):
             'callback_event_sha256': _sha(_encoded(callback))}
 
 
-def _trace(expected, selection, trace, raw, controls):
+def _trace(expected, selection, trace, raw, controls, *, source_write_read_variant=None):
     with command_policy._policy_digest_scope():
-        return _trace_body(expected, selection, trace, raw, controls)
+        return _trace_body(expected, selection, trace, raw, controls,
+                           source_write_read_variant=source_write_read_variant)
 
 
-def _trace_body(expected, selection, trace, raw, controls):
+def _trace_body(expected, selection, trace, raw, controls, *, source_write_read_variant=None):
     prefix = 'traces/' + trace + '/'
     launch = _json(raw[prefix + 'launch.json'])
     policy = projected_policy(expected, selection, launch['effect_root'])
@@ -864,20 +937,26 @@ def _trace_body(expected, selection, trace, raw, controls):
         for event in events:
             native_model_aliases.require_frame_models(event, aliases)
     init_id = native.initialization_id()
-    ack = {'type': 'control_response', 'response': {'subtype': 'success', 'request_id': init_id}}
-    _need(_same(clean[0], {'kind': 'initialize_sent', 'policy_sha256': native.policy_digest(policy),
-                          'frame': native.initialize_frame(policy['pretool_control'])}), 'initialization sent differs')
-    _need(_same(events[0], ack) and _same(clean[1], {'kind': 'initialize_ack', 'frame': ack}), 'initialization ack differs')
-    init = events[1]
-    _need(init.get('type') == 'system' and init.get('subtype') == 'init' and init.get('model') == model
-          and init.get('claude_code_version') == expected['runtime']['executable']['init_version']
-          and init.get('cwd') == launch['cwd'] and init.get('tools') == ['Read','Write','Bash']
-          and init.get('apiKeySource') == 'ANTHROPIC_API_KEY'
-          and init.get('permissionMode', 'dontAsk') == 'dontAsk', 'native init differs')
-    session = init.get('session_id')
-    _need(type(session) is str and re.fullmatch(r'[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}', session),
-          'invalid parent session')
-    _native_scope(init, session, aliases)
+    wire = None
+    if wire_profile.profile(expected['runtime']):
+        wire = wire_profile.begin_trace(events, clean, expected['runtime'], launch, policy,
+                                        additional_directories=[launch['effect_root']])
+        session, first_case = wire.session, wire.offset
+    else:
+        ack = {'type': 'control_response', 'response': {'subtype': 'success', 'request_id': init_id}}
+        _need(_same(clean[0], {'kind': 'initialize_sent', 'policy_sha256': native.policy_digest(policy),
+                              'frame': native.initialize_frame(policy['pretool_control'])}), 'initialization sent differs')
+        _need(_same(events[0], ack) and _same(clean[1], {'kind': 'initialize_ack', 'frame': ack}), 'initialization ack differs')
+        init = events[1]
+        _need(init.get('type') == 'system' and init.get('subtype') == 'init' and init.get('model') == model
+              and init.get('claude_code_version') == expected['runtime']['executable']['init_version']
+              and init.get('cwd') == launch['cwd'] and init.get('tools') == ['Read','Write','Bash']
+              and init.get('apiKeySource') == 'ANTHROPIC_API_KEY'
+              and init.get('permissionMode', 'dontAsk') == 'dontAsk', 'native init differs')
+        session, first_case = init.get('session_id'), 2
+        _need(type(session) is str and re.fullmatch(r'[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}', session),
+              'invalid parent session')
+        _native_scope(init, session, aliases)
     recipe = _recipe_data(expected, selection, launch, session, roots_checked=True)
     projected = projection(expected, selection, launch, session, policy=policy, recipe=recipe)
     _need(_same(_json(raw[prefix + 'projection.json']), projected), 'projection is not independently derived')
@@ -888,28 +967,36 @@ def _trace_body(expected, selection, trace, raw, controls):
                 _inventory(expected, selection, launch, session, completed=trace == 'settled', recipe=recipe)),
           'neutral after inventory shows missing or forbidden effects')
     all_cases = probe_cases(expected, selection, launch, session, policy=policy, recipe=recipe)
-    cases = [c for c in all_cases if c['mode'] != 'observer_stopped'] if trace == 'settled' else [
-        c for c in all_cases if c['id'] == trace[5:]]
-    _need(len(clean) == (len(cases) + 2 if trace == 'settled' else 2), 'control has missing/extra grants')
-    offset, request_ids, outcomes = 2, set(), []
+    cases = trace_cases(all_cases, trace, source_write_read_variant=source_write_read_variant)
+    outcome = _json(raw[prefix + 'outcome.json'])
+    _need(outcome.get('mode') != NATIVE_REFUSAL, 'native refusal outcome is withdrawn pending reviewed round-two evidence')
+    _need(len(clean) == 2 + sum(case['mode'] != 'observer_stopped' for case in cases),
+          'control has missing/extra grants')
+    offset, request_ids, outcomes = first_case, set(), []
     build_view = _view_factory(expected, selection, launch, session, policy=policy, recipe=recipe)
     for number, case in enumerate(cases):
-        offset = _settled_text(events, offset, session, aliases)
+        if wire is None:
+            offset = _settled_text(events, offset, session, aliases)
         call, callback = events[offset:offset+2]; offset += 2
         _need(call.get('type') == 'assistant', 'tool call is out of order')
         _native_scope(call, session, aliases, 'assistant')
         wanted_block = {'type': 'tool_use', 'id': case['id'], 'name': case['tool'], 'input': case['input']}
         _need(_same(call.get('message', {}).get('content'), [wanted_block]), 'call differs from required case')
+        if wire is not None:
+            wire.call(call, case, number)
         request_id = callback.get('request_id')
         _need(type(request_id) is str and request_id and request_id not in request_ids and request_id != init_id,
               'duplicate or missing callback identity')
         request_ids.add(request_id)
-        wanted = {'type': 'control_request', 'request_id': request_id, 'request': {'subtype': 'hook_callback',
-            'callback_id': policy['pretool_control']['callback_id'], 'input': {'hook_event_name': 'PreToolUse',
-            'tool_name': case['tool'], 'tool_use_id': case['id'], 'cwd': launch['cwd'], 'tool_input': case['input']}}}
-        if 'effort' in (callback.get('request') or {}).get('input', {}):
-            wanted['request']['input']['effort'] = expected['runtime']['effort']
-        _need(_same(callback, wanted), 'callback differs from observed call/selected authority')
+        if wire is not None:
+            wire.callback(callback, case)
+        else:
+            wanted = {'type': 'control_request', 'request_id': request_id, 'request': {'subtype': 'hook_callback',
+                'callback_id': policy['pretool_control']['callback_id'], 'input': {'hook_event_name': 'PreToolUse',
+                'tool_name': case['tool'], 'tool_use_id': case['id'], 'cwd': launch['cwd'], 'tool_input': case['input']}}}
+            if 'effort' in (callback.get('request') or {}).get('input', {}):
+                wanted['request']['input']['effort'] = expected['runtime']['effort']
+            _need(_same(callback, wanted), 'callback differs from observed call/selected authority')
         context = case['context'] if case['context'] in CONTEXTS else 'worker'
         view = build_view(context, read=case['tool'] == 'Write')
         classification, view = _classify_view(case, controls, policy, view)
@@ -931,7 +1018,7 @@ def _trace_body(expected, selection, trace, raw, controls):
             _need(result.get('type') == 'user', 'missing settled result')
             _native_scope(result, session, aliases, 'user')
             _tool_result(result, case, expected, selection, launch, session, raw['source.before'],
-                         policy=policy, recipe=recipe)
+                         policy=policy, recipe=recipe, wire=wire, classification=classification)
             result_sha = _sha(_encoded(result))
         outcomes.append({'id': case['id'], 'trace_id': trace, 'state': view.state, 'tool': case['tool'],
             'input_sha256': _sha(_encoded(case['input'])), 'classification': classification[0], 'basis': classification[1],
@@ -939,9 +1026,14 @@ def _trace_body(expected, selection, trace, raw, controls):
             'result_sha256': result_sha, 'stop_sha256': stop_sha})
     outcome = _json(raw[prefix + 'outcome.json'])
     if trace == 'settled':
-        offset = _settled_text(events, offset, session, aliases)
+        if wire is None:
+            offset = _settled_text(events, offset, session, aliases)
+        else:
+            wire.completion(events[offset], len(cases)); offset += 1
         _need(len(events) == offset + 1, 'extra/pending/post-terminal evidence')
         terminal = events[offset]; _native_scope(terminal, session, aliases)
+        if wire is not None:
+            wire.terminal(terminal, cases)
         native_model_aliases.require_model_usage(terminal, aliases)
         _need(terminal.get('type') == 'result' and terminal.get('is_error') is False and terminal.get('error') is None
               and terminal.get('subtype', 'success') == 'success' and terminal.get('terminal_reason') == 'completed'
@@ -964,13 +1056,17 @@ def _trace_body(expected, selection, trace, raw, controls):
                           'session_id': session, 'terminal_sha256': None,
                           'parent_stop_sha256': _sha(raw[prefix + 'parent-stop.json'])}
     _need(_same(outcome, wanted_outcome), 'trace outcome differs from actual raw lifecycle')
+    return _trace_summary(trace, launch, session, projected, raw[prefix + 'outcome.json'], wanted_outcome), outcomes, launch
+
+
+def _trace_summary(trace, launch, session, projected, outcome_raw, wanted_outcome):
     return {'id': trace, 'mode': wanted_outcome['mode'], 'executable': deepcopy(launch['executable']),
         'cwd': launch['cwd'], 'argv_sha256': _sha(_encoded(launch['argv'])),
         'environment_sha256': _sha(_encoded(launch['environment'])), 'session_id': session,
         'shutdown': deepcopy(launch['shutdown']),
         'projection': {'effect_root': launch['effect_root'], 'states': [
             {'name': state['name'], 'view_sha256': _sha(_encoded(state['view']))} for state in projected['states']]},
-        'outcome_sha256': _sha(raw[prefix + 'outcome.json'])}, outcomes, launch
+        'outcome_sha256': _sha(outcome_raw)}
 
 
 def _derived_controls(expected, selection, launch, session, *, policy=None, recipe=None):
@@ -1073,14 +1169,17 @@ def _verify_bound(raw_manifest, expected, controls, controller_sources):
         if name == 'settled':
             policy = projected_policy(expected, selection, launch['effect_root'])
             recipe = _recipe_data(expected, selection, launch, summary['session_id'], roots_checked=True)
-            roster = [{k:v for k,v in c.items() if k != 'input'}
-                      for c in probe_cases(expected, selection, launch, summary['session_id'],
-                                           policy=policy, recipe=recipe)]
+            all_cases = probe_cases(expected, selection, launch, summary['session_id'],
+                                    policy=policy, recipe=recipe)
+            roster = [{k:v for k,v in c.items() if k != 'input'} for c in all_cases]
             _need(_same(_json(raw['cases.json']), roster), 'closed case roster differs')
             derived = _derived_controls(expected, selection, launch, summary['session_id'],
                                         policy=policy, recipe=recipe)
         traces.append(summary); cases.extend(outcomes)
-    _need(len(cases) == 25 and len({case['id'] for case in cases}) == 25, 'not every required case was checked once')
+    required = [(name, case['id']) for name in TRACES for case in trace_cases(all_cases, name)]
+    observed = [(case['trace_id'], case['id']) for case in cases]
+    _need(observed == required and len(set(observed)) == len(observed),
+          'not every required case and Read precondition was checked once in its trace')
     # These two digests bind ordered per-trace raw-member hashes; the complete
     # member identities remain individually disclosed in ``members`` below.
     preservation = {'source_sha256': expected['source']['sha256'],

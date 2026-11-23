@@ -6,6 +6,7 @@ Live callers and the saved replay use the same closed observation joins.
 """
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import asdict, dataclass, field, fields, is_dataclass, replace
 from pathlib import Path, PurePosixPath
 import re
@@ -18,6 +19,7 @@ from . import native_shared_streams as live_streams
 from . import native_shared_observations as observed
 from . import native_shared_stage as stage
 from . import native_shared_receipts as receipt_api
+from . import native_wire_2_1_325 as wire
 
 _DYNAMIC = {'record': ('journal_records_root', 'json', 'history_records', 0),
             'request': ('requests_root', 'json', 'submissions', 1),
@@ -664,11 +666,16 @@ def _prefix_trace(base, transcript, control, init_lines=None, settled_cache=None
     sub = object.__new__(observed.Trace)
     sub.transcript, sub.control = transcript, control
     sub.session, sub.policy = base.session, base.policy
+    sub.runtime = deepcopy(base.runtime)
     sub.calls = {k: v for k, v in base.calls.items() if v[0] <= t_lines}
     sub.callbacks = {k: v for k, v in base.callbacks.items() if v[0] <= t_lines}
     sub.results = {k: v for k, v in base.results.items() if v[0] <= t_lines}
     sub.decisions = {k: v for k, v in base.decisions.items() if v[0] <= c_lines}
     sub.frames = {k: v for k, v in base.frames.items() if k <= t_lines}
+    # Preserve only denials whose verified frame is visible at this prefix.
+    visible_frames = {id(frame) for frame in sub.frames.values()}
+    sub._permission_denials = {k: v for k, v in base._permission_denials.items()
+                              if id(v) in visible_frames}
     sub.terminal = base.terminal if (base.terminal is not None and base.terminal <= t_lines) else None
     return _bind_trace_cache(sub, settled_cache, base=base)
 
@@ -895,7 +902,10 @@ def _require_initial_seal_identity(run, report, full, receipt):
     """Bind the checked helper result to the exact original bytes, live or saved."""
     from .native_shared_phase import initial_input_identity
     checks = [row for row in report['checks']
-              if row['helper'] == 'phase1_receipts' and row['exit_code'] == 0]
+              if row['helper'] == 'phase1_receipts' and (row['exit_code'] == 0
+                  or wire.profile(run.value['runtime']) and row['exit_code'] is None
+                  and 'exit_status' in row and row['exit_status'] is None
+                  and row.get('status_basis') == wire.STATUS_BASIS)]
     if not checks:
         raise ValueError('original seal lacks a successful initial receipt helper')
     trace = run.trace()
@@ -916,7 +926,8 @@ def phase_replay(run, *, complete=False):
     from .native_shared_render import commands
     paths = run.spec._agentic_artifact_paths
     phase = PhaseState(commands(run.spec), full_path=paths['full'], core_path=paths['core'],
-        report_path=paths['report'], receipt_path=paths['receipt'], working_directory=run.binding.working_directory)
+        report_path=paths['report'], receipt_path=paths['receipt'],
+        working_directory=run.binding.working_directory, runtime=run.value['runtime'])
     catalog, advance_before, advance_after, visible, seal_observations = _chronology(run)
     actions = {}
     previous = None
@@ -946,7 +957,8 @@ def phase_replay(run, *, complete=False):
         digest = None
         if count >= 3:
             digest = _journal_prefix_digest(run, count)[0]
-        blocks = frame.get('message', {}).get('content', [])
+        message = frame.get('message')
+        blocks = message.get('content', []) if type(message) is dict else []
         for block in blocks if type(blocks) is list else ():
             if type(block) is not dict:
                 continue

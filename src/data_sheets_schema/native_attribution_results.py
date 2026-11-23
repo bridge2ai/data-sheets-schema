@@ -710,11 +710,13 @@ def capture(composition_path, transcript_path, control_path, *, config_root=None
 
 
 def _saved_draft(prepared, classify):
+    from data_sheets_schema import native_wire_2_1_325 as wire
     state = deepcopy(prepared['state'])
     state.snapshot = prepared['snapshot']
     policy = prepared['policy']
     recorder = policy['post_final_recorder']['command']
     last_final, recorder_call, recorder_done = None, None, False
+    recorder_status = None
     problems = []
     for event in prepared['events']:
         preserved = set()
@@ -756,11 +758,25 @@ def _saved_draft(prepared, classify):
                     if identity == recorder_call:
                         meta = event.get('tool_use_result') or {}
                         exits = [meta[k] for k in ('exitCode', 'exit_code') if k in meta]
-                        if (not exits or any(type(code) is not int or code != 0 for code in exits)
+                        adapted = wire.missing_numeric_bash_success(event, item, getattr(state, 'runtime', None))
+                        if ((not adapted and (not exits or any(type(code) is not int or code != 0 for code in exits)))
                                 or item.get('is_error') is not False
                                 or any(meta.get(k) for k in ('interrupted', 'backgroundTaskId', 'background_task_id'))):
                             raise ValueError('registered recorder failed or has unusable result')
                         destination = policy['post_final_recorder']['destination']
+                        if adapted:
+                            stdout = meta['stdout']
+                            phase = prepared.get('phase_report', {})
+                            checked = [row for row in phase.get('checks', [])
+                                if type(row) is dict and row.get('tool_use_id') == identity]
+                            if (item['content'] != stdout or not stdout.splitlines()
+                                    or stdout.splitlines()[0] != '✓ ' + destination
+                                    or len(checked) != 1 or checked[0].get('helper') != 'recorder'
+                                    or checked[0].get('exit_code', False) is not None
+                                    or checked[0].get('exit_status', False) is not None
+                                    or checked[0].get('status_basis') != wire.STATUS_BASIS
+                                    or phase.get('passed') is not True or phase.get('problems') != []):
+                                raise ValueError('adapted recorder lacks its exact stdout and checked phase result')
                         recorded_path = state.snapshot.path(destination)
                         metadata = state.snapshot.metadata[str(recorded_path)]
                         alias = state.snapshot.alias_metadata[str(Path(destination))]
@@ -768,6 +784,9 @@ def _saved_draft(prepared, classify):
                             raise ValueError('completed recorder metadata must be a regular non-symlink single-link file')
                         state.snapshot.read(destination, 'provenance')
                         recorder_done = True
+                        if adapted:
+                            recorder_status = {'exit_code': None, 'exit_status': None,
+                                               'status_basis': wire.STATUS_BASIS}
             except (ValueError, TypeError, KeyError) as exc:
                 problems.append(str(exc))
         if event.get('type') == 'control_request':
@@ -781,6 +800,8 @@ def _saved_draft(prepared, classify):
     report = state.finish()
     report['problems'] += problems
     report['draft_gate_passed'] = report['draft_gate_passed'] and not problems
+    if recorder_status is not None:
+        report['recorder_status'] = recorder_status
     return report, last_final, recorder_done
 
 

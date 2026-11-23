@@ -28,9 +28,21 @@ def test_neutral_gate_primitive_is_accepted_by_the_unchanged_guard():
     raw = path.read_bytes()
     relative = 'src/data_sheets_schema/native_shared_gate_primitives.py'
     digest = hashlib.sha256(raw).hexdigest()
+    sources = {relative: digest}
+    for dependency in ('native_wire_2_1_325', 'native_shared_contract'):
+        dependency_path = path.with_name(dependency + '.py')
+        sources['src/data_sheets_schema/' + dependency + '.py'] = hashlib.sha256(
+            dependency_path.read_bytes()).hexdigest()
     checked = authority.refuse_legacy_consumer_imports(raw, name=neutral.__name__,
-        package_sources={relative: digest})
-    assert checked == {neutral.__name__: digest}
+        package_sources=sources)
+    assert checked == {name[len('src/'):-len('.py')].replace('/', '.'): value
+                       for name, value in sources.items()}
+    for dependency in ('native_wire_2_1_325', 'native_shared_contract'):
+        incomplete = dict(sources)
+        del incomplete['src/data_sheets_schema/' + dependency + '.py']
+        with pytest.raises(ValueError, match='missing or ambiguous source'):
+            authority.refuse_legacy_consumer_imports(raw, name=neutral.__name__,
+                package_sources=incomplete)
     assert neutral.GATES == historical.GATES
     assert neutral.IOKIT_ASSERTIONS == historical.IOKIT_ASSERTIONS
     assert neutral.RUNTIME_OBSERVATION_BASIS == historical.RUNTIME_OBSERVATION_BASIS

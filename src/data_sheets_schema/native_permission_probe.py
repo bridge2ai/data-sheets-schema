@@ -25,12 +25,21 @@ import time
 from .native_subscription_guard import canonical, read_regular, sha, strict_json
 from .native_probe_provider import local_provider
 from .native_path_identity import overlaps
+from .native_stage_root_diagnostic import (
+    MARKER, FIXTURE, MARKER_PATHS, MARKER_BYTES, MAX_CAPTURE, SENTINEL_BYTES,
+    _pin, _has_marker, boundary_case, boundary_policy, validate_boundary_diagnostic,
+)
 
 MAX_STREAM = 8 * 1024 * 1024
 MAX_PROBE_SECONDS = 600
-U4_ACCOUNT_LABEL = 'LBL work Claude Max'
+# Owner's 2026-11-21 account amendment; this label is not auth observation.
+U4_ACCOUNT_LABEL = 'claude-personal'
 U4_EFFORT = 'high'
 U4_RECEIPT_INSTRUMENT = 4
+
+
+class PermissionObserverStopMissing(ValueError):
+    """A forbidden-effect trace ended without its required observer stop."""
 
 
 class ProbeStopped(BaseException):
@@ -81,7 +90,7 @@ def require_u4_runtime(runtime):
     """Validate D106's saved selection, without querying an account or binary.
 
     The declaration records selected auth expectations, not authenticated
-    account identity. The external owner-choice record binds the LBL label.
+    account identity. The external owner-choice record binds claude-personal.
     Live account/headroom evidence is still a separately authorized gate.
     """
     from . import native_shared_permissions as permission
@@ -474,6 +483,8 @@ def _run_native(expected, launch, policy, observer, classifier, transport, serve
     tail, drainage = b"", {}
     try:
         _identity(expected)
+        from .native_shared_evidence import require_physical_directory
+        require_physical_directory(launch['effect_root'], must_exist=True)
         if time.monotonic() >= deadline:
             raise TimeoutError("permission probe deadline elapsed before process creation")
         process = subprocess.Popen(launch["argv"], cwd=launch["cwd"], env=launch["environment"],
@@ -597,9 +608,11 @@ class _RetainedMembers(dict):
 
 
 class _SharedObserver:
-    def __init__(self, p, expected, selected, launch, trace, controls, transport):
+    def __init__(self, p, expected, selected, launch, trace, controls, transport, *,
+                 source_write_read_variant=None):
         self.p, self.expected, self.selected, self.launch = p, expected, selected, launch
         self.trace, self.controls = trace, controls
+        self.source_write_read_variant = source_write_read_variant
         self.transport = transport
         self.session = None
         # None until native init has selected; the provider waits only on None.
@@ -634,9 +647,13 @@ class _SharedObserver:
             all_cases = p.probe_cases(self.expected, self.selected, self.launch, self.session)
             self.members["cases.json"] = canonical([{k: v for k, v in case.items() if k != "input"}
                                                     for case in all_cases])
-            self.cases = ([case for case in all_cases if case["mode"] != "observer_stopped"]
-                          if self.trace == "settled" else
-                          [case for case in all_cases if case["id"] == self.trace[5:]])
+            self.cases = p.trace_cases(all_cases, self.trace,
+                                      source_write_read_variant=self.source_write_read_variant)
+            if self.trace == 'stop-source_write':
+                classification, _ = p._classification(self.expected, self.selected, self.launch,
+                    self.session, self.cases[0], self.controls, policy=self.policy)
+                if classification[0] != 'prescribed':
+                    raise ValueError('source Read precondition is not admitted by the selected classifier')
         if event.get("type") == "assistant":
             for block in (event.get("message") or {}).get("content", []):
                 if block.get("type") == "tool_use":
@@ -669,20 +686,27 @@ class _SharedObserver:
             self.session, case, self.controls, policy=self.policy)[0]
 
 
-def _trace(expected, directory, deadline, controls, p, selected, transport, trace="settled"):
+def _trace(expected, directory, deadline, controls, p, selected, transport, trace="settled", *,
+           source_write_read_variant=None, diagnostic_fixture=None):
     _remaining(deadline)
+    from .native_stage_root_diagnostic import require_fixture
+    require_fixture(diagnostic_fixture)
     roots = ("config_root", "stub_root", "effect_root", "evidence_root")
     launch = {key: str(directory / key) for key in roots}
     launch["cwd"] = expected["policy"]["readonly_lookups"]["repository"]
     p._roots(expected, selected, launch)
     for key in roots:
         Path(launch[key]).mkdir(parents=True, exist_ok=False)
+    from .native_shared_evidence import require_physical_directory
+    require_physical_directory(launch['effect_root'], must_exist=True)
+    diagnostic = GrantCapture(directory, launch) if diagnostic_fixture is not None else None
     _write_new(Path(launch["config_root"]) / "settings.json", b"{}")
     stub_sources = p.stub_files()
     for name, text in stub_sources.items():
         relative = name.removeprefix("stubs/")
         _write_new(Path(launch["stub_root"]) / relative, text.encode())
-    observer = _SharedObserver(p, expected, selected, launch, trace, controls, transport)
+    observer = _SharedObserver(p, expected, selected, launch, trace, controls, transport,
+                               source_write_read_variant=source_write_read_variant)
     classifier, policy = observer.classify, observer.policy
     source_code = p.recipe_sources()["recipe/provider.py"].encode()
     supplier = lambda: observer.cases
@@ -692,18 +716,24 @@ def _trace(expected, directory, deadline, controls, p, selected, transport, trac
     exec(compile(source_code, "fixed-permission-recipe/provider.py", "exec"), namespace)
     reply = namespace["reply"]
     from .native_model_aliases import model_aliases
-    with local_provider(cases=supplier, model=model_aliases(expected['runtime'])['returned'],
-                        deadline=deadline, reply=reply) as (server, url):
-        launch.update(provider_url=url, provider_source_sha256=sha(source_code),
-            executable=deepcopy(expected["runtime"]["executable"]),
-            environment={**expected["permission_environment"], "CLAUDE_CONFIG_DIR": launch["config_root"],
-                "PYTHONPATH": launch["stub_root"], "ANTHROPIC_BASE_URL": url,
-                "ANTHROPIC_API_KEY": "d4d-local-permission-probe-token"},
-            argv=p.probe_argv(expected, policy))
-        _write_new(directory / "launch.before.json", canonical(launch))
-        result = _run_native(expected, launch, policy, observer, classifier, transport, server, deadline)
-        if server.failure is not None:
-            raise ValueError("scripted permission provider failed") from server.failure
+    capture_options = {'request_capture': diagnostic.capture} if diagnostic else {}
+    server = None
+    try:
+        with local_provider(cases=supplier, model=model_aliases(expected['runtime'])['returned'],
+                            deadline=deadline, reply=reply, **capture_options) as (server, url):
+            launch.update(provider_url=url, provider_source_sha256=sha(source_code),
+                executable=deepcopy(expected["runtime"]["executable"]),
+                environment={**expected["permission_environment"], "CLAUDE_CONFIG_DIR": launch["config_root"],
+                    "PYTHONPATH": launch["stub_root"], "ANTHROPIC_BASE_URL": url,
+                    "ANTHROPIC_API_KEY": "d4d-local-permission-probe-token"},
+                argv=p.probe_argv(expected, policy, effect_root=launch['effect_root']))
+            _write_new(directory / "launch.before.json", canonical(launch))
+            result = _run_native(expected, launch, policy, observer, classifier, transport, server, deadline)
+            if server.failure is not None:
+                raise ValueError("scripted permission provider failed") from server.failure
+    finally:
+        if diagnostic and server is not None and (directory / 'transcript.jsonl').is_file():
+            _finish_diagnostic(diagnostic, launch, server)
     launch.update(exit_code=result["exit_code"], shutdown=result["shutdown"])
     members = {"launch.json": canonical(launch), "config.json": b"{}",
                "transcript.jsonl": result["transcript.jsonl"], "control.jsonl": result["control.jsonl"]}
@@ -715,16 +745,37 @@ def _trace(expected, directory, deadline, controls, p, selected, transport, trac
     if trace == "settled":
         events = p._rows(result["transcript.jsonl"], "native transcript")
         terminal_hash, parent_hash = sha(canonical(events[-1])), None
-    else:
+    elif "parent-stop.json" in members:
         terminal_hash, parent_hash = None, sha(members["parent-stop.json"])
-    members["outcome.json"] = canonical({
-        "kind": "native_shared_permission_outcome", "version": 1,
-        "mode": "settled" if trace == "settled" else "observer_stopped",
-        "session_id": observer.session, "terminal_sha256": terminal_hash,
-        "parent_stop_sha256": parent_hash})
+    else:
+        raise PermissionObserverStopMissing(
+            "permission stop trace ended without parent-stop.json: " + trace)
+    if 'outcome.json' not in members:
+        members["outcome.json"] = canonical({
+            "kind": "native_shared_permission_outcome", "version": 1,
+            "mode": "settled" if trace == "settled" else "observer_stopped",
+            "session_id": observer.session, "terminal_sha256": terminal_hash,
+            "parent_stop_sha256": parent_hash})
     for name, raw in members.items():
         _write_new(directory / "completed" / name, raw)
     return members
+
+
+def _finish_diagnostic(diagnostic, launch, server):
+    """Retain secondary capture failures without replacing the original cause."""
+    active_failure = sys.exc_info()[1]
+    try:
+        diagnostic.finish(launch, request_count=server.requests)
+    except BaseException as exc:
+        try:
+            _write_new(diagnostic.directory / 'diagnostics' / 'failure.json', canonical({
+                'kind': 'native_stage_root_diagnostic_failure', 'version': 1,
+                'error_type': type(exc).__name__, 'message': str(exc)}))
+        except BaseException:
+            if active_failure is None:
+                raise exc
+        if active_failure is None:
+            raise
 
 
 def produce_saved_probe(expected, directory, *, deadline_seconds):
@@ -750,9 +801,12 @@ def produce_saved_probe(expected, directory, *, deadline_seconds):
         return _produce_captured(expected, directory, deadline, *inputs)
 
 
-def _produce_captured(expected, directory, deadline, p, controls, controller_sources,
-                      transport, selected, selection_raw):
-    """Host-only producer using already captured, live source-bound inputs."""
+def produce_stage_root_boundary_diagnostic(expected, directory, *, deadline_seconds):
+    return produce_boundary(expected, directory, deadline_seconds=deadline_seconds)
+
+
+def _require_producer_sources(expected, p):
+    """Bind both public producers to the same retained host source closure."""
     sources = {row["module"]: row for row in expected["production_sources"]}
     transport_source = None
     for name in ("native_permission_probe", "native_probe_provider", "native_subscription_guard"):
@@ -764,6 +818,13 @@ def _produce_captured(expected, directory, deadline, p, controls, controller_sou
             raise ValueError("permission producer source is absent from selected production closure: " + name)
         if name == "native_probe_provider":
             transport_source = raw
+    return transport_source
+
+
+def _produce_captured(expected, directory, deadline, p, controls, controller_sources,
+                      transport, selected, selection_raw):
+    """Host-only producer using already captured, live source-bound inputs."""
+    transport_source = _require_producer_sources(expected, p)
     _identity(expected)
     directory = Path(directory)
     if not directory.is_absolute() or directory.parent.resolve(strict=True) != directory.parent:
@@ -824,3 +885,180 @@ def _produce_captured(expected, directory, deadline, p, controls, controller_sou
         _write_new(directory / 'failure.json', canonical({
             'error_type': type(exc).__name__, 'message': str(exc)}))
         raise
+
+
+class GrantCapture:
+    def __init__(self, directory, launch):
+        from .native_permission_probe import _write_new
+        self.directory, self.launch = Path(directory), launch
+        self.requests, self.total = [], 0
+        for relative in MARKER_PATHS:
+            _write_new(Path(launch['effect_root']) / relative, MARKER_BYTES)
+            if read_regular(Path(launch['effect_root']) / relative) != MARKER_BYTES:
+                raise ValueError('stage diagnostic marker was not persisted')
+
+    def capture(self, raw, *, endpoint):
+        from .native_permission_probe import _write_new
+        if (type(raw) is not bytes or not raw or len(raw) > 8 * 1024 * 1024
+                or endpoint not in ('/v1/messages', '/v1/messages/count_tokens')):
+            raise ValueError('invalid diagnostic provider request')
+        self.total += len(raw)
+        if self.total > MAX_CAPTURE or len(self.requests) >= 256:
+            raise ValueError('diagnostic provider capture exceeds bound')
+        relative = 'requests/%06d.json' % (len(self.requests) + 1)
+        _write_new(self.directory / 'diagnostics' / relative, raw)
+        self.requests.append({'relative_path': relative, 'endpoint': endpoint, **_pin(raw)})
+
+    def finish(self, launch, *, request_count):
+        from .native_permission_probe import _write_new
+        transcript = read_regular(self.directory / 'transcript.jsonl', limit=8 * 1024 * 1024)
+        markers = []
+        for relative in MARKER_PATHS:
+            after = read_regular(Path(launch['effect_root']) / relative, limit=4096)
+            markers.append({'relative_path': relative, 'before': _pin(MARKER_BYTES), 'after': _pin(after)})
+        captured = [read_regular(self.directory / 'diagnostics' / row['relative_path'],
+                                 limit=8 * 1024 * 1024) for row in self.requests]
+        result = {'kind': 'native_stage_root_grant_diagnostic', 'version': 1,
+            'fixture': deepcopy(FIXTURE), 'cwd': launch['cwd'], 'stage_root': launch['effect_root'],
+            'argv': deepcopy(launch['argv']), 'markers': markers,
+            'provider_requests': deepcopy(self.requests),
+            'provider_request_count': request_count,
+            'transcript': {'relative_path': '../transcript.jsonl', **_pin(transcript)},
+            'marker_absent': {'transcript': not _has_marker(transcript, jsonl=True),
+                              'provider_requests': all(not _has_marker(raw) for raw in captured)}}
+        _write_new(self.directory / 'diagnostics' / 'grant.json', canonical(result))
+
+
+
+class _BoundaryObserver:
+    def __init__(self, launch, transport):
+        self.launch, self.transport = launch, transport
+        self.cases, self.session = None, None
+        self.called, self.callback_seen = False, False
+
+    def __call__(self, event):
+        self.transport.check()
+        if event.get('type') == 'system' and event.get('subtype') == 'init':
+            if self.session is not None:
+                raise ValueError('boundary diagnostic repeated init')
+            self.session = event.get('session_id')
+            if not isinstance(self.session, str):
+                raise ValueError('boundary diagnostic lacks session')
+            self.cases = [boundary_case(self.launch)]
+        if event.get('type') == 'assistant':
+            content = (event.get('message') or {}).get('content', [])
+            if any(type(block) is dict and block.get('type') == 'tool_use' for block in content):
+                case = boundary_case(self.launch)
+                wanted = [{'type': 'tool_use', 'id': case['id'], 'name': case['tool'], 'input': case['input']}]
+                if self.cases is None or self.called or canonical(content) != canonical(wanted):
+                    raise ValueError('boundary diagnostic contains an unscripted tool call')
+                self.called = True
+        if event.get('type') == 'control_request':
+            request = event.get('request') or {}
+            data = request.get('input') or {}
+            case = boundary_case(self.launch)
+            if (not self.called or self.callback_seen or request.get('subtype') != 'hook_callback'
+                    or request.get('tool_use_id') != case['id'] or data.get('tool_use_id') != case['id']
+                    or data.get('tool_name') != case['tool']
+                    or canonical(data.get('tool_input')) != canonical(case['input'])):
+                raise ValueError('boundary diagnostic contains an unscripted callback')
+            self.callback_seen = True
+
+    def classify(self, *args):
+        raise ValueError('boundary diagnostic never admits Bash')
+
+
+
+def produce_boundary(expected, directory, *, deadline_seconds):
+    """Explicit lead-only native entry; never yields a qualification manifest."""
+    import time
+    from . import native_permission_probe as producer
+    from . import native_shared_permissions as shared
+    from .native_shared_evidence import require_physical_directory
+    from .native_path_identity import overlaps
+    from .native_subscription_guard import strict_json
+    from .native_model_aliases import model_aliases
+    if type(deadline_seconds) is not int or not 0 < deadline_seconds <= producer.MAX_PROBE_SECONDS:
+        raise ValueError('boundary deadline must be 1..600 seconds')
+    producer.require_u4_expectation(expected)
+    raw_expected = canonical(expected)
+    if len(raw_expected) > shared.MAX_METADATA:
+        raise ValueError('boundary expectation exceeds metadata bound')
+    expected = strict_json(raw_expected)
+    if deadline_seconds > expected['runtime']['deadline_seconds']:
+        raise ValueError('boundary deadline exceeds selected runtime')
+    directory = Path(directory)
+    if not directory.is_absolute() or directory.parent.resolve(strict=True) != directory.parent:
+        raise ValueError('boundary directory requires resolved absolute parent')
+    deadline = time.monotonic() + deadline_seconds
+    with producer._probe_signals(), producer._loaded_probe_inputs(expected) as inputs:
+        p, controls, sources, transport, selected, selection_raw = inputs
+        producer._require_producer_sources(expected, p)
+        protected = [expected['policy']['readonly_lookups']['repository'], selected['stage_root'],
+            expected['source']['path'], expected['selection']['path'],
+            expected['runtime']['executable']['path'],
+            *expected['policy']['readonly_lookups']['inputs'],
+            *expected['policy']['readonly_lookups']['output_directories']]
+        protected += [value for key, value in expected['permission_environment'].items()
+                      if key in ('CLAUDE_CONFIG_DIR', 'D4D_LAUNCH_INSTRUCTION', 'PYSTOW_HOME')
+                      and value.startswith('/')]
+        if any(overlaps(directory, path) for path in protected):
+            raise ValueError('boundary evidence directory overlaps protected authority')
+        producer._identity(expected)
+        producer._remaining(deadline)
+        directory.mkdir(mode=0o700)
+        try:
+            (directory / 'version-config').mkdir(mode=0o700)
+            producer._write_new(directory / 'version.txt', producer._version(expected, deadline, directory))
+            launch = {key: str(directory / key) for key in
+                      ('config_root', 'stub_root', 'effect_root', 'evidence_root')}
+            launch['cwd'] = expected['policy']['readonly_lookups']['repository']
+            p._roots(expected, selected, launch)
+            for key in ('config_root', 'stub_root', 'effect_root', 'evidence_root'):
+                Path(launch[key]).mkdir(mode=0o700)
+            require_physical_directory(launch['effect_root'], must_exist=True)
+            producer._write_new(Path(launch['config_root']) / 'settings.json', b'{}')
+            for name, source in p.stub_files().items():
+                producer._write_new(Path(launch['stub_root']) / name.removeprefix('stubs/'), source.encode())
+            sentinel = Path(boundary_case(launch)['input']['file_path'])
+            producer._write_new(sentinel, SENTINEL_BYTES)
+            before = read_regular(sentinel)
+            producer._write_new(directory / 'sentinel.before', before)
+            policy = boundary_policy(expected, selected, launch)
+            observer = _BoundaryObserver(launch, transport)
+            source_code = p.recipe_sources()['recipe/provider.py'].encode()
+            namespace = {}
+            exec(compile(source_code, 'fixed-permission-recipe/provider.py', 'exec'), namespace)
+            with producer.local_provider(cases=lambda: observer.cases,
+                    model=model_aliases(expected['runtime'])['returned'], deadline=deadline,
+                    reply=namespace['reply']) as (server, url):
+                launch.update(provider_url=url, provider_source_sha256=sha(source_code),
+                    executable=deepcopy(expected['runtime']['executable']),
+                    environment={**expected['permission_environment'],
+                        'CLAUDE_CONFIG_DIR': launch['config_root'], 'PYTHONPATH': launch['stub_root'],
+                        'ANTHROPIC_BASE_URL': url, 'ANTHROPIC_API_KEY': 'd4d-local-permission-probe-token'},
+                    argv=p.probe_argv(expected, policy, effect_root=launch['effect_root']))
+                producer._write_new(directory / 'launch.before.json', canonical(launch))
+                producer._write_new(directory / 'policy.json', canonical(policy))
+                result = producer._run_native(expected, launch, policy, observer,
+                                               observer.classify, transport, server, deadline)
+                if server.failure is not None:
+                    raise ValueError('boundary scripted provider failed') from server.failure
+            launch.update(exit_code=result['exit_code'], shutdown=result['shutdown'])
+            after = read_regular(sentinel)
+            producer._write_new(directory / 'sentinel.after', after)
+            document = {'kind': 'native_stage_root_boundary_diagnostic', 'version': 1,
+                'launch': launch, 'policy': policy,
+                'sentinel': {'path': str(sentinel), 'before': _pin(before), 'after': _pin(after)},
+                'transcript': {'relative_path': 'transcript.jsonl', **_pin(result['transcript.jsonl'])},
+                'control': {'relative_path': 'control.jsonl', **_pin(result['control.jsonl'])}}
+            producer._write_new(directory / 'boundary.json', canonical(document))
+            checked = validate_boundary_diagnostic(document, expected=expected, selected=selected,
+                transcript_raw=result['transcript.jsonl'], control_raw=result['control.jsonl'],
+                sentinel_before=before, sentinel_after=after)
+            producer._write_new(directory / 'verification.json', canonical(checked))
+            return directory / 'boundary.json'
+        except BaseException as exc:
+            producer._write_new(directory / 'failure.json', canonical({
+                'error_type': type(exc).__name__, 'message': str(exc)}))
+            raise

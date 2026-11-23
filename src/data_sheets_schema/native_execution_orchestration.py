@@ -586,6 +586,10 @@ def _launch_prepared(registration_raw, *, review_path, ci_path, launch_word_path
                                 raise ValueError('native captured authority changed before process dispatch')
                             if proxy.closed or proxy.failed.is_set():
                                 raise ValueError('native admission is closed before process dispatch')
+                            from .native_shared_evidence import require_physical_directory
+                            stage_root = c.parse_selection(
+                                selected['selection_raw_json'].encode('utf-8'))['stage_root']
+                            require_physical_directory(stage_root, must_exist=True)
                         except ValueError as exc:
                             refusal = str(exc)
                         except (TypeError, KeyError, RecursionError):

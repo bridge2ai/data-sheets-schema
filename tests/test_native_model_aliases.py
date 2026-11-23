@@ -225,7 +225,7 @@ def test_genuine_saved_permission_consumer_uses_both_labels_and_refuses_mutation
         result = verify(fixture['manifest'], fixture['expected'])
     assert targets.keys() <= {key for key, _ in calls}
     assert result['checked'] is result['passed'] is True
-    assert len(result['traces']) == 7 and len(result['cases']) == 25
+    assert len(result['traces']) == 7 and len(result['cases']) == 28
     assert 'observation authenticity' in result['unassessed']
     for change in ('init_returned', 'assistant_requested', 'assistant_missing',
                    'usage_returned', 'usage_auxiliary', 'usage_missing'):
