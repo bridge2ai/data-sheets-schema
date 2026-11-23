@@ -135,6 +135,81 @@
     }
    ],
    "evaluations": {
+    "2026-11-22_general_context_v3/AI_READI_2026-11-22b_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/AI_READI_2026-11-22b_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/AI_READI_2026-11-22b_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/CHORUS_2026-11-22b_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/CHORUS_2026-11-22b_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/CHORUS_2026-11-22b_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/CM4AI_2026-11-22b_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/CM4AI_2026-11-22b_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/CM4AI_2026-11-22b_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/VOICE_2026-11-22b_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/VOICE_2026-11-22b_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/VOICE_2026-11-22b_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/VOICE_PEDIATRIC_2026-11-22b_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/VOICE_PEDIATRIC_2026-11-22b_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/VOICE_PEDIATRIC_2026-11-22b_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+     "instrument_commit": "b1cad371"
+    },
     "concatenated/2026-07-22_opus-4.8/AI_READI_claudecode_agent_core_evaluation.json": {
      "basis": "recovered_from_commit",
      "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
@@ -1322,6 +1397,81 @@
     }
    ],
    "evaluations": {
+    "2026-11-22_general_context_v3/AI_READI_2026-11-22b_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/AI_READI_2026-11-22b_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/AI_READI_2026-11-22b_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/CHORUS_2026-11-22b_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/CHORUS_2026-11-22b_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/CHORUS_2026-11-22b_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/CM4AI_2026-11-22b_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/CM4AI_2026-11-22b_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/CM4AI_2026-11-22b_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/VOICE_2026-11-22b_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/VOICE_2026-11-22b_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/VOICE_2026-11-22b_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/VOICE_PEDIATRIC_2026-11-22b_rep1_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/VOICE_PEDIATRIC_2026-11-22b_rep2_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+     "instrument_commit": "b1cad371"
+    },
+    "2026-11-22_general_context_v3/VOICE_PEDIATRIC_2026-11-22b_rep3_evaluation.json": {
+     "basis": "recorded",
+     "instrument_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+     "instrument_commit": "b1cad371"
+    },
     "concatenated/2026-07-22_opus-4.8/AI_READI_claudecode_agent_core_evaluation.json": {
      "basis": "recovered_from_commit",
      "recorded_hash_is": "nothing \u2014 this evaluation predates the field",
