@@ -691,6 +691,14 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
         selected = selected_manifest if registered.manifest_used else None
         manifest_basis = None if registered.manifest_used else "the registered instruction declares manifest context unused"
     elif condition:
+        if runtime is None:
+            # The renderer substitutes the runtime into the header, so a spec
+            # without one cannot render: it used to fail inside the renderer
+            # as a TypeError that the date search below then recorded as "no
+            # request spec", which `runs check --strict` passes (#6318).
+            raise click.ClickException(
+                f"--condition {condition} requires --runtime: the render specification names the runtime "
+                'the instruction declared (for example --runtime "Claude Code"), and none was given')
         from data_sheets_schema.api_runner import RunSpec, resolve_prompt
         bundle = bundle_for_spec or resolved_bundle
 
@@ -811,7 +819,10 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                 try:
                     matched_spec = next((candidate for candidate in _candidate_specs(cand_date)
                                          if _reproduces(candidate)), None)
-                except Exception as exc:       # noqa: BLE001 — the same for every date
+                except (ValueError, OSError, RuntimeError, click.ClickException) as exc:
+                    # A stated refusal is the same for every date. A defect in
+                    # the renderer itself is not "the text does not reproduce"
+                    # and is raised, not recorded as a missing spec (#6318).
                     render_error = exc
                     break
                 if matched_spec is not None:
