@@ -369,8 +369,9 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
                 # `declared_bundle` anchors a relative declaration to the
                 # record's tree, and the absolute result is this checkout's
                 # path, not the record's (#6314).
-                declared = (record.get("inputs") or {}).get("bundle_path") or (record.get("inputs") or {}).get("bundle")
-                block["artifacts"] = {"bundle": {"path": str(declared if declared else bundle),
+                spelling = _declared_spelling((record.get("inputs") or {}).get("bundle_path")
+                                              or (record.get("inputs") or {}).get("bundle"))
+                block["artifacts"] = {"bundle": {"path": spelling if spelling is not None else str(bundle),
                                                  "md5": _md5(bundle)}}
                 if not recorded:
                     # Not the same claim as a verified match. The bundle is

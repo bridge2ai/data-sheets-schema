@@ -497,27 +497,47 @@ CLAUDE_CODE_RUNTIMES = frozenset({"Claude Code", "Claude Code (direct)"})
 #: The variable a launcher sets to the exact saved launch instruction; the
 #: recorder reads it with `--prompt-text-env` (#2282).
 LAUNCH_INSTRUCTION_VARIABLE = "D4D_LAUNCH_INSTRUCTION"
+#: The variable a launcher sets to the exact rendering specification; the
+#: recorder reads it with `--render-spec-env` and checks it against the
+#: `--render-spec-sha256` on the line (#6065).
+RENDER_SPEC_VARIABLE = "D4D_RENDER_SPEC"
 
 #: Appended to an instruction rendered with `complete_recorder_line` (#6320).
 #: Part of the instruction, so part of its hash; changing it changes every
 #: instruction rendered under the key.
 COMPLETE_RECORDER_LINE_NOTE = (
     "\n\n## The provenance record line of this run (complete recorder line)\n\n"
-    "The `provenance record` line above is complete. It carries the launcher's rendering "
-    "specification (`--render-spec-json`) and names the variable that holds this instruction "
-    "(`--prompt-text-env " + LAUNCH_INSTRUCTION_VARIABLE + "`), which the launcher has set. "
-    "The recorder reads the condition, runtime, provider, date, asserted reasoning effort, "
-    "receipt expectation and prompt files from that specification.\n\n"
+    "The `provenance record` line above is complete. It names two variables the launcher has "
+    "set: `" + RENDER_SPEC_VARIABLE + "` holds the launcher's rendering specification, which "
+    "the hash on the line binds, and `" + LAUNCH_INSTRUCTION_VARIABLE + "` names the file "
+    "holding this instruction. The recorder reads the condition, runtime, provider, date, "
+    "asserted reasoning effort, receipt expectation and prompt files from that specification.\n\n"
     "Run the line as written, with one addition and no other change: append one `--phase` "
     "flag for each phase you actually performed, in order, in the JSON form the playbook's "
     "provenance template gives (`generate_full`, `derive_core`, `source_audit`, `reconcile`, "
     "`report`, and `repair` and `report_after_repair` only if a repair ran). Do not add "
     "`--prompt`, `--prompt-text`, `--condition`, `--runtime`, `--reasoning-effort` or "
-    "`--receipt-expected`, do not expand or replace the variable in the shell, and do not "
-    "edit the specification. The playbook's rule to add nothing to a line carrying "
-    "`--render-spec-json` describes runs whose launcher records the phase history; no "
-    "launcher does so for this run, and the recorder refuses this line without `--phase`.\n"
+    "`--receipt-expected`, and do not read, print, expand or replace either variable in the "
+    "shell. The playbook's rule to add nothing to a registered recorder line describes runs "
+    "whose launcher records the phase history; no launcher does so for this run. The recorder "
+    "refuses this line without `--phase` and says what to append: that refusal is part of "
+    "this procedure, not a failure of the run, and the line is then run again with the flags.\n"
 )
+
+
+def render_spec_payload(spec: "RunSpec") -> str:
+    """The bytes a launcher puts in `D4D_RENDER_SPEC` for a complete recorder line (#6320).
+
+    One serialization for the hash the line carries, the file `d4d prompt
+    render --render-spec-out` writes and the value the recorder reads: ASCII,
+    sorted keys, no whitespace, no trailing newline.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The rendering caller has validated the current RunSpec; serializing
+    its rendering selection neither admits a launch nor changes the specification.
+    """
+    return json.dumps(spec.render_spec(), sort_keys=True, separators=(",", ":"))
 
 
 
@@ -674,9 +694,12 @@ class RunSpec:
     # existing render spec byte-identical; True is emitted into the spec.
     prompt_text_env: bool = False
     # Render the recorder line of an agentic renderer 6 to 8 instruction as
-    # a complete command (#6320): it carries this specification
-    # (`--render-spec-json`) and names the variable that holds the launch
-    # instruction, as renderers 9 and later do for a registered run. The
+    # a complete command (#6320): it names the variable that holds this
+    # specification, bound by its sha256 on the line (`--render-spec-env`,
+    # `--render-spec-sha256`, #6065), and the variable that names the launch
+    # instruction, as the native controller's registered line does. The
+    # specification is not printed into the command, so a session that
+    # appends its phases never has to reproduce it. The
     # recorder then takes the condition, runtime, provider, date, asserted
     # effort, receipt expectation and prompt files from the specification
     # the launcher rendered, so a session that copies the line cannot drop
@@ -829,6 +852,13 @@ class RunSpec:
                 raise ValueError("launcher_model applies only to agentic renderers 6 to 8")
         if type(self.relative_toolchain) is not bool:
             raise ValueError("relative_toolchain must be a boolean")
+        if (self.relative_toolchain or self.launcher_model is not None) and not self.complete_recorder_line:
+            # The bare recorder line rebuilds the specification from flags,
+            # and no flag states either key: the record's specification would
+            # re-render another instruction and the render gate would read
+            # `mismatch`, which is #6311 again (#6325 review, S2).
+            raise ValueError("relative_toolchain and launcher_model require complete_recorder_line: "
+                             "only the complete recorder line carries the specification that states them")
         if self.relative_toolchain and not (self.is_agentic and self.render_version in (6, 7, 8)):
             # Renderer 6 is the first to bind a toolchain; renderers 9 and
             # later are the native controller's, whose registration and
@@ -1933,11 +1963,11 @@ def resolve_prompt(spec: RunSpec, *, _include_shared: bool = True, _omit_phase_c
     if spec.complete_recorder_line:
         # After every text adapter, as renderers 9 and later do: the
         # serialized specification must never be rewritten by one (#6320).
-        import shlex
-        payload = shlex.quote(json.dumps(spec.render_spec(), sort_keys=True, separators=(",", ":")))
+        digest = hashlib.sha256(render_spec_payload(spec).encode("utf-8")).hexdigest()
         body, lines = re.subn(
             r"(?m)^([^\n]* -m data_sheets_schema\.cli provenance record[^\n]*)$",
-            lambda match: (match.group(1) + " --render-spec-json " + payload
+            lambda match: (match.group(1) + " --render-spec-env " + RENDER_SPEC_VARIABLE
+                           + " --render-spec-sha256 " + digest
                            + " --prompt-text-env " + LAUNCH_INSTRUCTION_VARIABLE),
             body)
         if lines != 1:

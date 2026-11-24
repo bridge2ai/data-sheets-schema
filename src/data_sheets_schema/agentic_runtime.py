@@ -184,7 +184,11 @@ def instruction_adapter(spec) -> str:
     py = env["python"]
     paths = spec._agentic_artifact_paths
     commands = {
-        "Read the executable playbook view": d4d_command(env, "agents", "playbook"),
+        # Under a relative toolchain the view is printed with the same
+        # spellings, or it would hand the session a second, absolute header
+        # template (#6325 review, S1).
+        "Read the executable playbook view": d4d_command(
+            env, "agents", "playbook", *(["--relative-toolchain"] if getattr(spec, "relative_toolchain", False) else [])),
         "Validate the full record": [py, "-c", "from linkml.validator.cli import cli; cli()",
             "-s", env["resources"][SCHEMAS[0]], "-C", "Dataset", paths["full"]],
         "Derive the core": d4d_command(env, "derive", "core", "--full", paths["full"], "--out", paths["core"]),

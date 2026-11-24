@@ -3,13 +3,13 @@
 Series 2026-11-22b was sent the bare recorder line: seven of fifteen sessions
 wrote a record that failed its gates (no instruction, or no phase history) and
 all sixteen records said no effort was recorded. Under the opt-in
-`complete_recorder_line` the line carries the launcher's rendering
-specification and names the variable holding the instruction; the session
-adds only `--phase`.
+`complete_recorder_line` the line names the variable holding the launcher's
+rendering specification, bound by its sha256, and the variable naming the
+instruction; the session adds only `--phase`.
 
 The done criterion here is the release driver's: the rendered line, run as
-written with only the launcher's variable set and the phases appended, writes
-a record whose render gate reads `match`.
+written with only the launcher's two variables set and the phases appended,
+writes a record whose render gate reads `match`.
 
 Offline; synthetic corpus only. Inputs: generated fixture; outputs: temporary records.
 """
@@ -22,7 +22,7 @@ import yaml
 from click.testing import CliRunner
 
 from data_sheets_schema import chunking, runs
-from data_sheets_schema.api_runner import COMPLETE_RECORDER_LINE_NOTE, RunSpec
+from data_sheets_schema.api_runner import COMPLETE_RECORDER_LINE_NOTE, RunSpec, render_spec_payload
 from data_sheets_schema.cli import cli
 from data_sheets_schema.cli.api import _spec
 from tests.test_manifest_corpus_root import project_tree  # noqa: F401
@@ -30,6 +30,7 @@ from tests.test_manifest_corpus_root import project_tree  # noqa: F401
 PHASES = ['{"name":"generate_full","completed":true}', '{"name":"derive_core","completed":true}',
           '{"name":"source_audit","completed":true}', '{"name":"reconcile","completed":true,"iterations":1}',
           '{"name":"report","completed":true}']
+PHASE_FLAGS = [flag for phase in PHASES for flag in ("--phase", phase)]
 
 
 def _specs(project_tree, monkeypatch, **kw):
@@ -45,7 +46,7 @@ def _specs(project_tree, monkeypatch, **kw):
 
 
 def _recorder_argv(instruction):
-    lines = [line for line in instruction.splitlines() if " provenance record " in line and "--render-spec-json" in line]
+    lines = [line for line in instruction.splitlines() if " provenance record " in line and "--render-spec-env" in line]
     assert len(lines) == 1, lines
     argv = shlex.split(lines[0].strip())
     return argv[argv.index("provenance"):]
@@ -64,6 +65,11 @@ def _outputs(spec, root):
     return sent
 
 
+def _launcher_env(spec, sent):
+    """What the launcher exports, and nothing else."""
+    return {"D4D_LAUNCH_INSTRUCTION": str(sent), "D4D_RENDER_SPEC": render_spec_payload(spec)}
+
+
 def test_the_key_changes_only_the_recorder_line_and_appends_its_note(project_tree, monkeypatch):
     _, bare, complete = _specs(project_tree, monkeypatch, reasoning_effort="high")
     assert complete.instruction.endswith(COMPLETE_RECORDER_LINE_NOTE)
@@ -72,17 +78,28 @@ def test_the_key_changes_only_the_recorder_line_and_appends_its_note(project_tre
     changed = [(a, b) for a, b in zip(old, new, strict=True) if a != b]
     assert len(changed) == 1
     before, after = changed[0]
-    assert after.startswith(before + " --reasoning-effort high --render-spec-json ")
-    assert after.endswith(" --prompt-text-env D4D_LAUNCH_INSTRUCTION")
-    argv = _recorder_argv(complete.instruction)
-    assert json.loads(argv[argv.index("--render-spec-json") + 1]) == complete.render_spec()
+    digest = hashlib.sha256(render_spec_payload(complete).encode()).hexdigest()
+    assert after == (before + " --reasoning-effort high --render-spec-env D4D_RENDER_SPEC --render-spec-sha256 "
+                     + digest + " --prompt-text-env D4D_LAUNCH_INSTRUCTION")
+    # The specification is bound, not printed: the session never has to reproduce it.
+    assert "agentic_toolchain" not in complete.instruction
+    assert json.loads(render_spec_payload(complete)) == complete.render_spec()
+
+
+def test_the_note_is_pinned(project_tree, monkeypatch):
+    """The note is part of every instruction rendered under the key: an edit to it turns every
+    recorded specification under the key into a render mismatch, so it changes only on purpose."""
+    assert hashlib.sha256(COMPLETE_RECORDER_LINE_NOTE.encode()).hexdigest() == NOTE_SHA256
+
+
+NOTE_SHA256 = "b15bcc3253db1fa827f560b0da4aa74500849966623552a8d175444d244785c0"
 
 
 def test_a_spec_without_the_key_is_byte_identical_and_emits_no_key(project_tree, monkeypatch):
     _, bare, complete = _specs(project_tree, monkeypatch)
     assert "complete_recorder_line" not in bare.render_spec()
     assert "prompt_text_env" not in bare.render_spec()
-    assert "--render-spec-json" not in bare.instruction
+    assert "--render-spec-env" not in bare.instruction and "--render-spec-json" not in bare.instruction
     assert complete.render_spec() == {**bare.render_spec(), "complete_recorder_line": True, "prompt_text_env": True}
 
 
@@ -117,8 +134,7 @@ def test_the_key_is_refused_where_it_renders_nothing(project_tree, monkeypatch, 
 def test_the_line_as_written_with_phases_records_what_the_launcher_rendered(project_tree, monkeypatch):
     root, _, spec = _specs(project_tree, monkeypatch, reasoning_effort="high")
     sent = _outputs(spec, root)
-    command = _recorder_argv(spec.instruction) + [flag for phase in PHASES for flag in ("--phase", phase)]
-    result = CliRunner().invoke(cli, command, env={"D4D_LAUNCH_INSTRUCTION": str(sent)})
+    result = CliRunner().invoke(cli, _recorder_argv(spec.instruction) + PHASE_FLAGS, env=_launcher_env(spec, sent))
     assert result.exit_code == 0, (result.output, result.exception)
     record = yaml.safe_load(spec.provenance_path.read_text())
     request = record["prompts"]["request"]
@@ -136,13 +152,29 @@ def test_the_line_as_written_with_phases_records_what_the_launcher_rendered(proj
     assert len(hashed) == len(spec.prompt_files)
 
 
+def test_a_record_made_at_the_corpus_root_keeps_relative_paths_in_its_check_blocks(project_tree, monkeypatch):
+    """#6325 review, M2: the registered route handed the inline checks an absolute record
+    address, which put the tree's path into the pair, report-claims and form blocks."""
+    root, _, spec = _specs(project_tree, monkeypatch)
+    assert not spec.full_path.is_absolute() and not spec.bundle.is_absolute()
+    sent = _outputs(spec, root)
+    result = CliRunner().invoke(cli, _recorder_argv(spec.instruction) + PHASE_FLAGS, env=_launcher_env(spec, sent))
+    assert result.exit_code == 0, (result.output, result.exception)
+    record = yaml.safe_load(spec.provenance_path.read_text())
+    for name in ("outputs", "inputs", "pair_consistency", "report_claims", "grounding", "form", "receipts"):
+        assert str(root) not in yaml.safe_dump(record.get(name)), (name, record.get(name))
+    assert record["pair_consistency"]["artifacts"]["full"]["path"] == str(spec.full_path)
+    assert record["form"]["records"] == [str(spec.full_path), str(spec.core_path)]
+
+
 def test_the_line_without_phases_is_refused_and_says_what_to_append(project_tree, monkeypatch):
     root, _, spec = _specs(project_tree, monkeypatch)
     sent = _outputs(spec, root)
-    result = CliRunner().invoke(cli, _recorder_argv(spec.instruction), env={"D4D_LAUNCH_INSTRUCTION": str(sent)})
-    assert result.exit_code != 0
-    assert "requires the run's phase history" in result.output and "--phase" in result.output, result.output
-    assert not spec.provenance_path.exists()
+    for extra in ([], ["--phase-skipped", "generate_full"]):     # a skipped phase alone is no history (#6325 review, S3)
+        result = CliRunner().invoke(cli, _recorder_argv(spec.instruction) + extra, env=_launcher_env(spec, sent))
+        assert result.exit_code != 0, extra
+        assert "requires the run's phase history" in result.output and "--phase" in result.output, result.output
+        assert not spec.provenance_path.exists()
 
 
 def test_a_flag_that_disagrees_with_the_specification_is_refused(project_tree, monkeypatch):
@@ -150,21 +182,28 @@ def test_a_flag_that_disagrees_with_the_specification_is_refused(project_tree, m
     sent = _outputs(spec, root)
     command = _recorder_argv(spec.instruction) + ["--phase", PHASES[0]]
     for extra in (["--reasoning-effort", "max"], ["--condition", "generic_v8"], ["--runtime", "Claude Code (direct)"]):
-        result = CliRunner().invoke(cli, command + extra, env={"D4D_LAUNCH_INSTRUCTION": str(sent)})
+        result = CliRunner().invoke(cli, command + extra, env=_launcher_env(spec, sent))
         assert result.exit_code != 0, extra
         assert "conflicts with the registered specification" in result.output, result.output
     assert not spec.provenance_path.exists()
 
 
-def test_another_instruction_in_the_variable_is_refused(project_tree, monkeypatch):
+def test_another_instruction_or_another_specification_in_the_variables_is_refused(project_tree, monkeypatch):
     root, _, spec = _specs(project_tree, monkeypatch)
-    _outputs(spec, root)
+    sent = _outputs(spec, root)
     other = root / "other.txt"
     other.write_text(spec.instruction + "\nUse a different source-ranking policy.\n")
     command = _recorder_argv(spec.instruction) + ["--phase", PHASES[0]]
-    result = CliRunner().invoke(cli, command, env={"D4D_LAUNCH_INSTRUCTION": str(other)})
+    result = CliRunner().invoke(cli, command, env={**_launcher_env(spec, sent), "D4D_LAUNCH_INSTRUCTION": str(other)})
     assert result.exit_code != 0
     assert "does not reproduce the supplied instruction" in result.output, result.output
+    edited = json.dumps({**spec.render_spec(), "condition": "generic_v8"}, sort_keys=True, separators=(",", ":"))
+    result = CliRunner().invoke(cli, command, env={**_launcher_env(spec, sent), "D4D_RENDER_SPEC": edited})
+    assert result.exit_code != 0
+    assert "differs from --render-spec-sha256" in result.output, result.output
+    result = CliRunner().invoke(cli, command, env={"D4D_LAUNCH_INSTRUCTION": str(sent), "D4D_RENDER_SPEC": None})
+    assert result.exit_code != 0
+    assert "D4D_RENDER_SPEC is not set" in result.output, result.output
     assert not spec.provenance_path.exists()
 
 
@@ -178,18 +217,20 @@ def test_a_bare_renderer_7_specification_is_still_refused_on_the_specification_r
     assert "renderer-9-or-newer" in result.output, result.output
 
 
-def test_prompt_render_offers_the_two_options(project_tree, monkeypatch):
+def test_prompt_render_offers_the_options_and_writes_the_launchers_bytes(project_tree, monkeypatch):
     root, _, spec = _specs(project_tree, monkeypatch, reasoning_effort="high")
-    out = root / "rendered.md"
-    result = CliRunner().invoke(cli, ["prompt", "render", "--project", spec.project, "--label", spec.label,
-                                      "--condition", spec.condition, "--bundle", str(spec.bundle),
-                                      "--manifest", str(spec.manifest), "--chunk-manifest", str(spec.chunk_manifest),
-                                      "--runtime", "Claude Code", "--provider", "offline",
-                                      "--reasoning-effort", "high", "--complete-recorder-line", "--out", str(out)])
+    out, spec_out = root / "rendered.md", root / "rendered.spec.json"
+    base = ["prompt", "render", "--project", spec.project, "--label", spec.label,
+            "--condition", spec.condition, "--bundle", str(spec.bundle),
+            "--manifest", str(spec.manifest), "--chunk-manifest", str(spec.chunk_manifest),
+            "--runtime", "Claude Code", "--provider", "offline"]
+    result = CliRunner().invoke(cli, [*base, "--reasoning-effort", "high", "--complete-recorder-line",
+                                      "--out", str(out), "--render-spec-out", str(spec_out)])
     assert result.exit_code == 0, (result.output, result.exception)
     assert out.read_text() == spec.instruction
-    refused = CliRunner().invoke(cli, ["prompt", "render", "--project", spec.project, "--label", spec.label,
-                                       "--condition", spec.condition, "--bundle", str(spec.bundle),
-                                       "--manifest", str(spec.manifest), "--runtime", "Claude Code",
-                                       "--reasoning-effort", "default"])
-    assert refused.exit_code != 0
+    assert spec_out.read_text() == render_spec_payload(spec)
+    assert hashlib.sha256(spec_out.read_bytes()).hexdigest() in spec.instruction
+    assert CliRunner().invoke(cli, [*base, "--reasoning-effort", "default"]).exit_code != 0
+    orphan = CliRunner().invoke(cli, [*base, "--render-spec-out", str(root / "x.json")])
+    assert orphan.exit_code != 0 and "applies only with --complete-recorder-line" in orphan.output
+    assert not (root / "x.json").exists()

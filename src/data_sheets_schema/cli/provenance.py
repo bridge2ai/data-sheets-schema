@@ -541,7 +541,9 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                 # rendered the complete recorder line (#6320).
                 raise ValueError("--render-spec-json requires a native renderer-9-or-newer specification, "
                                  "or an agentic one rendered with the complete recorder line")
-            if registered.complete_recorder_line and not phase_specs and not phases_skipped:
+            if registered.complete_recorder_line and not phase_specs:
+                # `--phase-skipped` names what a resume skipped; alone it
+                # leaves no phase log either (#6325 review, S3).
                 # No launcher records this run's phase history: the session
                 # is its only attester, and a record without it fails
                 # `annotate-observed` and reads `missing` afterwards (#6320).
@@ -957,6 +959,16 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     # Evidence pins retain the same portable spelling as the record's
     # outputs. Reuse the resolved address without another corpus selection.
     inline_address = out if registered is not None or concat_dir.is_absolute() else out.relative_to(Path.cwd())
+    if (registered is not None and registered.complete_recorder_line
+            and not Path(registered._agentic_artifact_paths["core"]).is_absolute()):
+        # A complete-line specification rendered at the corpus root names its
+        # outputs relative to it, and the check blocks keep that spelling as
+        # the bare route's do. The resolved address above put the checkout's
+        # absolute path into seven block fields (#6314; #6325 review, M2).
+        try:
+            inline_address = out.relative_to(Path.cwd())
+        except ValueError:
+            pass
     _inline_checks(inline_address, origin_prior=origin_prior)
 
     # Say it here, but do not refuse. Recording an uncanonical prompt is the

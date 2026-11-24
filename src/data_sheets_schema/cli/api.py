@@ -643,21 +643,25 @@ def _runtime_method(arm, runtime, condition):
               help="the effort the launcher will assert for a runtime that names none in its route; rendered "
                    "into the recorder line and recorded as asserted, not observed (#2202, #6320)")
 @click.option("--complete-recorder-line", "complete_recorder_line", is_flag=True,
-              help="agentic renderers 6 to 8: render the recorder line with this rendering specification and "
-                   "`--prompt-text-env D4D_LAUNCH_INSTRUCTION`, so the session adds only its phase history; "
-                   "the launcher sets that variable to the saved instruction file (#6320)")
+              help="agentic renderers 6 to 8: render the recorder line with `--render-spec-env D4D_RENDER_SPEC`, "
+                   "the specification's sha256 and `--prompt-text-env D4D_LAUNCH_INSTRUCTION`, so the session "
+                   "adds only its phase history; the launcher sets the first variable to the bytes "
+                   "--render-spec-out writes and the second to the saved instruction file (#6320)")
+@click.option("--render-spec-out", "render_spec_out", type=click.Path(), default=None,
+              help="with --complete-recorder-line: write the rendering specification here, as the exact bytes "
+                   "the launcher exports in D4D_RENDER_SPEC (#6320)")
 @click.option("--launcher-model", "launcher_model", default=None,
-              help="agentic renderers 6 to 8: the model the launcher will start the session on, where it is not "
-                   "the shared configuration's; rendered into the `# Model:` header lines and kept in the "
-                   "rendering specification (#6311, #6312)")
+              help="with --complete-recorder-line: the model the launcher will start the session on, where it "
+                   "is not the shared configuration's; rendered into the `# Model:` header lines and kept in "
+                   "the rendering specification (#6311, #6312)")
 @click.option("--relative-toolchain", "relative_toolchain", is_flag=True,
-              help="agentic renderers 6 to 8: spell the interpreter, schema and playbook locations relative to "
-                   "the checkout the run is launched from, so the datasheet header and the commands carry no "
-                   "machine-absolute path; render from the checkout root (#6314)")
+              help="with --complete-recorder-line: spell the interpreter, schema and playbook locations "
+                   "relative to the checkout the run is launched from, so the datasheet header and the "
+                   "commands carry no machine-absolute path; render from the checkout root (#6314)")
 def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, runtime, allow_condition_mismatch,
                       provider, out, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None, method=None,
                       reasoning_effort=None, complete_recorder_line=False, relative_toolchain=False,
-                      launcher_model=None):
+                      launcher_model=None, render_spec_out=None):
     """Render the exact instruction a run should receive, for any runtime.
 
     The API path never types an instruction: `resolve_prompt()` builds it from
@@ -737,9 +741,25 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
     click.echo(f"# rendered {condition} for {project} / {arm} / runtime={runtime}",
                err=True)
     click.echo(f"# sha256 {digest}  ({len(text.encode('utf-8'))} bytes)", err=True)
+    if render_spec_out and not spec.complete_recorder_line:
+        raise click.ClickException("--render-spec-out applies only with --complete-recorder-line")
     if spec.complete_recorder_line:
-        click.echo("# its recorder line is complete: launch with D4D_LAUNCH_INSTRUCTION set to the saved "
-                   "instruction file; the session adds only its --phase flags (#6320)", err=True)
+        from data_sheets_schema.api_runner import render_spec_payload
+        if render_spec_out:
+            Path(render_spec_out).write_text(render_spec_payload(spec), encoding="utf-8")
+            click.echo(f"✓ {render_spec_out}", err=True)
+        click.echo("# its recorder line is complete: launch with D4D_RENDER_SPEC set to the bytes of "
+                   "--render-spec-out and D4D_LAUNCH_INSTRUCTION to the saved instruction file; the session "
+                   "adds only its --phase flags (#6320)", err=True)
+        if spec.relative_toolchain:
+            # Said here because the instruction would otherwise carry a
+            # machine path without a word (#6325 review, N3).
+            kept = [value for value in (spec._agentic_toolchain["python"],
+                                        *spec._agentic_toolchain["resources"].values())
+                    if Path(value).is_absolute()]
+            for value in kept:
+                click.echo(f"# ⚠️  --relative-toolchain: {value} is outside the launch checkout and keeps "
+                           "its absolute path", err=True)
     else:
         click.echo(f"# record it with: d4d provenance record ... --prompt-text <file>",
                    err=True)
