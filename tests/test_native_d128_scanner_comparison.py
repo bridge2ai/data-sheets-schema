@@ -16,6 +16,7 @@ import pytest
 
 from scripts.adhoc import native_u5_inputs_20261108 as inputs
 from scripts.adhoc import compare_pr6302_d128_successor_20261122 as successor
+from scripts.adhoc import compare_pr6325_d128_successor_20261124 as successor_pr6325
 from tests.test_native_u5_scanner_comparison import require_scanner_inventory
 
 
@@ -29,6 +30,11 @@ ARRAYS = ('hits', 'violations', 'test_dependencies')
 SUCCESSOR_FIXTURE = FIXTURE.with_name('native_d128_pr6302_successor.json')
 # Filled only after independent review of the complete PR6302 successor ledger.
 SUCCESSOR_SHA256 = '0d5a59ec6ad085be920c7d742315cfcaf56b6fd1c9ea36a3d14f60f2bc7bbbc0'
+# A second successor, chained after the PR6302 one (lead assignment 2026-11-24,
+# STATUS 20:59:12Z and 21:01:28Z): line-only relocations from PR 6325.
+PR6325_SUCCESSOR_FIXTURE = FIXTURE.with_name('native_d128_pr6325_successor.json')
+# Filled only after independent review of the complete PR6325 successor ledger.
+PR6325_SUCCESSOR_SHA256 = None
 
 
 def encoded(value):
@@ -155,6 +161,11 @@ def test_d128_final_composition_has_only_the_finite_approved_scanner_differences
     if SUCCESSOR_SHA256 is not None:
         approved = successor.require_successor(SUCCESSOR_FIXTURE.read_bytes(), SUCCESSOR_SHA256, approved)
         active_fixture_sha = SUCCESSOR_SHA256
+    if PR6325_SUCCESSOR_SHA256 is not None:
+        require(SUCCESSOR_SHA256 is not None, 'the PR6325 successor is chained after the PR6302 one')
+        approved = successor_pr6325.require_successor(PR6325_SUCCESSOR_FIXTURE.read_bytes(),
+                                                      PR6325_SUCCESSOR_SHA256, approval(), approved)
+        active_fixture_sha = PR6325_SUCCESSOR_SHA256
     candidate_head = inputs.git('rev-parse', '--verify', 'HEAD^{commit}').decode().strip()
     exports = tmp_path / 'exports'
     exports.mkdir()
@@ -177,7 +188,8 @@ def test_d128_final_composition_has_only_the_finite_approved_scanner_differences
     names = inputs.git('ls-tree', '-r', '--name-only', candidate_head, '--', SKILL).decode().splitlines()
     assets = {name: hashlib.sha256((candidate / name).read_bytes()).hexdigest() for name in names}
     require(assets == approved['tool_assets_sha256'], 'D128 requires the exact approved scanner assets')
-    evidence = dict(decision='D128' if SUCCESSOR_SHA256 is None else 'PR6302_D128_SUCCESSOR',
+    evidence = dict(decision=('D128' if SUCCESSOR_SHA256 is None else 'PR6302_D128_SUCCESSOR'
+                              if PR6325_SUCCESSOR_SHA256 is None else 'PR6325_D128_SUCCESSOR'),
                     baseline=BASELINE, candidate=candidate_head,
                     approved_reference_candidate=approved['reference_candidate']['commit'],
                     approval_fixture_sha256=active_fixture_sha,
