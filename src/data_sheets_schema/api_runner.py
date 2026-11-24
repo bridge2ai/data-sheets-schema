@@ -492,8 +492,8 @@ BACKOFF_BASE_SECONDS = 2
 #: admitted there (#2226). The renderer-3 receipt-manifest section is the
 #: one site that reads the narrower `CLAUDE_CODE_RUNTIMES` (#2259): it was
 #: never rendered for Codex, and stays that way.
-AGENTIC_RUNTIMES = frozenset({"Claude Code", "Claude Code (direct)", "Codex CLI"})
-CLAUDE_CODE_RUNTIMES = frozenset({"Claude Code", "Claude Code (direct)"})
+AGENTIC_RUNTIMES = frozenset({"Claude Code", "Claude Code (direct)", "Claude Code (release)", "Codex CLI"})
+CLAUDE_CODE_RUNTIMES = frozenset({"Claude Code", "Claude Code (direct)", "Claude Code (release)"})
 #: The variable a launcher sets to the exact saved launch instruction; the
 #: recorder reads it with `--prompt-text-env` (#2282).
 LAUNCH_INSTRUCTION_VARIABLE = "D4D_LAUNCH_INSTRUCTION"

@@ -26,9 +26,9 @@
 #   The worktree must be a checkout of this repository with its own .venv (poetry install),
 #   and this script must be started with that worktree as the working directory's root.
 #   Environment (optional): D4D_SERIES_CONDITION (default generic_v9), D4D_SERIES_METHOD
-#   (default claudecode_agent), D4D_SERIES_RUNTIME (default "Claude Code"). The method and
-#   runtime under which a release series is filed are the subject of #6324; pass what that
-#   issue decides once it has.
+#   (default claudecode_release), D4D_SERIES_RUNTIME (default "Claude Code (release)"): a
+#   release series is filed under its own method directory and runtime string, apart from
+#   the agentic arm and the direct arm (#6324).
 # Outputs (all under <worktree>):
 #   data/d4d_concatenated/<method>{,_core}/<label>/<PROJECT>_*   the records
 #   .temp/launch/<PROJECT>_<label>.md            the rendered launch instruction
@@ -45,8 +45,8 @@ set -u
 W=${1:?worktree}; SERIES=${2:?series}; MODEL=${3:?model}; EFFORT=${4:?effort}; REP=${5:?replicate number}; shift 5
 [ $# -ge 1 ] || { echo "no projects given" >&2; exit 2; }
 CONDITION=${D4D_SERIES_CONDITION:-generic_v9}
-METHOD=${D4D_SERIES_METHOD:-claudecode_agent}
-RUNTIME=${D4D_SERIES_RUNTIME:-Claude Code}
+METHOD=${D4D_SERIES_METHOD:-claudecode_release}
+RUNTIME=${D4D_SERIES_RUNTIME:-Claude Code (release)}
 case "$SERIES$MODEL$EFFORT$REP$CONDITION$METHOD" in *[!A-Za-z0-9._-]*) echo "series, model, effort, replicate, condition and method take plain tokens" >&2; exit 2;; esac
 case "$RUNTIME" in *[!A-Za-z0-9\ \(\)._-]*) echo "the runtime takes letters, digits, spaces and parentheses" >&2; exit 2;; esac
 LABEL="${SERIES}_${MODEL}-claudecode-${CONDITION//_/-}_rep${REP}"

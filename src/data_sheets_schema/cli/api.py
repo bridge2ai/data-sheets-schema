@@ -46,12 +46,14 @@ _CONDITION_SCOPE = (" API generic_v10 requires registered API25; source-heading 
                     "registered API27/shared2/playbook3/receipt3. Source-heading selections do not support native/direct launchers.")
 
 # Every non-core, non-deterministic method directory and the arm key it belongs
-# to (#5046). `baseline` spans three runtime directories (`claudecode_api`,
-# `claudecode_agent`, `claudecode_direct`); the other arms each have one.
+# to (#5046). `baseline` spans four runtime directories (`claudecode_api`,
+# `claudecode_agent`, `claudecode_direct`, `claudecode_release`); the other
+# arms each have one.
 _ARM_FOR_METHOD = {
     "claudecode_agent": "baseline",
     "claudecode_api": "baseline",
     "claudecode_direct": "baseline",
+    "claudecode_release": "baseline",
     "claudecode_agent_crate": "de_novo",
     "claudecode_agent_crate_only": "crate_only",
     "claudecode_agent_healthsheet": "healthsheet",
@@ -569,7 +571,7 @@ def _warn_method_runtime(method, runtime, condition=None):
     from data_sheets_schema.runs import RUNTIME_KEYS
     key = RUNTIME_KEYS.get((runtime or "").strip().lower())
     expected = _runtime_method("baseline", runtime, condition)
-    if expected is not None and method in ("claudecode_api", "claudecode_agent", "claudecode_direct") and method != expected:
+    if expected is not None and method in ("claudecode_api", "claudecode_agent", "claudecode_direct", "claudecode_release") and method != expected:
         base = (CONDITION_AXES.get(condition or "generic") or {}).get("base", "")
         historical = (key == "api" and method == "claudecode_agent"
                       and not (base[1:].isdigit() and int(base[1:]) >= 8))
@@ -596,7 +598,7 @@ def _runtime_method(arm, runtime, condition):
         return None
     key = RUNTIME_KEYS.get((runtime or "").strip().lower())
     return {"agentic": "claudecode_agent", "direct": "claudecode_direct",
-            "api": "claudecode_api"}.get(key)
+            "release": "claudecode_release", "api": "claudecode_api"}.get(key)
 
 
 @api.command("render-prompt")
@@ -618,7 +620,8 @@ def _runtime_method(arm, runtime, condition):
               show_default=True)
 @click.option("--method", type=click.Choice(_METHODS), default=None,
               help="output method directory (#5046); default for the baseline arm: the one --runtime writes under "
-                   "(Claude Code: claudecode_agent; Claude Code (direct): claudecode_direct; Claude API (direct): "
+                   "(Claude Code: claudecode_agent; Claude Code (direct): claudecode_direct; Claude Code (release): "
+                   "claudecode_release; Claude API (direct): "
                    "claudecode_api, where d4d api run writes), else the arm's method (#5063, #5089)")
 @click.option("--label", required=True, help="run label")
 @click.option("--condition", type=click.Choice(_CONDITIONS), default=None,

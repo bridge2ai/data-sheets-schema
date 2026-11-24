@@ -19,6 +19,8 @@ METHODS = [
     "claudecode_api_core",      # ... its D4D Core counterpart
     "claudecode_direct",        # Claude Code on the maintainer's subscription, direct to Anthropic; no proxy, no ledger (#2202)
     "claudecode_direct_core",   # ... its D4D Core counterpart
+    "claudecode_release",       # headless Claude Code on the maintainer's subscription with no native controller: a release series, not a comparison arm (#6324)
+    "claudecode_release_core",  # ... its D4D Core counterpart
     "claudecode_assistant",     # Claude Code assistant (interactive)
     "rocrate_mapped",           # RO-Crate via UPSTREAM's ro-crate-linkml.yaml, no model
     "rocrate_static_map",       # RO-Crate via OUR mapping table, no model
