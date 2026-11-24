@@ -75,15 +75,71 @@ def toolchain(*, native_shared: bool = False) -> dict:
     return validate_toolchain({"python": str(Path(sys.executable).absolute()), "resources": paths})
 
 
-def validate_toolchain(value) -> dict:
+def _located(value, relative: bool) -> bool:
+    """An absolute path, or under `relative` a plain path below the launch directory (#6314)."""
+    if not isinstance(value, str) or not value:
+        return False
+    path = Path(value)
+    return path.is_absolute() or (relative and ".." not in path.parts)
+
+
+def validate_toolchain(value, *, relative: bool = False) -> dict:
     if (not isinstance(value, dict) or set(value) != {"python", "resources"}
-            or not isinstance(value["python"], str) or not Path(value["python"]).is_absolute()
+            or not _located(value["python"], relative)
             or not isinstance(value["resources"], dict)
-            or any(not isinstance(k, str) or not isinstance(v, str) or not Path(v).is_absolute()
+            or any(not isinstance(k, str) or not _located(v, relative)
                    for k, v in value["resources"].items())
             or any(k not in value["resources"] for k in (*SCHEMAS, PLAYBOOK))):
         raise ValueError("invalid recorded agentic toolchain")
     return {"python": value["python"], "resources": dict(value["resources"])}
+
+
+#: Appended to an instruction rendered with `relative_toolchain` (#6314).
+#: Part of the instruction, so part of its hash.
+RELATIVE_TOOLCHAIN_NOTE = (
+    "\n\n## Toolchain locations (checkout-relative)\n\n"
+    "The interpreter, schema and playbook locations in this instruction are spelled relative "
+    "to the root of the repository checkout this run was launched in, wherever they lie under "
+    "it. Run every command from that directory and do not change directory. Write those "
+    "locations into record headers and reports exactly as this instruction spells them; do "
+    "not expand them to absolute paths.\n")
+
+
+def checkout_relative(value: dict) -> dict:
+    """`value` with every location under the checkout spelled relative to it (#6314).
+
+    The rendered instruction prints these locations into the datasheet's own
+    `# Schema:` header and into every command, so the absolute form writes the
+    operator's worktree path into the published record. Only where a relative
+    spelling can be run: the launch directory must be the root of the checkout
+    the toolchain was read from. A location outside it (an interpreter in
+    another environment) keeps its absolute form, as `repo_relative` does.
+    The interpreter is matched by spelling and never resolved: its path
+    selects the virtual environment.
+    """
+    from data_sheets_schema.resources import resource_root
+    root, kind = resource_root()
+    if kind != "checkout" or Path.cwd().resolve() != Path(root).resolve():
+        raise ValueError("relative_toolchain requires rendering from the root of the checkout that "
+                         "holds the toolchain; a relative location could not be run from here")
+    bases = list(dict.fromkeys((Path(root), Path(root).resolve(), Path.cwd())))
+
+    def spell(location: str) -> str:
+        path = Path(location)
+        if ".." in path.parts:
+            return location
+        for base in bases:
+            try:
+                relative = path.relative_to(base)
+            except ValueError:
+                continue
+            if relative.parts:
+                return str(relative)
+        return location
+
+    return validate_toolchain({"python": spell(value["python"]),
+                               "resources": {name: spell(path) for name, path in value["resources"].items()}},
+                              relative=True)
 
 
 def d4d_command(environment: dict, *args) -> list[str]:

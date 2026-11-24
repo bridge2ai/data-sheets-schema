@@ -687,6 +687,13 @@ class RunSpec:
     # byte-identical; True is emitted into the spec and requires
     # `prompt_text_env`.
     complete_recorder_line: bool = False
+    # Spell the bound toolchain of an agentic renderer 6 to 8 instruction
+    # relative to the checkout it is launched from (#6314). The instruction
+    # prints those locations into the datasheet's `# Schema:` header and into
+    # every command; the absolute form put the operator's worktree path into
+    # all 16 datasheets of 2026-11-22. False keeps the absolute spelling and
+    # every existing render spec byte-identical; True is emitted into the spec.
+    relative_toolchain: bool = False
     # Independent opt-in instruction axis; absent/zero preserves every historical renderer.
     api_playbook_version: int = 0
     native_source_attribution_version: int = 0
@@ -799,6 +806,13 @@ class RunSpec:
                 # The line names the variable and never a shell expansion,
                 # which Claude Code refuses under dontAsk (#2282).
                 raise ValueError("complete_recorder_line requires prompt_text_env")
+        if type(self.relative_toolchain) is not bool:
+            raise ValueError("relative_toolchain must be a boolean")
+        if self.relative_toolchain and not (self.is_agentic and self.render_version in (6, 7, 8)):
+            # Renderer 6 is the first to bind a toolchain; renderers 9 and
+            # later are the native controller's, whose registration and
+            # permission checks bind absolute locations (#6314).
+            raise ValueError("relative_toolchain applies only to agentic renderers 6 to 8")
         if self.prompt_text_env and not (self.is_agentic and (self.render_version >= 9
                                                               or self.complete_recorder_line)):
             # Only agentic renderers 9 and later, and an earlier one rendering
@@ -873,6 +887,9 @@ class RunSpec:
         if self.render_version >= 6 and self.is_agentic and not self._replay_only:
             from data_sheets_schema.agentic_runtime import toolchain
             self._agentic_toolchain = toolchain()
+            if self.relative_toolchain:
+                from data_sheets_schema.agentic_runtime import checkout_relative
+                self._agentic_toolchain = checkout_relative(self._agentic_toolchain)
         if self.manifest_line == default_line:   # an arm that declares its own header keeps it
             self.manifest_line = self.header_for_manifest(self.manifest)
         if self.profile is None:
@@ -1018,6 +1035,10 @@ class RunSpec:
         if any(k.startswith("receipt_completion_") for k in recorded):
             from data_sheets_schema.receipt_completion_policy import select_policy
             select_policy(render_spec=recorded)
+        if "relative_toolchain" in recorded and recorded["relative_toolchain"] is not True:
+            # Emitted only as true (#2315, #6314).
+            raise ValueError(f"invalid recorded relative_toolchain: {recorded['relative_toolchain']!r}; "
+                             "the key is recorded only as true")
         if "complete_recorder_line" in recorded and recorded["complete_recorder_line"] is not True:
             # Emitted only as true, like `prompt_text_env` (#2315, #6320).
             # Checked before construction: the key licenses the env form
@@ -1039,6 +1060,7 @@ class RunSpec:
                    reasoning_effort=recorded.get("reasoning_effort"),
                    prompt_text_env=recorded.get("prompt_text_env") is True,
                    complete_recorder_line=recorded.get("complete_recorder_line") is True,
+                   relative_toolchain=recorded.get("relative_toolchain") is True,
                    native_source_attribution_version=recorded.get("native_source_attribution_version", 0),
                    native_source_attribution_max_checks=recorded.get("native_source_attribution_max_checks"),
                    api_playbook_version=recorded.get("api_playbook_version", 0),
@@ -1120,7 +1142,8 @@ class RunSpec:
             spec._agentic_artifact_paths = dict(paths)
         if spec.render_version >= 6 and spec.is_agentic:
             from data_sheets_schema.agentic_runtime import validate_toolchain
-            spec._agentic_toolchain = validate_toolchain(recorded.get("agentic_toolchain"))
+            spec._agentic_toolchain = validate_toolchain(recorded.get("agentic_toolchain"),
+                                                         relative=spec.relative_toolchain)
         if spec.render_version >= 8 and not spec.is_agentic:
             spec._api_header_values = validate_api_header_values(recorded.get("api_header_values"))
         # A replay reads no live declaration — the manifest may be gone or
@@ -1317,6 +1340,7 @@ class RunSpec:
                 **({"reasoning_effort": self.reasoning_effort} if self.reasoning_effort else {}),
                 **({"prompt_text_env": True} if self.prompt_text_env else {}),
                 **({"complete_recorder_line": True} if self.complete_recorder_line else {}),
+                **({"relative_toolchain": True} if self.relative_toolchain else {}),
                 "bundle": str(self.bundle)}
 
     @cached_property
@@ -1874,6 +1898,9 @@ def resolve_prompt(spec: RunSpec, *, _include_shared: bool = True, _omit_phase_c
     if spec.render_version >= 7 and spec.is_agentic:
         from data_sheets_schema.agentic_runtime import temperature_instructions
         body = temperature_instructions(body)
+    if spec.relative_toolchain:
+        from data_sheets_schema.agentic_runtime import RELATIVE_TOOLCHAIN_NOTE
+        body += RELATIVE_TOOLCHAIN_NOTE
     if spec.complete_recorder_line:
         # After every text adapter, as renderers 9 and later do: the
         # serialized specification must never be rewritten by one (#6320).
