@@ -498,6 +498,28 @@ CLAUDE_CODE_RUNTIMES = frozenset({"Claude Code", "Claude Code (direct)"})
 #: recorder reads it with `--prompt-text-env` (#2282).
 LAUNCH_INSTRUCTION_VARIABLE = "D4D_LAUNCH_INSTRUCTION"
 
+#: Appended to an instruction rendered with `complete_recorder_line` (#6320).
+#: Part of the instruction, so part of its hash; changing it changes every
+#: instruction rendered under the key.
+COMPLETE_RECORDER_LINE_NOTE = (
+    "\n\n## The provenance record line of this run (complete recorder line)\n\n"
+    "The `provenance record` line above is complete. It carries the launcher's rendering "
+    "specification (`--render-spec-json`) and names the variable that holds this instruction "
+    "(`--prompt-text-env " + LAUNCH_INSTRUCTION_VARIABLE + "`), which the launcher has set. "
+    "The recorder reads the condition, runtime, provider, date, asserted reasoning effort, "
+    "receipt expectation and prompt files from that specification.\n\n"
+    "Run the line as written, with one addition and no other change: append one `--phase` "
+    "flag for each phase you actually performed, in order, in the JSON form the playbook's "
+    "provenance template gives (`generate_full`, `derive_core`, `source_audit`, `reconcile`, "
+    "`report`, and `repair` and `report_after_repair` only if a repair ran). Do not add "
+    "`--prompt`, `--prompt-text`, `--condition`, `--runtime`, `--reasoning-effort` or "
+    "`--receipt-expected`, do not expand or replace the variable in the shell, and do not "
+    "edit the specification. The playbook's rule to add nothing to a line carrying "
+    "`--render-spec-json` describes runs whose launcher records the phase history; no "
+    "launcher does so for this run, and the recorder refuses this line without `--phase`.\n"
+)
+
+
 
 _REGISTERED_INPUT_FIELDS = ("bundle", "manifest", "chunk_manifest")
 _INPUT_BINDING_SELECTORS = ("registered_input_paths", "native_source_attribution_version",
@@ -651,6 +673,20 @@ class RunSpec:
     # with the pinned binary. False renders the expansion, which keeps every
     # existing render spec byte-identical; True is emitted into the spec.
     prompt_text_env: bool = False
+    # Render the recorder line of an agentic renderer 6 to 8 instruction as
+    # a complete command (#6320): it carries this specification
+    # (`--render-spec-json`) and names the variable that holds the launch
+    # instruction, as renderers 9 and later do for a registered run. The
+    # recorder then takes the condition, runtime, provider, date, asserted
+    # effort, receipt expectation and prompt files from the specification
+    # the launcher rendered, so a session that copies the line cannot drop
+    # them; the session adds only its own phase history. Fifteen runs of
+    # series 2026-11-22b were sent the bare line, seven wrote a record that
+    # failed its gates and all sixteen records misstated the effort. False
+    # renders the bare line, which keeps every existing render spec
+    # byte-identical; True is emitted into the spec and requires
+    # `prompt_text_env`.
+    complete_recorder_line: bool = False
     # Independent opt-in instruction axis; absent/zero preserves every historical renderer.
     api_playbook_version: int = 0
     native_source_attribution_version: int = 0
@@ -751,8 +787,22 @@ class RunSpec:
                 raise ValueError("receipt completion requires a receipt-producing condition")
         elif self.receipt_completion_registration is not None:
             raise ValueError("receipt completion registration requires opt-in version 1")
-        if self.prompt_text_env and not (self.is_agentic and self.render_version >= 9):
-            # Only agentic renderers 9 and later carry the recorder line the
+        if type(self.complete_recorder_line) is not bool:
+            raise ValueError("complete_recorder_line must be a boolean")
+        if self.complete_recorder_line:
+            # Renderer 6 is the first whose recorder line names the bound
+            # interpreter, which is the spelling the specification is
+            # appended to; renderers 9 and later already carry it (#6320).
+            if not (self.is_agentic and self.render_version in (6, 7, 8)):
+                raise ValueError("complete_recorder_line applies only to agentic renderers 6 to 8")
+            if not self.prompt_text_env:
+                # The line names the variable and never a shell expansion,
+                # which Claude Code refuses under dontAsk (#2282).
+                raise ValueError("complete_recorder_line requires prompt_text_env")
+        if self.prompt_text_env and not (self.is_agentic and (self.render_version >= 9
+                                                              or self.complete_recorder_line)):
+            # Only agentic renderers 9 and later, and an earlier one rendering
+            # the complete recorder line (#6320), carry the recorder line the
             # key changes; elsewhere it would be recorded and do nothing (#2313).
             raise ValueError("prompt_text_env applies only to agentic renderers 9 and later")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
@@ -968,6 +1018,13 @@ class RunSpec:
         if any(k.startswith("receipt_completion_") for k in recorded):
             from data_sheets_schema.receipt_completion_policy import select_policy
             select_policy(render_spec=recorded)
+        if "complete_recorder_line" in recorded and recorded["complete_recorder_line"] is not True:
+            # Emitted only as true, like `prompt_text_env` (#2315, #6320).
+            # Checked before construction: the key licenses the env form
+            # below renderer 9, so a misspelt one would otherwise be refused
+            # as a misplaced `prompt_text_env`, which names the wrong cause.
+            raise ValueError(f"invalid recorded complete_recorder_line: {recorded['complete_recorder_line']!r}; "
+                             "the key is recorded only as true")
         spec = cls(project=project, method=method, label=label,
                    profile=recorded.get("profile") or "neutral",   # never live selection (#1468); the recorded values are restored below
                    profile_basis=recorded.get("profile_basis") or "replay",
@@ -981,6 +1038,7 @@ class RunSpec:
                    provider=recorded.get("provider"),
                    reasoning_effort=recorded.get("reasoning_effort"),
                    prompt_text_env=recorded.get("prompt_text_env") is True,
+                   complete_recorder_line=recorded.get("complete_recorder_line") is True,
                    native_source_attribution_version=recorded.get("native_source_attribution_version", 0),
                    native_source_attribution_max_checks=recorded.get("native_source_attribution_max_checks"),
                    api_playbook_version=recorded.get("api_playbook_version", 0),
@@ -1258,6 +1316,7 @@ class RunSpec:
                 or PROVIDER,
                 **({"reasoning_effort": self.reasoning_effort} if self.reasoning_effort else {}),
                 **({"prompt_text_env": True} if self.prompt_text_env else {}),
+                **({"complete_recorder_line": True} if self.complete_recorder_line else {}),
                 "bundle": str(self.bundle)}
 
     @cached_property
@@ -1815,6 +1874,21 @@ def resolve_prompt(spec: RunSpec, *, _include_shared: bool = True, _omit_phase_c
     if spec.render_version >= 7 and spec.is_agentic:
         from data_sheets_schema.agentic_runtime import temperature_instructions
         body = temperature_instructions(body)
+    if spec.complete_recorder_line:
+        # After every text adapter, as renderers 9 and later do: the
+        # serialized specification must never be rewritten by one (#6320).
+        import shlex
+        payload = shlex.quote(json.dumps(spec.render_spec(), sort_keys=True, separators=(",", ":")))
+        body, lines = re.subn(
+            r"(?m)^([^\n]* -m data_sheets_schema\.cli provenance record[^\n]*)$",
+            lambda match: (match.group(1) + " --render-spec-json " + payload
+                           + " --prompt-text-env " + LAUNCH_INSTRUCTION_VARIABLE),
+            body)
+        if lines != 1:
+            # A template with no recorder line, or with two, would render an
+            # instruction whose record nothing binds.
+            raise ValueError(f"complete_recorder_line found {lines} provenance record lines to complete, not one")
+        body += COMPLETE_RECORDER_LINE_NOTE
     if spec.render_version >= 8 and not spec.is_agentic:
         body = api_header_instructions(body, api_values)
     if spec.render_version >= 9:
