@@ -316,7 +316,7 @@ def _shared_plan_line(plan):
 
 def _spec(project, arm, label, condition, bundle=None, out_dir=None,
           runtime=None, provider=None, manifest=_UNSET, chunk_manifest=None, api_playbook_version=0, removal_repair_version=0, receipt_completion_version=0, receipt_completion_registration=None, shared_generation_version=0, shared_generation_registration=None, _shared_capture=None, method=None,
-          reasoning_effort=None, complete_recorder_line=False, relative_toolchain=False):
+          reasoning_effort=None, complete_recorder_line=False, relative_toolchain=False, launcher_model=None):
     """Resolve a run spec.
 
     `project` is a free string rather than a click.Choice because the GitHub
@@ -334,11 +334,11 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
     if shared_generation_version or shared_generation_registration is not None:
         if shared_generation_version not in (1, 2) or shared_generation_registration is None:
             raise click.ClickException("shared generation requires an explicit supported version and registration")
-        if reasoning_effort or complete_recorder_line or relative_toolchain:
+        if reasoning_effort or complete_recorder_line or relative_toolchain or launcher_model:
             # A shared registration states its own rendering; these options
-            # would be dropped without a word (#6320, #6314).
-            raise click.ClickException("--reasoning-effort, --complete-recorder-line and --relative-toolchain "
-                                       "do not apply to a shared-generation registration")
+            # would be dropped without a word (#6320, #6314, #6312).
+            raise click.ClickException("--reasoning-effort, --complete-recorder-line, --relative-toolchain and "
+                                       "--launcher-model do not apply to a shared-generation registration")
         captured = _shared_capture or _capture_shared_registration(shared_generation_registration)
         if captured['document']['selection']['version'] != shared_generation_version:
             raise click.ClickException('selected shared version differs from registration')
@@ -387,6 +387,8 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
         kw.update(complete_recorder_line=True, prompt_text_env=True)
     if relative_toolchain:
         kw["relative_toolchain"] = True
+    if launcher_model:
+        kw["launcher_model"] = launcher_model
     try:
         return RunSpec(project=project, arm=display, method=method,
                        bundle=resolved, label=label, condition=condition,
@@ -644,13 +646,18 @@ def _runtime_method(arm, runtime, condition):
               help="agentic renderers 6 to 8: render the recorder line with this rendering specification and "
                    "`--prompt-text-env D4D_LAUNCH_INSTRUCTION`, so the session adds only its phase history; "
                    "the launcher sets that variable to the saved instruction file (#6320)")
+@click.option("--launcher-model", "launcher_model", default=None,
+              help="agentic renderers 6 to 8: the model the launcher will start the session on, where it is not "
+                   "the shared configuration's; rendered into the `# Model:` header lines and kept in the "
+                   "rendering specification (#6311, #6312)")
 @click.option("--relative-toolchain", "relative_toolchain", is_flag=True,
               help="agentic renderers 6 to 8: spell the interpreter, schema and playbook locations relative to "
                    "the checkout the run is launched from, so the datasheet header and the commands carry no "
                    "machine-absolute path; render from the checkout root (#6314)")
 def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, runtime, allow_condition_mismatch,
                       provider, out, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None, method=None,
-                      reasoning_effort=None, complete_recorder_line=False, relative_toolchain=False):
+                      reasoning_effort=None, complete_recorder_line=False, relative_toolchain=False,
+                      launcher_model=None):
     """Render the exact instruction a run should receive, for any runtime.
 
     The API path never types an instruction: `resolve_prompt()` builds it from
@@ -689,7 +696,7 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
                  runtime=runtime, provider=provider, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration,
                  shared_generation_version=shared_generation_version, shared_generation_registration=shared_generation_registration,
                  method=method, reasoning_effort=reasoning_effort, complete_recorder_line=complete_recorder_line,
-                 relative_toolchain=relative_toolchain,
+                 relative_toolchain=relative_toolchain, launcher_model=launcher_model,
                  **_manifest_kw(manifest, chunk_manifest))
     _require_input_binding(spec)
     _refuse_condition_mismatch(spec, allow_condition_mismatch)   # the agentic path's launch instrument (#1130 round 2)

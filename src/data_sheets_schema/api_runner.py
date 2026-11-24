@@ -694,6 +694,17 @@ class RunSpec:
     # all 16 datasheets of 2026-11-22. False keeps the absolute spelling and
     # every existing render spec byte-identical; True is emitted into the spec.
     relative_toolchain: bool = False
+    # The model the launcher will start an agentic renderer 6 to 8 session
+    # on, where that is not the shared configuration's (#6311, #6312). The
+    # header's `# Model:` line otherwise comes from that file, so a session
+    # launched on another model was told to head its records with a model it
+    # did not run on; the 2026-11-22 series worked around it with a
+    # branch-only commit to the configuration file, which no commit on main
+    # carries. Stated here it is part of the rendering specification the
+    # record keeps, and the recorder's own note still reports the difference
+    # from the shared configuration. None renders the configuration's name
+    # and keeps every existing render spec byte-identical.
+    launcher_model: str | None = None
     # Independent opt-in instruction axis; absent/zero preserves every historical renderer.
     api_playbook_version: int = 0
     native_source_attribution_version: int = 0
@@ -806,6 +817,16 @@ class RunSpec:
                 # The line names the variable and never a shell expansion,
                 # which Claude Code refuses under dontAsk (#2282).
                 raise ValueError("complete_recorder_line requires prompt_text_env")
+        if self.launcher_model is not None:
+            if (type(self.launcher_model) is not str
+                    or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/:\[\]-]{0,127}", self.launcher_model) is None):
+                # One header token: the name is substituted into a `# Model:`
+                # line and a shell-quoted command, never free text.
+                raise ValueError(f"invalid launcher_model: {self.launcher_model!r}")
+            if not (self.is_agentic and self.render_version in (6, 7, 8)):
+                # The API path sends its own model and records it from the
+                # response; the native controller registers its own.
+                raise ValueError("launcher_model applies only to agentic renderers 6 to 8")
         if type(self.relative_toolchain) is not bool:
             raise ValueError("relative_toolchain must be a boolean")
         if self.relative_toolchain and not (self.is_agentic and self.render_version in (6, 7, 8)):
@@ -1035,6 +1056,11 @@ class RunSpec:
         if any(k.startswith("receipt_completion_") for k in recorded):
             from data_sheets_schema.receipt_completion_policy import select_policy
             select_policy(render_spec=recorded)
+        if "launcher_model" in recorded and not isinstance(recorded["launcher_model"], str):
+            # Emitted only when stated; a null would restore "not stated" and
+            # then fail to round-trip (#2315).
+            raise ValueError(f"invalid recorded launcher_model: {recorded['launcher_model']!r}; "
+                             "the key is recorded only as a model name")
         if "relative_toolchain" in recorded and recorded["relative_toolchain"] is not True:
             # Emitted only as true (#2315, #6314).
             raise ValueError(f"invalid recorded relative_toolchain: {recorded['relative_toolchain']!r}; "
@@ -1061,6 +1087,7 @@ class RunSpec:
                    prompt_text_env=recorded.get("prompt_text_env") is True,
                    complete_recorder_line=recorded.get("complete_recorder_line") is True,
                    relative_toolchain=recorded.get("relative_toolchain") is True,
+                   launcher_model=recorded.get("launcher_model"),
                    native_source_attribution_version=recorded.get("native_source_attribution_version", 0),
                    native_source_attribution_max_checks=recorded.get("native_source_attribution_max_checks"),
                    api_playbook_version=recorded.get("api_playbook_version", 0),
@@ -1341,6 +1368,7 @@ class RunSpec:
                 **({"prompt_text_env": True} if self.prompt_text_env else {}),
                 **({"complete_recorder_line": True} if self.complete_recorder_line else {}),
                 **({"relative_toolchain": True} if self.relative_toolchain else {}),
+                **({"launcher_model": self.launcher_model} if self.launcher_model else {}),
                 "bundle": str(self.bundle)}
 
     @cached_property
@@ -1792,7 +1820,8 @@ def resolve_prompt(spec: RunSpec, *, _include_shared: bool = True, _omit_phase_c
         # artifact asserted a runtime and model it never touched.
         "{RUNTIME}": spec.runtime,
         "{PROVIDER}": spec.provider or ident["provider"] or PROVIDER,
-        "{MODEL}": api_values["Model"] if api_values is not None else settings["name"],
+        "{MODEL}": (api_values["Model"] if api_values is not None
+                    else spec.launcher_model or settings["name"]),
         # v2 introduced `{DATE}` but nothing substituted it, so the literal
         # string reached the model. Its records carry the right date only
         # because the model read it off `{LABEL}` and guessed correctly.
