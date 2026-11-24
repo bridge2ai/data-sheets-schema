@@ -17,8 +17,14 @@ from pathlib import Path
 import sys
 
 # scripts/ is adjacent only for this stand-alone CLI (safe-path is supported).
+# It is removed again at once: the environment manifest these steps verify was
+# written without scripts/ as an import root (registration and launch lack it).
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from build_native_canary_packet import physical, write_new
+try:
+    from build_native_canary_packet import physical, write_new
+    import native_packet_review_inputs
+finally:
+    sys.path.remove(str(Path(__file__).resolve().parent))
 
 
 def produce(step, data):
@@ -75,7 +81,7 @@ def produce(step, data):
         verified(raw)
         return {'registration.json': raw}
     if step == 'review':
-        from native_packet_review_inputs import validate_supplied
+        validate_supplied = native_packet_review_inputs.validate_supplied
         raws = [Path(data[name]).read_bytes() for name in ('registration_path', 'review_path', 'launch_word_path')]
         validate_supplied(*raws)
         return {'review-validation.json': c.canonical({'scope': 'Saved declared byte bindings only; not human authentication, CI, full admission or authorization.', 'checked_sha256': [c.sha(raw) for raw in raws]})}

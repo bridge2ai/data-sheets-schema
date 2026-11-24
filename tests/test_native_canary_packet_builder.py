@@ -71,6 +71,18 @@ def test_real_chorus_prefix(tmp_path):
     # environment.write already performs the full fresh census comparison.
     manifest = environment.validate(json.loads((out/'environment-manifest.json').read_bytes()))
     assert manifest['distributions']
+    scripts = str(ROOT/'scripts')
+    assert not any(row['root'] == scripts for row in manifest['unowned_files'])
+    # Registration (C15), the controller and the launch verify this manifest from
+    # safe-path processes without scripts/ on sys.path; the pin must hold there.
+    verify = subprocess.run([sys.executable, '-P', '-s', '-B', '-c',
+        'import json, sys\n'
+        'from data_sheets_schema import native_environment_manifest as environment\n'
+        'assert sys.argv[2] not in sys.path\n'
+        "environment.verify(json.loads(sys.argv[1]), mode='light')\n"
+        "print('verified')", json.dumps(contract['environment_manifest']), scripts],
+        cwd=ROOT, capture_output=True, text=True, timeout=600)
+    assert verify.returncode == 0 and verify.stdout.strip() == 'verified', verify.stdout + verify.stderr
     assert not (tmp_path/'never-reserved-attempt').exists()
     assert all((out/name).stat().st_size for name in status['completed'])
 
