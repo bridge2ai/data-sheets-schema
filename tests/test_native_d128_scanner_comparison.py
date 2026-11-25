@@ -34,7 +34,7 @@ SUCCESSOR_SHA256 = '0d5a59ec6ad085be920c7d742315cfcaf56b6fd1c9ea36a3d14f60f2bc7b
 # STATUS 20:59:12Z and 21:01:28Z): line-only relocations from PR 6325.
 PR6325_SUCCESSOR_FIXTURE = FIXTURE.with_name('native_d128_pr6325_successor.json')
 # Filled only after independent review of the complete PR6325 successor ledger.
-PR6325_SUCCESSOR_SHA256 = None
+PR6325_SUCCESSOR_SHA256 = 'c42a5bd39765bf511de20720f110424978b8fa1d5006caa7896abf4816eb842c'
 
 
 def encoded(value):
