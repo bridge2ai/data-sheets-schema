@@ -30,7 +30,9 @@
 #   name; a canary and its series must use the same one), D4D_SERIES_CONDITION (default generic_v9), D4D_SERIES_METHOD
 #   (default claudecode_release), D4D_SERIES_RUNTIME (default "Claude Code (release)"): a
 #   release series is filed under its own method directory and runtime string, apart from
-#   the agentic arm and the direct arm (#6324).
+#   the agentic arm and the direct arm (#6324). D4D_SERIES_CONTINUE_AFTER_GATE_FAIL=1 lets
+#   the replicate go on to the next project after a project's gates read FAIL; without it
+#   (the default) a gate FAIL stops the replicate (exit 3), see below.
 # Outputs (all under <worktree>):
 #   data/d4d_concatenated/<method>{,_core}/<label>/<PROJECT>_*   the records
 #   .temp/launch/<PROJECT>_<label>.md            the rendered launch instruction
@@ -39,7 +41,14 @@
 #   .temp/launch/gates/<PROJECT>_<label>.txt     gate results, ending "GATES: PASS" or FAIL
 #   stdout: one line per event, "<UTC> <rep> <project> <event>"
 # Stops the replicate (exit 3) when a session fails outright, so a credential or rate-limit
-#   failure is not repeated on every remaining project.
+#   failure is not repeated on every remaining project, and when a project's gates read
+#   "GATES: FAIL", so a systematic defect (a render gate reading mismatch on every record,
+#   the path gate firing on every record) is not paid for on every remaining project,
+#   unless D4D_SERIES_CONTINUE_AFTER_GATE_FAIL=1 (review 2 of PR #6325, SF2). Also stops a
+#   project before launch when the render warns that the method and runtime disagree (MN4).
+# The gate file also reports, without changing PASS/FAIL, what the session's system/init
+#   event says about its launch environment: permission mode, API key source, auto-memory
+#   paths, and the skills, agents, slash commands and plugins it listed (SF1, recording only).
 # Canary first: run one project of one replicate through this script and require
 #   "GATES: PASS" with no re-record before starting any other run.
 # Serves: issues #6320, #6314, #6311, #6312, #6324. Date: 2026-11-24.
@@ -93,6 +102,16 @@ for P in "$@"; do
   if grep -q "keeps its absolute path" ".temp/launch/${P}_${LABEL}.render.err"; then
     say "$P STOP: the instruction still carries an absolute toolchain path (see .temp/launch/${P}_${LABEL}.render.err)"; exit 3
   fi
+  # _warn_method_runtime (src/data_sheets_schema/cli/api.py) warns, and does not refuse, when
+  # the method and the runtime disagree, e.g. D4D_SERIES_RUNTIME="Claude Code" with the default
+  # method: "--runtime 'Claude Code' with method claudecode_release: the instruction names
+  # claudecode_release/ output paths; an agentic run writes under claudecode_agent/ — pass
+  # --method claudecode_agent (#5046)". Such a record would carry another arm's runtime and its
+  # canonical marks would supersede that arm's (#6324). Matched on the ASCII fragment
+  # "output paths; " together with "run writes under ", both in that warning (review 2, MN4).
+  if grep -F "output paths; " ".temp/launch/${P}_${LABEL}.render.err" | grep -qF "run writes under "; then
+    say "$P STOP: the render warns that method $METHOD and runtime '$RUNTIME' disagree (see .temp/launch/${P}_${LABEL}.render.err)"; exit 3
+  fi
   [ -s "$SPEC" ] || { say "$P STOP: no rendering specification was written"; exit 3; }
   SHA=$(shasum -a 256 "$INSTR" | cut -d' ' -f1)
   START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
@@ -113,12 +132,18 @@ for P in "$@"; do
     echo "account: $ACCOUNT ($ACCOUNT_NOTE, as the owner's shell function of that name does)"
     echo "advisor tool: disabled with CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1"
     echo "MCP servers: none (--strict-mcp-config with no config)"
+    echo "environment unset before launch: ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN ANTHROPIC_BASE_URL CLAUDECODE CLAUDE_CODE_SESSION_ID CLAUDE_CODE_CHILD_SESSION CLAUDE_CODE_MESSAGING_SOCKET CLAUDE_CODE_MESSAGING_TOKEN CLAUDE_PLUGIN_DATA CLAUDE_EFFORT (whether or not the launching shell set them)"
     echo "delivery: the instruction file's text is the single prompt of a headless session (claude -p)"
     echo "launched by: scripts/adhoc/run_release_series_20261124.sh $SERIES $MODEL $EFFORT $REP"
   } > ".temp/launch/${P}_${LABEL}.launch.txt"
   say "$P LAUNCHED instruction $SHA"
   (
     unset CLAUDE_CONFIG_DIR CLAUDE_CODE_OAUTH_TOKEN CLAUDE_ACCOUNT_LABEL
+    # Neither a key, a token or a base URL from the launching shell, nor the variables a
+    # parent Claude Code session passes to its children, reaches the release session (MN6).
+    unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN ANTHROPIC_BASE_URL \
+          CLAUDECODE CLAUDE_CODE_SESSION_ID CLAUDE_CODE_CHILD_SESSION \
+          CLAUDE_CODE_MESSAGING_SOCKET CLAUDE_CODE_MESSAGING_TOKEN CLAUDE_PLUGIN_DATA CLAUDE_EFFORT
     if [ "$ACCOUNT" = claude-work ]; then
       export CLAUDE_CONFIG_DIR="$ACCOUNT_DIR"
       [ -n "${CLAUDE_OAUTH_WORK:-}" ] && export CLAUDE_CODE_OAUTH_TOKEN="$CLAUDE_OAUTH_WORK"
@@ -142,12 +167,14 @@ for P in "$@"; do
     "$PY" - "$STREAM" "$MODEL" "$SERIES" <<'PYEOF'
 import json, sys, collections
 models = collections.Counter(); tools = collections.Counter(); advisor = 0; result = None; recorder = 0
-reads = collections.Counter()
+reads = collections.Counter(); init = None
 for line in open(sys.argv[1], errors="replace"):
     try:
         e = json.loads(line)
     except Exception:
         continue
+    if init is None and e.get("type") == "system" and e.get("subtype") == "init":
+        init = e
     if e.get("type") == "assistant":
         m = e.get("message") or {}
         models[m.get("model")] += 1
@@ -178,6 +205,27 @@ else:
 ok = (result is not None and result.get("subtype") == "success" and not result.get("is_error")
       and advisor == 0 and set(models) <= {sys.argv[2], "<synthetic>"} and not prior)
 print("TRANSCRIPT:", "ok" if ok else "NOT OK")
+# Reported only; these lines change no PASS/FAIL (review 2 of PR #6325, SF1). The selected
+# account's configuration directory decides which memory, skills, agents, plugins and allow
+# rules enter the session; the init event is where the session says what it loaded.
+def reported(value):
+    return "not reported" if value is None else value
+def count(value):
+    return len(value) if isinstance(value, list) else "not reported"
+facts = init if isinstance(init, dict) else {}
+if init is None:
+    print("launch environment (reported only): no system/init event in the transcript")
+print("launch environment (reported only): permissionMode", reported(facts.get("permissionMode")))
+print("launch environment (reported only): apiKeySource", reported(facts.get("apiKeySource")))
+memory = facts.get("memory_paths")
+print("launch environment (reported only): memory_paths",
+      json.dumps(memory, sort_keys=True) if memory is not None else "not reported")
+for key in ("skills", "agents", "slash_commands", "plugins"):
+    print("launch environment (reported only):", key, "count", count(facts.get(key)))
+plugins = facts.get("plugins")
+names = ([(p.get("name") if isinstance(p, dict) else p) for p in plugins] if isinstance(plugins, list)
+         else "not reported")
+print("launch environment (reported only): plugin names", names)
 PYEOF
     for f in "$FULL" "$CORE" "data/d4d_concatenated/${METHOD}_core/$LABEL/${P}_coverage_receipt.yaml" \
              "data/d4d_concatenated/${METHOD}_core/$LABEL/${P}_reconciliation.md" \
@@ -222,24 +270,55 @@ PYEOF
     # three different roots, so the search is for any path under a home directory, not
     # only this worktree's.
     # A path, not a URL: "/Users/" or "/home/" not preceded by a URL character.
-    HITS=$(grep -nE "((^|[^A-Za-z0-9:/._-])/(Users|home)/|$W)" "$FULL" "$CORE" "data/d4d_concatenated/${METHOD}_core/$LABEL/${P}_"* "$INSTR" "$SPEC" 2>/dev/null \
-             | grep -v "_provenance.yaml:[0-9]*:  resource_root: " | cut -c1-200 | head -5)
-    if [ -z "$HITS" ]; then echo "absolute_path_exit 0"; else echo "$HITS"; echo "absolute_path_exit 1"; fi
+    # The worktree path is matched as a fixed string, apart from that pattern, so a path
+    # carrying ERE characters cannot break the search; grep's own failure (exit 2) fails
+    # the gate instead of reading as "no hit" (review 2, MN5). Only files that exist are
+    # searched, so exit 2 means grep failed, not that a record was never written (FILE
+    # MISSING reports that); -H keeps the file name the resource_root exclusion needs.
+    SEARCH=()
+    for f in "$FULL" "$CORE" "data/d4d_concatenated/${METHOD}_core/$LABEL/${P}_"* "$INSTR" "$SPEC"; do
+      [ -e "$f" ] && SEARCH+=("$f")
+    done
+    if [ ${#SEARCH[@]} -eq 0 ]; then
+      echo "absolute-path search: no file to search"; echo "absolute_path_exit 2"
+    else
+      HOME_HITS=$(grep -HnE "(^|[^A-Za-z0-9:/._-])/(Users|home)/" "${SEARCH[@]}" 2>&1); HOME_RC=$?
+      W_HITS=$(grep -HnF -- "$W" "${SEARCH[@]}" 2>&1); W_RC=$?
+      if [ $HOME_RC -ge 2 ] || [ $W_RC -ge 2 ]; then
+        echo "absolute-path search failed: grep exit $HOME_RC (home pattern) and $W_RC (worktree path)"
+        printf '%s\n%s\n' "$HOME_HITS" "$W_HITS" | grep -v '^$' | cut -c1-200 | head -5
+        echo "absolute_path_exit 2"
+      else
+        HITS=$(printf '%s\n%s\n' "$HOME_HITS" "$W_HITS" | grep -v '^$' \
+                 | grep -v "_provenance.yaml:[0-9]*:  resource_root: " | awk '!seen[$0]++' | cut -c1-200 | head -5)
+        if [ -z "$HITS" ]; then echo "absolute_path_exit 0"; else echo "$HITS"; echo "absolute_path_exit 1"; fi
+      fi
+    fi
   } > "$GATE" 2>&1
   if grep -q "TRANSCRIPT: ok" "$GATE" && ! grep -q "FILE MISSING" "$GATE" \
      && grep -q "^validate_full_exit 0" "$GATE" && grep -q "^validate_core_exit 0" "$GATE" \
      && grep -q "^receipts_exit 0" "$GATE" && grep -q "^scope_exit 0" "$GATE" \
      && grep -q "^observed_exit 0" "$GATE" && grep -q "^runs_check_exit 0" "$GATE" \
      && grep -q "^render_gate_exit 0" "$GATE" && grep -q "^absolute_path_exit 0" "$GATE"; then
-    echo "GATES: PASS" >> "$GATE"; say "$P DONE gates PASS ($START -> $END)"
+    echo "GATES: PASS" >> "$GATE"; say "$P DONE gates PASS ($START -> $END)"; GATES_FAILED=0
   else
-    echo "GATES: FAIL" >> "$GATE"; say "$P DONE gates FAIL (see $GATE)"
+    echo "GATES: FAIL" >> "$GATE"; say "$P DONE gates FAIL (see $GATE)"; GATES_FAILED=1
   fi
   # A session that failed outright (no success result, or no full record) stops the
   # replicate: the cause is usually credentials or a usage limit and would repeat.
   if [ $RC -ne 0 ] || ! grep -q "transcript result: success" "$GATE" || [ ! -s "$FULL" ]; then
     say "$P STOP: the session did not complete (exit $RC); not starting the next project"
     exit 3
+  fi
+  # A completed session whose gates fail stops the replicate too: a systematic defect would
+  # otherwise be paid for on every remaining project (review 2, SF2).
+  if [ "$GATES_FAILED" -eq 1 ]; then
+    if [ "${D4D_SERIES_CONTINUE_AFTER_GATE_FAIL:-}" = 1 ]; then
+      say "$P gates FAIL (see $GATE); continuing because D4D_SERIES_CONTINUE_AFTER_GATE_FAIL=1"
+    else
+      say "$P STOP: gates FAIL (see $GATE); not starting the next project (D4D_SERIES_CONTINUE_AFTER_GATE_FAIL=1 continues)"
+      exit 3
+    fi
   fi
 done
 say "ALL REQUESTED PROJECTS FINISHED"
