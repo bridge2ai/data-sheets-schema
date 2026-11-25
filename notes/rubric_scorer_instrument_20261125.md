@@ -82,8 +82,13 @@ existing virtual environment with environment creation disabled. The runner
 requires exit zero from the real schema and structured-evidence validator, then
 creates the final output exclusively. Existing outputs and spent run directories
 are refused. Failed candidates, process output and refusal receipts are retained.
-The copied authentication file is private to the fresh run home; it is sensitive
-local runtime state, not an artifact to commit or share with reports.
+The copied authentication file is private transient runtime state and is excluded
+from the retained artifact inventory. The runner unlinks only its copy immediately
+when Codex exits, before validation, and again during final cleanup on failure,
+timeout or interruption. The original caller file is preserved. Catchable SIGTERM
+uses the same cleanup path. An uncatchable process kill or host failure cannot run
+Python cleanup; inspect such abandoned runs before archiving them. Cleanup is not
+a claim that arbitrary model responses or CLI logs can never contain a secret.
 
 This differs from the earlier Claude-subagent scorer in model, reasoning policy,
 CLI, delegation, session evidence and tool restrictions. Do not pool the two

@@ -225,7 +225,7 @@ def build_plan(args):
             "run_directory": str(run), "working_directory": str(working),
             "codex_home": str(codex_home), "output": str(output), "inputs": inputs,
             "artifacts": {name: str(run / name) for name in (
-                "plan.json", "receipt.json", "home", "tmp", "codex-home/auth.json",
+                "plan.json", "receipt.json", "home", "tmp",
                 "codex-home/sessions", "codex.stdout.jsonl", "codex.stderr.txt",
                 "raw-response.json", "candidate_evaluation.json", "validator.stdout.txt",
                 "validator.stderr.txt")},
@@ -240,7 +240,7 @@ def build_plan(args):
             "requested": {"model": MODEL, "effort": EFFORT, "service_tier": TIER},
             "commands_shell": [shlex.join(command), shlex.join(validation)],
             "actions": ["Create fresh run, working, home and codex-home directories",
-                        "Copy only selected inputs to working; copy explicit auth to private codex-home",
+                        "Copy selected inputs; hold explicit auth only until Codex exits, then remove the copy",
                         "Send prompt on stdin; retain stdout, stderr, raw response and fresh session logs",
                         "Verify session identity and inputs; stamp observed model without altering scores",
                         "Run exact-file validator; publish without replacement only on exit zero"]}
@@ -274,6 +274,20 @@ def bounded_codex(command, prompt, working, env, stdout, stderr, timeout):
             child.wait()
         raise
     return child.returncode
+
+
+def remove_auth_copy(directory_fd, receipt):
+    """Remove only the transient copy in the freshly opened directory (6345).
+
+    A directory descriptor prevents a replaced parent path redirecting cleanup
+    to the caller's home. Unlink does not follow an auth-file symlink either.
+    """
+    if directory_fd is not None:
+        try:
+            os.unlink("auth.json", dir_fd=directory_fd)
+        except FileNotFoundError:
+            pass
+        receipt["auth_copy_absent"] = True
 
 
 def session_identity(plan, started, finished):
@@ -395,11 +409,13 @@ def execute(plan, args):
     receipt = {"status": "STARTED", "authorization_reference": args.authorization_reference,
                "started_utc": utc(), "plan_sha256": sha(json.dumps(plan, sort_keys=True).encode())}
     write_json(run / "plan.json", plan)
+    auth_directory_fd = None
     try:
         working = Path(plan["working_directory"])
         working.mkdir(mode=0o700)
         codex_home = Path(plan["codex_home"])
         codex_home.mkdir(mode=0o700)
+        auth_directory_fd = os.open(codex_home, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
         home = run / "home"
         home.mkdir(mode=0o700)
         temporary = run / "tmp"
@@ -407,17 +423,21 @@ def execute(plan, args):
         for name, item in plan["inputs"].items():
             (working / name).write_bytes(read_file(item["source"]))
         auth = read_file(plan["auth_file"], 1024 * 1024)
-        auth_path = codex_home / "auth.json"
-        with auth_path.open("xb") as handle:
-            os.chmod(auth_path, 0o600)
+        descriptor = os.open("auth.json", os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                             0o600, dir_fd=auth_directory_fd)
+        with os.fdopen(descriptor, "wb") as handle:
             handle.write(auth)
         env = {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": str(home),
                "CODEX_HOME": str(codex_home), "TMPDIR": str(temporary),
                "LANG": "en_US.UTF-8", "PYTHONDONTWRITEBYTECODE": "1"}
         started = datetime.now(timezone.utc)
-        with (run / "codex.stdout.jsonl").open("xb") as stdout, (run / "codex.stderr.txt").open("xb") as stderr:
-            status = bounded_codex(plan["command"], plan["prompt"].encode(), working,
-                                   env, stdout, stderr, args.timeout)
+        try:
+            with (run / "codex.stdout.jsonl").open("xb") as stdout, (run / "codex.stderr.txt").open("xb") as stderr:
+                status = bounded_codex(plan["command"], plan["prompt"].encode(), working,
+                                       env, stdout, stderr, args.timeout)
+        finally:
+            # Authentication is never retained through validation/publication.
+            remove_auth_copy(auth_directory_fd, receipt)
         finished = datetime.now(timezone.utc)
         receipt.update(codex_exit=status, codex_started_utc=started.isoformat(),
                        codex_finished_utc=finished.isoformat())
@@ -463,12 +483,22 @@ def execute(plan, args):
         require(read_file(output) == data, "published output differs")
         receipt.update(status="VALIDATED_AND_PUBLISHED", output=str(output), output_sha256=sha(data))
         return receipt
-    except Exception as exc:
+    except BaseException as exc:
         receipt.update(status="REFUSED", failure=f"{type(exc).__name__}: {exc}")
         raise
     finally:
-        receipt["finished_utc"] = utc()
-        write_json(run / "receipt.json", receipt)
+        try:
+            # Covers partial credential writes and every prelaunch exception.
+            remove_auth_copy(auth_directory_fd, receipt)
+        except OSError as exc:
+            receipt.update(status="REFUSED", auth_copy_absent=False,
+                           cleanup_failure=f"{type(exc).__name__}: {exc}")
+            raise ScorerError("authentication cleanup failed; do not archive this run") from exc
+        finally:
+            if auth_directory_fd is not None:
+                os.close(auth_directory_fd)
+            receipt["finished_utc"] = utc()
+            write_json(run / "receipt.json", receipt)
 
 
 def parser():
@@ -494,6 +524,11 @@ def parser():
 
 def main(argv=None):
     args = parser().parse_args(argv)
+    previous_term = None
+    if args.execute:
+        def interrupted(signum, frame):
+            raise InterruptedError(f"scorer interrupted by signal {signum}")
+        previous_term = signal.signal(signal.SIGTERM, interrupted)
     try:
         require(0 < args.timeout <= 7200, "timeout must be 1 through 7200 seconds")
         plan = build_plan(args)
@@ -503,6 +538,9 @@ def main(argv=None):
     except (OSError, ValueError, subprocess.SubprocessError) as exc:
         print(f"REFUSED: {type(exc).__name__}: {exc}", file=sys.stderr)
         return 2
+    finally:
+        if previous_term is not None:
+            signal.signal(signal.SIGTERM, previous_term)
 
 
 if __name__ == "__main__":
