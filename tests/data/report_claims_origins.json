@@ -1,6 +1,6 @@
 {
   "basis_commit": "01482abeb31a9999eeeb510c1a821e191f80588b",
-  "scope": "Every checked report_claims block in the committed corpus at basis_commit. Null denotes an absent recorded_by key, attested by the original run; a present marker must remain backfill_checks. New records require an explicit inventory extension; never recast historical origins. Extension of 2026-11-22: v8_origins registers the 16 agentic generic-v9 records of 2026-11-22 and 2026-11-22b, whose blocks were written inline by `d4d provenance record` (recorded_by: d4d provenance record, the run's recorded schema policy, #4062); that marker is admitted for those entries only.",
+  "scope": "Every checked report_claims block in the committed corpus at basis_commit. Null denotes an absent recorded_by key, attested by the original run; a present marker must remain backfill_checks. New records require an explicit inventory extension; never recast historical origins. Extension of 2026-11-22: v8_origins registers the 16 agentic generic-v9 records of 2026-11-22 and 2026-11-22b, whose blocks were written inline by `d4d provenance record` (recorded_by: d4d provenance record, the run's recorded schema policy, #4062); that marker is admitted for those entries only. Extension of 2026-11-25: v8_origins registers the 15 release-runtime generic-v9 records of series 2026-11-25c (claudecode_release_core, reps 1-3 of five projects), whose blocks `d4d provenance record` wrote inline in the same way; the marker is admitted for those entries too.",
   "origins": {
     "data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep1/AI_READI_provenance.yaml": "backfill_checks",
     "data/d4d_concatenated/claudecode_agent_core/2026-07-27_claude-opus-5_rep1/CHORUS_provenance.yaml": "backfill_checks",
@@ -297,6 +297,21 @@
     "data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3/CHORUS_provenance.yaml": "d4d provenance record",
     "data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3/CM4AI_provenance.yaml": "d4d provenance record",
     "data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3/VOICE_PEDIATRIC_provenance.yaml": "d4d provenance record",
-    "data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3/VOICE_provenance.yaml": "d4d provenance record"
+    "data/d4d_concatenated/claudecode_agent_core/2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3/VOICE_provenance.yaml": "d4d provenance record",
+    "data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1/AI_READI_provenance.yaml": "d4d provenance record",
+    "data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1/CHORUS_provenance.yaml": "d4d provenance record",
+    "data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1/CM4AI_provenance.yaml": "d4d provenance record",
+    "data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1/VOICE_PEDIATRIC_provenance.yaml": "d4d provenance record",
+    "data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1/VOICE_provenance.yaml": "d4d provenance record",
+    "data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2/AI_READI_provenance.yaml": "d4d provenance record",
+    "data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2/CHORUS_provenance.yaml": "d4d provenance record",
+    "data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2/CM4AI_provenance.yaml": "d4d provenance record",
+    "data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2/VOICE_PEDIATRIC_provenance.yaml": "d4d provenance record",
+    "data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2/VOICE_provenance.yaml": "d4d provenance record",
+    "data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/AI_READI_provenance.yaml": "d4d provenance record",
+    "data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/CHORUS_provenance.yaml": "d4d provenance record",
+    "data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/CM4AI_provenance.yaml": "d4d provenance record",
+    "data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/VOICE_PEDIATRIC_provenance.yaml": "d4d provenance record",
+    "data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/VOICE_provenance.yaml": "d4d provenance record"
   }
 }

@@ -2190,8 +2190,10 @@ def test_the_committed_corpus_locates_every_snippet_and_names_the_five_joined_on
     # The 16 agentic generic-v9 receipts of 2026-11-22 add 5,160 snippets,
     # every one located and verified (9770 -> 14930, 9298 -> 14458); the
     # not-verified and unresolved counts are those of the earlier corpus.
+    # The 15 release-runtime receipts of series 2026-11-25c add 5,666 more,
+    # every one located and verified (14930 -> 20596, 14458 -> 20124).
     assert (t["snippets"], t["located"], t["not_verified"], t["value_unresolved"], t["malformed_entries"]) == (
-        14930, 14458, 466, 6, 0)
+        20596, 20124, 466, 6, 0)
     joined = sorted((u["receipt"].split("/")[0][:-len("_core")], u["receipt"].split("/")[1],
                      u["receipt"].split("/")[2][:-len("_coverage_receipt.yaml")])
                     for p in out["projects"].values() for u in p["form_located_snippets"])

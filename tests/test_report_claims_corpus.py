@@ -332,9 +332,12 @@ def test_all_report_measurements_reproduce_with_the_registered_aggregate():
     # `d4d provenance record`: no findings, 9 claims, 4 prose-retention
     # claims, no unrecorded removals and no checked phase-1 snapshot (the
     # agentic path writes none). Kept apart from the 278 and the legacy v8 set.
-    assert len(recorded_v8_blocks) == 16
+    # 2026-11-25: the 15 release-runtime generic-v9 records of series
+    # 2026-11-25c (reps 1-3 of five projects) add 15 such blocks: no findings,
+    # 9 claims, 2 prose-retention claims (16 -> 31, 9 -> 18, 4 -> 6).
+    assert len(recorded_v8_blocks) == 31
     assert Counter(f["kind"] for b in recorded_v8_blocks for f in b["findings"]) == {}
-    assert sum(b["claims_checked"] for b in recorded_v8_blocks) == 9
-    assert sum(b["prose_retention_claims"] for b in recorded_v8_blocks) == 4
+    assert sum(b["claims_checked"] for b in recorded_v8_blocks) == 18
+    assert sum(b["prose_retention_claims"] for b in recorded_v8_blocks) == 6
     assert sum(b.get("removals_unrecorded_count") or 0 for b in recorded_v8_blocks) == 0
     assert sum(b["snapshot_checked"] for b in recorded_v8_blocks) == 0
