@@ -224,6 +224,12 @@ def build_plan(args):
             "runner": str(Path(__file__).resolve()), "runner_sha256": sha(Path(__file__).read_bytes()),
             "run_directory": str(run), "working_directory": str(working),
             "codex_home": str(codex_home), "output": str(output), "inputs": inputs,
+            "artifacts": {name: str(run / name) for name in (
+                "plan.json", "receipt.json", "home", "tmp", "codex-home/auth.json",
+                "codex-home/sessions", "codex.stdout.jsonl", "codex.stderr.txt",
+                "raw-response.json", "candidate_evaluation.json", "validator.stdout.txt",
+                "validator.stderr.txt")},
+            "isolated_inputs": {name: str(working / name) for name in inputs},
             "command": command, "validation_command": validation,
             "validation_cwd": str(root), "validation_venv": str(Path(args.validation_venv).absolute()),
             "auth_file": str(Path(args.auth_file).absolute()), "prompt": prompt,
