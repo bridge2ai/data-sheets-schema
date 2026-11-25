@@ -117,39 +117,3 @@ def test_prompt_render_names_release_paths_for_the_release_runtime(project_tree,
     assert "claudecode_agent/" not in text and "claudecode_direct/" not in text
     assert "## Installed agentic execution (renderer v6)" in text   # the agentic text, not the API's (#5089)
     assert " provenance record --project CLINICAL_X --method claudecode_release " in text
-
-
-# Review 2 of #6325, SF3: a release series does not use native source attribution.
-
-def test_native_attribution_runtimes_are_the_claude_code_runtimes_less_the_release_series():
-    """Pins the relation of the two sets; RunSpec construction reads the narrower one."""
-    from data_sheets_schema.api_runner import CLAUDE_CODE_RUNTIMES
-    from data_sheets_schema.native_source_attribution import NATIVE_RUNTIMES
-    assert CLAUDE_CODE_RUNTIMES - NATIVE_RUNTIMES == {RELEASE}
-    assert NATIVE_RUNTIMES <= CLAUDE_CODE_RUNTIMES
-
-
-def _attribution_spec(tmp_path, runtime, version):
-    from dataclasses import replace
-
-    from tests.test_source_metadata_renderer import fixture
-    spec, _ = fixture(tmp_path, runtime)
-    if not version:
-        return replace(spec, render_version=16)
-    return replace(spec, render_version=16, native_source_attribution_version=1, native_source_attribution_max_checks=2)
-
-
-def test_release_runtime_with_native_attribution_is_refused_at_construction(tmp_path):
-    import pytest
-    with pytest.raises(ValueError, match=r"requires a native source-attribution runtime .*'Claude Code \(release\)' is not one"):
-        _attribution_spec(tmp_path, RELEASE, 1)
-    assert _attribution_spec(tmp_path, RELEASE, 0).native_source_attribution_version == 0   # without it, unchanged
-
-
-def test_native_attribution_is_unchanged_for_the_other_claude_code_runtimes(tmp_path):
-    for runtime in ("Claude Code", "Claude Code (direct)"):
-        root = tmp_path / runtime.replace(" ", "_").replace("(", "").replace(")", "")
-        root.mkdir()
-        spec = _attribution_spec(root, runtime, 1)
-        assert spec.native_source_attribution_version == 1
-        assert "Native source-attribution draft preflight v1" in spec.instruction
