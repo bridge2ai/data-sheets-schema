@@ -11,8 +11,44 @@ from pathlib import Path
 import subprocess
 
 
+# Definition hashes frozen in reviewed candidate 26b74b67e before composition.
+FROZEN_DEFINITIONS = {
+    "rubric10": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+    "rubric20": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+}
+
+
 def sha(raw):
     return hashlib.sha256(raw).hexdigest()
+
+
+def verify_definition(plan, repo_root):
+    family = plan["identity"]["rubric"].removesuffix("-semantic")
+    source = f".claude/agents/d4d-{family}-semantic.md"
+    overrides = f"data/rubric/root_scope_v6/{family}_definition_overrides.json"
+    expected = {
+        "source_path": source, "source_sha256": sha((repo_root / source).read_bytes()),
+        "overrides_path": overrides, "overrides_sha256": sha((repo_root / overrides).read_bytes()),
+        "composed_sha256": FROZEN_DEFINITIONS[family],
+    }
+    assert plan["definition_provenance"] == expected
+    assert plan["inputs"]["agent-definition.md"] == {
+        "source": "root_scope_v6_composition", "sha256": FROZEN_DEFINITIONS[family],
+    }
+    assert plan["deterministic_fields"]["metadata"]["instrument_sha256"] == FROZEN_DEFINITIONS[family]
+    descriptor = next(json.loads(line) for line in plan["prompt"].splitlines()
+                      if line.startswith("{") and '"required_deterministic_fields"' in line)
+    assert descriptor["definition_provenance"] == expected
+    beginning = plan["prompt"].index("BEGIN agent-definition.md (")
+    header, rest = plan["prompt"][beginning:].split("\n", 1)
+    composed, _ = rest.split("\nEND agent-definition.md\n", 1)
+    raw = composed.encode()
+    assert sha(raw) == FROZEN_DEFINITIONS[family]
+    assert header == f"BEGIN agent-definition.md ({len(raw)} bytes; sha256 {sha(raw)})"
+    assert (repo_root / source).read_text() not in plan["prompt"]
+    assert (repo_root / overrides).read_text() not in plan["prompt"]
+    assert not (repo_root / f".claude/agents/d4d-{family}-semantic-v6.md").exists()
+    return expected
 
 
 def main():
@@ -30,7 +66,7 @@ def main():
     keyed = {(plan["identity"]["d4d_file"], plan["identity"]["rubric"]): plan
              for plan in legacy["plans"]}
     assert len(keyed) == 30
-    records, outputs, runs = {}, set(), set()
+    records, outputs, runs, definitions = {}, set(), set(), {}
     for plan in root["plans"]:
         identity = plan["identity"]
         path = identity["d4d_file"]
@@ -57,6 +93,7 @@ def main():
         for key in ("context_sha256", "input_sha256", "rubric_sha256", "evidence_authority_sha256"):
             assert fields["metadata"][key] == old["deterministic_fields"]["metadata"][key]
         assert identity["version"] == "6.0" and old["identity"]["version"] == "3.0"
+        definitions[identity["rubric"]] = verify_definition(plan, args.repo_root)
         assert plan["instrument"] != old["instrument"]
         assert declaration_raw.decode() in plan["prompt"]
         assert str(args.repo_root) not in plan["prompt"]
@@ -79,7 +116,7 @@ def main():
     result = {"data_ref": args.data_ref, "record_count": len(records), "evaluation_count": len(outputs),
               "root_plan_sha256": sha(root_raw), "legacy_plan_sha256": sha(legacy_raw),
               "run_directories_created": 0, "scoring_calls": 0,
-              "records": list(records.values())}
+              "records": list(records.values()), "definition_provenance": definitions}
     with args.output.open("x") as handle:
         json.dump(result, handle, indent=2, sort_keys=True)
         handle.write("\n")

@@ -165,8 +165,14 @@ def validate_outputs(paths: List[Path], rubric: str | None = None,
                 if definition_path is None:
                     raise ValueError(f"version-{expected_version[0]} output validation requires --agent-definition to verify its instrument pin")
                 import hashlib
-                definition_sha256 = hashlib.sha256(definition_path.read_bytes()).hexdigest()
-                if instrument.version in ("4.0", "5.0", "6.0") and definition_sha256 != hashlib.sha256(
+                definition_bytes = definition_path.read_bytes()
+                definition_sha256 = hashlib.sha256(definition_bytes).hexdigest()
+                if instrument.version == "6.0":
+                    from data_sheets_schema.root_scope_definition import compose_definition
+                    expected_definition, _ = compose_definition(declared)
+                    if definition_bytes != expected_definition:
+                        raise ValueError("supplied definition differs from independently composed semantic v6 bytes")
+                if instrument.version in ("4.0", "5.0") and definition_sha256 != hashlib.sha256(
                         resource_path(instrument.definition_path).read_bytes()).hexdigest():
                     raise ValueError(f"supplied definition is not the selected semantic version-{instrument.version[0]} instrument")
                 if doc["metadata"]["instrument_sha256"] != definition_sha256:

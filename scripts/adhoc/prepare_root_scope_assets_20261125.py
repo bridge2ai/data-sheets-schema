@@ -2,7 +2,7 @@
 """Build frozen root-scope v6 assets for issues 6358 and 6360, 2026-11-25.
 
 Inputs: PR 6340 source commit and the accepted release-series data commit.
-Outputs: new agent definitions, schemas, fifteen scope declarations and note.
+Outputs: exact-passage overrides, schemas, fifteen scope declarations and note.
 Use --check to verify exact reproduction without changing any file.
 This helper never starts a scorer, reads credentials or edits generated data.
 """
@@ -17,8 +17,17 @@ import jsonschema
 
 
 BASE = "483bed03b14a4c70d6e68dad6679631350a12b72"
+FROZEN = "26b74b67e52b9b4fe7091ea45a0e86f81c6ef231"
 DATA = "0a1bb84d1449edc27822fd76ffcfd1df7e913cd9"
 INSTRUMENT = "2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6"
+SOURCE_SHA256 = {
+    "rubric10": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+    "rubric20": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+}
+COMPOSED_SHA256 = {
+    "rubric10": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+    "rubric20": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+}
 REASON = (
     "The owner selected the complete submitted datasheet as the common comparison "
     "unit for every record of release series 2026-11-25c. Component entries remain "
@@ -66,7 +75,8 @@ def sha(raw):
 
 
 def json_bytes(value):
-    return (json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False) + "\n").encode()
+    encoded = json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False)
+    return (encoded.replace(chr(64), "\\u0040") + "\n").encode()
 
 
 def replace_once(text, old, new):
@@ -75,37 +85,58 @@ def replace_once(text, old, new):
     return text.replace(old, new, 1)
 
 
-def render_definition(raw, family):
+def render_overrides(raw, family, frozen):
+    if sha(raw) != SOURCE_SHA256[family] or sha(frozen) != COMPOSED_SHA256[family]:
+        raise ValueError("definition source or frozen composed bytes differ")
     text = raw.decode()
     original_rules = text[text.index("## Your Task"):text.index("## Output Format")]
-    text = text.replace(f"d4d-{family}-semantic", f"d4d-{family}-semantic-v6")
-    text = replace_once(text, "model: claude-opus-5", "model: gpt-6-astra")
-    text = replace_once(text, "## General context instrument v3", "## Independent root-scope instrument v6")
-    text = text.replace('"3.0"', '"6.0"')
+    replacements = []
+
+    def replace(original, replacement):
+        nonlocal text
+        if raw.decode().count(original) != 1:
+            raise ValueError("override original is not unique in the frozen source")
+        text = replace_once(text, original, replacement)
+        replacements.append({"original": original, "replacement": replacement})
+
+    replace(f"name: d4d-{family}-semantic\n", f"name: d4d-{family}-semantic-v6\n")
+    replace("model: claude-opus-5\n", "model: gpt-6-astra\n")
+    replace("## General context instrument v3\n", "## Independent root-scope instrument v6\n")
+    replace('this instrument; never replace earlier scores. Emit version "3.0".',
+            'this instrument; never replace earlier scores. Emit version "6.0".')
+    replace('"version": "3.0",', '"version": "6.0",')
     start = text.index("An explicit Dataset or CoreDataset declaration")
     end = text.index("\nKeep fixed and adjusted denominators", start)
-    text = text[:start] + ROOT_RULE + text[end:]
-    text = replace_once(text, "## Structured evidence and issue links (version 3)",
-                        "## Structured evidence and issue links (frozen v3 authority)")
-    text = replace_once(text, "new version 3 outputs use", "new version 6 outputs use")
-    text = replace_once(text, '"evaluation_scope": {\n    "policy": "single_dataset",',
-                        '"evaluation_scope": {\n    "selection_policy": "root_dataset_v1",\n    "policy": "single_dataset",')
-    text = replace_once(text, '"metadata": {\n    "instrument_sha256":',
-                        '"metadata": {\n    "scope_context_sha256": "<sha256 of the exact caller-supplied scope-context file>",\n    "instrument_sha256":')
+    replace(text[start:end], ROOT_RULE)
+    replace("## Structured evidence and issue links (version 3)",
+            "## Structured evidence and issue links (frozen v3 authority)")
+    replace("new version 3 outputs use", "new version 6 outputs use")
+    replace('"evaluation_scope": {\n    "policy": "single_dataset",',
+            '"evaluation_scope": {\n    "selection_policy": "root_dataset_v1",\n    "policy": "single_dataset",')
+    replace('"metadata": {\n    "instrument_sha256": "<sha256 of .claude/agents/' + f'd4d-{family}-semantic.md, this file>",',
+            '"metadata": {\n    "scope_context_sha256": "<sha256 of the exact caller-supplied scope-context file>",\n'
+            '    "instrument_sha256": "<sha256 of .claude/agents/' + f'd4d-{family}-semantic-v6.md, this file>",')
     command = ("poetry run python scripts/validate_evaluation_schema.py --file OUTPUT_PATH "
-               f"--input ORIGINAL_D4D_PATH --agent-definition .claude/agents/d4d-{family}-semantic-v6.md "
+               f"--input ORIGINAL_D4D_PATH --agent-definition .claude/agents/d4d-{family}-semantic.md "
                f"--rubric {family}-semantic")
-    text = replace_once(text, command,
-                        command + " --semantic-version 6.0 --scope-context ORIGINAL_SCOPE_CONTEXT_PATH")
-    text = replace_once(text, "context shown below and the one-line input",
-                        "applicability context shown below, an independently supplied root scope, and the one-line input")
+    replace(command, command.replace(f"d4d-{family}-semantic.md", f"d4d-{family}-semantic-v6.md")
+            + " --semantic-version 6.0 --scope-context ORIGINAL_SCOPE_CONTEXT_PATH")
+    replace("context shown below and the one-line input",
+            "applicability context shown below, an independently supplied root scope, and the one-line input")
     if text[text.index("## Your Task"):text.index("## Output Format")] != original_rules:
         raise ValueError("rubric item criteria changed")
-    # Spell out legacy score-summary notation without changing its arithmetic.
-    text = text.replace(" " + chr(64), " at ")
-    if chr(64) in text:
-        raise ValueError("unexpected prohibited character in generated definition")
-    return text.encode()
+    if family == "rubric20":
+        # Minimal neutral contexts distinguish every frozen notation change.
+        for fragment in ("questions " + chr(64) + "5 each", "pass/fail " + chr(64) + "1 each",
+                         "(4 numeric " + chr(64) + "5 each + Q5 pass/fail)",
+                         "(4 numeric " + chr(64) + "5 each + Q6 pass/fail)",
+                         "(5 numeric " + chr(64) + "5 each)",
+                         "(4 numeric " + chr(64) + "5 each + Q16 pass/fail)"):
+            replace(fragment, fragment.replace(chr(64), "at "))
+    if text.encode() != frozen:
+        raise ValueError("composition differs from the frozen reviewed definition")
+    return json_bytes({"version": "root_scope_definition_overrides_v1", "rubric": family,
+                       "replacements": replacements})
 
 
 def root_rows(node):
@@ -198,6 +229,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--refresh-registration", action="store_true",
+                        help="replace only the note frozen in the first root-scope candidate")
     args = parser.parse_args()
     root = args.repo_root.resolve()
 
@@ -205,9 +238,15 @@ def main():
         return subprocess.run(["git", "-C", str(root), *argv], check=True, capture_output=True).stdout
 
     outputs = {}
+    compositions = {}
     for family in ("rubric10", "rubric20"):
         source = f".claude/agents/d4d-{family}-semantic.md"
-        outputs[f".claude/agents/d4d-{family}-semantic-v6.md"] = render_definition(git("show", f"{BASE}:{source}"), family)
+        frozen = git("show", f"{FROZEN}:.claude/agents/d4d-{family}-semantic-v6.md")
+        override_path = f"data/rubric/root_scope_v6/{family}_definition_overrides.json"
+        outputs[override_path] = render_overrides(git("show", f"{BASE}:{source}"), family, frozen)
+        compositions[family] = {"source": source, "source_sha256": SOURCE_SHA256[family],
+                                "override": override_path, "override_sha256": sha(outputs[override_path]),
+                                "composed_sha256": COMPOSED_SHA256[family]}
         source = f"src/download/prompts/{family}_semantic_schema.json"
         outputs[f"src/download/prompts/{family}_semantic_v6_schema.json"] = render_schema(git("show", f"{BASE}:{source}"), family)
 
@@ -260,12 +299,32 @@ def main():
         "before exact-file validation and byte-bound publication, never afterward.", "",
         "New outputs are under:", "",
         f"`data/evaluation_llm/RUBRIC_semantic/label_aware/{INSTRUMENT}/PROJECT_LABEL_evaluation.json`", "",
+        "Definitions are composed at plan time from the unchanged pinned v3 source",
+        "and a pinned JSON list of exact original passages and replacements. Each",
+        "original passage must occur exactly once at its replacement step; source,",
+        "override and final composed hashes are checked. No new selectable agent",
+        "file is registered under .claude/agents/. The model receives the exact",
+        f"reviewed v6 definition bytes frozen at `{FROZEN}`.",
+        "This revision changes provenance storage only. Its historical validation",
+        "example remains byte-identical; the scorer supplies the actual captured",
+        "composed definition to its validator instead of that example path.", "",
+        "The source-definition SHA256, override-file SHA256 and composed-definition",
+        "SHA256 are recorded together in each plan, prompt descriptor and receipt.",
+        "The composed SHA256 remains metadata.instrument_sha256 in the evaluation.", "",
         "Versioned assets are reproduced by scripts/adhoc/prepare_root_scope_assets_20261125.py.",
         "Use its --check mode for a read-only exact-byte check. Its default mode",
-        "refuses any existing destination; original v3 inputs are read from the",
-        "pinned base commit. The tables below are generated from those inputs.", "",
-        "| Registered asset | SHA256 |", "| --- | --- |",
+        "creates missing assets and preserves byte-identical ones. The explicit",
+        "--refresh-registration option replaces only this note's frozen first-pass",
+        "bytes. Original sources and reviewed definitions are read from the pinned",
+        "commits. The tables below are generated from those inputs.", "",
+        "| Definition | Source SHA256 | Override SHA256 | Composed SHA256 |",
+        "| --- | --- | --- | --- |",
     ]
+    for family, item in compositions.items():
+        lines.append(f"| {family} | {item['source_sha256']} | {item['override_sha256']} | {item['composed_sha256']} |")
+    lines.extend(["",
+        "| Registered asset | SHA256 |", "| --- | --- |",
+    ])
     for path, raw in sorted(outputs.items()):
         if not path.startswith("data/evaluation_scope/"):
             lines.append(f"| {path} | {sha(raw)} |")
@@ -275,6 +334,9 @@ def main():
     for row in rows:
         lines.append("| " + " | ".join(row) + " |")
     outputs["notes/root_scope_instrument_20261125.md"] = ("\n".join(lines) + "\n").encode()
+    checks = {family: schema_controls(outputs[f"src/download/prompts/{family}_semantic_v6_schema.json"])
+              for family in ("rubric10", "rubric20")}
+    writes = []
     for path, raw in outputs.items():
         if chr(64).encode() in raw:
             raise ValueError(f"unexpected prohibited character: {path}")
@@ -283,17 +345,23 @@ def main():
             if not target.is_file() or target.read_bytes() != raw:
                 raise ValueError(f"asset differs: {path}")
         elif target.exists():
-            raise FileExistsError(target)
+            if target.read_bytes() == raw:
+                continue
+            if (path != "notes/root_scope_instrument_20261125.md" or not args.refresh_registration
+                    or target.read_bytes() != git("show", f"{FROZEN}:{path}")):
+                raise FileExistsError(target)
+            writes.append((path, raw, "wb"))
+        else:
+            writes.append((path, raw, "xb"))
     if not args.check:
-        for path, raw in outputs.items():
+        for path, raw, mode in writes:
             target = root / path
             target.parent.mkdir(parents=True, exist_ok=True)
-            with target.open("xb") as handle:
+            with target.open(mode) as handle:
                 handle.write(raw)
-    checks = {family: schema_controls(outputs[f"src/download/prompts/{family}_semantic_v6_schema.json"])
-              for family in ("rubric10", "rubric20")}
     print(json.dumps({"mode": "CHECK" if args.check else "BUILD", "instrument": INSTRUMENT,
                       "schema_controls": checks,
+                      "definition_provenance": compositions,
                       "scope_declarations": len(rows), "assets": {path: sha(raw) for path, raw in sorted(outputs.items())}}, indent=2))
 
 

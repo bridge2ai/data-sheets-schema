@@ -19,6 +19,11 @@ from tests.test_codex_rubric_scorer_instrument import ROOT, scenario, scorer
 
 
 INSTRUMENT = "2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6"
+# Frozen definition bytes reviewed in candidate 26b74b67e, before composition.
+FROZEN_DEFINITIONS = {
+    "rubric10": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+    "rubric20": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+}
 
 
 def sha(raw):
@@ -40,9 +45,9 @@ def write_case(tools, evaluation):
 
 def root_scenario(directory, rubric="rubric10", context=None, **changes):
     args, tree, tools, evaluation = scenario(directory, rubric, context=context, **changes)
-    support = ["src/data_sheets_schema/root_scope.py"]
+    support = ["src/data_sheets_schema/root_scope.py", "src/data_sheets_schema/root_scope_definition.py"]
     support += [name for family in ("rubric10", "rubric20") for name in (
-        f".claude/agents/d4d-{family}-semantic-v6.md",
+        f"data/rubric/root_scope_v6/{family}_definition_overrides.json",
         f"src/download/prompts/{family}_semantic_v6_schema.json",
     )]
     for name in support:
@@ -73,7 +78,7 @@ def root_scenario(directory, rubric="rubric10", context=None, **changes):
     }
     evaluation["metadata"].update(
         input_sha256=sha(Path(args.record).read_bytes()), scope_context_sha256=sha(scope.read_bytes()),
-        instrument_sha256=sha((tree / f".claude/agents/d4d-{rubric}-semantic-v6.md").read_bytes()),
+        instrument_sha256=FROZEN_DEFINITIONS[rubric],
     )
     for item in items(evaluation):
         row = copy.deepcopy(item["unit_scores"][0])
@@ -84,6 +89,34 @@ def root_scenario(directory, rubric="rubric10", context=None, **changes):
     (tools / "poetry").write_text("#!" + sys.executable + "\n" + source.read_text())
     (tools / "poetry").chmod(0o700)
     return args, tree, tools, evaluation
+
+
+def assert_definition_provenance(plan, tree):
+    family = plan["identity"]["rubric"].removesuffix("-semantic")
+    source = f".claude/agents/d4d-{family}-semantic.md"
+    overrides = f"data/rubric/root_scope_v6/{family}_definition_overrides.json"
+    expected = {
+        "source_path": source, "source_sha256": sha((tree / source).read_bytes()),
+        "overrides_path": overrides, "overrides_sha256": sha((tree / overrides).read_bytes()),
+        "composed_sha256": FROZEN_DEFINITIONS[family],
+    }
+    assert plan["definition_provenance"] == expected
+    assert plan["inputs"]["agent-definition.md"] == {
+        "source": "root_scope_v6_composition", "sha256": expected["composed_sha256"],
+    }
+    descriptor = next(json.loads(line) for line in plan["prompt"].splitlines()
+                      if line.startswith("{") and '"required_deterministic_fields"' in line)
+    assert descriptor["definition_provenance"] == expected
+    beginning = plan["prompt"].index("BEGIN agent-definition.md (")
+    header, rest = plan["prompt"][beginning:].split("\n", 1)
+    composed, _ = rest.split("\nEND agent-definition.md\n", 1)
+    raw = composed.encode()
+    assert sha(raw) == FROZEN_DEFINITIONS[family]
+    assert header == f"BEGIN agent-definition.md ({len(raw)} bytes; sha256 {sha(raw)})"
+    assert (tree / source).read_text() not in plan["prompt"]
+    assert (tree / overrides).read_text() not in plan["prompt"]
+    assert not list((tree / ".claude/agents").glob("*-v6.md"))
+    return expected
 
 
 def test_root_scope_plan_is_read_only_and_keeps_applicability_separate(tmp_path):
@@ -99,6 +132,7 @@ def test_root_scope_plan_is_read_only_and_keeps_applicability_separate(tmp_path)
     assert plan["identity"]["version"] == "6.0"
     assert plan["deterministic_fields"]["evaluation_scope"] == evaluation["evaluation_scope"]
     assert plan["deterministic_fields"]["metadata"] == evaluation["metadata"]
+    assert_definition_provenance(plan, tree)
     assert plan["deterministic_fields"]["applicability_context"] == evaluation["applicability_context"]
     assert "--scope-context" in plan["validation_command"]
     assert plan["validation_command"][plan["validation_command"].index("--scope-context") + 1] == str(args.scope_context)
@@ -115,10 +149,11 @@ def test_root_scope_plan_is_read_only_and_keeps_applicability_separate(tmp_path)
 
 
 def run_fake_canary(tmp_path, rubric, child=False):
-    args, _, tools, evaluation = root_scenario(tmp_path / rubric, rubric, child=child)
+    args, tree, tools, evaluation = root_scenario(tmp_path / rubric, rubric, child=child)
     before_record = Path(args.record).read_bytes()
     before_auth = args.auth_file.read_bytes()
     plan = scorer.build_plan(args)
+    expected_definition = assert_definition_provenance(plan, tree)
     scorer.execute(plan, args)
     output = Path(plan["output"])
     accepted = (tools / "validated-snapshot.json").read_bytes()
@@ -150,6 +185,8 @@ def run_fake_canary(tmp_path, rubric, child=False):
     receipt = json.loads((run / "receipt.json").read_bytes())
     assert receipt["status"] == "VALIDATED_AND_PUBLISHED"
     assert receipt["validator_input_sha256"] == sha(accepted)
+    assert receipt["definition_provenance"] == expected_definition
+    assert sha((run / "working/agent-definition.md").read_bytes()) == FROZEN_DEFINITIONS[rubric]
 
 
 def test_fake_canary_rubric10_through_real_validator(tmp_path):
@@ -213,6 +250,24 @@ def test_scope_bytes_changed_after_plan_refuse_before_launch(tmp_path):
         scorer.execute(plan, args)
     assert not Path(args.run_directory).exists()
     assert not (tools / "invocation.json").exists()
+
+
+def test_definition_component_changes_refuse_before_fake_launch(tmp_path):
+    for phase in ("before_plan", "after_plan"):
+        for component in ("source", "overrides"):
+            args, tree, tools, _ = root_scenario(tmp_path / f"{phase}-{component}")
+            plan = scorer.build_plan(args) if phase == "after_plan" else None
+            path = (tree / ".claude/agents/d4d-rubric10-semantic.md" if component == "source"
+                    else tree / "data/rubric/root_scope_v6/rubric10_definition_overrides.json")
+            with path.open("ab") as handle:
+                handle.write(b"\n")
+            with pytest.raises(ValueError):
+                if plan is None:
+                    scorer.build_plan(args)
+                else:
+                    scorer.execute(plan, args)
+            assert not Path(args.run_directory).exists()
+            assert not (tools / "invocation.json").exists()
 
 
 def test_real_validator_refuses_forged_scope_and_evidence(tmp_path):

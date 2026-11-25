@@ -1,0 +1,78 @@
+{
+  "replacements": [
+    {
+      "original": "name: d4d-rubric20-semantic\n",
+      "replacement": "name: d4d-rubric20-semantic-v6\n"
+    },
+    {
+      "original": "model: claude-opus-5\n",
+      "replacement": "model: gpt-6-astra\n"
+    },
+    {
+      "original": "## General context instrument v3\n",
+      "replacement": "## Independent root-scope instrument v6\n"
+    },
+    {
+      "original": "this instrument; never replace earlier scores. Emit version \"3.0\".",
+      "replacement": "this instrument; never replace earlier scores. Emit version \"6.0\"."
+    },
+    {
+      "original": "\"version\": \"3.0\",",
+      "replacement": "\"version\": \"6.0\","
+    },
+    {
+      "original": "An explicit Dataset or CoreDataset declaration (a class wrapper or a\nconforms_to_class value, including a URI) remains the dataset being scored,\neven when it has resources. Use its own documentation and the scope path #;\ndo not substitute its child components. Component assessments require a\nseparately selected input and do not change the parent assessment.\nFor DatasetCollection or CoreDatasetCollection inputs, enumerate member\ndatasets with JSON pointer paths and ids, recursively reducing nested\ncollections but stopping at each explicitly declared Dataset/CoreDataset.\nAn undeclared mapping with nonempty resources retains the collection\ninterpretation. Paths refer to the unwrapped evaluation document.\nDistribution/file fields support their own dataset, with exact evidence\npaths. Collection metadata is not implicitly inherited, and one sibling\ncannot satisfy another's gap.\nRubric10 sub-elements also carry their source item_id (for example E1.1).\nEach item includes applicable, applicability_status (applicable, unknown or\nnot_applicable), applicability_evidence, and unit_scores: one path, score and evidence entry for every\nresource. The item score is the minimum applicable resource score. This\nconservative coverage policy is minimum_per_item_across_all_resource_datasets_v1;\nsingle datasets use single_dataset. Preserve each instrument's score domain.\nFor N/A items, all unit scores are null. Report policy, units and\ncollection_metadata_inherited: false in evaluation_scope.\n",
+      "replacement": "The independent scope-context file is required for this instrument. Its closed\nkeys are policy, input_sha256 and reason; policy must be root_dataset_v1 and\ninput_sha256 must bind the original record bytes. Never create, alter, infer or\ncopy this declaration from your assessment. Preserve the supplied scope file\nand pass it to the validator with --scope-context. Missing, malformed, stale or\ncontradictory declarations refuse scoring. DatasetCollection and\nCoreDatasetCollection declarations contradict this root-dataset instrument.\nEvery resource child must remain structurally valid, even though it is not a\nseparate scoring unit. Do not alter or add fields to the original input.\n\nScore exactly the complete unwrapped submitted datasheet at path #, including\nwhen it lists component datasets. Do not substitute a child or add separate\nchild scores. Fields retain their actual locations: do not copy a component's\nvalues into its parent, or treat one sibling as another's missing evidence.\nRubric10 sub-elements also carry their source item_id (for example E1.1).\nEach item includes applicable, applicability_status (applicable, unknown or\nnot_applicable), applicability_evidence, and exactly one unit_scores row at #.\nThe item score equals its sole applicable unit score. Preserve the original\nscore domains and applicability denominators. For N/A items, its unit score\nis null. The result's aggregation policy remains single_dataset, with the\nsole root unit and collection_metadata_inherited: false in evaluation_scope.\nAlso record selection_policy: root_dataset_v1 in evaluation_scope and the\nSHA256 of the exact independent scope-context file as scope_context_sha256 in\nmetadata. This selection policy is distinct from the aggregation policy.\n\nThis is instrument 2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6.\nPublish beneath data/evaluation_llm/RUBRIC_semantic/label_aware/ followed by\nthat instrument id. The input identity d4d_file is repository-relative.\nPublished provenance must contain no absolute local filesystem paths. The\ncontroller records each session log path relative to its run directory and\nretains the log SHA256. Do not include local home, checkout or run-directory\npaths in any output field. Raw process evidence is retained separately.\n"
+    },
+    {
+      "original": "## Structured evidence and issue links (version 3)",
+      "replacement": "## Structured evidence and issue links (frozen v3 authority)"
+    },
+    {
+      "original": "new version 3 outputs use",
+      "replacement": "new version 6 outputs use"
+    },
+    {
+      "original": "\"evaluation_scope\": {\n    \"policy\": \"single_dataset\",",
+      "replacement": "\"evaluation_scope\": {\n    \"selection_policy\": \"root_dataset_v1\",\n    \"policy\": \"single_dataset\","
+    },
+    {
+      "original": "\"metadata\": {\n    \"instrument_sha256\": \"<sha256 of .claude/agents/d4d-rubric20-semantic.md, this file>\",",
+      "replacement": "\"metadata\": {\n    \"scope_context_sha256\": \"<sha256 of the exact caller-supplied scope-context file>\",\n    \"instrument_sha256\": \"<sha256 of .claude/agents/d4d-rubric20-semantic-v6.md, this file>\","
+    },
+    {
+      "original": "poetry run python scripts/validate_evaluation_schema.py --file OUTPUT_PATH --input ORIGINAL_D4D_PATH --agent-definition .claude/agents/d4d-rubric20-semantic.md --rubric rubric20-semantic",
+      "replacement": "poetry run python scripts/validate_evaluation_schema.py --file OUTPUT_PATH --input ORIGINAL_D4D_PATH --agent-definition .claude/agents/d4d-rubric20-semantic-v6.md --rubric rubric20-semantic --semantic-version 6.0 --scope-context ORIGINAL_SCOPE_CONTEXT_PATH"
+    },
+    {
+      "original": "context shown below and the one-line input",
+      "replacement": "applicability context shown below, an independently supplied root scope, and the one-line input"
+    },
+    {
+      "original": "questions \u00405 each",
+      "replacement": "questions at 5 each"
+    },
+    {
+      "original": "pass/fail \u00401 each",
+      "replacement": "pass/fail at 1 each"
+    },
+    {
+      "original": "(4 numeric \u00405 each + Q5 pass/fail)",
+      "replacement": "(4 numeric at 5 each + Q5 pass/fail)"
+    },
+    {
+      "original": "(4 numeric \u00405 each + Q6 pass/fail)",
+      "replacement": "(4 numeric at 5 each + Q6 pass/fail)"
+    },
+    {
+      "original": "(5 numeric \u00405 each)",
+      "replacement": "(5 numeric at 5 each)"
+    },
+    {
+      "original": "(4 numeric \u00405 each + Q16 pass/fail)",
+      "replacement": "(4 numeric at 5 each + Q16 pass/fail)"
+    }
+  ],
+  "rubric": "rubric20",
+  "version": "root_scope_definition_overrides_v1"
+}

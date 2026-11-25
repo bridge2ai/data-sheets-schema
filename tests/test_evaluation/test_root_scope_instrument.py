@@ -14,6 +14,7 @@ from data_sheets_schema.evaluation_context import dataset_units, load_document
 from data_sheets_schema.root_scope import (
     assert_portable_output, load_root_scope, parse_root_scope, resolve_root_units,
 )
+from data_sheets_schema.root_scope_definition import compose_definition
 from data_sheets_schema.semantic_evidence import check_evidence
 from data_sheets_schema.semantic_instrument import select_semantic_instrument
 from tests.test_evaluation.test_semantic_context_scope import ROOT, record
@@ -34,7 +35,8 @@ def root_fixture(directory, rubric):
     declaration = directory / "scope.json"
     declaration.write_bytes(scope_bytes(digest))
     instrument = select_semantic_instrument(rubric, "6.0")
-    definition = ROOT / instrument.definition_path
+    definition = directory / "composed-definition.md"
+    definition.write_bytes(compose_definition(rubric, repo_root=ROOT)[0])
     result.update(version="6.0", d4d_file="data/d4d_concatenated/synthetic/rep1/Toy_d4d.yaml",
                   evaluation_scope={"policy": "single_dataset", "selection_policy": "root_dataset_v1",
                                     "units": [{"path": "#", "id": "example:parent"}],

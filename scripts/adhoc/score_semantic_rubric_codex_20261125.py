@@ -152,7 +152,7 @@ def build_plan(args):
     require(not output.exists(), "evaluation already exists; never overwrite it")
     sources = {
         "record.yaml": record,
-        "agent-definition.md": root / f".claude/agents/d4d-{rubric}{'-v6' if root_scope else ''}.md",
+        "agent-definition.md": root / f".claude/agents/d4d-{rubric}.md",
         "rubric.txt": root / f"data/rubric/{family}.txt",
         "output-schema.json": root / f"src/download/prompts/{family}_semantic{'_v6' if root_scope else ''}_schema.json",
         "evidence-authority.json": root / "data/rubric/semantic_evidence_authority_v3.json",
@@ -162,6 +162,16 @@ def build_plan(args):
     if root_scope:
         sources["scope-context.json"] = physical(args.scope_context)
     raw = {name: read_file(path) for name, path in sources.items()}
+    definition_provenance = None
+    if root_scope:
+        # Composition is read-only and pins both original inputs and its output.
+        sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+        from data_sheets_schema import root_scope_definition as definition_tools
+        require(read_file(root / "src/data_sheets_schema/root_scope_definition.py")
+                == read_file(definition_tools.__file__),
+                "definition implementation differs from the runner checkout")
+        raw["agent-definition.md"], definition_provenance = definition_tools.compose_definition(
+            rubric, repo_root=root)
     registered = REGISTERED_ROOT if root_scope else REGISTERED
     for name, digest in {**registered[rubric], "evidence-authority.json": AUTHORITY_SHA256}.items():
         require(sha(raw[name]) == digest, f"registered rubric support changed: {name}")
@@ -193,13 +203,16 @@ def build_plan(args):
         scope["selection_policy"] = "root_dataset_v1"
     inputs = {name: {"source": str(path), "sha256": sha(raw[name])}
               for name, path in sources.items()}
+    if root_scope:
+        inputs["agent-definition.md"]["source"] = "root_scope_v6_composition"
     validation_files = ["scripts/validate_evaluation_schema.py", "pyproject.toml"]
     validation_files += ["src/data_sheets_schema/" + name for name in (
         "resources.py", "evaluation_context.py", "judge_contract.py", "semantic_scope.py",
         "semantic_instrument.py", "semantic_evidence.py", "semantic_evidence_authority.py",
         "evaluation/__init__.py", "evaluation/validate.py")]
     if root_scope:
-        validation_files.append("src/data_sheets_schema/root_scope.py")
+        validation_files.extend(["src/data_sheets_schema/root_scope.py",
+                                 "src/data_sheets_schema/root_scope_definition.py"])
     for optional in ("poetry.lock", "src/data_sheets_schema/__init__.py"):
         if (root / optional).exists():
             validation_files.append(optional)
@@ -220,7 +233,8 @@ def build_plan(args):
                     "--json", "-"])
     validation = [poetry, "run", "python", "scripts/validate_evaluation_schema.py", "--file",
                   str(run / "candidate_evaluation.json"), "--rubric", rubric,
-                  "--input", str(record), "--agent-definition", str(sources["agent-definition.md"])]
+                  "--input", str(record), "--agent-definition",
+                  str(working / "agent-definition.md" if root_scope else sources["agent-definition.md"])]
     if args.context:
         validation.extend(["--context", str(sources["caller-context.yaml"])])
     if root_scope:
@@ -240,6 +254,10 @@ def build_plan(args):
         deterministic["metadata"]["scope_context_sha256"] = sha(raw["scope-context.json"])
     prompt_inputs = ({name: {"source": name, "sha256": item["sha256"]} for name, item in inputs.items()}
                      if root_scope else inputs)
+    prompt_descriptor = {"output_identity": identity, "input_hashes": prompt_inputs,
+                         "required_deterministic_fields": deterministic}
+    if root_scope:
+        prompt_descriptor["definition_provenance"] = definition_provenance
     prompt = ("Evaluate exactly the one record below with the unchanged registered semantic criteria. "
               "The complete agent definition follows verbatim, including historical examples. "
               "This invocation overrides its runtime selection and batch/output-location examples only: "
@@ -252,14 +270,13 @@ def build_plan(args):
               "do not treat the agent frontmatter as runtime evidence. Preserve all scoring decisions. "
               "With no caller-context file, normalize empty applicability context: all conditional "
               "predicates are unknown, remain in the denominator, and cannot justify exclusion.\n"
-              + json.dumps({"output_identity": identity, "input_hashes": prompt_inputs,
-                            "required_deterministic_fields": deterministic}, sort_keys=True)
+              + json.dumps(prompt_descriptor, sort_keys=True)
               + "\n")
     for name, data in raw.items():
         prompt += f"\nBEGIN {name} ({len(data)} bytes; sha256 {sha(data)})\n"
         prompt += data.decode("utf-8")
         prompt += f"\nEND {name}\n"
-    return {"instrument": instrument, "identity": identity, "repo_root": str(root),
+    plan = {"instrument": instrument, "identity": identity, "repo_root": str(root),
             "runner": str(Path(__file__).resolve()), "runner_sha256": sha(Path(__file__).read_bytes()),
             "run_directory": str(run), "working_directory": str(working),
             "codex_home": str(codex_home), "output": str(output), "inputs": inputs,
@@ -283,12 +300,30 @@ def build_plan(args):
                         "Send prompt on stdin; retain stdout, stderr, raw response and fresh session logs",
                         "Verify session identity and inputs; stamp observed model without altering scores",
                         "Run exact-file validator; publish without replacement only on exit zero"]}
+    if root_scope:
+        plan["definition_provenance"] = definition_provenance
+    return plan
+
+
+def input_bytes(plan, name):
+    item = plan["inputs"][name]
+    if name == "agent-definition.md" and plan["identity"]["version"] == "6.0":
+        from data_sheets_schema.root_scope_definition import compose_definition
+        data, provenance = compose_definition(plan["identity"]["rubric"],
+                                              repo_root=Path(plan["repo_root"]))
+        require(item["source"] == "root_scope_v6_composition"
+                and provenance == plan["definition_provenance"],
+                "definition composition changed since plan")
+    else:
+        data = read_file(item["source"])
+    require(sha(data) == item["sha256"], "input changed since plan")
+    return data
 
 
 def check_inputs(plan):
     require(sha(read_file(plan["runner"])) == plan["runner_sha256"], "runner changed since plan")
-    for item in plan["inputs"].values():
-        require(sha(read_file(item["source"])) == item["sha256"], "input changed since plan")
+    for name in plan["inputs"]:
+        input_bytes(plan, name)
     for path, digest in plan["executable_sha256"].items():
         require(executable_digest(path) == digest, "executable changed since plan")
     for path, digest in plan["validation_sha256"].items():
@@ -546,6 +581,8 @@ def execute(plan, args):
     run.mkdir(mode=0o700, parents=False, exist_ok=False)
     receipt = {"status": "STARTED", "authorization_reference": args.authorization_reference,
                "started_utc": utc(), "plan_sha256": sha(json.dumps(plan, sort_keys=True).encode())}
+    if plan["identity"]["version"] == "6.0":
+        receipt["definition_provenance"] = plan["definition_provenance"]
     write_json(run / "plan.json", plan)
     auth_directory_fd = None
     try:
@@ -558,8 +595,8 @@ def execute(plan, args):
         home.mkdir(mode=0o700)
         temporary = run / "tmp"
         temporary.mkdir(mode=0o700)
-        for name, item in plan["inputs"].items():
-            (working / name).write_bytes(read_file(item["source"]))
+        for name in plan["inputs"]:
+            (working / name).write_bytes(input_bytes(plan, name))
         auth = read_file(plan["auth_file"], 1024 * 1024)
         descriptor = os.open("auth.json", os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
                              0o600, dir_fd=auth_directory_fd)

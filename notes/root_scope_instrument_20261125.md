@@ -42,15 +42,36 @@ New outputs are under:
 
 `data/evaluation_llm/RUBRIC_semantic/label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/PROJECT_LABEL_evaluation.json`
 
+Definitions are composed at plan time from the unchanged pinned v3 source
+and a pinned JSON list of exact original passages and replacements. Each
+original passage must occur exactly once at its replacement step; source,
+override and final composed hashes are checked. No new selectable agent
+file is registered under .claude/agents/. The model receives the exact
+reviewed v6 definition bytes frozen at `26b74b67e52b9b4fe7091ea45a0e86f81c6ef231`.
+This revision changes provenance storage only. Its historical validation
+example remains byte-identical; the scorer supplies the actual captured
+composed definition to its validator instead of that example path.
+
+The source-definition SHA256, override-file SHA256 and composed-definition
+SHA256 are recorded together in each plan, prompt descriptor and receipt.
+The composed SHA256 remains metadata.instrument_sha256 in the evaluation.
+
 Versioned assets are reproduced by scripts/adhoc/prepare_root_scope_assets_20261125.py.
 Use its --check mode for a read-only exact-byte check. Its default mode
-refuses any existing destination; original v3 inputs are read from the
-pinned base commit. The tables below are generated from those inputs.
+creates missing assets and preserves byte-identical ones. The explicit
+--refresh-registration option replaces only this note's frozen first-pass
+bytes. Original sources and reviewed definitions are read from the pinned
+commits. The tables below are generated from those inputs.
+
+| Definition | Source SHA256 | Override SHA256 | Composed SHA256 |
+| --- | --- | --- | --- |
+| rubric10 | c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3 | 434a4d065a8d64e5de5405be1715fa4c4232a5fb401a39628fc9a32b6164b024 | 84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d |
+| rubric20 | 35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b | f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d | 6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52 |
 
 | Registered asset | SHA256 |
 | --- | --- |
-| .claude/agents/d4d-rubric10-semantic-v6.md | 84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d |
-| .claude/agents/d4d-rubric20-semantic-v6.md | 6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52 |
+| data/rubric/root_scope_v6/rubric10_definition_overrides.json | 434a4d065a8d64e5de5405be1715fa4c4232a5fb401a39628fc9a32b6164b024 |
+| data/rubric/root_scope_v6/rubric20_definition_overrides.json | f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d |
 | src/download/prompts/rubric10_semantic_v6_schema.json | feaff440ad287a07fd5bd447e7abea3b878a89855c05e6021fcc0ec87e6d2c51 |
 | src/download/prompts/rubric20_semantic_v6_schema.json | 9837b1ef5eb231d11b19be7f7744bb09a2e0740d58d9b33b7d4246258dba9642 |
 | data/rubric/rubric10.txt | 9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97 |
