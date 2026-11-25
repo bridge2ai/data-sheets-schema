@@ -13,7 +13,7 @@ Generated 2026-11-25 (UTC) for the owner's decision of 2026-11-24 to rerun the r
 | Launch commit | `edd279fd27e1d4add4b0d536888638f55254a022` (main since 2026-11-25T06:59Z) |
 | Driver | `scripts/adhoc/run_release_series_20261124.sh`, one project per session |
 | Streams | `scripts/adhoc/run_release_series_stream_20261125.sh`, three replicate streams side by side |
-| Account | claude-work subscription |
+| Account | a Claude subscription account, through headless Claude Code |
 | Window | 2026-11-25T05:24:59Z to 08:17:15Z |
 
 The first run (CHORUS replicate 1, 05:24:59Z) was the canary, taken through the same driver
@@ -36,7 +36,7 @@ replicate numbers, and each provenance record's `repo.resource_root` names the d
 - `launch/`: per record, the instruction sent (`.md`), the launch record (`.launch.txt`) and the
   rendering specification (`.render_spec.json`).
 - `gates/`: per record, the driver's gate file as written at the end of the run.
-- `streams/`: the three stream logs, with each budget check.
+- `streams/`: the three stream logs, with the decision of each budget check.
 - `series_2026-11-25c_summary.tsv`: one row per record, from the gate files and transcripts
   (`scripts/adhoc/summarize_release_series_20261125.py`).
 - `evidence_boundary_scan.txt`: the tool calls whose input names generated-record territory
@@ -45,11 +45,50 @@ replicate numbers, and each provenance record's `repo.resource_root` names the d
   from two `cd` lines; the script itself prints the absolute path.
 
 - `review_1_pr6349.md`: the independent read-only review of PR 6349 at commit `0dd706fba`, as
-  written. Its check scripts are `scripts/adhoc/review_pr6349_*_20261125.py`; they read the
-  transcripts in the launch worktrees and take the worktrees' parent directory from
-  `D4D_EXECUTIONS_ROOT`.
+  written apart from the removals listed below. Its check scripts are
+  `scripts/adhoc/review_pr6349_*_20261125.py`; they read the transcripts in the launch
+  worktrees and take the worktrees' parent directory from `D4D_EXECUTIONS_ROOT`.
 
 The transcripts (about 60 MB) stay in the launch worktrees and are not committed.
+
+## Removed from these notes (2026-11-25)
+
+At the owner's decision (issue #6352) two things the run wrote are no longer in these notes:
+the name of the subscription account the series ran on, and the estimates of that account's
+weekly allowance that each budget check logged, with the figures they can be rebuilt from.
+The repository history before this change was not rewritten and still holds them.
+
+| File | Change |
+|---|---|
+| `launch/*.launch.txt` (15) | the `account:` line is replaced by a fixed line; every other line is as the driver wrote it |
+| `streams/stream_rep*.txt` (3) | each of the 14 `budget:` lines keeps the decision, the next project, the replicate, the count of finished runs and the projects in flight elsewhere; the usage estimates, the limit and the amount spent are removed |
+| `README.md` | the Account row of the first table; the `streams/` and `review_1_pr6349.md` entries of the file list; this section |
+| `review_1_pr6349.md` | five mentions of the account are reworded so that it is not named; two phrases that stated the budget calibration and a projected usage figure are replaced by wording without figures; otherwise as the reviewer wrote it |
+| `scripts/adhoc/release_series_budget_20261125.py` | the calibration constants and the comment that derived them are replaced by environment variables, which are checked; given the values the series used, it prints the same line as before |
+| `scripts/adhoc/run_release_series_stream_20261125.sh` | the header names those variables; no change to what it runs |
+
+`scripts/adhoc/redact_release_series_account_usage_20261125.py` makes the changes to the launch
+records, stream logs, Account row and review report from the originals. The account name and
+every text it replaces in the review report are its arguments and are not in the script.
+
+What follows from it:
+
+- The 15 launch records are no longer byte-identical to the files in the launch worktrees, and
+  the 3 stream logs are no longer byte-identical to the stream runner's own logs (kept outside
+  the repository). They differ in the lines above and nowhere else. Review 1 found them
+  identical, which was true of the commit it read.
+- `scripts/adhoc/review_pr6349_compare_notes_20261125.py` compares the launch and gate files
+  of the checkout named `release-series-data-20261125` under `D4D_EXECUTIONS_ROOT`, not of the
+  checkout it sits in, and never the stream logs. Pointed at a checkout of this state it
+  reports the 15 launch records as different and the other 45 files as the same.
+- The 90 record files, the instructions, the rendering specifications and the gate files are
+  unchanged and identical to the originals.
+- Not removed: the home-directory path of the `claude` binary in the launch records, which
+  issue #6352 lists, and `repo.resource_root` in the provenance records, which is absolute by
+  design.
+- After the calibration left the budget script, the published costs and decisions bound the
+  account's usage (every check answered start under a limit the script still states) but do
+  not determine it.
 
 ## Results
 

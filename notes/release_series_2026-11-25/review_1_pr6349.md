@@ -58,7 +58,7 @@ written.
 - `.temp/launch/` of the same worktree: holds the sibling projects' instructions and their full
   stream-json transcripts, which contain the sibling records verbatim (Write payloads). Not in
   `OTHER`.
-- `~/.claude-work/projects/<worktree slug>/`: shared by every session launched in that worktree
+- `<configuration directory>/projects/<worktree slug>/`: shared by every session launched in that worktree
   (session transcripts and `tool-results/`). The slug contains the own worktree name, which the
   scan exempts (line 73), so a read of a sibling session's file there passes.
 - Broad roots without the territory token: `rg X .`, `grep -r X data/`, `find . -name '*_d4d.yaml'`,
@@ -77,7 +77,7 @@ I checked every one of these routes directly, so the README's conclusion holds:
 - Independent path scan of all 1,771 tool inputs (any project name other than the run's own, any
   label or `_repN` other than its own, any absolute path outside the own worktree, any `data/`
   tree other than `preprocessed`/`d4d_concatenated`, any method directory other than
-  `claudecode_release[_core]`): 6 hits, all benign: four `Read`s of `~/.claude-work/.../tool-results/*.txt`
+  `claudecode_release[_core]`): 6 hits, all benign: four `Read`s of `<configuration directory>/.../tool-results/*.txt`
   whose session ids equal the reading transcript's own `session_id` (checked for all four);
   `rep2 VOICE` ran `ls -la .temp/schema_digest_Dataset_AI_READI_rep2.txt` (a sibling's schema
   digest, listed not read); `rep2 VOICE_PEDIATRIC` grepped VOICE naming in the source manifest.
@@ -129,8 +129,8 @@ was redacted (or redact in the script).
   provenance records: by design (the record contract documents it as absolute).
 - `claude code: 2.1.332 (Claude Code) (/Users/<user>/.local/bin/claude)` in all 15
   `notes/.../launch/*.launch.txt`: not by design; the driver writes the resolved binary path.
-- The account name `claude-work` and `CLAUDE_CONFIG_DIR=~/.claude-work` in the 15 launch records and
-  the README ("Account: claude-work subscription"); the budget lines of the three stream logs
+- The account line in the 15 launch records and
+  the README (the Account row); the budget lines of the three stream logs
   expose weekly-allowance percentages of that account.
 No tokens, keys, session ids, UUIDs or personal notes were found. The email addresses in the
 records (172 distinct address-per-file occurrences) all occur verbatim in the record's own input
@@ -196,8 +196,8 @@ checked whether a playbook rule asks for a version token. Only seen because I gr
   `# ATTENTION` lines (worktree argument order). Cost total 251.49 USD, range 8.47-22.64: confirmed
   from the transcripts' `total_cost_usd`.
 - `release_series_budget_20261125.py` drops the cost of any `is_error` result (underestimates
-  spend after a failed run) and its calibration (6 points per 21 USD) is a single /usage delta.
-  No effect here (no failed run; the final projection was about 75% against a 90% limit).
+  spend after a failed run) and its calibration rests on one pair of usage readings.
+  No effect here (no failed run; every budget check answered start).
 - `run_release_series_stream_20261125.sh` retried only zero-turn 529 results; the three stream
   logs show attempt 1 for all 14 stream runs, no overload, no STOP.
 

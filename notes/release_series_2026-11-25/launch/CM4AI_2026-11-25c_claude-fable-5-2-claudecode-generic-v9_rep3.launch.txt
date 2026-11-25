@@ -11,7 +11,7 @@ model: claude-fable-5-2   effort: high (CLI flags; both stated in the rendering 
 recorder line: complete (D4D_RENDER_SPEC and D4D_LAUNCH_INSTRUCTION); toolchain: checkout-relative
 render specification: .temp/launch/CM4AI_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3.render_spec.json sha256 e6c865ea7a8e081329cead41815f680d6d16a93096068b7386dfcfe1ae2d50b0
 claude code: 2.1.332 (Claude Code) (/Users/marcin/.local/bin/claude)
-account: claude-work (CLAUDE_CONFIG_DIR=~/.claude-work, as the owner's shell function of that name does)
+account: a Claude subscription account (name removed from the published copy, owner's decision of 2026-11-25)
 advisor tool: disabled with CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1
 MCP servers: none (--strict-mcp-config with no config)
 settings: project only (--setting-sources project): no user-level hooks, allow rules, skills, agents or plugins of the account
