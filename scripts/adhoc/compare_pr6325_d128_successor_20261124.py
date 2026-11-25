@@ -6,7 +6,7 @@ gate (tests/test_native_d128_scanner_comparison.py) refuses until a reviewed
 successor ledger is pinned. This helper prepares that ledger as a second
 successor chained after the PR6302 one, under the lead's assignment and
 dispositions in notes/coordination/STATUS.md (2026-11-24T20:59:12Z and
-21:01:28Z). It is derived from compare_pr6325_d128_successor_20261122.py,
+21:01:28Z). It is derived from compare_pr6302_d128_successor_20261122.py,
 which is unchanged, as are the historical D128 fixture and the PR6302 successor.
 
 Inputs: immutable local commits (the historical baseline, the predecessor main
@@ -285,13 +285,37 @@ def moved_reference_only(before, after):
 
 
 def require_stop_rule(delta):
-    """The lead's rule for this assignment, on the predecessor-to-candidate ledgers."""
+    """The lead's rule for this assignment, on the predecessor-to-candidate ledgers.
+
+    Nothing a ledger declares is taken on trust (review 2, D1 to D3): every
+    occurrence must be accounted exactly once and in place, and each row's
+    differing fields are recomputed from the two objects it carries. Whether
+    those objects are the scanned ones is `require_delta_on_arrays`' check.
+    """
     need(type(delta) is dict and set(delta) == set(ARRAYS), 'delta lacks complete arrays')
     exceptions = 0
     for name in ARRAYS:
         ledger = delta[name]
+        need(type(ledger) is dict and all(type(ledger.get(key)) is list for key in
+             ('exact_matches', 'relocations', 'changed_fields', 'added', 'removed')), name + ': incomplete ledger')
         need(ledger['added'] == [] and ledger['removed'] == [], name + ': added or removed rows stop this assignment')
-        need(ledger['before_count'] == ledger['after_count'], name + ': array length changed')
+        count = ledger.get('before_count')
+        need(type(count) is int and count >= 0 and type(ledger.get('after_count')) is int
+             and count == ledger['after_count'], name + ': array length changed')
+        seen = []
+        for pair in ledger['exact_matches']:
+            need(type(pair) is list and len(pair) == 2 and type(pair[0]) is int and pair[0] == pair[1],
+                 name + ': an occurrence changed position')
+            seen.append(pair[0])
+        for kind in ('relocations', 'changed_fields'):
+            for row in ledger[kind]:
+                need(type(row) is dict and type(row.get('before')) is dict and type(row.get('after')) is dict
+                     and type(row.get('before_index')) is int and row['before_index'] == row.get('after_index'),
+                     name + ': an occurrence changed position')
+                need(row.get('differing_fields') == fields(row['before'], row['after']),
+                     name + ': a row declares other fields than its objects differ in')
+                seen.append(row['before_index'])
+        need(sorted(seen) == list(range(count)), name + ': duplicate, missing or extra occurrence accounting')
         need(all(row['differing_fields'] == ['line'] for row in ledger['relocations']), name + ': non-coordinate relocation')
         for row in ledger['changed_fields']:
             need(name == 'hits' and row['differing_fields'] == ['line', 'model_text_function']
@@ -302,6 +326,59 @@ def require_stop_rule(delta):
          'violation objects changed')
     need(exceptions <= 1, 'more than the one disposed model_text_function row')
     return exceptions
+
+
+def predecessor_arrays(predecessor, before):
+    """The arrays the PR6302 successor approved, rebuilt from the baseline arrays and its ledger.
+
+    The gate scans the historical baseline and the candidate, never the
+    predecessor commit. Every approved occurrence is an exact match of a
+    baseline object or a row that carries its object, so the arrays follow
+    from the two, and their hashes must be the ones that successor pinned.
+    """
+    need(type(predecessor) is dict and predecessor.get('kind') == PREDECESSOR_KIND, 'predecessor is not the PR6302 successor')
+    array_shape(before)
+    rebuilt = {}
+    for name in ARRAYS:
+        ledger, old = predecessor['arrays'][name], before[name]
+        need(len(old) == ledger['before_count'] and sha(encoded(old)) == ledger['before_sha256'],
+             name + ': baseline arrays are not the ones the PR6302 successor starts from')
+        need(type(ledger['after_count']) is int and ledger['after_count'] >= 0, name + ': invalid PR6302 successor count')
+        rows = [None] * ledger['after_count']
+        def place(index, row):
+            need(type(index) is int and 0 <= index < len(rows) and rows[index] is None and type(row) is dict,
+                 name + ': the PR6302 successor arrays cannot be rebuilt')
+            rows[index] = row
+        for pair in ledger['exact_matches']:
+            need(type(pair) is list and len(pair) == 2 and type(pair[0]) is int and 0 <= pair[0] < len(old),
+                 name + ': the PR6302 successor arrays cannot be rebuilt')
+            place(pair[1], old[pair[0]])
+        for kind in ('relocations', 'changed_fields', 'added'):
+            for row in ledger[kind]:
+                place(row['after_index'], row['after'])
+        need(all(row is not None for row in rows) and sha(encoded(rows)) == ledger['after_sha256'],
+             name + ': the PR6302 successor arrays cannot be rebuilt')
+        rebuilt[name] = rows
+    return rebuilt
+
+
+def require_delta_on_arrays(value, predecessor, before, after):
+    """Bind the chained delta to the scanned arrays (review 2, D1).
+
+    `before` and `after` are the complete baseline and candidate arrays of the
+    two scans the gate already makes. The delta must account every occurrence
+    between the rebuilt PR6302 successor arrays and the candidate's, object by
+    object, and still satisfy the stop rule. A delta that merely declares
+    nothing changed does not pass.
+    """
+    array_shape(after)
+    middle = predecessor_arrays(predecessor, before)
+    chain = value.get('predecessor') if type(value) is dict else None
+    need(type(chain) is dict and type(chain.get('delta')) is dict and set(chain['delta']) == set(ARRAYS),
+         'successor lacks the chained delta')
+    for name in ARRAYS:
+        validate_array(middle[name], after[name], chain['delta'][name])
+    return require_stop_rule(chain['delta'])
 
 
 def require_successor(raw, expected_sha, historical_approval, predecessor):
@@ -576,10 +653,16 @@ def compare_runs(args):
         need(sha(encoded(middle['arrays'][name])) == previous['arrays'][name]['after_sha256']
              and len(middle['arrays'][name]) == previous['arrays'][name]['after_count'],
              name + ': the predecessor commit does not carry the PR6302 successor arrays; no proposal emitted')
+    # The gate rebuilds those arrays from the baseline scan and the PR6302 ledger;
+    # the rebuilt objects must be the scanned ones.
+    need(same(predecessor_arrays(previous, before['arrays']), middle['arrays']),
+         'the PR6302 successor arrays rebuilt from the baseline differ from the predecessor scan; no proposal emitted')
     delta = {name: {key: value for key, value in ledger.items()
                     if key not in ('positional_differences', 'exact_arrays_equal')}
              for name, ledger in legs[3]['arrays'].items()}
     exceptions = require_stop_rule(delta)
+    need(require_delta_on_arrays(dict(predecessor=dict(delta=delta)), previous, before['arrays'], after['arrays'])
+         == exceptions, 'the delta does not bind to the scanned arrays; no proposal emitted')
     proposal = dict(kind='pr6325_d128_successor_proposal', version=1, assignment=ASSIGNMENT,
         review_reference=None, comparison_evidence_sha256=receipt['sha256'],
         historical_fixture_sha256=HISTORICAL_SHA, historical_evidence_sha256=EVIDENCE_SHA,

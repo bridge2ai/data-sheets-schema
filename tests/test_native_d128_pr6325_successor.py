@@ -83,3 +83,100 @@ def test_the_helper_pins_the_unchanged_pr6302_successor_and_its_own_assignment()
     assert gate.SUCCESSOR_SHA256 == helper.PREDECESSOR_SHA
     assert helper.ASSIGNMENT.startswith("PR6325 lead assignment 2026-11-24: line-only relocations")
     assert helper.ASSIGNMENT.endswith("historical D128 decision and PR6302 successor unchanged")
+
+
+# Review 2 (D1 to D3): nothing a ledger declares is taken on trust.
+
+def _honest():
+    before, after = _arrays()
+    return before, after, _delta(before, after)
+
+
+def test_a_delta_that_declares_nothing_does_not_pass():
+    """D1: right counts and hashes with empty lists accounted no occurrence."""
+    _, _, delta = _honest()
+    for ledger in delta.values():
+        ledger.update(exact_matches=[], relocations=[], changed_fields=[])
+    with pytest.raises(ValueError, match="occurrence accounting"):
+        helper.require_stop_rule(delta)
+
+
+@pytest.mark.parametrize("forgery", ["duplicate_index", "missing_index", "index_out_of_range"])
+def test_every_occurrence_is_accounted_exactly_once(forgery):
+    before, after = _arrays()
+    before["hits"].append(dict(before["hits"][0], line=50, snippet="plain"))
+    after["hits"].append(deepcopy(before["hits"][2]))
+    delta = _delta(before, after)
+    assert delta["hits"]["exact_matches"] == [[2, 2]] and helper.require_stop_rule(delta) == 1
+    if forgery == "duplicate_index": delta["hits"]["exact_matches"].append([2, 2])
+    elif forgery == "missing_index": delta["hits"]["exact_matches"] = []
+    else: delta["hits"]["exact_matches"] = [[3, 3]]
+    with pytest.raises(ValueError, match="occurrence accounting"):
+        helper.require_stop_rule(delta)
+
+
+def test_declared_differing_fields_are_recomputed_from_the_row_objects():
+    """D2: a content change declared as a line-only move."""
+    _, _, delta = _honest()
+    row = delta["hits"]["relocations"][0]
+    row["after"]["snippet"] = "edited"
+    assert row["differing_fields"] == ["line"]
+    with pytest.raises(ValueError, match="declares other fields"):
+        helper.require_stop_rule(delta)
+
+
+def test_a_pure_reorder_stops():
+    """D3: the same objects in another order are not line-only relocations."""
+    before, _ = _arrays()
+    before["hits"].append(dict(before["hits"][0], line=50, snippet="plain"))
+    after = deepcopy(before)
+    after["hits"][0], after["hits"][2] = after["hits"][2], after["hits"][0]
+    with pytest.raises(ValueError, match="changed position"):
+        helper.require_stop_rule(_delta(before, after))
+
+
+def _chain():
+    """A toy baseline, the arrays a toy PR6302 successor approved, and a candidate."""
+    middle, after = _arrays()
+    baseline = deepcopy(middle)
+    baseline["hits"][0]["line"] = 8                      # a relocation the earlier successor approved
+    baseline["hits"].pop(1)                              # and a hit it approved as added
+    predecessor = dict(kind=helper.PREDECESSOR_KIND, arrays=_delta(baseline, middle))
+    return baseline, middle, after, predecessor
+
+
+def test_the_predecessor_arrays_are_rebuilt_from_the_baseline_and_its_ledger():
+    baseline, middle, _, predecessor = _chain()
+    assert [len(predecessor["arrays"]["hits"][kind]) for kind in ("relocations", "added")] == [1, 1]
+    assert helper.same(helper.predecessor_arrays(predecessor, baseline), middle)
+    other = deepcopy(baseline)
+    other["hits"][0]["snippet"] = "not the baseline"
+    with pytest.raises(ValueError, match="starts from"):
+        helper.predecessor_arrays(predecessor, other)
+    forged = deepcopy(predecessor)
+    forged["arrays"]["hits"]["added"][0]["after"]["snippet"] = "edited"
+    with pytest.raises(ValueError, match="cannot be rebuilt"):
+        helper.predecessor_arrays(forged, baseline)
+    with pytest.raises(ValueError, match="not the PR6302 successor"):
+        helper.predecessor_arrays(dict(predecessor, kind="other"), baseline)
+
+
+def test_the_chained_delta_is_bound_to_the_scanned_arrays():
+    baseline, middle, after, predecessor = _chain()
+    value = dict(predecessor=dict(delta=_delta(middle, after)))
+    assert helper.require_delta_on_arrays(value, predecessor, baseline, after) == 1
+    # D1 as reproduced by the review: the candidate's content changes with the count kept,
+    # and the delta is the honest one of other arrays or declares an in-place exact match.
+    changed = deepcopy(after)
+    changed["hits"][0]["snippet"] = "edited"
+    with pytest.raises(ValueError):
+        helper.require_delta_on_arrays(value, predecessor, baseline, changed)
+    declared = deepcopy(value)
+    ledger = declared["predecessor"]["delta"]["hits"]
+    ledger.update(exact_matches=[[0, 0], [1, 1]], relocations=[], changed_fields=[],
+                  after_sha256=helper.sha(helper.encoded(changed["hits"])))
+    assert helper.require_stop_rule(declared["predecessor"]["delta"]) == 0   # self-consistent as declared
+    with pytest.raises(ValueError, match="exact occurrence changed"):
+        helper.require_delta_on_arrays(declared, predecessor, baseline, changed)
+    with pytest.raises(ValueError):
+        helper.require_delta_on_arrays(dict(predecessor=dict()), predecessor, baseline, after)

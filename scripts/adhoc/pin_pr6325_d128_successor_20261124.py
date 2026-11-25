@@ -131,6 +131,8 @@ def main():
            .replace(chr(64), '\u0040') + '\n').encode('utf-8')
     fixture_sha = core.sha(raw)
     core.require_successor(raw, fixture_sha, historical, previous)
+    runs = comparison['new_runs']
+    core.require_delta_on_arrays(core.decode(raw), previous, runs['baseline']['arrays'], runs['candidate']['arrays'])
     changed = original.replace(INACTIVE, ("PR6325_SUCCESSOR_SHA256 = '" + fixture_sha + "'\n").encode('ascii'))
     core.need((ROOT / GATE).read_bytes() == original, 'gate changed during activation preparation')
     for path, expected in ((args.proposal, proposal_raw), (args.comparison, comparison_raw),

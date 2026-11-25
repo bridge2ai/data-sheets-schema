@@ -158,13 +158,15 @@ def scan(source, manifest, tool, assets, output):
 def test_d128_final_composition_has_only_the_finite_approved_scanner_differences(tmp_path, monkeypatch):
     approved = approval()
     active_fixture_sha = FIXTURE_SHA256
+    chained_after = None
     if SUCCESSOR_SHA256 is not None:
         approved = successor.require_successor(SUCCESSOR_FIXTURE.read_bytes(), SUCCESSOR_SHA256, approved)
         active_fixture_sha = SUCCESSOR_SHA256
     if PR6325_SUCCESSOR_SHA256 is not None:
         require(SUCCESSOR_SHA256 is not None, 'the PR6325 successor is chained after the PR6302 one')
+        chained_after = approved
         approved = successor_pr6325.require_successor(PR6325_SUCCESSOR_FIXTURE.read_bytes(),
-                                                      PR6325_SUCCESSOR_SHA256, approval(), approved)
+                                                      PR6325_SUCCESSOR_SHA256, approval(), chained_after)
         active_fixture_sha = PR6325_SUCCESSOR_SHA256
     candidate_head = inputs.git('rev-parse', '--verify', 'HEAD^{commit}').decode().strip()
     exports = tmp_path / 'exports'
@@ -203,6 +205,9 @@ def test_d128_final_composition_has_only_the_finite_approved_scanner_differences
             evidence['runs'][name] = {key: value for key, value in run.items() if key != 'arrays'}
             arrays[name] = complete_arrays(run)
         require_approved_arrays(arrays['before'], arrays['after'], approved)
+        if chained_after is not None:
+            # The chained delta is bound to these two scans, not taken as declared.
+            successor_pr6325.require_delta_on_arrays(approved, chained_after, arrays['before'], arrays['after'])
         for source, manifest, label in selected.values():
             inputs.checked_scanner_input(label, manifest['commit'])
         require(inputs.git('rev-parse', '--verify', 'HEAD^{commit}').decode().strip() == candidate_head,
