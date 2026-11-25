@@ -79,8 +79,9 @@ poetry run python scripts/validate_evaluation_schema.py --file CANDIDATE --rubri
 
 An explicit caller context adds `--context ORIGINAL_CONTEXT`. Validation uses an
 existing virtual environment with environment creation disabled. The runner
-requires exit zero from the real schema and structured-evidence validator, then
-creates the final output exclusively. Existing outputs and spent run directories
+captures the candidate bytes and hash before invoking the real schema and
+structured-evidence validator, requires exit zero and unchanged candidate bytes
+afterward, then publishes that captured snapshot exclusively. Existing outputs and spent run directories
 are refused. Failed candidates, process output and refusal receipts are retained.
 The copied authentication file is private transient runtime state and is excluded
 from the retained artifact inventory. The runner unlinks only its copy immediately

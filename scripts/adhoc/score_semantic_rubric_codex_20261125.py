@@ -461,6 +461,9 @@ def execute(plan, args):
                                           "runner_sha256": plan["runner_sha256"]}
         staged = run / "candidate_evaluation.json"
         write_json(staged, candidate)
+        # Bind publication to the bytes presented to the validator (6347).
+        validated_snapshot = read_file(staged)
+        receipt["validator_input_sha256"] = sha(validated_snapshot)
         venv = Path(plan["validation_venv"])
         require((venv / "pyvenv.cfg").is_file() and (venv / "bin/python").is_file(),
                 "select an existing validation virtual environment; never create one")
@@ -473,11 +476,13 @@ def execute(plan, args):
                                        env=validator_env, stdout=stdout, stderr=stderr, timeout=120)
         receipt["validator_exit"] = validated.returncode
         require(validated.returncode == 0, "exact-file schema/evidence validation failed; no publication")
+        require(read_file(staged) == validated_snapshot,
+                "candidate changed during validation; no publication")
         check_inputs(plan)
         output = physical(plan["output"])
         output.parent.mkdir(parents=True, exist_ok=True)
         # Exclusive creation prevents concurrent evaluators replacing a result.
-        data = read_file(staged)
+        data = validated_snapshot
         with output.open("xb") as handle:
             handle.write(data)
         require(read_file(output) == data, "published output differs")
