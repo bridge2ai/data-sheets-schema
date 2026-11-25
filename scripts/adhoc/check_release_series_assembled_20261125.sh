@@ -39,7 +39,11 @@ for REP in $(seq 1 "$REPS"); do
       --project "$P" --bundle "$BUNDLE" --chunk-manifest "$CHUNKS" --strict 2>&1); R="$R receipts=$?"
     "${D4D[@]}" download scope --manifest data/preprocessed/source_manifest.yaml --project "$P" --check \
       --record "$FULL" --record "$CORE" --strict > /dev/null 2>&1; R="$R scope=$?"
-    "${D4D[@]}" runs check --method "$METHOD" --label "$LABEL" --project "$P" --strict > /dev/null 2>&1; R="$R runs_check=$?"
+    # `runs check` exits 0 when no run matches its filters (review 1 of PR 6349, F1), so the
+    # exit code alone would pass a record it never selected: require that it checked one.
+    RUNS=$("${D4D[@]}" runs check --method "$METHOD" --label "$LABEL" --project "$P" --strict 2>&1); RUNS_RC=$?
+    if [ $RUNS_RC -eq 0 ] && ! printf '%s\n' "$RUNS" | grep -q "^1 run(s) checked, 1 subject to the requirement, 0 failing"; then RUNS_RC=9; fi
+    R="$R runs_check=$RUNS_RC"
     RENDER=$("$PY" -c "import sys; from data_sheets_schema import runs; s = runs.verify_request(sys.argv[1], sys.argv[2], sys.argv[3]); print(s[0]); sys.exit(0 if s[0] == 'match' else 1)" "$METHOD" "$LABEL" "$P" 2>&1 | tail -1); R="$R render=$RENDER"
     COUNTS=$(printf '%s\n' "$RECEIPTS" | grep -o 'chunks [0-9/]* reviewed.*slots [0-9/]* with a receipt' | head -1)
     case "$R" in " full=0 core=0 receipts=0 scope=0 runs_check=0 render=match") VERDICT=ok;; *) VERDICT=FAIL; BAD=$((BAD + 1));; esac
