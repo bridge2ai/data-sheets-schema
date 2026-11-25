@@ -1,4 +1,4 @@
-"""PR 6340 reviewer regressions for issues 6345, 6346 and 6347, 2026-11-25.
+"""PR 6340 reviewer regressions for issues 6345 through 6348, 2026-11-25.
 
 Inputs are synthetic records, fake credentials and fake executable session logs.
 The Poetry control invokes the unchanged real validator and can mutate its input
@@ -140,34 +140,123 @@ def test_partial_auth_copy_is_removed_without_touching_source(tmp_path):
     assert assert_auth_cleaned(plan, args, original)["status"] == "REFUSED"
 
 
-def test_sigterm_runs_auth_cleanup_in_the_real_cli_controller(tmp_path):
-    args, _, tools, _ = reviewed_scenario(tmp_path / "sigterm", sleep_seconds=30)
+def run_controller_signal_case(tmp_path, signum):
+    args, _, tools, _ = reviewed_scenario(tmp_path / signum.name.lower(), sleep_seconds=30)
     args.timeout = 60
     original = args.auth_file.read_bytes()
+    original_stat = args.auth_file.stat()
     plan = scorer.build_plan(args)
-    command = [sys.executable, str(scorer.__file__), "--execute"]
+    controller = ROOT / "tests/fixtures/rubric_scorer/signal_controller.py"
+    command = [sys.executable, str(controller), str(scorer.__file__), "--execute"]
     for name in ("repo_root", "method_directory", "label", "record", "rubric", "run_directory",
                  "codex_binary", "poetry_binary", "validation_venv", "auth_file",
                  "authorization_reference", "timeout"):
         command.extend(["--" + name.replace("_", "-"), str(getattr(args, name))])
     child = subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              start_new_session=True)
+    fake_pgid = None
     try:
         deadline = time.monotonic() + 10
-        while not (tools / "invocation.json").exists() and child.poll() is None and time.monotonic() < deadline:
+        invocation = None
+        while child.poll() is None and time.monotonic() < deadline:
+            try:
+                invocation = json.loads((tools / "invocation.json").read_bytes())
+                break
+            except (FileNotFoundError, json.JSONDecodeError):
+                pass
             time.sleep(0.02)
-        assert (tools / "invocation.json").is_file()
-        child.send_signal(signal.SIGTERM)
+        assert invocation is not None
+        assert invocation["pgid"] == invocation["pid"]
+        assert invocation["pgid"] not in (os.getpgrp(), child.pid)
+        fake_pgid = invocation["pgid"]
+        os.killpg(fake_pgid, 0)
+        assert invocation["copied_auth_present"] is True
+        assert (Path(plan["codex_home"]) / "auth.json").read_bytes() == original
+        child.send_signal(signum)
         stdout, stderr = child.communicate(timeout=10)
+        (tmp_path / "controller.stdout.txt").write_bytes(stdout)
+        (tmp_path / "controller.stderr.txt").write_bytes(stderr)
+        group_stopped = False
+        try:
+            os.killpg(fake_pgid, 0)
+        except ProcessLookupError:
+            group_stopped = True
+        # Save the actual observation before this test's emergency cleanup.
+        (tmp_path / "signal-result.json").write_text(json.dumps({
+            "signal": signum.name, "controller_returncode": child.returncode,
+            "fake_pid": invocation["pid"], "fake_pgid": fake_pgid,
+            "child_group_stopped_before_test_cleanup": group_stopped,
+            "copied_auth_absent": not (Path(plan["codex_home"]) / "auth.json").exists(),
+            "receipt_saved": (Path(plan["run_directory"]) / "receipt.json").is_file(),
+            "original_bytes_unchanged": args.auth_file.read_bytes() == original,
+        }, indent=2) + "\n")
+        assert group_stopped
+        assert child.returncode == 2
+        assert not Path(plan["output"]).exists()
+        receipt = assert_auth_cleaned(plan, args, original)
+        assert receipt["status"] == "REFUSED"
+        assert receipt["failure"] == f"InterruptedError: scorer interrupted by signal {signum.value}"
+        current_stat = args.auth_file.stat()
+        for field in ("st_dev", "st_ino", "st_mode", "st_size", "st_mtime_ns"):
+            assert getattr(current_stat, field) == getattr(original_stat, field)
     finally:
         if child.poll() is None:
             os.killpg(child.pid, signal.SIGKILL)
             child.communicate(timeout=10)
-    (tmp_path / "controller.stdout.txt").write_bytes(stdout)
-    (tmp_path / "controller.stderr.txt").write_bytes(stderr)
-    assert child.returncode != 0
-    assert not Path(plan["output"]).exists()
-    assert assert_auth_cleaned(plan, args, original)["status"] == "REFUSED"
+        if fake_pgid is not None:
+            try:
+                os.killpg(fake_pgid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+
+
+def test_sigterm_runs_auth_cleanup_in_the_real_cli_controller(tmp_path):
+    run_controller_signal_case(tmp_path, signal.SIGTERM)
+
+
+def test_sighup_stops_child_group_and_cleans_auth_in_the_real_cli_controller(tmp_path):
+    run_controller_signal_case(tmp_path, signal.SIGHUP)
+
+
+def test_main_restores_signal_dispositions_after_all_outcomes(tmp_path):
+    args, _, _, _ = reviewed_scenario(tmp_path / "dispositions")
+    signals = (signal.SIGTERM, signal.SIGHUP)
+    original = {sig: signal.getsignal(sig) for sig in signals}
+
+    def caller_handler(signum, frame):
+        raise AssertionError("caller handler must not run inside execute")
+
+    try:
+        for disposition in (signal.SIG_DFL, signal.SIG_IGN, caller_handler):
+            for outcome in ("success", "refusal", "term", "hup", "plan"):
+                for sig in signals:
+                    signal.signal(sig, disposition)
+                args.plan = outcome == "plan"
+                args.execute = not args.plan
+
+                def build_plan(parsed):
+                    for sig in signals:
+                        if args.plan:
+                            assert signal.getsignal(sig) == disposition
+                        else:
+                            assert signal.getsignal(sig) != disposition
+                    return {"offline": True}
+
+                def execute(plan, parsed):
+                    if outcome == "refusal":
+                        raise OSError("synthetic refusal")
+                    if outcome in ("term", "hup"):
+                        signal.raise_signal(signal.SIGTERM if outcome == "term" else signal.SIGHUP)
+                    return {"offline": True}
+
+                with patch.object(scorer.argparse.ArgumentParser, "parse_args", return_value=args), \
+                        patch.object(scorer, "build_plan", side_effect=build_plan), \
+                        patch.object(scorer, "execute", side_effect=execute):
+                    assert scorer.main([]) == (0 if outcome in ("success", "plan") else 2)
+                assert all(signal.getsignal(sig) == disposition for sig in signals)
+    finally:
+        for sig, disposition in original.items():
+            signal.signal(sig, disposition)
 
 
 def test_post_validation_candidate_replacement_refuses_publication(tmp_path):

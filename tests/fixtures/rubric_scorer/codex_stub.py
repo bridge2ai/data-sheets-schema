@@ -20,6 +20,7 @@ def main():
     (directory / "received-prompt.txt").write_text(prompt)
     (directory / "invocation.json").write_text(json.dumps({
         "argv": sys.argv[1:], "cwd": os.getcwd(),
+        "pid": os.getpid(), "pgid": os.getpgrp(),
         "working_files": sorted(p.name for p in Path.cwd().iterdir()),
         "codex_home": os.environ.get("CODEX_HOME"),
         "home": os.environ.get("HOME"),

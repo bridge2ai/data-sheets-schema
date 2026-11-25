@@ -626,12 +626,13 @@ def parser():
 
 def main(argv=None):
     args = parser().parse_args(argv)
-    previous_term = None
-    if args.execute:
-        def interrupted(signum, frame):
-            raise InterruptedError(f"scorer interrupted by signal {signum}")
-        previous_term = signal.signal(signal.SIGTERM, interrupted)
+    previous_signals = {}
     try:
+        if args.execute:
+            def interrupted(signum, frame):
+                raise InterruptedError(f"scorer interrupted by signal {signum}")
+            for signum in (signal.SIGTERM, signal.SIGHUP):
+                previous_signals[signum] = signal.signal(signum, interrupted)
         require(0 < args.timeout <= 7200, "timeout must be 1 through 7200 seconds")
         plan = build_plan(args)
         result = plan if args.plan else execute(plan, args)
@@ -641,8 +642,8 @@ def main(argv=None):
         print(f"REFUSED: {type(exc).__name__}: {exc}", file=sys.stderr)
         return 2
     finally:
-        if previous_term is not None:
-            signal.signal(signal.SIGTERM, previous_term)
+        for signum, disposition in previous_signals.items():
+            signal.signal(signum, disposition)
 
 
 if __name__ == "__main__":

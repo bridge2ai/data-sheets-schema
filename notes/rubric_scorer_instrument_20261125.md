@@ -98,7 +98,8 @@ The copied authentication file is private transient runtime state and is exclude
 from the retained artifact inventory. The runner unlinks only its copy immediately
 when Codex exits, before validation, and again during final cleanup on failure,
 timeout or interruption. The original caller file is preserved. Catchable SIGTERM
-uses the same cleanup path. An uncatchable process kill or host failure cannot run
+and SIGHUP use the same bounded child-stop and cleanup path; both prior signal
+dispositions are restored afterward. An uncatchable process kill or host failure cannot run
 Python cleanup; inspect such abandoned runs before archiving them. Cleanup is not
 a claim that arbitrary model responses or CLI logs can never contain a secret.
 
