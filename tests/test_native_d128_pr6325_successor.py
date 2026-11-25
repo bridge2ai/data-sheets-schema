@@ -15,6 +15,13 @@ from scripts.adhoc import compare_pr6325_d128_successor_20261124 as helper
 SENT = "PHASE_INSTRUCTIONS (sent in a PhaseRequest at src/x.py:{})"
 
 
+@pytest.fixture(autouse=True)
+def _toy_disposed_identity(monkeypatch):
+    """The helper names the one disposed hit by a hash of its identity; here that hit is the toy's."""
+    before, _ = _arrays()
+    monkeypatch.setattr(helper, "DISPOSED_IDENTITY_SHA256", helper.disposed_identity(before["hits"][1]))
+
+
 def _arrays():
     hit = dict(path="src/x.py", line=10, match="token", snippet="text", category="c", pattern="p", context="string_literal")
     described = dict(hit, line=20, snippet="other", model_text_function=SENT.format(300))
@@ -208,3 +215,64 @@ def test_a_relocation_must_differ_in_line_alone(fields):
     assert row["differing_fields"] == fields
     with pytest.raises(ValueError, match="non-coordinate relocation"):
         helper.require_stop_rule(delta)
+
+
+# Tab 197 pre-pass F1 (issue 6339): the exception is one named hit, and its new reference is real.
+
+def test_the_exception_is_bound_to_the_disposed_hit_and_no_other(monkeypatch):
+    before, after = _arrays()
+    delta = _delta(before, after)
+    assert helper.require_stop_rule(delta) == 1
+    # The same numeric-reference change on any other hit stops.
+    other_before, other_after = _arrays()
+    for rows in (other_before, other_after):
+        rows["hits"][1]["snippet"] = "an unrelated hit"
+    with pytest.raises(ValueError, match="single disposed exception"):
+        helper.require_stop_rule(_delta(other_before, other_after))
+    # And the toy's hit is not the one the helper itself names.
+    monkeypatch.undo()
+    assert len(helper.DISPOSED_IDENTITY_SHA256) == 64
+    with pytest.raises(ValueError, match="single disposed exception"):
+        helper.require_stop_rule(delta)
+
+
+def test_the_identity_ignores_only_the_two_coordinates():
+    before, after = _arrays()
+    described, moved = before["hits"][1], after["hits"][1]
+    assert helper.disposed_identity(described) == helper.disposed_identity(moved)
+    for key in helper.DISPOSED_IDENTITY_FIELDS:
+        assert helper.disposed_identity(dict(described, **{key: "changed"})) != helper.disposed_identity(described)
+    assert helper.disposed_identity(dict(described, model_text_function="OTHER (sent at src/x.py:300)")) \
+        != helper.disposed_identity(described)
+    assert helper.disposed_identity(dict(described, model_text_function="no reference")) is None
+    assert helper.disposed_identity(before["hits"][0]) is None
+
+
+@pytest.mark.parametrize(("source", "accepted"), [
+    ("\n" * 301 + "    return PhaseRequest(\n", True),
+    ("\n" * 301 + "    return something_else(\n", False),      # the line holds no such call
+    ("    return PhaseRequest(\n", False),                      # the line does not exist
+    (None, False),                                              # the file does not exist
+])
+def test_the_moved_reference_names_the_call_in_the_candidate_tree(source, accepted):
+    before, after = _arrays()
+    delta = _delta(before, after)
+    asked = []
+    def read_source(path):
+        asked.append(path)
+        return source
+    if accepted:
+        helper.require_reference_target(read_source, delta)
+    else:
+        with pytest.raises(ValueError, match="does not name a PhaseRequest call"):
+            helper.require_reference_target(read_source, delta)
+    assert asked == ["src/x.py"]
+
+
+def test_a_reference_to_a_nonexistent_line_stops():
+    before, after = _arrays()
+    after["hits"][1]["model_text_function"] = SENT.format(999999)
+    delta = _delta(before, after)
+    assert helper.require_stop_rule(delta) == 1          # the arrays alone cannot tell
+    with pytest.raises(ValueError, match="does not name a PhaseRequest call"):
+        helper.require_reference_target(lambda path: "\n" * 301 + "    return PhaseRequest(\n", delta)

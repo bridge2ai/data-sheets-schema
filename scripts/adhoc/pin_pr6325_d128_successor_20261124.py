@@ -115,6 +115,12 @@ def main():
              for name, ledger in legs[3]['arrays'].items()}
     core.need(core.same(delta, proposal['predecessor']['delta']), 'proposal delta differs from the exact comparison')
     core.require_stop_rule(delta)
+    def candidate_source(path):
+        try:
+            return core.git(ROOT, 'show', CANDIDATE + ':' + path).decode('utf-8')
+        except ValueError:
+            return None
+    core.require_reference_target(candidate_source, delta)
     arrays = {name: {key: value for key, value in ledger.items()
                     if key not in ('positional_differences', 'exact_arrays_equal')}
               for name, ledger in legs[0]['arrays'].items()}

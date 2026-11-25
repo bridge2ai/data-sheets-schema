@@ -60,6 +60,13 @@ ASSIGNMENT = ('PR6325 lead assignment 2026-11-24: line-only relocations from the
               '(6325 with 6334); historical D128 decision and PR6302 successor unchanged')
 DELTA_LABEL = 'predecessor_main_to_current_candidate'
 MOVED_REFERENCE = re.compile(r':[0-9]+\)\Z')
+# The one hit the lead disposed (STATUS 2026-11-24T21:01:28Z; tab 197 pre-pass F1, issue 6339),
+# named by the sha256 of its identity so that this file repeats none of the scanned text:
+# the fields below and its description up to the line number it ends with.
+DISPOSED_IDENTITY_FIELDS = ('path', 'match', 'pattern', 'category', 'role', 'context', 'snippet')
+DISPOSED_IDENTITY_SHA256 = 'b4ad052d5ceb64a3e707538dfab2512815f131121051059e1be573e27c209026'
+REFERENCE_TARGET = re.compile(r' at (?P<path>[A-Za-z0-9_./-]+):(?P<line>[1-9][0-9]*)\)\Z')
+REFERENCE_CALL = 'PhaseRequest('
 ENV = {'PATH': '/usr/bin:/bin:/usr/sbin:/sbin', 'GIT_NO_LAZY_FETCH': '1',
        'GIT_ALLOW_PROTOCOL': '', 'GIT_CONFIG_GLOBAL': '/dev/null',
        'GIT_CONFIG_SYSTEM': '/dev/null', 'GIT_CONFIG_NOSYSTEM': '1',
@@ -284,6 +291,33 @@ def moved_reference_only(before, after):
             and MOVED_REFERENCE.sub('', before) == MOVED_REFERENCE.sub('', after))
 
 
+def disposed_identity(row):
+    """The sha256 that names a hit apart from where it and its send site sit, or None."""
+    description = row.get('model_text_function') if type(row) is dict else None
+    if type(description) is not str or MOVED_REFERENCE.search(description) is None:
+        return None
+    return sha(encoded({**{key: row.get(key) for key in DISPOSED_IDENTITY_FIELDS},
+                        'description_stem': MOVED_REFERENCE.sub('', description)}))
+
+
+def require_reference_target(read_source, delta):
+    """The line a moved description now names must exist in the candidate tree and hold the call.
+
+    `read_source(path)` returns that file's text in the candidate tree, or None.
+    This runs where a tree is at hand (the comparison and the activation), not
+    in the gate, which stays a check of arrays. Whether the call is the same
+    one as before is the independent reviewer's condition (b).
+    """
+    for row in delta['hits']['changed_fields']:
+        found = REFERENCE_TARGET.search(row['after'].get('model_text_function') or '')
+        need(found is not None, 'the moved description names no source line')
+        text = read_source(found['path'])
+        lines = text.splitlines() if type(text) is str else []
+        number = int(found['line'])
+        need(1 <= number <= len(lines) and REFERENCE_CALL in lines[number - 1],
+             'the moved description does not name a PhaseRequest call in the candidate tree')
+
+
 def require_stop_rule(delta):
     """The lead's rule for this assignment, on the predecessor-to-candidate ledgers.
 
@@ -319,7 +353,8 @@ def require_stop_rule(delta):
         need(all(row['differing_fields'] == ['line'] for row in ledger['relocations']), name + ': non-coordinate relocation')
         for row in ledger['changed_fields']:
             need(name == 'hits' and row['differing_fields'] == ['line', 'model_text_function']
-                 and moved_reference_only(row['before'].get('model_text_function'), row['after'].get('model_text_function')),
+                 and moved_reference_only(row['before'].get('model_text_function'), row['after'].get('model_text_function'))
+                 and disposed_identity(row['before']) == DISPOSED_IDENTITY_SHA256 == disposed_identity(row['after']),
                  name + ': a changed field outside the single disposed exception stops this assignment')
             exceptions += 1
     need(delta['violations']['relocations'] == [] and delta['violations']['changed_fields'] == [],
@@ -661,6 +696,12 @@ def compare_runs(args):
                     if key not in ('positional_differences', 'exact_arrays_equal')}
              for name, ledger in legs[3]['arrays'].items()}
     exceptions = require_stop_rule(delta)
+    def candidate_source(path):
+        try:
+            return git(args.repository, 'show', args.candidate + ':' + path).decode('utf-8')
+        except ValueError:
+            return None
+    require_reference_target(candidate_source, delta)
     need(require_delta_on_arrays(dict(predecessor=dict(delta=delta)), previous, before['arrays'], after['arrays'])
          == exceptions, 'the delta does not bind to the scanned arrays; no proposal emitted')
     proposal = dict(kind='pr6325_d128_successor_proposal', version=1, assignment=ASSIGNMENT,
