@@ -50,6 +50,17 @@ turn, and a closed set of child logs linked to successful v2 spawn results. A
 different model, missing child log, unknown tool, reroute or foreign ancestry
 refuses publication. Historical v1 delegation aliases are not accepted.
 
+Child model and effort evidence must follow a `thread_settings_applied` marker
+whose thread id is the child's own id, with matching settings. When the first
+metadata record supplies `subagent_history_start_ordinal`, it must point to that
+exact serialized row. An owned `task_started` and `turn_context` must agree on
+a fresh turn id; inherited parent contexts cannot qualify a child. Owned tool
+calls and results are correlated in both directions and within the same session.
+Inherited contexts, calls and results must match retained ancestor-owned evidence.
+Conflicting assistant-message model fields are refused when present. The inspected
+historical marker examples are CLI 0.172.0; no live 0.170.0 child compatibility is
+claimed, and a missing ownership marker fails closed.
+
 The runner disables shell, executor, image, hook, memory, application and search
 features, supplies no MCP configuration, and accepts only the reviewed delegation
 operations in session history. The read-only sandbox is not a filesystem read

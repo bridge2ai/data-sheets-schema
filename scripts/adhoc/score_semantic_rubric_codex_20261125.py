@@ -290,6 +290,60 @@ def remove_auth_copy(directory_fd, receipt):
         receipt["auth_copy_absent"] = True
 
 
+def owned_turns(rows, ident, child, working_directory):
+    """Bind model-bearing turns to this log's thread, not forked history (6346).
+
+    Real v2 child logs resume their own history at thread_settings_applied for
+    the child's UUID. The optional metadata ordinal points at that exact row;
+    inherited parent metadata is not an ownership switch.
+    """
+    start = 1
+    if child:
+        markers = [index for index, row in enumerate(rows)
+                   if row.get("type") == "event_msg"
+                   and row.get("payload", {}).get("type") == "thread_settings_applied"
+                   and row["payload"].get("thread_id") == ident]
+        require(bool(markers), "child has no thread-owned history marker")
+        start = markers[0]
+        ordinal = rows[0]["payload"].get("subagent_history_start_ordinal")
+        if ordinal is not None:
+            require(type(ordinal) is int and ordinal == start,
+                    "child history ordinal does not match its thread marker")
+    inherited_ids = {row["payload"].get("turn_id") for row in rows[:start]
+                     if row.get("type") == "turn_context"}
+    active_turn = None
+    starts = {}
+    contexts = []
+    for row in rows[start:]:
+        payload = row.get("payload", {})
+        if row.get("type") == "session_meta":
+            require(payload.get("id") == ident, "foreign metadata in owned history")
+        if row.get("type") == "event_msg" and payload.get("type") == "thread_settings_applied":
+            require(payload.get("thread_id") == ident, "foreign settings in owned history")
+            settings = payload.get("thread_settings", {})
+            require(settings.get("model") == MODEL and settings.get("reasoning_effort") == EFFORT
+                    and settings.get("cwd") == working_directory, "owned thread settings differ")
+        if row.get("type") == "event_msg" and payload.get("type") == "task_started":
+            active_turn = payload.get("turn_id")
+            require(isinstance(active_turn, str) and active_turn and active_turn not in starts
+                    and active_turn not in inherited_ids, "missing, repeated or inherited owned turn id")
+            attribution = payload.get("turn_attribution")
+            if attribution is not None:
+                require(isinstance(attribution, dict) and attribution.get("turn_id") == active_turn,
+                        "owned turn attribution differs")
+            starts[active_turn] = payload
+        if row.get("type") == "turn_context":
+            require(active_turn is not None and payload.get("turn_id") == active_turn,
+                    "model context lacks its own matching task_started turn")
+            if "root_turn_id" in payload or "root_turn_id" in starts[active_turn]:
+                require(payload.get("root_turn_id") == starts[active_turn].get("root_turn_id"),
+                        "owned context root turn differs")
+            contexts.append(payload)
+    require(bool(contexts), "session has no thread-owned model-bearing turn context")
+    require(set(starts) == {row["turn_id"] for row in contexts}, "owned task lacks model/effort evidence")
+    return start, contexts
+
+
 def session_identity(plan, started, finished):
     run = Path(plan["run_directory"])
     events = [parse_json(line) for line in read_file(run / "codex.stdout.jsonl").splitlines() if line]
@@ -302,9 +356,19 @@ def session_identity(plan, started, finished):
     calls = {}
     call_outputs = {}
     receipts = []
+    owned_contexts = {}
+    turn_owners = {}
+    inherited_contexts = []
+    inherited_calls = []
+    inherited_outputs = []
     for path in logs:
         raw = read_file(path)
-        rows = [parse_json(line) for line in raw.splitlines() if line]
+        lines = raw.splitlines()
+        require(all(lines), "blank rollout row makes history ordinal ambiguous")
+        rows = [parse_json(line) for line in lines]
+        require(all(isinstance(row, dict) and isinstance(row.get("payload"), dict) for row in rows),
+                "malformed rollout row")
+        require(rows[0].get("type") == "session_meta", "rollout must begin with session metadata")
         metas = [row.get("payload", {}) for row in rows if row.get("type") == "session_meta"]
         require(bool(metas), "session log has no metadata")
         meta = metas[0]
@@ -327,18 +391,29 @@ def session_identity(plan, started, finished):
         if task_path is None and ident != threads[0]:
             task_path = spawn.get("agent_path")
         agent_paths[ident] = task_path or ("/root" if ident == threads[0] else None)
+        own_start, qualified_contexts = owned_turns(rows, ident, parent is not None, plan["working_directory"])
+        owned_contexts[ident] = qualified_contexts
+        inherited_contexts.extend((ident, row["payload"]) for row in rows[:own_start]
+                                  if row.get("type") == "turn_context")
+        for context in qualified_contexts:
+            turn_id = context["turn_id"]
+            require(turn_id not in turn_owners or turn_owners[turn_id] == ident,
+                    "turn id is claimed by different sessions")
+            turn_owners[turn_id] = ident
         contexts = [row.get("payload", {}) for row in rows if row.get("type") == "turn_context"]
         require(bool(contexts), "session has no model-bearing turn context")
         for context in contexts:
             require(context.get("model") == MODEL, f"observed another model: {context.get('model')}")
             require(context.get("effort") == EFFORT, "observed reasoning effort differs")
             require(context.get("cwd") == plan["working_directory"], "turn working directory differs")
-        for row in rows:
+        for index, row in enumerate(rows):
             timestamp = datetime.fromisoformat(row.get("timestamp", "").replace("Z", "+00:00"))
             require(started <= timestamp <= finished, "session event is outside this invocation")
             payload = row.get("payload", {})
             kind = payload.get("type", "")
             require(kind not in ("model_reroute", "model_changed"), "model reroute recorded")
+            if payload.get("role") == "assistant" and "model" in payload:
+                require(payload["model"] == MODEL, "assistant message model contradicts turn evidence")
             if row.get("type") == "response_item" and kind.endswith("_call"):
                 require(kind == "function_call" and payload.get("name") in AGENT_TOOLS,
                         f"unexpected tool activity: {payload.get('name', kind)}")
@@ -346,19 +421,28 @@ def session_identity(plan, started, finished):
                 require(isinstance(call_id, str), "agent call lacks correlation id")
                 arguments = parse_json(payload.get("arguments", ""))
                 require(isinstance(arguments, dict), "agent arguments must be an object")
-                call = (payload["name"], arguments)
-                require(call_id not in calls or calls[call_id] == call, "conflicting inherited agent call")
+                if index < own_start:
+                    inherited_calls.append((ident, call_id, payload["name"], arguments))
+                    continue
+                call = (payload["name"], arguments, ident)
+                require(call_id not in calls, "duplicate owned agent call")
                 calls[call_id] = call
-            if row.get("type") == "response_item" and kind == "function_call_output":
+            if row.get("type") == "response_item" and kind.endswith("_call_output"):
+                require(kind == "function_call_output", "unexpected tool output kind")
                 call_id = payload.get("call_id")
                 require(isinstance(call_id, str), "tool output lacks correlation id")
                 value = payload.get("output")
-                require(call_id not in call_outputs or call_outputs[call_id] == value,
-                        "conflicting inherited tool output")
-                call_outputs[call_id] = value
+                if index < own_start:
+                    inherited_outputs.append((ident, call_id, value))
+                    continue
+                require(call_id not in call_outputs, "duplicate owned tool output")
+                call_outputs[call_id] = (value, ident)
         receipts.append({"path": str(path), "sha256": sha(raw), "id": ident,
-                         "parent_thread_id": parent, "cli_version": meta["cli_version"]})
+                         "parent_thread_id": parent, "cli_version": meta["cli_version"],
+                         "owned_history_start_ordinal": own_start,
+                         "owned_turn_ids": sorted({row["turn_id"] for row in qualified_contexts})})
     require(threads[0] in sessions, "root thread lacks its matching session log")
+    ancestors = {}
     for ident in sessions:
         seen = set()
         current = ident
@@ -366,19 +450,34 @@ def session_identity(plan, started, finished):
             require(current in sessions and current not in seen, "foreign or cyclic child ancestry")
             seen.add(current)
             current = sessions[current]
+        ancestors[ident] = (seen | {threads[0]}) - {ident}
+    for inheritor, context in inherited_contexts:
+        require(turn_owners.get(context.get("turn_id")) in ancestors[inheritor],
+                "inherited context lacks retained ancestor-owned turn evidence")
     # Current V2 returns canonical task_name and records agent_path in the
     # child's first metadata. Never accept an unlogged child or a V1 alias.
     spawned = set()
     referenced = set()
-    for call_id, (name, arguments) in calls.items():
-        require(call_id in call_outputs, "agent call lacks its result")
+    require(set(calls) == set(call_outputs), "owned tool calls and outputs do not correlate both ways")
+    for inheritor, call_id, name, arguments in inherited_calls:
+        require(call_id in calls and calls[call_id][:2] == (name, arguments)
+                and calls[call_id][2] in ancestors[inheritor],
+                "inherited call lacks matching ancestor-owned evidence")
+    for inheritor, call_id, value in inherited_outputs:
+        require(call_id in call_outputs and call_outputs[call_id][0] == value
+                and call_outputs[call_id][1] in ancestors[inheritor],
+                "inherited output lacks matching ancestor-owned evidence")
+    for call_id, (name, arguments, owner) in calls.items():
+        value, output_owner = call_outputs[call_id]
+        require(owner == output_owner, "tool call and output belong to different sessions")
         if name == "spawn_agent":
-            outcome = parse_json(call_outputs[call_id])
+            outcome = parse_json(value)
             require(isinstance(outcome, dict), "unrecognized spawn result")
             target = outcome.get("task_name")
             require(isinstance(target, str), "spawn result lacks child identity")
             matching = [ident for ident, path in agent_paths.items() if ident == target or path == target]
             require(len(matching) == 1 and matching[0] != threads[0], "spawned child has no unique session log")
+            require(sessions[matching[0]] == owner, "spawn result does not belong to its parent session")
             spawned.add(matching[0])
         elif name in {"send_message", "followup_task", "interrupt_agent"}:
             target = arguments.get("target")
@@ -391,9 +490,7 @@ def session_identity(plan, started, finished):
                                                           and path.endswith("/" + target))]
         require(len(matching) == 1, "agent target has no unique retained session log")
     # Derive the stamp from the matching root's recorded turn, never the request.
-    root_path = Path(next(item["path"] for item in receipts if item["id"] == threads[0]))
-    root_rows = [parse_json(line) for line in read_file(root_path).splitlines() if line]
-    observed = next(row["payload"]["model"] for row in root_rows if row.get("type") == "turn_context")
+    observed = owned_contexts[threads[0]][0]["model"]
     return {"name": observed, "basis": "recorded Codex session turn_context",
             "selection_basis": "explicit override", "effort": EFFORT,
             "service_tier_requested": TIER, "service_tier_observed": None,
