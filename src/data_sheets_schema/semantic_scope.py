@@ -55,7 +55,7 @@ def validate_scope(result: dict, *, document: dict | None = None, input_sha256: 
     resolved_units = None
     if instrument.version == "6.0":
         from data_sheets_schema.root_scope import ROOT_POLICY, assert_portable_output, resolve_root_units
-        assert_portable_output(result)
+        assert_portable_output(result, document=document, resource_reader=resource_reader)
         if scope.get("selection_policy") != ROOT_POLICY or policy != "single_dataset" or paths != ["#"]:
             raise ValueError("semantic v6 requires the independently selected root unit")
         recorded_scope_hash = (result.get("metadata") or {}).get("scope_context_sha256")

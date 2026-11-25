@@ -156,9 +156,16 @@ def validate_outputs(paths: List[Path], rubric: str | None = None,
                 continue
             if project is not None or method is not None:
                 raise ValueError("--project and --method are field-agent validation options")
-            valid, errors = validate_evaluation(doc, load_schema(schema_dir / Path(instrument.schema_path).name))
-            if not valid:
-                raise ValueError("\n".join(errors))
+            schema = load_schema(schema_dir / Path(instrument.schema_path).name)
+            if instrument.version == "6.0":
+                # Local-looking considered pointers need the original record.
+                # Check structure here, then all semantics in the mandatory
+                # source-bound validate_scope below; no unbound exemption.
+                validate(instance=doc, schema=schema)
+            else:
+                valid, errors = validate_evaluation(doc, schema)
+                if not valid:
+                    raise ValueError("\n".join(errors))
             if instrument.evidence_authority_path is not None:
                 if input_path is None:
                     raise ValueError(f"version-{expected_version[0]} output validation requires --input to verify every source resource")
@@ -189,7 +196,7 @@ def validate_outputs(paths: List[Path], rubric: str | None = None,
                                           expected_context=load_context(context_path), **scope_kwargs)
                 for finding in evidence.warnings:
                     print(f"WARNING {path}: {finding.code}: {finding.message}")
-        except (OSError, ValueError, jsonschema.SchemaError) as exc:
+        except (OSError, ValueError, ValidationError, jsonschema.SchemaError) as exc:
             print(f"INVALID {path}: {exc}")
             failed = True
         else:

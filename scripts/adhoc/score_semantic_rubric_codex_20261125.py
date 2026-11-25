@@ -635,8 +635,12 @@ def execute(plan, args):
         candidate["scorer_instrument"] = {"id": plan["instrument"], "prompt_sha256": plan["prompt_sha256"],
                                           "runner_sha256": plan["runner_sha256"]}
         if plan["identity"]["version"] == "6.0":
+            import yaml
             from data_sheets_schema.root_scope import assert_portable_output
-            assert_portable_output(candidate)
+            authority = {"data/rubric/semantic_evidence_authority_v3.json":
+                         input_bytes(plan, "evidence-authority.json")}
+            assert_portable_output(candidate, document=yaml.safe_load(input_bytes(plan, "record.yaml")),
+                                   resource_reader=authority.__getitem__)
         staged = run / "candidate_evaluation.json"
         write_json(staged, candidate)
         # Bind publication to the bytes presented to the validator (6347).

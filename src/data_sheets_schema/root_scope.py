@@ -22,6 +22,7 @@ _LOCAL_PATH = re.compile(
 _UNC_PATH = re.compile(r"(?<![\w/\\])(?:\\\\|//)[^\\/\s]+[\\/][^\\/\s]+")
 _WEB_URL = re.compile(r"https?://[^\s<>\"']+", re.IGNORECASE)
 _PROVENANCE_SECTIONS = ("metadata", "evaluation_metadata", "evaluation_model", "scorer_instrument", "model")
+_FIELD_AUTHORITY_SHA256 = "0605c742c61f2cc4e13de907f8e09752bde5ebd08d173b31d837c273a4bf3872"
 
 
 def _path_role(parts: tuple, rubric: str) -> str | None:
@@ -36,8 +37,10 @@ def _path_role(parts: tuple, rubric: str) -> str | None:
         if rubric != selected:
             continue
         prefix = (groups, None, items, None, "unit_scores", None)
-        if address == prefix + ("path",) or address == prefix + ("considered", None):
+        if address == prefix + ("path",):
             return "pointer"
+        if address == prefix + ("considered", None):
+            return "considered"
         if any(address == prefix + (kind, None, "path") for kind in ("cited", "absent", "counts")):
             return "pointer"
     return None
@@ -132,13 +135,33 @@ def _relative_artifact(value: str, field: str) -> None:
         raise ValueError(f"{field} must be a relative POSIX path without traversal")
 
 
-def assert_portable_output(result: dict) -> None:
+def assert_portable_output(result: dict, *, document: dict | None = None, resource_reader=None) -> None:
     """Refuse absolute provenance paths and common local path forms in prose.
 
     Typed artifacts use their relative-path contract; typed evidence pointers
     retain their document meaning and are checked by the evidence validator.
+    Considered paths get that exemption only with trusted source resolution or
+    frozen field-name authority, since their evidence check is grammar-only.
     This does not infer arbitrary filesystem references from natural language.
     """
+    unit = unwrap_document(document) if document is not None else {}
+    authority_names = None
+
+    def established_considered(path):
+        nonlocal authority_names
+        from data_sheets_schema.semantic_evidence import _locations, _path_problem, _unknown_absence_name
+        from data_sheets_schema.semantic_evidence_authority import load_authority
+
+        if _path_problem(path) is not None:
+            return False
+        if document is not None and _locations(unit, path):
+            return True
+        if authority_names is None:
+            authority_names, digest = load_authority(resource_reader=resource_reader)
+            if digest != _FIELD_AUTHORITY_SHA256:
+                raise ValueError("considered evidence requires the frozen field-name authority")
+        return _unknown_absence_name(unit, path, authority_names) is None
+
     def web_url(match):
         try:
             parsed = urlsplit(match.group())
@@ -156,12 +179,17 @@ def assert_portable_output(result: dict) -> None:
                 # Do not reinterpret document keys, even local-looking keys,
                 # as filesystem paths. Strict acceptance checks their meaning.
                 return
+            if role == "considered" and established_considered(value):
+                return
             if provenance and value.lstrip().startswith("/"):
                 raise ValueError("published semantic v6 provenance contains an absolute POSIX path")
             # A URL may legitimately name /home or /Users on a remote site.
             # Only recognized HTTP(S) URLs are exempt; prose delimiters are not.
             prose = _WEB_URL.sub(web_url, value)
-            if _LOCAL_PATH.search(prose) or _UNC_PATH.search(prose):
+            # A pointer-shaped UNC value has one slash before its backslashes;
+            # without trusted record meaning, that slash must not hide the UNC.
+            considered_unc = role == "considered" and prose.startswith("/") and _UNC_PATH.search(prose[1:])
+            if _LOCAL_PATH.search(prose) or _UNC_PATH.search(prose) or considered_unc:
                 raise ValueError("published semantic v6 output contains a local absolute path")
         elif isinstance(value, dict):
             for key, item in value.items():
