@@ -783,7 +783,7 @@ class RunSpec:
         from .native_shared_render import validate_spec as validate_native_shared
         validate_native_shared(self)
         from data_sheets_schema.native_source_attribution import validate as validate_native_attribution
-        validate_native_attribution(self.native_source_attribution_version, native=self.runtime in CLAUDE_CODE_RUNTIMES,
+        validate_native_attribution(self.native_source_attribution_version, native=_native_attribution_runtime(self),  # SF3
                                     renderer=self.render_version, max_checks=self.native_source_attribution_max_checks)
         if self.render_version == 24 and self.is_agentic:
             raise ValueError("renderer 24 is an API-only offline receipt boundary")
@@ -8827,3 +8827,24 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             "outputs": {"full": str(spec.full_path), "core": str(spec.core_path),
                         "report": str(spec.report_path),
                         "provenance": str(spec.provenance_path)}}
+
+
+def _native_attribution_runtime(spec) -> bool:
+    """Whether `spec.runtime` may carry native source attribution (review 2 of #6325, SF3).
+
+    The set is `native_source_attribution.NATIVE_RUNTIMES`, the one its
+    `command_args` reads at render and registration, so construction and
+    rendering read one definition. It is narrower than `CLAUDE_CODE_RUNTIMES`:
+    a release series (`Claude Code (release)`, #6324) is a headless Claude Code
+    session with no native controller and does not use native source
+    attribution. Such a specification is refused here, naming that cause,
+    rather than admitted and then refused at render for its renderer.
+    Defined last in the module so that no line above it moves: the D128
+    scanner ledger pins this file's hit lines.
+    """
+    from data_sheets_schema.native_source_attribution import NATIVE_RUNTIMES
+    version = spec.native_source_attribution_version
+    if type(version) is int and version == 1 and spec.runtime not in NATIVE_RUNTIMES:
+        raise ValueError(f"native source attribution v1 requires a native source-attribution runtime "
+                         f"({', '.join(sorted(NATIVE_RUNTIMES))}); {spec.runtime!r} is not one")
+    return spec.runtime in NATIVE_RUNTIMES

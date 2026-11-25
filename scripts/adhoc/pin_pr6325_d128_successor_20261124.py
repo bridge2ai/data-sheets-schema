@@ -2,7 +2,7 @@
 
 Purpose: write the reviewed successor fixture for PR 6325 and replace the one
 inactive pin literal in the D128 gate test. Derived from
-pin_pr6325_d128_successor_20261122.py, which is unchanged. The candidate
+pin_pr6302_d128_successor_20261122.py, which is unchanged. The candidate
 commit and the proposal and comparison hashes are arguments here, not
 constants; the pinned review file must name all three and end with APPROVE.
 
@@ -132,6 +132,11 @@ def main():
     fixture_sha = core.sha(raw)
     core.require_successor(raw, fixture_sha, historical, previous)
     runs = comparison['new_runs']
+    # The baseline-to-candidate ledger this fixture pins must account for the comparison's own
+    # scans, as the gate's require_approved_arrays will require (review 2 of #6325, MN1).
+    for name in core.ARRAYS:
+        core.validate_array(runs['baseline']['arrays'][name], runs['candidate']['arrays'][name],
+                            reviewed['arrays'][name])
     core.require_delta_on_arrays(core.decode(raw), previous, runs['baseline']['arrays'], runs['candidate']['arrays'])
     changed = original.replace(INACTIVE, ("PR6325_SUCCESSOR_SHA256 = '" + fixture_sha + "'\n").encode('ascii'))
     core.need((ROOT / GATE).read_bytes() == original, 'gate changed during activation preparation')

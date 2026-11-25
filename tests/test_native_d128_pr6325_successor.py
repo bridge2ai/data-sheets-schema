@@ -180,3 +180,31 @@ def test_the_chained_delta_is_bound_to_the_scanned_arrays():
         helper.require_delta_on_arrays(declared, predecessor, baseline, changed)
     with pytest.raises(ValueError):
         helper.require_delta_on_arrays(dict(predecessor=dict()), predecessor, baseline, after)
+
+
+# Review 2 (MN3): controls for the two stop-rule checks no earlier control could fail without.
+
+def test_a_cross_index_row_stops():
+    """A relocation and a changed row that swap their after indexes, accounting otherwise consistent."""
+    _, _, delta = _honest()
+    relocation, changed = delta["hits"]["relocations"][0], delta["hits"]["changed_fields"][0]
+    assert (relocation["before_index"], changed["before_index"]) == (0, 1)
+    relocation["after_index"], changed["after_index"] = 1, 0     # both sides still a permutation of 0..1
+    assert relocation["differing_fields"] == helper.fields(relocation["before"], relocation["after"])
+    with pytest.raises(ValueError, match="changed position"):
+        helper.require_stop_rule(delta)
+
+
+@pytest.mark.parametrize("fields", [["line", "snippet"], []])
+def test_a_relocation_must_differ_in_line_alone(fields):
+    """A relocation row whose recomputed differing fields, declared honestly, are not exactly ['line']."""
+    _, _, delta = _honest()
+    row = delta["hits"]["relocations"][0]
+    if fields:
+        row["after"]["snippet"] = "edited"
+    else:
+        row["after"] = deepcopy(row["before"])
+    row["differing_fields"] = helper.fields(row["before"], row["after"])
+    assert row["differing_fields"] == fields
+    with pytest.raises(ValueError, match="non-coordinate relocation"):
+        helper.require_stop_rule(delta)
