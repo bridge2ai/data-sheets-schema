@@ -1,0 +1,22 @@
+Launch record: release series 2026-11-25c (headless, advisor off, no MCP servers)
+launched_at_utc: 2026-11-25T05:52:22Z  (date -u)
+project: AI_READI   replicate: 1   label: 2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1
+condition: generic_v9   method: claudecode_release   runtime: Claude Code (release)   arm: baseline
+instruction: .temp/launch/AI_READI_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1.md
+instruction_sha256: 5e35c3a523460dc3263561b3a281d58932524d1236abad0b1eb75fd044a5455d (35715 bytes)
+worktree: (the launch directory)   commit: edd279fd27e1d4add4b0d536888638f55254a022   tree dirty paths: 3
+schema: version: 3.2.1
+bundle: data/preprocessed/concatenated/AI_READI_preprocessed.txt sha256 b4a282fd5c44bc93a3bcd71a4c3ee53b36a0de31d105656b70c3e296cc02a956
+model: claude-fable-5-2   effort: high (CLI flags; both stated in the rendering specification, the effort asserted by the launcher)
+recorder line: complete (D4D_RENDER_SPEC and D4D_LAUNCH_INSTRUCTION); toolchain: checkout-relative
+render specification: .temp/launch/AI_READI_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1.render_spec.json sha256 60828d3d70ce6eea3c97ef45c4a58489aa16b81744361b07a0bb45d337ec46b4
+claude code: 2.1.332 (Claude Code) (/Users/marcin/.local/bin/claude)
+account: claude-work (CLAUDE_CONFIG_DIR=~/.claude-work, as the owner's shell function of that name does)
+advisor tool: disabled with CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1
+MCP servers: none (--strict-mcp-config with no config)
+settings: project only (--setting-sources project): no user-level hooks, allow rules, skills, agents or plugins of the account
+permission mode: auto (--permission-mode auto, stated because the user settings that set it are not loaded)
+auto-memory: off (CLAUDE_CODE_DISABLE_AUTO_MEMORY=1)
+environment: constructed with env -i (HOME, PATH, USER, LOGNAME, SHELL, LANG, TMPDIR, the two CLAUDE_CODE_DISABLE switches, the two D4D variables, and the account's configuration directory and token variable); nothing else of the launching shell reaches the session
+delivery: the instruction file's text is the single prompt of a headless session (claude -p)
+launched by: scripts/adhoc/run_release_series_20261124.sh 2026-11-25c claude-fable-5-2 high 1

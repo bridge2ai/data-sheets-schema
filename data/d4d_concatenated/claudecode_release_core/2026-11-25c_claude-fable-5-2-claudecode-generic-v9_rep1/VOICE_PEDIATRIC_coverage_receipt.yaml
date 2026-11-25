@@ -1,0 +1,737 @@
+bundle_md5: 0350223711484a63c21b2dd57af6f4c9
+chunks:
+- id: c001
+  status: nothing_relevant
+  reason: "Concatenation preamble only: input directory, file count and the table of contents naming the six source files; no dataset fact."
+- id: c002
+  status: extracted
+  extracted:
+  - slot: name
+    snippet: "Bridge2AI-Voice Pediatric Dataset"
+  - slot: title
+    snippet: "title = {{Bridge2AI-Voice Pediatric Dataset}}"
+  - slot: version
+    snippet: "note = {Version 1.1.0}"
+  - slot: issued
+    snippet: "Published: May 1, 2026"
+  - slot: citation
+    snippet: "Ghosh, S. (2026). Bridge2AI-Voice Pediatric Dataset (version 1.1.0)."
+  - slot: description
+    snippet: "Bridge2AI-Voice Pediatric Dataset v1.1.0 contains derived audio features for 23,533 recordings collected from 300 participants aged 2-18"
+  - slot: description
+    snippet: "Detailed demographic, clinical, and validated questionnaire data are also made available"
+  - slot: is_tabular
+    snippet: "Binary files are made available as Parquet, an open-source column-oriented data file format"
+  - slot: creators[0].name
+    snippet: "Yael Bensoussan"
+  - slot: creators[1].name
+    snippet: "Alexandros Sigaras"
+  - slot: creators[2].name
+    snippet: "Anais Rameau"
+  - slot: creators[3].name
+    snippet: "Olivier Elemento"
+  - slot: creators[4].name
+    snippet: "Maria Powell"
+  - slot: creators[5].name
+    snippet: "David Dorr"
+  - slot: creators[6].name
+    snippet: "Philip Payne"
+  - slot: creators[7].name
+    snippet: "Vardit Ravitsky"
+  - slot: creators[8].name
+    snippet: "Jean-Christophe Bélisle-Pipon"
+  - slot: creators[9].name
+    snippet: "Ruth Bahr"
+  - slot: creators[10].name
+    snippet: "Stephanie Watts"
+  - slot: creators[11].name
+    snippet: "Donald Bolser"
+  - slot: creators[12].name
+    snippet: "Jennifer Siu"
+  - slot: creators[13].name
+    snippet: "Jordan Lerner-Ellis"
+  - slot: creators[14].name
+    snippet: "Frank Rudzicz"
+  - slot: creators[15].name
+    snippet: "Micah Boyer"
+  - slot: creators[16].name
+    snippet: "Yassmeen Abdel-Aty"
+  - slot: creators[17].name
+    snippet: "Toufeeq Ahmed Syed"
+  - slot: creators[18].name
+    snippet: "Dona Amraei"
+  - slot: creators[19].name
+    snippet: "James Anibal"
+  - slot: creators[20].name
+    snippet: "Stephen Aradi"
+  - slot: creators[21].name
+    snippet: "Kirollos Armosh"
+  - slot: creators[22].name
+    snippet: "Ana Sophia Martinez"
+  - slot: creators[23].name
+    snippet: "Shaheen Awan"
+  - slot: creators[24].name
+    snippet: "Steven Bedrick"
+  - slot: creators[25].name
+    snippet: "Helena Beltran"
+  - slot: creators[26].name
+    snippet: "Alexander Bernier"
+  - slot: creators[27].name
+    snippet: "Moroni Berrios"
+  - slot: creators[28].name
+    snippet: "Isaac Bevers"
+  - slot: creators[29].name
+    snippet: "Alden Blatter"
+  - slot: creators[30].name
+    snippet: "Rahul Brito"
+  - slot: creators[31].name
+    snippet: "Amy Brown"
+  - slot: creators[32].name
+    snippet: "Johnathan Brown"
+  - slot: creators[33].name
+    snippet: "Léo Cadillac"
+  - slot: creators[34].name
+    snippet: "Selina Casalino"
+  - slot: creators[35].name
+    snippet: "John Costello"
+  - slot: creators[36].name
+    snippet: "Abhijeet Dalal"
+  - slot: creators[37].name
+    snippet: "Iris De Santiago"
+  - slot: creators[38].name
+    snippet: "Enrique Diaz-Ocampo"
+  - slot: creators[39].name
+    snippet: "Amanda Doherty-Kirby"
+  - slot: creators[40].name
+    snippet: "Mohamed Ebraheem"
+  - slot: creators[41].name
+    snippet: "Ellie Eiseman"
+  - slot: creators[42].name
+    snippet: "Mahmoud Elmahdy"
+  - slot: creators[43].name
+    snippet: "Renee English"
+  - slot: creators[44].name
+    snippet: "Emily Evangelista"
+  - slot: creators[45].name
+    snippet: "Kenneth Fletcher"
+  - slot: creators[46].name
+    snippet: "Hortense Gallois"
+  - slot: creators[47].name
+    snippet: "Gaelyn Garrett"
+  - slot: creators[48].name
+    snippet: "Alexander Gelbard"
+  - slot: creators[49].name
+    snippet: "Omar Ghaffar"
+  - slot: creators[50].name
+    snippet: "Anna Goldenberg"
+  - slot: creators[51].name
+    snippet: "Karim Hanna"
+  - slot: creators[52].name
+    snippet: "William Hersh"
+  - slot: creators[53].name
+    snippet: "Jennifer Jain"
+  - slot: creators[54].name
+    snippet: "Lochana Jayachandran"
+  - slot: creators[55].name
+    snippet: "Kaley Jenney"
+  - slot: creators[56].name
+    snippet: "Kathy Jenkins"
+  - slot: creators[57].name
+    snippet: "Jenkins, Kathy and Jo, Stacy and Johnson, Alistair"
+  - slot: creators[58].name
+    snippet: "Alistair Johnson"
+  - slot: creators[59].name
+    snippet: "Ayush Kalia"
+  - slot: creators[60].name
+    snippet: "Megha Kalia"
+  - slot: creators[61].name
+    snippet: "Zoha Khawa"
+  - slot: creators[62].name
+    snippet: "Kenji Kobayashi"
+  - slot: creators[63].name
+    snippet: "Cindy Kostelnik"
+  - slot: creators[64].name
+    snippet: "Alisa Krause"
+  - slot: creators[65].name
+    snippet: "Andrea Krussel"
+  - slot: creators[66].name
+    snippet: "Elisa Lapadula"
+  - slot: creators[67].name
+    snippet: "Genelle Leo"
+  - slot: creators[68].name
+    snippet: "Justin Levinsky"
+  - slot: creators[69].name
+    snippet: "Chloe Loewith"
+  - slot: creators[70].name
+    snippet: "Radhika Mahajan"
+  - slot: creators[71].name
+    snippet: "Vrishni Maharaj"
+  - slot: creators[72].name
+    snippet: "Siyu Miao"
+  - slot: creators[73].name
+    snippet: "LeAnn Michaels"
+  - slot: creators[74].name
+    snippet: "Matthew Mifsud"
+  - slot: creators[75].name
+    snippet: "Marian Mikhael"
+  - slot: creators[76].name
+    snippet: "Elijah Moothedan"
+  - slot: creators[77].name
+    snippet: "Yosef Nafii"
+  - slot: creators[78].name
+    snippet: "Tempestt Neal"
+  - slot: creators[79].name
+    snippet: "Karlee Newberry"
+  - slot: creators[80].name
+    snippet: "Newberry, Karlee and Ng, Evan and Nickel, Christopher"
+  - slot: creators[81].name
+    snippet: "Christopher Nickel"
+  - slot: creators[82].name
+    snippet: "Amanda Peltier"
+  - slot: creators[83].name
+    snippet: "Trevor Pharr"
+  - slot: creators[84].name
+    snippet: "Michaela Pnacekova"
+  - slot: creators[85].name
+    snippet: "Matthew Pontell"
+  - slot: creators[86].name
+    snippet: "Jaiden Potter"
+  - slot: creators[87].name
+    snippet: "Claire Premi-Bortolotto"
+  - slot: creators[88].name
+    snippet: "Parnaz Rafatjou"
+  - slot: creators[89].name
+    snippet: "JM Rahman"
+  - slot: creators[90].name
+    snippet: "Gayathiri Rajkumar"
+  - slot: creators[91].name
+    snippet: "John Ramos"
+  - slot: creators[92].name
+    snippet: "Michael de Riesthal"
+  - slot: creators[93].name
+    snippet: "Sarah Rohde"
+  - slot: creators[94].name
+    snippet: "Jillian Rossi"
+  - slot: creators[95].name
+    snippet: "Laurie Russell"
+  - slot: creators[96].name
+    snippet: "Samantha Salvi Cruz"
+  - slot: creators[97].name
+    snippet: "Joyce Samuel"
+  - slot: creators[98].name
+    snippet: "Suketu Shah"
+  - slot: creators[99].name
+    snippet: "Ahmed Shawkat"
+  - slot: creators[100].name
+    snippet: "Elizabeth Silberholz"
+  - slot: creators[101].name
+    snippet: "John Stark"
+  - slot: creators[102].name
+    snippet: "Stark, John and Su, Lala and Sudhakar, Shrramana Ganesh"
+  - slot: creators[103].name
+    snippet: "Shrramana Ganesh Sudhakar"
+  - slot: creators[104].name
+    snippet: "Duncan Sutherland"
+  - slot: creators[105].name
+    snippet: "Venkata Swarna Mukhi"
+  - slot: creators[106].name
+    snippet: "Jeffrey Tang"
+  - slot: creators[107].name
+    snippet: "Luka Taylor"
+  - slot: creators[108].name
+    snippet: "Jamie Toghranegar"
+  - slot: creators[109].name
+    snippet: "Julie Tu"
+  - slot: creators[110].name
+    snippet: "Megan Urbano"
+  - slot: creators[111].name
+    snippet: "Gavin Victor"
+  - slot: creators[112].name
+    snippet: "Kimberly Vinson"
+  - slot: creators[113].name
+    snippet: "Jordan Wilke"
+  - slot: creators[114].name
+    snippet: "Claire Wilson"
+  - slot: creators[115].name
+    snippet: "Madeleine Zanin"
+  - slot: creators[116].name
+    snippet: "Xijie Zeng"
+  - slot: creators[117].name
+    snippet: "Theresa Zesiewicz"
+  - slot: creators[118].name
+    snippet: "Robin Zhao"
+  - slot: creators[119].name
+    snippet: "Pantelis Zisimopoulos"
+  - slot: creators[120].name
+    snippet: "Satrajit Ghosh"
+  - slot: purposes[0].response
+    snippet: "seeks to create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health"
+  - slot: purposes[1].response
+    snippet: "Establishing a robust multi-institutional dataset that integrates pediatric voice data with demographic information would advance the understanding of voice and disease as well as early detection and intervention"
+  - slot: intended_uses[0].description
+    snippet: "Resources such as this project are intended to enable study of developmental norms"
+  - slot: intended_uses[1].description
+    snippet: "create AI-driven tools for early screening"
+  - slot: intended_uses[2].description
+    snippet: "and support clinical insight"
+  - slot: addressing_gaps[0].response
+    snippet: "These factors have contributed to the lack of publicly/open access/ available pediatric data sets that enable machine learning for pediatric voice analysis"
+  - slot: addressing_gaps[0].response
+    snippet: "the availability of large-scale pediatric databases/datasets remains/is limited"
+  - slot: addressing_gaps[0].response
+    snippet: "unique challenges such as privacy issues, consent processes, the need for developmentally appropriate tasks"
+  - slot: addressing_gaps[1].response
+    snippet: "evidence/normative data that we have in adults cannot be generalized to pediatric populations"
+  - slot: addressing_gaps[1].response
+    snippet: "the respiratory system and larynx undergo rapid functional maturation/development throughout childhood"
+  - slot: page
+    snippet: "Source URL: https://physionet.org/content/b2ai-voice-pediatric/1.1.0/"
+  - slot: description
+    snippet: "The release contains data considered low risk, including derivations such as spectrograms but not the original voice recordings"
+  - slot: instances[0].data_substrate
+    snippet: "Binary files are made available as Parquet, an open-source column-oriented data file format"
+  - slot: instances[0].description
+    snippet: "a unique identifier for the participant (participant_id), a unique identifier for the recording session (session_id)"
+  - slot: instances[1].description
+    snippet: "collected from 300 participants aged 2-18"
+  - slot: collection_mechanisms[0].used_software[0].name
+    snippet: "customized software –\nreproschema-ui –\non tablets"
+  - slot: preprocessing_strategies[0].preprocessing_details
+    snippet: "b2aiprep library"
+  - slot: preprocessing_strategies[1].used_software[0].name
+    snippet: "using an open source library developed by our team [4]"
+  - slot: preprocessing_strategies[2].preprocessing_details
+    snippet: "Each feature is present in the static_features.tsv file"
+  - slot: preprocessing_strategies[2].used_software[0].name
+    snippet: "Extraction (openSMILE [5])"
+  - slot: preprocessing_strategies[2].used_software[1].name
+    snippet: "Praat [6], parselmouth [7]"
+  - slot: preprocessing_strategies[2].used_software[2].name
+    snippet: "parselmouth [7], and torchaudio"
+  - slot: preprocessing_strategies[2].used_software[3].name
+    snippet: "and torchaudio [8, 9] are provided"
+  - slot: missing_data_documentation[0].missing_data_causes
+    snippet: "whether due to length or other issues"
+  - slot: participant_privacy[0].privacy_techniques
+    snippet: "The release contains data considered low risk, including derivations such as spectrograms but not the original voice recordings"
+  - slot: raw_sources[0].raw_data_details
+    snippet: "Raw Audio Data Access for Bridge2AI Voice Pediatric Cohort is via Synapse\n(March 9, 2026, 10:07 a.m.)"
+  - slot: raw_sources[0].raw_data_details
+    snippet: "Data will be made available via Synapse"
+  - slot: distribution_formats[0].description
+    snippet: "Binary files are made available as Parquet, an open-source column-oriented data file format"
+  - slot: distribution_formats[1].description
+    snippet: "the features folder contains the following plain-text file"
+  - slot: distribution_formats[1].description
+    snippet: "Data were exported and converted to tab delimited values"
+  - slot: distribution_formats[2].description
+    snippet: "a dictionary where keys are the column names matching the associated data file, and values are dictionaries with further detail"
+  - slot: distribution_formats[2].description
+    snippet: "The description value in the data dictionary provides a one sentence summary of the respective column"
+  - slot: related_datasets[0].target_dataset
+    snippet: "https://physionet.org/content/b2ai-voice/"
+  - slot: related_datasets[0].relationship_type
+    snippet: "Note that the Bridge2AI-Voice Adult Dataset is also available on PhysioNet"
+  - slot: related_datasets[0].name
+    snippet: "Bridge2AI-Voice Adult Dataset"
+  - slot: related_datasets[0].description
+    snippet: "Note that the Bridge2AI-Voice Adult Dataset is also available on PhysioNet"
+  - slot: file_collections[0].path
+    snippet: "derived audio data features (under features)"
+  - slot: file_collections[0].description
+    snippet: "All of the above files are associated with a data dictionary file which has the same file stem and a JSON suffixes"
+  - slot: file_collections[1].path
+    snippet: "phenotypic information acquired during data collection (under phenotype)"
+  - slot: file_collections[1].description
+    snippet: "phenotypic information acquired during data collection (under phenotype)"
+  - slot: file_collections[2].path
+    snippet: "metadata information for the recordings (available under metadata)"
+  - slot: file_collections[2].collection_type
+    snippet: "metadata information for the recordings (available under metadata)"
+  - slot: file_collections[2].description
+    snippet: "metadata information for the recordings (available under metadata)"
+  - slot: at_risk_populations.guardian_consent
+    snippet: "Following confirmation of eligibility, parental or participant consent was obtained prior to data collection and data sharing"
+  - slot: human_subject_research.special_populations
+    snippet: "Patients were considered eligible for the study if they fulfilled the inclusion criteria of 2 to 18 years of age"
+  - slot: at_risk_populations.guardian_consent[0]
+    snippet: "Following confirmation of eligibility, parental or participant consent was obtained"
+  - slot: human_subject_research.special_populations[0]
+    snippet: "inclusion criteria of 2 to 18 years of age"
+  - slot: instances[0].instance_type
+    snippet: "contains derived audio features for 23,533 recordings"
+  - slot: instances[0].counts
+    snippet: "derived audio features for 23,533 recordings"
+  - slot: instances[0].description
+    snippet: "the task performed (task_name), the number of time frames associated with that feature (n_frames), and the tensor data for the feature"
+  - slot: instances[0].data_topic
+    snippet: "a comprehensive collection of data derived from voice recordings with corresponding clinical information"
+  - slot: instances[1].instance_type
+    snippet: "collected from 300 participants aged 2-18"
+  - slot: instances[1].counts
+    snippet: "collected from 300 participants aged 2-18"
+  - slot: instances[1].description
+    snippet: "Patients/healthy volunteers at the Hospital for Sick Children were considered for enrollment in the study"
+  - slot: sampling_strategies[0].source_data
+    snippet: "Patients/healthy volunteers at the Hospital for Sick Children were considered for enrollment in the study"
+  - slot: sampling_strategies[0].strategies
+    snippet: "inclusion criteria of 2 to 18 years of age, and English proficiency. Exclusion criteria included participants over 18 years of age, and individuals who were non-verbal"
+  - slot: sampling_strategies[0].strategies
+    snippet: "Non-patients, recruited through research postings, were evaluated for eligibility"
+  - slot: collection_mechanisms[0].mechanism_details
+    snippet: "All data was collected through customized software"
+  - slot: collection_mechanisms[0].mechanism_details
+    snippet: "All participants completed the recording and demographic data collection in one session"
+  - slot: collection_mechanisms[1].mechanism_details
+    snippet: "A headset was used to record for most participants"
+  - slot: collection_mechanisms[2].mechanism_details
+    snippet: "the remaining recordings utilized the built-in tablet microphone due to low tolerance of wearing headphones or existing complex medical conditions"
+  - slot: acquisition_methods[0].acquisition_details
+    snippet: "The protocol included the collection of demographic information, voice and speech related questionnaires, and questionnaires inquiring about medical history"
+  - slot: acquisition_methods[0].acquisition_details
+    snippet: "parents or decision-makers completed the survey during the recording on a separate tablet"
+  - slot: informed_consent[0].consent_obtained
+    snippet: "parental or participant consent was obtained prior to data collection and data sharing"
+  - slot: informed_consent[0].consent_type
+    snippet: "parental or participant consent was obtained"
+  - slot: informed_consent[0].consent_scope
+    snippet: "consent was obtained prior to data collection and data sharing"
+  - slot: at_risk_populations.at_risk_groups_included
+    snippet: "inclusion criteria of 2 to 18 years of age"
+  - slot: at_risk_populations.guardian_consent[0]
+    snippet: "parental or participant consent was obtained prior to data collection and data sharing"
+  - slot: human_subject_research.involves_human_subjects
+    snippet: "Patients/healthy volunteers at the Hospital for Sick Children were considered for enrollment in the study"
+  - slot: human_subject_research.special_populations[0]
+    snippet: "collected from 300 participants aged 2-18"
+  - slot: preprocessing_strategies[0].preprocessing_details
+    snippet: "The code used to preprocess the raw audio waveforms into the parquet file and to merge the source data into the phenotype files has been made open source"
+  - slot: preprocessing_strategies[0].used_software[0].name
+    snippet: "b2aiprep library"
+  - slot: preprocessing_strategies[1].preprocessing_details
+    snippet: "Data were exported and converted to tab delimited values using an open source library developed by our team"
+  - slot: preprocessing_strategies[2].preprocessing_details
+    snippet: "features derived from the open-source Speech and Music Interpretation by Large-space Extraction (openSMILE [5]), Praat [6], parselmouth [7], and torchaudio [8, 9] are provided"
+  - slot: cleaning_strategies[0].cleaning_details
+    snippet: "Spectrograms, Mel Spectrograms, MFC coefficients, PPGs, and EMAs for sensitive records and audio checks have been removed from v1.1"
+  - slot: missing_data_documentation[0].missing_data_patterns
+    snippet: "some files, whether due to length or other issues, could not generate certain features and so are not included in the bundled data"
+  - slot: raw_sources[0].raw_data_details
+    snippet: "This PhysioNet project does not contain raw audios"
+  - slot: raw_sources[0].raw_data_details
+    snippet: "Accessing raw audio is a more involved process and requires institutional sign off"
+  - slot: raw_sources[0].access_url
+    snippet: "https://www.synapse.org/Synapse:syn73617068"
+  - slot: data_governance.access_review_process
+    snippet: "Please reach out to the access committee if you are interested in access: DACO@b2ai-voice.org"
+  - slot: distribution_formats[0].format
+    snippet: "Binary files are made available as Parquet"
+  - slot: distribution_formats[1].format
+    snippet: "Each feature is present in the static_features.tsv file"
+  - slot: distribution_formats[2].format
+    snippet: "a data dictionary file which has the same file stem and a JSON suffixes"
+  - slot: variables[0]
+    snippet: "a unique identifier for the participant (participant_id)"
+  - slot: variables[1]
+    snippet: "a unique identifier for the recording session (session_id)"
+  - slot: variables[2]
+    snippet: "the task performed (task_name)"
+  - slot: variables[3]
+    snippet: "the number of time frames associated with that feature (n_frames)"
+  - slot: file_collections[0].name
+    snippet: "derived audio data features (under features)"
+  - slot: file_collections[0].description
+    snippet: "In addition to the parquet files, the features folder contains the following plain-text file"
+  - slot: file_collections[0].resources[0]
+    snippet: "torchaudio_spectrograms.parquet (n=23533) contains spectrograms of dimension 201xT"
+  - slot: file_collections[0].resources[1]
+    snippet: "torchaudio_mel_spectrograms.parquet (n=23533) contains Mel spectrograms of dimension 60xT"
+  - slot: file_collections[0].resources[2]
+    snippet: "torchaudio_mfcc.parquet (n=23533) contains Mel-frequency cepstrum coefficients of dimension 60xT"
+  - slot: file_collections[0].resources[3]
+    snippet: "torchaudio_pitch.parquet (n=23533) contains the detected pitch (fundamental frequency) over time"
+  - slot: file_collections[0].resources[4]
+    snippet: "sparc_ema.parquet (n=23532) contains the estimated electromagnetic articulography (EMA)"
+  - slot: file_collections[0].resources[5]
+    snippet: "sparc_loudness.parquet (n=23532) contains the estimated loudness"
+  - slot: file_collections[0].resources[6]
+    snippet: "sparc_periodicity.parquet (n=23532) contains the estimated periodicity"
+  - slot: file_collections[0].resources[7]
+    snippet: "sparc_pitch.parquet (n=23532) contains the estimated fundamental frequency (F0)"
+  - slot: file_collections[0].resources[8]
+    snippet: "ppgs.parquet (n=23533) contains the phonetic posteriorgram probabilities across 40 phoneme categories"
+  - slot: file_collections[0].resources[9]
+    snippet: "Each feature is present in the static_features.tsv file"
+  - slot: distribution_formats[1].description
+    snippet: "metrics related to audio quality derived from the recordings present in the audio_quality_metrics.tsv file"
+  - slot: direct_collection[0].is_direct
+    snippet: "All participants completed the recording and demographic data collection in one session"
+  - slot: direct_collection[0].collection_details
+    snippet: "All participants completed the recording and demographic data collection in one session"
+  - slot: direct_collection[0].collection_details
+    snippet: "parents or decision-makers completed the survey during the recording on a separate tablet"
+  - slot: file_collections[1].name
+    snippet: "phenotypic information acquired during data collection (under phenotype)"
+  - slot: file_collections[2].name
+    snippet: "metadata information for the recordings (available under metadata)"
+- id: c003
+  status: extracted
+  extracted:
+  - slot: id
+    snippet: "https://doi.org/10.13026/mf9s-5r03"
+  - slot: doi
+    snippet: "https://doi.org/10.13026/h995-bt35"
+  - slot: keywords
+    snippet: "Topics:\nhealth\npediatric\nbiomarkers\nbridge2ai\nvoice"
+  - slot: version_access.versions_available
+    snippet: "Versions\n1.0.0\nDec. 17, 2025\n1.1.0\nMay 1, 2026"
+  - slot: distribution_dates[0].release_dates
+    snippet: "Versions\n1.0.0\nDec. 17, 2025\n1.1.0\nMay 1, 2026"
+  - slot: human_subject_research.irb_approval
+    snippet: "Data collection and sharing was approved by the Research Ethics Board at the Hospital for Sick Children"
+  - slot: external_resources[0].external_resources
+    snippet: "Project Website:\nhttps://b2ai-voice.org/"
+  - slot: keywords[0]
+    snippet: "Topics:\nhealth\npediatric"
+  - slot: keywords[1]
+    snippet: "health\npediatric\nbiomarkers"
+  - slot: keywords[2]
+    snippet: "pediatric\nbiomarkers\nbridge2ai"
+  - slot: keywords[3]
+    snippet: "biomarkers\nbridge2ai\nvoice"
+  - slot: keywords[4]
+    snippet: "bridge2ai\nvoice\nProject Website"
+  - slot: license
+    snippet: "Bridge2AI Voice Registered Access License"
+  - slot: license_and_use_terms.license_terms
+    snippet: "Only credentialed users who sign the DUA can access the files"
+  - slot: license_and_use_terms.license_terms
+    snippet: "Bridge2AI Voice Registered Access Agreement"
+  - slot: regulatory_restrictions.confidentiality_level
+    snippet: "This is a restricted-access resource"
+  - slot: version_access.latest_version_doi
+    snippet: "DOI (latest version):\nhttps://doi.org/10.13026/mf9s-5r03"
+  - slot: version_access.versions_available[0]
+    snippet: "1.0.0\nDec. 17, 2025"
+  - slot: version_access.versions_available[1]
+    snippet: "1.1.0\nMay 1, 2026"
+  - slot: version_access.version_details
+    snippet: "b2ai-voice-pediatric v1.1: No new participants released in this minor update"
+  - slot: version_access.version_details
+    snippet: "b2ai-voice-pediatric v1.0: This was the first release of the Bridge2AI-Voice Pediatric dataset"
+  - slot: distribution_dates[0].release_dates[0]
+    snippet: "1.0.0\nDec. 17, 2025"
+  - slot: distribution_dates[0].release_dates[1]
+    snippet: "1.1.0\nMay 1, 2026"
+  - slot: ethical_reviews[0].reviewing_organization
+    snippet: "approved by the Research Ethics Board at the Hospital for Sick Children"
+  - slot: ethical_reviews[0].review_details
+    snippet: "Data collection and sharing was approved by the Research Ethics Board at the Hospital for Sick Children"
+  - slot: human_subject_research.ethics_review_board
+    snippet: "the Research Ethics Board at the Hospital for Sick Children"
+  - slot: human_subject_research.irb_approval[0]
+    snippet: "Data collection and sharing was approved by the Research Ethics Board at the Hospital for Sick Children"
+  - slot: funders[0].grantor
+    snippet: "This project was funded by NIH project number 3OT2OD032720-01S1"
+  - slot: funders[0].grants[0].grant_number
+    snippet: "NIH project number 3OT2OD032720-01S1"
+  - slot: funders[0].grants[0].name
+    snippet: "Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced, bioaccoustic database to understand disease like never before"
+  - slot: preprocessing_strategies[0].used_software[0].id
+    snippet: "https://github.com/sensein/b2aiprep"
+  - slot: preprocessing_strategies[0].used_software[0].url
+    snippet: "https://github.com/sensein/b2aiprep"
+  - slot: preprocessing_strategies[0].used_software[0].version
+    snippet: "Bridge2AI Data Processing Library (Version 3.0.0) [Computer software]"
+  - slot: preprocessing_strategies[0].used_software[0].description
+    snippet: "Bridge2AI Data Processing Library (Version 3.0.0) [Computer software]"
+  - slot: cleaning_strategies[1].cleaning_details
+    snippet: "releasing audio features for all free speech tasks that were manually checked for presence of unconsented speakers and PII"
+  - slot: file_collections[1].resources[0]
+    snippet: "A phenotype file can be loaded with any statistical analysis tool"
+  - slot: file_collections[1].resources[0]
+    snippet: "df = pd.read_csv(\"demographics.tsv\", sep=\"\\t\", header=0)"
+  - slot: external_resources[0].external_resources[0]
+    snippet: "Project Website:\nhttps://b2ai-voice.org/"
+  - slot: external_resources[0].name
+    snippet: "Project Website:\nhttps://b2ai-voice.org/"
+  - slot: preprocessing_strategies[0].used_software[0].name
+    snippet: "https://github.com/sensein/b2aiprep"
+  - slot: preprocessing_strategies[1].used_software[0].id
+    snippet: "https://github.com/sensein/b2aiprep"
+  - slot: participant_privacy[0].privacy_techniques
+    snippet: "manually checked for presence of unconsented speakers and PII"
+  - slot: version_access.version_details
+    snippet: "releases new metrics related to the audio quality of the recordings and per recording metadata information"
+  - slot: file_collections[1].description
+    snippet: "A phenotype file can be loaded with any statistical analysis tool"
+  - slot: license_and_use_terms.license_terms
+    snippet: "Required training:\nNo training required"
+  - slot: description
+    snippet: "Only credentialed users who sign the DUA can access the files"
+- id: c004
+  status: extracted
+  extracted:
+  - slot: addressing_gaps[2].response
+    snippet: "The literature is sparser in terms of pediatric voice and speech analysis partly due to ethical concerns and challenges in data acquisition for this cohort"
+  - slot: addressing_gaps[2].response
+    snippet: "creating a voice database of “normal cohort” of different age groups will be key to help machine learning models diagnose age specific speech delays and disorders"
+  - slot: creators[0].principal_investigator
+    snippet: "PRINCIPAL INVESTIGATOR:\nYael Bensoussan, MD MSc, FRCSC"
+  - slot: creators[0].principal_investigator.email
+    snippet: "yaelbensoussan@usf.edu"
+  - slot: creators[0].affiliations[0].name
+    snippet: "University of South Florida, Tampa, Florida, US (USF)"
+  - slot: creators[0].principal_investigator.affiliation[0].name
+    snippet: "University of South Florida, Tampa, Florida, US (USF)"
+  - slot: creators[2].affiliations[0].name
+    snippet: "Weill Cornell Medicine, New York, New York, US (WCM)"
+  - slot: creators[3].affiliations[0].name
+    snippet: "Weill Cornell Medicine, New York, New York, US (WCM)"
+  - slot: creators[1].affiliations[0].name
+    snippet: "Weill Cornell Medicine (WCM)\tAlexandros Sigaras, PhD"
+  - slot: creators[4].affiliations[0].name
+    snippet: "Vanderbilt University Medical Center (VUMC)\tMaria Powell, PhD"
+  - slot: creators[9].affiliations[0].name
+    snippet: "Other USF Co-investigators...Ruth Bahr, PhD CCC-SLP – Professor, Department of Communication Sciences & Disorders"
+  - slot: creators[10].affiliations[0].name
+    snippet: "Other USF Co-investigators...Stephanie Watts, PhD, CCC-SLP – Assistant Professor, Department of OTOHNS"
+  - slot: creators[13].affiliations[0].name
+    snippet: "Mount Sinai Hospital (MSH)\tJordan Lerner-Ellis, PhD"
+  - slot: creators[14].affiliations[0].name
+    snippet: "University of Toronto (UofT)\tFrank Rudzicz, PhD"
+  - slot: creators[15].affiliations[0].name
+    snippet: "Other USF Co-investigators...Micah Boyer, PhD – Clinical Research Associate"
+  - slot: creators[16].affiliations[0].name
+    snippet: "Other USF Co-investigators\nYassmeen Abdel-Aty, MD – Deparment of Otolaryngology"
+  - slot: creators[20].affiliations[0].name
+    snippet: "Other USF Co-investigators...Stephen Aradi, MD – Assistant Professor, Department of Neurology"
+  - slot: creators[51].affiliations[0].name
+    snippet: "Other USF Co-investigators...Karim Hanna, MD – Assistant Professor, TCOP Department of Pharmacy Practice"
+  - slot: creators[58].affiliations[0].name
+    snippet: "Hospital for Sick Children (HSC)\tAlistair Johnson, DPhil"
+  - slot: creators[74].affiliations[0].name
+    snippet: "Other USF Co-investigators...Matthew Mifsud, MD – Associate Professor, College of Medicine Otolaryngology"
+  - slot: creators[78].affiliations[0].name
+    snippet: "Other USF Co-investigators...Tempestt Neal PhD – Assistant Professor, Department of Engineering"
+  - slot: creators[81].affiliations[0].name
+    snippet: "Other USF Co-investigators...Christopher Nickel, MD – Assistant Professor, College of Medicine Otolaryngology"
+  - slot: creators[98].affiliations[0].name
+    snippet: "Other USF Co-investigators...Suketu Shah, MD – Assistant Professor, College of Medicine Otolaryngology"
+  - slot: creators[99].affiliations[0].name
+    snippet: "Other USF Co-investigators...Ahmed Shawkat, MD – Internal Medicine, Morsani College of Medicine"
+  - slot: creators[117].affiliations[0].name
+    snippet: "Other USF Co-investigators...Theresa Zesiewicz, MD – Professor, Department of Neurology"
+  - slot: creators[120].affiliations[0].name
+    snippet: "Massachusetts Institute of Technology (MIT)\tSatrajit Ghosh, PhD"
+- id: c005
+  status: extracted
+  extracted:
+  - slot: creators[0].affiliations[0].name
+    snippet: "USF\tYael Bensoussan MD, MSc\tCo-Lead of Data Acquisition"
+  - slot: creators[2].affiliations[0].name
+    snippet: "WCM\tAnais Rameau, MD, MPhil\tCo-Lead of Data Acquisition"
+  - slot: creators[3].affiliations[0].name
+    snippet: "WCM\tOlivier Elemento, PhD\tCo-Lead – Tools – Software and IT infrastructure"
+- id: c006
+  status: extracted
+  extracted:
+  - slot: subpopulations[0].identification
+    snippet: "Pediatric participants are recruited strictly from the Hospital for Sick Children (SickKids) and are grouped by age"
+  - slot: subpopulations[0].identification
+    snippet: "Pediatrics\nPeds 10+\nPeds 6-10\nPeds 4-6\nPeds 2-4"
+  - slot: sampling_strategies[0].source_data
+    snippet: "Pediatric participants are recruited strictly from the Hospital for Sick Children (SickKids)"
+  - slot: collection_mechanisms[0].mechanism_details
+    snippet: "For Pediatrics, all data is collected using\nreproschema-ui\nwith the Bridge2AI-Voice pediatric protocol"
+  - slot: collection_mechanisms[0].mechanism_details
+    snippet: "Voice, breathing, cough, and speech data are recorded with the app for adults and with reproschema-ui for pediatrics"
+  - slot: license_and_use_terms.license_terms
+    snippet: "The adult and pediatric datasets are available through separate PhysioNet links under registered access. Credentialed users must be approved and sign DUA"
+  - slot: raw_sources[0].raw_data_details
+    snippet: "Users interested in access the audio data from any Bridge2AI-Voice dataset can request access by emailing"
+  - slot: raw_sources[0].raw_data_details
+    snippet: "Raw audio data is disseminated through controlled access only to protect participants’ privacy"
+  - slot: related_datasets[0].description
+    snippet: "The adult and pediatric datasets are available through separate PhysioNet links under registered access"
+  - slot: funders[0].description
+    snippet: "Bridge2AI-Voice is a Precision Public Health grand challenge project funded by the NIH Common Fund Bridge2AI Program"
+  - slot: version_access.version_details
+    snippet: "The pediatric dataset v1.0 is now available containing data from 300 participants"
+- id: c007
+  status: extracted
+  extracted:
+  - slot: acquisition_methods[1].acquisition_details
+    snippet: "ABC’s\nRecalling alphabet\nPeds"
+  - slot: acquisition_methods[1].acquisition_details
+    snippet: "Ready For School\nRecalling a typical day preparing for School\nPeds"
+  - slot: acquisition_methods[1].acquisition_details
+    snippet: "Long Sounds\nSustained /ee/ and /ah/ sounds\nPeds"
+  - slot: acquisition_methods[1].acquisition_details
+    snippet: "Caterpillar Passage (Pediatrics)\nvalidated passage\nPeds"
+  - slot: acquisition_methods[1].acquisition_details
+    snippet: "Silly Sounds\n/PUH/ /TUH/ /KUH/ /PUH TUH KUH/\nPeds"
+  - slot: creators[0].principal_investigator
+    snippet: "co-led by Dr. Yaël Bensoussan, MD, MSc, from USF Health Morsani College of Medicine and Olivier Elemento, PhD, from Weill Cornell Medicine, who are co-principal investigators for the project"
+  - slot: creators[3].principal_investigator
+    snippet: "Olivier Elemento, PhD, from Weill Cornell Medicine, who are co-principal investigators for the project"
+  - slot: creators[3].principal_investigator.affiliation[0].name
+    snippet: "Olivier Elemento, PhD, from Weill Cornell Medicine"
+  - slot: funders[0].grantor
+    snippet: "U.S. National Institutes of Health (NIH) Grant/Contract Award Number"
+  - slot: acquisition_methods[1].acquisition_details
+    snippet: "Role naming\nrecalling days, months, and counting from 60 – 70\nPeds"
+  - slot: creators[5].affiliations[0].name
+    snippet: "David Dorr, MD (Oregon Health & Science University)"
+  - slot: creators[6].affiliations[0].name
+    snippet: "Philip Payne, PhD (Washington University in St. Louis)"
+  - slot: creators[7].affiliations[0].name
+    snippet: "Vardit Ravitsky, PhD (The Hastings Center)"
+  - slot: creators[8].affiliations[0].name
+    snippet: "Jean-Christophe Bélisle-Pipon, PhD (Simon Fraser University)"
+  - slot: creators[13].affiliations[1].name
+    snippet: "Jordan Lerner-Ellis, PhD (Sinai Health)"
+  - slot: data_governance.committee_name
+    snippet: "Submit your application to the Data Access Compliance Office for review"
+  - slot: data_governance.access_review_process
+    snippet: "Complete the Data Access Request Form (DARF)\nComplete the Data Use Agreement (DUA)\nSubmit your application to the Data Access Compliance Office for review"
+  - slot: data_governance.access_review_process
+    snippet: "Upon approval, ensure a Data Use and Transfer Agreement (DTUA) is signed by an authorized official at your institution"
+  - slot: license_and_use_terms.license_terms
+    snippet: "Sign the Bridge2AI-Voice Registered Access Agreement, which outlines the terms and conditions for data use"
+  - slot: funders[0].description
+    snippet: "Bridge2AI-Voice is supported by NIH grant OT2OD032720 through the NIH Bridge2AI Common Fund program"
+- id: c008
+  status: extracted
+  extracted:
+  - slot: preprocessing_strategies[3].preprocessing_details
+    snippet: "Pediatric data collected through ReproSchema-UI is extracted and transformed into REDCap format, and subsequently converted to the Brain Imaging Data Structure (BIDS)"
+  - slot: acquisition_methods[1].acquisition_details
+    snippet: "Caterpillar Passage (Pediatrics)\nCinderella Story\nCounting"
+- id: c009
+  status: extracted
+  extracted:
+  - slot: preprocessing_strategies[0].used_software[0].license
+    snippet: "Description: The code used to preprocess the raw audio waveforms into the parquet file and to merge the source data into the phenotype files.\nLicense: Apache-2.0"
+- id: c010
+  status: extracted
+  extracted:
+  - slot: creators[0].principal_investigator
+    snippet: "Principal investigator: BENSOUSSAN, YAEL EMILIE"
+  - slot: creators[0].affiliations[0].name
+    snippet: "Principal investigator: BENSOUSSAN, YAEL EMILIE\nOrganization: UNIVERSITY OF SOUTH FLORIDA"
+  - slot: creators[0].principal_investigator.affiliation[0].name
+    snippet: "Principal investigator: BENSOUSSAN, YAEL EMILIE\nOrganization: UNIVERSITY OF SOUTH FLORIDA"
+  - slot: funders[0].grants[0].name
+    snippet: "Title: Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced, bioaccoustic database to understand disease like never before"
+- id: c011
+  status: extracted
+  extracted:
+  - slot: data_governance.committee_name
+    snippet: "the approval of the Data Access Compliance\nOffice (“DACO”) requiring a distinct application"
+- id: c012
+  status: nothing_relevant
+  reason: "Closing clauses of the Data Transfer and Use Agreement template (IRB documentation on request, adherence to PhysioNet requirements, unilateral amendment, a Florida statute warranty) and the blank Attachment 3 personnel list; the agreement's data description is the Bridge2AI-Voice dataset in general and no clause states a fact about the pediatric release that the record carries."
+- id: c013
+  status: nothing_relevant
+  reason: "README of the documentation website's source repository (badges, license pointer, how to cite the docs repository, how to run the docs app); it describes the documentation software, not the pediatric dataset."

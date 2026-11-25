@@ -1,0 +1,53 @@
+Gates for AI_READI 2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3   session exit 0   2026-11-25T06:09:15Z -> 2026-11-25T06:38:38Z
+transcript models: {'claude-fable-5-2': 205}
+transcript tools: {'Read': 45, 'Bash': 41, 'Write': 4, 'Edit': 37}
+transcript advisor calls: 0
+transcript recorder attempts: 1
+transcript Read of other d4d_concatenated paths: []
+transcript result: success | is_error False | turns 128 | minutes 29.4 | models used ['claude-fable-5-2']
+TRANSCRIPT: ok
+launch environment (reported only): permissionMode auto
+launch environment (reported only): apiKeySource none
+launch environment (reported only): memory_paths not reported (the init event carries the key only when auto-memory is on)
+launch environment (reported only): skills count 22
+launch environment (reported only): agents count 21
+launch environment (reported only): slash_commands count 68
+launch environment (reported only): plugins count 4
+launch environment (reported only): mcp_servers count 0
+launch environment (reported only): tools count 25
+launch environment (reported only): plugin names ['cc-plugin-agents-md', 'cc-plugin-telemetry', 'cc-plugin-privacy', 'cc-plugin-plugin-authoring']
+file ok: data/d4d_concatenated/claudecode_release/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/AI_READI_d4d.yaml (45573 bytes)
+file ok: data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/AI_READI_d4d_core.yaml (41310 bytes)
+file ok: data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/AI_READI_coverage_receipt.yaml (68014 bytes)
+file ok: data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/AI_READI_reconciliation.md (18152 bytes)
+file ok: data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/AI_READI_provenance.yaml (26863 bytes)
+--- validate full
+No issues found
+validate_full_exit 0
+--- validate core
+No issues found
+validate_core_exit 0
+--- receipts check --strict
+   chunks 25/25 reviewed · snippets 377/377 verified (7 bearing on no token of their value) (15 entry receipt(s) overlapping one leaf) · slots 431/431 with a receipt (32 exempt)
+   · not checked here: that a chunk marked nothing_relevant truly held nothing for the record — a judgement; sample by chunk id in review
+   · not checked here: that a verified snippet supports the value it is attached to — a snippet can be real and irrelevant; sample by slot path in review
+receipts_exit 0
+--- scope check
+
+2 record(s) checked against the declaration
+   ✓ none is about a dataset its project declares distinct
+scope_exit 0
+--- observed (transcript) annotation
+✓ data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/AI_READI_provenance.yaml
+observed_exit 0
+observed: {'assistant_turns': 80, 'output_tokens': 179513, 'thinking_tokens': 70158, 'receipt_chunks_unopened': 0, 'receipt_chunks_total': 25, 'bundle_lines_read': 6424, 'bundle_lines_total': 6424}
+--- runs check --strict
+1 run(s) checked, 1 subject to the requirement, 0 failing
+All runs subject to the live-provenance requirement satisfy it.
+runs_check_exit 0
+--- render gate (the record's specification must re-render to the instruction sent)
+render gate: match
+render_gate_exit 0
+--- no absolute home-directory path in what the run wrote
+absolute_path_exit 0
+GATES: PASS

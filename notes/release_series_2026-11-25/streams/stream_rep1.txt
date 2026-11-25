@@ -1,0 +1,21 @@
+2026-11-25T05:52:20Z stream rep1 budget: {"decision": "start", "fable_week_percent_if_started_estimate": 16.8, "fable_week_percent_now_estimate": 11.0, "finished_runs": 1, "in_flight_elsewhere": [], "limit_percent": 90.0, "next": "AI_READI", "rep": "1", "spent_usd_beyond_base": 0}
+2026-11-25T05:52:20Z stream rep1 AI_READI attempt 1
+2026-11-25T05:52:23Z rep1 AI_READI LAUNCHED instruction 5e35c3a523460dc3263561b3a281d58932524d1236abad0b1eb75fd044a5455d
+2026-11-25T06:24:32Z rep1 AI_READI DONE gates PASS (2026-11-25T05:52:22Z -> 2026-11-25T06:24:08Z)
+2026-11-25T06:24:32Z rep1 ALL REQUESTED PROJECTS FINISHED
+2026-11-25T06:24:32Z stream rep1 budget: {"decision": "start", "fable_week_percent_if_started_estimate": 37.9, "fable_week_percent_now_estimate": 21.9, "finished_runs": 4, "in_flight_elsewhere": ["AI_READI", "AI_READI"], "limit_percent": 90.0, "next": "CM4AI", "rep": "1", "spent_usd_beyond_base": 38.19}
+2026-11-25T06:24:32Z stream rep1 CM4AI attempt 1
+2026-11-25T06:24:36Z rep1 CM4AI LAUNCHED instruction b3d3341602930e289f4b24c9caabbe6270117b555b7fa946750e531407ed16c5
+2026-11-25T06:54:20Z rep1 CM4AI DONE gates PASS (2026-11-25T06:24:35Z -> 2026-11-25T06:54:06Z)
+2026-11-25T06:54:20Z rep1 ALL REQUESTED PROJECTS FINISHED
+2026-11-25T06:54:21Z stream rep1 budget: {"decision": "start", "fable_week_percent_if_started_estimate": 53.0, "fable_week_percent_now_estimate": 38.7, "finished_runs": 7, "in_flight_elsewhere": ["CM4AI", "CM4AI"], "limit_percent": 90.0, "next": "VOICE", "rep": "1", "spent_usd_beyond_base": 96.86}
+2026-11-25T06:54:21Z stream rep1 VOICE attempt 1
+2026-11-25T06:54:22Z rep1 VOICE LAUNCHED instruction 867f279cdecdd0c9728c88095f734a156c4357421faceede7c674940281352ef
+2026-11-25T07:26:01Z rep1 VOICE DONE gates PASS (2026-11-25T06:54:22Z -> 2026-11-25T07:25:45Z)
+2026-11-25T07:26:01Z rep1 ALL REQUESTED PROJECTS FINISHED
+2026-11-25T07:26:01Z stream rep1 budget: {"decision": "start", "fable_week_percent_if_started_estimate": 70.8, "fable_week_percent_now_estimate": 55.4, "finished_runs": 10, "in_flight_elsewhere": ["VOICE", "VOICE"], "limit_percent": 90.0, "next": "VOICE_PEDIATRIC", "rep": "1", "spent_usd_beyond_base": 155.27}
+2026-11-25T07:26:01Z stream rep1 VOICE_PEDIATRIC attempt 1
+2026-11-25T07:26:03Z rep1 VOICE_PEDIATRIC LAUNCHED instruction e76795713455acc02d76b27cd0d69bf85f504fc6defcaefabc3e11346be05b7a
+2026-11-25T07:53:46Z rep1 VOICE_PEDIATRIC DONE gates PASS (2026-11-25T07:26:02Z -> 2026-11-25T07:53:15Z)
+2026-11-25T07:53:46Z rep1 ALL REQUESTED PROJECTS FINISHED
+2026-11-25T07:53:46Z stream rep1 ALL PROJECTS OF THIS STREAM FINISHED
