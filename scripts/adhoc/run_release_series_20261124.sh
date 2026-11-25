@@ -76,6 +76,9 @@ D4D=("$PY" -m data_sheets_schema.cli)
 "$PY" -c "import data_sheets_schema.api_runner as m,sys; sys.exit(0 if m.__file__.startswith('$W/') else 1)" \
   || { echo "the .venv does not import this worktree's source" >&2; exit 2; }
 mkdir -p .temp/launch/gates ".temp/launch/transcripts/$LABEL"
+# The file on PATH, never a shell function or alias of the same name.
+CLAUDE_BIN=$(type -P claude) || { echo "no claude binary on PATH" >&2; exit 2; }
+case "$CLAUDE_BIN" in /*) ;; *) echo "claude does not resolve to a file path: $CLAUDE_BIN" >&2; exit 2;; esac
 say() { echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) rep$REP $*"; }
 
 for P in "$@"; do
@@ -86,8 +89,19 @@ for P in "$@"; do
   STREAM=".temp/launch/transcripts/$LABEL/${P}.stream.jsonl"
   GATE=".temp/launch/gates/${P}_${LABEL}.txt"
   if [ -e "$FULL" ] || [ -e "$CORE" ] || [ -e "$STREAM" ]; then
-    say "$P SKIPPED: outputs or a transcript already exist for this label (never rerun into a populated label)"
-    continue
+    # Never rerun into a populated label. A project that already passed is skipped; one that
+    # stopped or failed its gates stops the rerun too, so the same command run again cannot
+    # walk past it to the next project (review 3, S2).
+    if [ -e "$GATE" ] && grep -q "^GATES: PASS" "$GATE"; then
+      say "$P SKIPPED: already run under this label with gates PASS"
+      continue
+    fi
+    if [ "${D4D_SERIES_CONTINUE_AFTER_GATE_FAIL:-}" = 1 ]; then
+      say "$P SKIPPED: outputs or a transcript exist for this label without a passing gate file; continuing because D4D_SERIES_CONTINUE_AFTER_GATE_FAIL=1"
+      continue
+    fi
+    say "$P STOP: outputs or a transcript exist for this label without a passing gate file (see $GATE); use a new series label, not a rerun"
+    exit 3
   fi
   BUNDLE="data/preprocessed/concatenated/${P}_preprocessed.txt"
   CHUNKS="data/preprocessed/chunks/${P}_chunks.yaml"
@@ -128,44 +142,39 @@ for P in "$@"; do
     echo "model: $MODEL   effort: $EFFORT (CLI flags; both stated in the rendering specification, the effort asserted by the launcher)"
     echo "recorder line: complete (D4D_RENDER_SPEC and D4D_LAUNCH_INSTRUCTION); toolchain: checkout-relative"
     echo "render specification: $SPEC sha256 $(shasum -a 256 "$SPEC" | cut -d' ' -f1)"
-    echo "claude code: $(command claude --version 2>/dev/null)"
+    echo "claude code: $("$CLAUDE_BIN" --version 2>/dev/null) ($CLAUDE_BIN)"
     echo "account: $ACCOUNT ($ACCOUNT_NOTE, as the owner's shell function of that name does)"
     echo "advisor tool: disabled with CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1"
     echo "MCP servers: none (--strict-mcp-config with no config)"
     echo "settings: project only (--setting-sources project): no user-level hooks, allow rules, skills, agents or plugins of the account"
     echo "permission mode: auto (--permission-mode auto, stated because the user settings that set it are not loaded)"
     echo "auto-memory: off (CLAUDE_CODE_DISABLE_AUTO_MEMORY=1)"
-    echo "environment unset before launch: ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN ANTHROPIC_BASE_URL CLAUDECODE CLAUDE_CODE_SESSION_ID CLAUDE_CODE_CHILD_SESSION CLAUDE_CODE_MESSAGING_SOCKET CLAUDE_CODE_MESSAGING_TOKEN CLAUDE_PLUGIN_DATA CLAUDE_EFFORT (whether or not the launching shell set them)"
+    echo "environment: constructed with env -i (HOME, PATH, USER, LOGNAME, SHELL, LANG, TMPDIR, the two CLAUDE_CODE_DISABLE switches, the two D4D variables, and the account's configuration directory and token variable); nothing else of the launching shell reaches the session"
     echo "delivery: the instruction file's text is the single prompt of a headless session (claude -p)"
     echo "launched by: scripts/adhoc/run_release_series_20261124.sh $SERIES $MODEL $EFFORT $REP"
   } > ".temp/launch/${P}_${LABEL}.launch.txt"
   say "$P LAUNCHED instruction $SHA"
-  (
-    unset CLAUDE_CONFIG_DIR CLAUDE_CODE_OAUTH_TOKEN CLAUDE_ACCOUNT_LABEL
-    # Neither a key, a token or a base URL from the launching shell, nor the variables a
-    # parent Claude Code session passes to its children, reaches the release session (MN6).
-    unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN ANTHROPIC_BASE_URL \
-          CLAUDECODE CLAUDE_CODE_SESSION_ID CLAUDE_CODE_CHILD_SESSION \
-          CLAUDE_CODE_MESSAGING_SOCKET CLAUDE_CODE_MESSAGING_TOKEN CLAUDE_PLUGIN_DATA CLAUDE_EFFORT
-    if [ "$ACCOUNT" = claude-work ]; then
-      export CLAUDE_CONFIG_DIR="$ACCOUNT_DIR"
-      [ -n "${CLAUDE_OAUTH_WORK:-}" ] && export CLAUDE_CODE_OAUTH_TOKEN="$CLAUDE_OAUTH_WORK"
-    else
-      [ -n "${CLAUDE_OAUTH_PERSONAL:-}" ] && export CLAUDE_CODE_OAUTH_TOKEN="$CLAUDE_OAUTH_PERSONAL"
-    fi
-    export CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1
-    # Owner decision 2026-11-25: a generation session loads nothing of the account beyond its
-    # credentials. `--bare` would do that but reads no subscription login, so the same is
-    # stated piecewise: project settings only, the permission mode named, auto-memory off.
-    export CLAUDE_CODE_DISABLE_AUTO_MEMORY=1
-    # The recorder line reads the specification and the instruction from these (#6320).
-    export D4D_LAUNCH_INSTRUCTION="$W/$INSTR"
-    D4D_RENDER_SPEC=$(cat "$SPEC"); export D4D_RENDER_SPEC
-    command claude -p --model "$MODEL" --effort "$EFFORT" --strict-mcp-config \
+  # The session gets a constructed environment, not the launching shell's: what a shell or
+  # a parent Claude Code session exports (keys, base URLs, model and provider overrides,
+  # experimental switches, messaging sockets) cannot reach it (review 2 MN6, review 3 S1).
+  # Owner decision 2026-11-25: a generation session also loads nothing of the account beyond
+  # its login. `--bare` would do that but reads no subscription login, so the same is stated
+  # piecewise: project settings only, the permission mode named, auto-memory off.
+  LAUNCH_ENV=("HOME=$HOME" "PATH=$PATH" "USER=${USER:-$(id -un)}" "LOGNAME=${LOGNAME:-${USER:-$(id -un)}}"
+              "SHELL=/bin/bash" "LANG=${LANG:-en_US.UTF-8}" "TMPDIR=${TMPDIR:-/tmp}"
+              "CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1" "CLAUDE_CODE_DISABLE_AUTO_MEMORY=1"
+              # The recorder line reads the specification and the instruction from these (#6320).
+              "D4D_LAUNCH_INSTRUCTION=$W/$INSTR" "D4D_RENDER_SPEC=$(cat "$SPEC")")
+  if [ "$ACCOUNT" = claude-work ]; then
+    LAUNCH_ENV+=("CLAUDE_CONFIG_DIR=$ACCOUNT_DIR")
+    [ -n "${CLAUDE_OAUTH_WORK:-}" ] && LAUNCH_ENV+=("CLAUDE_CODE_OAUTH_TOKEN=$CLAUDE_OAUTH_WORK")
+  else
+    [ -n "${CLAUDE_OAUTH_PERSONAL:-}" ] && LAUNCH_ENV+=("CLAUDE_CODE_OAUTH_TOKEN=$CLAUDE_OAUTH_PERSONAL")
+  fi
+  /usr/bin/env -i "${LAUNCH_ENV[@]}" "$CLAUDE_BIN" -p --model "$MODEL" --effort "$EFFORT" --strict-mcp-config \
       --setting-sources project --permission-mode auto \
       --output-format stream-json --verbose "$(cat "$INSTR")" \
       > "$STREAM" 2> ".temp/launch/transcripts/$LABEL/${P}.stderr" < /dev/null
-  )
   RC=$?
   END=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
@@ -227,8 +236,9 @@ print("launch environment (reported only): permissionMode", reported(facts.get("
 print("launch environment (reported only): apiKeySource", reported(facts.get("apiKeySource")))
 memory = facts.get("memory_paths")
 print("launch environment (reported only): memory_paths",
-      json.dumps(memory, sort_keys=True) if memory is not None else "not reported")
-for key in ("skills", "agents", "slash_commands", "plugins"):
+      json.dumps(memory, sort_keys=True) if memory is not None
+      else "not reported (the init event carries the key only when auto-memory is on)")
+for key in ("skills", "agents", "slash_commands", "plugins", "mcp_servers", "tools"):
     print("launch environment (reported only):", key, "count", count(facts.get(key)))
 plugins = facts.get("plugins")
 names = ([(p.get("name") if isinstance(p, dict) else p) for p in plugins] if isinstance(plugins, list)
@@ -290,7 +300,7 @@ PYEOF
     if [ ${#SEARCH[@]} -eq 0 ]; then
       echo "absolute-path search: no file to search"; echo "absolute_path_exit 2"
     else
-      HOME_HITS=$(grep -HnE "(^|[^A-Za-z0-9:/._-])/(Users|home)/" "${SEARCH[@]}" 2>&1); HOME_RC=$?
+      HOME_HITS=$(grep -HnE "((^|[^A-Za-z0-9:/._-])|file://)/(Users|home)/" "${SEARCH[@]}" 2>&1); HOME_RC=$?
       W_HITS=$(grep -HnF -- "$W" "${SEARCH[@]}" 2>&1); W_RC=$?
       if [ $HOME_RC -ge 2 ] || [ $W_RC -ge 2 ]; then
         echo "absolute-path search failed: grep exit $HOME_RC (home pattern) and $W_RC (worktree path)"
@@ -314,7 +324,7 @@ PYEOF
   fi
   # A session that failed outright (no success result, or no full record) stops the
   # replicate: the cause is usually credentials or a usage limit and would repeat.
-  if [ $RC -ne 0 ] || ! grep -q "transcript result: success" "$GATE" || [ ! -s "$FULL" ]; then
+  if [ $RC -ne 0 ] || ! grep -q "transcript result: success | is_error False" "$GATE" || [ ! -s "$FULL" ]; then
     say "$P STOP: the session did not complete (exit $RC); not starting the next project"
     exit 3
   fi

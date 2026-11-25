@@ -14,6 +14,7 @@
 set -u
 REPO=${1:?repository checkout}; COMMIT=${2:?commit}; PARENT=${3:?parent directory}; PREFIX=${4:?name prefix}; COUNT=${5:?count}
 case "$PREFIX$COUNT" in *[!A-Za-z0-9._-]*) echo "prefix and count take plain tokens" >&2; exit 2;; esac
+case "$COUNT" in ''|*[!0-9]*|0) echo "count must be a positive whole number" >&2; exit 2;; esac
 git -C "$REPO" cat-file -e "$COMMIT^{commit}" || { echo "unknown commit $COMMIT" >&2; exit 2; }
 for n in $(seq 1 "$COUNT"); do
   W="$PARENT/$PREFIX-rep$n"
