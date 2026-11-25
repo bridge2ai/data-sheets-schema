@@ -176,7 +176,8 @@ class EvidenceValidationError(ValueError):
         super().__init__("\n".join(f"{finding.code}: {finding.message}" for finding in report.errors))
 
 
-def check_evidence(result: dict, document: dict, rubric_name: str, *, resource_reader=None) -> EvidenceReport:
+def check_evidence(result: dict, document: dict, rubric_name: str, *, resource_reader=None,
+                   unit_map: dict | None = None) -> EvidenceReport:
     """Report where a rating's evidence or issue links contradict its input.
 
     Raises ValueError, as `validate_scope` does, when the rubric is not a
@@ -188,7 +189,15 @@ def check_evidence(result: dict, document: dict, rubric_name: str, *, resource_r
     """
     rubric_name, instrument, specification, rules = _issue_contract(result, rubric_name, resource_reader=resource_reader)
     fields = _declared_fields(rubric_name, specification)
-    units = dict(dataset_units(document))
+    if result.get("version") == "6.0":
+        from data_sheets_schema.evaluation_context import unwrap_document
+        if not isinstance(unit_map, dict) or set(unit_map) != {"#"} or unit_map["#"] != unwrap_document(document):
+            raise ValueError("semantic v6 evidence requires the independently resolved root unit")
+        units = unit_map
+    else:
+        if unit_map is not None:
+            raise ValueError("legacy evidence does not accept a scope override")
+        units = dict(dataset_units(document))
     absence_names = None
     if instrument is not None and instrument.evidence_authority_path is not None:
         from data_sheets_schema.semantic_evidence_authority import verify_authority
@@ -233,7 +242,7 @@ def _issue_contract(result: dict, rubric_name: str, *, resource_reader=None):
     from data_sheets_schema.semantic_instrument import select_semantic_instrument
     version = result.get("version")
     instrument = (select_semantic_instrument(rubric_name, version)
-                  if version in ("2.0", "3.0", "4.0", "5.0") else None)
+                  if version in ("2.0", "3.0", "4.0", "5.0", "6.0") else None)
     rubric_path = instrument.rubric_path if instrument else f"data/rubric/{rubric_name}.txt"
     raw = (resource_path(rubric_path).read_bytes() if resource_reader is None
            else resource_reader(rubric_path))
@@ -656,7 +665,7 @@ def _issue_findings(result: dict, rules: dict, below: dict[str, dict]) -> Iterat
                                   f"issue {index}: item_ids must be a list of item ids and score_effect "
                                   f"one of {', '.join(sorted(SCORE_EFFECTS))}", issue=index)
             continue
-        if result.get("version") in ("3.0", "4.0", "5.0"):
+        if result.get("version") in ("3.0", "4.0", "5.0", "6.0"):
             if (not isinstance(issue.get("type"), str) or issue["type"] not in ISSUE_TYPES
                     or not isinstance(issue.get("category"), str) or issue["category"] not in ISSUE_CATEGORIES
                     or effect not in SCORE_EFFECTS or "item_ids" not in issue
