@@ -132,6 +132,9 @@ for P in "$@"; do
     echo "account: $ACCOUNT ($ACCOUNT_NOTE, as the owner's shell function of that name does)"
     echo "advisor tool: disabled with CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1"
     echo "MCP servers: none (--strict-mcp-config with no config)"
+    echo "settings: project only (--setting-sources project): no user-level hooks, allow rules, skills, agents or plugins of the account"
+    echo "permission mode: auto (--permission-mode auto, stated because the user settings that set it are not loaded)"
+    echo "auto-memory: off (CLAUDE_CODE_DISABLE_AUTO_MEMORY=1)"
     echo "environment unset before launch: ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN ANTHROPIC_BASE_URL CLAUDECODE CLAUDE_CODE_SESSION_ID CLAUDE_CODE_CHILD_SESSION CLAUDE_CODE_MESSAGING_SOCKET CLAUDE_CODE_MESSAGING_TOKEN CLAUDE_PLUGIN_DATA CLAUDE_EFFORT (whether or not the launching shell set them)"
     echo "delivery: the instruction file's text is the single prompt of a headless session (claude -p)"
     echo "launched by: scripts/adhoc/run_release_series_20261124.sh $SERIES $MODEL $EFFORT $REP"
@@ -151,10 +154,15 @@ for P in "$@"; do
       [ -n "${CLAUDE_OAUTH_PERSONAL:-}" ] && export CLAUDE_CODE_OAUTH_TOKEN="$CLAUDE_OAUTH_PERSONAL"
     fi
     export CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1
+    # Owner decision 2026-11-25: a generation session loads nothing of the account beyond its
+    # credentials. `--bare` would do that but reads no subscription login, so the same is
+    # stated piecewise: project settings only, the permission mode named, auto-memory off.
+    export CLAUDE_CODE_DISABLE_AUTO_MEMORY=1
     # The recorder line reads the specification and the instruction from these (#6320).
     export D4D_LAUNCH_INSTRUCTION="$W/$INSTR"
     D4D_RENDER_SPEC=$(cat "$SPEC"); export D4D_RENDER_SPEC
     command claude -p --model "$MODEL" --effort "$EFFORT" --strict-mcp-config \
+      --setting-sources project --permission-mode auto \
       --output-format stream-json --verbose "$(cat "$INSTR")" \
       > "$STREAM" 2> ".temp/launch/transcripts/$LABEL/${P}.stderr" < /dev/null
   )
