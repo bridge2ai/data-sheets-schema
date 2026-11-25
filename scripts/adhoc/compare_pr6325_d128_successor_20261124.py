@@ -29,6 +29,7 @@ Serves: PR 6325, issues 6318, 6320, 6314, 6324.
 """
 
 import argparse
+import ast
 from collections import defaultdict, deque
 import hashlib
 import importlib.util
@@ -66,7 +67,7 @@ MOVED_REFERENCE = re.compile(r':[0-9]+\)\Z')
 DISPOSED_IDENTITY_FIELDS = ('path', 'match', 'pattern', 'category', 'role', 'context', 'snippet')
 DISPOSED_IDENTITY_SHA256 = 'b4ad052d5ceb64a3e707538dfab2512815f131121051059e1be573e27c209026'
 REFERENCE_TARGET = re.compile(r' at (?P<path>[A-Za-z0-9_./-]+):(?P<line>[1-9][0-9]*)\)\Z')
-REFERENCE_CALL = 'PhaseRequest('
+REFERENCE_CALL = 'PhaseRequest'
 ENV = {'PATH': '/usr/bin:/bin:/usr/sbin:/sbin', 'GIT_NO_LAZY_FETCH': '1',
        'GIT_ALLOW_PROTOCOL': '', 'GIT_CONFIG_GLOBAL': '/dev/null',
        'GIT_CONFIG_SYSTEM': '/dev/null', 'GIT_CONFIG_NOSYSTEM': '1',
@@ -305,16 +306,24 @@ def require_reference_target(read_source, delta):
 
     `read_source(path)` returns that file's text in the candidate tree, or None.
     This runs where a tree is at hand (the comparison and the activation), not
-    in the gate, which stays a check of arrays. Whether the call is the same
-    one as before is the independent reviewer's condition (b).
+    in the gate, which stays a check of arrays. The file must parse and a call
+    whose function is the bare name must start on that line: the name in a
+    comment or a string is not a call (tab 197 final review, F1-final). Whether
+    the call is the same one as before is the independent reviewer's condition (b).
     """
     for row in delta['hits']['changed_fields']:
         found = REFERENCE_TARGET.search(row['after'].get('model_text_function') or '')
         need(found is not None, 'the moved description names no source line')
         text = read_source(found['path'])
-        lines = text.splitlines() if type(text) is str else []
         number = int(found['line'])
-        need(1 <= number <= len(lines) and REFERENCE_CALL in lines[number - 1],
+        try:
+            tree = ast.parse(text) if type(text) is str else None
+        except (SyntaxError, ValueError, RecursionError):
+            tree = None
+        need(tree is not None and any(
+                isinstance(node, ast.Call) and node.lineno == number
+                and isinstance(node.func, ast.Name) and node.func.id == REFERENCE_CALL
+                for node in ast.walk(tree)),
              'the moved description does not name a PhaseRequest call in the candidate tree')
 
 

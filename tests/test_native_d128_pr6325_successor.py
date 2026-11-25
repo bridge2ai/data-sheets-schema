@@ -248,11 +248,20 @@ def test_the_identity_ignores_only_the_two_coordinates():
     assert helper.disposed_identity(before["hits"][0]) is None
 
 
+def _source(line_302):
+    """A module whose line 302 is the given statement inside a function."""
+    return "\n" * 300 + "def send(phase):\n" + line_302 + "\n        phase=phase)\n"
+
+
 @pytest.mark.parametrize(("source", "accepted"), [
-    ("\n" * 301 + "    return PhaseRequest(\n", True),
-    ("\n" * 301 + "    return something_else(\n", False),      # the line holds no such call
-    ("    return PhaseRequest(\n", False),                      # the line does not exist
-    (None, False),                                              # the file does not exist
+    (_source("    return PhaseRequest("), True),
+    (_source("    return something_else("), False),                    # the line holds another call
+    (_source("    return dict(  # PhaseRequest("), False),             # the name only in a comment
+    ("\n" * 301 + 'marker = "PhaseRequest("\n', False),               # the name only in a string
+    (_source("    return module.PhaseRequest("), False),               # not the bare name
+    (_source("    return PhaseRequest(").replace("def send", "def send(", 1), False),   # does not parse
+    ("def send(phase):\n    return PhaseRequest(\n        phase=phase)\n", False),   # the line does not exist
+    (None, False),                                                    # the file does not exist
 ])
 def test_the_moved_reference_names_the_call_in_the_candidate_tree(source, accepted):
     before, after = _arrays()
@@ -275,4 +284,4 @@ def test_a_reference_to_a_nonexistent_line_stops():
     delta = _delta(before, after)
     assert helper.require_stop_rule(delta) == 1          # the arrays alone cannot tell
     with pytest.raises(ValueError, match="does not name a PhaseRequest call"):
-        helper.require_reference_target(lambda path: "\n" * 301 + "    return PhaseRequest(\n", delta)
+        helper.require_reference_target(lambda path: _source("    return PhaseRequest("), delta)
