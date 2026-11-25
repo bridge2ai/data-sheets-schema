@@ -1,8 +1,8 @@
 #!/bin/bash
 # run_release_series_20261124.sh
 # Purpose: run one replicate of a release series of D4D generations (d4d-full-core playbook),
-#   one project after another, each in a fresh headless Claude Code session on the
-#   claude-personal account, then run the completion gates and record what was observed.
+#   one project after another, each in a fresh headless Claude Code session on one of the
+#   owner's two subscription accounts, then run the completion gates and record what was observed.
 #   Successor of run_agentic_fanout_20261122.sh, which is kept unchanged as the record of
 #   series 2026-11-22b. Differences, each for a defect that series had:
 #     - the instruction is rendered with the complete recorder line, so the session's
@@ -25,7 +25,9 @@
 #   <effort>  the level passed to `claude --effort` and asserted in the record
 #   The worktree must be a checkout of this repository with its own .venv (poetry install),
 #   and this script must be started with that worktree as the working directory's root.
-#   Environment (optional): D4D_SERIES_CONDITION (default generic_v9), D4D_SERIES_METHOD
+#   Environment (optional): D4D_SERIES_ACCOUNT (claude-personal, the default, or claude-work;
+#   the same configuration directory and token variable as the owner's shell function of that
+#   name; a canary and its series must use the same one), D4D_SERIES_CONDITION (default generic_v9), D4D_SERIES_METHOD
 #   (default claudecode_release), D4D_SERIES_RUNTIME (default "Claude Code (release)"): a
 #   release series is filed under its own method directory and runtime string, apart from
 #   the agentic arm and the direct arm (#6324).
@@ -47,6 +49,13 @@ W=${1:?worktree}; SERIES=${2:?series}; MODEL=${3:?model}; EFFORT=${4:?effort}; R
 CONDITION=${D4D_SERIES_CONDITION:-generic_v9}
 METHOD=${D4D_SERIES_METHOD:-claudecode_release}
 RUNTIME=${D4D_SERIES_RUNTIME:-Claude Code (release)}
+ACCOUNT=${D4D_SERIES_ACCOUNT:-claude-personal}
+case "$ACCOUNT" in
+  claude-personal) ACCOUNT_DIR="" ; ACCOUNT_NOTE="CLAUDE_CONFIG_DIR unset" ;;
+  claude-work) ACCOUNT_DIR="$HOME/.claude-work" ; ACCOUNT_NOTE="CLAUDE_CONFIG_DIR=~/.claude-work"
+    [ -d "$ACCOUNT_DIR" ] || { echo "STOP: no configuration directory for claude-work" >&2; exit 2; } ;;
+  *) echo "STOP: D4D_SERIES_ACCOUNT must be claude-personal or claude-work, not '$ACCOUNT'" >&2; exit 2 ;;
+esac
 case "$SERIES$MODEL$EFFORT$REP$CONDITION$METHOD" in *[!A-Za-z0-9._-]*) echo "series, model, effort, replicate, condition and method take plain tokens" >&2; exit 2;; esac
 case "$RUNTIME" in *[!A-Za-z0-9\ \(\)._-]*) echo "the runtime takes letters, digits, spaces and parentheses" >&2; exit 2;; esac
 LABEL="${SERIES}_${MODEL}-claudecode-${CONDITION//_/-}_rep${REP}"
@@ -101,7 +110,7 @@ for P in "$@"; do
     echo "recorder line: complete (D4D_RENDER_SPEC and D4D_LAUNCH_INSTRUCTION); toolchain: checkout-relative"
     echo "render specification: $SPEC sha256 $(shasum -a 256 "$SPEC" | cut -d' ' -f1)"
     echo "claude code: $(command claude --version 2>/dev/null)"
-    echo "account: claude-personal (CLAUDE_CONFIG_DIR unset, as the owner's claude-personal function does)"
+    echo "account: $ACCOUNT ($ACCOUNT_NOTE, as the owner's shell function of that name does)"
     echo "advisor tool: disabled with CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1"
     echo "MCP servers: none (--strict-mcp-config with no config)"
     echo "delivery: the instruction file's text is the single prompt of a headless session (claude -p)"
@@ -110,7 +119,12 @@ for P in "$@"; do
   say "$P LAUNCHED instruction $SHA"
   (
     unset CLAUDE_CONFIG_DIR CLAUDE_CODE_OAUTH_TOKEN CLAUDE_ACCOUNT_LABEL
-    [ -n "${CLAUDE_OAUTH_PERSONAL:-}" ] && export CLAUDE_CODE_OAUTH_TOKEN="$CLAUDE_OAUTH_PERSONAL"
+    if [ "$ACCOUNT" = claude-work ]; then
+      export CLAUDE_CONFIG_DIR="$ACCOUNT_DIR"
+      [ -n "${CLAUDE_OAUTH_WORK:-}" ] && export CLAUDE_CODE_OAUTH_TOKEN="$CLAUDE_OAUTH_WORK"
+    else
+      [ -n "${CLAUDE_OAUTH_PERSONAL:-}" ] && export CLAUDE_CODE_OAUTH_TOKEN="$CLAUDE_OAUTH_PERSONAL"
+    fi
     export CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1
     # The recorder line reads the specification and the instruction from these (#6320).
     export D4D_LAUNCH_INSTRUCTION="$W/$INSTR"
