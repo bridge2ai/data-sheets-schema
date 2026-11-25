@@ -17,10 +17,30 @@ from data_sheets_schema.evaluation_context import declared_class, dataset_units,
 ROOT_POLICY = "root_dataset_v1"
 _SHA256 = re.compile(r"[0-9a-f]{64}")
 _LOCAL_PATH = re.compile(
-    r"(?:/(?:Users|home|root|tmp|private|var|opt|mnt|usr|etc|run|Volumes|Applications|System|bin|sbin|dev|media|srv)/"
+    r"(?:(?<![\w./\\~-])/(?:Users|home|root|tmp|private|var|opt|mnt|usr|etc|run|Volumes|Applications|System|bin|sbin|dev|media|srv)/"
     r"|file:[\\/]|(?<![A-Za-z0-9])[A-Za-z]:[\\/])", re.IGNORECASE)
+_UNC_PATH = re.compile(r"(?<![\w/\\])(?:\\\\|//)[^\\/\s]+[\\/][^\\/\s]+")
 _WEB_URL = re.compile(r"https?://[^\s<>\"']+", re.IGNORECASE)
-_PROVENANCE_SECTIONS = ("metadata", "evaluation_model", "scorer_instrument", "model")
+_PROVENANCE_SECTIONS = ("metadata", "evaluation_metadata", "evaluation_model", "scorer_instrument", "model")
+
+
+def _path_role(parts: tuple, rubric: str) -> str | None:
+    """Recognize schema addresses, never a field name or a string's spelling."""
+    address = tuple(None if type(part) is int else part for part in parts)
+    if address in (("d4d_file",), ("evaluation_model", "session_logs", None, "path")):
+        return "artifact"
+    if address == ("evaluation_scope", "units", None, "path"):
+        return "pointer"
+    for selected, groups, items in (("rubric10-semantic", "elements", "sub_elements"),
+                                    ("rubric20-semantic", "categories", "questions")):
+        if rubric != selected:
+            continue
+        prefix = (groups, None, items, None, "unit_scores", None)
+        if address == prefix + ("path",) or address == prefix + ("considered", None):
+            return "pointer"
+        if any(address == prefix + (kind, None, "path") for kind in ("cited", "absent", "counts")):
+            return "pointer"
+    return None
 
 
 def validate_root_scope(value: dict, input_sha256: str | None = None) -> dict:
@@ -115,7 +135,8 @@ def _relative_artifact(value: str, field: str) -> None:
 def assert_portable_output(result: dict) -> None:
     """Refuse absolute provenance paths and common local path forms in prose.
 
-    Evidence pointers outside provenance retain their JSON-pointer meaning.
+    Typed artifacts use their relative-path contract; typed evidence pointers
+    retain their document meaning and are checked by the evidence validator.
     This does not infer arbitrary filesystem references from natural language.
     """
     def web_url(match):
@@ -125,25 +146,32 @@ def assert_portable_output(result: dict) -> None:
         except ValueError:
             return match.group()
 
-    def walk(value, provenance=False):
+    def walk(value, parts=(), provenance=False):
         if isinstance(value, str):
+            role = _path_role(parts, result.get("rubric"))
+            if role == "artifact":
+                _relative_artifact(value, "published artifact")
+                return
+            if role == "pointer":
+                # Do not reinterpret document keys, even local-looking keys,
+                # as filesystem paths. Strict acceptance checks their meaning.
+                return
             if provenance and value.lstrip().startswith("/"):
                 raise ValueError("published semantic v6 provenance contains an absolute POSIX path")
             # A URL may legitimately name /home or /Users on a remote site.
             # Only recognized HTTP(S) URLs are exempt; prose delimiters are not.
-            if _LOCAL_PATH.search(_WEB_URL.sub(web_url, value)):
+            prose = _WEB_URL.sub(web_url, value)
+            if _LOCAL_PATH.search(prose) or _UNC_PATH.search(prose):
                 raise ValueError("published semantic v6 output contains a local absolute path")
         elif isinstance(value, dict):
             for key, item in value.items():
-                walk(key, provenance)
-                walk(item, provenance)
+                walk(key, provenance=provenance)
+                walk(item, parts + (key,), provenance or (not parts and key in _PROVENANCE_SECTIONS))
         elif isinstance(value, list):
-            for item in value:
-                walk(item, provenance)
+            for index, item in enumerate(value):
+                walk(item, parts + (index,), provenance)
 
     walk(result)
-    for section in _PROVENANCE_SECTIONS:
-        walk(result.get(section), provenance=True)
     _relative_artifact(result.get("d4d_file"), "d4d_file")
     evaluation_model = result.get("evaluation_model")
     if isinstance(evaluation_model, dict):
