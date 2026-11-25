@@ -57,7 +57,7 @@ def inspect(path):
             if isinstance(settings, dict):
                 item["settings_keys"] = sorted(settings)
                 item["settings_identity"] = {key: settings[key] for key in (
-                    "model", "effort", "reasoning_effort", "model_reasoning_effort") if key in settings}
+                    "model", "effort", "reasoning_effort", "model_reasoning_effort", "cwd") if key in settings}
         elif kind == "response_item" and payload.get("type") == "message" and payload.get("model"):
             item["identity"] = {key: payload[key] for key in (
                 "type", "role", "turn_id", "thread_id", "session_id", "model") if key in payload}
