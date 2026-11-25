@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib
 import inspect
 import json
 import os
@@ -112,9 +113,31 @@ def parser():
     return p
 
 
+def sibling_import(name):
+    """Import an adjacent scripts/ module without leaving scripts/ an import root.
+
+    The environment manifest records every sys.path root. Registration, the
+    controller and the launch verify it from processes that do not have this
+    directory on sys.path, so it must not be one when the manifest is written.
+    """
+    scripts = str(Path(__file__).resolve().parent)
+    sys.path.insert(0, scripts)
+    try:
+        return importlib.import_module(name)
+    finally:
+        sys.path.remove(scripts)
+
+
+def require_scripts_not_import_root():
+    scripts = Path(__file__).resolve().parent
+    if any(Path(entry or os.getcwd()).resolve() == scripts for entry in sys.path):
+        raise ValueError('scripts directory is an import root; run with -P so the environment manifest '
+                         'matches the registration and launch import roots')
+
+
 def build(args):
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from native_packet_review_inputs import source_contract
+    source_contract = sibling_import('native_packet_review_inputs').source_contract
+    require_scripts_not_import_root()
     from data_sheets_schema import api_runner, chunking, native_shared_contract as c
     from data_sheets_schema import native_shared_selection as selection
     from data_sheets_schema import native_environment_manifest as environment
