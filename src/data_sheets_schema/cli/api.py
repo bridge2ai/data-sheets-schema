@@ -46,12 +46,14 @@ _CONDITION_SCOPE = (" API generic_v10 requires registered API25; source-heading 
                     "registered API27/shared2/playbook3/receipt3. Source-heading selections do not support native/direct launchers.")
 
 # Every non-core, non-deterministic method directory and the arm key it belongs
-# to (#5046). `baseline` spans three runtime directories (`claudecode_api`,
-# `claudecode_agent`, `claudecode_direct`); the other arms each have one.
+# to (#5046). `baseline` spans four runtime directories (`claudecode_api`,
+# `claudecode_agent`, `claudecode_direct`, `claudecode_release`); the other
+# arms each have one.
 _ARM_FOR_METHOD = {
     "claudecode_agent": "baseline",
     "claudecode_api": "baseline",
     "claudecode_direct": "baseline",
+    "claudecode_release": "baseline",
     "claudecode_agent_crate": "de_novo",
     "claudecode_agent_crate_only": "crate_only",
     "claudecode_agent_healthsheet": "healthsheet",
@@ -315,7 +317,8 @@ def _shared_plan_line(plan):
 
 
 def _spec(project, arm, label, condition, bundle=None, out_dir=None,
-          runtime=None, provider=None, manifest=_UNSET, chunk_manifest=None, api_playbook_version=0, removal_repair_version=0, receipt_completion_version=0, receipt_completion_registration=None, shared_generation_version=0, shared_generation_registration=None, _shared_capture=None, method=None):
+          runtime=None, provider=None, manifest=_UNSET, chunk_manifest=None, api_playbook_version=0, removal_repair_version=0, receipt_completion_version=0, receipt_completion_registration=None, shared_generation_version=0, shared_generation_registration=None, _shared_capture=None, method=None,
+          reasoning_effort=None, complete_recorder_line=False, relative_toolchain=False, launcher_model=None):
     """Resolve a run spec.
 
     `project` is a free string rather than a click.Choice because the GitHub
@@ -333,6 +336,11 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
     if shared_generation_version or shared_generation_registration is not None:
         if shared_generation_version not in (1, 2) or shared_generation_registration is None:
             raise click.ClickException("shared generation requires an explicit supported version and registration")
+        if reasoning_effort or complete_recorder_line or relative_toolchain or launcher_model:
+            # A shared registration states its own rendering; these options
+            # would be dropped without a word (#6320, #6314, #6312).
+            raise click.ClickException("--reasoning-effort, --complete-recorder-line, --relative-toolchain and "
+                                       "--launcher-model do not apply to a shared-generation registration")
         captured = _shared_capture or _capture_shared_registration(shared_generation_registration)
         if captured['document']['selection']['version'] != shared_generation_version:
             raise click.ClickException('selected shared version differs from registration')
@@ -374,6 +382,15 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
         kw["provider"] = provider
     if condition is None:                      # not chosen: the default applies and the record says so (#1094)
         condition, kw["condition_stated"] = "generic", False
+    if reasoning_effort:
+        kw["reasoning_effort"] = reasoning_effort
+    if complete_recorder_line:
+        # The complete line names the variable, never a shell expansion (#6320).
+        kw.update(complete_recorder_line=True, prompt_text_env=True)
+    if relative_toolchain:
+        kw["relative_toolchain"] = True
+    if launcher_model:
+        kw["launcher_model"] = launcher_model
     try:
         return RunSpec(project=project, arm=display, method=method,
                        bundle=resolved, label=label, condition=condition,
@@ -381,6 +398,12 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
                        out_dir=Path(out_dir) if out_dir else None, **kw)
     except ValueError as exc:                    # an unknown profile, from a manifest or the environment (#1630)
         raise click.ClickException(str(exc))
+
+
+def _effort_ladder() -> tuple[str, ...]:
+    """The recorder's closed set of efforts, so the two commands cannot drift apart (#2255)."""
+    from data_sheets_schema.provenance import _EFFORT_LADDER
+    return tuple(_EFFORT_LADDER)
 
 
 def _manifest_kw(manifest, chunk_manifest) -> dict:
@@ -548,7 +571,7 @@ def _warn_method_runtime(method, runtime, condition=None):
     from data_sheets_schema.runs import RUNTIME_KEYS
     key = RUNTIME_KEYS.get((runtime or "").strip().lower())
     expected = _runtime_method("baseline", runtime, condition)
-    if expected is not None and method in ("claudecode_api", "claudecode_agent", "claudecode_direct") and method != expected:
+    if expected is not None and method in ("claudecode_api", "claudecode_agent", "claudecode_direct", "claudecode_release") and method != expected:
         base = (CONDITION_AXES.get(condition or "generic") or {}).get("base", "")
         historical = (key == "api" and method == "claudecode_agent"
                       and not (base[1:].isdigit() and int(base[1:]) >= 8))
@@ -575,7 +598,7 @@ def _runtime_method(arm, runtime, condition):
         return None
     key = RUNTIME_KEYS.get((runtime or "").strip().lower())
     return {"agentic": "claudecode_agent", "direct": "claudecode_direct",
-            "api": "claudecode_api"}.get(key)
+            "release": "claudecode_release", "api": "claudecode_api"}.get(key)
 
 
 @api.command("render-prompt")
@@ -597,7 +620,8 @@ def _runtime_method(arm, runtime, condition):
               show_default=True)
 @click.option("--method", type=click.Choice(_METHODS), default=None,
               help="output method directory (#5046); default for the baseline arm: the one --runtime writes under "
-                   "(Claude Code: claudecode_agent; Claude Code (direct): claudecode_direct; Claude API (direct): "
+                   "(Claude Code: claudecode_agent; Claude Code (direct): claudecode_direct; Claude Code (release): "
+                   "claudecode_release; Claude API (direct): "
                    "claudecode_api, where d4d api run writes), else the arm's method (#5063, #5089)")
 @click.option("--label", required=True, help="run label")
 @click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
@@ -618,8 +642,29 @@ def _runtime_method(arm, runtime, condition):
               help="write the instruction here as well as printing its digest")
 @click.option("--allow-condition-mismatch", is_flag=True,
               help="render even though the label names a different condition (#1094)")
+@click.option("--reasoning-effort", "reasoning_effort", default=None, type=click.Choice(_effort_ladder()),
+              help="the effort the launcher will assert for a runtime that names none in its route; rendered "
+                   "into the recorder line and recorded as asserted, not observed (#2202, #6320)")
+@click.option("--complete-recorder-line", "complete_recorder_line", is_flag=True,
+              help="agentic renderers 6 to 8: render the recorder line with `--render-spec-env D4D_RENDER_SPEC`, "
+                   "the specification's sha256 and `--prompt-text-env D4D_LAUNCH_INSTRUCTION`, so the session "
+                   "adds only its phase history; the launcher sets the first variable to the bytes "
+                   "--render-spec-out writes and the second to the saved instruction file (#6320)")
+@click.option("--render-spec-out", "render_spec_out", type=click.Path(), default=None,
+              help="with --complete-recorder-line: write the rendering specification here, as the exact bytes "
+                   "the launcher exports in D4D_RENDER_SPEC (#6320)")
+@click.option("--launcher-model", "launcher_model", default=None,
+              help="with --complete-recorder-line: the model the launcher will start the session on, where it "
+                   "is not the shared configuration's; rendered into the `# Model:` header lines and kept in "
+                   "the rendering specification (#6311, #6312)")
+@click.option("--relative-toolchain", "relative_toolchain", is_flag=True,
+              help="with --complete-recorder-line: spell the interpreter, schema and playbook locations "
+                   "relative to the checkout the run is launched from, so the datasheet header and the "
+                   "commands carry no machine-absolute path; render from the checkout root (#6314)")
 def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, runtime, allow_condition_mismatch,
-                      provider, out, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None, method=None):
+                      provider, out, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None, method=None,
+                      reasoning_effort=None, complete_recorder_line=False, relative_toolchain=False,
+                      launcher_model=None, render_spec_out=None):
     """Render the exact instruction a run should receive, for any runtime.
 
     The API path never types an instruction: `resolve_prompt()` builds it from
@@ -657,7 +702,9 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
     spec = _spec(project, arm, label, condition, bundle,
                  runtime=runtime, provider=provider, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration,
                  shared_generation_version=shared_generation_version, shared_generation_registration=shared_generation_registration,
-                 method=method, **_manifest_kw(manifest, chunk_manifest))
+                 method=method, reasoning_effort=reasoning_effort, complete_recorder_line=complete_recorder_line,
+                 relative_toolchain=relative_toolchain, launcher_model=launcher_model,
+                 **_manifest_kw(manifest, chunk_manifest))
     _require_input_binding(spec)
     _refuse_condition_mismatch(spec, allow_condition_mismatch)   # the agentic path's launch instrument (#1130 round 2)
     _require_bundle(spec, project, bundle)
@@ -697,8 +744,28 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
     click.echo(f"# rendered {condition} for {project} / {arm} / runtime={runtime}",
                err=True)
     click.echo(f"# sha256 {digest}  ({len(text.encode('utf-8'))} bytes)", err=True)
-    click.echo(f"# record it with: d4d provenance record ... --prompt-text <file>",
-               err=True)
+    if render_spec_out and not spec.complete_recorder_line:
+        raise click.ClickException("--render-spec-out applies only with --complete-recorder-line")
+    if spec.complete_recorder_line:
+        from data_sheets_schema.api_runner import render_spec_payload
+        if render_spec_out:
+            Path(render_spec_out).write_text(render_spec_payload(spec), encoding="utf-8")
+            click.echo(f"✓ {render_spec_out}", err=True)
+        click.echo("# its recorder line is complete: launch with D4D_RENDER_SPEC set to the bytes of "
+                   "--render-spec-out and D4D_LAUNCH_INSTRUCTION to the saved instruction file; the session "
+                   "adds only its --phase flags (#6320)", err=True)
+        if spec.relative_toolchain:
+            # Said here because the instruction would otherwise carry a
+            # machine path without a word (#6325 review, N3).
+            kept = [value for value in (spec._agentic_toolchain["python"],
+                                        *spec._agentic_toolchain["resources"].values())
+                    if Path(value).is_absolute()]
+            for value in kept:
+                click.echo(f"# ⚠️  --relative-toolchain: {value} is outside the launch checkout and keeps "
+                           "its absolute path", err=True)
+    else:
+        click.echo(f"# record it with: d4d provenance record ... --prompt-text <file>",
+                   err=True)
     if not out:
         click.echo(text)
 

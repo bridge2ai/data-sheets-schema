@@ -1,0 +1,757 @@
+"""PR6325 chained D128 successor evidence, 2026-11-24.
+
+Purpose: PR 6325 (release-series recorder and renderer fixes, with the runtime
+key of PR 6334 folded in) moves scanner hits by line number, which the D128
+gate (tests/test_native_d128_scanner_comparison.py) refuses until a reviewed
+successor ledger is pinned. This helper prepares that ledger as a second
+successor chained after the PR6302 one, under the lead's assignment and
+dispositions in notes/coordination/STATUS.md (2026-11-24T20:59:12Z and
+21:01:28Z). It is derived from compare_pr6302_d128_successor_20261122.py,
+which is unchanged, as are the historical D128 fixture and the PR6302 successor.
+
+Inputs: immutable local commits (the historical baseline, the predecessor main
+commit whose arrays the PR6302 successor approved, and the candidate), complete
+Git exports, the unchanged historical approval with its exact retained
+evidence, and the unchanged PR6302 successor fixture. Outputs (all under the
+external --output directory): a plan, three serial scan records, the full
+comparisons and a proposal that confers no approval.
+
+Stop rule (lead, 20:59Z): against the predecessor's approved arrays only
+line-only relocations are acceptable; any added or removed row, any changed
+violation and any other changed field stops with no proposal. Narrow exception
+(lead, 21:01Z): at most one hit may differ in exactly `line` and
+`model_text_function`, where the two strings differ only in the line number
+they end with. The independent reviewer re-derives every row on its own scans.
+
+No native binary, generation code, provider, network or Git mutation is used.
+Each prepare/scan/compare invocation is separate; there is no batch/approval mode.
+Serves: PR 6325, issues 6318, 6320, 6314, 6324.
+"""
+
+import argparse
+import ast
+from collections import defaultdict, deque
+import hashlib
+import importlib.util
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+import time
+
+
+ROOT = Path(__file__).resolve().parents[2]
+SELF = 'scripts/adhoc/compare_pr6325_d128_successor_20261124.py'
+EXPORTER = 'scripts/adhoc/native_u5_inputs_20261108.py'
+HISTORICAL_FIXTURE = 'tests/fixtures/native_d128_approved.json'
+HISTORICAL_SHA = 'b54b057ab074e1154ff05cceddc27e96fe980ad340d9ebf97669e82aca3c2373'
+EVIDENCE_SHA = '16b09d196f13addd5b4b15eac3baf86d328ff3cd76131649dbca60d2e6d6f69a'
+PREDECESSOR_FIXTURE = 'tests/fixtures/native_d128_pr6302_successor.json'
+PREDECESSOR_SHA = '0d5a59ec6ad085be920c7d742315cfcaf56b6fd1c9ea36a3d14f60f2bc7bbbc0'
+PREDECESSOR_KIND = 'pr6302_d128_reviewed_successor'
+BASELINE = 'cf50d9a1c059f3b5030103378ccef33619475dde'
+REFERENCE = '1de1d0ff67f8e622ce14862effcba9050d5147c2'
+FROZEN = ROOT.parent / 'scratch-d128-1de1d0ff6-20261119/itemized-scanner-comparison.json'
+SKILL = '.claude/skills/d4d-generation-specificity-audit'
+ARRAYS = ('hits', 'violations', 'test_dependencies')
+KINDS = ('relocations', 'changed_fields', 'removed', 'added')
+ASSIGNMENT = ('PR6325 lead assignment 2026-11-24: line-only relocations from the release-series recorder fixes '
+              '(6325 with 6334); historical D128 decision and PR6302 successor unchanged')
+DELTA_LABEL = 'predecessor_main_to_current_candidate'
+MOVED_REFERENCE = re.compile(r':[0-9]+\)\Z')
+# The one hit the lead disposed (STATUS 2026-11-24T21:01:28Z; tab 197 pre-pass F1, issue 6339),
+# named by the sha256 of its identity so that this file repeats none of the scanned text:
+# the fields below and its description up to the line number it ends with.
+DISPOSED_IDENTITY_FIELDS = ('path', 'match', 'pattern', 'category', 'role', 'context', 'snippet')
+DISPOSED_IDENTITY_SHA256 = 'b4ad052d5ceb64a3e707538dfab2512815f131121051059e1be573e27c209026'
+REFERENCE_TARGET = re.compile(r' at (?P<path>[A-Za-z0-9_./-]+):(?P<line>[1-9][0-9]*)\)\Z')
+REFERENCE_CALL = 'PhaseRequest'
+ENV = {'PATH': '/usr/bin:/bin:/usr/sbin:/sbin', 'GIT_NO_LAZY_FETCH': '1',
+       'GIT_ALLOW_PROTOCOL': '', 'GIT_CONFIG_GLOBAL': '/dev/null',
+       'GIT_CONFIG_SYSTEM': '/dev/null', 'GIT_CONFIG_NOSYSTEM': '1',
+       'GIT_OPTIONAL_LOCKS': '0', 'GIT_TERMINAL_PROMPT': '0'}
+
+
+def need(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+def encoded(value):
+    return json.dumps(value, sort_keys=True, separators=(',', ':'),
+                      ensure_ascii=False, allow_nan=False).encode('utf-8')
+
+
+def sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+def same(left, right):
+    return encoded(left) == encoded(right)
+
+
+def decode(raw):
+    def pairs(rows):
+        result = {}
+        for key, value in rows:
+            need(key not in result, 'duplicate JSON key')
+            result[key] = value
+        return result
+    def invalid(value):
+        raise ValueError('nonfinite JSON value: ' + value)
+    return json.loads(raw, object_pairs_hook=pairs, parse_constant=invalid)
+
+
+def save(path, value):
+    raw = (json.dumps(value, indent=2, sort_keys=True, ensure_ascii=True, allow_nan=False)
+           .replace(chr(64), '\\u0040') + '\n').encode('utf-8')
+    need(not path.exists() and not path.is_symlink(), 'preserve existing output: ' + str(path))
+    with path.open('xb') as stream:
+        stream.write(raw)
+    need(path.read_bytes() == raw, 'persisted output differs')
+    return {'path': str(path), 'bytes': len(raw), 'sha256': sha(raw)}
+
+
+def full_sha(value):
+    need(type(value) is str and re.fullmatch('[0-9a-f]{40}', value) is not None,
+         'full immutable commit required')
+    return value
+
+
+def git(repo, *args):
+    completed = subprocess.run(['/usr/bin/git', '--no-replace-objects', '-c',
+        'core.hooksPath=/dev/null', '-c', 'core.fsmonitor=false', '-c',
+        'protocol.allow=never', *args], cwd=repo, env=ENV,
+        capture_output=True, timeout=120)
+    need(completed.returncode == 0, 'local Git read failed: ' + completed.stderr.decode(errors='replace'))
+    return completed.stdout
+
+
+def array_shape(arrays):
+    need(type(arrays) is dict and set(arrays) == set(ARRAYS), 'complete array roster required')
+    need(all(type(rows) is list and all(type(row) is dict for row in rows)
+             for rows in arrays.values()), 'complete object arrays required')
+
+
+def fields(before, after):
+    return sorted(key for key in set(before) | set(after)
+        if (key in before) != (key in after) or not same(before.get(key), after.get(key)))
+
+
+def positions(before, after):
+    rows = []
+    for index in range(max(len(before), len(after))):
+        left, right = index < len(before), index < len(after)
+        if left and right and same(before[index], after[index]):
+            continue
+        row = dict(index=index, before_present=left, after_present=right)
+        if left: row['before'] = before[index]
+        if right: row['after'] = after[index]
+        if left and right: row['differing_fields'] = fields(before[index], after[index])
+        rows.append(row)
+    return rows
+
+
+def diff_array(before, after):
+    """Occurrence accounting from the reviewed H1 v3 comparator; types survive."""
+    need(type(before) is list and type(after) is list
+         and all(type(row) is dict for row in before + after), 'object arrays required')
+    old, new = set(range(len(before))), set(range(len(after)))
+    def pair(key):
+        available = defaultdict(deque)
+        for index in sorted(new):
+            available[key(after[index])].append(index)
+        pairs = []
+        for index in sorted(old):
+            matches = available[key(before[index])]
+            if matches:
+                pairs.append((index, matches.popleft()))
+        for left, right in pairs:
+            old.remove(left)
+            new.remove(right)
+        return pairs
+    exact = pair(encoded)
+    moved = pair(lambda row: encoded({key: value for key, value in row.items() if key != 'line'}))
+    anchor = ('path', 'category', 'pattern', 'match', 'context', 'snippet')
+    changed = pair(lambda row: encoded({key: row[key] for key in anchor if key in row}))
+    def record(indices):
+        left, right = indices
+        return dict(before_index=left, after_index=right, before=before[left], after=after[right],
+                    differing_fields=fields(before[left], after[right]))
+    relocations = [record(indices) for indices in moved]
+    need(all(row['differing_fields'] == ['line'] for row in relocations), 'non-coordinate relocation')
+    ledger = dict(before_count=len(before), after_count=len(after),
+        before_sha256=sha(encoded(before)), after_sha256=sha(encoded(after)),
+        exact_matches=[[left, right] for left, right in exact], relocations=relocations,
+        changed_fields=[record(indices) for indices in changed],
+        removed=[dict(before_index=index, before=before[index]) for index in sorted(old)],
+        added=[dict(after_index=index, after=after[index]) for index in sorted(new)],
+        positional_differences=positions(before, after), exact_arrays_equal=same(before, after))
+    validate_array(before, after, ledger)
+    return ledger
+
+
+def validate_array(before, after, ledger):
+    need(type(ledger['before_count']) is int and type(ledger['after_count']) is int
+         and ledger['before_count'] == len(before) and ledger['after_count'] == len(after),
+         'complete array counts differ')
+    need(sha(encoded(before)) == ledger['before_sha256']
+         and sha(encoded(after)) == ledger['after_sha256'], 'ordered full-array hashes differ')
+    old, new = [], []
+    def index(value, rows):
+        need(type(value) is int and 0 <= value < len(rows), 'invalid occurrence index')
+        return value
+    for pair in ledger['exact_matches']:
+        need(type(pair) is list and len(pair) == 2, 'invalid exact pair')
+        left, right = index(pair[0], before), index(pair[1], after)
+        need(same(before[left], after[right]), 'exact occurrence changed')
+        old.append(left); new.append(right)
+    for kind in ('relocations', 'changed_fields'):
+        for row in ledger[kind]:
+            left, right = index(row['before_index'], before), index(row['after_index'], after)
+            need(same(before[left], row['before']) and same(after[right], row['after']), 'changed occurrence differs')
+            changed = fields(before[left], after[right])
+            need(changed == row['differing_fields'] and bool(changed), 'changed-field ledger differs')
+            if kind == 'relocations': need(changed == ['line'], 'relocation changed another field')
+            old.append(left); new.append(right)
+    for row in ledger['removed']:
+        left = index(row['before_index'], before)
+        need(same(before[left], row['before']), 'removed occurrence differs')
+        old.append(left)
+    for row in ledger['added']:
+        right = index(row['after_index'], after)
+        need(same(after[right], row['after']), 'added occurrence differs')
+        new.append(right)
+    need(sorted(old) == list(range(len(before))) and sorted(new) == list(range(len(after))),
+         'duplicate, missing or extra occurrence accounting')
+    if 'positional_differences' in ledger:
+        need(same(ledger['positional_differences'], positions(before, after)), 'positional ledger differs')
+    if 'exact_arrays_equal' in ledger:
+        need(type(ledger['exact_arrays_equal']) is bool and ledger['exact_arrays_equal'] == same(before, after),
+             'ordered array equality differs')
+
+
+def compare(label, before, after):
+    array_shape(before); array_shape(after)
+    ledgers = {name: diff_array(before[name], after[name]) for name in ARRAYS}
+    return {'label': label, 'arrays': ledgers,
+            'exact_arrays_equal': all(row['exact_arrays_equal'] for row in ledgers.values())}
+
+
+def historical(fixture_raw, evidence_raw):
+    need(sha(fixture_raw) == HISTORICAL_SHA and sha(evidence_raw) == EVIDENCE_SHA,
+         'historical fixture or evidence changed')
+    approved, evidence = decode(fixture_raw), decode(evidence_raw)
+    need(approved['decision'] == 'D128' and type(approved['version']) is int and approved['version'] == 1
+         and approved['source_evidence_sha256'] == EVIDENCE_SHA
+         and approved['baseline']['commit'] == BASELINE
+         and approved['reference_candidate']['commit'] == REFERENCE
+         and approved['tool_commit'] == REFERENCE, 'historical approval identity differs')
+    frozen = {}
+    for label, role in (('saved_main_cf50', 'baseline'), ('candidate', 'reference_candidate')):
+        matches = [row for row in evidence['inputs'] if row['label'] == label]
+        need(len(matches) == 1, 'historical input is not unique')
+        value = matches[0]
+        need(value['derivation_complete'] is True and same(value['source'], approved[role])
+             and value['tool_commit'] == REFERENCE
+             and same(value['tool_assets_sha256'], approved['tool_assets_sha256']),
+             'historical source/tool pins differ')
+        array_shape(value['arrays'])
+        frozen[role] = value
+    before, after = frozen['baseline']['arrays'], frozen['reference_candidate']['arrays']
+    for name in ARRAYS:
+        validate_array(before[name], after[name], approved['arrays'][name])
+    need(len(approved['exact_violations']) == 9
+         and same(before['violations'], approved['exact_violations'])
+         and same(after['violations'], approved['exact_violations']), 'historical violation objects differ')
+    return approved, frozen
+
+
+def predecessor_successor(raw, approved_for_plan):
+    """The unchanged PR6302 successor, read without importing its helper."""
+    need(sha(raw) == PREDECESSOR_SHA, 'PR6302 successor fixture changed')
+    value = decode(raw)
+    need(value.get('kind') == PREDECESSOR_KIND and type(value.get('version')) is int and value['version'] == 1
+         and value.get('historical_fixture_sha256') == HISTORICAL_SHA
+         and value.get('historical_evidence_sha256') == EVIDENCE_SHA
+         and value.get('historical_owner_decision_changed') is False, 'PR6302 successor identity differs')
+    need(type(value.get('arrays')) is dict and set(value['arrays']) == set(ARRAYS), 'PR6302 successor lacks complete arrays')
+    if approved_for_plan is not None:
+        need(same(value.get('baseline'), approved_for_plan['baseline'])
+             and same(value.get('exact_violations'), approved_for_plan['exact_violations']),
+             'PR6302 successor differs from the historical approval')
+    return value
+
+
+def moved_reference_only(before, after):
+    """True where two descriptions differ only in the line number they end with."""
+    return (type(before) is str and type(after) is str and before != after
+            and MOVED_REFERENCE.search(before) is not None and MOVED_REFERENCE.search(after) is not None
+            and MOVED_REFERENCE.sub('', before) == MOVED_REFERENCE.sub('', after))
+
+
+def disposed_identity(row):
+    """The sha256 that names a hit apart from where it and its send site sit, or None."""
+    description = row.get('model_text_function') if type(row) is dict else None
+    if type(description) is not str or MOVED_REFERENCE.search(description) is None:
+        return None
+    return sha(encoded({**{key: row.get(key) for key in DISPOSED_IDENTITY_FIELDS},
+                        'description_stem': MOVED_REFERENCE.sub('', description)}))
+
+
+def require_reference_target(read_source, delta):
+    """The line a moved description now names must exist in the candidate tree and hold the call.
+
+    `read_source(path)` returns that file's text in the candidate tree, or None.
+    This runs where a tree is at hand (the comparison and the activation), not
+    in the gate, which stays a check of arrays. The file must parse and a call
+    whose function is the bare name must start on that line: the name in a
+    comment or a string is not a call (tab 197 final review, F1-final). Whether
+    the call is the same one as before is the independent reviewer's condition (b).
+    """
+    for row in delta['hits']['changed_fields']:
+        found = REFERENCE_TARGET.search(row['after'].get('model_text_function') or '')
+        need(found is not None, 'the moved description names no source line')
+        text = read_source(found['path'])
+        number = int(found['line'])
+        try:
+            tree = ast.parse(text) if type(text) is str else None
+        except (SyntaxError, ValueError, RecursionError):
+            tree = None
+        need(tree is not None and any(
+                isinstance(node, ast.Call) and node.lineno == number
+                and isinstance(node.func, ast.Name) and node.func.id == REFERENCE_CALL
+                for node in ast.walk(tree)),
+             'the moved description does not name a PhaseRequest call in the candidate tree')
+
+
+def require_stop_rule(delta):
+    """The lead's rule for this assignment, on the predecessor-to-candidate ledgers.
+
+    Nothing a ledger declares is taken on trust (review 2, D1 to D3): every
+    occurrence must be accounted exactly once and in place, and each row's
+    differing fields are recomputed from the two objects it carries. Whether
+    those objects are the scanned ones is `require_delta_on_arrays`' check.
+    """
+    need(type(delta) is dict and set(delta) == set(ARRAYS), 'delta lacks complete arrays')
+    exceptions = 0
+    for name in ARRAYS:
+        ledger = delta[name]
+        need(type(ledger) is dict and all(type(ledger.get(key)) is list for key in
+             ('exact_matches', 'relocations', 'changed_fields', 'added', 'removed')), name + ': incomplete ledger')
+        need(ledger['added'] == [] and ledger['removed'] == [], name + ': added or removed rows stop this assignment')
+        count = ledger.get('before_count')
+        need(type(count) is int and count >= 0 and type(ledger.get('after_count')) is int
+             and count == ledger['after_count'], name + ': array length changed')
+        seen = []
+        for pair in ledger['exact_matches']:
+            need(type(pair) is list and len(pair) == 2 and type(pair[0]) is int and pair[0] == pair[1],
+                 name + ': an occurrence changed position')
+            seen.append(pair[0])
+        for kind in ('relocations', 'changed_fields'):
+            for row in ledger[kind]:
+                need(type(row) is dict and type(row.get('before')) is dict and type(row.get('after')) is dict
+                     and type(row.get('before_index')) is int and row['before_index'] == row.get('after_index'),
+                     name + ': an occurrence changed position')
+                need(row.get('differing_fields') == fields(row['before'], row['after']),
+                     name + ': a row declares other fields than its objects differ in')
+                seen.append(row['before_index'])
+        need(sorted(seen) == list(range(count)), name + ': duplicate, missing or extra occurrence accounting')
+        need(all(row['differing_fields'] == ['line'] for row in ledger['relocations']), name + ': non-coordinate relocation')
+        for row in ledger['changed_fields']:
+            need(name == 'hits' and row['differing_fields'] == ['line', 'model_text_function']
+                 and moved_reference_only(row['before'].get('model_text_function'), row['after'].get('model_text_function'))
+                 and disposed_identity(row['before']) == DISPOSED_IDENTITY_SHA256 == disposed_identity(row['after']),
+                 name + ': a changed field outside the single disposed exception stops this assignment')
+            exceptions += 1
+    need(delta['violations']['relocations'] == [] and delta['violations']['changed_fields'] == [],
+         'violation objects changed')
+    need(exceptions <= 1, 'more than the one disposed model_text_function row')
+    return exceptions
+
+
+def predecessor_arrays(predecessor, before):
+    """The arrays the PR6302 successor approved, rebuilt from the baseline arrays and its ledger.
+
+    The gate scans the historical baseline and the candidate, never the
+    predecessor commit. Every approved occurrence is an exact match of a
+    baseline object or a row that carries its object, so the arrays follow
+    from the two, and their hashes must be the ones that successor pinned.
+    """
+    need(type(predecessor) is dict and predecessor.get('kind') == PREDECESSOR_KIND, 'predecessor is not the PR6302 successor')
+    array_shape(before)
+    rebuilt = {}
+    for name in ARRAYS:
+        ledger, old = predecessor['arrays'][name], before[name]
+        need(len(old) == ledger['before_count'] and sha(encoded(old)) == ledger['before_sha256'],
+             name + ': baseline arrays are not the ones the PR6302 successor starts from')
+        need(type(ledger['after_count']) is int and ledger['after_count'] >= 0, name + ': invalid PR6302 successor count')
+        rows = [None] * ledger['after_count']
+        def place(index, row):
+            need(type(index) is int and 0 <= index < len(rows) and rows[index] is None and type(row) is dict,
+                 name + ': the PR6302 successor arrays cannot be rebuilt')
+            rows[index] = row
+        for pair in ledger['exact_matches']:
+            need(type(pair) is list and len(pair) == 2 and type(pair[0]) is int and 0 <= pair[0] < len(old),
+                 name + ': the PR6302 successor arrays cannot be rebuilt')
+            place(pair[1], old[pair[0]])
+        for kind in ('relocations', 'changed_fields', 'added'):
+            for row in ledger[kind]:
+                place(row['after_index'], row['after'])
+        need(all(row is not None for row in rows) and sha(encoded(rows)) == ledger['after_sha256'],
+             name + ': the PR6302 successor arrays cannot be rebuilt')
+        rebuilt[name] = rows
+    return rebuilt
+
+
+def require_delta_on_arrays(value, predecessor, before, after):
+    """Bind the chained delta to the scanned arrays (review 2, D1).
+
+    `before` and `after` are the complete baseline and candidate arrays of the
+    two scans the gate already makes. The delta must account every occurrence
+    between the rebuilt PR6302 successor arrays and the candidate's, object by
+    object, and still satisfy the stop rule. A delta that merely declares
+    nothing changed does not pass.
+    """
+    array_shape(after)
+    middle = predecessor_arrays(predecessor, before)
+    chain = value.get('predecessor') if type(value) is dict else None
+    need(type(chain) is dict and type(chain.get('delta')) is dict and set(chain['delta']) == set(ARRAYS),
+         'successor lacks the chained delta')
+    for name in ARRAYS:
+        validate_array(middle[name], after[name], chain['delta'][name])
+    return require_stop_rule(chain['delta'])
+
+
+def require_successor(raw, expected_sha, historical_approval, predecessor):
+    """The generation helper cannot approve its own proposal; this pin is reviewed.
+
+    `predecessor` is the value the PR6302 helper returned for its own fixture:
+    this successor is chained after it and widens nothing it fixed.
+    """
+    need(type(expected_sha) is str and re.fullmatch('[0-9a-f]{64}', expected_sha) is not None,
+         'reviewed successor pin is not supplied')
+    need(sha(raw) == expected_sha, 'reviewed successor bytes changed')
+    value = decode(raw)
+    need(value.get('kind') == 'pr6325_d128_reviewed_successor' and type(value.get('version')) is int
+         and value['version'] == 1 and value.get('assignment') == ASSIGNMENT,
+         'successor is not the exact PR6325 review scope')
+    need(value.get('historical_fixture_sha256') == HISTORICAL_SHA
+         and value.get('historical_evidence_sha256') == EVIDENCE_SHA
+         and value.get('historical_owner_decision_changed') is False,
+         'successor changed historical approval')
+    need(type(value.get('review_reference')) is str and bool(value['review_reference'].strip())
+         and re.fullmatch('[0-9a-f]{64}', value.get('comparison_evidence_sha256', '')) is not None,
+         'successor lacks explicit review/evidence identity')
+    need(same(value.get('baseline'), historical_approval['baseline'])
+         and same(value.get('exact_violations'), historical_approval['exact_violations']),
+         'successor widened baseline or violation approval')
+    need(value.get('frozen_baseline_unchanged') is True, 'current tool changed the frozen baseline')
+    need(type(value.get('arrays')) is dict and set(value['arrays']) == set(ARRAYS), 'successor lacks complete arrays')
+    for name in ARRAYS:
+        ledger = value['arrays'][name]
+        need(ledger.get('before_sha256') == historical_approval['arrays'][name]['before_sha256']
+             and type(ledger.get('before_count')) is int
+             and ledger['before_count'] == historical_approval['arrays'][name]['before_count'],
+             'successor baseline array differs')
+    full_sha(value['reference_candidate']['commit']); full_sha(value['tool_commit'])
+    need(value['reference_candidate']['commit'] == value['tool_commit'], 'successor source/tool commits differ')
+    identity = value['reference_candidate']
+    need(set(identity) == set(historical_approval['reference_candidate'])
+         and same(identity.get('physical_input_mask'), historical_approval['baseline']['physical_input_mask']),
+         'successor source inventory scope differs')
+    full_sha(identity['tree'])
+    need(all(type(identity.get(key)) is str and re.fullmatch('[0-9a-f]{64}', identity[key])
+             for key in ('committed_roster_sha256', 'physical_inputs_sha256')),
+         'successor source inventory pins are incomplete')
+    # Chained after the PR6302 successor: same scanner bytes, and every array
+    # starts from exactly what that successor approved.
+    need(type(predecessor) is dict and predecessor.get('kind') == PREDECESSOR_KIND, 'predecessor is not the PR6302 successor')
+    chain = value.get('predecessor')
+    need(type(chain) is dict and set(chain) == {'successor_sha256', 'commit', 'identity', 'delta'}
+         and chain['successor_sha256'] == PREDECESSOR_SHA, 'successor is not chained after the PR6302 successor')
+    full_sha(chain['commit'])
+    need(type(chain['identity']) is dict and chain['identity'].get('commit') == chain['commit'], 'predecessor identity differs')
+    need(same(value.get('tool_assets_sha256'), predecessor['tool_assets_sha256']),
+         'successor changed the scanner or its configuration')
+    require_stop_rule(chain['delta'])
+    for name in ARRAYS:
+        delta, ledger, before = chain['delta'][name], value['arrays'][name], predecessor['arrays'][name]
+        need(delta['before_sha256'] == before['after_sha256'] and delta['before_count'] == before['after_count'],
+             name + ': the delta does not start from the PR6302 successor arrays')
+        need(delta['after_sha256'] == ledger['after_sha256'] and delta['after_count'] == ledger['after_count'],
+             name + ': the delta does not end at this successor arrays')
+    return value
+
+
+def exporter(repo, output):
+    path = ROOT / EXPORTER
+    spec = importlib.util.spec_from_file_location('pr6325_d128_exporter', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    module.ROOT, module.SCRATCH = repo, output / 'exports'
+    module.git = lambda *args: git(repo, *args)
+    return module
+
+
+def source_identity(repo, manifest):
+    rows = [dict(path=path, mode=row['mode'], kind='blob', git_oid=row['git_blob'],
+                 bytes=row['bytes'], sha256=row['sha256']) for path, row in sorted(manifest['files'].items())]
+    return dict(commit=manifest['commit'], tree=manifest['commit_tree'],
+        physical_input_mask=manifest['path_mask'],
+        committed_roster_sha256=sha(git(repo, 'ls-tree', '-r', '-z', manifest['commit'])),
+        physical_inputs_sha256=sha(encoded(rows)))
+
+
+def assets(repo, commit):
+    names = git(repo, 'ls-tree', '-r', '--name-only', commit, '--', SKILL).decode().splitlines()
+    need(names and len(set(names)) == len(names), 'scanner assets missing or duplicated')
+    return {name: sha(git(repo, 'show', commit + ':' + name)) for name in names}
+
+
+def checked_plan(args):
+    raw = (args.output / 'plan.json').read_bytes()
+    need(type(args.plan_sha256) is str and sha(raw) == args.plan_sha256, 'explicit plan pin differs')
+    plan = decode(raw)
+    need(plan.get('kind') == 'pr6325_d128_successor_plan' and type(plan.get('version')) is int
+         and plan['version'] == 1 and plan.get('assignment') == ASSIGNMENT, 'plan scope differs')
+    need(plan['candidate_commit'] == args.candidate and plan['predecessor_commit'] == args.predecessor
+         and plan['repository'] == str(args.repository), 'plan source differs')
+    predecessor_successor((ROOT / PREDECESSOR_FIXTURE).read_bytes(), approved_for_plan=None)
+    need(set(plan['helper_assets_sha256']) == {SELF, EXPORTER, HISTORICAL_FIXTURE, PREDECESSOR_FIXTURE}, 'plan helper roster differs')
+    for relative, digest in plan['helper_assets_sha256'].items():
+        need(sha((ROOT / relative).read_bytes()) == digest
+             and sha(git(args.repository, 'show', args.candidate + ':' + relative)) == digest,
+             'helper differs from the immutable candidate: ' + relative)
+    approved, frozen = historical((ROOT / HISTORICAL_FIXTURE).read_bytes(), args.frozen_evidence.read_bytes())
+    need(same(plan['historical_approval'], approved), 'plan historical approval differs')
+    need(same(plan['historical_evidence'], {'path': str(args.frozen_evidence), 'sha256': EVIDENCE_SHA}),
+         'plan frozen evidence differs')
+    inputs = exporter(args.repository, args.output)
+    need(set(plan['sources']) == {'baseline', 'predecessor', 'candidate'}, 'plan source roster differs')
+    for name, commit in (('baseline', BASELINE), ('predecessor', args.predecessor), ('candidate', args.candidate)):
+        selected = plan['sources'][name]
+        need(selected['identity']['commit'] == commit and selected['label'] == 'scanner-candidate-' + commit[:9],
+             'plan source role differs')
+        tree, manifest = inputs.checked_scanner_input(selected['label'], selected['identity']['commit'])
+        need(selected['tree'] == str(tree), 'plan physical tree differs')
+        need(same(source_identity(args.repository, manifest), selected['identity']), 'source inventory changed')
+        need(sha((tree.parent / 'manifest.json').read_bytes()) == selected['manifest_sha256'], 'export manifest changed')
+    need(same(assets(args.repository, args.candidate), plan['tool_assets_sha256']), 'current scanner changed')
+    return plan, inputs, approved, frozen
+
+
+def prepare(args):
+    need(not args.output.exists() and not args.output.is_symlink(), 'prepare requires a fresh output root')
+    need(args.output == args.output.resolve() and not args.output.is_relative_to(args.repository),
+         'output must be a physical external directory')
+    need(git(args.repository, 'rev-parse', args.candidate + '^{commit}').decode().strip() == args.candidate,
+         'candidate is not the explicit local commit')
+    need(git(args.repository, 'rev-parse', args.predecessor + '^{commit}').decode().strip() == args.predecessor
+         and args.predecessor not in (args.candidate, BASELINE)
+         and git(args.repository, 'merge-base', args.predecessor, args.candidate).decode().strip() == args.predecessor,
+         'predecessor must be a distinct ancestor of the candidate')
+    helper_pins = {}
+    for relative in (SELF, EXPORTER, HISTORICAL_FIXTURE, PREDECESSOR_FIXTURE):
+        raw = (ROOT / relative).read_bytes()
+        need(raw == git(args.repository, 'show', args.candidate + ':' + relative), 'commit helper before preparing')
+        helper_pins[relative] = sha(raw)
+    approved, frozen = historical((ROOT / HISTORICAL_FIXTURE).read_bytes(), args.frozen_evidence.read_bytes())
+    predecessor_successor((ROOT / PREDECESSOR_FIXTURE).read_bytes(), approved_for_plan=approved)
+    need(same(assets(args.repository, REFERENCE), approved['tool_assets_sha256']), 'frozen tool Git bytes differ')
+    for value in frozen.values():
+        source = value['source']
+        need(git(args.repository, 'rev-parse', source['commit'] + '^{tree}').decode().strip() == source['tree']
+             and sha(git(args.repository, 'ls-tree', '-r', '-z', source['commit'])) == source['committed_roster_sha256'],
+             'frozen Git source identity differs')
+    args.output.mkdir()
+    (args.output / 'exports').mkdir()
+    inputs = exporter(args.repository, args.output)
+    sources = {}
+    for name, commit in (('baseline', BASELINE), ('predecessor', args.predecessor), ('candidate', args.candidate)):
+        label = 'scanner-candidate-' + commit[:9]
+        inputs.materialize(label, commit, inputs.BASE_SCAN_PATHS)
+        tree, manifest = inputs.checked_scanner_input(label, commit)
+        sources[name] = dict(label=label, tree=str(tree), identity=source_identity(args.repository, manifest),
+            manifest_sha256=sha((tree.parent / 'manifest.json').read_bytes()))
+    need(same(sources['baseline']['identity'], approved['baseline']), 'baseline export differs from historical source')
+    plan = dict(kind='pr6325_d128_successor_plan', version=1, assignment=ASSIGNMENT,
+        repository=str(args.repository), candidate_commit=args.candidate,
+        predecessor_commit=args.predecessor, predecessor_successor_sha256=PREDECESSOR_SHA, sources=sources,
+        helper_assets_sha256=helper_pins, historical_approval=approved,
+        historical_evidence={'path': str(args.frozen_evidence), 'sha256': EVIDENCE_SHA},
+        tool_assets_sha256=assets(args.repository, args.candidate),
+        scope='Three new current-tool scans plus exact retained frozen evidence and the unchanged PR6302 successor; no approval or native acceptance.')
+    print(json.dumps(save(args.output / 'plan.json', plan), sort_keys=True))
+
+
+def load_scan(args, name, plan):
+    directory = args.output / name
+    run = decode((directory / 'run.json').read_bytes())
+    need(type(run.get('returncode')) is int and run['returncode'] in (0, 1)
+         and run.get('derivation_complete') is True and run.get('source_unchanged') is True,
+         'scan is incomplete or failed')
+    need(run.get('plan_sha256') == args.plan_sha256 and run.get('source') == name
+         and same(run.get('source_identity'), plan['sources'][name]['identity'])
+         and same(run.get('tool_assets_sha256'), plan['tool_assets_sha256']), 'scan source/tool binding differs')
+    raw = (directory / 'scan.json').read_bytes()
+    need(sha(raw) == run['scan_sha256'], 'complete scanner report changed')
+    document = decode(raw)
+    need(document.get('self_test', {}).get('passed') is True, 'scanner self-test did not pass')
+    arrays = {key: document[key] for key in ARRAYS}
+    array_shape(arrays)
+    need(same(arrays, run['arrays']), 'persisted full arrays differ')
+    return run
+
+
+def scan(args):
+    plan, inputs, _, _ = checked_plan(args)
+    name = args.scan
+    if name in ('predecessor', 'candidate'):
+        load_scan(args, 'baseline', plan)
+    if name == 'candidate':
+        load_scan(args, 'predecessor', plan)
+    selected = plan['sources'][name]
+    tree, _ = inputs.checked_scanner_input(selected['label'], selected['identity']['commit'])
+    tool = Path(plan['sources']['candidate']['tree']) / SKILL / 'scan.py'
+    directory = args.output / name
+    directory.mkdir()
+    command = [sys.executable, '-P', '-B', str(tool), '--root', str(tree),
+        '--report', str(directory / 'scan.md'), '--json', str(directory / 'scan.json'),
+        '--tokens', str(tool.with_name('tokens.yaml')), '--exceptions', str(tool.with_name('exceptions.yaml')), '--full-json']
+    environment = dict(ENV, PYTHONDONTWRITEBYTECODE='1', PYTHONNOUSERSITE='1',
+                       PIP_NO_INDEX='1', UV_OFFLINE='1')
+    for key in ('HOME', 'TMPDIR', 'VIRTUAL_ENV'):
+        if key in os.environ: environment[key] = os.environ[key]
+    started = time.monotonic()
+    record = dict(source=name, plan_sha256=args.plan_sha256, command=command,
+        source_identity=selected['identity'], tool_assets_sha256=plan['tool_assets_sha256'],
+        returncode=None, derivation_complete=False, source_unchanged=False,
+        interpreter={'executable': sys.executable, 'version': sys.version})
+    error = None
+    stdout, stderr = b'', b''
+    try:
+        result = subprocess.run(command, cwd=tree, env=environment, capture_output=True, timeout=600)
+        stdout, stderr = result.stdout, result.stderr
+        record['returncode'] = result.returncode
+        if type(result.returncode) is int and result.returncode in (0, 1):
+            raw = (directory / 'scan.json').read_bytes()
+            document = decode(raw)
+            arrays = {key: document[key] for key in ARRAYS}
+            array_shape(arrays)
+            need(document.get('self_test', {}).get('passed') is True, 'scanner self-test failed')
+            record.update(arrays=arrays, scan_sha256=sha(raw), derivation_complete=True)
+    except BaseException as caught:
+        error = caught
+        if isinstance(caught, subprocess.TimeoutExpired):
+            stdout, stderr = caught.stdout or b'', caught.stderr or b''
+        record['failure'] = type(caught).__name__ + ': ' + str(caught)
+    try:
+        checked_plan(args)
+        record['source_unchanged'] = True
+    except BaseException as caught:
+        record['source_check_failure'] = type(caught).__name__ + ': ' + str(caught)
+        if error is None: error = caught
+    record.update(seconds=time.monotonic() - started, stdout_sha256=sha(stdout), stderr_sha256=sha(stderr))
+    (directory / 'stdout.txt').write_bytes(stdout)
+    (directory / 'stderr.txt').write_bytes(stderr)
+    receipt = save(directory / 'run.json', record)
+    if error is not None: raise error
+    need(record['derivation_complete'], 'scanner did not produce complete arrays')
+    print(json.dumps(dict(receipt, counts={key: len(rows) for key, rows in record['arrays'].items()}), sort_keys=True))
+
+
+def compare_runs(args):
+    plan, _, approved, frozen = checked_plan(args)
+    previous = predecessor_successor((ROOT / PREDECESSOR_FIXTURE).read_bytes(), approved_for_plan=approved)
+    before, after = load_scan(args, 'baseline', plan), load_scan(args, 'candidate', plan)
+    middle = load_scan(args, 'predecessor', plan)
+    legs = [compare(label, left, right) for label, left, right in (
+        ('current_tool_baseline_to_current_candidate', before['arrays'], after['arrays']),
+        ('frozen_tool_baseline_to_current_tool_baseline', frozen['baseline']['arrays'], before['arrays']),
+        ('frozen_reference_to_current_candidate', frozen['reference_candidate']['arrays'], after['arrays']),
+        (DELTA_LABEL, middle['arrays'], after['arrays']))]
+    report = dict(kind='pr6325_d128_successor_comparison', version=1,
+        status='complete_diagnostic_pending_review', assignment=ASSIGNMENT,
+        plan_sha256=args.plan_sha256, historical_fixture_sha256=HISTORICAL_SHA,
+        predecessor_successor_sha256=PREDECESSOR_SHA, predecessor_commit=args.predecessor,
+        source_manifests=plan['sources'], helper_assets_sha256=plan['helper_assets_sha256'],
+        historical_evidence_sha256=EVIDENCE_SHA, historical_owner_decision_changed=False,
+        frozen_inputs=frozen, new_runs={'baseline': before, 'predecessor': middle, 'candidate': after},
+        comparisons=legs, fresh_scan_count=3, frozen_runs_reexecuted=False,
+        tool_asset_delta=[dict(path=path, before_sha256=previous['tool_assets_sha256'].get(path),
+                             after_sha256=plan['tool_assets_sha256'].get(path))
+            for path in sorted(set(previous['tool_assets_sha256']) | set(plan['tool_assets_sha256']))
+            if previous['tool_assets_sha256'].get(path) != plan['tool_assets_sha256'].get(path)],
+        interpretation='All ordered objects and duplicate occurrences retained. New differences require explicit PR6325 review; neither the historical approval nor the PR6302 successor is rewritten.')
+    receipt = save(args.output / 'comparison.json', report)
+    need(legs[1]['exact_arrays_equal'], 'current scanner changed the historical baseline; no proposal emitted')
+    need(report['tool_asset_delta'] == [], 'scanner assets differ from the PR6302 successor; no proposal emitted')
+    need(same(before['arrays']['violations'], approved['exact_violations'])
+         and same(after['arrays']['violations'], approved['exact_violations']),
+         'unreviewed violation objects; no proposal emitted')
+    # The predecessor commit must carry exactly the arrays the PR6302 successor approved.
+    for name in ARRAYS:
+        need(sha(encoded(middle['arrays'][name])) == previous['arrays'][name]['after_sha256']
+             and len(middle['arrays'][name]) == previous['arrays'][name]['after_count'],
+             name + ': the predecessor commit does not carry the PR6302 successor arrays; no proposal emitted')
+    # The gate rebuilds those arrays from the baseline scan and the PR6302 ledger;
+    # the rebuilt objects must be the scanned ones.
+    need(same(predecessor_arrays(previous, before['arrays']), middle['arrays']),
+         'the PR6302 successor arrays rebuilt from the baseline differ from the predecessor scan; no proposal emitted')
+    delta = {name: {key: value for key, value in ledger.items()
+                    if key not in ('positional_differences', 'exact_arrays_equal')}
+             for name, ledger in legs[3]['arrays'].items()}
+    exceptions = require_stop_rule(delta)
+    def candidate_source(path):
+        try:
+            return git(args.repository, 'show', args.candidate + ':' + path).decode('utf-8')
+        except ValueError:
+            return None
+    require_reference_target(candidate_source, delta)
+    need(require_delta_on_arrays(dict(predecessor=dict(delta=delta)), previous, before['arrays'], after['arrays'])
+         == exceptions, 'the delta does not bind to the scanned arrays; no proposal emitted')
+    proposal = dict(kind='pr6325_d128_successor_proposal', version=1, assignment=ASSIGNMENT,
+        review_reference=None, comparison_evidence_sha256=receipt['sha256'],
+        historical_fixture_sha256=HISTORICAL_SHA, historical_evidence_sha256=EVIDENCE_SHA,
+        historical_owner_decision_changed=False, frozen_baseline_unchanged=True,
+        baseline=approved['baseline'], reference_candidate=plan['sources']['candidate']['identity'],
+        tool_commit=args.candidate, tool_assets_sha256=plan['tool_assets_sha256'],
+        predecessor=dict(successor_sha256=PREDECESSOR_SHA, commit=args.predecessor,
+                         identity=plan['sources']['predecessor']['identity'], delta=delta),
+        arrays={name: {key: value for key, value in ledger.items()
+                      if key not in ('positional_differences', 'exact_arrays_equal')}
+                for name, ledger in legs[0]['arrays'].items()}, exact_violations=approved['exact_violations'])
+    summary = {name: dict(relocations=len(delta[name]['relocations']), changed_fields=len(delta[name]['changed_fields']),
+                          exact_matches=len(delta[name]['exact_matches'])) for name in ARRAYS}
+    print(json.dumps({'comparison': receipt, 'proposal': save(args.output / 'successor-proposal.json', proposal),
+                      'delta_from_predecessor': summary, 'disposed_exception_rows': exceptions,
+                      'approved': False}, sort_keys=True))
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--repository', type=Path, default=ROOT)
+    parser.add_argument('--candidate', required=True)
+    parser.add_argument('--predecessor', required=True,
+                        help='the main commit the candidate is based on; its arrays must be the PR6302 successor\'s approved ones')
+    parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--frozen-evidence', type=Path, default=FROZEN)
+    parser.add_argument('--plan-sha256')
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument('--prepare', action='store_true')
+    mode.add_argument('--scan', choices=('baseline', 'predecessor', 'candidate'))
+    mode.add_argument('--compare', action='store_true')
+    args = parser.parse_args()
+    args.repository, args.output = args.repository.absolute(), args.output.absolute()
+    full_sha(args.candidate); full_sha(args.predecessor)
+    need(args.repository == args.repository.resolve(), 'repository is an alias')
+    if args.prepare: prepare(args)
+    elif args.scan: scan(args)
+    else: compare_runs(args)
+
+
+if __name__ == '__main__':
+    main()

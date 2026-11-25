@@ -492,11 +492,53 @@ BACKOFF_BASE_SECONDS = 2
 #: admitted there (#2226). The renderer-3 receipt-manifest section is the
 #: one site that reads the narrower `CLAUDE_CODE_RUNTIMES` (#2259): it was
 #: never rendered for Codex, and stays that way.
-AGENTIC_RUNTIMES = frozenset({"Claude Code", "Claude Code (direct)", "Codex CLI"})
-CLAUDE_CODE_RUNTIMES = frozenset({"Claude Code", "Claude Code (direct)"})
+AGENTIC_RUNTIMES = frozenset({"Claude Code", "Claude Code (direct)", "Claude Code (release)", "Codex CLI"})
+CLAUDE_CODE_RUNTIMES = frozenset({"Claude Code", "Claude Code (direct)", "Claude Code (release)"})
 #: The variable a launcher sets to the exact saved launch instruction; the
 #: recorder reads it with `--prompt-text-env` (#2282).
 LAUNCH_INSTRUCTION_VARIABLE = "D4D_LAUNCH_INSTRUCTION"
+#: The variable a launcher sets to the exact rendering specification; the
+#: recorder reads it with `--render-spec-env` and checks it against the
+#: `--render-spec-sha256` on the line (#6065).
+RENDER_SPEC_VARIABLE = "D4D_RENDER_SPEC"
+
+#: Appended to an instruction rendered with `complete_recorder_line` (#6320).
+#: Part of the instruction, so part of its hash; changing it changes every
+#: instruction rendered under the key.
+COMPLETE_RECORDER_LINE_NOTE = (
+    "\n\n## The provenance record line of this run (complete recorder line)\n\n"
+    "The `provenance record` line above is complete. It names two variables the launcher has "
+    "set: `" + RENDER_SPEC_VARIABLE + "` holds the launcher's rendering specification, which "
+    "the hash on the line binds, and `" + LAUNCH_INSTRUCTION_VARIABLE + "` names the file "
+    "holding this instruction. The recorder reads the condition, runtime, provider, date, "
+    "asserted reasoning effort, receipt expectation and prompt files from that specification.\n\n"
+    "Run the line as written, with one addition and no other change: append one `--phase` "
+    "flag for each phase you actually performed, in order, in the JSON form the playbook's "
+    "provenance template gives (`generate_full`, `derive_core`, `source_audit`, `reconcile`, "
+    "`report`, and `repair` and `report_after_repair` only if a repair ran). Do not add "
+    "`--prompt`, `--prompt-text`, `--condition`, `--runtime`, `--reasoning-effort` or "
+    "`--receipt-expected`, and do not read, print, expand or replace either variable in the "
+    "shell. The playbook's rule to add nothing to a registered recorder line describes runs "
+    "whose launcher records the phase history; no launcher does so for this run. The recorder "
+    "refuses this line without `--phase` and says what to append: that refusal is part of "
+    "this procedure, not a failure of the run, and the line is then run again with the flags.\n"
+)
+
+
+def render_spec_payload(spec: "RunSpec") -> str:
+    """The bytes a launcher puts in `D4D_RENDER_SPEC` for a complete recorder line (#6320).
+
+    One serialization for the hash the line carries, the file `d4d prompt
+    render --render-spec-out` writes and the value the recorder reads: ASCII,
+    sorted keys, no whitespace, no trailing newline.
+
+    RunSpec boundary: validated-caller
+
+    RunSpec precondition: The rendering caller has validated the current RunSpec; serializing
+    its rendering selection neither admits a launch nor changes the specification.
+    """
+    return json.dumps(spec.render_spec(), sort_keys=True, separators=(",", ":"))
+
 
 
 _REGISTERED_INPUT_FIELDS = ("bundle", "manifest", "chunk_manifest")
@@ -651,6 +693,41 @@ class RunSpec:
     # with the pinned binary. False renders the expansion, which keeps every
     # existing render spec byte-identical; True is emitted into the spec.
     prompt_text_env: bool = False
+    # Render the recorder line of an agentic renderer 6 to 8 instruction as
+    # a complete command (#6320): it names the variable that holds this
+    # specification, bound by its sha256 on the line (`--render-spec-env`,
+    # `--render-spec-sha256`, #6065), and the variable that names the launch
+    # instruction, as the native controller's registered line does. The
+    # specification is not printed into the command, so a session that
+    # appends its phases never has to reproduce it. The
+    # recorder then takes the condition, runtime, provider, date, asserted
+    # effort, receipt expectation and prompt files from the specification
+    # the launcher rendered, so a session that copies the line cannot drop
+    # them; the session adds only its own phase history. Fifteen runs of
+    # series 2026-11-22b were sent the bare line, seven wrote a record that
+    # failed its gates and all sixteen records misstated the effort. False
+    # renders the bare line, which keeps every existing render spec
+    # byte-identical; True is emitted into the spec and requires
+    # `prompt_text_env`.
+    complete_recorder_line: bool = False
+    # Spell the bound toolchain of an agentic renderer 6 to 8 instruction
+    # relative to the checkout it is launched from (#6314). The instruction
+    # prints those locations into the datasheet's `# Schema:` header and into
+    # every command; the absolute form put the operator's worktree path into
+    # all 16 datasheets of 2026-11-22. False keeps the absolute spelling and
+    # every existing render spec byte-identical; True is emitted into the spec.
+    relative_toolchain: bool = False
+    # The model the launcher will start an agentic renderer 6 to 8 session
+    # on, where that is not the shared configuration's (#6311, #6312). The
+    # header's `# Model:` line otherwise comes from that file, so a session
+    # launched on another model was told to head its records with a model it
+    # did not run on; the 2026-11-22 series worked around it with a
+    # branch-only commit to the configuration file, which no commit on main
+    # carries. Stated here it is part of the rendering specification the
+    # record keeps, and the recorder's own note still reports the difference
+    # from the shared configuration. None renders the configuration's name
+    # and keeps every existing render spec byte-identical.
+    launcher_model: str | None = None
     # Independent opt-in instruction axis; absent/zero preserves every historical renderer.
     api_playbook_version: int = 0
     native_source_attribution_version: int = 0
@@ -706,7 +783,7 @@ class RunSpec:
         from .native_shared_render import validate_spec as validate_native_shared
         validate_native_shared(self)
         from data_sheets_schema.native_source_attribution import validate as validate_native_attribution
-        validate_native_attribution(self.native_source_attribution_version, native=self.runtime in CLAUDE_CODE_RUNTIMES,
+        validate_native_attribution(self.native_source_attribution_version, native=_native_attribution_runtime(self),  # SF3
                                     renderer=self.render_version, max_checks=self.native_source_attribution_max_checks)
         if self.render_version == 24 and self.is_agentic:
             raise ValueError("renderer 24 is an API-only offline receipt boundary")
@@ -751,8 +828,46 @@ class RunSpec:
                 raise ValueError("receipt completion requires a receipt-producing condition")
         elif self.receipt_completion_registration is not None:
             raise ValueError("receipt completion registration requires opt-in version 1")
-        if self.prompt_text_env and not (self.is_agentic and self.render_version >= 9):
-            # Only agentic renderers 9 and later carry the recorder line the
+        if type(self.complete_recorder_line) is not bool:
+            raise ValueError("complete_recorder_line must be a boolean")
+        if self.complete_recorder_line:
+            # Renderer 6 is the first whose recorder line names the bound
+            # interpreter, which is the spelling the specification is
+            # appended to; renderers 9 and later already carry it (#6320).
+            if not (self.is_agentic and self.render_version in (6, 7, 8)):
+                raise ValueError("complete_recorder_line applies only to agentic renderers 6 to 8")
+            if not self.prompt_text_env:
+                # The line names the variable and never a shell expansion,
+                # which Claude Code refuses under dontAsk (#2282).
+                raise ValueError("complete_recorder_line requires prompt_text_env")
+        if self.launcher_model is not None:
+            if (type(self.launcher_model) is not str
+                    or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/:\[\]-]{0,127}", self.launcher_model) is None):
+                # One header token: the name is substituted into a `# Model:`
+                # line and a shell-quoted command, never free text.
+                raise ValueError(f"invalid launcher_model: {self.launcher_model!r}")
+            if not (self.is_agentic and self.render_version in (6, 7, 8)):
+                # The API path sends its own model and records it from the
+                # response; the native controller registers its own.
+                raise ValueError("launcher_model applies only to agentic renderers 6 to 8")
+        if type(self.relative_toolchain) is not bool:
+            raise ValueError("relative_toolchain must be a boolean")
+        if (self.relative_toolchain or self.launcher_model is not None) and not self.complete_recorder_line:
+            # The bare recorder line rebuilds the specification from flags,
+            # and no flag states either key: the record's specification would
+            # re-render another instruction and the render gate would read
+            # `mismatch`, which is #6311 again (#6325 review, S2).
+            raise ValueError("relative_toolchain and launcher_model require complete_recorder_line: "
+                             "only the complete recorder line carries the specification that states them")
+        if self.relative_toolchain and not (self.is_agentic and self.render_version in (6, 7, 8)):
+            # Renderer 6 is the first to bind a toolchain; renderers 9 and
+            # later are the native controller's, whose registration and
+            # permission checks bind absolute locations (#6314).
+            raise ValueError("relative_toolchain applies only to agentic renderers 6 to 8")
+        if self.prompt_text_env and not (self.is_agentic and (self.render_version >= 9
+                                                              or self.complete_recorder_line)):
+            # Only agentic renderers 9 and later, and an earlier one rendering
+            # the complete recorder line (#6320), carry the recorder line the
             # key changes; elsewhere it would be recorded and do nothing (#2313).
             raise ValueError("prompt_text_env applies only to agentic renderers 9 and later")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
@@ -823,6 +938,9 @@ class RunSpec:
         if self.render_version >= 6 and self.is_agentic and not self._replay_only:
             from data_sheets_schema.agentic_runtime import toolchain
             self._agentic_toolchain = toolchain()
+            if self.relative_toolchain:
+                from data_sheets_schema.agentic_runtime import checkout_relative
+                self._agentic_toolchain = checkout_relative(self._agentic_toolchain)
         if self.manifest_line == default_line:   # an arm that declares its own header keeps it
             self.manifest_line = self.header_for_manifest(self.manifest)
         if self.profile is None:
@@ -968,6 +1086,22 @@ class RunSpec:
         if any(k.startswith("receipt_completion_") for k in recorded):
             from data_sheets_schema.receipt_completion_policy import select_policy
             select_policy(render_spec=recorded)
+        if "launcher_model" in recorded and not isinstance(recorded["launcher_model"], str):
+            # Emitted only when stated; a null would restore "not stated" and
+            # then fail to round-trip (#2315).
+            raise ValueError(f"invalid recorded launcher_model: {recorded['launcher_model']!r}; "
+                             "the key is recorded only as a model name")
+        if "relative_toolchain" in recorded and recorded["relative_toolchain"] is not True:
+            # Emitted only as true (#2315, #6314).
+            raise ValueError(f"invalid recorded relative_toolchain: {recorded['relative_toolchain']!r}; "
+                             "the key is recorded only as true")
+        if "complete_recorder_line" in recorded and recorded["complete_recorder_line"] is not True:
+            # Emitted only as true, like `prompt_text_env` (#2315, #6320).
+            # Checked before construction: the key licenses the env form
+            # below renderer 9, so a misspelt one would otherwise be refused
+            # as a misplaced `prompt_text_env`, which names the wrong cause.
+            raise ValueError(f"invalid recorded complete_recorder_line: {recorded['complete_recorder_line']!r}; "
+                             "the key is recorded only as true")
         spec = cls(project=project, method=method, label=label,
                    profile=recorded.get("profile") or "neutral",   # never live selection (#1468); the recorded values are restored below
                    profile_basis=recorded.get("profile_basis") or "replay",
@@ -981,6 +1115,9 @@ class RunSpec:
                    provider=recorded.get("provider"),
                    reasoning_effort=recorded.get("reasoning_effort"),
                    prompt_text_env=recorded.get("prompt_text_env") is True,
+                   complete_recorder_line=recorded.get("complete_recorder_line") is True,
+                   relative_toolchain=recorded.get("relative_toolchain") is True,
+                   launcher_model=recorded.get("launcher_model"),
                    native_source_attribution_version=recorded.get("native_source_attribution_version", 0),
                    native_source_attribution_max_checks=recorded.get("native_source_attribution_max_checks"),
                    api_playbook_version=recorded.get("api_playbook_version", 0),
@@ -1062,7 +1199,8 @@ class RunSpec:
             spec._agentic_artifact_paths = dict(paths)
         if spec.render_version >= 6 and spec.is_agentic:
             from data_sheets_schema.agentic_runtime import validate_toolchain
-            spec._agentic_toolchain = validate_toolchain(recorded.get("agentic_toolchain"))
+            spec._agentic_toolchain = validate_toolchain(recorded.get("agentic_toolchain"),
+                                                         relative=spec.relative_toolchain)
         if spec.render_version >= 8 and not spec.is_agentic:
             spec._api_header_values = validate_api_header_values(recorded.get("api_header_values"))
         # A replay reads no live declaration — the manifest may be gone or
@@ -1258,6 +1396,9 @@ class RunSpec:
                 or PROVIDER,
                 **({"reasoning_effort": self.reasoning_effort} if self.reasoning_effort else {}),
                 **({"prompt_text_env": True} if self.prompt_text_env else {}),
+                **({"complete_recorder_line": True} if self.complete_recorder_line else {}),
+                **({"relative_toolchain": True} if self.relative_toolchain else {}),
+                **({"launcher_model": self.launcher_model} if self.launcher_model else {}),
                 "bundle": str(self.bundle)}
 
     @cached_property
@@ -1709,7 +1850,8 @@ def resolve_prompt(spec: RunSpec, *, _include_shared: bool = True, _omit_phase_c
         # artifact asserted a runtime and model it never touched.
         "{RUNTIME}": spec.runtime,
         "{PROVIDER}": spec.provider or ident["provider"] or PROVIDER,
-        "{MODEL}": api_values["Model"] if api_values is not None else settings["name"],
+        "{MODEL}": (api_values["Model"] if api_values is not None
+                    else spec.launcher_model or settings["name"]),
         # v2 introduced `{DATE}` but nothing substituted it, so the literal
         # string reached the model. Its records carry the right date only
         # because the model read it off `{LABEL}` and guessed correctly.
@@ -1815,6 +1957,24 @@ def resolve_prompt(spec: RunSpec, *, _include_shared: bool = True, _omit_phase_c
     if spec.render_version >= 7 and spec.is_agentic:
         from data_sheets_schema.agentic_runtime import temperature_instructions
         body = temperature_instructions(body)
+    if spec.relative_toolchain:
+        from data_sheets_schema.agentic_runtime import RELATIVE_TOOLCHAIN_NOTE
+        body += RELATIVE_TOOLCHAIN_NOTE
+    if spec.complete_recorder_line:
+        # After every text adapter, as renderers 9 and later do: the
+        # serialized specification must never be rewritten by one (#6320).
+        digest = hashlib.sha256(render_spec_payload(spec).encode("utf-8")).hexdigest()
+        body, lines = re.subn(
+            r"(?m)^([^\n]* -m data_sheets_schema\.cli provenance record[^\n]*)$",
+            lambda match: (match.group(1) + " --render-spec-env " + RENDER_SPEC_VARIABLE
+                           + " --render-spec-sha256 " + digest
+                           + " --prompt-text-env " + LAUNCH_INSTRUCTION_VARIABLE),
+            body)
+        if lines != 1:
+            # A template with no recorder line, or with two, would render an
+            # instruction whose record nothing binds.
+            raise ValueError(f"complete_recorder_line found {lines} provenance record lines to complete, not one")
+        body += COMPLETE_RECORDER_LINE_NOTE
     if spec.render_version >= 8 and not spec.is_agentic:
         body = api_header_instructions(body, api_values)
     if spec.render_version >= 9:
@@ -8667,3 +8827,24 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             "outputs": {"full": str(spec.full_path), "core": str(spec.core_path),
                         "report": str(spec.report_path),
                         "provenance": str(spec.provenance_path)}}
+
+
+def _native_attribution_runtime(spec) -> bool:
+    """Whether `spec.runtime` may carry native source attribution (review 2 of #6325, SF3).
+
+    The set is `native_source_attribution.NATIVE_RUNTIMES`, the one its
+    `command_args` reads at render and registration, so construction and
+    rendering read one definition. It is narrower than `CLAUDE_CODE_RUNTIMES`:
+    a release series (`Claude Code (release)`, #6324) is a headless Claude Code
+    session with no native controller and does not use native source
+    attribution. Such a specification is refused here, naming that cause,
+    rather than admitted and then refused at render for its renderer.
+    Defined last in the module so that no line above it moves: the D128
+    scanner ledger pins this file's hit lines.
+    """
+    from data_sheets_schema.native_source_attribution import NATIVE_RUNTIMES
+    version = spec.native_source_attribution_version
+    if type(version) is int and version == 1 and spec.runtime not in NATIVE_RUNTIMES:
+        raise ValueError(f"native source attribution v1 requires a native source-attribution runtime "
+                         f"({', '.join(sorted(NATIVE_RUNTIMES))}); {spec.runtime!r} is not one")
+    return spec.runtime in NATIVE_RUNTIMES

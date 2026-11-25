@@ -24,6 +24,20 @@ the two Claude Code arms is `Claude Code` against `Claude Code (direct)`.
 2026-08 agentic records it is the literal the old playbook line dictated
 while the transport was CBORG, and #2215 is its basis.
 
+## A release series is not this arm (#6324)
+
+A headless Claude Code run on the same subscription, made without the native
+controller and without a registration, is a **release series**: the source of
+released datasheets, not a comparison arm. It shares this arm's transport and
+the agentic arm's playbook and is neither. Its records carry the runtime
+string `Claude Code (release)` (key `release`) under `claudecode_release`, so
+its canonical marks are scoped apart from the agentic arm's and from this
+arm's. The 15 runs of series 2026-11-22b predate that key: they were recorded
+as plain `Claude Code` under `claudecode_agent`, and their canonical marks
+superseded the agentic arm's, which is the hazard the paragraph above names.
+"No accepted direct-arm run exists" is a statement about runs under the
+controller, and a release series does not change it.
+
 ## What is kept from the native controls
 
 Everything that hooks the runtime rather than the provider, imported from

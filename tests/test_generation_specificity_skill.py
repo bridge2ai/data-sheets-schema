@@ -579,7 +579,7 @@ class TestTheScannerSees(unittest.TestCase):
         self.assertTrue(any("physionet" in p for p in result["problems"]), result["problems"])
 
     def test_every_python_hit_is_on_a_line_that_holds_it(self):
-        """Implicitly concatenated literals (constants/methods.py:58-64,
+        """Implicitly concatenated literals (constants/methods.py:60-66,
         PHASE_INSTRUCTIONS in api_runner) are reported on the physical line
         of each part (#4026), so the reported line's text holds the match."""
         tokens = list(_tokens())
@@ -594,7 +594,7 @@ class TestTheScannerSees(unittest.TestCase):
         methods = scan.scan_file(ROOT, scan.Surface("src/data_sheets_schema/constants/methods.py", ["api"],
                                                     "run_shaping", "live", "test"), tokens)
         self.assertEqual({h["line"] for h in methods if h["match"] == "AI-READI"
-                          and h["context"] == "string_literal"}, {60, 63})
+                          and h["context"] == "string_literal"}, {62, 65})   # two lines down since #6324 added a method
 
     @unittest.skipIf(sys.version_info < (3, 12), "an f-string's parts are tokens from Python 3.12")
     def test_a_concatenated_f_string_part_is_reported_on_its_own_line(self):

@@ -2625,8 +2625,17 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
               snapshot_spec=None, snapshot_record: dict | None = None,
               allow_manifest_discovery: bool = True,
               receipt_render_spec: dict | None = None,
-              native_selection_path: Path | None = None) -> dict[str, Any]:
+              native_selection_path: Path | None = None,
+              bundle_spelling: str | None = None,
+              manifest_spelling: str | None = None) -> dict[str, Any]:
     """The provenance block for one run, or why it could not be computed.
+
+    `bundle_spelling` and `manifest_spelling` are the record's own spellings
+    of `bundle` and `manifest` (`inputs.bundle_path`, `inputs.chunks.path`),
+    given by a caller that resolved the two paths from them. The block then
+    names the files as the record does, not as this process resolved them:
+    a record read in a worktree otherwise persists that worktree's absolute
+    path in `bundle_basis` and `artifacts.manifest` (#6314, #713).
 
     `expected` is whether this run's procedure was to write a receipt. It is
     carried into the block so the canary gate can tell "no receipt from a
@@ -2791,7 +2800,8 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     # `on_disk` is a complete canonical mapping of these bytes, with both
     # digests checked. Invalid disk mappings require recorded-rule recovery.
     manifest_is_the_records = on_disk is not None and (not recorded or bytes_on_disk_are_the_records)
-    bundle_basis: dict[str, Any] = {"source": "bundle on disk", "path": str(bundle)}
+    bundle_named = bundle_spelling if bundle_spelling is not None else str(bundle)
+    bundle_basis: dict[str, Any] = {"source": "bundle on disk", "path": bundle_named}
     rule = (record_chunks or {}).get("rule") or (on_disk or {}).get("rule")
     rule_basis = ("the record's own inputs.chunks.rule" if (record_chunks or {}).get("rule")
                   else "the on-disk manifest's rule (the record carries none)")
@@ -2849,7 +2859,7 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
         if built is None:
             return {**base, "checked": False, "reason": refusal}
         m, raw = built, disk_bytes                                              # type: ignore[assignment]
-        bundle_basis = {"source": "bundle on disk", "path": str(bundle),
+        bundle_basis = {"source": "bundle on disk", "path": bundle_named,
                         "manifest": f"chunked in memory under {rule_basis}: {disk_state} (#1140)"}
     elif recorded:
         context = (disk_because if disk_because else
@@ -2925,7 +2935,9 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
             return {**base, "checked": False, "reason": f"receipt coverage counters refused: {exc}"}
     block["artifacts"] = {
         "receipt": {"path": str(receipt), "sha256": hashlib.sha256(receipt_bytes).hexdigest()},
-        "manifest": ({"path": str(mpath), "sha256": hashlib.sha256(manifest_bytes).hexdigest()}
+        "manifest": ({"path": (manifest_spelling if manifest_spelling is not None and manifest is not None
+                               else str(mpath)),
+                      "sha256": hashlib.sha256(manifest_bytes).hexdigest()}
                      if bundle_basis["source"] == "bundle on disk" and "manifest" not in bundle_basis else
                      {"path": None, "rule": m.get("rule"), "chunk_count": m.get("chunk_count"),
                       "bundle_md5": m.get("bundle_md5"), "bundle_sha256": m.get("bundle_sha256")}),

@@ -63,6 +63,13 @@ ARM_BY_METHOD = {
     # differs in transport, which its distinct runtime string reports.
     "claudecode_direct": "baseline",
     "claudecode_direct_core": "baseline",
+    # A release series (#6324): headless Claude Code on the maintainer's
+    # subscription with no native controller and no registration. Same
+    # baseline inputs. It shares the direct arm's transport and the agentic
+    # arm's playbook, and is neither: its own directory and runtime string
+    # keep its records, and its canonical marks, out of both arms'.
+    "claudecode_release": "baseline",
+    "claudecode_release_core": "baseline",
     "claudecode_agent_crate": "de_novo",
     "claudecode_agent_crate_core": "de_novo",
     "claudecode_agent_healthsheet": "healthsheet_only",
@@ -74,27 +81,32 @@ ARM_BY_METHOD = {
 }
 DETERMINISTIC = {"rocrate_mapped", "rocrate_static_map"}
 #: Method-directory prefixes that hold model-generated agent-family runs.
-AGENT_FAMILY = ("claudecode_agent", "claudecode_api", "claudecode_direct")
+AGENT_FAMILY = ("claudecode_agent", "claudecode_api", "claudecode_direct", "claudecode_release")
 
 #: `model.agent_runtime` as the records write it, folded to a runtime key.
 #: The direct arm writes a distinct runtime string on purpose (#2202): a
 #: subscription record reading plain "Claude Code" would be scoped with the
 #: CBORG-proxied agentic canonicals and could supersede them.
+#: A release series writes a fourth (#6324): the 2026-11-22 series ran on the
+#: subscription with no proxy, was recorded as plain "Claude Code", and its
+#: canonical marks superseded the agentic arm's, which is the hazard above.
 RUNTIME_KEYS = {"claude code": "agentic", "claude api (direct)": "api",
-                "claude code (direct)": "direct"}
+                "claude code (direct)": "direct", "claude code (release)": "release"}
 #: Every runtime key, in the order the reports list them: what `--runtime`
 #: admits and what `canonical_sets` enumerates (#2211, #2210).
-RUNTIME_CHOICES = ("api", "agentic", "direct")
+RUNTIME_CHOICES = ("api", "agentic", "direct", "release")
 #: The spelling each key is recorded under. `RunSpec.is_agentic`,
 #: `AGENTIC_RUNTIMES` and the rendered text compare exact strings.
 CANONICAL_RUNTIMES = {"agentic": "Claude Code", "api": "Claude API (direct)",
-                      "direct": "Claude Code (direct)"}
+                      "direct": "Claude Code (direct)", "release": "Claude Code (release)"}
 #: The keys whose executing program is the Claude Code binary, whatever
 #: transport reaches the model (#2202): the agentic arm through the local
 #: proxy to CBORG, the direct arm on the maintainer's subscription. Both read
 #: the playbooks, neither writes a reasoning log of its own, and a header
 #: temperature or effort on either is the generating agent's assertion.
-CLAUDE_CODE_KEYS = ("agentic", "direct")
+#: A release series is the same binary on the subscription with no
+#: controller (#6324), and the same holds for it.
+CLAUDE_CODE_KEYS = ("agentic", "direct", "release")
 
 
 def is_claude_code_runtime(runtime: str | None) -> bool:
@@ -118,7 +130,7 @@ def canonical_runtime(runtime: str | None) -> str | None:
 
 
 def runtime_of(record: dict) -> str | None:
-    """`api`, `agentic`, `direct`, or None when the record does not say (#690)."""
+    """`api`, `agentic`, `direct`, `release`, or None when the record does not say (#690, #6324)."""
     model = record.get("model") if isinstance(record, dict) else None
     value = (model or {}).get("agent_runtime") if isinstance(model, dict) else None
     if not isinstance(value, str):
@@ -597,7 +609,7 @@ def canonical_runs(concat_dir: Path | None = None,
 
     A canonical mark is scoped to a runtime (#690, v8 plan D6): the API
     and agentic arms each keep one canonical per project, side by side.
-    `runtime` (one of `RUNTIME_CHOICES`: `api`, `agentic`, `direct`) picks
+    `runtime` (one of `RUNTIME_CHOICES`: `api`, `agentic`, `direct`, `release`) picks
     one; without it a project marked
     under both runtimes is ambiguous and refused, naming both, exactly as a
     project marked under two configurations is.

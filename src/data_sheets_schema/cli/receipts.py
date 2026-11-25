@@ -158,7 +158,9 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
         bundle = bc.declared_bundle(record, p["provenance"])
         md5, expected = inputs.get("bundle_md5"), bool(inputs.get("receipt_expected"))
         recovery = {"snapshot_record": record, "bundle_rel_path": inputs.get("bundle_path"), "record_bundle_sha256": inputs.get("bundle_sha256"),
-                    "record_chunks": inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None}
+                    "record_chunks": inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None,
+                    # `bundle` was resolved from this spelling; the block names it as the record does (#6314).
+                    "bundle_spelling": bc._declared_spelling(inputs.get("bundle_path") or inputs.get("bundle"))}
     else:
         # Before the record exists — Phase 1 runs this before Phase 2 (#730).
         # Everything the check needs is on disk; the bundle comes from the
@@ -191,8 +193,10 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
         from data_sheets_schema.provenance import resolve_record_input
         recovery["manifest"] = resolve_record_input(Path(chunks["path"]), p["provenance"])
         recovery["allow_manifest_discovery"] = False
+        recovery["manifest_spelling"] = bc._declared_spelling(chunks["path"])
     if chunk_manifest is not None:
         recovery["manifest"] = chunk_manifest
+        recovery.pop("manifest_spelling", None)      # the caller's file, in the caller's spelling
     if native_capture is not None:
         from data_sheets_schema import receipt_completion_policy as cp
         declaration = cp.native_render_declaration(native_capture)

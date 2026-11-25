@@ -56,7 +56,17 @@ def test_backfill_grounding_uses_only_an_established_record_owner(tmp_path, monk
     block = backfill_checks.compute(record, only={"grounding"})["grounding"]
     assert block["checked"] is known_owner, block
     if known_owner:
-        assert Path(block["artifacts"]["bundle"]["path"]).resolve() == owner / "evidence.txt"
+        # The block names the bundle as the record declares it (#6314); which
+        # file that is, the record's owner decides and the md5 attests. A
+        # same-named file in the caller's tree is never the one read.
+        import hashlib
+        from data_sheets_schema.provenance import resolve_record_input
+        named = block["artifacts"]["bundle"]["path"]
+        assert named == "evidence.txt"
+        assert resolve_record_input(Path(named), record) == owner / "evidence.txt"
+        assert block["artifacts"]["bundle"]["md5"] == hashlib.md5((owner / "evidence.txt").read_bytes()).hexdigest()
+        if caller_copy:
+            assert block["artifacts"]["bundle"]["md5"] != hashlib.md5((caller / "evidence.txt").read_bytes()).hexdigest()
     else:
         assert "base" in block["reason"]
 

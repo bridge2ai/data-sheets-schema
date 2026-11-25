@@ -159,8 +159,8 @@ def full_output_baseline_cmd(method, labels, projects, as_json):
         if len(families) > 1:
             raise click.ClickException(f"labels live under {sorted(families)}; pass --method")
         if not families:
-            raise click.ClickException("none of the labels lives under a claudecode_agent_core, claudecode_api_core "
-                                       "or claudecode_direct_core directory; pass --method")   # #2229
+            raise click.ClickException("none of the labels lives under a claudecode_agent_core, claudecode_api_core, "
+                                       "claudecode_direct_core or claudecode_release_core directory; pass --method")   # #2229, #6324
         method = families.pop()
     from data_sheets_schema.reasoning import UnreadableLog
     try:

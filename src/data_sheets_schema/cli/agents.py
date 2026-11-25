@@ -23,10 +23,20 @@ def agents():
 
 
 @agents.command("playbook")
-def playbook():
+@click.option("--relative-toolchain", "relative_toolchain", is_flag=True,
+              help="spell locations under the launch checkout relative to it, as an instruction rendered "
+                   "with --relative-toolchain does; run from the checkout root (#6314)")
+def playbook(relative_toolchain):
     """Print the agentic playbook with executable installed resource paths."""
-    from data_sheets_schema.agentic_runtime import playbook_text
-    click.echo(playbook_text())
+    from data_sheets_schema.agentic_runtime import checkout_relative, playbook_text, toolchain
+    if not relative_toolchain:
+        click.echo(playbook_text())
+        return
+    try:
+        environment = checkout_relative(toolchain())
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(playbook_text(environment))
 
 
 @agents.command("preamble")

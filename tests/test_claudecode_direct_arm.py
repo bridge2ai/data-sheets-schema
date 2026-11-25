@@ -47,7 +47,8 @@ class DirectArmRegistry(unittest.TestCase):
         self.assertEqual(runtime_of({"model": {"agent_runtime": DIRECT}}), "direct")
         self.assertEqual(runtime_of({"model": {"agent_runtime": "Claude Code"}}), "agentic")
         self.assertEqual(runtime_of({"model": {"agent_runtime": "Claude API (direct)"}}), "api")
-        self.assertEqual(set(RUNTIME_KEYS.values()), {"agentic", "api", "direct"})
+        self.assertEqual(runtime_of({"model": {"agent_runtime": "Claude Code (release)"}}), "release")   # #6324
+        self.assertEqual(set(RUNTIME_KEYS.values()), {"agentic", "api", "direct", "release"})
         # Every key is offered wherever a runtime is chosen (#2211).
         self.assertEqual(set(RUNTIME_CHOICES), set(RUNTIME_KEYS.values()))
         self.assertEqual(RUNTIME_CHOICES[:2], ("api", "agentic"))       # the existing order is kept
@@ -132,7 +133,8 @@ class ThreeRuntimeCanonicals(unittest.TestCase):
     def test_canonical_sets_enumerates_every_runtime_key(self):
         from data_sheets_schema.runs import RUNTIME_CHOICES, canonical_sets
         sets = canonical_sets(concat_dir=self.corpus)
-        self.assertEqual(list(sets), list(RUNTIME_CHOICES))
+        # Every key that holds a mark, in the reports' order; this corpus has no release-series record (#6324).
+        self.assertEqual(list(sets), [rt for rt in RUNTIME_CHOICES if rt != "release"])
         self.assertEqual({rt: found["CHORUS"]["label"] for rt, found in sets.items()},
                          {"api": "2026-09-04f_b_rep1", "agentic": "2026-08-28_a_rep1", "direct": "2026-09-22_d_rep1"})
 

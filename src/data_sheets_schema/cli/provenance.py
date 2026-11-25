@@ -534,8 +534,23 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             if not isinstance(supplied, dict) or supplied_text is None:
                 raise ValueError("--render-spec-json requires an object and --prompt-text or --prompt-text-env")
             registered = RunSpec.from_render_spec(supplied, project=project, method=method, label=label)
-            if not registered.is_agentic or registered.render_version < 9:
-                raise ValueError("--render-spec-json requires a native renderer-9-or-newer specification")
+            if not registered.is_agentic or (registered.render_version < 9
+                                             and not registered.complete_recorder_line):
+                # Renderers 9 and later carry the specification on the line;
+                # an earlier agentic renderer does only where the launcher
+                # rendered the complete recorder line (#6320).
+                raise ValueError("--render-spec-json requires a native renderer-9-or-newer specification, "
+                                 "or an agentic one rendered with the complete recorder line")
+            if registered.complete_recorder_line and not phase_specs:
+                # `--phase-skipped` names what a resume skipped; alone it
+                # leaves no phase log either (#6325 review, S3).
+                # No launcher records this run's phase history: the session
+                # is its only attester, and a record without it fails
+                # `annotate-observed` and reads `missing` afterwards (#6320).
+                raise ValueError(
+                    "this recorder line requires the run's phase history: run it again as written and append "
+                    "one --phase flag for each phase you performed, in order, in the JSON form the playbook's "
+                    "provenance template gives, for example --phase '{\"name\":\"generate_full\",\"completed\":true}'")
             if registered.prompt_text_env and prompt_text_env is None:
                 # One way only (#2314): a line rendered with the env form is
                 # run as written. The other direction stays open, so an
@@ -572,6 +587,12 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
         # written and carries no flag, and a specification that binds the
         # receipt's destination is a procedure that writes one (#2350).
         receipt_expected = receipt_expected or registered.writes_receipt
+        if registered.complete_recorder_line and not prompts:
+            # The prompt files the specification selects are the ones the
+            # launcher rendered into the instruction; the line carries no
+            # --prompt, so a copied line cannot drop them (#6320).
+            from data_sheets_schema.resources import resource_path
+            prompts = tuple(str(resource_path(path)) for path in registered.prompt_files)
         if manifest is None:
             manifest = str(registered.manifest) if registered.manifest is not None else "none"
         if chunk_manifest is None:
@@ -691,6 +712,14 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
         selected = selected_manifest if registered.manifest_used else None
         manifest_basis = None if registered.manifest_used else "the registered instruction declares manifest context unused"
     elif condition:
+        if runtime is None:
+            # The renderer substitutes the runtime into the header, so a spec
+            # without one cannot render: it used to fail inside the renderer
+            # as a TypeError that the date search below then recorded as "no
+            # request spec", which `runs check --strict` passes (#6318).
+            raise click.ClickException(
+                f"--condition {condition} requires --runtime: the render specification names the runtime "
+                'the instruction declared (for example --runtime "Claude Code"), and none was given')
         from data_sheets_schema.api_runner import RunSpec, resolve_prompt
         bundle = bundle_for_spec or resolved_bundle
 
@@ -811,7 +840,10 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                 try:
                     matched_spec = next((candidate for candidate in _candidate_specs(cand_date)
                                          if _reproduces(candidate)), None)
-                except Exception as exc:       # noqa: BLE001 — the same for every date
+                except (ValueError, OSError, RuntimeError, click.ClickException) as exc:
+                    # A stated refusal is the same for every date. A defect in
+                    # the renderer itself is not "the text does not reproduce"
+                    # and is raised, not recorded as a missing spec (#6318).
                     render_error = exc
                     break
                 if matched_spec is not None:
@@ -927,6 +959,16 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     # Evidence pins retain the same portable spelling as the record's
     # outputs. Reuse the resolved address without another corpus selection.
     inline_address = out if registered is not None or concat_dir.is_absolute() else out.relative_to(Path.cwd())
+    if (registered is not None and registered.complete_recorder_line
+            and not Path(registered._agentic_artifact_paths["core"]).is_absolute()):
+        # A complete-line specification rendered at the corpus root names its
+        # outputs relative to it, and the check blocks keep that spelling as
+        # the bare route's do. The resolved address above put the checkout's
+        # absolute path into seven block fields (#6314; #6325 review, M2).
+        try:
+            inline_address = out.relative_to(Path.cwd())
+        except ValueError:
+            pass
     _inline_checks(inline_address, origin_prior=origin_prior)
 
     # Say it here, but do not refuse. Recording an uncanonical prompt is the

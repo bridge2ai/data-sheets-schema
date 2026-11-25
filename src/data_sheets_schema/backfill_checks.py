@@ -86,6 +86,11 @@ def record_paths(provenance: Path) -> dict[str, Path]:
             "full": full_dir / f"{project}_d4d.yaml"}
 
 
+def _declared_spelling(value: Any) -> str | None:
+    """A record's own spelling of an input path, when it states one as text."""
+    return value if isinstance(value, str) and value else None
+
+
 def declared_bundle(record: dict[str, Any], provenance: Path | None = None) -> Path | None:
     """The bundle the record says it read, if it says."""
     inputs = record.get("inputs") or {}
@@ -360,7 +365,13 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
         else:
             block = check_run(full, core, bundle, record=record)
             if block.get("checked"):
-                block["artifacts"] = {"bundle": {"path": str(bundle),
+                # As the record names it, not as this process resolved it:
+                # `declared_bundle` anchors a relative declaration to the
+                # record's tree, and the absolute result is this checkout's
+                # path, not the record's (#6314).
+                spelling = _declared_spelling((record.get("inputs") or {}).get("bundle_path")
+                                              or (record.get("inputs") or {}).get("bundle"))
+                block["artifacts"] = {"bundle": {"path": spelling if spelling is not None else str(bundle),
                                                  "md5": _md5(bundle)}}
                 if not recorded:
                     # Not the same claim as a verified match. The bundle is
@@ -401,7 +412,10 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
                                        bundle_rel_path=inputs.get("bundle_path"),
                                        record_bundle_sha256=inputs.get("bundle_sha256"),
                                        record_chunks=inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None,
-                                       snapshot_record=record)
+                                       snapshot_record=record,
+                                       # Both paths above were resolved from these spellings (#6314).
+                                       bundle_spelling=_declared_spelling(inputs.get("bundle_path") or inputs.get("bundle")),
+                                       manifest_spelling=_declared_spelling(declared_mapping))
         out["receipts"] = {**assessment,
                            "origin": for_assessment(assessment, origin_prior, receipt, full,
                                                     api_path=bool(record.get("api_usage"))),
