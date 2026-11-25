@@ -44,6 +44,11 @@ replicate numbers, and each provenance record's `repo.resource_root` names the d
   The committed copy is the script's output with the launch worktrees' parent directory removed
   from two `cd` lines; the script itself prints the absolute path.
 
+- `review_1_pr6349.md`: the independent read-only review of PR 6349 at commit `0dd706fba`, as
+  written. Its check scripts are `scripts/adhoc/review_pr6349_*_20261125.py`; they read the
+  transcripts in the launch worktrees and take the worktrees' parent directory from
+  `D4D_EXECUTIONS_ROOT`.
+
 The transcripts (about 60 MB) stay in the launch worktrees and are not committed.
 
 ## Results
