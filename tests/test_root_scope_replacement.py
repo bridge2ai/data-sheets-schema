@@ -393,4 +393,3 @@ def test_second_refusal_leaves_cell_unpublished_and_forbids_another_replacement(
     with pytest.raises((OSError, ValueError, RuntimeError)):
         helper.build_batch(args)
     assert len(calls) == 1
-
