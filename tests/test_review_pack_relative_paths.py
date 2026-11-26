@@ -67,7 +67,7 @@ def test_a_pack_built_from_a_committed_record_carries_no_absolute_bundle_path():
     core = Path(root) / "data" / "d4d_concatenated"
     records = sorted(core.glob("*_core/*/*_provenance.yaml"))
     built = None
-    for provenance in reversed(records):          # newest labels first: they carry a chunk manifest
+    for provenance in reversed(records):          # last in sorted order first: recent labels carry a chunk manifest
         pack = review_pack.build_pack(provenance, None, None, write_instruction=False, instruction_out=[])
         if pack["bundle"].get("manifest") and pack["bundle"].get("resolved_path"):
             built = pack
@@ -77,3 +77,38 @@ def test_a_pack_built_from_a_committed_record_carries_no_absolute_bundle_path():
     assert not Path(built["bundle"]["manifest"]).is_absolute()
     assert not Path(built["bundle"]["resolved_path"]).is_absolute()
     assert built["bundle"]["resolved_path"] == built["bundle"]["path"]
+
+
+@pytest.mark.corpus
+def test_no_text_of_a_pack_states_where_the_checkout_is(monkeypatch):
+    """The whole pack, not only the two bundle keys: a record whose bundle has
+    drifted says so in `bundle_state` and in `gaps`, and that sentence named
+    the bundle by its absolute path (review 1 of PR #6380, finding A1).
+
+    The record is named relative to the root, from the root, as `d4d review
+    pack` names it: the pack repeats the caller's spelling of the record's own
+    paths (`provenance.path`, `records.*`, `instruction.path`), which this
+    change does not touch."""
+    import yaml
+
+    root, kind = resources.resource_root()
+    if kind != "checkout":
+        pytest.skip("needs a checkout with the corpus")
+    monkeypatch.chdir(root)
+    location = str(Path(root).resolve())
+    records = sorted(Path("data/d4d_concatenated").glob("*_core/*/*_provenance.yaml"))
+    seen = {"drifted": 0, "current": 0}
+    for provenance in records:
+        if all(seen.values()):
+            break
+        try:
+            pack = review_pack.build_pack(provenance, None, None, write_instruction=False, instruction_out=[])
+        except Exception:                      # a record this generator cannot pack is another test's subject
+            continue
+        text = yaml.safe_dump(pack, sort_keys=False, allow_unicode=True, width=10_000)
+        kind_of_record = "drifted" if "bundle drifted" in text else "current" if "current" in text else None
+        if kind_of_record is None or seen[kind_of_record]:
+            continue
+        seen[kind_of_record] += 1
+        assert location not in text, f"{provenance}: the pack names the checkout's location"
+    assert all(seen.values()), f"the corpus did not offer both a drifted and a current record: {seen}"

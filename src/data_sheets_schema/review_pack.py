@@ -590,7 +590,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         bpath = bundle
         pack["bundle"]["resolved_path"] = _pack_path(bpath)   # which root the bytes came from (round 2, note 6)
         if not bpath.exists():
-            bundle_state = f"bundle not on disk ({bpath})"
+            bundle_state = f"bundle not on disk ({_pack_path(bpath)})"
         else:
             raw = bpath.read_bytes()
             on_disk = hashlib.md5(raw).hexdigest()
@@ -598,7 +598,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
             if not recorded:
                 bundle_state = f"no bundle_md5 recorded (on disk {on_disk})"
             elif on_disk != recorded:
-                bundle_state = f"bundle drifted (recorded {recorded}, on disk {on_disk} at {bpath})"
+                bundle_state = f"bundle drifted (recorded {recorded}, on disk {on_disk} at {_pack_path(bpath)})"
             else:
                 bundle_text, bundle_state = raw.decode("utf-8", errors="replace"), "current"
     id_entries, id_gap = (_id_slots(full_record, bundle_text=bundle_text, identifier_bases=identifier_bases) if full_record
