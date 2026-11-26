@@ -1,0 +1,63 @@
+{
+  "plan_deterministic_fields": {
+    "applicability_context": {},
+    "evaluation_scope": {
+      "collection_metadata_inherited": false,
+      "policy": "single_dataset",
+      "selection_policy": "root_dataset_v1",
+      "units": [
+        {
+          "id": "example:record",
+          "path": "#"
+        }
+      ]
+    },
+    "metadata": {
+      "context_sha256": "synthetic_digest_context_sha256",
+      "evidence_authority_sha256": "synthetic_digest_evidence_authority_sha256",
+      "input_sha256": "synthetic_digest_input_sha256",
+      "instrument_sha256": "synthetic_digest_instrument_sha256",
+      "rubric_sha256": "synthetic_digest_rubric_sha256",
+      "scope_context_sha256": "synthetic_digest_scope_context_sha256"
+    }
+  },
+  "provenance": {
+    "basis": "accepted root-scope v6 plan/publication pair",
+    "projection": "deterministic fields and overall-score structure",
+    "redactions": "all input digests, unit identifiers, annotation text and points"
+  },
+  "published_fields": {
+    "applicability_context": {},
+    "evaluation_scope": {
+      "collection_metadata_inherited": false,
+      "policy": "single_dataset",
+      "selection_policy": "root_dataset_v1",
+      "units": [
+        {
+          "id": "example:record",
+          "path": "#"
+        }
+      ]
+    },
+    "metadata": {
+      "context_sha256": "synthetic_digest_context_sha256",
+      "evaluation_timestamp_note": "Synthetic publication annotation.",
+      "evidence_authority_sha256": "synthetic_digest_evidence_authority_sha256",
+      "input_sha256": "synthetic_digest_input_sha256",
+      "instrument_sha256": "synthetic_digest_instrument_sha256",
+      "rubric_sha256": "synthetic_digest_rubric_sha256",
+      "scope_context_sha256": "synthetic_digest_scope_context_sha256",
+      "validation_note": "Synthetic publication annotation."
+    },
+    "overall_score": {
+      "adjusted_max_points": 50,
+      "excluded_item_ids": [],
+      "excluded_max_points": 0,
+      "fixed_percentage": 2.0,
+      "max_points": 50,
+      "normalized_percentage": 2.0,
+      "sub_elements_not_applicable": 0,
+      "total_points": 1
+    }
+  }
+}

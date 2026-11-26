@@ -1686,9 +1686,8 @@ def _validates(record: Path) -> tuple[bool, str]:
                    "the agentic arm's canonical in place, and vice versa.")
 @click.option("--review-margin", default=None, type=int,
               help="Retired: an adverse-count margin is not a calibrated selection rule (#835).")
-def select_cmd(method, project, config, allow_unverified, execute, ignore_reviews, review_margin,
-               supersede_all_runtimes, score_policy=None, score_instrument=None,
-               score_receipts=(), score_owner_rulings=None):
+def select_cmd(method, project, config, allow_unverified, execute, ignore_reviews, review_margin, supersede_all_runtimes,
+               score_policy=None, score_instrument=None, score_receipts=(), score_owner_rulings=None):
     """Mark one replicate canonical, keeping all of them.
 
     Selection, not merging. Replicates state different facts on **47-63% of the
@@ -1720,12 +1719,8 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
     block naming every candidate and the criterion, so the choice is auditable
     and reversible.
     """
-    from data_sheets_schema.cli.provenance import _require_repo_root_cwd
-    _require_repo_root_cwd("d4d runs select")          # a corpus write lands under the cwd (#1685)
-    if bool(score_policy) != bool(score_instrument):
-        raise click.ClickException("--score-policy and --score-instrument must be supplied together")
-    if (score_receipts or score_owner_rulings) and not score_policy:
-        raise click.ClickException("score evidence and owner rulings require --score-policy")
+    _require_score_selection_options(score_policy, score_instrument,
+                                     score_receipts, score_owner_rulings)
     if review_margin is not None:
         raise click.ClickException(
             "--review-margin is retired: review metrics are reported only "
@@ -1822,42 +1817,12 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
     criterion = "full and core both validate against the current schema, then most slots, then lowest label"
     contenders.sort(key=lambda c: (-c[3], c[0]))
     eligible.sort(key=lambda c: (-c[3], c[0]))
-    winner = contenders[0]
-    runner_up = contenders[1] if len(contenders) > 1 else None
-    margin = winner[3] - runner_up[3] if runner_up else None
-
-    score_record = None
-    if score_policy:
-        from data_sheets_schema.score_selection import decide
-        try:
-            table, variation = _score_selection_context(
-                method, config, score_instrument, score_receipts,
-                project=project, candidates=candidates,
-                adverse_of=adverse_of, evidence_why=evidence_why)
-            decision = decide(table, variation, score_instrument)
-            score_record = decision["score_policy"]
-            if score_owner_rulings:
-                score_record["owner_rulings"] = _score_owner_rulings(
-                    score_owner_rulings, {c[0] for c in candidates})
-        except (ValueError, OSError) as error:
-            raise click.ClickException(str(error)) from error
-        _score_report("Evidence table", table)
-        _score_report("Series variation", variation)
-        _score_report("Score policy", score_record)
-        click.echo(f"Current policy pick: {winner[0]}")
-        click.echo(f"score_gap_v1 pick: {decision['selected']}")
-        click.echo(f"Deciding rule: {score_record['rule']}; "
-                   f"reason: {score_record.get('fallback_reason') or 'score gap and no rubric reversal'}")
-        winner = next(c for c in eligible if c[0] == decision["selected"])
-        runner_up = next((c for c in contenders if c[0] != winner[0]), None)
-        margin = winner[3] - runner_up[3] if runner_up else None
-        criterion += "; score_gap_v1 under the registered score selection policy"
+    winner, runner_up, margin, criterion, score_record = _select_with_score_policy(
+        method, project, config, score_policy, score_instrument, score_receipts, score_owner_rulings,
+        candidates, contenders, adverse_of, evidence_why, criterion)
 
     click.echo(f"\n→ {winner[0]}  ({winner[3]} slots)")
-    if score_record is not None:
-        click.echo(f"   {score_record['rule']} decided; reviews not applied ({why})")
-    else:
-        click.echo(f"   coverage decided; reviews not applied ({why})")
+    _print_selection_reason(score_record, why)
     if runner_up is None or score_record is not None:
         pass
     elif margin == 0:
@@ -1926,7 +1891,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
     # sheds the pointer that said it was displaced.
     own_prior = data.pop("canonical", None) or {}
     data.pop("canonical_superseded_by", None)
-    data["canonical"] = {
+    data["canonical"] = _canonical_with_score({
         "criterion": criterion,
         "selected_from": [
             {"label": lab, "slots": n, "validation": detail,
@@ -1941,9 +1906,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
         "reviews_not_applied_because": why,
         "review_policy": "reported_only_pending_calibration_v1 (#835)",
         "selected_by": "d4d runs select",
-    }
-    if score_record is not None:
-        data["canonical"]["score_policy"] = score_record
+    }, score_record)
     # Named, not merely removed. A mark that vanishes leaves no trace of what
     # the project used to ship, and "this replaced that" is the fact a reader
     # of either record wants.
@@ -1994,6 +1957,65 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
                    "what replaced it.")
     click.echo("All replicates kept — this marks one, it does not move or "
                "delete anything.")
+
+
+def _require_score_selection_options(score_policy, score_instrument, score_receipts, score_owner_rulings):
+    """Keep preflight and score options outside the historical selector layout."""
+    from data_sheets_schema.cli.provenance import _require_repo_root_cwd
+    _require_repo_root_cwd("d4d runs select")
+    if bool(score_policy) != bool(score_instrument):
+        raise click.ClickException("--score-policy and --score-instrument must be supplied together")
+    if (score_receipts or score_owner_rulings) and not score_policy:
+        raise click.ClickException("score evidence and owner rulings require --score-policy")
+
+
+def _select_with_score_policy(method, project, config, score_policy, score_instrument,
+                              score_receipts, score_owner_rulings, candidates, contenders,
+                              adverse_of, evidence_why, criterion):
+    """Return the original coverage pick unless the caller opted into scoring."""
+    winner = contenders[0]
+    runner_up = contenders[1] if len(contenders) > 1 else None
+    margin = winner[3] - runner_up[3] if runner_up else None
+    if not score_policy:
+        return winner, runner_up, margin, criterion, None
+    from data_sheets_schema.score_selection import decide
+    try:
+        table, variation = _score_selection_context(
+            method, config, score_instrument, score_receipts,
+            project=project, candidates=candidates,
+            adverse_of=adverse_of, evidence_why=evidence_why)
+        decision = decide(table, variation, score_instrument)
+        score_record = decision["score_policy"]
+        if score_owner_rulings:
+            score_record["owner_rulings"] = _score_owner_rulings(
+                score_owner_rulings, {c[0] for c in candidates})
+    except (ValueError, OSError) as error:
+        raise click.ClickException(str(error)) from error
+    _score_report("Evidence table", table)
+    _score_report("Series variation", variation)
+    _score_report("Score policy", score_record)
+    click.echo(f"Current policy pick: {winner[0]}")
+    click.echo(f"score_gap_v1 pick: {decision['selected']}")
+    click.echo(f"Deciding rule: {score_record['rule']}; "
+               f"reason: {score_record.get('fallback_reason') or 'score gap and no rubric reversal'}")
+    winner = next(c for c in contenders if c[0] == decision["selected"])
+    runner_up = next((c for c in contenders if c[0] != winner[0]), None)
+    margin = winner[3] - runner_up[3] if runner_up else None
+    criterion += "; score_gap_v1 under the registered score selection policy"
+    return winner, runner_up, margin, criterion, score_record
+
+
+def _print_selection_reason(score_record, why):
+    if score_record is not None:
+        click.echo(f"   {score_record['rule']} decided; reviews not applied ({why})")
+    else:
+        click.echo(f"   coverage decided; reviews not applied ({why})")
+
+
+def _canonical_with_score(canonical, score_record):
+    if score_record is not None:
+        canonical["score_policy"] = score_record
+    return canonical
 
 
 def _score_selection_context(method, config, instrument_id, receipt_roots, *,

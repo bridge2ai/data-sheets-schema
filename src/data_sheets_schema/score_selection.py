@@ -155,6 +155,29 @@ def _measurement(plan, record_sha):
     return result
 
 
+def _published_deterministic_fields(value, planned):
+    """Match input invariants while retaining publication-only annotations.
+
+    The captured v6 output schemas leave metadata open to additional fields.
+    Evaluators use that space for timestamp and assessment notes; those notes
+    are not part of the six planned input hashes. Every planned metadata key
+    remains mandatory and exact. Scope, context and any other planned block
+    still require full equality, including their closed internal structure.
+    """
+    _require(isinstance(planned, dict), "planned deterministic fields are not an object")
+    for key, expected_value in planned.items():
+        if key == "metadata":
+            actual = value.get(key)
+            _require(isinstance(actual, dict) and isinstance(expected_value, dict),
+                     "published measured-input metadata is not an object")
+            for name, expected in expected_value.items():
+                _require(name in actual and actual[name] == expected,
+                         "published measured-input metadata differs: " + name)
+        else:
+            _require(value.get(key) == expected_value,
+                     "published measured-input block differs: " + key)
+
+
 def _score_cell(index, number, path, *, project, method, label, family, instrument, record_sha):
     matches = [entry for entry in index["runs"].values()
                if _identity_matches(entry["plan"], project, method, label, family, instrument)]
@@ -231,8 +254,7 @@ def _score_cell(index, number, path, *, project, method, label, family, instrume
         _require(value.get("scorer_instrument") == {"id": instrument,
                  "prompt_sha256": measured["prompt_sha256"], "runner_sha256": measured["runner_sha256"]},
                  "published instrument differs")
-        for key, expected_value in plan["deterministic_fields"].items():
-            _require(value.get(key) == expected_value, "published measured-input metadata differs")
+        _published_deterministic_fields(value, plan["deterministic_fields"])
         score = value.get("overall_score", {})
         points, maximum = score.get("total_points"), score.get("adjusted_max_points")
         _require(all(type(item) in (int, float) and math.isfinite(item) for item in (points, maximum))

@@ -112,6 +112,65 @@ def rebind(entry):
         write(entry["manifest_path"], entry["manifest"])
 
 
+def apply_real_shape(entry):
+    """Use an accepted v6 pair's projected structure with synthetic identities."""
+    path = Path(__file__).parent / "fixtures/score_selection/accepted_v6_metadata_extensions.json"
+    shape = json.loads(path.read_bytes())
+    hashes = copy.deepcopy(entry["plan"]["deterministic_fields"]["metadata"])
+    planned = shape["plan_deterministic_fields"]
+    publication = shape["published_fields"]
+    planned["metadata"] = hashes
+    publication["metadata"].update(hashes)
+    entry["plan"]["deterministic_fields"] = planned
+    entry["publication"].update(publication)
+    rebind(entry)
+
+
+def test_real_published_shape_keeps_annotations_without_losing_input_identity(tmp_path):
+    case = scenario(tmp_path)
+    entry = case[3]["rubric10", 2]
+    apply_real_shape(entry)
+    # This is exactly the old reader's false refusal: accepted publication
+    # annotations make whole metadata-object equality incorrect.
+    assert entry["publication"]["metadata"] != entry["plan"]["deterministic_fields"]["metadata"]
+    measured = cell(table(case), number=2)
+    assert measured["status"] == "measured"
+    assert measured["points"] == 1 and measured["maximum"] == 50
+    assert measured["measurement_identity"]["record_sha256"] == sha(case[2][0]["record"].read_bytes())
+
+
+def test_rebound_publication_still_refuses_each_changed_identity_invariant(tmp_path):
+    changes = ("record_hash", "scope_hash", "definition_hash", "instrument_id", "prompt_hash",
+               "missing_hash", "metadata_type", "scope_block", "context_block")
+    for change in changes:
+        case = scenario(tmp_path / change)
+        entry = case[3]["rubric10", 2]
+        apply_real_shape(entry)
+        publication = entry["publication"]
+        if change in ("record_hash", "scope_hash", "definition_hash"):
+            key = {"record_hash": "input_sha256", "scope_hash": "scope_context_sha256",
+                   "definition_hash": "instrument_sha256"}[change]
+            publication["metadata"][key] = sha(change.encode())
+        elif change in ("instrument_id", "prompt_hash"):
+            key = "id" if change == "instrument_id" else "prompt_sha256"
+            publication["scorer_instrument"][key] = "different-instrument" if key == "id" else sha(b"different prompt")
+        elif change == "missing_hash":
+            del publication["metadata"]["evidence_authority_sha256"]
+        elif change == "metadata_type":
+            publication["metadata"] = []
+        elif change == "scope_block":
+            publication["evaluation_scope"]["unexpected_extension"] = "not allowed"
+        else:
+            publication["applicability_context"]["changed"] = True
+        # Rebind all ordinary publication/receipt/export hashes, so refusal
+        # proves the semantic identity check, rather than a stale byte digest.
+        rebind(entry)
+        result = cell(table(case), number=2)
+        assert result["status"] == "not measured", change
+        assert "published bytes" not in result["reason"], change
+        assert result["points"] is None and result["percentage"] is None
+
+
 def test_three_scorings_each_rubric_with_identical_measured_inputs(tmp_path):
     case = scenario(tmp_path)
     rows = table(case)

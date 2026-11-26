@@ -1,8 +1,9 @@
 # Score selection previews, 2026-11-26
 
 Issue 6385. These commands implement the registered policy without changing it.
-They are for the lead to run after confirming the complete published scoring
-corpus and retained receipt roots. They were not run during implementation.
+Run them after confirming the complete published scoring corpus and retained
+receipt roots. The lead authorized these six read-only previews for the real-data
+follow-up; their outputs and hashes belong in its evidence handoff.
 There is no execution or canonical-mark command here.
 
 Use the tool code from the selection branch while keeping the evaluations
@@ -10,16 +11,23 @@ worktree as the caller's corpus. Receipt roots supply accepted plans and export
 manifests; a published filename alone is insufficient evidence. The score reader
 does not open refused candidates or transcripts.
 
+The operator must set all five local-path variables before running this block:
+`TOOL_ROOT` is the selection-tool checkout, `SCORING_PY` its usable Python,
+`BASELINE_RECEIPTS` and `REPEAT_RECEIPTS` the retained scorer run roots, and
+`CORPUS_ROOT` the evaluations checkout containing the complete published corpus.
+There are no machine-specific defaults.
+
 ```bash
-TOOL_ROOT=/Users/marcin/agent-work/data-sheets-schema/score-gap-selection-20261126
-SCORING_PY=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
-BASELINE_RECEIPTS=/Users/marcin/agent-work/data-sheets-schema/codex196-pr6366-fix6370-evidence-20261125/live-runs
-REPEAT_RECEIPTS=/Users/marcin/agent-work/data-sheets-schema/codex196-repeat-scoring-evidence-20261126/live-runs
+: "${TOOL_ROOT:?Set TOOL_ROOT to the selection-tool checkout}"
+: "${SCORING_PY:?Set SCORING_PY to the Python executable}"
+: "${BASELINE_RECEIPTS:?Set BASELINE_RECEIPTS to the accepted first-scoring run root}"
+: "${REPEAT_RECEIPTS:?Set REPEAT_RECEIPTS to the repeat run and export-manifest root}"
+: "${CORPUS_ROOT:?Set CORPUS_ROOT to the complete evaluations checkout}"
 CONFIG=2026-11-25c_claude-fable-5-2-claudecode-generic-v9
 INSTRUMENT=2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6
 export PYTHONPATH="$TOOL_ROOT/src"
 export PYTHONDONTWRITEBYTECODE=1
-cd /Users/marcin/agent-work/data-sheets-schema/root-scope-v6-evals-20261126 || exit 2
+cd "$CORPUS_ROOT" || exit 2
 git -C "$TOOL_ROOT" merge-base --is-ancestor a920186203d16a5fe501d4bd86c5b336162314bb HEAD || exit 2
 ```
 
