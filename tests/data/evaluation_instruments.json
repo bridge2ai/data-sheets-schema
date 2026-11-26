@@ -462,6 +462,201 @@
      "instrument_sha256": "76e6968bf76e460a33550a191b9c7a6d78b8528ae48c1c495096bb4a1ac9986c",
      "instrument_commit": "fa90b4ec"
     },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/AI_READI_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric10-semantic.md",
+      "source_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+      "overrides_path": "data/rubric/root_scope_v6/rubric10_definition_overrides.json",
+      "overrides_sha256": "434a4d065a8d64e5de5405be1715fa4c4232a5fb401a39628fc9a32b6164b024",
+      "composed_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/AI_READI_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric10-semantic.md",
+      "source_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+      "overrides_path": "data/rubric/root_scope_v6/rubric10_definition_overrides.json",
+      "overrides_sha256": "434a4d065a8d64e5de5405be1715fa4c4232a5fb401a39628fc9a32b6164b024",
+      "composed_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/AI_READI_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric10-semantic.md",
+      "source_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+      "overrides_path": "data/rubric/root_scope_v6/rubric10_definition_overrides.json",
+      "overrides_sha256": "434a4d065a8d64e5de5405be1715fa4c4232a5fb401a39628fc9a32b6164b024",
+      "composed_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/CHORUS_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric10-semantic.md",
+      "source_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+      "overrides_path": "data/rubric/root_scope_v6/rubric10_definition_overrides.json",
+      "overrides_sha256": "434a4d065a8d64e5de5405be1715fa4c4232a5fb401a39628fc9a32b6164b024",
+      "composed_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/CHORUS_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric10-semantic.md",
+      "source_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+      "overrides_path": "data/rubric/root_scope_v6/rubric10_definition_overrides.json",
+      "overrides_sha256": "434a4d065a8d64e5de5405be1715fa4c4232a5fb401a39628fc9a32b6164b024",
+      "composed_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/CHORUS_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric10-semantic.md",
+      "source_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+      "overrides_path": "data/rubric/root_scope_v6/rubric10_definition_overrides.json",
+      "overrides_sha256": "434a4d065a8d64e5de5405be1715fa4c4232a5fb401a39628fc9a32b6164b024",
+      "composed_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/CM4AI_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric10-semantic.md",
+      "source_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+      "overrides_path": "data/rubric/root_scope_v6/rubric10_definition_overrides.json",
+      "overrides_sha256": "434a4d065a8d64e5de5405be1715fa4c4232a5fb401a39628fc9a32b6164b024",
+      "composed_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/CM4AI_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric10-semantic.md",
+      "source_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+      "overrides_path": "data/rubric/root_scope_v6/rubric10_definition_overrides.json",
+      "overrides_sha256": "434a4d065a8d64e5de5405be1715fa4c4232a5fb401a39628fc9a32b6164b024",
+      "composed_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/CM4AI_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric10-semantic.md",
+      "source_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+      "overrides_path": "data/rubric/root_scope_v6/rubric10_definition_overrides.json",
+      "overrides_sha256": "434a4d065a8d64e5de5405be1715fa4c4232a5fb401a39628fc9a32b6164b024",
+      "composed_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/VOICE_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric10-semantic.md",
+      "source_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+      "overrides_path": "data/rubric/root_scope_v6/rubric10_definition_overrides.json",
+      "overrides_sha256": "434a4d065a8d64e5de5405be1715fa4c4232a5fb401a39628fc9a32b6164b024",
+      "composed_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/VOICE_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric10-semantic.md",
+      "source_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+      "overrides_path": "data/rubric/root_scope_v6/rubric10_definition_overrides.json",
+      "overrides_sha256": "434a4d065a8d64e5de5405be1715fa4c4232a5fb401a39628fc9a32b6164b024",
+      "composed_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/VOICE_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric10-semantic.md",
+      "source_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+      "overrides_path": "data/rubric/root_scope_v6/rubric10_definition_overrides.json",
+      "overrides_sha256": "434a4d065a8d64e5de5405be1715fa4c4232a5fb401a39628fc9a32b6164b024",
+      "composed_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/VOICE_PEDIATRIC_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric10-semantic.md",
+      "source_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+      "overrides_path": "data/rubric/root_scope_v6/rubric10_definition_overrides.json",
+      "overrides_sha256": "434a4d065a8d64e5de5405be1715fa4c4232a5fb401a39628fc9a32b6164b024",
+      "composed_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/VOICE_PEDIATRIC_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric10-semantic.md",
+      "source_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+      "overrides_path": "data/rubric/root_scope_v6/rubric10_definition_overrides.json",
+      "overrides_sha256": "434a4d065a8d64e5de5405be1715fa4c4232a5fb401a39628fc9a32b6164b024",
+      "composed_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/VOICE_PEDIATRIC_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric10-semantic.md",
+      "source_sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+      "overrides_path": "data/rubric/root_scope_v6/rubric10_definition_overrides.json",
+      "overrides_sha256": "434a4d065a8d64e5de5405be1715fa4c4232a5fb401a39628fc9a32b6164b024",
+      "composed_sha256": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d"
+     }
+    },
     "label_aware/AI_READI_2026-08-20b_rep1_evaluation.json": {
      "basis": "recovered_from_commit",
      "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
@@ -1639,6 +1834,201 @@
      "recovered_from": "fa90b4ec",
      "instrument_sha256": "e8eb3d0f1e64320ce63becfdeb117441ddd0144b246f81c7cdf98b49a8669c1a",
      "instrument_commit": "fa90b4ec"
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/AI_READI_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric20-semantic.md",
+      "source_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "overrides_path": "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+      "overrides_sha256": "f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d",
+      "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/AI_READI_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric20-semantic.md",
+      "source_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "overrides_path": "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+      "overrides_sha256": "f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d",
+      "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/AI_READI_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric20-semantic.md",
+      "source_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "overrides_path": "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+      "overrides_sha256": "f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d",
+      "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/CHORUS_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric20-semantic.md",
+      "source_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "overrides_path": "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+      "overrides_sha256": "f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d",
+      "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/CHORUS_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric20-semantic.md",
+      "source_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "overrides_path": "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+      "overrides_sha256": "f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d",
+      "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/CHORUS_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric20-semantic.md",
+      "source_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "overrides_path": "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+      "overrides_sha256": "f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d",
+      "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/CM4AI_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric20-semantic.md",
+      "source_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "overrides_path": "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+      "overrides_sha256": "f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d",
+      "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/CM4AI_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric20-semantic.md",
+      "source_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "overrides_path": "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+      "overrides_sha256": "f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d",
+      "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/CM4AI_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric20-semantic.md",
+      "source_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "overrides_path": "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+      "overrides_sha256": "f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d",
+      "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/VOICE_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric20-semantic.md",
+      "source_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "overrides_path": "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+      "overrides_sha256": "f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d",
+      "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/VOICE_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric20-semantic.md",
+      "source_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "overrides_path": "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+      "overrides_sha256": "f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d",
+      "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/VOICE_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric20-semantic.md",
+      "source_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "overrides_path": "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+      "overrides_sha256": "f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d",
+      "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/VOICE_PEDIATRIC_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric20-semantic.md",
+      "source_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "overrides_path": "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+      "overrides_sha256": "f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d",
+      "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/VOICE_PEDIATRIC_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric20-semantic.md",
+      "source_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "overrides_path": "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+      "overrides_sha256": "f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d",
+      "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/VOICE_PEDIATRIC_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric20-semantic.md",
+      "source_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "overrides_path": "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+      "overrides_sha256": "f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d",
+      "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
+     }
     },
     "label_aware/AI_READI_2026-08-22c_rep2_evaluation.json": {
      "basis": "recorded",

@@ -1,0 +1,1304 @@
+{
+  "applicability_context": {},
+  "categories": [
+    {
+      "category_max": 21,
+      "category_score": 17,
+      "name": "Structural Completeness",
+      "questions": [
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Proportion of required identification, hierarchy, governance and composition fields populated.",
+          "evidence": "Ten of the fourteen specified root field paths are populated. Root resources, parent_datasets, variables and regulatory_restrictions.confidentiality_level are absent.",
+          "id": 1,
+          "max_score": 5,
+          "name": "Field Completeness",
+          "quality_note": "The 10/14 coverage is approximately 71.4%, meeting the 3-point band. File metadata resources nested under file_collections do not populate root resources. Narrative confidentiality information is useful but does not populate the particular field counted here.",
+          "score": 3,
+          "score_label": "Good: approximately 70% populated",
+          "score_type": "numeric",
+          "semantic_analysis": "Identification and purpose fields meaningfully describe the public version 3.0.0 dataset. Component metadata retain their actual locations.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/resources"
+                },
+                {
+                  "path": "/parent_datasets"
+                },
+                {
+                  "path": "/variables"
+                },
+                {
+                  "path": "/regulatory_restrictions/confidentiality_level"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/id"
+                },
+                {
+                  "path": "/title"
+                },
+                {
+                  "path": "/description"
+                },
+                {
+                  "path": "/keywords"
+                },
+                {
+                  "path": "/license_and_use_terms"
+                },
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/page"
+                },
+                {
+                  "path": "/creators"
+                },
+                {
+                  "path": "/purposes"
+                },
+                {
+                  "path": "/instances"
+                }
+              ],
+              "considered": [
+                "/file_collections",
+                "/confidential_elements",
+                "/regulatory_restrictions"
+              ],
+              "counts": [],
+              "evidence": "Ten specified fields are populated; four specified root paths are absent.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Whether description and purpose narratives provide meaningful content exceeding the length threshold.",
+          "evidence": "The description explains release scope, collection dates, participant count, modalities, privacy exclusions, size and organization. Two purpose statements explain diabetes research and data-standardization objectives.",
+          "id": 2,
+          "max_score": 5,
+          "name": "Entry Length Adequacy",
+          "quality_note": "The average length across the description and purpose responses clearly exceeds 200 characters, with substantive information rather than filler.",
+          "score": 5,
+          "score_label": "Excellent: average narrative length exceeds 200 characters",
+          "score_type": "numeric",
+          "semantic_analysis": "The research and standardization purposes are consistent with the modalities and the explicitly documented NIH Bridge2AI funding.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/description"
+                },
+                {
+                  "path": "/purposes/0/response"
+                },
+                {
+                  "path": "/purposes/1/response"
+                }
+              ],
+              "considered": [],
+              "counts": [
+                {
+                  "claimed": 2,
+                  "path": "/purposes"
+                }
+              ],
+              "evidence": "Detailed description and two substantive purpose responses exceed the narrative-length threshold.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Number of distinct documented dataset keywords.",
+          "evidence": "The seven keywords are Diabetes mellitus, Machine Learning, Artificial Intelligence, Electrocardiography, Continuous Glucose Monitoring, Retinal imaging and Eye exam.",
+          "id": 3,
+          "max_score": 5,
+          "name": "Keyword Diversity",
+          "no_issue_reason": "The score follows the explicit seven-keyword threshold; no separate semantic defect is inferred from this count.",
+          "quality_note": "Seven distinct keywords meet the 3\u20137 band. The record does not establish an additional controlled keyword vocabulary that raises the count to eight.",
+          "score": 3,
+          "score_label": "Good: seven distinct keywords",
+          "score_type": "numeric",
+          "semantic_analysis": "The keywords are relevant to the documented condition, intended computational uses and measurement modalities.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/keywords"
+                }
+              ],
+              "considered": [],
+              "counts": [
+                {
+                  "claimed": 7,
+                  "path": "/keywords"
+                }
+              ],
+              "evidence": "The keywords list contains seven distinct entries.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Variety of documented distribution formats and file types.",
+          "evidence": "distribution_formats lists DICOM, Markdown, CSV and JSON. Root metadata resources additionally document TXT and TSV. The record reports 356343 files and describes nine data directories plus a metadata collection.",
+          "id": 4,
+          "max_score": 5,
+          "name": "File Enumeration and Type Variety",
+          "quality_note": "At least six distinct released file types are documented. Raw-source XML is not needed to meet the threshold and is not treated as a released distribution format.",
+          "score": 5,
+          "score_label": "Excellent: more than three file types",
+          "score_type": "numeric",
+          "semantic_analysis": "The documented formats support the stated mixture of imaging, tabular and physiological data. File variety does not by itself establish machine-learning readiness.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/distribution_formats"
+                },
+                {
+                  "path": "/file_collections"
+                },
+                {
+                  "path": "/total_file_count"
+                }
+              ],
+              "considered": [
+                "/source_caveats"
+              ],
+              "counts": [
+                {
+                  "claimed": 4,
+                  "path": "/distribution_formats"
+                },
+                {
+                  "claimed": 10,
+                  "path": "/file_collections"
+                },
+                {
+                  "claimed": 9,
+                  "path": "/file_collections/9/resources"
+                }
+              ],
+              "evidence": "Four distribution media types plus TXT and TSV metadata exceed the three-type threshold.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Availability of numeric size, instance-count or split metadata.",
+          "evidence": "total_size_bytes is 3815969779678; instances reports 2280 participants; the recommended splits contain 1576 training, 352 validation and 352 test participants.",
+          "id": 5,
+          "max_score": 1,
+          "name": "Data File Size Availability",
+          "quality_note": "Both byte counts and participant dimensions are available, exceeding the minimum requirement. The documented directory-byte reconciliation uncertainty does not erase the available size metadata.",
+          "score": 1,
+          "score_label": "Pass",
+          "score_type": "pass_fail",
+          "semantic_analysis": "Participant split counts sum to 2280. The record distinguishes release size from planned enrollment.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/total_size_bytes"
+                },
+                {
+                  "path": "/instances/0/counts"
+                },
+                {
+                  "path": "/splits"
+                },
+                {
+                  "path": "/file_collections"
+                },
+                {
+                  "path": "/subpopulations"
+                }
+              ],
+              "considered": [
+                "/source_caveats"
+              ],
+              "counts": [],
+              "evidence": "Dataset bytes, directory bytes, participant count and split sizes are documented.",
+              "path": "#",
+              "score": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category_max": 21,
+      "category_score": 19,
+      "name": "Metadata Quality & Content",
+      "questions": [
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Persistent dataset identification and hosting-platform information.",
+          "evidence": "The dataset DOI is 10.60775/fairhub.3, id is doi:10.60775/fairhub.3, page is https://fairhub.io/datasets/3 and publisher is https://fairhub.io/.",
+          "id": 6,
+          "max_score": 1,
+          "name": "Dataset Identification Metadata",
+          "quality_note": "A persistent identifier and an explicitly identified hosting platform are present.",
+          "score": 1,
+          "score_label": "Pass",
+          "score_type": "pass_fail",
+          "semantic_analysis": "The identifier, landing page and publisher consistently identify FAIRhub dataset 3. DOI syntax is plausible; registrar ownership and resolution were not externally verified.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/doi",
+                  "quote": "10.60775/fairhub.3"
+                },
+                {
+                  "path": "/id"
+                },
+                {
+                  "path": "/page"
+                },
+                {
+                  "path": "/publisher"
+                }
+              ],
+              "considered": [],
+              "counts": [],
+              "evidence": "DOI, DOI-based id, FAIRhub landing page and publisher are mutually consistent.",
+              "path": "#",
+              "score": 1
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Funding agencies, grant identifiers and creator affiliations.",
+          "evidence": "NIH funding includes OT2OD032644, P30DK035816 and UL1TR003096. Research to Prevent Blindness is also acknowledged. Named investigators have institutional affiliations and identifiers.",
+          "id": 7,
+          "max_score": 5,
+          "name": "Funding and Acknowledgements Completeness",
+          "quality_note": "The record meets the funders-with-grants and creators-with-affiliations anchor. Publication-only funding and two unavailable investigator affiliations are transparently qualified rather than invented.",
+          "score": 5,
+          "score_label": "Excellent: grants and institutional affiliations documented",
+          "score_type": "numeric",
+          "semantic_analysis": "The NIH award strings have plausible NIH formats. The record explicitly resolves a source O/0 typo and distinguishes the funding institution from the dataset manager.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/funders"
+                },
+                {
+                  "path": "/creators"
+                },
+                {
+                  "path": "/funders/0/grants/0/grant_number",
+                  "quote": "OT2OD032644"
+                }
+              ],
+              "considered": [
+                "/purposes"
+              ],
+              "counts": [
+                {
+                  "claimed": 2,
+                  "path": "/funders"
+                }
+              ],
+              "evidence": "Funding mechanisms contain named agencies and grant numbers; creator records contain institutional affiliations.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "human_subjects was not independently declared by the caller; unknown remains scored and in the denominator.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Ethical oversight, consent, participant safeguards and data-protection impacts.",
+          "evidence": "University of Washington IRB approval STUDY00016228, consent and withdrawal conditions, $200 compensation, vulnerable-population exclusions, privacy techniques and theoretical re-identification risk are documented. source_caveats explicitly says no data protection impact analysis has been conducted.",
+          "id": 8,
+          "max_score": 5,
+          "name": "Ethical and Privacy Declarations",
+          "quality_note": "The record provides substantially more than basic oversight, but lacks the impact assessment needed for the comprehensive band. An explicit statement that no assessment occurred is credited as disclosure, not treated as an assessment of impacts.",
+          "score": 3,
+          "score_label": "Good: extensive safeguards, incomplete impact assessment",
+          "score_type": "numeric",
+          "semantic_analysis": "Human-subject, IRB and consent declarations align. Withdrawal limits are clearly disclosed. The competing NoDeIdentification and Safe Harbor accounts are preserved with source qualifications, but their stage-specific relationship remains uncertain.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/data_protection_impacts"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/ethical_reviews"
+                },
+                {
+                  "path": "/human_subject_research"
+                },
+                {
+                  "path": "/is_deidentified"
+                },
+                {
+                  "path": "/participant_privacy"
+                },
+                {
+                  "path": "/participant_privacy/1/reidentification_risk"
+                },
+                {
+                  "path": "/participant_compensation"
+                },
+                {
+                  "path": "/at_risk_populations"
+                },
+                {
+                  "path": "/informed_consent"
+                },
+                {
+                  "path": "/source_caveats",
+                  "quote": "no data protection impact analysis has been conducted"
+                }
+              ],
+              "considered": [
+                "/collection_consents",
+                "/consent_revocations",
+                "/license_and_use_terms",
+                "/regulatory_restrictions",
+                "/sensitive_elements",
+                "/confidential_elements"
+              ],
+              "counts": [],
+              "evidence": "Oversight and participant protections are detailed, while no data-protection impact analysis is available.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "License, access conditions, intellectual-property restrictions, confidentiality and governance.",
+          "evidence": "The version 2.0 license requires verified-ID login, self-attestation and diabetes-related research. It specifies storage, redistribution, derivative-data and intellectual-property restrictions. The public dataset is explicitly described as containing no confidential information; Washington University in St. Louis is the accountable organization and licensor.",
+          "id": 9,
+          "max_score": 5,
+          "name": "Access Requirements and Governance Documentation",
+          "quality_note": "The license-plus-restrictions-plus-confidentiality anchor is met through substantive narrative declarations. Confidentiality is described in confidential_elements even though the specific regulatory confidentiality field counted by Q1 is absent. Governance and contact routes are also supplied.",
+          "score": 5,
+          "score_label": "Excellent: license, restrictions and confidentiality documented",
+          "score_type": "numeric",
+          "semantic_analysis": "Public distribution is correctly distinguished from unrestricted use. NIH GDS and HIPAA-related storage obligations are license conditions; they are not interpreted as a universal compliance certification or a requirement for committee review of this public release.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/license_and_use_terms"
+                },
+                {
+                  "path": "/ip_restrictions"
+                },
+                {
+                  "path": "/regulatory_restrictions"
+                },
+                {
+                  "path": "/confidential_elements/0/confidentiality_details"
+                },
+                {
+                  "path": "/data_governance"
+                },
+                {
+                  "path": "/maintainers"
+                },
+                {
+                  "path": "/creators/0/principal_investigator/email"
+                }
+              ],
+              "considered": [
+                "/participant_privacy",
+                "/source_caveats"
+              ],
+              "counts": [],
+              "evidence": "Detailed license and IP restrictions, regulatory obligations, narrative confidentiality classification and accountable governance are provided.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "shared_dataset was not independently declared by the caller; unknown remains scored and in the denominator.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Standard formats, schema conformance and documented integration capability.",
+          "evidence": "The dataset conforms to Clinical Dataset Structure v0.1.1. Clinical CSV files map one-to-one to OMOP CDM tables; imaging uses DICOM, ECG uses WFDB, environmental data use ESDS guidance and wearable data use Open mHealth.",
+          "id": 10,
+          "max_score": 5,
+          "name": "Interoperability, Standardization, and Cross-Platform Integration",
+          "quality_note": "Standard distributions, a versioned structural specification and explicit harmonization/table mappings meet the maximum anchor.",
+          "score": 5,
+          "score_label": "Excellent: standards and integration mappings documented",
+          "score_type": "numeric",
+          "semantic_analysis": "The record connects standards to particular data domains and explains central terminology mapping. Integration capability is supported by these mappings and the participant-oriented hierarchy, rather than inferred solely from an AI-related title.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/distribution_formats"
+                },
+                {
+                  "path": "/conforms_to"
+                },
+                {
+                  "path": "/external_resources"
+                },
+                {
+                  "path": "/file_collections/1/description"
+                },
+                {
+                  "path": "/file_collections"
+                },
+                {
+                  "path": "/preprocessing_strategies/1/preprocessing_details"
+                }
+              ],
+              "considered": [
+                "/description"
+              ],
+              "counts": [],
+              "evidence": "CDS v0.1.1, OMOP table mappings and modality-specific standards provide substantive interoperability evidence.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category_max": 25,
+      "category_score": 19,
+      "name": "Technical Documentation",
+      "questions": [
+        {
+          "applicability_evidence": "data_processing was not independently declared by the caller; unknown remains scored and in the denominator.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Processing and cleaning strategies with relevant software and reproducibility details.",
+          "evidence": "The record describes raw-image conversion to DICOM, mapping to OMOP and other terminologies, REDCap range checks, skip-pattern checks, duplicate detection and PI-approved editing.",
+          "id": 11,
+          "max_score": 5,
+          "name": "Tool and Software Transparency",
+          "quality_note": "Multiple concrete strategies meet the 3-point anchor. Processing-specific software versions, executable workflow links and detailed conversion parameters are not supplied. Acquisition-device model names do not substitute for processing software versions.",
+          "score": 3,
+          "score_label": "Good: strategies documented without versioned workflows",
+          "score_type": "numeric",
+          "semantic_analysis": "The explicit absence of supplied labels is respected; absent annotation tools alone do not cause the deduction. Missing-data causes are documented, but they do not establish an imputation procedure.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/software_and_tools"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/preprocessing_strategies"
+                },
+                {
+                  "path": "/cleaning_strategies"
+                },
+                {
+                  "path": "/missing_data_documentation"
+                },
+                {
+                  "path": "/instances/0/label"
+                }
+              ],
+              "considered": [
+                "/collection_mechanisms",
+                "/external_resources",
+                "/raw_data_sources"
+              ],
+              "counts": [],
+              "evidence": "Standardization and quality-control strategies are meaningful, but reproducible software and workflow specifications are incomplete.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "data_collection was not independently declared by the caller; unknown remains scored and in the denominator.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Collection mechanisms, acquisition methods, collectors, timeframes and raw sources.",
+          "evidence": "The record specifies a 2.5\u20134-hour visit, questionnaires and ten days of home monitoring; names collection devices and procedures; identifies UAB, UCSD and UW as collectors; and gives the release collection period as 2023-07-19 through 2025-05-01.",
+          "id": 12,
+          "max_score": 5,
+          "name": "Collection Protocol Clarity",
+          "quality_note": "Methods, responsible sites, equipment, monitoring duration, collection dates and representative raw exports provide actionable collection documentation.",
+          "score": 5,
+          "score_label": "Excellent: full collection protocol",
+          "score_type": "numeric",
+          "semantic_analysis": "Direct observations and participant reports are distinguished. Pilot collection, formal collection and release dates are qualified rather than conflated.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/acquisition_methods"
+                },
+                {
+                  "path": "/collection_mechanisms"
+                },
+                {
+                  "path": "/data_collectors"
+                },
+                {
+                  "path": "/collection_timeframes"
+                },
+                {
+                  "path": "/raw_data_sources"
+                }
+              ],
+              "considered": [
+                "/direct_collection"
+              ],
+              "counts": [
+                {
+                  "claimed": 3,
+                  "path": "/data_collectors"
+                },
+                {
+                  "claimed": 2,
+                  "path": "/raw_data_sources"
+                }
+              ],
+              "evidence": "Detailed modality protocols are connected to three collection sites and an explicit release collection timeframe.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "shared_dataset was not independently declared by the caller; unknown remains scored and in the denominator.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Version history, maintenance responsibility and durable preservation arrangements.",
+          "evidence": "Versions 1.0.0, 2.0.0 and 3.0.0 have dates, DOIs and participant counts. Annual new releases, static-version behavior, AI-READI maintenance and FAIRhub hosting on Microsoft Azure are described. Version 2.0.0 is no longer accessible.",
+          "id": 13,
+          "max_score": 5,
+          "name": "Version History, Maintenance, and Sustainability",
+          "quality_note": "Versioning is detailed, but full sustainability documentation is incomplete: no explicit durable preservation period or archival route for superseded releases is given. A support statement and a persistent identifier meet the 3-point band without establishing the maximum preservation commitment.",
+          "score": 3,
+          "score_label": "Good: versioning and maintenance with limited preservation commitment",
+          "score_type": "numeric",
+          "semantic_analysis": "The raw-data preservation promise is limited to at least the project duration. The absence of licensee retention limits does not establish repository preservation. Changes such as dropping Snellen variables are usefully documented.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/errata"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/version"
+                },
+                {
+                  "path": "/version_access"
+                },
+                {
+                  "path": "/updates"
+                },
+                {
+                  "path": "/maintainers"
+                },
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/publisher"
+                },
+                {
+                  "path": "/raw_sources"
+                }
+              ],
+              "considered": [
+                "/data_governance",
+                "/retention_limit",
+                "/source_caveats"
+              ],
+              "counts": [],
+              "evidence": "Three release histories and maintenance arrangements are documented, but long-term access and preservation of prior releases are not fully specified.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Distinct references and a formal citation for the dataset.",
+          "evidence": "Eight external-resource entries include dataset documentation, project and code sites, the CDS specification, a BMJ Open protocol citation and a Nature Metabolism overview citation. The dataset DOI is present, but citation is absent.",
+          "id": 14,
+          "max_score": 5,
+          "name": "Associated Publications",
+          "quality_note": "Multiple distinct references satisfy the 3-point condition. The 5-point condition additionally requires a formal citation for this dataset; general citation instructions and separate title, creator and DOI fields do not provide that formatted citation.",
+          "score": 3,
+          "score_label": "Good: multiple references without a formal dataset citation",
+          "score_type": "numeric",
+          "semantic_analysis": "The two publication citations identify related publications, not a supplied citation for the released dataset itself.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/citation"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/external_resources"
+                },
+                {
+                  "path": "/doi"
+                }
+              ],
+              "considered": [
+                "/intended_uses",
+                "/license_and_use_terms",
+                "/title",
+                "/creators"
+              ],
+              "counts": [
+                {
+                  "claimed": 8,
+                  "path": "/external_resources"
+                }
+              ],
+              "evidence": "Multiple external references and the dataset DOI are documented, but no formal dataset citation is supplied.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "human_subjects was not independently declared by the caller; unknown remains scored and in the denominator.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Participant demographics, subgroups, sampling and eligibility.",
+          "evidence": "The release contains 2280 participants. Aggregate race/ethnicity, sex and diabetes-status counts are reported. Recruitment targets four race/ethnic groups and four diabetes categories; eligibility addresses age, English proficiency, consent, pregnancy, gestational diabetes and Type 1 diabetes.",
+          "id": 15,
+          "max_score": 5,
+          "name": "Human Subject Representation",
+          "quality_note": "Subgroup distributions, recruitment design, inclusion/exclusion criteria and representativeness limitations meet the comprehensive anchor.",
+          "score": 5,
+          "score_label": "Excellent: detailed population characterization",
+          "score_type": "numeric",
+          "semantic_analysis": "The absence of released participant-level sex and race/ethnicity variables is compatible with aggregate subgroup totals. The record clearly distinguishes balanced recruitment goals from the achieved release composition.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/instances"
+                },
+                {
+                  "path": "/subpopulations"
+                },
+                {
+                  "path": "/at_risk_populations"
+                },
+                {
+                  "path": "/missing_data_documentation"
+                },
+                {
+                  "path": "/sampling_strategies"
+                },
+                {
+                  "path": "/known_limitations"
+                }
+              ],
+              "considered": [
+                "/splits"
+              ],
+              "counts": [],
+              "evidence": "Participant counts, demographic and clinical subgroups, eligibility and sampling limitations are documented.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category_max": 21,
+      "category_score": 15,
+      "name": "FAIRness & Accessibility",
+      "questions": [
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Persistent identifiers and external dataset or documentation links.",
+          "evidence": "The record provides DOI 10.60775/fairhub.3, the FAIRhub dataset landing page and https://docs.aireadi.org/.",
+          "id": 16,
+          "max_score": 1,
+          "name": "Findability (Persistent Links)",
+          "quality_note": "Persistent identifiers and structurally plausible external links meet the presence requirement. Live reachability was not tested.",
+          "score": 1,
+          "score_label": "Pass",
+          "score_type": "pass_fail",
+          "semantic_analysis": "Dataset identity and documentation links are clearly distinguished from publication and project links.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/page"
+                },
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/id"
+                },
+                {
+                  "path": "/external_resources"
+                }
+              ],
+              "considered": [],
+              "counts": [],
+              "evidence": "DOI, dataset landing page and documentation links provide persistent discovery routes.",
+              "path": "#",
+              "score": 1
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "shared_dataset was not independently declared by the caller; unknown remains scored and in the denominator.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Platform, authorization steps, formats and access policy.",
+          "evidence": "The FAIRhub landing page is supplied. Access is PublicDownloadSelfAttestationRequired: verified-ID login, agreement to diabetes-related research and acceptance of the license terms. Distribution formats are listed.",
+          "id": 17,
+          "max_score": 5,
+          "name": "Accessibility (Access Mechanism)",
+          "quality_note": "The platform, login requirement and policy commitments define the access mechanism. A separate direct download URL is not necessary to understand the documented authorization path.",
+          "score": 5,
+          "score_label": "Excellent: explicit access path and authorization tier",
+          "score_type": "numeric",
+          "semantic_analysis": "The record does not mischaracterize public access as anonymous or unrestricted, and distinguishes this release from the separate controlled-access dataset.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/license_and_use_terms"
+                },
+                {
+                  "path": "/distribution_formats"
+                },
+                {
+                  "path": "/page"
+                },
+                {
+                  "path": "/data_governance/access_review_process"
+                }
+              ],
+              "considered": [
+                "/source_caveats"
+              ],
+              "counts": [],
+              "evidence": "FAIRhub access requires verified-ID login, self-attestation and license acceptance; available formats are documented.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "License and use guidance together with social-impact analysis and mitigation.",
+          "evidence": "Intended diabetes research and AI/ML development are specified. Prohibitions cover clinical decisions, re-identification, harmful use, third-party model training and publication of data. future_use_impacts reports no anticipated harmful uses but acknowledges theoretical re-identification risk.",
+          "id": 18,
+          "max_score": 5,
+          "name": "Reusability, Use Guidance, and Social Impact",
+          "quality_note": "The license and use restrictions are detailed, and privacy mitigations are present. The maximum band is not met because downstream social impacts, affected populations and mitigation of broader model-related harms are not comprehensively analyzed.",
+          "score": 3,
+          "score_label": "Good: detailed use guidance with limited social-impact analysis",
+          "score_type": "numeric",
+          "semantic_analysis": "Commercial use is subject to the same disease-specific and security constraints. Model-memorization precautions and privacy restrictions are credited, but they do not substitute for a broader social-impact assessment.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/discouraged_uses"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/license_and_use_terms"
+                },
+                {
+                  "path": "/intended_uses"
+                },
+                {
+                  "path": "/prohibited_uses"
+                },
+                {
+                  "path": "/future_use_impacts"
+                }
+              ],
+              "considered": [
+                "/participant_privacy",
+                "/known_biases",
+                "/known_limitations",
+                "/sampling_strategies",
+                "/splits"
+              ],
+              "counts": [],
+              "evidence": "Comprehensive legal use restrictions coexist with only a short social-impact statement centered on re-identification.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Version history and complete entity-activity-agent processing lineage.",
+          "evidence": "The record documents release history, update plans, missing-data causes, recommended splits and raw ECG XML and MoCA CSV exports. It also describes collection sites, central mapping and quality-control responsibilities.",
+          "id": 19,
+          "max_score": 5,
+          "name": "Data Integrity, Provenance Graph, and Quality",
+          "quality_note": "These narratives provide partial origins and processing information, but not complete derivation paths linking source entities, transformation activities, responsible agents and released outputs across modalities. The 3-point band is appropriate.",
+          "score": 3,
+          "score_label": "Good: version history and partial processing lineage",
+          "score_type": "numeric",
+          "semantic_analysis": "Textual provenance is accepted; the deduction is for incomplete lineage, not absence of RDF or a graphical serialization. Version history and modality inventories alone do not establish full processing provenance.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/errata"
+                },
+                {
+                  "path": "/was_derived_from"
+                },
+                {
+                  "path": "/parent_datasets"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/version_access"
+                },
+                {
+                  "path": "/updates"
+                },
+                {
+                  "path": "/missing_data_documentation"
+                },
+                {
+                  "path": "/splits"
+                },
+                {
+                  "path": "/raw_data_sources"
+                },
+                {
+                  "path": "/preprocessing_strategies"
+                },
+                {
+                  "path": "/cleaning_strategies"
+                },
+                {
+                  "path": "/data_collectors"
+                }
+              ],
+              "considered": [
+                "/collection_mechanisms",
+                "/acquisition_methods",
+                "/raw_sources",
+                "/instances",
+                "/file_collections",
+                "/source_caveats"
+              ],
+              "counts": [],
+              "evidence": "Versioning and several processing stages are described, but complete source-to-release derivation relationships are not supplied.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Categorized biases, limitations, effects on use and fairness analysis.",
+          "evidence": "known_biases categorizes volunteer bias as selection_bias. Limitations include English-language eligibility, urban hospital recruitment, omitted racial/ethnic groups and incomplete balance in periodic releases. Recruitment and recommended splits aim to improve balance.",
+          "id": 20,
+          "max_score": 5,
+          "name": "Bias Documentation and Responsible AI Alignment",
+          "quality_note": "The record provides a valid bias category and meaningful limitations, exceeding an unstructured generic warning. It does not provide comprehensive taxonomy coverage and fairness analysis sufficient for the 5-point band.",
+          "score": 3,
+          "score_label": "Good: identified biases with limited fairness analysis",
+          "score_type": "numeric",
+          "semantic_analysis": "Balanced recruitment and validation/test design are credited as mitigation efforts, but do not demonstrate equitable model performance or eliminate selection bias. The short future-impact statement does not resolve these limitations.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/known_biases"
+                },
+                {
+                  "path": "/future_use_impacts"
+                }
+              ],
+              "considered": [
+                "/known_limitations",
+                "/sampling_strategies",
+                "/splits",
+                "/subpopulations"
+              ],
+              "counts": [],
+              "evidence": "Selection bias, representativeness limitations and balancing measures are documented without a comprehensive fairness assessment.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "d4d_file": "data/d4d_concatenated/claudecode_release/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1/AI_READI_d4d.yaml",
+  "evaluation_model": {
+    "basis": "recorded Codex session turn_context",
+    "effort": "ultra",
+    "name": "gpt-6-astra",
+    "selection_basis": "explicit override",
+    "service_tier_observed": null,
+    "service_tier_requested": "fast",
+    "session_logs": [
+      {
+        "cli_version": "0.172.0",
+        "id": "01a2164b-1a39-7a40-9fb3-0cd1888b1b83",
+        "owned_history_start_ordinal": 1,
+        "owned_turn_ids": [
+          "01a2164b-1f34-7ae2-a038-21dd967d4b0a"
+        ],
+        "parent_thread_id": null,
+        "path": "codex-home/sessions/2026/11/25/rollout-2026-11-25T21-19-11-01a2164b-1a39-7a40-9fb3-0cd1888b1b83.jsonl",
+        "sha256": "4fa441c878852cc46d3f387c6182cf1feee64c2949179fa62f5e43a295ab815e"
+      }
+    ],
+    "thread_id": "01a2164b-1a39-7a40-9fb3-0cd1888b1b83"
+  },
+  "evaluation_scope": {
+    "collection_metadata_inherited": false,
+    "policy": "single_dataset",
+    "selection_policy": "root_dataset_v1",
+    "units": [
+      {
+        "id": "doi:10.60775/fairhub.3",
+        "path": "#"
+      }
+    ]
+  },
+  "evaluation_timestamp": "2026-11-25T00:00:00Z",
+  "instrument_id": "2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6",
+  "label": "2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1",
+  "metadata": {
+    "context_sha256": "fca403729b83dda36a67c4b749455b0fd864ba992e0e40b9a0f5c65bc039bfad",
+    "evaluation_timestamp_note": "The session-supplied date is recorded with a midnight UTC placeholder; the exact evaluation time was not exposed.",
+    "evidence_authority_sha256": "0605c742c61f2cc4e13de907f8e09752bde5ebd08d173b31d837c273a4bf3872",
+    "input_sha256": "c484d79004bbde58e3ddd04344cd121eb6353b6e39c1973c09266811b68d11d1",
+    "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+    "rubric_sha256": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
+    "scope_context_sha256": "55ef534185d502bfe988a5f4213edceaff6c07b16dc446613601e17c11939ac9",
+    "validation_note": "Assessment used only the supplied record and rubric materials. No commands, external sources or validation tools were used; controller validation is pending."
+  },
+  "method": "claudecode_release",
+  "model": {
+    "evaluation_type": "semantic_llm_judge",
+    "evaluator_model": "unobserved",
+    "identity_note": "The controller will stamp observed runtime model identity from session logs.",
+    "name": "gpt-6-astra",
+    "temperature": null,
+    "temperature_note": "Not exposed by this runtime; no deterministic-score guarantee."
+  },
+  "overall_score": {
+    "adjusted_max_points": 88,
+    "excluded_item_ids": [],
+    "excluded_max_points": 0,
+    "fixed_percentage": 79.54545454545455,
+    "max_points": 88,
+    "normalized_percentage": 79.54545454545455,
+    "questions_not_applicable": 0,
+    "total_points": 70
+  },
+  "project": "AI_READI",
+  "rubric": "rubric20-semantic",
+  "scorer_instrument": {
+    "id": "2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6",
+    "prompt_sha256": "91cbef5d89f2a90da0d7bed8b300b481a524412e67dd6f4127002d57fb1f7db1",
+    "runner_sha256": "b2a5c0995d891d4c5179509834b460390b1d921d78b0191965fc4ea3f91c21b9"
+  },
+  "semantic_analysis": {
+    "consistency_checks": {
+      "failed": 0,
+      "passed": 10,
+      "warnings": 3
+    },
+    "correctness_validations": {
+      "doi_format": "Valid DOI syntax for 10.60775/fairhub.3; registrar association and resolution were not independently verified.",
+      "grant_number_format": "Plausible NIH formats for OT2OD032644, P30DK035816, UL1TR003096 and the full project identifier 1OT2OD032644-01. The source O/0 discrepancy is explicitly documented.",
+      "rrid_format": "not_present",
+      "temporal_ordering": "IRB approval in December 2022 precedes collection from July 2023 through May 2025 and release in November 2025.",
+      "url_validity": "Supplied URLs have plausible structures and domains; live reachability was not checked."
+    },
+    "issues_detected": [
+      {
+        "category": "variables_metadata",
+        "description": "Only ten of fourteen specified root field paths are populated. Variable metadata and the specified regulatory confidentiality classification are absent, as are root resources and parent_datasets.",
+        "fields_involved": [
+          "variables",
+          "regulatory_restrictions.confidentiality_level",
+          "resources",
+          "parent_datasets",
+          "file_collections"
+        ],
+        "item_ids": [
+          "Q1"
+        ],
+        "recommendation": "Add variable-level metadata and an explicit regulatory confidentiality classification, and document actual root or parent relationships where they exist without promoting nested metadata into root fields.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "privacy_regulatory",
+        "description": "The record explicitly states that no data-protection impact analysis has been conducted. Detailed safeguards and a theoretical re-identification warning do not provide a comprehensive assessment of residual privacy impacts.",
+        "fields_involved": [
+          "data_protection_impacts",
+          "source_caveats",
+          "participant_privacy",
+          "is_deidentified"
+        ],
+        "item_ids": [
+          "Q8"
+        ],
+        "recommendation": "Document a release-specific assessment of disclosure risks, likely impacts, safeguards and residual risk, while preserving the current disclosure that no such analysis was available.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "processing_provenance",
+        "description": "Processing and cleaning strategies are described, but processing-software versions, specific workflow URLs and reproducible transformation parameters are not supplied.",
+        "fields_involved": [
+          "preprocessing_strategies",
+          "cleaning_strategies",
+          "software_and_tools",
+          "external_resources"
+        ],
+        "item_ids": [
+          "Q11"
+        ],
+        "recommendation": "Identify the software and versions used for conversions and terminology mapping, and link versioned workflows with their inputs, outputs and relevant parameters.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "temporal_version",
+        "description": "Release history and maintenance responsibility are documented, but durable preservation commitments and an archival access route for superseded releases are not specified; version 2.0.0 is reported as inaccessible.",
+        "fields_involved": [
+          "version_access",
+          "updates",
+          "maintainers",
+          "publisher",
+          "raw_sources",
+          "retention_limit"
+        ],
+        "item_ids": [
+          "Q13"
+        ],
+        "recommendation": "Specify the preservation responsibility, duration or funding commitment, and policy for retaining or accessing superseded releases.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "attribution",
+        "description": "Several related references are provided, but a formal citation for this dataset release is absent.",
+        "fields_involved": [
+          "citation",
+          "external_resources",
+          "doi",
+          "intended_uses"
+        ],
+        "item_ids": [
+          "Q14"
+        ],
+        "recommendation": "Provide a recommended dataset citation identifying the authors or publishing organization, dataset title, version, release date and DOI.",
+        "score_effect": "lowered",
+        "severity": "low",
+        "type": "completeness"
+      },
+      {
+        "category": "bias_quality",
+        "description": "Use permissions and prohibitions are extensive, but social-impact documentation is largely limited to no anticipated harmful use and theoretical re-identification risk.",
+        "fields_involved": [
+          "license_and_use_terms",
+          "intended_uses",
+          "prohibited_uses",
+          "discouraged_uses",
+          "future_use_impacts"
+        ],
+        "item_ids": [
+          "Q18"
+        ],
+        "recommendation": "Analyze foreseeable downstream harms and affected populations, connect each material risk to mitigation, and state discouraged applications where relevant.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "processing_provenance",
+        "description": "The record describes source devices, responsible teams and broad processing stages but does not provide complete entity-activity-agent derivation paths for the released modalities.",
+        "fields_involved": [
+          "was_derived_from",
+          "raw_data_sources",
+          "preprocessing_strategies",
+          "cleaning_strategies",
+          "data_collectors",
+          "file_collections",
+          "version_access"
+        ],
+        "item_ids": [
+          "Q19"
+        ],
+        "recommendation": "Add textual or structured lineage connecting each source modality to transformations, responsible agents and released outputs, including the relevant workflow or mapping versions.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "bias_quality",
+        "description": "Selection bias is categorized and several population limitations are described, but comprehensive bias categorization and fairness analysis are not provided.",
+        "fields_involved": [
+          "known_biases",
+          "known_limitations",
+          "future_use_impacts",
+          "sampling_strategies",
+          "splits",
+          "subpopulations"
+        ],
+        "item_ids": [
+          "Q20"
+        ],
+        "recommendation": "Extend the bias assessment across recruitment, measurement, missingness and downstream use, and document subgroup analyses or limitations on performing them.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "source_conflict",
+        "description": "The record transparently preserves a conflict between version-specific metadata describing no active deidentification and a general publication describing HIPAA Safe Harbor removal. The precise stage-specific relationship is unresolved.",
+        "fields_involved": [
+          "is_deidentified.deidentification_details",
+          "is_deidentified.identifiers_removed",
+          "is_deidentified.source_caveats",
+          "participant_privacy"
+        ],
+        "item_ids": [],
+        "recommendation": "Clarify which safeguards applied during collection, source storage, preparation and release, and distinguish version-specific practice from general project descriptions.",
+        "score_effect": "noted_only",
+        "severity": "medium",
+        "type": "consistency"
+      },
+      {
+        "category": "source_conflict",
+        "description": "Source descriptions differ over pilot-only, first-year and second-year coverage. The record explicitly prioritizes version-specific FAIRhub metadata and preserves the conflicting statements as caveats.",
+        "fields_involved": [
+          "source_caveats",
+          "sampling_strategies",
+          "updates",
+          "collection_timeframes"
+        ],
+        "item_ids": [],
+        "recommendation": "Obtain a version-specific correction of the conflicting source statements while retaining the documented collection dates and provenance of each claim.",
+        "score_effect": "noted_only",
+        "severity": "low",
+        "type": "consistency"
+      },
+      {
+        "category": "count_size",
+        "description": "The record reports that directory totals are nine files and 419614 bytes below dataset totals. Nine listed root metadata files match the file-count difference, but their sizes are unavailable and the byte difference is not explicitly explained by the sources.",
+        "fields_involved": [
+          "total_file_count",
+          "total_size_bytes",
+          "file_collections",
+          "source_caveats"
+        ],
+        "item_ids": [],
+        "recommendation": "Provide root metadata file sizes or a complete manifest that reconciles directory and dataset totals.",
+        "score_effect": "noted_only",
+        "severity": "low",
+        "type": "consistency"
+      }
+    ],
+    "semantic_insights": [
+      "The evaluation covers the complete root datasheet. Nested file collections remain evidence at their actual paths and are not separate scoring units.",
+      "All conditional predicates remain unknown because the caller supplied an empty applicability context; no item is excluded.",
+      "The public release is consistently distinguished from the separate controlled-access dataset, and access restrictions are not confused with anonymous or unrestricted availability.",
+      "Human-subject participation is supported by both IRB documentation and informed consent. Privacy techniques and withdrawal limits are explicitly described.",
+      "The documented NIH funding aligns with the stated diabetes research and data-standardization purposes; this contextual interpretation comes from the funding and purpose values.",
+      "The DOI-based id, landing page and publisher consistently identify FAIRhub dataset 3, and permitted reuse is accompanied by documented distribution formats.",
+      "IRB approval precedes collection, collection precedes release, and the participant totals for demographic groups, disease groups and recommended splits each reconcile to 2280.",
+      "The version progression is internally coherent: 204 pilot participants plus 863 additional participants gives 1067 in version 2, followed by 2280 in version 3.",
+      "Aggregate demographic summaries do not contradict the removal of participant-level demographic attributes from the public data.",
+      "The record distinguishes acknowledged source disagreements from established facts and avoids treating planned enrollment as the released sample size."
+    ]
+  },
+  "version": "6.0"
+}
