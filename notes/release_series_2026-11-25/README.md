@@ -72,8 +72,9 @@ Total cost at list price as reported by the sessions: 251.49 USD (8.47 to 22.64 
 1. **Receipt coverage differs in one record.** AI_READI replicate 1 has a receipt on 414 of
    453 receiptable slots; the other 14 records have one on every receiptable slot. Of the 39
    slots, 29 are `name` leaves (28 entry labels, and `maintainers[0].name`, a factual value),
-   six are enumerated or boolean leaves (`bias_type`, `limitation_type`, `is_representative`,
-   `compensation_provided`, `sensitive_elements_present`, `use_category`), and four are
+   five are enumerated or boolean leaves (`bias_type`, `limitation_type`, `is_representative`,
+   `compensation_provided`, `sensitive_elements_present`), one is a short free-text category
+   (`use_category`, whose range is a string), and four are
    free-text statements a reviewer should sample: `direct_collection[0].collection_details`,
    `raw_data_sources[1].source_description`,
    `participant_compensation[0].compensation_type` and
