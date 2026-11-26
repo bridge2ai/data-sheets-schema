@@ -1687,7 +1687,8 @@ def _validates(record: Path) -> tuple[bool, str]:
 @click.option("--review-margin", default=None, type=int,
               help="Retired: an adverse-count margin is not a calibrated selection rule (#835).")
 def select_cmd(method, project, config, allow_unverified, execute, ignore_reviews, review_margin,
-               supersede_all_runtimes):
+               supersede_all_runtimes, score_policy=None, score_instrument=None,
+               score_receipts=(), score_owner_rulings=None):
     """Mark one replicate canonical, keeping all of them.
 
     Selection, not merging. Replicates state different facts on **47-63% of the
@@ -1721,6 +1722,10 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
     """
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d runs select")          # a corpus write lands under the cwd (#1685)
+    if bool(score_policy) != bool(score_instrument):
+        raise click.ClickException("--score-policy and --score-instrument must be supplied together")
+    if (score_receipts or score_owner_rulings) and not score_policy:
+        raise click.ClickException("score evidence and owner rulings require --score-policy")
     if review_margin is not None:
         raise click.ClickException(
             "--review-margin is retired: review metrics are reported only "
@@ -1821,9 +1826,38 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
     runner_up = contenders[1] if len(contenders) > 1 else None
     margin = winner[3] - runner_up[3] if runner_up else None
 
+    score_record = None
+    if score_policy:
+        from data_sheets_schema.score_selection import decide
+        try:
+            table, variation = _score_selection_context(
+                method, config, score_instrument, score_receipts,
+                project=project, candidates=candidates,
+                adverse_of=adverse_of, evidence_why=evidence_why)
+            decision = decide(table, variation, score_instrument)
+            score_record = decision["score_policy"]
+            if score_owner_rulings:
+                score_record["owner_rulings"] = _score_owner_rulings(
+                    score_owner_rulings, {c[0] for c in candidates})
+        except (ValueError, OSError) as error:
+            raise click.ClickException(str(error)) from error
+        _score_report("Evidence table", table)
+        _score_report("Series variation", variation)
+        click.echo(f"Current policy pick: {winner[0]}")
+        click.echo(f"score_gap_v1 pick: {decision['selected']}")
+        click.echo(f"Deciding rule: {score_record['rule']}; "
+                   f"reason: {score_record.get('fallback_reason') or 'score gap and no rubric reversal'}")
+        winner = next(c for c in eligible if c[0] == decision["selected"])
+        runner_up = next((c for c in contenders if c[0] != winner[0]), None)
+        margin = winner[3] - runner_up[3] if runner_up else None
+        criterion += "; score_gap_v1 under the registered score selection policy"
+
     click.echo(f"\n→ {winner[0]}  ({winner[3]} slots)")
-    click.echo(f"   coverage decided; reviews not applied ({why})")
-    if runner_up is None:
+    if score_record is not None:
+        click.echo(f"   {score_record['rule']} decided; reviews not applied ({why})")
+    else:
+        click.echo(f"   coverage decided; reviews not applied ({why})")
+    if runner_up is None or score_record is not None:
         pass
     elif margin == 0:
         click.echo("   Tied on coverage with the runner-up; the label broke the "
@@ -1907,6 +1941,8 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
         "review_policy": "reported_only_pending_calibration_v1 (#835)",
         "selected_by": "d4d runs select",
     }
+    if score_record is not None:
+        data["canonical"]["score_policy"] = score_record
     # Named, not merely removed. A mark that vanishes leaves no trace of what
     # the project used to ship, and "this replaced that" is the fact a reader
     # of either record wants.
@@ -1957,6 +1993,118 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
                    "what replaced it.")
     click.echo("All replicates kept — this marks one, it does not move or "
                "delete anything.")
+
+
+def _score_selection_context(method, config, instrument_id, receipt_roots, *,
+                             project=None, candidates=(), adverse_of=None,
+                             evidence_why=None):
+    """Read one complete series for pooled noise, with caller-owned corpus paths."""
+    from data_sheets_schema.runs import CONCAT_DIR, REPLICATE_RE
+    from data_sheets_schema.score_selection import build_evidence_table, pooled_variation
+    import yaml
+
+    concat = _corpus_path(CONCAT_DIR).resolve()
+    corpus_root = concat.parent.parent
+    base = concat / method
+    directories = [p for p in sorted(base.glob(f"{config}_rep*")) if p.is_dir()
+                   and REPLICATE_RE.fullmatch(p.name)
+                   and REPLICATE_RE.fullmatch(p.name).group("config") == config]
+    projects = {p.name[:-len("_d4d.yaml")] for directory in directories
+                for p in directory.glob("*_d4d.yaml")}
+    if project is not None:
+        projects.add(project)
+    all_rows, selected = [], []
+    for name in sorted(projects):
+        if name == project:
+            rows = [{"label": label, "record": record, "validity": status,
+                     "slots": slots if status not in ("incomplete", "no record") else None,
+                     "review_adverse": (adverse_of or {}).get(label),
+                     "review_not_evidence": (evidence_why or {}).get(label)}
+                    for label, record, status, slots, _recorded, _detail in candidates]
+        else:
+            rows = []
+            for directory in directories:
+                record = directory / f"{name}_d4d.yaml"
+                if not record.is_file():
+                    continue
+                loaded = yaml.safe_load(record.read_text(encoding="utf-8"))
+                rows.append({"label": directory.name, "record": record,
+                             "validity": "not measured",
+                             "slots": len(loaded) if isinstance(loaded, dict) else None})
+        table = build_evidence_table(name, config, instrument_id, candidates=rows,
+                                     corpus_root=corpus_root,
+                                     evidence_roots=tuple(Path(p) for p in receipt_roots))
+        all_rows.extend(table)
+        if name == project:
+            selected = table
+    if not all_rows:
+        raise ValueError(f"no records for configuration {config!r}")
+    return (selected if project is not None else all_rows), pooled_variation(all_rows)
+
+
+def _score_report(title, value):
+    """Keep missing evidence explicit in previews without changing stored nulls."""
+    import json
+
+    def display(item):
+        if item is None:
+            return "not measured"
+        if isinstance(item, dict):
+            return {key: display(child) for key, child in item.items()}
+        if isinstance(item, (list, tuple)):
+            return [display(child) for child in item]
+        return item
+
+    click.echo(title + ":")
+    click.echo(json.dumps(display(value), indent=2, sort_keys=True, default=str, allow_nan=False))
+
+
+def _score_owner_rulings(path, labels):
+    """Record the owner's explicit adjudications; they never alter the score rule."""
+    import json
+    value = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(value, list) or not value:
+        raise ValueError("owner rulings must be a nonempty JSON list")
+    for row in value:
+        if (not isinstance(row, dict) or row.get("label") not in labels
+                or any(not isinstance(row.get(key), str) or not row[key].strip()
+                       for key in ("slot", "ruling", "authorization_reference"))):
+            raise ValueError("each owner ruling needs a candidate label, slot, ruling and authorization_reference")
+    return value
+
+
+select_cmd.params.extend([
+    click.Option(["--score-policy"], type=click.Choice(["score_gap_v1"]), default=None,
+                 help="Opt in to the registered repeated-score gap rule."),
+    click.Option(["--score-instrument"], default=None,
+                 help="Exactly one scorer instrument id; required with --score-policy."),
+    click.Option(["--score-receipts"], type=click.Path(exists=True, file_okay=False), multiple=True,
+                 help="Retained scorer run root, including repeat export manifests; repeat for baseline and repeats."),
+    click.Option(["--score-owner-rulings"], type=click.Path(exists=True, dir_okay=False), default=None,
+                 help="Owner-adjudicated content findings JSON, recorded without automatic ranking effects."),
+])
+
+
+def score_variation_cmd(method, config, score_instrument, score_receipts):
+    """Preview pooled within-record scorer variation; never mark a canonical."""
+    from data_sheets_schema.cli.method import resolve_method
+    method = method or resolve_method(config)
+    try:
+        table, variation = _score_selection_context(method, config, score_instrument, score_receipts)
+    except (ValueError, OSError) as error:
+        raise click.ClickException(str(error)) from error
+    _score_report("Series evidence", table)
+    _score_report("Series variation", variation)
+    click.echo("Review per-project spread before applying the policy; no heterogeneity cutoff is registered.")
+
+
+score_variation_cmd = runs.command("score-variation")(score_variation_cmd)
+score_variation_cmd.params.extend([
+    click.Option(["--method"], default=None),
+    click.Option(["--config"], required=True),
+    click.Option(["--score-instrument"], required=True),
+    click.Option(["--score-receipts"], type=click.Path(exists=True, file_okay=False), multiple=True),
+])
 
 
 @runs.command("redundancy")
