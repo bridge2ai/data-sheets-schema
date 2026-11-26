@@ -159,7 +159,33 @@ ARMS = (
      [f"2026-09-04f_claude-opus-5-api-generic-v8_rep{r}" for r in (1, 2, 3)]
      + [f"2026-09-04g_claude-opus-5-api-generic-v8_rep{r}" for r in (1, 2, 3)],
      "Claude API via CBORG", "reps"),
+    # Two descriptive arms added 2026-11-26 (the owner's decision): both run
+    # the generic_v9 prompt through headless Claude Code, one session per
+    # project and replicate, and differ from every arm above in prompt version
+    # and model, and from each other mainly in model. Neither is a controlled
+    # contrast with an API arm. Their rubric evaluations live under other
+    # instrument directories than EVAL_DIRS and are not read here.
+    ("v9agentic", "v9 agentic, Opus 5.5 (2026-11-22b)",
+     "2026-11-22b_claude-opus-5-5-claudecode-generic-v9", "Claude Code", "reps"),
+    ("v9release", "v9 Claude Code release, Fable 5.2 (2026-11-25c; headless, uncontrolled)",
+     "2026-11-25c_claude-fable-5-2-claudecode-generic-v9", "Claude Code (release)", "reps"),
 )
+
+# The arms added on 2026-11-26, the arm each is set beside in the "what
+# differs" table, and the one project they cover that no earlier arm does.
+# That project is reported in its own section and is not added to PROJECTS:
+# the pooled and per-project figures of the earlier arms stay what they were.
+RECENT_ARMS = ("v9agentic", "v9release")
+RECENT_PAIRS = (("v9agentic", "v9release"), ("v6agentic", "v9agentic"), ("v6agentic", "v9release"),
+                ("v7prod", "v9agentic"), ("v7prod", "v9release"))
+RECENT_ONLY_PROJECTS = ("VOICE_PEDIATRIC",)
+RECENT_SCORE_NOTE = (
+    "The two v9 arms show no score in the tables above. Their rubric evaluations exist but were made "
+    "with other instruments and are kept in other directories, which this report does not read: the "
+    "2026-11-22b series under `2026-11-22_general_context_v3`, the 2026-11-25c series under "
+    "`label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6` (not on main when this was "
+    "written). Scores from different instruments are not comparable with each other or with the "
+    "columns above, so they are not pooled into these tables.")
 
 
 def _rep_tag(label: str) -> str:
@@ -1661,6 +1687,9 @@ def render_markdown(data, scores, *, attainability=None, ancestor_diagnostics=Fa
               "No gold standard exists (#177); the rubrics are "
               "not domain-neutral (#627); rubric20's N/A convention is #155's.", ""]
     lines += same_family_section(scores)
+    if all(any(key == recent for key, *_ in ARMS) for recent in RECENT_ARMS):
+        lines += [RECENT_SCORE_NOTE, ""]
+    lines += recent_arms_section(data)
     for evaluator, arms, versions, cohort in cohorts:
         lines += render_discrimination(cohort, scope=f", {evaluator} evaluations", evaluator=evaluator)
         lines += [f"This cohort is every {evaluator} evaluation in the rubric tables above "
@@ -1674,6 +1703,70 @@ def render_markdown(data, scores, *, attainability=None, ancestor_diagnostics=Fa
         captured = _attainability_evaluations(scores)
         lines.append(render(attainability, unselected=bind_report(attainability, captured)))
     return "\n".join(lines)
+
+
+def recent_arms_section(data) -> list[str]:
+    """The two descriptive arms added on 2026-11-26: what their own records
+    say differs from the arm beside them, and the project only they cover.
+
+    The differences are read from the provenance records (`runs.arm_facts`,
+    `runs.arm_confounds`), not typed here. Every entry is a reason a difference
+    between two arms cannot be attributed to one cause. An arm given by an
+    explicit label list has no single prefix to read facts for and is not
+    paired here."""
+    from data_sheets_schema.runs import arm_confounds, arm_facts
+    arms = {key: (disp, prefix) for key, disp, prefix, _rt, _role in ARMS}
+    if not all(key in arms for key in RECENT_ARMS):
+        return []
+    if not any(data.get(key, {}).get(project) for key in RECENT_ARMS for project in PROJECTS):
+        return []                          # no replicate of either arm was collected: nothing to describe
+    lines = ["## Arms added 2026-11-26: what differs, and a fifth project", "",
+             "Both arms run the `generic_v9` prompt through headless Claude Code, one session per project "
+             "and replicate, with no run controller. They are descriptive: neither holds prompt version "
+             "and model equal to an API arm, so no difference between one of them and an earlier arm is "
+             "a runtime effect or a prompt effect alone. What each pair's own records state differently:", "",
+             "| arms | field | first | second |", "|---|---|---|---|"]
+    facts: dict[str, dict[str, Any]] = {}
+    for first, second in RECENT_PAIRS:
+        if first not in arms or second not in arms:
+            continue
+        if any(not isinstance(arms[key][1], str) for key in (first, second)):
+            continue
+        for key in (first, second):
+            if key not in facts:
+                facts[key] = arm_facts(arms[key][1], concat_dir=CONCAT)
+        differing = arm_confounds(facts[first], facts[second])
+        if not differing:
+            lines.append(f"| {arms[first][0]} / {arms[second][0]} | – | no recorded procedure field differs | |")
+        for entry in differing:
+            lines.append(f"| {arms[first][0]} / {arms[second][0]} | {entry['field']} | "
+                         f"{entry[arms[first][1]]} | {entry[arms[second][1]]} |")
+    lines += ["", "Not a recorded procedure field, and so not in the table: neither v9 arm ran under a run "
+              "controller. Each replicate of each project was one headless session.", ""]
+
+    for project in RECENT_ONLY_PROJECTS:
+        per_arm = {key: [m for label in arm_labels(arms[key][1]) if (m := run_metrics(label, project))]
+                   for key in RECENT_ARMS}
+        if not any(per_arm.values()):
+            continue
+        lines += [f"### {project}, the two v9 arms only", "",
+                  f"No earlier arm of this report has a {project} record, so the project is not in the "
+                  "tables above and is not pooled into any figure of this report. Mean ± SD over the "
+                  "replicates, as in the deterministic-metrics table:", "",
+                  "| metric | " + " | ".join(arms[key][0] for key in RECENT_ARMS) + " |",
+                  "|---|" + "|".join("---" for _ in RECENT_ARMS) + "|"]
+        for metric, (disp, *_rest) in METRICS.items():
+            lines.append(f"| {disp} | " + " | ".join(cell(per_arm[key], metric, "reps") for key in RECENT_ARMS) + " |")
+        lines += ["", "| arm | records | receiptable slots | with a receipt | snippets | not in the chunk cited |",
+                  "|---|---|---|---|---|---|"]
+        for key in RECENT_ARMS:
+            pooled = pooled_receipts(per_arm[key])
+            lines.append(f"| {arms[key][0]} | {pooled['records']} | {pooled['receiptable'] if pooled['receiptable'] is not None else '–'} | "
+                         f"{_rate(pooled['withreceipt'], pooled['receiptable'])} | "
+                         f"{pooled['snippets'] if pooled['snippets'] is not None else '–'} | "
+                         f"{_rate(pooled['wrongchunk'], pooled['snippets'])} |")
+        lines.append("")
+    return lines
 
 
 def rubric_discrimination(scores) -> list[tuple[str, list[str], str, dict[str, Any]]]:
