@@ -1,0 +1,16 @@
+project	replicate	model_field_as_written
+AI_READI	1	claude-opus-5-5 (Claude Opus 5.5), running as a Claude Code general subagent given .claude/agents/d4d-review-record.md as its instructions, not launched as the typed d4d-review-record agent
+CHORUS	1	claude-opus-5-5
+CM4AI	1	claude-opus-5-5 (a Claude Code subagent given .claude/agents/d4d-review-record.md as its instructions via the launcher's brief; not launched as the typed d4d-review-record agent, so the definition's model pin claude-opus-5 did not select this model)
+VOICE_PEDIATRIC	1	claude-opus-5-5 (Claude Opus 5.5), running as a Claude Code subagent that was given .claude/agents/d4d-review-record.md as its instructions; not launched as the typed d4d-review-record agent, so the definition's front-matter model (claude-opus-5) was not what ran
+VOICE	1	claude-opus-5-5 (Opus 5.5), running as a Claude Code subagent that was given .claude/agents/d4d-review-record.md as its instructions through a brief, not launched as the typed d4d-review-record agent; the definition's front matter names claude-opus-5, which is not the model this review ran on
+AI_READI	2	claude-opus-5-5 (Claude Opus 5.5), running as a Claude Code subagent that was given .claude/agents/d4d-review-record.md as its instructions through a brief; not launched as the typed d4d-review-record agent, so the definition's frontmatter model (claude-opus-5) does not describe this run
+CHORUS	2	claude-opus-5-5 (Claude Opus 5.5, as stated by the runtime environment)
+CM4AI	2	claude-opus-5-5
+VOICE_PEDIATRIC	2	claude-opus-5-5 (Claude Opus 5.5), per its own system prompt; a Claude Code subagent given .claude/agents/d4d-review-record.md as its instructions, not launched as the typed d4d-review-record agent (whose front matter names claude-opus-5)
+VOICE	2	claude-opus-5-5
+AI_READI	3	claude-opus-5-5 (Claude Opus 5.5), running as a Claude Code general subagent that was given .claude/agents/d4d-review-record.md as its instructions; not launched as the typed d4d-review-record agent, whose front matter names claude-opus-5
+CHORUS	3	claude-opus-5-5
+CM4AI	3	claude-opus-5-5 (Claude Opus 5.5)
+VOICE_PEDIATRIC	3	claude-opus-5-5 (Claude Opus 5.5, as stated in the subagent's own environment; the definition's frontmatter names claude-opus-5)
+VOICE	3	claude-opus-5-5 (Claude Opus 5.5), running as a Claude Code general subagent that was given .claude/agents/d4d-review-record.md as its instructions; not launched as the typed d4d-review-record agent, whose front matter names claude-opus-5

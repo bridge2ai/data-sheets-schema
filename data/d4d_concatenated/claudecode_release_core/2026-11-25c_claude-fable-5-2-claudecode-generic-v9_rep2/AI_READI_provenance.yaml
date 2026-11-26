@@ -745,10 +745,7 @@ review:
   summary: items 58/58 answered · 1 adverse · 0 cannot_tell
   reviewer:
     reviewer: d4d-review-record
-    model: claude-opus-5-5 (Claude Opus 5.5), running as a Claude Code subagent that
-      was given .claude/agents/d4d-review-record.md as its instructions through a
-      brief; not launched as the typed d4d-review-record agent, so the definition's
-      frontmatter model (claude-opus-5) does not describe this run
+    model: claude-opus-5-5
     reviewed_at: '2026-11-26T03:51:56Z'
     model_basis: self-reported by the reviewing agent
   artifacts:
@@ -757,5 +754,5 @@ review:
       sha256: 8e742411fe37bd9cd9c611e39cee730550a7761d20cfb8bf1dbbe1ad86017273
     review:
       path: data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2/AI_READI_review.yaml
-      sha256: a3c8e44a602a085da79d3f19cd219ef4adc85ba76e5cb3c6d08b9bcac7195a13
+      sha256: 8df56ed969202770e7d66084f78e36928e65aa39e91bff5f70f704b57956b9c9
   recorded_by: d4d review check

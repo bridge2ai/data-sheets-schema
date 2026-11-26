@@ -681,7 +681,7 @@ review:
   reviewer:
     reviewer: d4d-review-record (Claude Code subagent given the definition file as
       its instructions, not launched as the typed agent)
-    model: claude-opus-5-5 (Claude Opus 5.5)
+    model: claude-opus-5-5
     reviewed_at: '2026-11-26T03:49:34Z'
     model_basis: self-reported by the reviewing agent
   artifacts:
@@ -690,5 +690,5 @@ review:
       sha256: 4ceb238e998c423554754c932b22518992ab786868476e1c869576ddb6d73409
     review:
       path: data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/CM4AI_review.yaml
-      sha256: 65c1f2b77855b1f7193751fe97e2944d8fee9005e49d7d27a45d437a871dc784
+      sha256: 168851276e480fd998540472c9cadea631159ebeb3d5287e328a94710177130d
   recorded_by: d4d review check

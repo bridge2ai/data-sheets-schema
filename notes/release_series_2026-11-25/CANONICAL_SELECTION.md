@@ -100,7 +100,10 @@ hashes for each. Adverse verdicts, rep1 / rep2 / rep3:
 - The reviews were given the reviewer definition as a file to follow
   (`.claude/agents/d4d-review-record.md` at main `483bed03b`) and ran as a general subagent on
   claude-opus-5-5, not as the typed agent whose front matter names another model. Each review
-  file says so.
+  file says so. Eleven reviews wrote the model id followed by a description in their `model`
+  field; the field was reduced to the bare id so that one reviewer does not read as eleven
+  (`tests/test_reviewer_basis.py`, #1058), and `review_model_field_as_written.tsv` keeps what
+  each review wrote. The arm's reviewer is declared in `tests/data/reviewer_basis.json`.
 - The packs committed are not byte for byte the packs the reviewers read: two absolute paths
   were removed by regenerating each pack with the fixed generator (#6379, PR #6380), after
   checking that nothing else differs; `review_pack_repin.tsv` gives both hashes and the

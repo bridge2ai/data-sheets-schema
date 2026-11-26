@@ -1,5 +1,5 @@
 reviewer: d4d-review-record
-model: "claude-opus-5-5 (a Claude Code subagent given .claude/agents/d4d-review-record.md as its instructions via the launcher's brief; not launched as the typed d4d-review-record agent, so the definition's model pin claude-opus-5 did not select this model)"
+model: claude-opus-5-5
 reviewed_at: "2026-11-26T03:48:17Z"
 pack_sha256: d6cec0ea483cc6389fc1b81edc716ce2685675daceaa1347fc6681f91628f6cc
 items:

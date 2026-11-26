@@ -1,5 +1,5 @@
 reviewer: d4d-review-record
-model: "claude-opus-5-5 (Claude Opus 5.5), running as a Claude Code general subagent given .claude/agents/d4d-review-record.md as its instructions, not launched as the typed d4d-review-record agent"
+model: claude-opus-5-5
 reviewed_at: "2026-11-26T03:41:03Z"
 pack_sha256: 641e3b95246bb15f7eb9c03e32a2e48b88e2d3ff256fce0bff40195460da985f
 items:
