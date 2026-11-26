@@ -98,17 +98,19 @@ def test_no_text_of_a_pack_states_where_the_checkout_is(monkeypatch):
     location = str(Path(root).resolve())
     records = sorted(Path("data/d4d_concatenated").glob("*_core/*/*_provenance.yaml"))
     seen = {"drifted": 0, "current": 0}
-    for provenance in records:
+    for provenance in reversed(records):       # recent labels first: they reach both states soonest
         if all(seen.values()):
             break
         try:
             pack = review_pack.build_pack(provenance, None, None, write_instruction=False, instruction_out=[])
         except Exception:                      # a record this generator cannot pack is another test's subject
             continue
+        state = str((pack.get("id_slots") or {}).get("bundle_state") or "")
+        kind_of_record = "drifted" if state.startswith("bundle drifted") else "current" if state == "current" else None
         text = yaml.safe_dump(pack, sort_keys=False, allow_unicode=True, width=10_000)
-        kind_of_record = "drifted" if "bundle drifted" in text else "current" if "current" in text else None
-        if kind_of_record is None or seen[kind_of_record]:
-            continue
-        seen[kind_of_record] += 1
-        assert location not in text, f"{provenance}: the pack names the checkout's location"
+        assert location not in text, f"{provenance}: the pack names the checkout's location"      # every pack built
+        if kind_of_record == "drifted":
+            assert not Path(state.rsplit(" at ", 1)[1].rstrip(")")).is_absolute(), state
+        if kind_of_record is not None:
+            seen[kind_of_record] += 1
     assert all(seen.values()), f"the corpus did not offer both a drifted and a current record: {seen}"
