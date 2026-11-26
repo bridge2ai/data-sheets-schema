@@ -285,7 +285,7 @@ the right dataset per title/id; scope check pass.
 - Model reasoning content (thinking blocks carry only signatures).
 
 ## Review helpers (scratchpad, not committed anywhere)
-`/private/tmp/claude-501/-Users-marcin-Documents-VIMSS-ontology-bridge2ai-data-sheets-schema/739c8f5b-2480-48d9-b567-1229e9d76264/scratchpad/`
+`<session scratchpad>/`
 `transcript_facts.py`, `path_scan.py`, `content_scan.py`, `content_scan_seq.py`,
 `recorder_calls.py`, `compare_notes.py`.
 
