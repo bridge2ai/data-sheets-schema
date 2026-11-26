@@ -8,11 +8,13 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import json
 import os
 from pathlib import Path
 import subprocess
 import time
+import xml.etree.ElementTree as ET
 
 
 LANES = {
@@ -45,6 +47,7 @@ def main() -> None:
         if key.endswith("_API_KEY") or key in {
             "ANTHROPIC_AUTH_TOKEN", "CLAUDE_CODE_OAUTH_TOKEN",
             "ANTHROPIC_BASE_URL", "OPENAI_BASE_URL",
+            "PYTEST_ADDOPTS", "PYTEST_PLUGINS",
         }:
             del env[key]
     env.update({"PYTHONPATH": str(root / "src") + os.pathsep + str(root),
@@ -54,19 +57,39 @@ def main() -> None:
                "-q", "-p", "no:cacheprovider", "--basetemp=" + str(output / "tmp"),
                "--junitxml=" + str(output / "junit.xml")]
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
+    diff_hash = hashlib.sha256(subprocess.check_output(["git", "diff", "HEAD", "--"], cwd=root)).hexdigest()
     started = datetime.now(timezone.utc).isoformat()
     clock = time.monotonic()
     with (output / "pytest.log").open("x") as log:
         result = subprocess.run(command, cwd=root, env=env, stdout=log, stderr=subprocess.STDOUT)
+    post_head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
+    post_diff_hash = hashlib.sha256(subprocess.check_output(["git", "diff", "HEAD", "--"], cwd=root)).hexdigest()
+    counts = {}
+    try:
+        report = ET.parse(output / "junit.xml").getroot()
+        suites = [report] if report.tag == "testsuite" else report.findall("testsuite")
+        counts = {key: sum(int(suite.get(key, "0")) for suite in suites)
+                  for key in ("tests", "failures", "errors", "skipped")}
+    except (OSError, ET.ParseError, ValueError):
+        pass
+    artifacts_present = (output / "pytest.log").stat().st_size > 0 and bool(counts)
+    stable_source = head == post_head and diff_hash == post_diff_hash
+    accepted = (result.returncode == 0 and artifacts_present and stable_source
+                and counts["failures"] == 0 and counts["errors"] == 0
+                and (args.lane == "corpus-collect" or counts["tests"] > 0))
     receipt = {"lane": args.lane, "head": head, "command": command,
                "started_utc": started, "finished_utc": datetime.now(timezone.utc).isoformat(),
                "elapsed_seconds": time.monotonic() - clock, "exit_code": result.returncode,
                "provider_environment_cleared_before_collection": True,
+               "pytest_environment_overrides_cleared": True,
                "nice_value": os.getpriority(os.PRIO_PROCESS, 0),
+               "post_head": post_head, "tracked_diff_sha256": diff_hash,
+               "stable_tracked_source": stable_source, "junit_counts": counts,
+               "artifacts_present": artifacts_present, "accepted": accepted,
                "log": str(output / "pytest.log"), "junit": str(output / "junit.xml")}
     (output / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print(json.dumps(receipt, sort_keys=True))
-    raise SystemExit(result.returncode)
+    raise SystemExit(result.returncode if result.returncode else (0 if accepted else 3))
 
 
 if __name__ == "__main__":
