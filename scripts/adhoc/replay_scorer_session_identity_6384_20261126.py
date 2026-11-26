@@ -43,6 +43,30 @@ def physical(path):
     return result
 
 
+def require_output_outside(output, protected_directories):
+    """Refuse lexical and filesystem aliases of protected ancestry (6403)."""
+    output = physical(output)
+    identities = set()
+    for directory in protected_directories:
+        directory = physical(directory)
+        require(output != directory and directory not in output.parents,
+                "output is within a protected directory")
+        info = directory.stat()
+        require(stat.S_ISDIR(info.st_mode), "protected input is not a directory")
+        identities.add((info.st_dev, info.st_ino))
+    # Case folding and Unicode normalization may leave different path strings
+    # naming the same directory. Compare existing ancestors by device and inode;
+    # nonexistent suffixes do not conceal an existing protected ancestor.
+    for ancestor in (output, *output.parents):
+        try:
+            info = ancestor.stat()
+        except FileNotFoundError:
+            continue
+        require((info.st_dev, info.st_ino) not in identities,
+                "output aliases a protected directory")
+    return output
+
+
 def read(path):
     path = physical(path)
     info = path.stat()
@@ -265,6 +289,7 @@ def main(argv=None):
         require(not output.is_relative_to(Path(run)), "output must be outside explicitly supplied runs")
     for root in report["roots"]:
         require(not output.is_relative_to(Path(root)), "output must be outside retained roots")
+    require_output_outside(output, [*retained, *report["run_directories"], *report["roots"]])
     report.update(mode="inventory_only" if args.inventory_only else "identity_replay",
                   validation_performed=False, publication_performed=False)
     if args.session_metadata:

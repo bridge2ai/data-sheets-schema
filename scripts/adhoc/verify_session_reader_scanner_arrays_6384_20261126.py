@@ -21,6 +21,8 @@ import time
 
 sys.dont_write_bytecode = True
 
+from replay_scorer_session_identity_6384_20261126 import require_output_outside
+
 BASE = "047137b9ea30603abbe3ede25a15c4a753f71978"
 REMOTE_MAIN = "483bed03b14a4c70d6e68dad6679631350a12b72"
 SKILL = ".claude/skills/d4d-generation-specificity-audit"
@@ -66,10 +68,11 @@ def compare(before, after):
 
 def verify(args):
     root, out = physical(args.repo_root), physical(args.evidence_directory)
+    require(not out.exists() and root != out and root not in out.parents, "output must be fresh and outside checkout")
+    require_output_outside(out, (root,))
     candidate = git(root, "rev-parse", args.candidate_ref).decode().strip()
     require(git(root, "rev-parse", "HEAD").decode().strip() == candidate, "candidate is not current HEAD")
     require(not git(root, "diff", "HEAD", "--"), "tracked source has uncommitted changes")
-    require(not out.exists() and root != out and root not in out.parents, "output must be fresh and outside checkout")
     out.mkdir(parents=False, exist_ok=False)
     results, documents, reference_assets = {}, {}, None
     try:

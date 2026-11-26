@@ -21,6 +21,7 @@ sys.dont_write_bytecode = True
 
 from verify_root_scope_repeat_plans_20261126 import physical, relocated_plan
 from verify_root_scope_plan_evidence_20261125 import verify_definition
+from replay_scorer_session_identity_6384_20261126 import require_output_outside
 
 
 RUNNER = "scripts/adhoc/score_semantic_rubric_codex_20261125.py"
@@ -70,6 +71,7 @@ def preflight(args):
             "preflight evidence must be fresh and outside source")
     require(baseline_root != out and baseline_root not in out.parents,
             "preflight evidence must be outside baseline run tree")
+    require_output_outside(out, (root, baseline_root))
     plan_paths = sorted(baseline_root.glob("*/plan.json"))
     require(len(plan_paths) == 30, "expected thirty baseline plans")
     checks, executables, records, problems = {}, {}, set(), []
@@ -120,9 +122,15 @@ def preflight(args):
 
 
 def compare(args):
+    root, baseline_root = physical(args.repo_root), physical(args.baseline_runs)
+    out = physical(args.evidence_directory)
+    require(not out.exists(), "evidence directory must be fresh")
+    require(root != out and root not in out.parents, "evidence must be outside source checkout")
+    require(baseline_root != out and baseline_root not in out.parents,
+            "evidence must be outside baseline run tree")
+    require_output_outside(out, (root, baseline_root))
     from score_semantic_rubric_codex_20261125 import build_plan, parser as scorer_parser
 
-    root = physical(args.repo_root)
     require(root == physical(Path(__file__).resolve().parents[2]), "helper must run from the source checkout")
     expected_head = git(root, "rev-parse", args.expected_head).decode().strip()
     require(git(root, "rev-parse", "HEAD").decode().strip() == expected_head, "source HEAD differs")
@@ -131,14 +139,8 @@ def compare(args):
     require(runner_sha != args.measured_runner_sha256, "reader revision did not change the runner hash")
     require(read(root / RUNNER) == git(root, "show", expected_head + ":" + RUNNER),
             "runner differs from frozen committed source")
-    baseline_root = physical(args.baseline_runs)
     plan_paths = sorted(baseline_root.glob("*/plan.json"))
     require(len(plan_paths) == 30, "expected exactly thirty immediate accepted baseline plans")
-    out = physical(args.evidence_directory)
-    require(not out.exists(), "evidence directory must be fresh")
-    require(root != out and root not in out.parents, "evidence must be outside source checkout")
-    require(baseline_root != out and baseline_root not in out.parents,
-            "evidence must be outside baseline run tree")
     out.mkdir(parents=False, exist_ok=False)
     plans, rows, fingerprints, identities = [], [], {}, set()
     try:

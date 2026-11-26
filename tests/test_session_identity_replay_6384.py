@@ -23,6 +23,12 @@ def write(path, value):
     path.write_text(json.dumps(value, sort_keys=True) + "\n")
 
 
+def synthetic_bytes(directory):
+    """Snapshot only test-created files, including the synthetic candidate."""
+    return {str(path.relative_to(directory)): path.read_bytes()
+            for path in directory.rglob("*") if path.is_file()}
+
+
 def retained_run(tmp_path, category="published"):
     run = tmp_path / "runs" / "synthetic-run"
     plan = {"run_directory": str(run), "codex_home": str(run / "codex-home"),
@@ -154,3 +160,139 @@ def test_output_cannot_be_written_inside_explicit_run_excluded_from_census(tmp_p
         replay.main(["--run-directory", str(kept), "--run-directory", str(excluded),
                      "--inventory-only", "--output", str(target)])
     assert not target.exists()
+
+
+def identity_alias(monkeypatch, alias, protected, *, same_device=True):
+    """Simulate filesystem name aliases on case-sensitive CI as well."""
+    original = Path.stat
+    info = original(protected)
+    substitute = SimpleNamespace(st_dev=info.st_dev if same_device else info.st_dev + 1,
+                                 st_ino=info.st_ino, st_mode=info.st_mode)
+
+    def lookup(path, *args, **kwargs):
+        return substitute if path == alias else original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "stat", lookup)
+
+
+def test_case_alias_output_is_refused_on_case_insensitive_filesystem(tmp_path, monkeypatch):
+    run, _report, _values, _log, _candidate = retained_run(tmp_path)
+    alias = run.parent.with_name(run.parent.name.upper())
+    if not alias.exists() or not alias.samefile(run.parent):
+        pytest.skip("case-sensitive filesystem; portable identity-alias controls still run")
+    monkeypatch.setattr(replay.os, "getpriority", lambda *args: 10)
+    target = alias / run.name / "forbidden-report.json"
+    before = synthetic_bytes(run)
+    assert not target.is_relative_to(run.parent)
+    with pytest.raises(ValueError, match="output aliases a protected directory"):
+        replay.main(["--root", str(run.parent), "--inventory-only", "--output", str(target)])
+    assert not target.exists()
+    assert not (run / target.name).exists()
+    assert synthetic_bytes(run) == before
+
+
+def test_replay_protects_selected_explicit_excluded_and_root_identities(tmp_path, monkeypatch):
+    for kind in ("selected", "excluded", "root"):
+        case = tmp_path / kind
+        run, _report, _values, _log, _candidate = retained_run(case / "included")
+        protected = run
+        arguments = ["--run-directory", str(run)]
+        if kind == "root":
+            protected = run.parent
+            arguments = ["--root", str(protected)]
+        elif kind == "excluded":
+            protected, _report, _values, _log, _candidate = retained_run(case / "excluded")
+            plan = json.loads((protected / "plan.json").read_bytes())
+            plan["identity"]["label"] = "unrelated_series_rep1"
+            write(protected / "plan.json", plan)
+            receipt = json.loads((protected / "receipt.json").read_bytes())
+            receipt["plan_sha256"] = hashlib.sha256(json.dumps(plan, sort_keys=True).encode()).hexdigest()
+            write(protected / "receipt.json", receipt)
+            arguments.extend(["--run-directory", str(protected)])
+        alias = case / "different-spelling"
+        alias.mkdir()
+        target = alias / "forbidden-report.json"
+        before = synthetic_bytes(case)
+        assert not target.is_relative_to(protected)
+        with monkeypatch.context() as control:
+            control.setattr(replay.os, "getpriority", lambda *args: 10)
+            identity_alias(control, alias, protected)
+            with pytest.raises(ValueError, match="output aliases a protected directory"):
+                replay.main([*arguments, "--inventory-only", "--output", str(target)])
+        assert not target.exists()
+        assert synthetic_bytes(case) == before
+
+
+def load_adhoc(name, monkeypatch):
+    monkeypatch.syspath_prepend(str(ROOT / "scripts/adhoc"))
+    spec = importlib.util.spec_from_file_location(name, ROOT / "scripts/adhoc" / (name + ".py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_plan_preflight_and_final_verifier_refuse_source_and_baseline_aliases_early(tmp_path, monkeypatch):
+    module = load_adhoc("verify_session_reader_plan_revision_6384_20261126", monkeypatch)
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("output guard did not run before Git or baseline reads")
+
+    monkeypatch.setattr(module, "git", forbidden)
+    monkeypatch.setattr(module, "document", forbidden)
+    for mode in ("preflight", "compare"):
+        for protected_name in ("source", "baseline"):
+            case = tmp_path / mode / protected_name
+            source, baseline, alias = (case / name for name in ("source", "baseline", "alias"))
+            for directory in (source, baseline, alias):
+                directory.mkdir(parents=True)
+            target = alias / "forbidden-evidence"
+            args = SimpleNamespace(repo_root=source, baseline_runs=baseline, evidence_directory=target,
+                                   expected_head="synthetic-head", measured_runner_sha256="a" * 64)
+            protected = source if protected_name == "source" else baseline
+            with monkeypatch.context() as control:
+                identity_alias(control, alias, protected)
+                with pytest.raises(ValueError, match="output aliases a protected directory"):
+                    getattr(module, mode)(args)
+            assert not target.exists()
+
+
+def test_scanner_refuses_checkout_alias_before_git_or_archive(tmp_path, monkeypatch):
+    module = load_adhoc("verify_session_reader_scanner_arrays_6384_20261126", monkeypatch)
+    source, alias = tmp_path / "source", tmp_path / "alias"
+    source.mkdir()
+    alias.mkdir()
+    target = alias / "forbidden-evidence"
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("output guard did not run before Git or archive")
+
+    monkeypatch.setattr(module, "git", forbidden)
+    identity_alias(monkeypatch, alias, source)
+    args = SimpleNamespace(repo_root=source, evidence_directory=target, candidate_ref="synthetic-head")
+    with pytest.raises(ValueError, match="output aliases a protected directory"):
+        module.verify(args)
+    assert not target.exists()
+
+
+def test_output_guard_retains_symlink_refusal_and_device_distinction(tmp_path, monkeypatch):
+    protected, outside = tmp_path / "protected", tmp_path / "outside"
+    protected.mkdir()
+    outside.mkdir()
+    link = tmp_path / "linked"
+    link.symlink_to(protected, target_is_directory=True)
+    with pytest.raises(ValueError, match="symlink"):
+        replay.require_output_outside(link / "report.json", [protected])
+    target = outside / "report.json"
+    with monkeypatch.context() as control:
+        identity_alias(control, outside, protected, same_device=False)
+        assert replay.require_output_outside(target, [protected]) == target
+
+
+def test_outside_inventory_report_is_still_written(tmp_path, monkeypatch):
+    run, _report, _values, _log, _candidate = retained_run(tmp_path)
+    monkeypatch.setattr(replay.os, "getpriority", lambda *args: 10)
+    target = tmp_path / "outside-report.json"
+    assert replay.main(["--root", str(run.parent), "--inventory-only", "--output", str(target)]) == 0
+    saved = json.loads(target.read_bytes())
+    assert saved["counts"] == {"2026-11-25c/published": 1}
+    assert not (run / target.name).exists()
