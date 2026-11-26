@@ -1,0 +1,1327 @@
+{
+  "applicability_context": {},
+  "categories": [
+    {
+      "category_max": 21,
+      "category_score": 17,
+      "name": "Structural Completeness",
+      "questions": [
+        {
+          "applicability_evidence": "Always applicable under the rubric.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Proportion of rubric-designated identification, hierarchy, governance, and composition fields populated.",
+          "evidence": "Twelve of the fourteen designated root fields are populated. Root resources and parent_datasets are absent; file descriptions instead occur within file_collections.",
+          "id": 1,
+          "max_score": 5,
+          "name": "Field Completeness",
+          "no_issue_reason": "This deduction follows the field-coverage threshold. The record does not establish that a parent relationship or root resource hierarchy should exist, so no substantive defect or invented hierarchy is recommended.",
+          "quality_note": "Coverage is approximately 85.7%, below the explicit 90% threshold for 5. The discrete middle band applies.",
+          "score": 3,
+          "score_label": "Good",
+          "score_type": "numeric",
+          "semantic_analysis": "Nested file_collections resources are useful documentation but do not populate the root resources field. The separate pediatric dataset is a related dataset, not evidence of a parent relationship.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/resources"
+                },
+                {
+                  "path": "/parent_datasets"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/id"
+                },
+                {
+                  "path": "/title"
+                },
+                {
+                  "path": "/description"
+                },
+                {
+                  "path": "/keywords"
+                },
+                {
+                  "path": "/license_and_use_terms"
+                },
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/page"
+                },
+                {
+                  "path": "/creators"
+                },
+                {
+                  "path": "/purposes"
+                },
+                {
+                  "path": "/instances"
+                },
+                {
+                  "path": "/variables"
+                },
+                {
+                  "path": "/regulatory_restrictions/confidentiality_level"
+                }
+              ],
+              "considered": [
+                "/file_collections",
+                "/related_datasets"
+              ],
+              "counts": [],
+              "evidence": "12/14 designated fields are populated at their actual locations; resources and parent_datasets are absent at the root.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "Always applicable under the rubric.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Meaningful length and substance of the description and purpose narratives.",
+          "evidence": "Both the description and purpose response exceed 200 characters and explain the release contents, clinical context, and research objectives.",
+          "id": 2,
+          "max_score": 5,
+          "name": "Entry Length Adequacy",
+          "quality_note": "The average narrative length exceeds the maximum-band threshold, with substantive information rather than repetitive padding.",
+          "score": 5,
+          "score_label": "Excellent",
+          "score_type": "numeric",
+          "semantic_analysis": "The description distinguishes released derived features from withheld original recordings, while the purpose explains voice-biomarker research.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/description",
+                  "quote": "A collection of data derived from voice recordings with corresponding clinical information."
+                },
+                {
+                  "path": "/purposes/0/response",
+                  "quote": "facilitating the use of voice as a non-invasive, cost-effective biomarker for the screening, diagnosis, and monitoring of a wide range of health conditions."
+                }
+              ],
+              "considered": [],
+              "counts": [],
+              "evidence": "Description and purpose both exceed 200 characters and provide dataset-specific context.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "Always applicable under the rubric.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Diversity of keywords and explicitly documented supplementary domain or condition terms.",
+          "evidence": "The keyword list contains four entries. The diagnosis-file list additionally documents distinct conditions including airway stenosis, amyotrophic lateral sclerosis, anxiety, benign lesions, bipolar disorder, cognitive impairment, COPD/asthma, and depression.",
+          "id": 3,
+          "max_score": 5,
+          "name": "Keyword Diversity",
+          "quality_note": "The explicit allowance for documented condition lists supplies more than eight distinct topic terms. JSON and TSV versions of the same condition are counted once.",
+          "score": 5,
+          "score_label": "Excellent",
+          "score_type": "numeric",
+          "semantic_analysis": "The supplementary condition terms describe the submitted dataset's diagnosis files. They are not inferred from its project identity, and they are not represented as additional entries in the four-element keywords array.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/keywords"
+                },
+                {
+                  "path": "/file_collections/2/resources/4/name",
+                  "quote": "airway_stenosis.json"
+                },
+                {
+                  "path": "/file_collections/2/resources/6/name",
+                  "quote": "amyotrophic_lateral_sclerosis.json"
+                },
+                {
+                  "path": "/file_collections/2/resources/8/name",
+                  "quote": "anxiety.json"
+                },
+                {
+                  "path": "/file_collections/2/resources/10/name",
+                  "quote": "benign_lesions.json"
+                },
+                {
+                  "path": "/file_collections/2/resources/12/name",
+                  "quote": "bipolar_disorder.json"
+                },
+                {
+                  "path": "/file_collections/2/resources/14/name",
+                  "quote": "cognitive_impairment.json"
+                },
+                {
+                  "path": "/file_collections/2/resources/18/name",
+                  "quote": "copd_and_asthma.json"
+                },
+                {
+                  "path": "/file_collections/2/resources/20/name",
+                  "quote": "depression.json"
+                }
+              ],
+              "considered": [],
+              "counts": [
+                {
+                  "claimed": 4,
+                  "path": "/keywords"
+                }
+              ],
+              "evidence": "Four explicit keywords plus the documented diagnosis condition list meet the eight-topic threshold permitted by Q3.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "Always applicable under the rubric.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Number and variety of documented distribution formats and file types.",
+          "evidence": "The release documents Parquet, TSV, and JSON across features, metadata, and phenotype file collections.",
+          "id": 4,
+          "max_score": 5,
+          "name": "File Enumeration and Type Variety",
+          "no_issue_reason": "The score reflects the rubric's format-variety threshold, not an identified documentation error. Adding redundant formats solely to increase this score is not warranted.",
+          "quality_note": "Three distinct release formats meet the 2\u20133-format band. Numerous files and feature representations do not increase the number of formats.",
+          "score": 3,
+          "score_label": "Good",
+          "score_type": "numeric",
+          "semantic_analysis": "BIDS is a structural standard, and linked protocol PDFs are supporting resources; neither is counted as an additional format of this release.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/total_file_count"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/distribution_formats"
+                },
+                {
+                  "path": "/file_collections"
+                }
+              ],
+              "considered": [
+                "/external_resources",
+                "/raw_sources"
+              ],
+              "counts": [
+                {
+                  "claimed": 3,
+                  "path": "/distribution_formats"
+                },
+                {
+                  "claimed": 3,
+                  "path": "/file_collections"
+                }
+              ],
+              "evidence": "The documented release formats are Parquet, TSV, and JSON.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "Always applicable under the rubric.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Availability of numeric file-size, dimensional, or instance-count metadata.",
+          "evidence": "instances[0].counts is 833. Feature-file descriptions also provide recording counts and dimensions such as 201xT and 60xT.",
+          "id": 5,
+          "max_score": 1,
+          "name": "Data File Size Availability",
+          "quality_note": "The numeric participant count independently satisfies the pass condition.",
+          "score": 1,
+          "score_label": "Pass",
+          "score_type": "pass_fail",
+          "semantic_analysis": "Participants, recordings, and feature dimensions are different quantities. The record does not claim that the participant count is a byte-size measurement or the total number of recordings.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/instances/0/counts"
+                },
+                {
+                  "path": "/file_collections/0/resources/5/description"
+                },
+                {
+                  "path": "/file_collections/0/resources/6/description"
+                }
+              ],
+              "considered": [
+                "/source_caveats"
+              ],
+              "counts": [],
+              "evidence": "833 participants are explicitly counted, with additional feature-level dimensions and counts.",
+              "path": "#",
+              "score": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category_max": 21,
+      "category_score": 19,
+      "name": "Metadata Quality & Content",
+      "questions": [
+        {
+          "applicability_evidence": "Always applicable under the rubric.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Persistent dataset identification and hosting-platform information.",
+          "evidence": "The release DOI is 10.13026/8xbn-nq66, the project identifier is doi:10.13026/37yb-1t42, and the version-specific landing page is hosted on PhysioNet.",
+          "id": 6,
+          "max_score": 1,
+          "name": "Dataset Identification Metadata",
+          "quality_note": "Persistent identification and the hosting platform are both clear despite the absence of a separate publisher field.",
+          "score": 1,
+          "score_label": "Pass",
+          "score_type": "pass_fail",
+          "semantic_analysis": "source_caveats explains the project-level versus version-level DOI distinction. The RRID in the citation identifies PhysioNet and is not treated as a separate dataset-specific identifier.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/doi",
+                  "quote": "10.13026/8xbn-nq66"
+                },
+                {
+                  "path": "/id"
+                },
+                {
+                  "path": "/page"
+                },
+                {
+                  "path": "/citation"
+                },
+                {
+                  "path": "/source_caveats"
+                }
+              ],
+              "considered": [],
+              "counts": [],
+              "evidence": "A release DOI, project DOI, and PhysioNet release page provide persistent identification and repository context.",
+              "path": "#",
+              "score": 1
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "Always applicable under the rubric.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Funding sources, grant identifiers, creators, and institutional affiliations.",
+          "evidence": "The NIH Common Fund is named with grant 3OT2OD032720-01S1. Named investigators have affiliations including USF Health Morsani College of Medicine and Weill Cornell Medicine.",
+          "id": 7,
+          "max_score": 5,
+          "name": "Funding and Acknowledgements Completeness",
+          "quality_note": "The funder-plus-grant and creators-plus-affiliations requirements are met. Not every author has an affiliation, but the rubric does not require exhaustive affiliation coverage for its maximum anchor.",
+          "score": 5,
+          "score_label": "Excellent",
+          "score_type": "numeric",
+          "semantic_analysis": "The NIH award has a plausible supplemental-award structure. Different source award numbers are explicitly distinguished rather than conflated, and the stated funding purpose aligns with voice-biomarker research.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/funders"
+                },
+                {
+                  "path": "/funders/0/grants/0/grant_number",
+                  "quote": "3OT2OD032720-01S1"
+                },
+                {
+                  "path": "/creators"
+                },
+                {
+                  "path": "/creators/0/principal_investigator/affiliation"
+                },
+                {
+                  "path": "/creators/1/affiliations"
+                }
+              ],
+              "considered": [
+                "/purposes"
+              ],
+              "counts": [],
+              "evidence": "NIH funding includes a grant number, and multiple named investigators have institutional affiliations.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "human_subjects is undeclared in the empty caller applicability context; unknown remains scored.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Ethical oversight, consent, privacy safeguards, compensation, vulnerability protections, and data-protection impacts.",
+          "evidence": "USF IRB oversight, informed consent, withdrawal limits, HIPAA Safe Harbor removal, re-identification concerns, and compensation are documented. source_caveats explicitly states that no analysis of potential impact on data subjects has been conducted.",
+          "id": 8,
+          "max_score": 5,
+          "name": "Ethical and Privacy Declarations",
+          "quality_note": "The documentation substantially exceeds minimal oversight, but lacks the impact assessment and population-specific vulnerability safeguards needed for comprehensive coverage.",
+          "score": 3,
+          "score_label": "Good",
+          "score_type": "numeric",
+          "semantic_analysis": "Raw-voice risks and controlled-access terms are distinguished from the registered feature release. Acknowledging that an impact analysis was not conducted is transparent, but does not supply that analysis.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/data_protection_impacts"
+                },
+                {
+                  "path": "/at_risk_populations"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/ethical_reviews"
+                },
+                {
+                  "path": "/human_subject_research"
+                },
+                {
+                  "path": "/is_deidentified"
+                },
+                {
+                  "path": "/participant_privacy"
+                },
+                {
+                  "path": "/participant_privacy/0/reidentification_risk"
+                },
+                {
+                  "path": "/participant_compensation"
+                },
+                {
+                  "path": "/informed_consent"
+                },
+                {
+                  "path": "/source_caveats",
+                  "quote": "no analysis of the potential impact of the dataset on data subjects has been conducted"
+                }
+              ],
+              "considered": [
+                "/sensitive_elements",
+                "/consent_revocations",
+                "/regulatory_restrictions",
+                "/data_governance"
+              ],
+              "counts": [],
+              "evidence": "Oversight, consent, deidentification, privacy risk, and compensation are described; data-subject impact assessment and specific vulnerability protections are not documented.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "Always applicable under the rubric.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Access conditions, licensing, intellectual-property terms, regulatory obligations, confidentiality, and governance contacts.",
+          "evidence": "The Registered Access License, signed agreement, intellectual-property restrictions, restricted confidentiality classification, DACO review process and email, HIPAA/Common Rule references, and Canadian REB route are described.",
+          "id": 9,
+          "max_score": 5,
+          "name": "Access Requirements and Governance Documentation",
+          "quality_note": "Access tiers, restrictions, governance contacts, and jurisdiction-specific oversight are meaningfully documented.",
+          "score": 5,
+          "score_label": "Excellent",
+          "score_type": "numeric",
+          "semantic_analysis": "Registered feature access and controlled raw-audio access have different authorization requirements. The Canadian REB language is identified as a protocol requirement rather than represented as completed approval for every institution.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/license_and_use_terms"
+                },
+                {
+                  "path": "/regulatory_restrictions"
+                },
+                {
+                  "path": "/regulatory_restrictions/confidentiality_level",
+                  "quote": "restricted"
+                },
+                {
+                  "path": "/data_governance/access_review_process"
+                },
+                {
+                  "path": "/human_subject_research/regulatory_compliance"
+                },
+                {
+                  "path": "/ethical_reviews/1/review_details"
+                }
+              ],
+              "considered": [
+                "/prohibited_uses",
+                "/source_caveats"
+              ],
+              "counts": [],
+              "evidence": "License and IP terms are combined with restricted confidentiality, explicit access procedures, regulatory context, and a DACO contact.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "shared_dataset is undeclared in the empty caller applicability context; unknown remains scored.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Standard formats, schema conformance, dataset relationships, and documented integration capability.",
+          "evidence": "Parquet, TSV, and JSON are documented alongside BIDS v1.9.0, the D4D schema reference, JSON data dictionaries, participant/session identifiers, and a pipeline for merging source data into phenotype files.",
+          "id": 10,
+          "max_score": 5,
+          "name": "Interoperability, Standardization, and Cross-Platform Integration",
+          "quality_note": "Standard formats, scoped conformance claims, shared identifiers, dictionaries, and documented merging software support integration for the stated research uses.",
+          "score": 5,
+          "score_label": "Excellent",
+          "score_type": "numeric",
+          "semantic_analysis": "The D4D schema describes the metadata record; the BIDS claim concerns converted raw audio and questionnaires. The pediatric relationship is explicitly references and does not imply participant linkage or merge compatibility.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/distribution_formats"
+                },
+                {
+                  "path": "/conforms_to_schema"
+                },
+                {
+                  "path": "/conforms_to"
+                },
+                {
+                  "path": "/external_resources"
+                },
+                {
+                  "path": "/related_datasets"
+                },
+                {
+                  "path": "/variables"
+                },
+                {
+                  "path": "/preprocessing_strategies/8"
+                },
+                {
+                  "path": "/preprocessing_strategies/9"
+                }
+              ],
+              "considered": [
+                "/file_collections",
+                "/source_caveats"
+              ],
+              "counts": [],
+              "evidence": "Standard distributions and dictionaries are accompanied by BIDS conversion, identifiers for integration, and documented phenotype-merging software.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category_max": 25,
+      "category_score": 19,
+      "name": "Technical Documentation",
+      "questions": [
+        {
+          "applicability_evidence": "data_processing is undeclared in the empty caller applicability context; unknown remains scored.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Processing, cleaning, annotation, software versions, workflow details, and missing-value handling.",
+          "evidence": "The record details audio standardization, feature extraction parameters, quality-control steps, clinician labeling, and b2aiprep v3.0.0 with repository URLs. Whisper is listed as OpenAI Whisper Large unknown; automated outputs are described as unaudited.",
+          "id": 11,
+          "max_score": 5,
+          "name": "Tool and Software Transparency",
+          "quality_note": "The processing documentation is extensive, but the comprehensive band is not met across annotation reproducibility, annotation-quality assessment, and imputation or explicit no-imputation documentation.",
+          "score": 3,
+          "score_label": "Good",
+          "score_type": "numeric",
+          "semantic_analysis": "Clinical validation and audit procedures are meaningful evidence. They do not establish the correctness of machine-generated transcriptions, and missingness descriptions do not establish an imputation policy.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/annotation_analyses"
+                },
+                {
+                  "path": "/imputation_protocols"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/preprocessing_strategies"
+                },
+                {
+                  "path": "/cleaning_strategies"
+                },
+                {
+                  "path": "/labeling_strategies"
+                },
+                {
+                  "path": "/machine_annotation_tools"
+                },
+                {
+                  "path": "/machine_annotation_tools/0/tools/0",
+                  "quote": "OpenAI Whisper Large unknown"
+                },
+                {
+                  "path": "/missing_data_documentation"
+                },
+                {
+                  "path": "/known_limitations/1/limitation_description",
+                  "quote": "Certain aspects of the data (e.g., transcription) were generated using off-the-shelf models that have not been audited for correctness."
+                }
+              ],
+              "considered": [
+                "/acquisition_methods",
+                "/is_deidentified",
+                "/content_warnings"
+              ],
+              "counts": [],
+              "evidence": "Detailed transformations and a versioned pipeline are documented, but machine annotation has an unknown model version, no documented correctness audit, and no explicit imputation status.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "data_collection is undeclared in the empty caller applicability context; unknown remains scored.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Collection methods, mechanisms, personnel, timeframes, and raw-data sources.",
+          "evidence": "The app, iPad and microphone hardware, acoustic tasks, trained research assistants, and clinical verification are described. The only collection duration is a 12-month Healthsheet statement whose release applicability is unknown.",
+          "id": 12,
+          "max_score": 5,
+          "name": "Collection Protocol Clarity",
+          "quality_note": "Methods and collectors are detailed, but a timeframe for the evaluated version is not established, preventing the full-protocol band.",
+          "score": 3,
+          "score_label": "Good",
+          "score_type": "numeric",
+          "semantic_analysis": "The release publication date is not a collection date. The older Healthsheet duration cannot be silently assigned to version 3.1.0.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/acquisition_methods"
+                },
+                {
+                  "path": "/collection_mechanisms"
+                },
+                {
+                  "path": "/data_collectors"
+                },
+                {
+                  "path": "/collection_timeframes"
+                },
+                {
+                  "path": "/collection_timeframes/0/source_caveats",
+                  "quote": "No source states collection start and end dates for version 3.1.0."
+                },
+                {
+                  "path": "/raw_sources"
+                }
+              ],
+              "considered": [
+                "/sampling_strategies",
+                "/distribution_dates"
+              ],
+              "counts": [],
+              "evidence": "Detailed collection methods and personnel lack a collection window demonstrably associated with version 3.1.0.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "shared_dataset is undeclared in the empty caller applicability context; unknown remains scored.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Version history, maintenance responsibility, preservation commitments, and durable access.",
+          "evidence": "Six versions are described with dates and changes, including withdrawal of 1.1 files. The record identifies PhysioNet and its institutional maintainer, planned semi-annual releases, version-specific DOIs, default continued hosting, and research-oriented retention.",
+          "id": 13,
+          "max_score": 5,
+          "name": "Version History, Maintenance, and Sustainability",
+          "quality_note": "Version history, repository stewardship, access governance, update communication, and qualified retention commitments together meet the maximum anchor.",
+          "score": 5,
+          "score_label": "Excellent",
+          "score_type": "numeric",
+          "semantic_analysis": "Default support for older versions is explicitly qualified by the right to remove access, and the unavailable 1.1 files are disclosed. The Health Data Nexus origin of the update plan is also acknowledged.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/version"
+                },
+                {
+                  "path": "/version_access"
+                },
+                {
+                  "path": "/updates"
+                },
+                {
+                  "path": "/maintainers"
+                },
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/retention_limit"
+                },
+                {
+                  "path": "/data_governance"
+                }
+              ],
+              "considered": [
+                "/source_caveats",
+                "/page",
+                "/creators/0/principal_investigator/email"
+              ],
+              "counts": [
+                {
+                  "claimed": 6,
+                  "path": "/version_access/versions_available"
+                }
+              ],
+              "evidence": "Release history and persistent version identifiers are supported by repository stewardship, update plans, governance, and retention commitments.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "Always applicable under the rubric.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Formal dataset citation and distinct associated references or resources.",
+          "evidence": "A formal dataset citation supplies authors, title, version, year, PhysioNet, and DOI. Distinct additional references include the Interspeech protocol publication, REDCap protocol repository and Zenodo records, and project documentation.",
+          "id": 14,
+          "max_score": 5,
+          "name": "Associated Publications",
+          "quality_note": "A formal dataset citation and at least two distinct references satisfy the explicit maximum condition.",
+          "score": 5,
+          "score_label": "Excellent",
+          "score_type": "numeric",
+          "semantic_analysis": "Documentation and code repositories count under the registered clarification. The citation's DOI and the bare release DOI are not counted as separate resources.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/citation"
+                },
+                {
+                  "path": "/external_resources"
+                },
+                {
+                  "path": "/doi"
+                }
+              ],
+              "considered": [],
+              "counts": [
+                {
+                  "claimed": 3,
+                  "path": "/external_resources"
+                }
+              ],
+              "evidence": "A formal release citation is accompanied by multiple distinct publication, protocol, repository, and documentation references.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "human_subjects is undeclared in the empty caller applicability context; unknown remains scored.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Population characterization, demographic subgroups, recruitment, and inclusion or exclusion criteria.",
+          "evidence": "The record identifies 833 participants, diagnostic groups, demographic variable categories, specialty-clinic recruitment, a minimum age of 18, healthy-volunteer eligibility, and an English-language exclusion criterion from study documentation.",
+          "id": 15,
+          "max_score": 5,
+          "name": "Human Subject Representation",
+          "quality_note": "Recruitment and eligibility are described, but the actual demographic composition and subgroup sizes of version 3.1.0 are not reported. Naming demographic variables is insufficient for detailed population characterization.",
+          "score": 3,
+          "score_label": "Good",
+          "score_type": "numeric",
+          "semantic_analysis": "The adult dataset is distinguished from the related pediatric release. Historical eligibility information and unequal disease representation are disclosed but do not establish current demographic distributions or substantiate diversity quantitatively.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/at_risk_populations"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/instances"
+                },
+                {
+                  "path": "/subpopulations"
+                },
+                {
+                  "path": "/subpopulations/0/identification",
+                  "quote": "Age, gender, sex, ethnicity and socioeconomic status."
+                },
+                {
+                  "path": "/missing_data_documentation"
+                },
+                {
+                  "path": "/sampling_strategies"
+                },
+                {
+                  "path": "/known_limitations/0"
+                }
+              ],
+              "considered": [
+                "/source_caveats",
+                "/description",
+                "/related_datasets"
+              ],
+              "counts": [],
+              "evidence": "Participant count and recruitment criteria are present; demographic fields are listed without release-specific distributions or subgroup counts.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category_max": 21,
+      "category_score": 15,
+      "name": "FAIRness & Accessibility",
+      "questions": [
+        {
+          "applicability_evidence": "Always applicable under the rubric.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Persistent identifiers and external links for dataset discovery.",
+          "evidence": "The record supplies project and release DOIs, a version-specific PhysioNet page, and documentation links.",
+          "id": 16,
+          "max_score": 1,
+          "name": "Findability (Persistent Links)",
+          "quality_note": "Persistent identifiers and structurally plausible external URLs satisfy the presence-based requirement.",
+          "score": 1,
+          "score_label": "Pass",
+          "score_type": "pass_fail",
+          "semantic_analysis": "URL syntax and identifier consistency were assessed from the supplied text. Live resolution was not tested.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/page"
+                },
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/id"
+                },
+                {
+                  "path": "/external_resources"
+                }
+              ],
+              "considered": [],
+              "counts": [],
+              "evidence": "Persistent project and release identifiers and a version-specific repository URL are present.",
+              "path": "#",
+              "score": 1
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "shared_dataset is undeclared in the empty caller applicability context; unknown remains scored.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Actionable access route, formats, policy, and authorization requirements.",
+          "evidence": "Distribution entries point to the PhysioNet release. Feature access requires registration, identity confirmation, and a signed agreement; raw audio additionally requires DACO review and institutional authorization, with a Synapse destination supplied.",
+          "id": 17,
+          "max_score": 5,
+          "name": "Accessibility (Access Mechanism)",
+          "quality_note": "Platform, access tiers, agreements, approval steps, and formats are sufficiently explicit to guide an applicant.",
+          "score": 5,
+          "score_label": "Excellent",
+          "score_type": "numeric",
+          "semantic_analysis": "The record does not equate broad availability with unrestricted access. Registered feature access is distinguished from committee-controlled raw-audio access.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/distribution_formats"
+                },
+                {
+                  "path": "/license_and_use_terms"
+                },
+                {
+                  "path": "/data_governance/access_review_process"
+                },
+                {
+                  "path": "/raw_sources/0/access_url"
+                }
+              ],
+              "considered": [
+                "/page",
+                "/intended_uses"
+              ],
+              "counts": [],
+              "evidence": "The release URL and formats accompany explicit registration and agreement requirements, with separate controlled-audio procedures.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "Always applicable under the rubric.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Licensing, intended and restricted uses, and social-impact analysis with mitigation strategies.",
+          "evidence": "Research and AI uses are listed, while hiring, insurance adjustment, surveillance, re-identification, harm, and data sale are restricted or discouraged. future_use_impacts advises consideration of disorder, site, and demographic skews.",
+          "id": 18,
+          "max_score": 5,
+          "name": "Reusability, Use Guidance, and Social Impact",
+          "quality_note": "Use guidance is detailed and includes concrete protective restrictions. The social-impact discussion does not comprehensively connect affected groups, foreseeable outcomes, mitigation choices, and evaluation of mitigation effectiveness.",
+          "score": 3,
+          "score_label": "Good",
+          "score_type": "numeric",
+          "semantic_analysis": "Access controls and prohibitions are genuine mitigations, but they do not substitute for the comprehensive social-impact analysis required for 5.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/license_and_use_terms"
+                },
+                {
+                  "path": "/intended_uses"
+                },
+                {
+                  "path": "/prohibited_uses"
+                },
+                {
+                  "path": "/discouraged_uses"
+                },
+                {
+                  "path": "/future_use_impacts/0/impact_details",
+                  "quote": "The dataset has skews based on disorder category, site, and other demographic factors. Users should consider the multivariate distribution when assessing utility for different questions."
+                }
+              ],
+              "considered": [
+                "/participant_privacy",
+                "/known_biases",
+                "/known_limitations",
+                "/source_caveats"
+              ],
+              "counts": [],
+              "evidence": "Detailed licensing and use restrictions are present; social-impact analysis remains a general caution about distributional skews.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "Always applicable under the rubric.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Version and quality history plus complete source-to-output lineage with entity, activity, and agent relationships.",
+          "evidence": "Version changes, missingness causes, quality-control procedures, controlled raw sources, and detailed audio-processing stages are described. The record does not provide a complete release-bound lineage map connecting source entities, activities, responsible agents, and all released artifacts.",
+          "id": 19,
+          "max_score": 5,
+          "name": "Data Integrity, Provenance Graph, and Quality",
+          "quality_note": "There is meaningful textual processing lineage beyond version history, but it is incomplete. The full provenance condition is not established merely by listing sources, software, and output files in separate sections.",
+          "score": 3,
+          "score_label": "Good",
+          "score_type": "numeric",
+          "semantic_analysis": "Textual provenance is accepted. The deduction concerns incomplete connections and source-version binding, not the absence of RDF or a particular graph serialization.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/was_derived_from"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/version_access"
+                },
+                {
+                  "path": "/updates"
+                },
+                {
+                  "path": "/missing_data_documentation"
+                },
+                {
+                  "path": "/raw_sources"
+                },
+                {
+                  "path": "/preprocessing_strategies"
+                },
+                {
+                  "path": "/cleaning_strategies"
+                },
+                {
+                  "path": "/file_collections"
+                }
+              ],
+              "considered": [
+                "/source_caveats",
+                "/acquisition_methods",
+                "/collection_mechanisms",
+                "/data_collectors",
+                "/labeling_strategies",
+                "/creators"
+              ],
+              "counts": [],
+              "evidence": "Release history and partial textual derivation are documented, but a complete entity-activity-agent lineage for the released artifacts is not.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "Always applicable under the rubric.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Bias identification, standard categorization, fairness analysis, and effects on intended uses.",
+          "evidence": "The record identifies recruitment differences associated with medical-system trust and geographic proximity, site/device confounding, unequal disease categories, and potential diagnostic-practice shifts.",
+          "id": 20,
+          "max_score": 5,
+          "name": "Bias Documentation and Responsible AI Alignment",
+          "quality_note": "Specific bias mechanisms and use implications are documented. Standard taxonomy mapping and fairness analysis are absent, so the maximum anchor is not met.",
+          "score": 3,
+          "score_label": "Good",
+          "score_type": "numeric",
+          "semantic_analysis": "These are meaningful dataset-specific observations. Advising users to consider multivariate distributions does not establish that subgroup fairness or mitigation effectiveness has been assessed.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/known_biases/0/bias_type"
+                },
+                {
+                  "path": "/known_biases/1/bias_type"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/known_biases"
+                },
+                {
+                  "path": "/future_use_impacts"
+                },
+                {
+                  "path": "/known_limitations"
+                },
+                {
+                  "path": "/sampling_strategies"
+                }
+              ],
+              "considered": [
+                "/subpopulations",
+                "/discouraged_uses",
+                "/prohibited_uses"
+              ],
+              "counts": [
+                {
+                  "claimed": 2,
+                  "path": "/known_biases"
+                }
+              ],
+              "evidence": "Recruitment and site/device biases are identified without standard taxonomy categories or a documented fairness analysis.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "d4d_file": "data/d4d_concatenated/claudecode_release/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/VOICE_d4d.yaml",
+  "evaluation_model": {
+    "basis": "recorded Codex session turn_context",
+    "effort": "ultra",
+    "name": "gpt-6-astra",
+    "selection_basis": "explicit override",
+    "service_tier_observed": null,
+    "service_tier_requested": "fast",
+    "session_logs": [
+      {
+        "cli_version": "0.172.0",
+        "id": "01a2163f-05c2-7eb3-897c-7977b13dbf9a",
+        "owned_history_start_ordinal": 1,
+        "owned_turn_ids": [
+          "01a2163f-0dea-7322-a898-b064b7614f10"
+        ],
+        "parent_thread_id": null,
+        "path": "codex-home/sessions/2026/11/25/rollout-2026-11-25T21-06-00-01a2163f-05c2-7eb3-897c-7977b13dbf9a.jsonl",
+        "sha256": "551d37ea1deb995b71a1ee4476e060b0c47b3ec9af395b5860a53c3329a91639"
+      }
+    ],
+    "thread_id": "01a2163f-05c2-7eb3-897c-7977b13dbf9a"
+  },
+  "evaluation_scope": {
+    "collection_metadata_inherited": false,
+    "policy": "single_dataset",
+    "selection_policy": "root_dataset_v1",
+    "units": [
+      {
+        "id": "doi:10.13026/37yb-1t42",
+        "path": "#"
+      }
+    ]
+  },
+  "evaluation_timestamp": "2026-11-25T00:00:00Z",
+  "instrument_id": "2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6",
+  "label": "2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3",
+  "metadata": {
+    "context_sha256": "fca403729b83dda36a67c4b749455b0fd864ba992e0e40b9a0f5c65bc039bfad",
+    "evaluation_timestamp_precision": "Session-provided date only; midnight represents unavailable time-of-day.",
+    "evidence_authority_sha256": "0605c742c61f2cc4e13de907f8e09752bde5ebd08d173b31d837c273a4bf3872",
+    "input_sha256": "8a8e7ccc08b14afc0742aa024c6c9e4bbc327fa5ee80247e59d357607e2a316f",
+    "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+    "rubric_sha256": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
+    "scope_context_sha256": "fa341448618903294454950b3a40dff3b21d57b4ff3a2d05918694a87db10777"
+  },
+  "method": "claudecode_release",
+  "model": {
+    "evaluation_type": "semantic_llm_judge",
+    "identity_note": "The controller will stamp observed runtime identity from session logs. Agent frontmatter was not used as runtime evidence.",
+    "name": "gpt-6-astra",
+    "temperature": null,
+    "temperature_note": "Not exposed by this runtime; no deterministic-score guarantee."
+  },
+  "overall_score": {
+    "adjusted_max_points": 88,
+    "excluded_item_ids": [],
+    "excluded_max_points": 0,
+    "fixed_percentage": 79.54545454545455,
+    "max_points": 88,
+    "normalized_percentage": 79.54545454545455,
+    "questions_not_applicable": 0,
+    "total_points": 70
+  },
+  "project": "VOICE",
+  "rubric": "rubric20-semantic",
+  "scorer_instrument": {
+    "id": "2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6",
+    "prompt_sha256": "064f6767ae584ebc173afb0cf59f777c4a8be1760162c6adec8671b2be7b39b7",
+    "runner_sha256": "b2a5c0995d891d4c5179509834b460390b1d921d78b0191965fc4ea3f91c21b9"
+  },
+  "semantic_analysis": {
+    "consistency_check_details": {
+      "failed": [],
+      "passed": [
+        "Human-subject involvement is accompanied by ethics-review documentation.",
+        "Human-subject involvement is accompanied by informed consent and withdrawal limitations.",
+        "Deidentification claims are accompanied by methods and participant-privacy discussion.",
+        "Funding has grant details and aligns with the documented voice-biomarker research purpose.",
+        "The project DOI and release DOI distinction is explained, and the release DOI aligns with the version-specific landing page.",
+        "Reuse licensing is accompanied by distribution formats and access requirements.",
+        "Raw-audio restrictions are distinguished from the registered feature-release access conditions.",
+        "The stated release chronology, issued date, and version-3.1.0 publication date are internally consistent."
+      ],
+      "warnings": [
+        "The collection timeframe is not established for the evaluated release.",
+        "The root language assertion is not verified for version 3.1.0.",
+        "Some sensitive-content and free-speech statements retain unresolved historical release scope."
+      ]
+    },
+    "consistency_checks": {
+      "failed": 0,
+      "passed": 8,
+      "warnings": 3
+    },
+    "correctness_validations": {
+      "doi_format": "Valid DOI syntax for the principal identifiers; the 10.13026 prefix and PhysioNet hosting are consistent. Registration and resolution were not externally checked.",
+      "grant_number_format": "Valid-looking NIH supplemental award structure for 3OT2OD032720-01S1 and core award OT2OD032720; alternate source awards are explicitly distinguished.",
+      "rrid_format": "RRID:SCR_007345 in the citation has valid SCR identifier syntax and is associated with the PhysioNet platform.",
+      "url_validity": "Documented URLs have plausible schemes, hosts, and paths. Live availability and redirects were not checked."
+    },
+    "issues_detected": [
+      {
+        "category": "privacy_regulatory",
+        "description": "Ethics and privacy safeguards are extensive, but the record explicitly states that no data-subject impact analysis has been conducted and does not document safeguards tailored to potentially vulnerable participant groups.",
+        "fields_involved": [
+          "/ethical_reviews",
+          "/human_subject_research",
+          "/participant_privacy",
+          "/informed_consent",
+          "/source_caveats",
+          "/data_protection_impacts",
+          "/at_risk_populations"
+        ],
+        "item_ids": [
+          "Q8"
+        ],
+        "recommendation": "Document the relevant data-protection impact assessment and cohort-specific vulnerability assessment, including safeguards and residual risks, while retaining explicit distinctions between raw audio and released features.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "processing_provenance",
+        "description": "The core pipeline is versioned and transformations are detailed, but the transcription model version is explicitly unknown, machine-generated outputs lack a documented correctness audit, and imputation or non-imputation is not specified.",
+        "fields_involved": [
+          "/preprocessing_strategies",
+          "/machine_annotation_tools",
+          "/known_limitations",
+          "/labeling_strategies",
+          "/missing_data_documentation",
+          "/annotation_analyses",
+          "/imputation_protocols"
+        ],
+        "item_ids": [
+          "Q11"
+        ],
+        "recommendation": "Identify the exact annotation model or checkpoint, document annotation-quality assessment for the relevant outputs, and state how missing values are handled, including an explicit no-imputation statement if appropriate.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "temporal_version",
+        "description": "The only collection duration comes from a Healthsheet of uncertain release scope. Collection dates or a collection window for version 3.1.0 are not established.",
+        "fields_involved": [
+          "/collection_timeframes",
+          "/collection_timeframes/0/source_caveats",
+          "/version",
+          "/distribution_dates"
+        ],
+        "item_ids": [
+          "Q12"
+        ],
+        "recommendation": "Provide a collection interval tied to version 3.1.0, distinguishing collection dates from release dates and identifying any site-specific or cohort-specific windows.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "bias_quality",
+        "description": "Demographic variable names and recruitment criteria are documented, but the actual participant demographics and subgroup counts of the evaluated release are not supplied.",
+        "fields_involved": [
+          "/instances",
+          "/subpopulations",
+          "/sampling_strategies",
+          "/known_limitations",
+          "/missing_data_documentation"
+        ],
+        "item_ids": [
+          "Q15"
+        ],
+        "recommendation": "Report privacy-appropriate demographic and diagnostic subgroup summaries for version 3.1.0, with denominators, missingness, and the eligibility criteria applicable to that release.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "bias_quality",
+        "description": "Detailed permitted and prohibited uses provide meaningful protection, but the social-impact analysis is limited to a general caution about demographic, site, and disease-category skews.",
+        "fields_involved": [
+          "/license_and_use_terms",
+          "/intended_uses",
+          "/prohibited_uses",
+          "/discouraged_uses",
+          "/future_use_impacts"
+        ],
+        "item_ids": [
+          "Q18"
+        ],
+        "recommendation": "Connect foreseeable research and deployment outcomes to affected populations, identify benefits and harms, and explain mitigation strategies and how their effectiveness will be assessed.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "processing_provenance",
+        "description": "Version history and substantial textual processing descriptions do not fully bind the released artifacts to specific upstream source entities, processing activities, and responsible agents.",
+        "fields_involved": [
+          "/version_access",
+          "/raw_sources",
+          "/preprocessing_strategies",
+          "/cleaning_strategies",
+          "/file_collections",
+          "/was_derived_from"
+        ],
+        "item_ids": [
+          "Q19"
+        ],
+        "recommendation": "Provide a textual or structured lineage map linking source versions or entities, transformations, responsible human or software agents, and released outputs. A formal RDF serialization is not required.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "bias_quality",
+        "description": "Specific recruitment and measurement-confounding risks are described, but they are not mapped to a standard bias taxonomy and are not accompanied by a fairness analysis.",
+        "fields_involved": [
+          "/known_biases",
+          "/future_use_impacts",
+          "/known_limitations",
+          "/subpopulations"
+        ],
+        "item_ids": [
+          "Q20"
+        ],
+        "recommendation": "Map documented biases to an appropriate standard taxonomy and report subgroup coverage or performance analyses relevant to the intended uses, including uncertainty and mitigation results.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "temporal_version",
+        "description": "The root language value asserts English, while source_caveats says this comes from v2.0.0 documentation, notes a later Spanish-language collection amendment, and states that the languages present in v3.1.0 are not documented.",
+        "fields_involved": [
+          "/language",
+          "/source_caveats",
+          "/sampling_strategies"
+        ],
+        "item_ids": [],
+        "recommendation": "Verify the language coverage of version 3.1.0 or qualify the root language assertion as historical or unconfirmed. The current evidence does not establish that the value is false.",
+        "score_effect": "noted_only",
+        "severity": "low",
+        "type": "content_accuracy"
+      },
+      {
+        "category": "source_conflict",
+        "description": "Sensitive-element and free-speech content statements derive from a Healthsheet with different release scope. The caveats acknowledge removals and possible release differences but do not establish exactly which statements remain true for version 3.1.0.",
+        "fields_involved": [
+          "/sensitive_elements",
+          "/content_warnings",
+          "/is_deidentified",
+          "/source_caveats"
+        ],
+        "item_ids": [],
+        "recommendation": "Tie sensitive-field and content-warning statements to the current release dictionaries and exclusions, preserving historical statements separately when their current applicability is unknown.",
+        "score_effect": "noted_only",
+        "severity": "low",
+        "type": "completeness"
+      }
+    ],
+    "semantic_insights": [
+      "The record carefully distinguishes project-level and release-level DOIs, preventing a superficial identifier mismatch from becoming an erroneous deduction.",
+      "Registered derived-feature access and controlled raw-audio access have different privacy and authorization requirements, and the documentation generally preserves that distinction.",
+      "Processing parameters, repository links, clinical labeling procedures, and file-level feature descriptions provide substantial technical utility even where complete reproducibility and provenance remain incomplete.",
+      "Historical source limitations are frequently disclosed. This improves interpretability but does not turn historical evidence into verified version-3.1.0 facts.",
+      "Record-internal human-subject and access statements inform semantic checks, but they do not replace the independent caller applicability declarations. All conditional items therefore remain unknown and scored."
+    ]
+  },
+  "version": "6.0"
+}
