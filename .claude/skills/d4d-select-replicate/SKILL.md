@@ -26,11 +26,24 @@ Repeat exports must also have an `EXPORTED_VALIDATED_REPEAT` manifest.
 Verify that all scorings use the same instrument and unchanged measured inputs.
 Keep invalid generation records visible; they cannot win selection.
 
-Every missing or refused cell is **not measured**, never zero. A missing cell in
-any valid candidate means policy fallback for that project's selection. Do not
-drop the candidate, mix instruments or silently retry. An accepted replacement
-counts once under its scoring number; list its attempt-2 designation and the
-retained refusal reason without opening the refused evaluation.
+Every missing or refused cell is **not measured**, never zero. Inspect the census
+of every record in the series, including records of other projects. Under the
+lead's conservative implementation rulings, an unreadable record or any
+not-measured cell makes every project fall back to the current policy. Keep the
+record, usable paired count and exact reason visible; never silently remove it
+from the noise estimate.
+
+An accepted replacement counts once under its scoring number. Its attempt-2
+manifest must name exactly one retained refusal, and every matching refusal must
+be accounted for by exactly one accepted cell. Undeclared refusals or an
+additional attempt force fallback. Never open the refused evaluation.
+
+The registered threshold compares means of three scorings. A fourth scoring
+forces fallback rather than being ignored. Percentages use the fixed rubric
+maxima, 50 and 88; adjusted and fixed maxima must agree, with one applicability
+context across the project's candidates and rubrics. Otherwise retain the
+recorded fallback reason. These checks implement the lead's rulings without
+editing steps 1–8 of the registered rule.
 
 ## 2. Run the series variation report
 
@@ -42,6 +55,9 @@ poetry run d4d runs score-variation --method "$METHOD" --config "$CONFIG" \
 
 Report pooled within-record `s`, its degrees of freedom, and the per-project and
 per-rubric values. Pool the whole series, not only the project being selected.
+A pool with fewer than two usable records, zero pooled spread, or incompatible
+instrument bytes cannot support a score switch; report its fallback reason.
+A partial diagnostic spread never authorizes selection from an incomplete series.
 If per-project spread differs strongly, show it to the owner before applying the
 rule. No numerical heterogeneity cutoff is registered; do not invent one.
 
@@ -57,7 +73,10 @@ For every replicate, show validity, slot coverage, receipt coverage, presence
 evaluations, each scoring's points/maximum and attempt, rubric means/spreads, and
 content-review verdict counts. Keep absent columns explicitly not measured.
 Show the current validity/coverage/label pick, the score-policy pick, `T`, the gap,
-and the deciding rule or fallback reason. A score switch requires a gap strictly
+and the deciding rule or fallback reason. Retain per-cell points, maximum,
+attempt, publication and receipt hashes, and repository-relative publication
+paths so the decision can be re-derived. Report any highest-mean tie and the
+conservative tie rule. A score switch requires a gap strictly
 greater than `T` and no reversal on either rubric. Do not rewrite the rule.
 
 ## 4. Compare every charged content finding across siblings
@@ -75,9 +94,17 @@ owner rules on it. Content-review counts never become an automatic veto or tie-b
 Leave every canonical mark unchanged until the owner explicitly authorizes the
 concrete selection after seeing the evidence and sibling comparisons.
 Record each adjudicated finding in a JSON list with nonempty `label`, `slot`,
-`ruling` and `authorization_reference` strings; `label` must name a candidate.
+`ruling` and `authorization_reference` strings, with no other fields; `label` must
+name a candidate and `slot` must occur in that candidate’s evidence table. Use
+portable references rather than absolute machine paths.
 Preview again with `--score-owner-rulings path/to/owner-rulings.json` to include
 those rulings in the proposed `canonical.score_policy.owner_rulings` record.
-This records the judgment without changing the registered score rule.
+Each ruling is printed and retained; it never changes the arithmetic. If the owner
+wants another selection, resolve that decision explicitly rather than expecting
+the rulings file to veto a score result.
+A score-policy mark requires the owner's separate nonempty text through
+`--score-owner-authorization TEXT`; the CLI records the text and refuses a mark
+without it. Authorization is checked before any write. Ordinary previews need
+no authorization text, and this skill does not supply one.
 After an authorized mark, verify the persisted selection, its score-policy
 record, unchanged review policy and owner rulings, and that every replicate remains.

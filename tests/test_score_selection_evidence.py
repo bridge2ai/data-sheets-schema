@@ -64,7 +64,8 @@ def scenario(tmp_path):
                            **deterministic,
                            "scorer_instrument": {"id": INSTRUMENT, "prompt_sha256": plan["prompt_sha256"],
                                                  "runner_sha256": plan["runner_sha256"]},
-                           "overall_score": {"total_points": 20 + number, "adjusted_max_points": maximum}}
+                           "overall_score": {"total_points": 20 + number, "max_points": maximum,
+                                             "adjusted_max_points": maximum}}
             output_sha = write(output, publication)
             plan_sha = write(run / "plan.json", plan)
             receipt = {"status": "VALIDATED_AND_PUBLISHED", "plan_sha256": sha(json.dumps(plan, sort_keys=True).encode()),
@@ -81,6 +82,11 @@ def scenario(tmp_path):
                             "actual_receipt": str(run / "receipt.json"), "actual_receipt_sha256": receipt_sha,
                             "destination": str(output), "destination_sha256": output_sha,
                             "source_output_sha256": output_sha, "copy_validator_exit": 0}
+                baseline = entries[family, 1]
+                manifest.update(baseline_plan=str(baseline["plan_path"]),
+                                baseline_plan_sha256=sha(baseline["plan_path"].read_bytes()),
+                                baseline_receipt=str(baseline["receipt_path"]),
+                                baseline_receipt_sha256=sha(baseline["receipt_path"].read_bytes()))
                 write(manifest_path, manifest)
                 entry.update(manifest=manifest, manifest_path=manifest_path)
             entries[family, number] = entry
@@ -110,6 +116,261 @@ def rebind(entry):
         entry["manifest"].update(actual_plan_sha256=plan_sha, actual_receipt_sha256=receipt_sha,
                                  destination_sha256=output_sha, source_output_sha256=output_sha)
         write(entry["manifest_path"], entry["manifest"])
+
+
+def rebind_receipt_only(entry):
+    digest = write(entry["receipt_path"], entry["receipt"])
+    entry["manifest"]["actual_receipt_sha256"] = digest
+    write(entry["manifest_path"], entry["manifest"])
+
+
+def add_refusal(case, family="rubric10", name="original-refusal"):
+    directory = case[1] / name
+    plan = copy.deepcopy(case[3][family, 3]["plan"])
+    plan["run_directory"] = str(directory)
+    plan_sha = write(directory / "plan.json", plan)
+    receipt = {"status": "REFUSED", "failure": "synthetic refusal",
+               "plan_sha256": sha(json.dumps(plan, sort_keys=True).encode())}
+    receipt_sha = write(directory / "receipt.json", receipt)
+    return {"plan": plan, "receipt": receipt, "plan_path": directory / "plan.json",
+            "receipt_path": directory / "receipt.json", "plan_sha256": plan_sha, "receipt_sha256": receipt_sha}
+
+
+def declare_replacement(case, original, family="rubric10", number=3):
+    entry = case[3][family, number]
+    entry["manifest"].update(attempt=2,
+                             refused_attempt_receipt={"path": str(original["receipt_path"]),
+                                                      "sha256": original["receipt_sha256"]},
+                             refused_attempt_plan={"path": str(original["plan_path"]),
+                                                   "sha256": original["plan_sha256"]})
+    write(entry["manifest_path"], entry["manifest"])
+
+
+def test_isolated_reader_receipt_and_publication_guards(tmp_path):
+    """Each mutation changes just one proof, with all other bindings refreshed."""
+    cases = ("publication_hash", "receipt_plan", "manifest_output_hash", "validator_input_hash",
+             "codex_exit", "validator_exit", "auth_cleanup", "definition_provenance",
+             "plan_input_metadata", "receipt_status", "export_status", "copy_validator_exit",
+             "publication_identity", "plan_hash_binding", "receipt_hash_binding", "planned_metadata_key")
+    for change in cases:
+        case = scenario(tmp_path / change)
+        entry = case[3]["rubric10", 2]
+        if change == "publication_hash":
+            entry["publication"]["overall_score"]["total_points"] += 1
+            write(entry["output"], entry["publication"])
+        elif change == "receipt_plan":
+            entry["plan"]["unmeasured_test_annotation"] = "changed"
+            entry["manifest"]["actual_plan_sha256"] = write(entry["plan_path"], entry["plan"])
+            write(entry["manifest_path"], entry["manifest"])
+        elif change == "manifest_output_hash":
+            entry["manifest"]["destination_sha256"] = sha(b"wrong exported bytes")
+            write(entry["manifest_path"], entry["manifest"])
+        elif change == "validator_input_hash":
+            entry["receipt"]["validator_input_sha256"] = sha(b"wrong validated bytes")
+            rebind_receipt_only(entry)
+        elif change in ("codex_exit", "validator_exit", "auth_cleanup", "receipt_status"):
+            key = "auth_copy_absent" if change == "auth_cleanup" else "status" if change == "receipt_status" else change
+            entry["receipt"][key] = False if change == "auth_cleanup" else "STARTED" if change == "receipt_status" else 1
+            rebind_receipt_only(entry)
+        elif change == "definition_provenance":
+            entry["plan"]["definition_provenance"]["composed_sha256"] = sha(b"other composed definition")
+            rebind(entry)
+        elif change == "plan_input_metadata":
+            entry["plan"]["inputs"]["evidence-authority.json"]["sha256"] = sha(b"other authority")
+            rebind(entry)
+        elif change in ("export_status", "copy_validator_exit"):
+            key = "status" if change == "export_status" else change
+            entry["manifest"][key] = "REFUSED" if change == "export_status" else 1
+            write(entry["manifest_path"], entry["manifest"])
+        elif change == "publication_identity":
+            entry["publication"]["label"] = "another_rep1"
+            rebind(entry)
+        elif change in ("plan_hash_binding", "receipt_hash_binding"):
+            key = "actual_plan_sha256" if change == "plan_hash_binding" else "actual_receipt_sha256"
+            entry["manifest"][key] = sha(b"incorrect metadata hash")
+            write(entry["manifest_path"], entry["manifest"])
+        else:
+            entry["plan"]["deterministic_fields"] = copy.deepcopy(entry["plan"]["deterministic_fields"])
+            entry["plan"]["deterministic_fields"]["metadata"]["required_extra_annotation"] = "must remain"
+            rebind(entry)
+        result = cell(table(case), number=2)
+        assert result["status"] == "not measured", change
+        assert result["points"] is None, change
+
+
+def test_replacement_original_status_and_hash_checks_are_independent(tmp_path):
+    for change in ("status", "hash"):
+        case = scenario(tmp_path / change)
+        original = add_refusal(case)
+        declare_replacement(case, original)
+        if change == "status":
+            original["receipt"]["status"] = "STARTED"
+            digest = write(original["receipt_path"], original["receipt"])
+        else:
+            digest = sha(b"wrong original receipt hash")
+        entry = case[3]["rubric10", 3]
+        entry["manifest"]["refused_attempt_receipt"]["sha256"] = digest
+        write(entry["manifest_path"], entry["manifest"])
+        assert cell(table(case), number=3)["status"] == "not measured", change
+
+
+def test_baseline_is_pinned_by_repeat_receipts_and_not_a_repeat_run(tmp_path):
+    case = scenario(tmp_path / "pinned")
+    for number in (2, 3):
+        entry = case[3]["rubric10", number]
+        entry["manifest"]["baseline_receipt_sha256"] = sha(b"different baseline receipt")
+        write(entry["manifest_path"], entry["manifest"])
+    assert cell(table(case))["status"] == "not measured"
+    assert "baseline" in cell(table(case))["reason"]
+
+    unrelated = copy.deepcopy(case[3]["rubric10", 1]["plan"])
+    directory = case[1] / "000-unrelated-plan"
+    unrelated["run_directory"] = str(directory)
+    unrelated["identity"].update(version="different", unrelated_annotation="must not select the manifest filter")
+    write(directory / "plan.json", unrelated)
+    write(directory / "receipt.json", {"status": "STARTED"})
+    assert cell(table(case))["status"] == "not measured"
+    assert "baseline" in cell(table(case))["reason"]
+
+    case = scenario(tmp_path / "not-repeat")
+    first = case[3]["rubric10", 1]
+    first["receipt"]["status"] = "STARTED"
+    write(first["receipt_path"], first["receipt"])
+    for number in (2, 3):
+        entry = case[3]["rubric10", number]
+        entry["publication"] = copy.deepcopy(first["publication"])
+        entry["manifest"] = {key: value for key, value in entry["manifest"].items() if not key.startswith("baseline_")}
+        rebind(entry)
+    assert cell(table(case))["status"] == "not measured"
+
+
+def test_all_refusals_require_exactly_one_declared_replacement(tmp_path):
+    for change in ("undeclared", "omitted_attempt", "second_refusal", "multiply_declared"):
+        case = scenario(tmp_path / change)
+        original = add_refusal(case)
+        if change != "undeclared":
+            declare_replacement(case, original)
+        if change == "omitted_attempt":
+            entry = case[3]["rubric10", 3]
+            del entry["manifest"]["attempt"]
+            write(entry["manifest_path"], entry["manifest"])
+        elif change == "second_refusal":
+            add_refusal(case, name="second-refusal")
+        elif change == "multiply_declared":
+            declare_replacement(case, original, number=2)
+        rows = table(case)
+        assert any("refus" in problem for problem in rows[0]["eligibility_problems"]), change
+        assert rows[0]["rubrics"]["rubric10"]["eligibility_problems"], change
+
+
+def test_fixed_percentage_base_is_required_even_after_rebinding(tmp_path):
+    for change in ("missing_maximum", "wrong_fixed", "reduced_adjusted"):
+        case = scenario(tmp_path / change)
+        entry = case[3]["rubric20", 2]
+        score = entry["publication"]["overall_score"]
+        if change == "missing_maximum":
+            del score["max_points"]
+        elif change == "wrong_fixed":
+            score.update(max_points=44, adjusted_max_points=44)
+        else:
+            score["adjusted_max_points"] = 44
+        rebind(entry)
+        assert cell(table(case), "rubric20", 2)["status"] == "not measured", change
+        assert "fixed percentage" in cell(table(case), "rubric20", 2)["reason"]
+
+
+def test_integral_float_fixed_maxima_are_equivalent_json_numbers(tmp_path):
+    case = scenario(tmp_path)
+    for family, maximum in (("rubric10", 50.0), ("rubric20", 88.0)):
+        entry = case[3][family, 2]
+        apply_real_shape(entry)
+        entry["publication"]["overall_score"].update(max_points=maximum, adjusted_max_points=maximum)
+        rebind(entry)
+        result = cell(table(case), family, 2)
+        assert result["status"] == "measured"
+        assert result["maximum"] == maximum
+        assert result["adjusted_max_points"] == maximum
+        assert result["percentage"] == 100 / maximum
+
+
+def test_fourth_scoring_and_unreadable_records_remain_in_the_table(tmp_path):
+    case = scenario(tmp_path / "fourth")
+    extra = case[0] / "data/evaluation_repeats" / INSTRUMENT / "scoring_rep4/rubric10_semantic" / (PROJECT + "_" + LABEL + "_evaluation.json")
+    write(extra, {"do_not_read": "a fourth scoring cannot use the registered three-run threshold"})
+    row = table(case)[0]
+    assert len(row["rubrics"]["rubric10"]["scorings"]) == 4
+    assert row["rubrics"]["rubric10"]["scorings"][3]["status"] == "not measured"
+    assert "three" in row["rubrics"]["rubric10"]["scorings"][3]["reason"]
+    case[2][0]["record"].write_text("broken: [\n")
+    row = table(case)[0]
+    assert row["slots"] is None
+    assert row["eligibility_problems"]
+    assert all(item["status"] == "not measured" for family in ("rubric10", "rubric20")
+               for item in row["rubrics"][family]["scorings"])
+
+
+def test_incomplete_record_coverage_is_none_and_publication_paths_are_relative(tmp_path):
+    case = scenario(tmp_path)
+    case[2][0].update(validity="incomplete", slots=None)
+    row = table(case)[0]
+    assert row["slots"] is None
+    assert row["slot_names"] == ["id", "title"]
+    for family in ("rubric10", "rubric20"):
+        for item in row["rubrics"][family]["scorings"]:
+            assert not Path(item["publication_path"]).is_absolute()
+            assert item["publication_sha256"] == item["sha256"]
+            assert item["adjusted_max_points"] == item["maximum"]
+
+
+def test_copied_and_symlinked_receipt_roots_have_specific_reasons(tmp_path):
+    import shutil
+    from data_sheets_schema.score_selection import load_evidence_index
+    case = scenario(tmp_path / "source")
+    copied = tmp_path / "copied"
+    shutil.copytree(case[1], copied)
+    index = load_evidence_index([copied])
+    assert any("copied or relocated" in issue for issue in index["issues"])
+    linked = tmp_path / "linked"
+    linked.symlink_to(case[1], target_is_directory=True)
+    index = load_evidence_index([linked])
+    assert index["runs"] == {}
+    assert any("symlink" in issue for issue in index["issues"])
+
+
+def test_malformed_metadata_is_recorded_instead_of_raising(tmp_path):
+    for change in ("actual_plan", "baseline_hash", "run_directory"):
+        case = scenario(tmp_path / change)
+        entry = case[3]["rubric10", 2]
+        if change == "run_directory":
+            entry["plan"]["run_directory"] = None
+            rebind(entry)
+        else:
+            key = "actual_plan" if change == "actual_plan" else "baseline_plan_sha256"
+            entry["manifest"][key] = []
+            write(entry["manifest_path"], entry["manifest"])
+        rows = table(case)
+        assert len(rows) == 1
+        assert rows[0]["problems"], change
+
+
+def test_denied_evidence_directory_enumeration_records_series_fallback(tmp_path, monkeypatch):
+    from data_sheets_schema.score_selection import load_evidence_index, pooled_variation
+    for kind in ("receipt", "manifest"):
+        case = scenario(tmp_path / kind)
+        blocked = case[1] if kind == "receipt" else case[1] / "export-manifests"
+        original = Path.iterdir
+        def denied(path):
+            if path == blocked:
+                raise PermissionError("synthetic denied directory listing")
+            return original(path)
+        with monkeypatch.context() as scoped:
+            scoped.setattr(Path, "iterdir", denied)
+            index = load_evidence_index([case[1]])
+            assert any(kind in issue and "could not be enumerated" in issue for issue in index["issues"])
+            rows = table(case)
+        variation = pooled_variation(rows)
+        assert any(kind in reason and "could not be enumerated" in reason
+                   for reason in variation["fallback_reasons"])
 
 
 def apply_real_shape(entry):

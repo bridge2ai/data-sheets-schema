@@ -63,8 +63,17 @@ def load_evidence_index(evidence_roots=()):
     runs, manifests, issues = {}, {}, []
     for supplied in evidence_roots:
         root = Path(supplied).absolute()
-        _require(root.is_dir() and not root.is_symlink(), f"invalid evidence root: {root}")
-        children = [p for p in sorted(root.iterdir()) if p.is_dir() and not p.is_symlink()]
+        if any(part.is_symlink() for part in (root, *root.parents)):
+            issues.append("receipt root reached through a symlink; use the original physical receipt root")
+            continue
+        if not root.is_dir():
+            issues.append("receipt root is missing or is not a directory")
+            continue
+        try:
+            children = [p for p in sorted(root.iterdir()) if p.is_dir() and not p.is_symlink()]
+        except OSError as exc:
+            issues.append(f"receipt root could not be enumerated: {type(exc).__name__}")
+            children = []
         for directory in [root, *children]:
             plan_path, receipt_path = directory / "plan.json", directory / "receipt.json"
             if not (plan_path.exists() and receipt_path.exists()):
@@ -78,16 +87,21 @@ def load_evidence_index(evidence_roots=()):
                 runs[key] = {"plan": plan, "receipt": receipt, "plan_path": key,
                              "plan_sha256": plan_sha, "receipt_path": str(receipt_path),
                              "receipt_sha256": receipt_sha}
-            except (OSError, ValueError) as exc:
-                issues.append(str(exc))
+                if Path(plan.get("run_directory", "")) != directory:
+                    issues.append("copied or relocated receipt root: saved run directory differs from supplied evidence")
+            except (OSError, ValueError, TypeError) as exc:
+                issues.append(f"unreadable scoring plan/receipt metadata ({directory.name}): {type(exc).__name__}")
         export_roots = [root / "export-manifests"]
         if root.name == "export-manifests":
             export_roots.append(root)
         paths = [root / "manifest.json"]
         for directory in export_roots:
             if directory.is_dir() and not directory.is_symlink():
-                paths.extend(p / "manifest.json" for p in sorted(directory.iterdir())
-                             if p.is_dir() and not p.is_symlink())
+                try:
+                    paths.extend(p / "manifest.json" for p in sorted(directory.iterdir())
+                                 if p.is_dir() and not p.is_symlink())
+                except OSError as exc:
+                    issues.append(f"repeat manifest root could not be enumerated: {type(exc).__name__}")
         for path in paths:
             if not path.exists() or str(path) in manifests:
                 continue
@@ -95,7 +109,7 @@ def load_evidence_index(evidence_roots=()):
                 value, digest = _json(path)
                 manifests[str(path)] = {"value": value, "path": str(path), "sha256": digest}
             except (OSError, ValueError) as exc:
-                issues.append(str(exc))
+                issues.append(f"unreadable repeat export metadata ({path.parent.name}): {type(exc).__name__}")
     return {"runs": runs, "manifests": list(manifests.values()), "issues": issues}
 
 
@@ -124,7 +138,7 @@ def _accepted_metadata(entry):
              and receipt.get("auth_copy_absent") is True, "acceptance or cleanup is unproven")
     _require(receipt.get("output") == plan.get("output"), "receipt publication path differs")
     _require(Path(plan.get("run_directory", "")) == Path(entry["plan_path"]).parent,
-             "plan names another run directory")
+             "copied or relocated receipt root: saved run directory differs from supplied evidence")
     _require(receipt.get("output_sha256") == receipt.get("validator_input_sha256"),
              "published and validated hashes differ")
     return _digest(receipt.get("output_sha256"))
@@ -181,11 +195,31 @@ def _published_deterministic_fields(value, planned):
 def _score_cell(index, number, path, *, project, method, label, family, instrument, record_sha):
     matches = [entry for entry in index["runs"].values()
                if _identity_matches(entry["plan"], project, method, label, family, instrument)]
-    referenced = {item["value"].get("actual_plan") for item in index["manifests"]}
+    referenced = {item["value"].get("actual_plan") for item in index["manifests"]
+                  if isinstance(item["value"].get("actual_plan"), str)}
+    matching_exports = [item for item in index["manifests"]
+                        if all(_mapping(item["value"].get("identity")).get(key) == wanted
+                               for key, wanted in (("project", project), ("method", method), ("label", label),
+                                                   ("rubric", family + "-semantic"), ("instrument_id", instrument)))]
     manifest = None
     if number == 1:
         choices = [entry for entry in matches if entry["plan_path"] not in referenced
                    and entry["receipt"].get("status") == "VALIDATED_AND_PUBLISHED"]
+        bindings = [item["value"] for item in matching_exports
+                    if any("baseline_" + kind in item["value"] or "baseline_" + kind + "_sha256" in item["value"]
+                           for kind in ("plan", "receipt"))]
+        if bindings:
+            if any(not isinstance(item.get(key), str) or not item[key]
+                   for item in bindings for key in ("baseline_plan", "baseline_plan_sha256", "baseline_receipt", "baseline_receipt_sha256")):
+                return _missing(number, "repeat manifest baseline plan/receipt binding is incomplete")
+            pinned = {(item.get("baseline_plan"), item.get("baseline_plan_sha256"),
+                       item.get("baseline_receipt"), item.get("baseline_receipt_sha256")) for item in bindings}
+            if len(pinned) != 1 or any(not isinstance(value, str) or not value for value in next(iter(pinned))):
+                return _missing(number, "repeat manifests disagree on baseline plan/receipt binding")
+            plan_path, plan_sha, receipt_path, receipt_sha = next(iter(pinned))
+            choices = [entry for entry in choices if entry["plan_path"] == plan_path]
+            if len(choices) != 1 or choices[0]["plan_sha256"] != plan_sha or choices[0]["receipt_path"] != receipt_path or choices[0]["receipt_sha256"] != receipt_sha:
+                return _missing(number, "scoring 1 differs from repeat baseline plan/receipt hashes")
     else:
         exports = [item for item in index["manifests"]
                    if item["value"].get("scoring_replicate") == number
@@ -199,9 +233,7 @@ def _score_cell(index, number, path, *, project, method, label, family, instrume
         manifest = exports[0]
         choices = [entry for entry in matches if entry["plan_path"] == manifest["value"].get("actual_plan")]
     if len(choices) != 1:
-        reasons = sorted({str(entry["receipt"].get("failure", "scoring receipt is not accepted"))
-                          for entry in matches if entry["receipt"].get("status") == "REFUSED"})
-        return _missing(number, "; ".join(reasons) or "missing or ambiguous accepted scoring receipt")
+        return _missing(number, "missing or ambiguous accepted scoring receipt")
     entry = choices[0]
     try:
         expected = _accepted_metadata(entry)
@@ -256,17 +288,26 @@ def _score_cell(index, number, path, *, project, method, label, family, instrume
                  "published instrument differs")
         _published_deterministic_fields(value, plan["deterministic_fields"])
         score = value.get("overall_score", {})
-        points, maximum = score.get("total_points"), score.get("adjusted_max_points")
+        points, maximum = score.get("total_points"), score.get("max_points")
+        adjusted = score.get("adjusted_max_points")
+        _require(all(type(item) in (int, float) and math.isfinite(item) for item in (maximum, adjusted))
+                 and maximum == {"rubric10": 50, "rubric20": 88}[family] and adjusted == maximum,
+                 "fixed percentage base requires max_points 50/88 and adjusted_max_points equal to it")
         _require(all(type(item) in (int, float) and math.isfinite(item) for item in (points, maximum))
                  and 0 <= points <= maximum and maximum > 0, "score is not a finite points/maximum pair")
         return {"scoring_number": number, "status": "measured", "points": points,
-                "maximum": maximum, "percentage": 100 * points / maximum, "attempt": attempt,
+                "maximum": maximum, "adjusted_max_points": adjusted,
+                "percentage_base": "fixed_max_points", "percentage": 100 * points / maximum, "attempt": attempt,
                 "measurement_identity": measured, "reason": None, "path": str(path),
                 "sha256": expected, "receipt": entry["receipt_path"],
+                "publication_sha256": expected, "plan_sha256": entry["plan_sha256"],
                 "receipt_sha256": entry["receipt_sha256"], "refused_attempt": refused,
-                "manifest": manifest["path"] if manifest else None}
+                "manifest": manifest["path"] if manifest else None,
+                "manifest_sha256": manifest["sha256"] if manifest else None}
     except (OSError, ValueError, TypeError, KeyError, AttributeError) as exc:
-        return _missing(number, str(exc))
+        reason = ("publication cannot be read: " + str(exc.strerror)
+                  if isinstance(exc, OSError) else str(exc).replace(str(path), path.name))
+        return _missing(number, reason)
 
 
 def _other_evidence(record, project, label, method, root, record_sha):
@@ -322,20 +363,29 @@ def build_evidence_table(project, config, instrument_id, *, candidates, corpus_r
         record = Path(candidate["record"]) if candidate.get("record") else None
         method = candidate.get("method") or (record.parent.parent.name if record else None)
         import yaml
-        record_sha, slots, record_issue = None, None, None
+        record_sha, slots, record_issue, slot_names = None, None, None, []
         if record and record.is_file():
             try:
                 raw = _read(record)
-                record_sha = _sha(raw)
                 loaded = yaml.safe_load(raw)
-                slots = len(loaded) if isinstance(loaded, dict) else None
+                _require(isinstance(loaded, dict), "candidate record is not a mapping")
+                record_sha = _sha(raw)
+                slot_names = sorted(str(key) for key in loaded)
+                slots = len(loaded) if candidate.get("slots") is not None and candidate["validity"] != "incomplete" else None
             except (OSError, ValueError, yaml.YAMLError) as exc:
-                record_issue = str(exc)
+                record_issue = "candidate record cannot be read: " + type(exc).__name__
+                mark = getattr(exc, "problem_mark", None)
+                if mark is not None:
+                    record_issue += f" at line {mark.line + 1}, column {mark.column + 1}"
+        else:
+            record_issue = "candidate record is missing"
         row = {"project": project, "config": config, "instrument_id": instrument_id,
                "label": label, "validity": candidate["validity"], "slots": slots,
+               "slot_names": slot_names,
                "record_sha256": record_sha, "rubrics": {},
                "review_adverse": candidate.get("review_adverse"),
                "review_not_evidence": candidate.get("review_not_evidence"),
+               "eligibility_problems": ([record_issue] if record_issue else []) + index["issues"],
                "receipt_coverage": None, "presence_evaluation": None, "review_verdict_counts": None}
         if record_sha:
             coverage, reviews, presence = _other_evidence(record, project, label, method, root, record_sha)
@@ -350,7 +400,36 @@ def build_evidence_table(project, config, instrument_id, *, candidates, corpus_r
                 cells.append(_score_cell(index, number, path, project=project, method=method, label=label,
                                          family=family, instrument=instrument_id, record_sha=record_sha)
                              if record_sha else _missing(number, "record bytes are not available"))
-            row["rubrics"][family] = {"scorings": cells}
+            for cell in cells:
+                if cell.get("path"):
+                    cell["publication"] = str(Path(cell["path"]).relative_to(root))
+                    cell["publication_path"] = cell["publication"]
+                    cell["path"] = cell["publication"]
+            repeat_root = root / "data/evaluation_repeats" / instrument_id
+            for extra in sorted(repeat_root.glob("scoring_rep*")):
+                match = re.fullmatch(r"scoring_rep([0-9]+)", extra.name)
+                if not match or int(match.group(1)) <= 3:
+                    continue
+                publication = extra / (family + "_semantic") / (project + "_" + label + "_evaluation.json")
+                if publication.exists() or publication.is_symlink():
+                    extra_cell = _missing(int(match.group(1)), "more than three scorings on disk; score_gap_v1 is defined for three")
+                    extra_cell["publication"] = str(publication.relative_to(root))
+                    extra_cell["publication_path"] = extra_cell["publication"]
+                    cells.append(extra_cell)
+            problems = []
+            refused_matches = [entry for entry in index["runs"].values()
+                               if _identity_matches(entry["plan"], project, method, label, family, instrument_id)
+                               and entry["receipt"].get("status") == "REFUSED"]
+            for refused in refused_matches:
+                declarations = [cell for cell in cells if cell["status"] == "measured" and cell["attempt"] == 2
+                                and _mapping(cell.get("refused_attempt")).get("path") == refused["receipt_path"]
+                                and _mapping(cell.get("refused_attempt")).get("sha256") == refused["receipt_sha256"]]
+                if len(declarations) != 1:
+                    problems.append(f"{family}: refused attempt is declared by {len(declarations)} accepted cells; exactly one is required")
+            if len(refused_matches) > sum(cell["status"] == "measured" and cell["attempt"] == 2 for cell in cells):
+                problems.append(f"{family}: undeclared refusal or more than one refusal for a cell")
+            row["eligibility_problems"].extend(problems)
+            row["rubrics"][family] = {"scorings": cells, "eligibility_problems": problems}
         summary = summarize(row)
         for family in FAMILIES:
             row["rubrics"][family].update(summary["rubrics"][family])
