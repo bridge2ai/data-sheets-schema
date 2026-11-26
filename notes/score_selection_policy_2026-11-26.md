@@ -86,6 +86,8 @@ Stated so that a reader can judge how far the rule was fixed in advance.
 - Three repeat runs were refused and replaced under the rule above; the decisions
   were taken without reading the refused outputs.
 
+Correction, 2026-11-26 (issue 6387): when this note was committed at 06:21:57Z, the three replacements had been authorized and started; one had been published (06:18:23Z) and two were still running (they were published at 06:23:13Z and 06:24:37Z). The variation report was saved at 06:24:58Z, after this commit. This note is the first committed form of the rule; it was not committed before the second and third scorings existed.
+
 ## Owner decisions
 
 The owner asked on 2026-11-26 for a plan to select the best replicate from the
