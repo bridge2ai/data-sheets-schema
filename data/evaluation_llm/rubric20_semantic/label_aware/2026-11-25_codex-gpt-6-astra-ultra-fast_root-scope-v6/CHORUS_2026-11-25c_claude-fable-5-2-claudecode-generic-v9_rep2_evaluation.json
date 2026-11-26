@@ -1,0 +1,1355 @@
+{
+  "applicability_context": {},
+  "categories": [
+    {
+      "category_max": 21,
+      "category_score": 19,
+      "name": "Structural Completeness",
+      "questions": [
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Proportion of mandatory schema fields populated including core identification, hierarchical structure, governance, and composition metadata.",
+          "evidence": "Nine of fourteen specified fields are populated: id, title, description, keywords, license_and_use_terms, page, creators, purposes and instances. DOI, resources, parent_datasets, variables and confidentiality classification are absent.",
+          "id": 1,
+          "max_score": 5,
+          "name": "Field Completeness",
+          "quality_note": "The populated proportion is 64.3%, supporting the approximate 70% band and falling below the 90% threshold.",
+          "score": 3,
+          "score_label": "Good: approximately two-thirds of specified fields populated",
+          "score_type": "numeric",
+          "semantic_analysis": "The instance descriptions identify modalities but do not supply variable definitions. A root landing URL does not populate the separate DOI field. No hierarchy or confidentiality values are inferred.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/resources"
+                },
+                {
+                  "path": "/parent_datasets"
+                },
+                {
+                  "path": "/variables"
+                },
+                {
+                  "path": "/regulatory_restrictions/confidentiality_level"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/id",
+                  "quote": "https://chorus4ai.org/"
+                }
+              ],
+              "considered": [
+                "/title",
+                "/description",
+                "/keywords",
+                "/license_and_use_terms",
+                "/page",
+                "/creators",
+                "/purposes",
+                "/instances"
+              ],
+              "counts": [],
+              "evidence": "Nine of the fourteen rubric-listed fields contain meaningful content.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Checks whether narrative fields have meaningful content length.",
+          "evidence": "The description explains the dataset, participating institutions, modalities, retrospective collection and source dates. Both purpose responses provide substantial motivation.",
+          "id": 2,
+          "max_score": 5,
+          "name": "Entry Length Adequacy",
+          "quality_note": "The average narrative length comfortably exceeds 200 characters, and the text provides relevant context.",
+          "score": 5,
+          "score_label": "Excellent: substantive narratives exceed 200 characters",
+          "score_type": "numeric",
+          "semantic_analysis": "Narrative length reflects substantive information, including distinctions between project plans and observed availability.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/description"
+                },
+                {
+                  "path": "/purposes/0/response",
+                  "quote": "develop a publicly available, AI-ready critical care dataset"
+                },
+                {
+                  "path": "/purposes/1/response"
+                }
+              ],
+              "considered": [],
+              "counts": [],
+              "evidence": "The description and purpose responses provide extensive, relevant dataset context.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Number of distinct keywords describing the dataset.",
+          "evidence": "Twelve distinct keywords cover critical care, critical illness, AI, machine learning, EHR, EEG, telemetry, acute care, standards, multimodality and social health determinants.",
+          "id": 3,
+          "max_score": 5,
+          "name": "Keyword Diversity",
+          "quality_note": "The list exceeds the eight-keyword threshold and covers clinical, technical and modality-related topics.",
+          "score": 5,
+          "score_label": "Excellent: at least eight distinct keywords",
+          "score_type": "numeric",
+          "semantic_analysis": "Some terms overlap conceptually, but the list still supplies more than eight distinct, relevant discovery terms.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/keywords"
+                }
+              ],
+              "considered": [],
+              "counts": [
+                {
+                  "claimed": 12,
+                  "path": "/keywords"
+                }
+              ],
+              "evidence": "The keywords list contains twelve distinct entries.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Number and variety of documented distribution formats and file types.",
+          "evidence": "DICOM, WFDB, EDF+ and Persyst are documented for imaging, waveform telemetry and waveform EEG. The EEG formats are explicitly associated with extraction that was in progress.",
+          "id": 4,
+          "max_score": 5,
+          "name": "File Enumeration and Type Variety",
+          "quality_note": "Four distinct format families meet the greater-than-three threshold across the complete submitted datasheet. Their inclusion does not imply that all four were already available in the enclave.",
+          "score": 5,
+          "score_label": "Excellent: more than three documented formats",
+          "score_type": "numeric",
+          "semantic_analysis": "OMOP is treated as a data model and OHNLP as a toolkit, rather than counting either as an additional file type. Modality names alone are not counted as formats.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/conforms_to",
+                  "quote": "OMOP; DICOM; WFDB; OHNLP; EDF+ and Persyst"
+                },
+                {
+                  "path": "/instances/7/description"
+                },
+                {
+                  "path": "/instances/8/description"
+                },
+                {
+                  "path": "/instances/9/description"
+                },
+                {
+                  "path": "/distribution_formats"
+                }
+              ],
+              "considered": [],
+              "counts": [],
+              "evidence": "The record explicitly documents DICOM, WFDB, EDF+ and Persyst, while preserving the incomplete EEG extraction status.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Presence of file size or dimensional metadata, including instance counts and data splits.",
+          "evidence": "The patient-admission instance has counts: 50000. Its description also reports 1.6 billion EHR OMOP rows, 7,642 admissions with radiology data and 23 Tb of waveform data.",
+          "id": 5,
+          "max_score": 1,
+          "name": "Data File Size Availability",
+          "quality_note": "The explicit numeric admission count independently satisfies the pass criterion.",
+          "score": 1,
+          "score_label": "Pass",
+          "score_type": "pass_fail",
+          "semantic_analysis": "Admissions are not equated with unique patients, and the waveform quantity is not converted into exact bytes. The planned holdout is not treated as an existing split.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/instances/0/counts"
+                },
+                {
+                  "path": "/instances/0/description"
+                },
+                {
+                  "path": "/instances/0/source_caveats"
+                }
+              ],
+              "considered": [
+                "/splits"
+              ],
+              "counts": [],
+              "evidence": "A structured count of 50,000 patient admissions supplies numeric dimensional metadata.",
+              "path": "#",
+              "score": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category_max": 21,
+      "category_score": 14,
+      "name": "Metadata Quality & Content",
+      "questions": [
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Presence of persistent identifiers or URLs and hosting platform information.",
+          "evidence": "Both id and page identify https://chorus4ai.org/ as the dataset's landing location.",
+          "id": 6,
+          "max_score": 1,
+          "name": "Dataset Identification Metadata",
+          "quality_note": "The documented landing URL meets the explicit identifier-or-link pass anchor. A dataset DOI and named publishing repository are not supplied.",
+          "score": 1,
+          "score_label": "Pass",
+          "score_type": "pass_fail",
+          "semantic_analysis": "The project landing URL is not presented as a DOI or immutable release identifier. Hosting is described only as a cloud enclave, and URL reachability was not checked.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/id",
+                  "quote": "https://chorus4ai.org/"
+                },
+                {
+                  "path": "/page"
+                }
+              ],
+              "considered": [
+                "/distribution_formats",
+                "/source_caveats"
+              ],
+              "counts": [],
+              "evidence": "A dataset landing URL is populated in both identification fields.",
+              "path": "#",
+              "score": 1
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Presence of funding sources, grants, institutional sponsors and creator affiliations.",
+          "evidence": "NIH funding is linked to OT2OD032701, with the full project number, award amount and project dates. All six creators have institutional affiliations.",
+          "id": 7,
+          "max_score": 5,
+          "name": "Funding and Acknowledgements Completeness",
+          "quality_note": "The record satisfies the grants-plus-affiliations anchor and adds useful funding context.",
+          "score": 5,
+          "score_label": "Excellent: funding award and creator affiliations documented",
+          "score_type": "numeric",
+          "semantic_analysis": "OT2OD032701 and 1OT2OD032701-01 are structurally plausible NIH award identifiers. The documented critical-care infrastructure purposes align with the described award goals.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/funders/0/grants/0/grant_number",
+                  "quote": "OT2OD032701"
+                },
+                {
+                  "path": "/funders"
+                },
+                {
+                  "path": "/creators"
+                }
+              ],
+              "considered": [
+                "/purposes"
+              ],
+              "counts": [
+                {
+                  "claimed": 6,
+                  "path": "/creators"
+                }
+              ],
+              "evidence": "NIH grant details and affiliations for six named creators are supplied.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "human_subjects was not independently declared; unknown remains scored and in the denominator.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Ethical oversight and privacy safeguards appropriate to the subjects, data and jurisdiction.",
+          "evidence": "is_deidentified describes a planned approach to limiting re-identification and imaging de-identification in progress. No ethics review, consent or waiver basis, participant privacy assessment or data protection impact assessment is documented.",
+          "id": 8,
+          "max_score": 5,
+          "name": "Ethical and Privacy Declarations",
+          "quality_note": "The three-point anchor requires basic oversight and privacy safeguards. The record does not establish oversight or describe an implemented deidentification method. Access controls and note tokenization provide relevant privacy context but do not satisfy that threshold.",
+          "score": 0,
+          "score_label": "Insufficient: basic oversight and safeguards threshold not met",
+          "score_type": "numeric",
+          "semantic_analysis": "The presence of is_deidentified is not interpreted as a claim that all data are already deidentified. The deduction concerns inadequate documentation, not an allegation that review or consent was absent in practice.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/ethical_reviews"
+                },
+                {
+                  "path": "/human_subject_research"
+                },
+                {
+                  "path": "/informed_consent"
+                },
+                {
+                  "path": "/participant_privacy"
+                },
+                {
+                  "path": "/participant_compensation"
+                },
+                {
+                  "path": "/at_risk_populations"
+                },
+                {
+                  "path": "/data_protection_impacts"
+                },
+                {
+                  "path": "/regulatory_restrictions/hipaa_compliant"
+                },
+                {
+                  "path": "/regulatory_restrictions/other_compliance"
+                },
+                {
+                  "path": "/regulatory_restrictions/governance_committee_contact"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/is_deidentified/deidentification_details",
+                  "quote": "de-identification of imaging was in process for the larger cohort."
+                }
+              ],
+              "considered": [
+                "/is_deidentified",
+                "/license_and_use_terms",
+                "/data_governance",
+                "/preprocessing_strategies",
+                "/instances/6"
+              ],
+              "counts": [],
+              "evidence": "Only planned or in-progress deidentification is documented in the ethics fields; oversight and the consent or waiver basis are absent.",
+              "path": "#",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Documentation of access and license terms, restrictions, confidentiality, regulatory obligations and governance contacts.",
+          "evidence": "Access is controlled. Training-program participants must sign a licensing agreement, register and use a .edu email address. General access-request email contacts are also supplied.",
+          "id": 9,
+          "max_score": 5,
+          "name": "Access Requirements and Governance Documentation",
+          "quality_note": "The agreement and registration requirements establish basic restrictions. Dataset license provisions, confidentiality classification, applicable regulatory obligations and the authority responsible for governance are insufficiently specified for five points.",
+          "score": 3,
+          "score_label": "Good: basic access conditions documented",
+          "score_type": "numeric",
+          "semantic_analysis": "Registration, signing an agreement and receiving access are distinct steps. The GitHub project's MIT license is correctly not applied to the dataset.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/ip_restrictions"
+                },
+                {
+                  "path": "/regulatory_restrictions"
+                },
+                {
+                  "path": "/regulatory_restrictions/confidentiality_level"
+                },
+                {
+                  "path": "/data_protection_impacts"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/license_and_use_terms/license_terms",
+                  "quote": "Controlled access."
+                },
+                {
+                  "path": "/data_governance/access_review_process"
+                }
+              ],
+              "considered": [
+                "/license_and_use_terms",
+                "/source_caveats"
+              ],
+              "counts": [],
+              "evidence": "Controlled access and a signed agreement are documented, but detailed governance and confidentiality terms are missing.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "shared_dataset was not independently declared; unknown remains scored and in the denominator.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Documentation of standard formats, schema or ontology conformance and integration capability.",
+          "evidence": "The record documents OMOP, DICOM and waveform standards, a datasheet schema URI, semantic mappings to international standards, clinical validation procedures and repositories supporting interoperable data extraction and delivery.",
+          "id": 10,
+          "max_score": 5,
+          "name": "Interoperability, Standardization, and Cross-Platform Integration",
+          "quality_note": "Standard formats, OMOP Common Data Model standardization and documented mapping resources together satisfy the five-point anchor.",
+          "score": 5,
+          "score_label": "Excellent: standards, data-model conformance and integration resources",
+          "score_type": "numeric",
+          "semantic_analysis": "The datasheet schema URI describes metadata conformance; clinical-data schema evidence comes separately from OMOP standardization. Standards and mapping resources support interoperability without independently proving AI readiness.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/distribution_formats"
+                },
+                {
+                  "path": "/conforms_to_schema"
+                },
+                {
+                  "path": "/conforms_to"
+                },
+                {
+                  "path": "/external_resources/0/description",
+                  "quote": "validated semantic mappings for connecting clinical data in various source formats to international standards"
+                },
+                {
+                  "path": "/preprocessing_strategies/0"
+                },
+                {
+                  "path": "/preprocessing_strategies/1"
+                }
+              ],
+              "considered": [
+                "/external_resources",
+                "/conforms_to_standard"
+              ],
+              "counts": [],
+              "evidence": "The record combines recognized standards with OMOP mapping and integration documentation.",
+              "path": "#",
+              "score": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category_max": 25,
+      "category_score": 12,
+      "name": "Technical Documentation",
+      "questions": [
+        {
+          "applicability_evidence": "data_processing was not independently declared; unknown remains scored and in the denominator.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Documentation of preprocessing, cleaning, labeling, annotation and imputation, including software and workflow details.",
+          "evidence": "Preprocessing covers standardization, semantic mapping and OHNLP clinical-note tokenization. Labeling is explicitly described as planned. The GitHub organization supplies related tooling and SOP resources.",
+          "id": 11,
+          "max_score": 5,
+          "name": "Tool and Software Transparency",
+          "quality_note": "At least one substantive strategy and tool are documented. Software versions, reproducible workflow details, cleaning procedures and annotation-quality information are not sufficiently specified for five points.",
+          "score": 3,
+          "score_label": "Good: processing strategies and a named toolkit",
+          "score_type": "numeric",
+          "semantic_analysis": "The OHNLP identifier is a project-local fragment, not a versioned software release link. Planned labeling is not credited as an implemented annotation pipeline.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/cleaning_strategies"
+                },
+                {
+                  "path": "/machine_annotation_tools"
+                },
+                {
+                  "path": "/annotation_analyses"
+                },
+                {
+                  "path": "/imputation_protocols"
+                },
+                {
+                  "path": "/missing_data_documentation"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/preprocessing_strategies/2/preprocessing_details",
+                  "quote": "Clinical notes are extracted and tokenized using the OHNLP toolkit."
+                },
+                {
+                  "path": "/labeling_strategies"
+                }
+              ],
+              "considered": [
+                "/preprocessing_strategies",
+                "/external_resources"
+              ],
+              "counts": [],
+              "evidence": "Standardization, semantic mapping and OHNLP tokenization are described without comprehensive versioned workflows.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "data_collection was not independently declared; unknown remains scored and in the denominator.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Completeness of collection mechanisms, acquisition methods, collectors, timeframes and raw sources.",
+          "evidence": "Collection is retrospective. Site data managers follow SOPs for extraction and contribution. Sources include PACS, bedside monitors with gateway or middleware, and a hospital EEG database.",
+          "id": 12,
+          "max_score": 5,
+          "name": "Collection Protocol Clarity",
+          "quality_note": "The record identifies mechanisms, collectors and source systems but lacks collection windows and sufficiently detailed acquisition procedures.",
+          "score": 3,
+          "score_label": "Good: partial collection protocol",
+          "score_type": "numeric",
+          "semantic_analysis": "Webinar dates, website snapshots and grant dates are not substituted for the dates covered by the underlying clinical records.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/acquisition_methods"
+                },
+                {
+                  "path": "/collection_timeframes"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/collection_mechanisms"
+                },
+                {
+                  "path": "/data_collectors"
+                },
+                {
+                  "path": "/raw_data_sources"
+                }
+              ],
+              "considered": [],
+              "counts": [
+                {
+                  "claimed": 3,
+                  "path": "/raw_data_sources"
+                }
+              ],
+              "evidence": "Retrospective extraction, site data managers and three raw-source entries are documented; collection timeframes are absent.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "shared_dataset was not independently declared; unknown remains scored and in the denominator.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Documentation of version identifiers, change history, maintenance, preservation and durable access.",
+          "evidence": "updates describes anticipated expansion and work in progress. source_caveats explicitly states that no dataset DOI or version identifier appears in the sources.",
+          "id": 13,
+          "max_score": 5,
+          "name": "Version History, Maintenance, and Sustainability",
+          "quality_note": "The record does not meet the three-point requirement for a version number, basic access information and a persistent identifier. It also lacks a maintenance or preservation commitment.",
+          "score": 0,
+          "score_label": "Insufficient: release versioning and sustainability not documented",
+          "score_type": "numeric",
+          "semantic_analysis": "A current-versus-anticipated size comparison is not a release history. Access contacts and a program manager are not automatically maintainers with documented preservation responsibilities.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/version"
+                },
+                {
+                  "path": "/version_access"
+                },
+                {
+                  "path": "/errata"
+                },
+                {
+                  "path": "/maintainers"
+                },
+                {
+                  "path": "/doi"
+                },
+                {
+                  "path": "/publisher"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/updates"
+                },
+                {
+                  "path": "/source_caveats",
+                  "quote": "No dataset DOI or version identifier appears in the sources."
+                }
+              ],
+              "considered": [
+                "/page",
+                "/notes",
+                "/data_governance"
+              ],
+              "counts": [],
+              "evidence": "Expansion information is present, but no release version or sustainability plan is documented.",
+              "path": "#",
+              "score": 0
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Citation and documentation links identifying the dataset and related publications or resources.",
+          "evidence": "Two external-resource entries identify the chorus-ai GitHub organization and the Bridge2AI CHoRUS webpage. No formal dataset citation is supplied.",
+          "id": 14,
+          "max_score": 5,
+          "name": "Associated Publications",
+          "quality_note": "Distinct non-publication resources qualify for three points. Five points additionally requires a formal citation for the dataset.",
+          "score": 3,
+          "score_label": "Good: external references without a formal dataset citation",
+          "score_type": "numeric",
+          "semantic_analysis": "The statement that data are used for publications does not identify a publication. The two external resources count despite not being journal articles.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/citation"
+                },
+                {
+                  "path": "/doi"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/external_resources"
+                }
+              ],
+              "considered": [
+                "/existing_uses"
+              ],
+              "counts": [
+                {
+                  "claimed": 2,
+                  "path": "/external_resources"
+                }
+              ],
+              "evidence": "Two distinct external resources are documented, but a recommended dataset citation is absent.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "human_subjects was not independently declared; unknown remains scored and in the denominator.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Documentation of participant representation, recruitment, sampling and relevant subgroups.",
+          "evidence": "The dataset includes 50,000 admissions from ICU, PICU and NICU settings. Demographics is named as an instance type, and balanced, diverse sampling is described as planned.",
+          "id": 15,
+          "max_score": 5,
+          "name": "Human Subject Representation",
+          "quality_note": "The care settings and admission count provide general population information, but demographic distributions, subgroup counts and inclusion or exclusion criteria are absent.",
+          "score": 3,
+          "score_label": "Good: broad clinical population described",
+          "score_type": "numeric",
+          "semantic_analysis": "A demographics modality does not document the cohort's demographics. Planned sampling does not demonstrate achieved representativeness, and admission counts are not unique-person counts.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/subpopulations"
+                },
+                {
+                  "path": "/at_risk_populations"
+                },
+                {
+                  "path": "/missing_data_documentation"
+                },
+                {
+                  "path": "/subsets/is_data_split"
+                },
+                {
+                  "path": "/subsets/is_subpopulation"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/instances/0/description",
+                  "quote": "50,000 patient admissions from ICU, PICU, and NICU"
+                },
+                {
+                  "path": "/instances/1"
+                },
+                {
+                  "path": "/sampling_strategies"
+                }
+              ],
+              "considered": [
+                "/instances",
+                "/description"
+              ],
+              "counts": [],
+              "evidence": "Clinical care settings and admission counts are documented without detailed population characterization.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category_max": 21,
+      "category_score": 10,
+      "name": "FAIRness & Accessibility",
+      "questions": [
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Dataset identifiers and external links for access and documentation.",
+          "evidence": "The record supplies https://chorus4ai.org/ and https://github.com/chorus-ai as external locations.",
+          "id": 16,
+          "max_score": 1,
+          "name": "Findability (Persistent Links)",
+          "quality_note": "Explicit, syntactically plausible HTTPS links meet the documented-link criterion. Live reachability was not checked.",
+          "score": 1,
+          "score_label": "Pass",
+          "score_type": "pass_fail",
+          "semantic_analysis": "The scheme-less Bridge2AI reference is a separate formatting limitation and does not negate the other complete HTTPS URLs.",
+          "unit_scores": [
+            {
+              "absent": [],
+              "cited": [
+                {
+                  "path": "/page"
+                },
+                {
+                  "path": "/id"
+                },
+                {
+                  "path": "/external_resources/0/external_resources/0",
+                  "quote": "https://github.com/chorus-ai"
+                }
+              ],
+              "considered": [
+                "/external_resources"
+              ],
+              "counts": [],
+              "evidence": "Complete HTTPS links identify the project landing page and associated repository organization.",
+              "path": "#",
+              "score": 1
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "shared_dataset was not independently declared; unknown remains scored and in the denominator.",
+          "applicability_status": "unknown",
+          "applicable": true,
+          "description": "Clarity of the platform, authorization steps, access policy and acquisition route.",
+          "evidence": "Training participants register with identifying information, sign a licensing agreement, need a .edu email and receive email notification after access and compute are provisioned. General requests can be sent to two named email contacts.",
+          "id": 17,
+          "max_score": 5,
+          "name": "Accessibility (Access Mechanism)",
+          "quality_note": "The access tier is clear, but the record does not provide the registration or enclave entry URL, login instructions, agreement text or a complete process for users outside the training program.",
+          "score": 3,
+          "score_label": "Good: actionable but incomplete access route",
+          "score_type": "numeric",
+          "semantic_analysis": "The program-specific requirements are not generalized to all users. A public-availability goal does not imply unauthenticated access.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/download_url"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/distribution_formats"
+                },
+                {
+                  "path": "/license_and_use_terms"
+                },
+                {
+                  "path": "/data_governance/access_review_process",
+                  "quote": "an email is sent once access is granted and compute is provisioned."
+                }
+              ],
+              "considered": [
+                "/existing_uses",
+                "/page"
+              ],
+              "counts": [],
+              "evidence": "Registration, an agreement, eligibility information and request contacts are present, but a complete platform access path is not supplied.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "License and use guidance, including prohibited or discouraged uses and social-impact risks with mitigations.",
+          "evidence": "A signed licensing agreement is required for training-program access. Intended use is building ML and AI models to improve critical-care outcomes.",
+          "id": 18,
+          "max_score": 5,
+          "name": "Reusability, Use Guidance, and Social Impact",
+          "quality_note": "The record supplies basic use guidance and an agreement requirement. It does not supply substantive license permissions, prohibited or discouraged uses, or social-impact analysis and mitigation strategies.",
+          "score": 3,
+          "score_label": "Good: basic licensing condition and intended use",
+          "score_type": "numeric",
+          "semantic_analysis": "Desirable clinical outcomes are a purpose, not an assessment of downstream harms. The GitHub MIT license is explicitly distinguished from dataset licensing.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/prohibited_uses"
+                },
+                {
+                  "path": "/discouraged_uses"
+                },
+                {
+                  "path": "/future_use_impacts"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/license_and_use_terms"
+                },
+                {
+                  "path": "/intended_uses/0/description",
+                  "quote": "Building machine-learning (ML) and artificial intelligence (AI)-derived models to improve the care and outcomes of patients requiring critical care."
+                }
+              ],
+              "considered": [
+                "/intended_uses",
+                "/source_caveats"
+              ],
+              "counts": [],
+              "evidence": "An agreement requirement and critical-care modeling purpose are documented without comprehensive reuse guidance.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Documentation of origins, updates, derivation paths, processing lineage and entity-activity-agent relationships.",
+          "evidence": "Raw sources identify PACS, bedside monitoring infrastructure and an EEG database. The record describes site data managers, mapping and tokenization, ongoing expansion and a planned holdout test set.",
+          "id": 19,
+          "max_score": 5,
+          "name": "Data Integrity, Provenance Graph, and Quality",
+          "quality_note": "Source and update metadata support the intermediate band, but they do not establish complete, traceable entity-activity-agent relationships and derivation paths for a defined release.",
+          "score": 3,
+          "score_label": "Good: partial provenance and update information",
+          "score_type": "numeric",
+          "semantic_analysis": "Textual provenance is acceptable. The limitation is incomplete lineage, not the absence of a formal PROV-O serialization. Planned splits are not treated as existing validation partitions.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/version_access"
+                },
+                {
+                  "path": "/errata"
+                },
+                {
+                  "path": "/was_derived_from"
+                },
+                {
+                  "path": "/parent_datasets"
+                },
+                {
+                  "path": "/missing_data_documentation"
+                },
+                {
+                  "path": "/subsets/is_data_split"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/raw_data_sources"
+                },
+                {
+                  "path": "/updates"
+                },
+                {
+                  "path": "/splits"
+                }
+              ],
+              "considered": [
+                "/preprocessing_strategies",
+                "/data_collectors",
+                "/external_resources"
+              ],
+              "counts": [],
+              "evidence": "Origins and processing context are documented without complete release-specific derivation and quality lineage.",
+              "path": "#",
+              "score": 3
+            }
+          ]
+        },
+        {
+          "applicability_evidence": "This item applies to every dataset; missing bias documentation cannot establish non-applicability.",
+          "applicability_status": "applicable",
+          "applicable": true,
+          "description": "Documentation of known biases, limitations and their effects on intended or foreseeable uses.",
+          "evidence": "known_biases and future_use_impacts are absent. Sampling statements describe planned balance and diversity, while source_caveats discusses source interpretation and release uncertainty.",
+          "id": 20,
+          "max_score": 5,
+          "name": "Bias Documentation and Responsible AI Alignment",
+          "quality_note": "No actual bias mechanism, affected population, fairness result or effect on downstream use is identified. The three-point basic-bias-identification threshold is not met.",
+          "score": 0,
+          "score_label": "Absent: bias assessment",
+          "score_type": "numeric",
+          "semantic_analysis": "An equity objective and careful source caveats do not substitute for documenting dataset biases or their implications.",
+          "unit_scores": [
+            {
+              "absent": [
+                {
+                  "path": "/known_biases"
+                },
+                {
+                  "path": "/future_use_impacts"
+                }
+              ],
+              "cited": [
+                {
+                  "path": "/sampling_strategies/0/strategies",
+                  "quote": "Planned, not reported as applied"
+                }
+              ],
+              "considered": [
+                "/source_caveats",
+                "/purposes"
+              ],
+              "counts": [],
+              "evidence": "The record describes diversity aspirations without identifying or assessing dataset biases.",
+              "path": "#",
+              "score": 0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "d4d_file": "data/d4d_concatenated/claudecode_release/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2/CHORUS_d4d.yaml",
+  "evaluation_model": {
+    "basis": "recorded Codex session turn_context",
+    "effort": "ultra",
+    "name": "gpt-6-astra",
+    "selection_basis": "explicit override",
+    "service_tier_observed": null,
+    "service_tier_requested": "fast",
+    "session_logs": [
+      {
+        "cli_version": "0.172.0",
+        "id": "01a21593-f5ee-7bb1-b936-a3936ee6ce48",
+        "owned_history_start_ordinal": 1,
+        "owned_turn_ids": [
+          "01a21593-fa9c-7740-9db5-e98681c0b123"
+        ],
+        "parent_thread_id": null,
+        "path": "codex-home/sessions/2026/11/25/rollout-2026-11-25T17-59-08-01a21593-f5ee-7bb1-b936-a3936ee6ce48.jsonl",
+        "sha256": "2eeb25db3b01e70ec5ff5e9d7a1d08a2d248108b7b1c572aec2094698b318d96"
+      }
+    ],
+    "thread_id": "01a21593-f5ee-7bb1-b936-a3936ee6ce48"
+  },
+  "evaluation_scope": {
+    "collection_metadata_inherited": false,
+    "policy": "single_dataset",
+    "selection_policy": "root_dataset_v1",
+    "units": [
+      {
+        "id": "https://chorus4ai.org/",
+        "path": "#"
+      }
+    ]
+  },
+  "evaluation_timestamp": "2026-11-25T00:00:00-08:00",
+  "instrument_id": "2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6",
+  "label": "2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2",
+  "metadata": {
+    "context_sha256": "fca403729b83dda36a67c4b749455b0fd864ba992e0e40b9a0f5c65bc039bfad",
+    "evaluation_timestamp_note": "Only the supplied evaluation date was available; time is normalized to midnight in America/Los_Angeles and is not an observed execution time.",
+    "evidence_authority_sha256": "0605c742c61f2cc4e13de907f8e09752bde5ebd08d173b31d837c273a4bf3872",
+    "input_sha256": "d7217a29e64136b551540446d3490f826a6acca3ebf6f1d235f268aff9db70e0",
+    "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+    "rubric_sha256": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
+    "scope_context_sha256": "0f0f60f282f7ab9bd773923009f8ea44f5b22449406ac722e14de80754be2d0c",
+    "validation_note": "No commands, browsing, external files or validation tools were used. Controller validation is pending."
+  },
+  "method": "claudecode_release",
+  "model": {
+    "evaluation_type": "semantic_llm_judge",
+    "evaluator_model": "unknown",
+    "identity_note": "The controller will stamp observed runtime model identity from session logs; the agent frontmatter was not used as runtime evidence.",
+    "name": "gpt-6-astra",
+    "temperature": null,
+    "temperature_note": "Not exposed by this runtime; no deterministic-score guarantee."
+  },
+  "overall_score": {
+    "adjusted_max_points": 88,
+    "excluded_item_ids": [],
+    "excluded_max_points": 0,
+    "fixed_percentage": 62.5,
+    "max_points": 88,
+    "normalized_percentage": 62.5,
+    "questions_not_applicable": 0,
+    "total_points": 55
+  },
+  "project": "CHORUS",
+  "rubric": "rubric20-semantic",
+  "scorer_instrument": {
+    "id": "2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6",
+    "prompt_sha256": "3d981c8ceb2538f433ec3bb4bd78aa2abb0aed978a8462265520ef6f10c6b268",
+    "runner_sha256": "b2a5c0995d891d4c5179509834b460390b1d921d78b0191965fc4ea3f91c21b9"
+  },
+  "semantic_analysis": {
+    "consistency_checks": {
+      "details": [
+        {
+          "check": "Funding agency and grant details",
+          "explanation": "The NIH funder is accompanied by structurally plausible NIH award identifiers and award details.",
+          "result": "passed"
+        },
+        {
+          "check": "Funding and purpose alignment",
+          "explanation": "The stated award goals align with the critical-care infrastructure and clinical modeling purposes.",
+          "result": "passed"
+        },
+        {
+          "check": "Admission count compatibility",
+          "explanation": "An earlier lower bound above 45,000 admissions is compatible with an undated 50,000-admission snapshot.",
+          "result": "passed"
+        },
+        {
+          "check": "Collaboration and contributing-site counts",
+          "explanation": "Twenty collaborating centers and fourteen contributing centers are explicitly distinguished.",
+          "result": "passed"
+        },
+        {
+          "check": "Planned versus available modalities",
+          "explanation": "EEG extraction and broader imaging deidentification remain qualified as in progress.",
+          "result": "passed"
+        },
+        {
+          "check": "Public-availability goal and current access restrictions",
+          "explanation": "The public-availability statement is a project goal; current controlled access is separately documented.",
+          "result": "passed"
+        },
+        {
+          "check": "Deidentification method detail",
+          "explanation": "The deidentification field provides intentions and status without specifying a method.",
+          "result": "warning"
+        },
+        {
+          "check": "Deidentification and participant privacy documentation",
+          "explanation": "Participant privacy protections and residual re-identification risks are not documented in the corresponding fields.",
+          "result": "warning"
+        },
+        {
+          "check": "Snapshot and release identification",
+          "explanation": "The website snapshot is undated and lacks a release identifier, limiting temporal reconciliation and reproducibility.",
+          "result": "warning"
+        }
+      ],
+      "failed": 0,
+      "passed": 6,
+      "warnings": 3
+    },
+    "correctness_validations": {
+      "doi_format": "not_present",
+      "grant_number_format": "Structurally plausible NIH identifiers: OT2OD032701 and 1OT2OD032701-01. Award authenticity was not independently checked.",
+      "rrid_format": "not_present",
+      "url_validity": "The explicit HTTPS URLs have plausible syntax. www.bridge2ai.org/chorus lacks a URI scheme. Network reachability and persistence were not checked."
+    },
+    "issues_detected": [
+      {
+        "category": "variables_metadata",
+        "description": "Five of fourteen Q1 fields are absent, including variable definitions and confidentiality classification.",
+        "fields_involved": [
+          "doi",
+          "resources",
+          "parent_datasets",
+          "variables",
+          "regulatory_restrictions.confidentiality_level"
+        ],
+        "item_ids": [
+          "Q1"
+        ],
+        "recommendation": "Provide variable metadata, confidentiality classification and a release identifier; document resource or parent relationships where relevant without inventing a hierarchy.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "consent_ethics",
+        "description": "Planned or in-progress deidentification does not establish the basic oversight and implemented safeguards required by the three-point anchor. Ethics review and consent or waiver documentation are absent.",
+        "fields_involved": [
+          "ethical_reviews",
+          "human_subject_research",
+          "informed_consent",
+          "is_deidentified",
+          "participant_privacy",
+          "participant_compensation",
+          "at_risk_populations",
+          "data_protection_impacts"
+        ],
+        "item_ids": [
+          "Q8"
+        ],
+        "recommendation": "Document the applicable oversight decision, consent or waiver basis, implemented deidentification methods, residual privacy risks and protections appropriate to the included adult, pediatric and neonatal populations.",
+        "score_effect": "lowered",
+        "severity": "high",
+        "type": "completeness"
+      },
+      {
+        "category": "privacy_regulatory",
+        "description": "Controlled access and a licensing agreement are described, but substantive permissions, confidentiality classification, applicable regulatory obligations and governance authority are not defined.",
+        "fields_involved": [
+          "license_and_use_terms",
+          "ip_restrictions",
+          "regulatory_restrictions",
+          "data_protection_impacts",
+          "data_governance"
+        ],
+        "item_ids": [
+          "Q9"
+        ],
+        "recommendation": "Identify the governing dataset agreement, its restrictions, the confidentiality classification, applicable compliance framework and responsible governance authority.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "processing_provenance",
+        "description": "Processing strategies and OHNLP are named without software versions or sufficient workflow details to reproduce the transformations.",
+        "fields_involved": [
+          "preprocessing_strategies",
+          "labeling_strategies",
+          "cleaning_strategies",
+          "annotation_analyses",
+          "imputation_protocols",
+          "missing_data_documentation"
+        ],
+        "item_ids": [
+          "Q11"
+        ],
+        "recommendation": "Supply versioned software and workflow references, inputs and outputs, cleaning decisions, and the status and quality assessment of labeling or imputation where used.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "processing_provenance",
+        "description": "Retrospective collection, collectors and source systems are documented, but clinical collection periods and detailed acquisition methods are missing.",
+        "fields_involved": [
+          "collection_mechanisms",
+          "data_collectors",
+          "raw_data_sources",
+          "acquisition_methods",
+          "collection_timeframes"
+        ],
+        "item_ids": [
+          "Q12"
+        ],
+        "recommendation": "Specify the clinical date ranges, participating-site coverage and acquisition procedures or directly identified SOP versions for each modality.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "temporal_version",
+        "description": "Anticipated growth and work-in-progress updates do not provide a version identifier, release history or preservation commitment.",
+        "fields_involved": [
+          "version",
+          "version_access",
+          "errata",
+          "updates",
+          "maintainers",
+          "doi",
+          "publisher"
+        ],
+        "item_ids": [
+          "Q13"
+        ],
+        "recommendation": "Identify the documented release and its date, provide version access and change history, and name maintainers and the preservation arrangements.",
+        "score_effect": "lowered",
+        "severity": "high",
+        "type": "completeness"
+      },
+      {
+        "category": "attribution",
+        "description": "Related documentation resources are identified, but the dataset has no formal recommended citation.",
+        "fields_involved": [
+          "citation",
+          "external_resources",
+          "doi"
+        ],
+        "item_ids": [
+          "Q14"
+        ],
+        "recommendation": "Add a dataset citation identifying its title, authors or publishing organization, release and persistent location.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "variables_metadata",
+        "description": "Admission counts and care settings do not provide demographic distributions, subgroup counts or eligibility criteria.",
+        "fields_involved": [
+          "instances",
+          "subpopulations",
+          "sampling_strategies",
+          "at_risk_populations",
+          "missing_data_documentation"
+        ],
+        "item_ids": [
+          "Q15"
+        ],
+        "recommendation": "Describe the represented cohort, inclusion and exclusion criteria, relevant subgroup distributions and demographic missingness, distinguishing admissions from unique individuals.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "format_access",
+        "description": "The training-program access steps and general request contacts are useful, but the platform entry point and complete access procedure for other users are unspecified.",
+        "fields_involved": [
+          "distribution_formats",
+          "license_and_use_terms",
+          "data_governance",
+          "download_url"
+        ],
+        "item_ids": [
+          "Q17"
+        ],
+        "recommendation": "Link the registration and enclave entry points, identify the governing agreement, and distinguish eligibility and authorization steps for training participants and other researchers.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "license_use_terms",
+        "description": "The intended clinical modeling purpose and agreement requirement do not define comprehensive reuse permissions, use restrictions or downstream social risks and mitigations.",
+        "fields_involved": [
+          "license_and_use_terms",
+          "intended_uses",
+          "prohibited_uses",
+          "discouraged_uses",
+          "future_use_impacts"
+        ],
+        "item_ids": [
+          "Q18"
+        ],
+        "recommendation": "Document the substantive dataset terms, permitted and inappropriate applications, foreseeable harms and corresponding mitigation measures.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "processing_provenance",
+        "description": "Source systems, broad processing descriptions and expansion updates do not establish complete derivation paths for identifiable released data.",
+        "fields_involved": [
+          "raw_data_sources",
+          "updates",
+          "splits",
+          "was_derived_from",
+          "version_access",
+          "missing_data_documentation",
+          "preprocessing_strategies",
+          "data_collectors"
+        ],
+        "item_ids": [
+          "Q19"
+        ],
+        "recommendation": "Document source entities, responsible agents, transformation activities and resulting release entities in connected text or a provenance graph, including quality and missing-data handling.",
+        "score_effect": "lowered",
+        "severity": "medium",
+        "type": "completeness"
+      },
+      {
+        "category": "bias_quality",
+        "description": "Diversity goals are stated without identifying known biases, measuring fairness or explaining consequences for intended uses.",
+        "fields_involved": [
+          "known_biases",
+          "future_use_impacts",
+          "sampling_strategies"
+        ],
+        "item_ids": [
+          "Q20"
+        ],
+        "recommendation": "Assess and document supported selection, measurement and representation biases, their affected populations and downstream effects, with mitigation and fairness analyses where available.",
+        "score_effect": "lowered",
+        "severity": "high",
+        "type": "completeness"
+      },
+      {
+        "category": "format_access",
+        "description": "The external reference www.bridge2ai.org/chorus lacks a URI scheme. Other complete HTTPS links satisfy the link-based pass criteria.",
+        "fields_involved": [
+          "external_resources"
+        ],
+        "item_ids": [],
+        "recommendation": "Provide a verified absolute URL for the Bridge2AI CHoRUS resource.",
+        "score_effect": "noted_only",
+        "severity": "low",
+        "type": "correctness"
+      }
+    ],
+    "semantic_insights": [
+      "The record consistently distinguishes 2022 project plans, September 2025 webinar observations and the undated website snapshot.",
+      "The website's 50,000 admissions and the webinar's earlier lower bound of over 45,000 admissions are not inherently contradictory.",
+      "Twenty collaborating academic centers and fourteen data-acquisition centers describe different organizational roles.",
+      "The record explicitly avoids equating patient counts with admission counts and avoids treating the GitHub project's MIT license as the dataset license.",
+      "Current enclave availability, local retention of clinical notes and incomplete imaging or EEG processing are qualified rather than presented as uniformly complete.",
+      "OMOP mapping, modality standards, tooling and SOP descriptions provide substantive interoperability evidence.",
+      "Documentation gaps do not establish that the underlying dataset lacks ethical oversight, privacy protections or quality controls; they limit what a reader can verify from this record."
+    ]
+  },
+  "version": "6.0"
+}
