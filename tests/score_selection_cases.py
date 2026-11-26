@@ -43,12 +43,14 @@ def report(result, name):
 
 
 class Case:
-    def __init__(self, tmp):
+    def __init__(self, tmp, *, manifest_projects=("P", "Q")):
         self.tmp = Path(tmp).resolve()
         self.corpus = self.tmp / "corpus"
         self.concat = self.corpus / "data/d4d_concatenated"
         self.receipts = self.tmp / "receipts"
         self.receipts.mkdir(parents=True, exist_ok=True)
+        self.manifest = self.tmp / "source-manifest.json"
+        write(self.manifest, {"projects": {name: {"sources": []} for name in manifest_projects}})
         self.entries = {}
 
     def record(self, project, label, slots=4):
@@ -192,6 +194,7 @@ class Case:
                 command.extend(["--score-receipts", str(root)])
         command.extend(extra)
         with patch.object(model, "CONCAT_DIR", self.concat), \
+                patch("data_sheets_schema.registry.selected_manifest", lambda context=None: self.manifest), \
                 patch.object(module, "_validates", lambda path: (Path(path).parent.name not in invalid,
                              "invalid (full)" if Path(path).parent.name in invalid else "valid")), \
                 patch("data_sheets_schema.cli.provenance._require_repo_root_cwd", lambda name: None):

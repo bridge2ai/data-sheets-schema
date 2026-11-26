@@ -263,6 +263,81 @@ def test_all_refusals_require_exactly_one_declared_replacement(tmp_path):
         assert rows[0]["rubrics"]["rubric10"]["eligibility_problems"], change
 
 
+def test_every_nonaccepted_matching_run_is_counted_without_reading_its_output(tmp_path, monkeypatch):
+    from data_sheets_schema.score_selection import load_evidence_index, pooled_variation
+
+    for kind, status in (("missing", None), ("started", "STARTED"), ("unknown", "INTERRUPTED"),
+                         ("no_status", None), ("malformed_status", {"unexpected": True}),
+                         ("malformed_receipt", None)):
+        case = scenario(tmp_path / kind)
+        original = add_refusal(case, name="earlier-attempt")
+        forbidden = original["plan_path"].parent / "candidate_evaluation.json"
+        write(forbidden, {"must_not_be_read": "not a published measurement"})
+        original["plan"]["output"] = str(forbidden)
+        write(original["plan_path"], original["plan"])
+        original["receipt"]["plan_sha256"] = sha(json.dumps(original["plan"], sort_keys=True).encode())
+        if kind == "missing":
+            original["receipt_path"].unlink()
+        elif kind == "malformed_receipt":
+            original["receipt_path"].write_text("{malformed\n")
+        else:
+            if kind == "no_status":
+                original["receipt"].pop("status")
+            else:
+                original["receipt"]["status"] = status
+            write(original["receipt_path"], original["receipt"])
+        original_read = Path.read_bytes
+
+        def guarded(path):
+            if path == forbidden:
+                raise AssertionError("nonaccepted attempt output was opened")
+            return original_read(path)
+
+        with monkeypatch.context() as scoped:
+            scoped.setattr(Path, "read_bytes", guarded)
+            index = load_evidence_index([case[1]])
+            rows = table(case)
+        assert str(original["plan_path"]) in index["runs"], kind
+        if kind == "missing":
+            retained = index["runs"][str(original["plan_path"])]
+            assert retained["receipt_sha256"] is None
+        assert all(item["status"] == "measured" for family in ("rubric10", "rubric20")
+                   for item in rows[0]["rubrics"][family]["scorings"]), kind
+        assert any("refused attempt is declared by 0 accepted cells" in problem
+                   and "earlier-attempt/receipt.json" in problem
+                   for problem in rows[0]["eligibility_problems"]), kind
+        assert any("earlier-attempt/receipt.json" in reason
+                   for reason in pooled_variation(rows)["fallback_reasons"]), kind
+
+
+def test_unreadable_unrelated_metadata_names_the_specific_file(tmp_path):
+    from data_sheets_schema.score_selection import pooled_variation
+
+    for filename in ("plan.json", "receipt.json"):
+        case = scenario(tmp_path / filename)
+        original = add_refusal(case, name="unrelated-metadata")
+        original["plan"]["identity"]["label"] = "another_configuration_rep1"
+        write(original["plan_path"], original["plan"])
+        (original["plan_path"].parent / filename).write_text("{malformed\n")
+        rows = table(case)
+        assert all(item["status"] == "measured" for family in ("rubric10", "rubric20")
+                   for item in rows[0]["rubrics"][family]["scorings"])
+        reasons = pooled_variation(rows)["fallback_reasons"]
+        assert any("receipts/unrelated-metadata/" + filename in reason for reason in reasons)
+        assert str(case[1]) not in " ".join(reasons)
+
+
+def test_invalid_unscored_record_is_named_without_excluding_measured_invalid_noise(tmp_path):
+    case = scenario(tmp_path)
+    case[2][0]["validity"] = "invalid"
+    measured = table(case)[0]
+    assert measured["eligibility_problems"] == []
+    missing = table(case, roots=False)[0]
+    assert any(PROJECT + "/" + LABEL + "/" + PROJECT + "_d4d.yaml" in reason
+               and "invalid generation record has unmeasured scorings" in reason
+               for reason in missing["eligibility_problems"])
+
+
 def test_orphan_refusal_identity_does_not_depend_on_redundant_instrument(tmp_path, monkeypatch):
     from data_sheets_schema import score_selection as reader
 
@@ -301,20 +376,43 @@ def test_orphan_refusal_identity_does_not_depend_on_redundant_instrument(tmp_pat
         assert "refused attempt is declared by 0 accepted cells" in decision["score_policy"]["fallback_reason"]
 
 
-def test_fixed_percentage_base_is_required_even_after_rebinding(tmp_path):
-    for change in ("missing_maximum", "wrong_fixed", "reduced_adjusted"):
+def test_published_percentage_base_is_required_even_after_rebinding(tmp_path):
+    for change in ("missing_maximum", "zero_maximum", "boolean_maximum", "reduced_adjusted"):
         case = scenario(tmp_path / change)
         entry = case[3]["rubric20", 2]
         score = entry["publication"]["overall_score"]
         if change == "missing_maximum":
             del score["max_points"]
-        elif change == "wrong_fixed":
-            score.update(max_points=44, adjusted_max_points=44)
+        elif change == "zero_maximum":
+            score.update(max_points=0, adjusted_max_points=0)
+        elif change == "boolean_maximum":
+            score.update(total_points=0, max_points=True, adjusted_max_points=True)
         else:
             score["adjusted_max_points"] = 44
         rebind(entry)
         assert cell(table(case), "rubric20", 2)["status"] == "not measured", change
         assert "fixed percentage" in cell(table(case), "rubric20", 2)["reason"]
+
+
+def test_consistent_other_instrument_maxima_are_read_from_publications(tmp_path):
+    case = scenario(tmp_path)
+    for family, maximum in (("rubric10", 60), ("rubric20", 100.0)):
+        for number in (1, 2, 3):
+            entry = case[3][family, number]
+            entry["publication"]["overall_score"].update(max_points=maximum, adjusted_max_points=maximum)
+            rebind(entry)
+        baseline = case[3][family, 1]
+        for number in (2, 3):
+            entry = case[3][family, number]
+            entry["manifest"]["baseline_plan_sha256"] = sha(baseline["plan_path"].read_bytes())
+            entry["manifest"]["baseline_receipt_sha256"] = sha(baseline["receipt_path"].read_bytes())
+            write(entry["manifest_path"], entry["manifest"])
+    rows = table(case)
+    assert not rows[0]["problems"]
+    for family, maximum in (("rubric10", 60), ("rubric20", 100.0)):
+        assert all(item["status"] == "measured" and item["maximum"] == maximum
+                   and item["percentage"] == 100 * item["points"] / maximum
+                   for item in rows[0]["rubrics"][family]["scorings"])
 
 
 def test_integral_float_fixed_maxima_are_equivalent_json_numbers(tmp_path):
@@ -557,7 +655,8 @@ def test_replacement_is_one_scoring_and_keeps_refused_receipt_provenance(tmp_pat
     replaced = cell(rows, "rubric20", 3)
     assert replaced["attempt"] == 2
     assert replaced["refused_attempt"]["sha256"] == refused_sha
-    assert replaced["refused_attempt"]["reason"] == "synthetic non-score refusal"
+    assert replaced["refused_attempt"]["plan_sha256"] == old_plan_sha
+    assert replaced["refused_attempt"]["reason"] == "UnspecifiedError: synthetic non-score refusal"
     assert rows[0]["paired_numbers"] == [1, 2, 3]
     old_plan["inputs"]["output-schema.json"]["sha256"] = sha(b"different refused schema")
     old_plan_sha = write(refused_path / "plan.json", old_plan)
@@ -568,6 +667,19 @@ def test_replacement_is_one_scoring_and_keeps_refused_receipt_provenance(tmp_pat
     write(entry["manifest_path"], entry["manifest"])
     assert cell(table(case), "rubric20", 3)["status"] == "not measured"
     assert "refused measured inputs" in cell(table(case), "rubric20", 3)["reason"]
+
+
+def test_replacement_reason_is_bounded_before_evidence_table_disclosure(tmp_path):
+    case = scenario(tmp_path)
+    original = add_refusal(case)
+    original["receipt"]["failure"] = "ScorerError: validation failed for file:/private/hidden run/candidate.json afterwards"
+    original["receipt_sha256"] = write(original["receipt_path"], original["receipt"])
+    declare_replacement(case, original)
+    result = cell(table(case), "rubric10", 3)
+    assert result["status"] == "measured"
+    assert result["refused_attempt"]["reason"] == "ScorerError: validation failed for"
+    assert result["refused_attempt"]["sha256"] == original["receipt_sha256"]
+    assert result["refused_attempt"]["plan_sha256"] == original["plan_sha256"]
 
 
 def test_changed_receipt_or_publication_is_not_a_measurement(tmp_path):

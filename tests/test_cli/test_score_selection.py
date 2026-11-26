@@ -19,7 +19,7 @@ INSTRUMENT = "synthetic-score-instrument"
 REVIEW_POLICY = "reported_only_pending_calibration_v1 (#835)"
 
 
-def setup_case(tmp_path, monkeypatch):
+def setup_case(tmp_path, monkeypatch, *, projects=("P",)):
     from data_sheets_schema.cli import runs as cli
     from data_sheets_schema import runs as model
 
@@ -39,6 +39,9 @@ def setup_case(tmp_path, monkeypatch):
             "run": {"method": "claudecode_agent", "label": label, "project": "P"},
         }), encoding="utf-8")
     monkeypatch.setattr(model, "CONCAT_DIR", root)
+    manifest = tmp_path / "source-manifest.json"
+    manifest.write_text(json.dumps({"projects": {name: {"sources": []} for name in projects}}), encoding="utf-8")
+    monkeypatch.setattr("data_sheets_schema.registry.selected_manifest", lambda context=None: manifest)
     monkeypatch.setattr(cli, "_validates", lambda record: (True, "valid"))
     monkeypatch.setattr("data_sheets_schema.cli.provenance._require_repo_root_cwd", lambda name: None)
     return cli, root
@@ -123,6 +126,10 @@ def test_score_preview_prints_both_picks_and_preserves_every_file(tmp_path, monk
     assert policy["T"] > 0
     assert policy["gap"] == 40
     assert policy["rule"] == "score_gap"
+    variation, _ = json.JSONDecoder().raw_decode(result.output.split("Series variation:\n", 1)[1])
+    assert variation["degrees_of_freedom"] == 6
+    assert variation["s"] == pytest.approx(1.0)
+    assert set(variation["per_project"]) == {"P"}
     assert snapshot(root) == before
 
 
@@ -242,6 +249,8 @@ def test_score_record_adds_policy_without_applying_content_review(tmp_path, monk
     assert canonical["score_policy"]["rule"] == "score_gap"
     assert canonical["score_policy"]["current_policy_pick"] == "cfg_rep2"
     assert canonical["margin_over_runner_up"] == 3
+    assert canonical["score_policy"]["selected_coverage_margin_over_best_other"] == -5
+    assert canonical["score_policy"]["selected_coverage_comparison_label"] == "cfg_rep2"
     assert canonical["criterion"].endswith("decision: score_gap")
     assert "slot(s) ahead of the runner-up" not in result.output
     assert canonical["score_policy"]["owner_authorization"] == "synthetic owner decision"
@@ -251,7 +260,7 @@ def test_score_record_adds_policy_without_applying_content_review(tmp_path, monk
 
 
 def test_selection_pools_other_projects_in_the_same_series(tmp_path, monkeypatch):
-    cli, root = setup_case(tmp_path, monkeypatch)
+    cli, root = setup_case(tmp_path, monkeypatch, projects=("P", "Q"))
     for directory in (root / "claudecode_agent").iterdir():
         (directory / "Q_d4d.yaml").write_text("id: example:other\n", encoding="utf-8")
     seen = []
@@ -380,6 +389,29 @@ def test_owner_authorization_requires_score_policy(tmp_path, monkeypatch):
     result = run(cli, "--score-owner-authorization", "synthetic owner word")
     assert result.exit_code != 0
     assert "require --score-policy" in result.output
+
+
+def test_series_project_option_requires_score_policy_and_cannot_omit_selected_project(tmp_path, monkeypatch):
+    cli, root = setup_case(tmp_path, monkeypatch)
+    before = snapshot(root)
+    result = run(cli, "--score-series-project", "P")
+    assert result.exit_code != 0
+    assert "--score-policy" in result.output
+    with patch("data_sheets_schema.score_selection.build_evidence_table", side_effect=score_rows):
+        result = run(cli, *policy_args(), "--score-series-project", "Q")
+    assert result.exit_code != 0
+    assert "selected project P" in result.output
+    assert "outside" in result.output
+    assert snapshot(root) == before
+
+
+def test_help_states_authorization_is_a_record_not_proof(tmp_path, monkeypatch):
+    cli, _root = setup_case(tmp_path, monkeypatch)
+    result = CliRunner().invoke(cli.runs, ["select", "--help"])
+    assert result.exit_code == 0
+    words = " ".join(result.output.split())
+    assert "not proof of authorization" in words
+    assert "--score-series-project" in words
 
 
 def test_owner_ruling_unknown_slot_refuses_and_valid_ruling_prints(tmp_path, monkeypatch):

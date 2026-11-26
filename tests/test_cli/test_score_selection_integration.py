@@ -45,11 +45,12 @@ def values_with_key(value, key):
             yield from values_with_key(child, key)
 
 
-def same_variation(left, right):
+def same_variation(left, right, census):
     """Variation has no validity/coverage pass; its measurements must agree."""
     for key in ("s", "degrees_of_freedom", "records", "per_project", "per_rubric", "fallback_reasons"):
         assert left[key] == right[key]
-    for a, b in zip(left["series_census"], right["series_census"], strict=True):
+    assert "series_census" not in right
+    for a, b in zip(left["series_census"], census, strict=True):
         for key in ("project", "label", "cells", "usable_paired_count", "not_measured_cells"):
             assert a[key] == b[key]
 
@@ -62,13 +63,206 @@ def test_real_reader_complete_series_changes_pick_and_variation_matches(tmp_path
     assert value["rule"] == "score_gap"
     assert value["gap"] > value["T"] > 0
     assert "→ cfg_rep1" in result.output
+    printed_variation = report(result, "Series variation")
+    same_variation(printed_variation, value["variation"], value["series_census"])
+    assert printed_variation["records"] == 6
+    assert len(list(values_with_key(value, "series_census"))) == 1
     before = snapshot(case.tmp)
     variation = report(case.invoke(variation=True), "Series variation")
-    same_variation(variation, value["variation"])
+    same_variation(variation, value["variation"], value["series_census"])
     assert variation["records"] == 6
     assert variation["degrees_of_freedom"] == 12
     assert set(variation["per_project"]) == {"P", "Q"}
     assert snapshot(case.tmp) == before
+
+
+def test_receipt_only_project_and_missing_records_remain_in_the_census(tmp_path):
+    """Reviewer N1b: dropping all record files must not drop that project's rows."""
+    case = Case(tmp_path).base(noisy=True)
+    for label, _slots in LABELS:
+        (case.concat / METHOD / label / "Q_d4d.yaml").unlink()
+    result, value = fallback(case, "candidate record is missing")
+    census = value["series_census"]
+    assert {(row["project"], row["label"]) for row in census} == {
+        (project, label) for project in ("P", "Q") for label, _slots in LABELS}
+    for label, _slots in LABELS:
+        assert f"Q/{label}" in value["fallback_reason"]
+        row = next(row for row in census if (row["project"], row["label"]) == ("Q", label))
+        assert row["not_measured_cells"]
+    assert {(row["project"], row["label"]) for row in value["discovered_census"]} == {
+        (project, label) for project in ("P", "Q") for label, _slots in LABELS}
+    variation = report(case.invoke(variation=True), "Series variation")
+    same_variation(variation, value["variation"], census)
+
+
+def test_receipt_only_project_outside_manifest_is_disclosed_and_falls_back(tmp_path):
+    case = Case(tmp_path, manifest_projects=("P",)).base(noisy=True)
+    for label, _slots in LABELS:
+        (case.concat / METHOD / label / "Q_d4d.yaml").unlink()
+    _result, value = fallback(case, "Q/cfg_rep1")
+    assert value["series_roster"]["projects"] == ["P"]
+    assert {(row["project"], row["label"]) for row in value["roster_unexpected"]} == {
+        ("Q", label) for label, _slots in LABELS}
+    assert set(row["project"] for row in value["series_census"]) == {"P", "Q"}
+
+
+def test_unreadable_selected_candidate_is_a_named_fallback_not_a_traceback(tmp_path):
+    """Reviewer F7b exercises the selected project's YAML parser failure."""
+    case = Case(tmp_path).base()
+    (case.concat / METHOD / "cfg_rep3/P_d4d.yaml").write_text("a: [unclosed\n", encoding="utf-8")
+    result, value = fallback(case, "cannot be read")
+    assert "P/cfg_rep3" in value["fallback_reason"]
+    assert "Traceback" not in result.output
+    assert result.exception is None
+    variation = report(case.invoke(variation=True), "Series variation")
+    assert any("P/cfg_rep3" in reason and "cannot be read" in reason
+               for reason in variation["fallback_reasons"])
+
+
+def test_manifest_roster_detects_a_project_missing_from_corpus_and_receipts(tmp_path):
+    case = Case(tmp_path, manifest_projects=("P", "Q", "R")).base()
+    _result, value = fallback(case, "R/cfg_rep1")
+    assert value["series_roster"]["projects"] == ["P", "Q", "R"]
+    assert value["series_roster"]["manifest_sha256"] == sha(case.manifest.read_bytes())
+    assert len(value["expected_roster"]) == 9
+    assert len(value["discovered_census"]) == 6
+    assert len(value["series_census"]) == 9
+    assert {(row["project"], row["label"]) for row in value["roster_missing"]} == {
+        ("R", label) for label, _slots in LABELS}
+    assert value["s"] == value["T"] == "not measured"
+    assert "series_census" not in value["variation"]
+    explicit = ("--score-series-project", "P", "--score-series-project", "Q")
+    result, narrowed = policy(case, extra=explicit)
+    assert narrowed["rule"] == "score_gap"
+    assert narrowed["series_roster"]["projects"] == ["P", "Q"]
+    assert "explicit" in narrowed["series_roster"]["basis"]
+    assert len(narrowed["expected_roster"]) == 6
+    assert narrowed["roster_missing"] == narrowed["roster_unexpected"] == []
+    variation = report(case.invoke(variation=True, extra=explicit), "Series variation")
+    same_variation(variation, narrowed["variation"], narrowed["series_census"])
+    assert "→ cfg_rep1" in result.output
+
+
+def test_explicit_narrower_roster_records_excluded_projects_and_changes_pool_only_explicitly(tmp_path):
+    case = Case(tmp_path).base(noisy=True)
+    _result, full = fallback(case, "score gap is not greater than T")
+    explicit = ("--score-series-project", "P")
+    result, narrow = policy(case, extra=explicit)
+    assert full["variation"]["records"] == 6
+    assert narrow["variation"]["records"] == 3
+    assert narrow["series_roster"]["projects"] == ["P"]
+    assert narrow["series_roster"]["excluded_discovered_projects"] == ["Q"]
+    assert set(row["project"] for row in narrow["series_census"]) == {"P"}
+    assert narrow["rule"] == "score_gap"
+    assert "→ cfg_rep1" in result.output
+
+
+def test_variation_reader_valueerror_is_a_clean_cli_message_without_writes(tmp_path):
+    case = Case(tmp_path)
+    before = snapshot(case.tmp)
+    result = case.invoke(variation=True)
+    assert result.exit_code != 0
+    assert isinstance(result.exception, SystemExit)
+    assert result.output.startswith("Error:")
+    assert "cfg" in result.output
+    assert "Traceback" not in result.output
+    assert snapshot(case.tmp) == before
+
+
+def test_unscored_invalid_record_and_unrelated_metadata_name_the_fallback_cause(tmp_path):
+    for problem in ("unscored-invalid", "unrelated-metadata"):
+        case = Case(tmp_path / problem)
+        if problem == "unscored-invalid":
+            for label, slots in LABELS:
+                case.record("P", label, slots)
+                case.record("Q", label, slots)
+                case.score_record("Q", label, [30, 30, 31], [50, 51, 50])
+                if label != "cfg_rep3":
+                    case.score_record("P", label, [40, 41, 40] if label == "cfg_rep1" else [35, 35, 36],
+                                      [70, 71, 70] if label == "cfg_rep1" else [62, 62, 63])
+            result, value = fallback(case, "P/cfg_rep3", invalid=("cfg_rep3",))
+        else:
+            case.base()
+            bad = case.receipts / "unrelated-run" / "plan.json"
+            bad.parent.mkdir()
+            bad.write_text("{truncated", encoding="utf-8")
+            result, value = fallback(case, "unrelated-run/plan.json")
+        assert "Traceback" not in result.output
+        assert str(case.tmp) not in json.dumps(value)
+
+
+def test_incomplete_series_has_only_explicit_partial_noise_diagnostics(tmp_path):
+    case = Case(tmp_path).base()
+    (case.entry("Q", "cfg_rep2", "rubric20", 3)["run"] / "receipt.json").unlink()
+    _result, value = fallback(case, "Q/cfg_rep2")
+    assert value["s"] == value["T"] == "not measured"
+    assert value["variation"]["s"] == "not measured"
+    partial = value["variation"]["partial_variation"]
+    assert partial["partial_s"] > 0
+    assert partial["partial_T"] > 0
+    assert partial["partial_degrees_of_freedom"] > 0
+    assert partial["partial_records"] > 0
+
+
+def test_replacement_from_another_project_is_listed_in_the_selected_block(tmp_path):
+    case = Case(tmp_path).base()
+    refused = case.scoring("Q", "cfg_rep2", "rubric20", 3, 0, status="REFUSED", run_name="refused-other-project")
+    accepted = case.entry("Q", "cfg_rep2", "rubric20", 3)
+    accepted["manifest"].update(attempt=2,
+        refused_attempt_receipt={"path": str(refused["run"] / "receipt.json"), "sha256": refused["receipt_sha"]},
+        refused_attempt_plan={"path": str(refused["run"] / "plan.json"), "sha256": refused["plan_sha"]})
+    write(accepted["manifest_path"], accepted["manifest"])
+    _result, value = policy(case)
+    assert value["rule"] == "score_gap"
+    assert len(value["replaced_cells"]) == 1
+    replacement = value["replaced_cells"][0]
+    assert replacement["project"] == "Q"
+    assert replacement["label"] == "cfg_rep2"
+    assert replacement["rubric"] == "rubric20"
+    assert replacement["refused_attempt"]["plan_sha256"] == refused["plan_sha"]
+    assert replacement["refused_attempt"]["receipt_sha256"] == refused["receipt_sha"]
+
+
+def test_refusal_disclosures_keep_only_bounded_path_free_prefix_and_hashes(tmp_path):
+    paths = ("file:/sensitive/run/candidate.json", "file:///sensitive/run/candidate.json",
+             "/sensitive/run folder/candidate.json", "Z:\\sensitive\\run folder\\candidate.json",
+             "\\\\server\\sensitive\\candidate.json")
+    for index, path in enumerate(paths):
+        case = Case(tmp_path / str(index)).base()
+        refused = case.scoring("P", "cfg_rep1", "rubric10", 3, 0,
+                               status="REFUSED", run_name="refused-first")
+        refused["receipt"]["failure"] = "ValueError: validation failed for " + path + " hidden suffix"
+        case.refresh(refused, receipt=True)
+        accepted = case.entry(number=3)
+        accepted["manifest"].update(attempt=2,
+            refused_attempt_receipt={"path": str(refused["run"] / "receipt.json"), "sha256": refused["receipt_sha"]},
+            refused_attempt_plan={"path": str(refused["run"] / "plan.json"), "sha256": refused["plan_sha"]})
+        write(accepted["manifest_path"], accepted["manifest"])
+        _result, value = policy(case)
+        assert value["rule"] == "score_gap"
+        first = value["replaced_cells"][0]["refused_attempt"]
+        assert first["reason"] == "ValueError: validation failed for"
+        assert first["receipt_sha256"] == refused["receipt_sha"]
+        assert first["plan_sha256"] == refused["plan_sha"]
+        assert len(first["reason"]) <= 200
+        assert "sensitive" not in json.dumps(value)
+        assert "hidden suffix" not in json.dumps(value)
+
+
+def test_complete_series_with_other_fixed_rubric_maxima_remains_eligible(tmp_path):
+    case = Case(tmp_path).base()
+    _result, original = policy(case)
+    for entry in case.entries.values():
+        score = entry["publication"]["overall_score"]
+        for key in ("total_points", "max_points", "adjusted_max_points"):
+            score[key] *= 2
+        case.refresh(entry, publication=True)
+    _result, value = policy(case)
+    assert value["rule"] == "score_gap"
+    assert value["percentage_base"]["maxima"] == {"rubric10": 100, "rubric20": 176}
+    assert value["s"] == pytest.approx(original["s"])
+    assert value["T"] == pytest.approx(original["T"])
+    assert value["gap"] == pytest.approx(original["gap"])
 
 
 def test_missing_other_project_evidence_cannot_shrink_the_series_silently(tmp_path):
@@ -80,20 +274,20 @@ def test_missing_other_project_evidence_cannot_shrink_the_series_silently(tmp_pa
     assert complete_policy["rule"] == "policy_fallback"
     assert complete_policy["s"] > 10
     result, value = fallback(case, "not measured")
-    census = value["variation"]["series_census"]
+    census = value["series_census"]
     assert len(census) == 6
     assert "Q" in json.dumps(census)
     assert "cfg_rep1" in json.dumps(census)
     assert "missing" in json.dumps(census).lower()
     variation = report(case.invoke(variation=True), "Series variation")
-    same_variation(variation, value["variation"])
+    same_variation(variation, value["variation"], value["series_census"])
 
 
 def test_partial_pair_diagnostics_join_scoring_numbers_not_cell_positions(tmp_path):
     case = Case(tmp_path).base()
     (case.entry("Q", "cfg_rep1", "rubric10", 2)["run"] / "receipt.json").unlink()
     result, value = fallback(case, "not measured")
-    partial = next(row for row in value["variation"]["series_census"]
+    partial = next(row for row in value["series_census"]
                    if row["project"] == "Q" and row["label"] == "cfg_rep1")
     assert partial["paired_numbers"] == [1, 3]
     assert partial["usable_paired_count"] == 2
@@ -102,7 +296,7 @@ def test_partial_pair_diagnostics_join_scoring_numbers_not_cell_positions(tmp_pa
     assert partial["paired"]["mean"] == pytest.approx((paired_one + paired_three) / 2)
     assert partial["paired"]["spread"] == pytest.approx(abs(paired_three - paired_one) / (2 ** 0.5))
     variation = report(case.invoke(variation=True), "Series variation")
-    same_variation(variation, value["variation"])
+    same_variation(variation, value["variation"], value["series_census"])
 
 
 def test_other_project_record_and_receipt_errors_are_reported_not_tracebacks(tmp_path):
@@ -120,7 +314,7 @@ def test_other_project_record_and_receipt_errors_are_reported_not_tracebacks(tmp
             reason = "JSONDecodeError"
         result, value = fallback(case, reason)
         assert "Traceback" not in result.output
-        assert len(value["variation"]["series_census"]) == 6
+        assert len(value["series_census"]) == 6
         assert reason.lower() in case.invoke(variation=True).output.lower()
 
 
@@ -306,7 +500,7 @@ def test_policy_excludes_replica_like_suffixes_but_legacy_discovery_is_unchanged
     case.record("Q", "cfg_rep1_old", 99)
     result, value = policy(case)
     assert "cfg_rep1_old" not in json.dumps(value)
-    assert len(value["variation"]["series_census"]) == 6
+    assert len(value["series_census"]) == 6
     legacy = case.invoke(policy=False)
     assert legacy.exit_code == 0, legacy.output
     assert "→ cfg_rep1_old" in legacy.output

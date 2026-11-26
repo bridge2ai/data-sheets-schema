@@ -16,7 +16,6 @@ from statistics import mean, stdev
 
 
 RUBRICS = ("rubric10", "rubric20")
-FIXED_MAXIMA = {"rubric10": 50, "rubric20": 88}
 INSTRUMENT_HASHES = ("definition_sha256", "schema_sha256", "rubric_sha256",
                      "runner_sha256", "evidence_authority_sha256")
 MEASURED_HASHES = (*INSTRUMENT_HASHES, "record_sha256", "scope_sha256",
@@ -37,10 +36,63 @@ def _digest(value):
     return isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value) is not None
 
 
+def _absolute_token(token):
+    """Recognize root markers without rewriting pieces of an error message."""
+    token = token.lstrip("\"'([{<")
+    if token.startswith(("https://", "http://")):
+        return False
+    for index, char in enumerate(token):
+        previous = token[index - 1] if index else ""
+        boundary = not previous or not (previous.isalnum() or previous in "_./\\-")
+        if boundary and token[index:index + 5].lower() == "file:":
+            return True
+        if boundary and char in "/\\":
+            return True
+        if (boundary and char.isalpha() and token[index + 1:index + 2] == ":"
+                and token[index + 2:index + 3] in ("/", "\\")):
+            return True
+    return False
+
+
 def _portable_text(value):
-    # Error messages can embed the path that failed. Keep the specific failure
-    # but never turn a machine-local evidence root into canonical metadata.
-    return re.sub(r"(?<![\w:./\\])(?:[A-Za-z]:[\\/]|\\\\|/)[^\s\"'<>;,]+", "[external path]", str(value))
+    # General internally generated labels retain web and relative references.
+    # Once an absolute root occurs, discard the entire suffix, including spaces
+    # and later tokens. Raw refusal text uses the stricter helper below.
+    text, offset = str(value), 0
+    for token in text.split():
+        start = text.find(token, offset)
+        if _absolute_token(token):
+            return text[:start].rstrip()
+        offset = start + len(token)
+    return text
+
+
+def bounded_refusal_reason(value, exception_class=None):
+    """Keep only an exception class and a path-free prefix, at most 200 chars.
+
+    No path substitution is attempted: the first slash or backslash token and
+    everything following it is discarded. Receipt and plan hashes bind the
+    original bytes separately; this text is only a bounded explanation.
+    """
+    if isinstance(value, BaseException):
+        exception_class = exception_class or type(value).__name__
+    text = str(value)
+    head, separator, rest = text.partition(":")
+    if (exception_class is None and not separator and head.isidentifier()
+            and head.endswith(("Error", "Exception"))):
+        exception_class, text = head, ""
+    if (exception_class is None and separator and head.isidentifier()
+            and (head.endswith(("Error", "Exception")) or head in ("KeyboardInterrupt", "SystemExit"))):
+        exception_class, text = head, rest
+    if (not isinstance(exception_class, str) or not exception_class.isidentifier()
+            or len(exception_class) > 80):
+        exception_class = "UnspecifiedError"
+    prefix = []
+    for token in text.split():
+        if "/" in token or "\\" in token:
+            break
+        prefix.append(token)
+    return (exception_class + (": " + " ".join(prefix) if prefix else ""))[:200]
 
 
 def _portable(value):
@@ -76,7 +128,7 @@ def _portable_cell(cell):
             "reason": _portable_text(cell["reason"]) if cell.get("reason") else None,
             "refused_attempt": ({"receipt_sha256": refused.get("receipt_sha256", refused.get("sha256")),
                                  "plan_sha256": refused.get("plan_sha256"),
-                                 "reason": _portable_text(refused.get("reason", "refused attempt"))}
+                                 "reason": bounded_refusal_reason(refused.get("reason", "refused attempt"))}
                                 if isinstance(refused, dict) else None)}
 
 
@@ -136,9 +188,8 @@ def summarize(row):
                     identity = cell.get("measurement_identity")
                     if not (_number(points) and _number(maximum) and maximum > 0 and 0 <= points <= maximum):
                         issue = "invalid points or maximum"
-                    elif maximum != FIXED_MAXIMA[rubric]:
-                        issue = "maximum differs from fixed rubric maximum"
-                    elif cell.get("adjusted_max_points") != maximum:
+                    elif (not _number(cell.get("adjusted_max_points"))
+                          or cell["adjusted_max_points"] != maximum):
                         issue = "adjusted maximum differs from fixed maximum"
                     elif (not _number(cell.get("percentage"))
                           or not math.isclose(100.0 * points / maximum, cell["percentage"], rel_tol=0, abs_tol=1e-9)):
@@ -237,6 +288,52 @@ def _census(summaries):
             for row in summaries]
 
 
+def _maximum_state(rows):
+    """Derive fixed unadjusted denominators from every measured series cell."""
+    maxima, problems = {}, []
+    for rubric in RUBRICS:
+        observed = []
+        for row in rows:
+            cells = row.get("cells", {}).get(rubric)
+            if cells is None:
+                cells = row.get("rubrics", {}).get(rubric, {}).get("scorings", [])
+            for cell in cells:
+                if cell.get("status") != "measured":
+                    continue
+                label = f"{row['project']}/{row['label']} {rubric} scoring {cell.get('scoring_number')}"
+                maximum, adjusted = cell.get("maximum"), cell.get("adjusted_max_points")
+                if not (_number(maximum) and maximum > 0):
+                    problems.append(label + ": maximum must be finite and positive")
+                    continue
+                observed.append((label, maximum))
+                if not _number(adjusted) or adjusted != maximum:
+                    problems.append(label + ": adjusted maximum differs from fixed maximum")
+        values = {maximum for _, maximum in observed}
+        maxima[rubric] = next(iter(values)) if len(values) == 1 else None
+        if len(values) > 1:
+            problems.extend(label + ": maximum differs across measured series cells"
+                            for label, _ in observed)
+    return ({"kind": "fixed_max_points", "maxima": maxima,
+             "adjusted_max_points_must_equal_max_points": True}, sorted(set(problems)))
+
+
+def _partial_diagnostics(variation):
+    s = variation.get("s")
+    return {"partial_s": s,
+            "partial_T": 2 * s * math.sqrt(2 / 3) if _number(s) else None,
+            "partial_degrees_of_freedom": variation.get("degrees_of_freedom", 0),
+            "partial_records": variation.get("records", 0),
+            "partial_per_project": deepcopy(variation.get("per_project", {})),
+            "partial_per_rubric": deepcopy(variation.get("per_rubric", {}))}
+
+
+def _unregistered_variation(variation):
+    result = deepcopy(variation)
+    result.setdefault("partial_variation", _partial_diagnostics(result))
+    result.update(s=None, T=None, per_project={}, per_rubric={})
+    return result
+
+
 def pooled_variation(rows):
     """Return the full series census, diagnostic spread and fallback reasons.
 
@@ -247,7 +344,8 @@ def pooled_variation(rows):
     rows = sorted(rows, key=lambda row: (row["project"], row["label"]))
     summaries = [summarize(row) for row in rows]
     identities = {row.get("instrument_id") for row in rows}
-    incompatible = _instrument_problems(rows) + _context_problems(rows)
+    percentage_base, maximum_problems = _maximum_state(rows)
+    incompatible = _instrument_problems(rows) + _context_problems(rows) + maximum_problems
     if len(identities) > 1 or (identities and (None in identities or "" in identities)):
         incompatible.append("pooled variation requires exactly one named instrument")
     record_ids = [(row["project"], row["label"]) for row in rows]
@@ -278,9 +376,8 @@ def pooled_variation(rows):
     result["pool_suppressed"] = bool(incompatible)
     result["fallback_reasons"] = sorted({_portable_text(reason) for reason in reasons})
     result["not_measured_reason"] = "; ".join(result["fallback_reasons"]) or None
-    result["percentage_base"] = {"kind": "fixed_max_points", "maxima": dict(FIXED_MAXIMA),
-                                 "adjusted_max_points_must_equal_max_points": True}
-    return result
+    result["percentage_base"] = percentage_base
+    return _unregistered_variation(result) if result["fallback_reasons"] else result
 
 
 def _coverage_key(row):
@@ -292,10 +389,10 @@ def _replacement_disclosures(summaries):
     result = []
     for row in summaries:
         for rubric in RUBRICS:
-            for cell in row["cells"][rubric]:
+            for cell in row.get("cells", {}).get(rubric, []):
                 if cell.get("status") == "measured" and cell.get("attempt") == 2:
                     result.append({"label": row["label"], "project": row["project"], "rubric": rubric,
-                                   **deepcopy(cell)})
+                                   **_portable_cell(cell)})
     return result
 
 
@@ -319,16 +416,23 @@ def decide(table, pooled, instrument_id, *, policy_pick=None):
         if len(matches) != 1:
             raise ValueError("supplied current policy pick is not one candidate")
         current = matches[0]
+    census = _portable(pooled.get("series_census", _census(summaries)))
+    percentage_base, maximum_problems = _maximum_state(census)
+    _, selected_maximum_problems = _maximum_state(rows)
+    roster_keys = ("series_roster", "expected_roster", "discovered_census", "roster_missing", "roster_unexpected")
+    variation = _portable({key: value for key, value in pooled.items()
+                           if key not in ("series_census", *roster_keys)})
     record = {"name": "score_gap_v1", "instrument_id": instrument_id,
               "current_policy_pick": current["label"], "highest_mean_pick": None,
-              "candidates": _census(summaries), "series_census": _portable(pooled.get("series_census", _census(summaries))),
+              "candidates": _census(summaries), "series_census": census,
               "s": None, "degrees_of_freedom": pooled.get("degrees_of_freedom", 0),
               "T": None, "gap": None, "rule": "policy_fallback", "fallback_reason": None,
-              "variation": _portable(pooled), "replaced_cells": _replacement_disclosures(summaries),
-              "percentage_base": {"kind": "fixed_max_points", "maxima": dict(FIXED_MAXIMA),
-                                  "adjusted_max_points_must_equal_max_points": True},
+              "variation": variation, "replaced_cells": _replacement_disclosures(census),
+              "percentage_base": percentage_base,
               "tied_highest_mean": [], "tie_resolution": None}
-    problems = _instrument_problems(rows) + _context_problems(rows)
+    record.update({key: _portable(pooled[key]) for key in roster_keys if key in pooled})
+    problems = (_instrument_problems(rows) + _context_problems(rows)
+                + maximum_problems + selected_maximum_problems)
     if current["validity"] != "valid":
         problems.append("current policy pick is not current-valid for score comparison")
     problems.extend(pooled.get("fallback_reasons") or [])
@@ -351,12 +455,12 @@ def decide(table, pooled, instrument_id, *, policy_pick=None):
         problems.append(("pooled within-record variation is zero; noise estimate unavailable" if s == 0
                          else "pooled within-record variation is not measured")
                         + (": " + str(reason) if reason else ""))
-    else:
-        record["s"] = s
-        record["T"] = 2 * s * math.sqrt(2 / 3)
     if problems:
+        record["variation"] = _unregistered_variation(record["variation"])
         record["fallback_reason"] = "; ".join(sorted({_portable_text(problem) for problem in problems}))
         return {"selected": current["label"], "score_policy": record}
+    record["s"] = s
+    record["T"] = 2 * s * math.sqrt(2 / 3)
     highest = min(eligible, key=lambda row: (-row["paired"]["mean"], *_coverage_key(row)))
     tied = [row["label"] for row in eligible if row["paired"]["mean"] == highest["paired"]["mean"]]
     if len(tied) > 1:

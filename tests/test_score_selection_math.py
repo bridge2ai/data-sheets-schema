@@ -8,8 +8,11 @@ import math
 import pytest
 
 from data_sheets_schema._score_selection_math import (
-    FIXED_MAXIMA, MEASURED_HASHES, _portable_text, decide, pooled_variation, summarize,
+    MEASURED_HASHES, _portable_text, bounded_refusal_reason, decide, pooled_variation, summarize,
 )
+
+
+FIXED_MAXIMA = {"rubric10": 50, "rubric20": 88}
 
 
 def digest(value):
@@ -192,10 +195,14 @@ def test_pooled_within_record_degrees_of_freedom_and_unequal_rubric_spreads_m02_
     actual = pooled_variation(rows)
     assert actual["degrees_of_freedom"] == 3
     assert actual["records"] == 2
-    assert actual["s"] == pytest.approx(math.sqrt(40 / 3))
-    assert actual["per_project"]["Example"]["s"] == pytest.approx(4)
-    assert actual["per_project"]["Other"]["s"] == pytest.approx(math.sqrt(8))
-    assert actual["per_rubric"]["rubric10"]["s"] == pytest.approx(math.sqrt(26 / 3))
+    assert actual["s"] is None and actual["T"] is None
+    partial = actual["partial_variation"]
+    assert partial["partial_s"] == pytest.approx(math.sqrt(40 / 3))
+    assert partial["partial_T"] == pytest.approx(2 * math.sqrt(40 / 3) * math.sqrt(2 / 3))
+    assert partial["partial_degrees_of_freedom"] == 3 and partial["partial_records"] == 2
+    assert partial["partial_per_project"]["Example"]["s"] == pytest.approx(4)
+    assert partial["partial_per_project"]["Other"]["s"] == pytest.approx(math.sqrt(8))
+    assert partial["partial_per_rubric"]["rubric10"]["s"] == pytest.approx(math.sqrt(26 / 3))
     assert actual["fallback_reasons"]  # diagnostic partial pool cannot decide
     assert [item["usable_paired_count"] for item in actual["series_census"]] == [3, 2, 1]
 
@@ -269,7 +276,8 @@ def test_fixed_denominator_and_context_compatibility(kind):
     result = decide(rows, pooled_variation(rows), "instrument-x")
     assert result["selected"] == "a"
     assert ("maximum" if "maximum" in kind else "context differs") in result["score_policy"]["fallback_reason"]
-    assert result["score_policy"]["percentage_base"]["maxima"] == {"rubric10": 50, "rubric20": 88}
+    assert result["score_policy"]["percentage_base"]["maxima"] == {
+        "rubric10": 50, "rubric20": None if kind == "maximum" else 88}
 
 
 def test_unreadable_other_project_preserved_and_blocks_every_project():
@@ -343,9 +351,103 @@ def test_portable_text_preserves_web_and_relative_references():
 
 def test_portable_text_removes_absolute_unix_and_windows_paths():
     for text in ("/synthetic-evidence/operator/receipt.json", "C:/evidence/receipt.json",
-                 r"C:\evidence\receipt.json", r"\\host\share\receipt.json"):
-        assert _portable_text(text) == "[external path]"
-        assert _portable_text("failed reading '" + text + "'") == "failed reading '[external path]'"
+                 r"C:\evidence\receipt.json", r"\\host\share\receipt.json",
+                 "file:/synthetic-evidence/a", "file:///synthetic-evidence/a"):
+        assert _portable_text(text) == ""
+        assert _portable_text("failed reading '" + text + "'") == "failed reading"
+
+
+def test_bounded_refusal_reason_stops_before_path_token_and_discards_whole_suffix(path):
+    reason = "PermissionError: cannot inspect " + path + " secret suffix remains private"
+    safe = bounded_refusal_reason(reason)
+    assert safe == "PermissionError: cannot inspect"
+    assert bounded_refusal_reason(safe) == safe
+    assert "/" not in safe and "\\" not in safe
+
+
+def test_refusal_reason_bounded_class_and_idempotent_empty_prefix():
+    assert bounded_refusal_reason(ValueError("invalid score")) == "ValueError: invalid score"
+    assert bounded_refusal_reason("bad output", "RuntimeError") == "RuntimeError: bad output"
+    assert bounded_refusal_reason("/private/evidence") == "UnspecifiedError"
+    assert bounded_refusal_reason("UnspecifiedError") == "UnspecifiedError"
+    reason = bounded_refusal_reason("ValueError: " + "too many values " * 100)
+    assert len(reason) == 200 and reason.startswith("ValueError: ")
+
+
+def test_refused_plan_and_receipt_hashes_bind_text_without_serializing_raw_reason():
+    rows = [row("a", [49, 50, 51], slots=20), row("b", [69, 70, 71])]
+    cell = rows[1]["rubrics"]["rubric10"]["scorings"][2]
+    cell.update(attempt=2, refused_attempt={"receipt_sha256": "a" * 64,
+                "plan_sha256": "b" * 64,
+                "reason": "OSError: failed at file:///synthetic-evidence/private folder/score.json secret"})
+    block = decide(rows, pooled_variation(rows), "instrument-x")["score_policy"]
+    refused = block["replaced_cells"][0]["refused_attempt"]
+    assert refused == {"receipt_sha256": "a" * 64, "plan_sha256": "b" * 64,
+                       "reason": "OSError: failed at"}
+    assert "private folder" not in json.dumps(block) and "secret" not in json.dumps(block)
+
+
+def test_alternative_consistent_instrument_maxima_are_derived_not_hard_coded():
+    rows = [row("a", [49, 50, 51], slots=20), row("b", [69, 70, 71]),
+            row("x", [20, 22, 24], project="Other", valid=False)]
+    maxima = {"rubric10": 60, "rubric20": 100}
+    for candidate in rows:
+        for rubric, family in candidate["rubrics"].items():
+            maximum = maxima[rubric]
+            for cell in family["scorings"]:
+                cell.update(maximum=maximum, adjusted_max_points=maximum,
+                            points=cell["percentage"] * maximum / 100)
+    variation = pooled_variation(rows)
+    assert variation["fallback_reasons"] == [] and variation["s"] > 0
+    assert variation["percentage_base"]["maxima"] == maxima
+    block = decide(rows[:2], variation, "instrument-x")["score_policy"]
+    assert block["rule"] == "score_gap" and block["percentage_base"]["maxima"] == maxima
+
+
+def test_other_project_maximum_drift_prevents_registered_pool():
+    selected = [row("a", [49, 50, 51], slots=20), row("b", [69, 70, 71])]
+    other = row("x", [20, 22, 24], project="Other", valid=False)
+    for cell in other["rubrics"]["rubric20"]["scorings"]:
+        cell.update(maximum=100, adjusted_max_points=100, points=cell["percentage"])
+    variation = pooled_variation([*selected, other])
+    assert variation["s"] is None
+    assert "Other/x rubric20" in variation["not_measured_reason"]
+    assert "maximum differs across measured series cells" in variation["not_measured_reason"]
+    result = decide(selected, variation, "instrument-x")
+    assert result["selected"] == "a" and result["score_policy"]["T"] is None
+    assert result["score_policy"]["percentage_base"]["maxima"]["rubric20"] is None
+
+
+def test_incomplete_decision_keeps_registered_noise_null_and_partial_named():
+    rows = [row("a", [49, 50, 51], slots=20), row("b", [69, 70, 71])]
+    rows[1]["rubrics"]["rubric10"]["scorings"].pop()
+    for variation in (pooled_variation(rows), noise(2)):
+        block = decide(rows, variation, "instrument-x")["score_policy"]
+        assert block["s"] is None and block["T"] is None
+        assert block["variation"]["s"] is None and block["variation"]["T"] is None
+        assert block["variation"]["partial_variation"]["partial_s"] > 0
+
+
+def test_series_census_once_roster_once_and_other_projects_replacements_disclosed():
+    selected = [row("a", [49, 50, 51], slots=20), row("b", [69, 70, 71])]
+    other = row("x", [20, 22, 24], project="Other", valid=False)
+    cell = other["rubrics"]["rubric20"]["scorings"][1]
+    cell.update(attempt=2, refused_attempt={"receipt_sha256": "a" * 64,
+                "plan_sha256": "b" * 64, "reason": "ValueError: invalid result"})
+    variation = pooled_variation([*selected, other])
+    roster = [{"project": candidate["project"], "label": candidate["label"]}
+              for candidate in (*selected, other)]
+    variation.update(expected_roster=roster, discovered_census=roster,
+                     series_roster={"basis": "source manifest"}, roster_missing=[], roster_unexpected=[])
+    block = decide(selected, variation, "instrument-x")["score_policy"]
+    assert len(block["series_census"]) == 3
+    assert "series_census" not in block["variation"]
+    for key in ("expected_roster", "discovered_census", "series_roster", "roster_missing", "roster_unexpected"):
+        assert block[key] == variation[key] and key not in block["variation"]
+    assert len(block["replaced_cells"]) == 1
+    assert block["replaced_cells"][0]["project"] == "Other"
+    assert block["replaced_cells"][0]["label"] == "x"
+    assert block["replaced_cells"][0]["refused_attempt"]["plan_sha256"] == "b" * 64
 
 
 test_every_measured_cell_requires_pinned_identity_keys = pytest.mark.parametrize(
@@ -354,3 +456,9 @@ test_every_measured_cell_requires_pinned_identity_keys = pytest.mark.parametrize
 test_fixed_denominator_and_context_compatibility = pytest.mark.parametrize(
     "kind", ("maximum", "adjusted maximum", "candidate context", "rubric context")
 )(test_fixed_denominator_and_context_compatibility)
+test_bounded_refusal_reason_stops_before_path_token_and_discards_whole_suffix = pytest.mark.parametrize(
+    "path", ("file:/synthetic-evidence/secret", "file:///synthetic-evidence/secret",
+             "'/synthetic-evidence/private folder/secret.json'", "C:/private folder/secret.json",
+             r"C:\private folder\secret.json", r"\\host\private folder\secret.json",
+             "relative/secret.json", "https://example.org/private")
+)(test_bounded_refusal_reason_stops_before_path_token_and_discards_whole_suffix)

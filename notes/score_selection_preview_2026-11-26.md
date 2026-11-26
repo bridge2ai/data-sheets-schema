@@ -77,3 +77,27 @@ show identical values explicitly, and obtain the owner's ruling. Selection stays
 a preview until the owner authorizes a mark. The `--score-owner-rulings` input can
 retain those rulings in a later explicitly authorized selection block; it does
 not introduce an automatic veto or modify the score-gap rule.
+
+## Independent roster and interpretation
+
+The expected project roster now comes from the selected source manifest,
+independently of which projects have retained scoring evidence. The replicate
+labels are the union discovered for the configuration in record directories and
+matching retained plans. Compare the recorded `expected_roster` and
+`discovered_census`; any difference makes every project fall back. A label absent
+from both discovery sources cannot be inferred by this union rule.
+
+For this real series, the default manifest's project list equals the five project
+names in the commands above; there are no additions or omissions. The manifest
+bytes have SHA256 `b28c300596cc9be964e93f1a21609f24a8b53d55302abc5fb45a29681e55cea8`.
+No narrower roster is needed for these six previews. When intentionally selecting
+a narrower series, add `--score-series-project NAME` once per expected project to
+every command; the explicit roster replaces the manifest list and is recorded.
+
+Registered `s` and `T` are null when the series is incomplete. Any remaining
+partial estimates have explicitly partial names. Each rubric's denominator is
+its consistent published `max_points` across the measured series, with
+`adjusted_max_points` equal to it. Replacement disclosures include every project
+contributing to the pooled spread. Owner authorization text is a record and an
+accident-prevention guard; it is not proof of authority. These previews neither
+supply such text nor change a canonical mark.

@@ -1687,7 +1687,7 @@ def _validates(record: Path) -> tuple[bool, str]:
 @click.option("--review-margin", default=None, type=int,
               help="Retired: an adverse-count margin is not a calibrated selection rule (#835).")
 def select_cmd(method, project, config, allow_unverified, execute, ignore_reviews, review_margin, supersede_all_runtimes,
-               score_policy=None, score_instrument=None, score_receipts=(), score_owner_rulings=None, score_owner_authorization=None):
+               score_policy=None, score_instrument=None, score_receipts=(), score_owner_rulings=None, score_owner_authorization=None, score_series_project=()):
     """Mark one replicate canonical, keeping all of them.
 
     Selection, not merging. Replicates state different facts on **47-63% of the
@@ -1720,7 +1720,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
     and reversible.
     """
     _require_score_selection_options(score_policy, score_instrument,
-                                     score_receipts, score_owner_rulings, execute=execute, authorization=score_owner_authorization)
+                                     score_receipts, score_owner_rulings, execute=execute, authorization=score_owner_authorization, series_projects=score_series_project)
     if review_margin is not None:
         raise click.ClickException(
             "--review-margin is retired: review metrics are reported only "
@@ -1819,7 +1819,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
     eligible.sort(key=lambda c: (-c[3], c[0]))
     winner, runner_up, margin, criterion, score_record = _select_with_score_policy(
         method, project, config, score_policy, score_instrument, score_receipts, score_owner_rulings,
-        candidates, contenders, adverse_of, evidence_why, criterion, authorization=score_owner_authorization)
+        candidates, contenders, adverse_of, evidence_why, criterion, authorization=score_owner_authorization, series_projects=score_series_project)
 
     click.echo(f"\n→ {winner[0]}  ({winner[3]} slots)")
     _print_selection_reason(score_record, why)
@@ -1995,24 +1995,24 @@ def _selection_record_mapping(record, score_policy):
 
 def _selection_live_validation(record, loaded, score_policy):
     if score_policy and not isinstance(loaded, dict):
-        return False, "unreadable record"
+        return False, f"{record.parent.name}/{record.name}: unreadable record"
     if not score_policy:
         return _validates(record)
     try:
         return _validates(record)
     except (ValueError, OSError):
-        return False, "record validation could not be read"
+        return False, f"{record.parent.name}/{record.name}: record validation could not be read"
 
 
 def _require_score_selection_options(score_policy, score_instrument, score_receipts,
-                                     score_owner_rulings, *, execute=False, authorization=None):
+                                     score_owner_rulings, *, execute=False, authorization=None, series_projects=()):
     """Keep preflight and score options outside the historical selector layout."""
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d runs select")
     if bool(score_policy) != bool(score_instrument):
         raise click.ClickException("--score-policy and --score-instrument must be supplied together")
-    if (score_receipts or score_owner_rulings or authorization is not None) and not score_policy:
-        raise click.ClickException("score evidence, owner rulings and authorization require --score-policy")
+    if (score_receipts or score_owner_rulings or authorization is not None or series_projects) and not score_policy:
+        raise click.ClickException("score evidence, owner rulings, authorization and series projects require --score-policy")
     if authorization is not None and (not isinstance(authorization, str) or not authorization.strip()):
         raise click.ClickException("--score-owner-authorization needs nonempty owner text")
     if authorization is not None:
@@ -2026,7 +2026,7 @@ def _require_score_selection_options(score_policy, score_instrument, score_recei
 
 def _select_with_score_policy(method, project, config, score_policy, score_instrument,
                               score_receipts, score_owner_rulings, candidates, contenders,
-                              adverse_of, evidence_why, criterion, *, authorization=None):
+                              adverse_of, evidence_why, criterion, *, authorization=None, series_projects=()):
     """Return the original coverage pick unless the caller opted into scoring."""
     winner = contenders[0]
     runner_up = contenders[1] if len(contenders) > 1 else None
@@ -2038,9 +2038,15 @@ def _select_with_score_policy(method, project, config, score_policy, score_instr
         table, variation = _score_selection_context(
             method, config, score_instrument, score_receipts,
             project=project, candidates=candidates,
-            adverse_of=adverse_of, evidence_why=evidence_why)
+            adverse_of=adverse_of, evidence_why=evidence_why, series_projects=series_projects)
         decision = decide(table, variation, score_instrument, policy_pick=winner[0])
         score_record = decision["score_policy"]
+        score_winner = next(c for c in contenders if c[0] == decision["selected"])
+        other_contenders = [c for c in contenders if c[0] != decision["selected"]]
+        coverage_runner = other_contenders[0] if other_contenders else None
+        score_record["selected_coverage_margin_over_best_other"] = (
+            score_winner[3] - coverage_runner[3] if coverage_runner else None)
+        score_record["selected_coverage_comparison_label"] = coverage_runner[0] if coverage_runner else None
         if score_owner_rulings:
             score_record["owner_rulings"] = _score_owner_rulings(score_owner_rulings, table)
         if authorization is not None:
@@ -2077,10 +2083,49 @@ def _canonical_with_score(canonical, score_record):
     return canonical
 
 
+def _score_project_name(name):
+    from pathlib import PureWindowsPath
+    return (isinstance(name, str) and bool(name.strip()) and name == name.strip()
+            and name not in (".", "..") and Path(name).name == name
+            and PureWindowsPath(name).name == name and "\x00" not in name)
+
+
+def _score_expected_projects(series_projects):
+    """The expected project roster is declared independently of score evidence."""
+    import hashlib
+    from data_sheets_schema.registry import DEFAULT_MANIFEST, load_registry, selected_manifest
+
+    if series_projects:
+        names = list(series_projects)
+        if any(not _score_project_name(name) for name in names) or len(set(names)) != len(names):
+            raise ValueError("--score-series-project needs distinct project path components")
+        return sorted(names), {"basis": "explicit_score_series_projects", "manifest_sha256": None}, []
+    context = click.get_current_context(silent=True)
+    requested = selected_manifest(context) if context is not None else DEFAULT_MANIFEST
+    manifest_name = Path(requested).name if requested is not None else "no manifest"
+    try:
+        registry = load_registry(requested)
+        names = registry.projects()
+        digest = (hashlib.sha256(registry.path.read_bytes()).hexdigest()
+                  if registry.path is not None and registry.path.is_file() else None)
+    except (click.ClickException, OSError, ValueError) as error:
+        return [], {"basis": "selected_source_manifest", "manifest_sha256": None}, [
+            f"source manifest {manifest_name}: {type(error).__name__}; project roster is unreadable"]
+    metadata = {"basis": "selected_source_manifest", "manifest_sha256": digest}
+    if any(not _score_project_name(name) for name in names):
+        return [], metadata, [f"source manifest {manifest_name}: invalid project path component"]
+    return sorted(names), metadata, ([] if names else [
+        f"source manifest {manifest_name}: no declared projects; expected roster unavailable"])
+
+
+def _score_roster_pairs(pairs):
+    return [{"project": project, "label": label} for project, label in sorted(pairs)]
+
+
 def _score_selection_context(method, config, instrument_id, receipt_roots, *,
                              project=None, candidates=(), adverse_of=None,
-                             evidence_why=None):
-    """Read each series record and retained evidence index once for pooled noise."""
+                             evidence_why=None, series_projects=()):
+    """Bind a manifest-declared project roster to the discovered label union."""
     from data_sheets_schema.runs import CONCAT_DIR, REPLICATE_RE
     from data_sheets_schema.score_selection import build_evidence_table, load_evidence_index, pooled_variation
 
@@ -2090,28 +2135,48 @@ def _score_selection_context(method, config, instrument_id, receipt_roots, *,
     directories = [base / label for label in _selection_labels(base, config, True)]
     roots = tuple(Path(p) for p in receipt_roots)
     index = load_evidence_index(roots)
-    projects = {p.name[:-len("_d4d.yaml")] for directory in directories
-                for p in directory.glob("*_d4d.yaml")}
+    discovered = {(p.name[:-len("_d4d.yaml")], directory.name) for directory in directories
+                  for p in directory.glob("*_d4d.yaml")}
     for entry in index["runs"].values():
         identity = entry["plan"].get("identity", {})
+        origin = Path(entry["plan_path"]).parent.name + "/plan.json"
         if not isinstance(identity, dict):
-            index["issues"].append("retained plan identity is not a mapping")
+            index["issues"].append(f"{origin}: retained plan identity is not a mapping")
             continue
         label = identity.get("label", "")
         match = REPLICATE_RE.fullmatch(label) if isinstance(label, str) else None
         if (match and match.group("config") == config and identity.get("method") == method
-                and identity.get("instrument_id") == instrument_id and isinstance(identity.get("project"), str)):
-            name = identity["project"]
-            if not name or Path(name).name != name or name in (".", ".."):
-                index["issues"].append("retained series plan has invalid project identity")
+                and identity.get("instrument_id") == instrument_id):
+            name = identity.get("project")
+            if not _score_project_name(name):
+                index["issues"].append(f"{origin}: retained series plan has invalid project identity")
                 continue
-            projects.add(name)
+            discovered.add((name, label))
             directory = base / label
             if directory not in directories:
                 directories.append(directory)
     directories.sort()
-    if project is not None:
-        projects.add(project)
+    expected_projects, roster, roster_problems = _score_expected_projects(series_projects)
+    observed_projects = {name for name, _label in discovered}
+    excluded = sorted(observed_projects - set(expected_projects)) if series_projects else []
+    if series_projects:
+        if project is not None and project not in expected_projects:
+            raise ValueError(f"selected project {project}: outside the explicitly declared series roster")
+        discovered = {pair for pair in discovered if pair[0] in expected_projects}
+        projects = set(expected_projects)
+    else:
+        projects = set(expected_projects) | observed_projects
+        if project is not None:
+            projects.add(project)
+    labels = [directory.name for directory in directories]
+    expected = {(name, label) for name in expected_projects for label in labels}
+    missing, unexpected = expected - discovered, discovered - expected
+    roster.update(projects=expected_projects, replicate_labels=labels,
+                  excluded_discovered_projects=excluded)
+    roster_problems.extend(f"series roster missing {name}/{label}: no candidate record or retained plan"
+                           for name, label in sorted(missing))
+    roster_problems.extend(f"series roster unexpected {name}/{label}: project is not in the declared roster"
+                           for name, label in sorted(unexpected))
     all_rows, selected = [], []
     for name in sorted(projects):
         if name == project:
@@ -2135,6 +2200,25 @@ def _score_selection_context(method, config, instrument_id, receipt_roots, *,
     if not all_rows:
         raise ValueError(f"no records for configuration {config!r}")
     variation = pooled_variation(all_rows)
+    variation.update(series_roster=roster, expected_roster=_score_roster_pairs(expected),
+                     discovered_census=_score_roster_pairs(discovered),
+                     roster_missing=_score_roster_pairs(missing), roster_unexpected=_score_roster_pairs(unexpected))
+    if roster_problems:
+        if variation.get("s") is not None:
+            import math
+            variation["partial_variation"] = {
+                "partial_s": variation["s"], "partial_T": 2 * variation["s"] * math.sqrt(2 / 3),
+                "partial_degrees_of_freedom": variation.get("degrees_of_freedom"),
+                "partial_records": variation.get("records"),
+                "partial_per_project": variation.get("per_project"),
+                "partial_per_rubric": variation.get("per_rubric")}
+        variation["s"] = None
+        variation["T"] = None
+        variation["per_project"] = {}
+        variation["per_rubric"] = {}
+        variation["fallback_reasons"] = sorted(set(variation.get("fallback_reasons", []) + roster_problems))
+        variation["not_measured_reason"] = "; ".join(variation["fallback_reasons"])
+        variation["series_complete"] = False
     return (selected if project is not None else all_rows), variation
 
 
@@ -2186,16 +2270,19 @@ select_cmd.params.extend([
     click.Option(["--score-owner-rulings"], type=click.Path(exists=True, dir_okay=False), default=None,
                  help="Owner-adjudicated content findings JSON, recorded without automatic ranking effects."),
     click.Option(["--score-owner-authorization"], default=None,
-                 help="Explicit owner text required before recording a score-policy canonical mark."),
+                 help="Owner text required before recording a score-policy mark; a recorded accident-prevention guard, not proof of authorization."),
+    click.Option(["--score-series-project"], multiple=True,
+                 help="Explicitly replace the selected manifest project roster; repeat once per project in the narrower series."),
 ])
 
 
-def score_variation_cmd(method, config, score_instrument, score_receipts):
+def score_variation_cmd(method, config, score_instrument, score_receipts, score_series_project=()):
     """Preview pooled within-record scorer variation; never mark a canonical."""
     from data_sheets_schema.cli.method import resolve_method
     method = method or resolve_method(config)
     try:
-        table, variation = _score_selection_context(method, config, score_instrument, score_receipts)
+        table, variation = _score_selection_context(method, config, score_instrument, score_receipts,
+                                                     series_projects=score_series_project)
     except (ValueError, OSError) as error:
         raise click.ClickException(str(error)) from error
     _score_report("Series evidence", table)
@@ -2209,6 +2296,8 @@ score_variation_cmd.params.extend([
     click.Option(["--config"], required=True),
     click.Option(["--score-instrument"], required=True),
     click.Option(["--score-receipts"], type=click.Path(exists=True, file_okay=False), multiple=True),
+    click.Option(["--score-series-project"], multiple=True,
+                 help="Explicitly replace the selected manifest project roster; repeat once per project in the narrower series."),
 ])
 
 

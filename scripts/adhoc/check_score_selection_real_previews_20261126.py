@@ -25,7 +25,7 @@ def git(root, *args):
 
 
 def snapshot(args):
-    files = set()
+    files = {args.corpus_root / "data/preprocessed/source_manifest.yaml"}
     for project in args.projects:
         for number in (1, 2, 3):
             label = args.config + "_rep" + str(number)
@@ -105,9 +105,15 @@ def main():
             break
         if name == "variation":
             table = section(stdout.read_text(), "Series evidence")
+            variation = section(stdout.read_text(), "Series variation")
             cells = [cell for row in table for rubric in row["rubrics"].values() for cell in rubric["scorings"]]
             if len(cells) != 90 or any(cell["status"] != "measured" for cell in cells):
                 preview_problem = "variation canary did not establish 90 measured cells; project previews not run"
+                break
+            if (variation.get("series_roster", {}).get("projects") != sorted(args.projects)
+                    or variation.get("roster_missing") or variation.get("roster_unexpected")
+                    or variation.get("fallback_reasons")):
+                preview_problem = "variation canary did not establish the complete independent roster; project previews not run"
                 break
         else:
             policy = section(stdout.read_text(), "Score policy")
