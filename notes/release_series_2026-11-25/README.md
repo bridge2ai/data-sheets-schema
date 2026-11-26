@@ -116,7 +116,8 @@ Total cost at list price as reported by the sessions: 251.49 USD (8.47 to 22.64 
    project carries a `d4d runs select` mark; `CANONICAL_SELECTION.md` names them and gives
    the rubric scores (`rubric_scores_root_scope_v6.tsv`), and `html/` holds a preview of
    every run. The evaluation files themselves are in PR #6372.
-5. **Not checked here**: that a chunk marked `nothing_relevant` held nothing for the record,
+5. **Not checked when the records were merged** (the content reviews made on 2026-11-26 sample
+   both for every record; see `CANONICAL_SELECTION.md`): that a chunk marked `nothing_relevant` held nothing for the record,
    and that a verified snippet supports the value it is attached to. Both are review
    judgements. The receipt check counts 109 verified snippets, in 12 of the 15 records, that
    share no token with the value they are attached to (most in VOICE_PEDIATRIC replicates 3

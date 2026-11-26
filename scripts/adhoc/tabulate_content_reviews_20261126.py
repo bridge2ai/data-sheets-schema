@@ -82,7 +82,7 @@ def main() -> int:
             ))
     print("\t".join((
         "project", "replicate", "label", "items_total", "items_answered", "adverse", "cannot_tell", "verdicts_by_kind",
-        "reviewer_as_reported", "reviewer_model_as_reported", "reviewed_at", "pack_sha256", "review_sha256",
+        "reviewer_as_reported", "reviewer_model", "reviewed_at", "pack_sha256", "review_sha256",
         "definition_path", "definition_sha256", "definition_last_commit",
     )))
     for row in rows:
