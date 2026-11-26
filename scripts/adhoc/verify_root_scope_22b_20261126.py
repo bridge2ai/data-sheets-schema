@@ -9,7 +9,10 @@ VALIDATED_AND_PUBLISHED, validator exit 0, auth copy absent; published bytes equ
 receipt and validator-input sha256; instrument id and version; evaluator model; one root
 unit "#"; the rubric's fixed maximum; the record sha256 and scope-declaration sha256 in
 the file equal the bytes in the checkout; no local path or account name in the file.
-It never opens a refused run's candidate output. It also re-verifies the 15 scope
+A cell with a second attempt must carry the reviewed replacement helper's claim and
+terminal record (live-runs/first-scoring-remediations/<name>-01/), binding the refused
+plan and receipt and, when published, the published bytes. It never opens a refused
+run's candidate output. It also re-verifies the 15 scope
 declarations against scope-declarations.sha256.
 Inputs: argv[1] evidence directory (holds checkout/, live-runs/, scope-declarations.sha256).
 Outputs: lines on stdout; JSON to argv[2]; TSV provenance table to argv[3] (repository-
@@ -75,6 +78,22 @@ for project in PROJECTS:
                     hits = [t for t in LEAKS if t in text]
                     if hits: bad(f"leak tokens {hits}")
             if cell["state"] != "measured" and (W / rel).exists(): bad("a file exists for a cell that is not measured")
+            # a second attempt must be declared by the reviewed replacement helper's terminal record
+            second = X / "live-runs" / f"{base}-02"
+            remedy = X / "live-runs" / "first-scoring-remediations" / f"{base}-01"
+            if second.exists() or remedy.exists():
+                if not (remedy / "claim.json").exists() or not (remedy / "manifest.json").exists(): bad("attempt 2 without the helper's claim and terminal record")
+                else:
+                    raw = (remedy / "manifest.json").read_text(); m = json.loads(raw)
+                    cell["remedy_status"] = m.get("status"); cell["remedy_kind"] = m.get("kind")
+                    if m.get("kind") != "ROOT_SCOPE_FIRST_SCORING_REPLACEMENT_V1" or m.get("attempt") != 2 or m.get("scoring_replicate") != 1: bad("terminal record is not a first-scoring replacement, attempt 2")
+                    if sha(X / "live-runs" / f"{base}-01" / "receipt.json") not in raw or sha(X / "live-runs" / f"{base}-01" / "plan.json") not in raw: bad("terminal record does not bind the refused plan and receipt")
+                    if cell["state"] == "measured":
+                        if cell.get("attempt") != 2: bad("a remedy exists but attempt 1 is the published one")
+                        if m.get("status") != "FIRST_SCORING_REPLACEMENT_PUBLISHED": bad(f"published attempt 2 but terminal status {m.get('status')}")
+                        if cell.get("sha256") and cell["sha256"] not in raw: bad("terminal record does not bind the published bytes")
+                    elif m.get("status") != "FIRST_SCORING_REPLACEMENT_REFUSED": bad(f"cell not measured but terminal status {m.get('status')}")
+            elif cell.get("attempt") == 2: bad("attempt 2 published without a remedy record")
             cells.append(cell)
 on_disk = sorted(str(p.relative_to(W)) for p in (W / "data/evaluation_llm").glob(f"*_semantic/label_aware/{INST}/*_evaluation.json"))
 expected = sorted(c["path"] for c in cells if c["state"] == "measured")
