@@ -47,13 +47,19 @@ percentage (of 88) for one scoring number.
 
 ## Reading
 
-- A single scoring of a record is typically within about 1.3 points of that record's
-  mean. Two replicates whose 3-scoring means differ by less than about 2 points cannot
-  be told apart on this instrument.
-- The per-project values range from 0.69 to 1.84. With 6 degrees of freedom each, a
-  largest-to-smallest variance ratio of 7.1 across five groups is within what equal
-  true variances produce (Hartley's maximum-ratio test, 5 groups, 6 df, 5% point about
-  16), so the pooled value is used. The estimate for any one project is rough.
+- The standard deviation of one scoring of a record is about 1.3 points. Under
+  `score_gap_v1`, a gap between two 3-scoring means below the threshold of 2.05 points
+  does not trigger a change from the current pick. That is a decision threshold. It
+  does not show that two such replicates are equivalent, and it is not a resolution
+  limit of the instrument.
+- The per-project values range from 0.69 to 1.84, a largest-to-smallest variance
+  ratio of 7.09. Under Hartley's maximum-ratio test for 5 groups with 6 degrees of
+  freedom each, assuming normal and independent scoring scores, the upper 5% point is
+  12.11 and the upper-tail probability of the observed ratio is 0.18
+  (`scripts/adhoc/check_hartley_fmax_20261126.py` checks both by simulation). The test
+  does not reject equal variances, but with 6 degrees of freedom per project that is
+  weak evidence and does not establish that the variances are equal. Pooling is a
+  working assumption, and the estimate for any one project is rough.
 - Rubric10 varies more than rubric20 in percentage terms: its items are binary, so one
   item is 2 percentage points.
 - Two records gave the same total on all six scorings; the largest move within one rubric was 6
@@ -85,5 +91,8 @@ false refusals depend on how the scorer started a helper session, not on the out
   statements are true.
 - Three scorings per record give a rough per-record SD; only the pooled value is used.
 - The session-reader defect (issue 6384) could in principle also accept a mismatched
-  session. An independent census found no such case among the 65 runs completed before
-  2026-11-26T05:30:53Z; the later runs are to be covered before this data merges.
+  session. An independent census of all 90 published runs found none: 118 retained
+  sessions; 26 runs with a child session, 28 children in all, every one started as a
+  fork whose inherited context equals a retained payload owned by its parent; no
+  published run with a fresh child; no disagreement between a context and its preceding
+  task start among 156 checked. The census does not fix the reader or cover later runs.
