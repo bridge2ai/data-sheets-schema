@@ -83,15 +83,30 @@ hashes for each. Adverse verdicts, rep1 / rep2 / rep3:
 | VOICE | 2 | 4 | 6 |
 | VOICE_PEDIATRIC | 0 | 4 | 4 |
 
-- Every item of every pack was answered; no verdict is `cannot_tell`, and none says a value is
-  unsupported, misread or not in the bundle.
+- Every item of every pack was answered and no verdict is `cannot_tell`. No sampled slot got the
+  verdict `unsupported`, `misread` or `not_in_bundle`. That is a statement about those labels
+  only: several rule verdicts do charge a specific value. Rule 01 was ruled violated for VOICE
+  rep2 (`versions_available` lists 1.1, whose files the source says are gone) and VOICE rep3
+  (`language: English`, stated in the source for an earlier version only); rule 21 for VOICE
+  rep3 (a maintainer taken from the hosting site's footer) and VOICE_PEDIATRIC rep3 (SenseLab,
+  below); rule 27 for AI_READI rep3 (a caveat that attributes a funding acknowledgement to both
+  publications); and one chunk the VOICE rep3 run set aside as irrelevant was ruled
+  `missed_content`.
+- A review samples its record (25 receipted values, the rules, the chunks set aside). It does
+  not show that each value is right. The defect of README item 8 (VOICE rep3, "OpenAI Whisper
+  Large unknown") was not among the sampled items and no review mentions it.
+- The table counts adverse verdicts, not defects: one defect can be charged under two rules
+  (CHORUS rep2 under rules 05 and 22; VOICE rep3's six verdicts are four defects by its
+  reviewer's own count).
 - **The counts are not comparable between replicates.** Each review samples its own record, and
   the same value was judged differently by different reviews. Checked against the sibling
   records: all three VOICE records list version 1.1 under `versions_available` (the source says
   its files are no longer available; rep3 says so in the entry) and only rep2 was charged; VOICE
   rep2 and rep3 both state `language: English` and only rep3 was charged; the
   `relationship_type: references` of the related dataset is the same in all three
-  VOICE_PEDIATRIC records and was ruled a violation in rep2 and followed in rep1 and rep3.
+  VOICE_PEDIATRIC records and was ruled a violation in rep2 and followed in rep1 and rep3, and
+  the VOICE reviews split the same way on the same rule (rep2 violated, rep1 and rep3 followed).
+  That split comes from two generation rules that pull against each other (#6417).
   The counts are reported only, as the selection policy says (#835); they were not used to
   choose or to revisit a mark.
 - One finding was checked as a difference between records: VOICE_PEDIATRIC rep3 names the
@@ -99,17 +114,23 @@ hashes for each. Adverse verdicts, rep1 / rep2 / rep3:
   name it.
 - The reviews were given the reviewer definition as a file to follow
   (`.claude/agents/d4d-review-record.md` at main `483bed03b`) and ran as a general subagent on
-  claude-opus-5-5, not as the typed agent whose front matter names another model. Each review
-  file says so. Eleven reviews wrote the model id followed by a description in their `model`
-  field; the field was reduced to the bare id so that one reviewer does not read as eleven
-  (`tests/test_reviewer_basis.py`, #1058), and `review_model_field_as_written.tsv` keeps what
-  each review wrote. The arm's reviewer is declared in `tests/data/reviewer_basis.json`.
+  claude-opus-5-5, not as the typed agent whose front matter names another model. That is the
+  launching session's account; each review said so itself when it was written, in its
+  `reviewer`, `model` or `notes` field. Eleven reviews wrote the model id followed by a
+  description in their `model` field, and the 15 files held twelve distinct values there; the
+  field was reduced to the bare id by a script after the reviews were written
+  (`tests/test_reviewer_basis.py`, #1058). `review_model_field_as_written.tsv` keeps what each
+  review wrote. For AI_READI rep3 the `model` field was the only place the review said how it
+  ran, so its file no longer says so and the table is where that statement is kept. The
+  `model_basis: self-reported by the reviewing agent` of the provenance blocks describes the
+  id, not the edit. The arm's reviewer is declared in `tests/data/reviewer_basis.json`.
 - The packs committed are not byte for byte the packs the reviewers read: two absolute paths
   were removed by regenerating each pack with the fixed generator (#6379, PR #6380), after
   checking that nothing else differs; `review_pack_repin.tsv` gives both hashes and the
   generator behind each. Main's generator reproduces the committed packs only once PR #6380
   is merged. The `definition_sha256` column of `content_reviews.tsv` is the hash of the
-  definition file when the table was made, which is the file every review was given.
+  definition file when the table was made. That it is the file every review was given is the
+  launching session's statement; nothing in a review file attests it.
 
 ## Presence evaluation
 
@@ -117,7 +138,9 @@ hashes for each. Adverse verdicts, rep1 / rep2 / rep3:
 existence, deterministic, no model) of the full and core records, made with
 `scripts/adhoc/run_presence_evaluation_release_series_20261126.sh`. 28 of 30 records are
 scored. The full records of CM4AI rep1 and rep3 list component `resources`; the presence
-evaluator validates them as a collection, the validation fails, and it skips them (#6377).
+evaluator validates them as a collection, the validation fails, and it skips them (#6377);
+the output's own files do not list the two skips, so the README beside them does. The run
+directory's name carries a local-time stamp (2026-11-25 19:12 Pacific, 2026-11-26 03:12 UTC).
 These scores are not comparable with the semantic rubric scores above.
 
 ## HTML
