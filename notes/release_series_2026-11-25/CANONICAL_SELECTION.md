@@ -1,9 +1,9 @@
 # Canonical selection, release runtime, 2026-11-26
 
-From 2026-11-26 the canonical datasheet of the release runtime (`Claude Code (release)`,
+Dates here are UTC. From 2026-11-26 the canonical datasheet of the release runtime (`Claude Code (release)`,
 method `claudecode_release`) for each project is one replicate of the series
-`2026-11-25c_claude-fable-5-2-claudecode-generic-v9` (generic_v9 prompt, claude-fable-5-2 at
-effort high, headless Claude Code). No release-runtime canonical existed before.
+`2026-11-25c_claude-fable-5-2-claudecode-generic-v9` (generic_v9 prompt, claude-fable-5-2, headless
+Claude Code; reasoning effort recorded as high, asserted by the launcher and not observed). No release-runtime canonical existed before.
 
 | Project | Canonical record | Populated slots (rep1 / rep2 / rep3) | Margin | Receipts |
 |---|---|---|---|---|
@@ -61,7 +61,8 @@ its sha256. Rubric10 is out of 50, rubric20 out of 88. The canonical record is i
 - AI_READI rep1 has 39 receiptable values without a receipt (README, item 1). Four of them
   are free-text statements. A text search of the bundle the record read finds each of the
   four stated there; that was a search by the session that prepared this change, not an
-  independent review, and the other 35 (names and enumerated values) were not checked. Rep2,
+  independent review, and the other 35 were not checked: 29 names, three booleans, two
+  enumerated values and one short free-text category (`use_category`). Rep2,
   which ties rep1 on populated slots, has a receipt on every receiptable value.
 - Three of the five picks were decided by the label alone. On the command's criterion the
   choice between the tied replicates is arbitrary.
@@ -78,3 +79,9 @@ its sha256. Rubric10 is out of 50, rubric20 out of 88. The canonical record is i
   longer the 2026-11-22b agentic page (the owner's decision of 2026-11-26). The agentic pages
   stay in `data/d4d_html/concatenated/claudecode_agent/`. The site's home page links the
   `curated` pages and is unchanged.
+- The site is deployed by `.github/workflows/deploy-docs.yaml` on every push to main, so the
+  merge of this change is also the publication of these five pages.
+- Beside each `<PROJECT>_d4d.html` the site's `html_output/` still holds older pages of the
+  same project from earlier runs (`_d4d_human_readable`, `_d4d_interleaved`,
+  `_evaluation_rubric10`, `_evaluation_rubric20`). They are not of this series and are not
+  changed here.

@@ -7,50 +7,81 @@ Purpose: the content check that issue #6362 (item 1) found missing. PR #6349 was
 Inputs: a git checkout (--root) and a base ref (--base); the files examined are the
   ones `git diff --name-only --diff-filter=AMR BASE...HEAD` lists, plus, with
   --worktree, staged, unstaged and untracked files. Or explicit --path arguments.
-  Names to look for are given with --name and are never written anywhere by this
-  script; further patterns with --pattern 'LABEL::REGEX'.
-Outputs: one line per finding on stdout (file:line: kind), a summary, and exit
-  status 0 (no finding), 1 (findings) or 2 (usage or read problem).
-  A --name hit never prints the matching text.
-Serves: issue #6362, the release series 2026-11-25c selection PR. Date: 2026-11-26.
+  Names to look for are given with --name and are never printed by this script, also
+  not inside the text another check shows; further patterns with --pattern
+  'LABEL::REGEX'.
+Outputs: one line per finding on stdout (file:line: kind), the list of excluded and
+  unread files, a summary, and exit status 0 (no finding and every listed file read),
+  1 (a finding, or a listed file that could not be read) or 2 (usage problem).
+Serves: issue #6362, the release series 2026-11-25c selection PR (#6373; hardened after
+  its review 1, finding F2). Date: 2026-11-26.
 
-What it looks for in each text file:
-  name            each --name, case-insensitive, with '-', '_', ' ' and '.' alike or absent
-  home-path       an absolute home-directory path (/Users/<x>/, /home/<x>/, C:\\Users\\<x>\\)
+What it looks for, every occurrence on every line:
+  name            each --name, case-insensitive, with '-', '_', ' ' and '.' alike or absent;
+                  also in the file path, and across line breaks (a name folded over two
+                  lines), reported once per file as "name across lines"
+  home-path       a home-directory or per-user temporary path: /Users/<x>, /home/<x>,
+                  C:\\Users\\<x>, ~/<x>, /var/folders or /private/var/folders, with plain
+                  or JSON-escaped slashes, with or without a trailing slash
   email           an email address; reported, and counted as a finding only with
                   --fail-on-email (a datasheet legitimately carries its dataset's contact
                   addresses; give a private address, or its local part, as a --name)
-  usage           wording about a subscription's usage or allowance
+  usage           wording about a subscription's usage, allowance, quota, plan or limits.
+                  The list of phrasings is in USAGE below; it is a list, not a guarantee
   pattern:<label> each --pattern
-A finding on a line that matches an --allow-line regex is reported as allowed and
-does not fail the run. A finding on a line that the base ref's version of the same file
-already has is reported as "on base" and does not fail the run either: the gate is about
-what the PR adds, and the line is listed so that it is not mistaken for clean. With --path
-there is no base and every line counts. Binary files are listed as not read.
+
+What does not fail the run, and is still listed:
+  - a finding on a line that matches an --allow-line regex ("allowed");
+  - a finding on a line that the merge base's version of the same file already has
+    ("on base"). Each base line gives credit once: a PR that repeats an existing line
+    a second time is a finding. A renamed or new file has no base. With --path there
+    is no base either.
+What does fail the run besides findings: a listed file that is not a regular file
+(a dangling link, a directory, a missing path). A symbolic link is read through, and its
+link text is scanned too. A file with NUL bytes is scanned as text and noted as binary.
+Files matching --exclude are not read; each is listed, so that a report can say which.
 """
 from __future__ import annotations
 
 import argparse
+import collections
+import os
 import re
 import subprocess
 import sys
 from pathlib import Path
 
-HOME_PATH = re.compile(r"(/Users/[^/\s\"']+/|/home/[^/\s\"']+/|[A-Za-z]:\\\\?Users\\\\?[^\\\s\"']+)")
+SLASH = r"(?:\\?/)"
+HOME_PATH = re.compile(
+    r"(?<![\w.])" + SLASH + r"(?:Users|home)" + SLASH + r"[^/\\\s\"'<>:,;)]+"
+    r"|[A-Za-z]:\\\\?Users\\\\?[^\\\s\"'<>]+"
+    r"|(?<![\w/~])~" + SLASH + r"[\w.-]+"
+    r"|(?<![\w.])" + SLASH + r"(?:private" + SLASH + r")?var" + SLASH + r"folders\b"
+)
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+")
 USAGE = re.compile(
-    r"(weekly (allowance|limit|usage)|usage[_ ]estimate|percent of (the |its )?(weekly|allowance|limit)"
-    r"|allowance (used|left|remaining)|/usage\b|rate[- ]limit(ed)? (until|reset))",
+    r"weekly (?:allowance|limit|usage|cap|quota)"
+    r"|usage[_ -](?:estimates?|limits?|caps?)"
+    r"|(?:percent|%) of (?:the |its |my |your |a )?(?:weekly|allowance|limit|cap|quota|usage)"
+    r"|allowance (?:used|left|remaining)"
+    r"|/usage\b"
+    r"|rate[- ]limit"
+    r"|(?:5|five)[- ]hour (?:limit|window|cap)"
+    r"|session limit"
+    r"|quota (?:exhausted|reached|left|remaining|used)"
+    r"|\b(?:max|pro|team) plan\b"
+    r"|\bsubscription",
     re.IGNORECASE,
 )
 
 
-def folded(name: str) -> re.Pattern[str]:
+def folded(name: str, across_lines: bool = False) -> re.Pattern[str]:
     """A pattern matching the name whatever separates its parts."""
     parts = [re.escape(part) for part in re.split(r"[-_ .]+", name) if part]
     if not parts:
         raise ValueError("a --name must contain a letter or digit")
-    return re.compile(r"[-_ .]?".join(parts), re.IGNORECASE)
+    separator = r"[-_.]?" if across_lines else r"[-_ .]?"
+    return re.compile(separator.join(parts), re.IGNORECASE)
 
 
 def git(root: Path, *args: str) -> list[str]:
@@ -60,15 +91,15 @@ def git(root: Path, *args: str) -> list[str]:
     return [line for line in done.stdout.split("\0") if line]
 
 
-def base_lines(root: Path, base: str, relative: str) -> set[str]:
-    """The lines of the file at the merge base with `base`; empty if it is not there."""
+def base_lines(root: Path, base: str, relative: str) -> collections.Counter[str]:
+    """How often each line occurs in the file at the merge base; empty if it is not there."""
     merge_base = subprocess.run(["git", "-C", str(root), "merge-base", base, "HEAD"], capture_output=True, text=True)
     if merge_base.returncode != 0:
-        return set()
+        return collections.Counter()
     shown = subprocess.run(["git", "-C", str(root), "show", f"{merge_base.stdout.strip()}:{relative}"], capture_output=True)
     if shown.returncode != 0:
-        return set()
-    return set(shown.stdout.decode("utf-8", errors="replace").splitlines())
+        return collections.Counter()
+    return collections.Counter(shown.stdout.decode("utf-8", errors="replace").splitlines())
 
 
 def changed_files(root: Path, base: str, worktree: bool) -> list[str]:
@@ -96,6 +127,7 @@ def main() -> int:
     root = Path(args.root).resolve()
     try:
         names = [(f"name[{index}]", folded(name)) for index, name in enumerate(args.name, 1)]
+        squeezed_names = [(f"name[{index}]", folded(name, across_lines=True)) for index, name in enumerate(args.name, 1)]
         extra = []
         for item in args.pattern:
             label, separator, regex = item.partition("::")
@@ -109,50 +141,88 @@ def main() -> int:
         print(f"cannot start: {exc}", file=sys.stderr)
         return 2
 
+    def shown(kind: str, text: str) -> str:
+        """The matched text for the report, with every --name inside it replaced."""
+        if kind.startswith("name"):
+            return ""
+        for _, regex in names:
+            text = regex.sub("<name>", text)
+        return f" {text[:80]!r}"
+
     checks = names + [("home-path", HOME_PATH), ("email", EMAIL), ("usage", USAGE)] + extra
     findings = allowed_findings = reported = on_base = read = 0
     not_read: list[str] = []
     skipped: list[str] = []
+    binary: list[str] = []
+
+    def record(relative: str, number: int | str, kind: str, text: str, line: str, credit: collections.Counter[str]) -> None:
+        nonlocal findings, allowed_findings, reported, on_base
+        where = f"{relative}:{number}"
+        if kind == "email" and not args.fail_on_email:
+            reported += 1
+            print(f"{where}: {kind} (reported only){shown(kind, text)}")
+        elif credit[line] > 0:
+            on_base += 1
+            print(f"{where}: {kind} (on base){shown(kind, text)}")
+        elif any(allow.search(line) for allow in allowed):
+            allowed_findings += 1
+            print(f"{where}: {kind} (allowed){shown(kind, text)}")
+        else:
+            findings += 1
+            print(f"{where}: {kind}{shown(kind, text)}")
+
     for relative in files:
         if any(regex.search(relative) for regex in excluded):
             skipped.append(relative)
             continue
         path = root / relative
-        if not path.is_file():
-            not_read.append(f"{relative} (not a file in the checkout)")
-            continue
-        raw = path.read_bytes()
-        if b"\0" in raw[:8192]:
-            not_read.append(f"{relative} (binary)")
-            continue
-        read += 1
-        # The file name itself can carry a name too.
+        none = collections.Counter()
         for kind, regex in names:
             if regex.search(relative):
                 findings += 1
                 print(f"{relative}: {kind} in the file path")
-        already = set() if args.path else base_lines(root, args.base, relative)
-        for number, line in enumerate(raw.decode("utf-8", errors="replace").splitlines(), 1):
+        if path.is_symlink():
+            target = os.readlink(path)
             for kind, regex in checks:
-                match = regex.search(line)
-                if not match:
-                    continue
-                shown = "" if kind.startswith("name") else f" {match.group(0)[:80]!r}"
-                if kind == "email" and not args.fail_on_email:
-                    reported += 1
-                    print(f"{relative}:{number}: {kind} (reported only){shown}")
-                elif line in already:
-                    on_base += 1
-                    print(f"{relative}:{number}: {kind} (on base){shown}")
-                elif any(allow.search(line) for allow in allowed):
-                    allowed_findings += 1
-                    print(f"{relative}:{number}: {kind} (allowed){shown}")
-                else:
-                    findings += 1
-                    print(f"{relative}:{number}: {kind}{shown}")
+                for match in regex.finditer(target):
+                    record(relative, "link", kind, match.group(0), target, none)
+        if not path.is_file():
+            not_read.append(f"{relative} (not a regular file in the checkout)")
+            continue
+        raw = path.read_bytes()
+        if b"\0" in raw[:8192]:
+            binary.append(relative)
+        read += 1
+        text = raw.decode("utf-8", errors="replace")
+        credit = collections.Counter() if args.path else base_lines(root, args.base, relative)
+        per_line_names = collections.Counter()
+        for number, line in enumerate(text.splitlines(), 1):
+            hits = []
+            for kind, regex in checks:
+                seen = set()
+                for match in regex.finditer(line):
+                    if match.group(0) not in seen:
+                        seen.add(match.group(0))
+                        hits.append((kind, match.group(0)))
+                    if kind.startswith("name"):
+                        per_line_names[kind] += 1
+            for kind, matched in hits:
+                record(relative, number, kind, matched, line, credit)
+            if hits and credit[line] > 0:
+                credit[line] -= 1          # one credit per occurrence of the line on base
+        squeezed = re.sub(r"\s+", "", text)
+        for kind, regex in squeezed_names:
+            in_lines = sum(1 for line in text.splitlines() for _ in regex.finditer(re.sub(r"\s+", "", line)))
+            if len(regex.findall(squeezed)) > in_lines:
+                findings += 1
+                print(f"{relative}: {kind} across lines")
 
+    for item in binary:
+        print(f"binary, scanned as text: {item}")
     for item in not_read:
         print(f"not read: {item}")
+    for item in skipped:
+        print(f"excluded: {item}")
     print(
         f"files listed {len(files)}, read {read}, excluded {len(skipped)}, not read {len(not_read)}; "
         f"names given {len(names)}; findings {findings}, on base {on_base}, allowed {allowed_findings}, "
@@ -160,7 +230,7 @@ def main() -> int:
     )
     if not names:
         print("no --name was given: the name check did not run")
-    return 1 if findings else 0
+    return 1 if findings or not_read else 0
 
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ refused them; the records validate as `Dataset` under the schema (see `../gates/
 CM4AI replicate 2 has no `resources` and rendered with the pre-check on, as did the other
 twelve.
 
-Checked with `scripts/adhoc/scan_data_pr_private_details_20261126.py`: no account name,
-no absolute home-directory path and no usage wording in the 15 pages or the stylesheet.
-The 16 email addresses it reports are contact addresses the datasheets state from their
-sources.
+Checked with `scripts/adhoc/scan_data_pr_private_details_20261126.py`: no account name, no
+home-directory path and none of the usage phrasings the script lists in the 15 pages or the
+stylesheet. The email addresses it reports are seven distinct contact addresses that the
+datasheets state from their sources.
