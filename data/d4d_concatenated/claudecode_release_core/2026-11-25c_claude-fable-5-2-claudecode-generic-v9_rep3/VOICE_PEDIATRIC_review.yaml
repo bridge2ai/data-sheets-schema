@@ -1,0 +1,200 @@
+reviewer: d4d-review-record procedure, run by a Claude Code subagent given the definition file as its instructions through a brief (not launched as the typed agent)
+model: claude-opus-5-5 (Claude Opus 5.5, as stated in the subagent's own environment; the definition's frontmatter names claude-opus-5)
+reviewed_at: '2026-11-26T03:55:02Z'
+pack_sha256: 501a0da3db340f564617b79d10acdac41312abfd745e36860bc7f10955d7dc65
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-20 are the concatenator's preamble (input directory, file count, selection manifest, table of contents of six source files); no dataset fact"
+- id: chunk-c012
+  verdict: confirmed
+  evidence: "lines 2776-2824 are DTUA template clauses 7-10 (recipient IRB documentation, adherence to PhysioNet requirements, unilateral amendment, Florida labor-coercion warranty) and an empty Attachment 3 placeholder (2811-2818); none names the pediatric release, and the record correctly keeps the template's terms out of its own slots (raw_sources[0].source_caveats)"
+- id: chunk-c013
+  verdict: confirmed
+  evidence: "lines 2825-2866 are the bridge2ai-docs repository README (badges, MIT license pointer for the docs code, how to cite the docs, pip install, startup.sh); it describes the documentation software, not the dataset"
+- id: slot-004
+  verdict: supported
+  evidence: "line 444 (PhysioNet Ethics section): 'Data collection and sharing was approved by the Research Ethics Board at the Hospital for Sick Children'; human_subject_research.ethics_review_board names that board, as the slot asks"
+- id: slot-005
+  verdict: supported
+  evidence: "line 412: 'Spectrograms, Mel Spectrograms, MFC coefficients, PPGs, and EMAs for sensitive records and audio checks have been removed from v1.1'; cleaning_strategies[0].name is a faithful label for that removal step of the current release"
+- id: slot-006
+  verdict: supported
+  evidence: "line 402: 'phenotypic information acquired during data collection (under phenotype)'; file_collections[1].path 'phenotype' is the folder the Data Description names"
+- id: slot-007
+  verdict: weak
+  evidence: "lines 437-439 are a Usage Notes code example ('A phenotype file can be loaded ... For example ... pd.read_csv(\"demographics.tsv\" ...)'); the passage is real and on topic but does not establish that a file named demographics.tsv is a member of the released phenotype collection: the same Usage Notes section loads 'torchaudio_spectrogram.parquet' and 'torchaudio_mel_spectrogram.parquet' (lines 421, 428), which are not the released names at lines 403-404, so its file names are illustrative. The record's own description ('named in the Usage Notes example') discloses this; format/media_type from the .tsv extension are exempt under rule-24"
+- id: slot-008
+  verdict: supported
+  evidence: "line 400: 'the remaining recordings utilized the built-in tablet microphone due to low tolerance of wearing headphones or existing complex medical conditions'; collection_mechanisms[2].name 'Built-in tablet microphone' is that mechanism"
+- id: slot-009
+  verdict: supported
+  evidence: "line 213 in the PhysioNet author list (also BibTeX line 326 'Mifsud, Matthew'); creators[74].name 'Matthew Mifsud'"
+- id: slot-010
+  verdict: supported
+  evidence: "lines 554 and 559: under 'Other USF Co-investigators', 'Karim Hanna, MD - Assistant Professor, TCOP Department of Pharmacy Practice'; creators[51] is Karim Hanna and affiliations[0].name 'University of South Florida' is what the heading states (protocol title page names the USF investigators)"
+- id: slot-011
+  verdict: supported
+  evidence: "line 402: 'Each element of the parquet formatted dataset contains a unique identifier for the participant (participant_id)'; variables[0].description restates it"
+- id: slot-012
+  verdict: supported
+  evidence: "lines 490-495, the PhysioNet 'Topics:' list (health 491, pediatric 492, biomarkers 493, bridge2ai 494, voice 495); keywords carries exactly that tag list, which rule-27 allows keywords (and only keywords) to take. The receipt snippets are three of the five tag-list entries (see rule-15)"
+- id: slot-013
+  verdict: supported
+  evidence: "line 326 BibTeX author list '... and Bahr, Ruth and ...' (also line 83 'Ruth Bahr'); creators[9].name 'Ruth Bahr'"
+- id: slot-014
+  verdict: supported
+  evidence: "line 395: 'Resources such as this project are intended to enable study of developmental norms, create AI-driven tools for early screening, and support clinical insight'; intended_uses[0].description keeps the passage's own reach (no pediatric qualifier added)"
+- id: slot-015
+  verdict: supported
+  evidence: "judging the id leaf only: line 1874 states 'https://github.com/sensein/senselab' as the location of preprocessing software, so the URL is SenseLab's own repository and is stated in the bundle (no declared prefix covers github, so a URL in this uriorcurie id is right). Whether the SenseLab entry belongs in this release's preprocessing at all is a separate question, charged under rule-21 (violated): line 1874 is the documentation's datasheet answer for the adult v2.0.0 dataset, and lines 2200-2204 sit in the section following 'Methods of De-identification for v3.0.0' (2184); neither names the pediatric data, and the PhysioNet page names only b2aiprep (415-417)"
+- id: slot-016
+  verdict: supported
+  evidence: "line 143 PhysioNet author list 'Amanda Doherty-Kirby'; creators[39].name"
+- id: slot-017
+  verdict: supported
+  evidence: "line 413: 'features derived from the open-source Speech and Music Interpretation by Large-space Extraction (openSMILE [5]), Praat [6], parselmouth [7], and torchaudio [8, 9] are provided. Each feature is present in the static_features.tsv file. There is also metrics related to audio quality ... in the audio_quality_metrics.tsv file'; preprocessing_strategies[2].preprocessing_details restates it without extension"
+- id: slot-018
+  verdict: supported
+  evidence: "line 151 PhysioNet author list 'Renee English'; creators[43].name"
+- id: slot-019
+  verdict: supported
+  evidence: "line 189 PhysioNet author list 'Kenji Kobayashi'; creators[62].name"
+- id: slot-020
+  verdict: supported
+  evidence: "line 391: 'derived audio features for 23,533 recordings collected from 300 participants aged 2-18'; instances[1] (Participant).counts 300"
+- id: slot-021
+  verdict: supported
+  evidence: "line 310: 'The published Bridge2AI-Voice Pediatric Dataset contains derived features from the audio waveforms'; acquisition_methods[2].name 'Derived audio features' with was_inferred_derived true matches; line 415 confirms they were preprocessed from raw waveforms"
+- id: slot-022
+  verdict: supported
+  evidence: "the URL occurs in the bundle only at line 30, the SOURCE METADATA header naming the page's address, not in the page body; it is nonetheless the address of the page whose Files/Access sections (lines 474-484, 512-517) state that the files are accessed there by credentialed users who sign the DUA, so distribution_formats[0].access_urls names the access point the page itself describes (the same URL is the record's page)"
+- id: slot-023
+  verdict: supported
+  evidence: "line 201 PhysioNet author list 'Justin Levinsky'; creators[68].name"
+- id: slot-024
+  verdict: supported
+  evidence: "line 459 is reference [6], 'Boersma P, Van Heuven V. Speak and unSpeak with PRAAT', the citation the Data Description attaches to 'Praat [6]' at line 413 as a tool the static features were derived from; unlike a tagline standing in for a name, the reference names the tool itself, so used_software[1].name 'Praat' is supported (line 413 is the stronger passage)"
+- id: slot-025
+  verdict: supported
+  evidence: "line 1759: 'co-led by Dr. Yael Bensoussan ... and Olivier Elemento, PhD, from Weill Cornell Medicine, who are co-principal investigators for the project'; creators[3].principal_investigator.name 'Olivier Elemento' is a person the documents designate with that title for the project that produced the dataset (rule-26), and the entry's source_caveats records that the protocol and RePORTER name only Bensoussan"
+- id: slot-026
+  verdict: supported
+  evidence: "line 1140: 'Pediatric participants are recruited strictly from the Hospital for Sick Children (SickKids) and are grouped by age'; subpopulations[0].name 'Age groups' is the identification dimension the Subpopulation class asks about ('by age')"
+- id: slot-027
+  verdict: supported
+  evidence: "lines 554 and 566: under 'Other USF Co-investigators', 'Stephanie Watts, PhD, CCC-SLP - Assistant Professor, Department of OTOHNS'; creators[10] is Stephanie Watts, affiliation 'University of South Florida'"
+- id: slot-028
+  verdict: supported
+  evidence: "line 285 PhysioNet author list 'Megan Urbano'; creators[110].name"
+- id: rule-01
+  verdict: followed
+  evidence: "every value checked traces to the bundle: identity/version/doi/latest DOI (lines 306-307, 486-489), license and access (478-484), counts (391), file list and per-file n (403-411), release notes (441-442), ethics (444), grant (447); slots without evidence are omitted (publisher, known_limitations, collection_timeframes, raw_data_format, total sizes; report 'Considered and left out'). Affiliations come only from passages that name the person with the institution; Jennifer Siu and Alexander Gelbard are left without one. Placement and subject issues are charged under rule-06, rule-07 and rule-21, and slot-007 is weak"
+- id: rule-02
+  verdict: followed
+  evidence: "disagreements are represented, not silently resolved: creators[14] Jordan Lerner-Ellis carries both 'Mount Sinai Hospital' (line 582) and 'Sinai Health' (line 1759) with a caveat; funders[0].source_caveats records RePORTER's 3OT2OD032720-01S3 (line 2334) beside the page's -01S1 (447); source_caveats records the Usage Notes vs Data Description file-name difference and the 23,532/23,533 per-file counts. Minor: the documentation's own award strings ('3TF-OT2ActfOD032720Projectf01S1' line 1763, '#3Tf-OTOD03272001S2' line 2309) are not mentioned"
+- id: rule-03
+  verdict: followed
+  evidence: "the reconciliation report (Referent section) states the choice of release 1.1.0 of the Bridge2AI-Voice Pediatric Dataset (id doi:10.13026/h995-bt35, line 486-487) with the project DOI in version_access.latest_version_doi; the core carries the same id and identical shared slots (checked by comparing every shared top-level key), and the adult dataset appears only in related_datasets[0]"
+- id: rule-04
+  verdict: followed
+  evidence: "no padding toward a density target: the record omits unsupported slots (report lists 20+ deliberately unpopulated slots with reasons) and populates others only from passages; e.g. variables carries only the four columns line 402 names, without data_type where no passage classifies them"
+- id: rule-05
+  verdict: followed
+  evidence: "multivalued slots carry one object per entity: 121 creators, one per author (lines 65-305), intended_uses split into three uses from line 395, collection_mechanisms split into tablet software, headset and built-in microphone (398-400), 12 File entries. preprocessing_strategies[1] covers both waveform-to-Parquet derivation and phenotype merging, but line 415 states them as the work of one b2aiprep code base, so it is not two entities collapsed"
+- id: rule-06
+  verdict: violated
+  evidence: "at_risk_populations.special_protections[1] = 'The protocol states that Checklist HRP-416 for children under 21 has been completed and is appended to the protocol.' (line 857): it records that a checklist document exists and where it is, not what protection was implemented, which is what special_protections asks; the slot should carry the protection or omit the entry. Other values answer their fields (license_terms names the license and the DUA/credentialing constraints, lines 478-484)"
+- id: rule-07
+  verdict: violated
+  evidence: "subpopulations[1] 'Patients and non-patient volunteers' has identification text from line 397 ('Patients/healthy volunteers at the Hospital for Sick Children were considered for enrollment ... Non-patients, recruited through research postings'), which describes who was eligible and how they were recruited: it answers sampling_strategies (where sampling_strategies[0] already carries the same passage), not the Subpopulation question of whether the dataset identifies such subpopulations and how. No passage states that the release identifies patients versus non-patients. Other placements reviewed are in the field they answer (access route in data_governance, not distribution_formats; release dates in distribution_dates; versions in version_access)"
+- id: rule-08
+  verdict: followed
+  evidence: "class-ranged objects carry their declared fields where evidence states them: principal_investigator objects carry id, name, email (yaelbensoussan@usf.edu, line 553) and affiliation; funders[0].grants[0] has grant_number and name (line 447); affiliations are Organization objects with name; File entries carry name, file_type, and format/media_type for the .tsv files. The nine Parquet files carry no format because File.format's FormatEnum has no Parquet value, so that field could not be populated; reference_attributes is empty for this schema"
+- id: rule-09
+  verdict: followed
+  evidence: "uriorcurie slots use declared prefixes: id 'doi:10.13026/h995-bt35', version_access.latest_version_doi 'doi:10.13026/mf9s-5r03' (line 489 gives the resolver URL), all minted ids on the doi: CURIE; the two GitHub software ids are URLs no declared prefix covers; doi slot holds the bare DOI '10.13026/h995-bt35'; access_urls/page/access_url (uri) keep URLs; the citation keeps its URL as text"
+- id: rule-10
+  verdict: followed
+  evidence: "every external identifier is in the bundle: Synapse URL (line 314), adult dataset URL (317), latest DOI (489), b2aiprep and senselab URLs (457, 1874), project/docs websites (497, 1035), RRID in the citation (323); no ROR, ORCID or other registry id was added from outside knowledge (the bundle has no ORCID; grep count 0)"
+- id: rule-11
+  verdict: followed
+  evidence: "id_slots: 22 entries are minted, all fragments on the record's own id doi:10.13026/h995-bt35, an identifier the evidence supplies (line 487) under the declared doi prefix; no constructed ids, no invented prefix, no fragment on an organization's identifier; the 2 stated ids are the tools' own GitHub URLs. Persons are fragments on the dataset id, not on an organization id"
+- id: rule-12
+  verdict: followed
+  evidence: "the run's form block records british_spellings 0 (instrument v4); a scan of the full record for -isation/-our/-ise/-tre/-lled forms found only American 'fulfilled', 'enrolled', 'controlled'; 'bioaccoustic' in funders[0].grants[0].name is the source's own spelling of a title (line 447)"
+- id: rule-13
+  verdict: followed
+  evidence: "manifest ranks PhysioNet tier 1, protocol/documentation/DUA tier 2, RePORTER tier 4: the grant number follows the tier-1 page (3OT2OD032720-01S1, line 447) with the tier-4 -01S3 recorded in funders[0].source_caveats; the Lerner-Ellis affiliation disagreement is between two tier-2 sources and both are represented with the reason stated in creators[14].source_caveats; PI designations are compatible and both recorded with sources"
+- id: rule-14
+  verdict: not_applicable
+  evidence: "every minted id (22: 2 Person, 5 Software, 3 FileCollection, 12 File) is schema-forced per id_slots (forced: true), so the points-at test does not reach them (rule-23); no unforced fragment exists in the record"
+- id: rule-15
+  verdict: followed
+  evidence: "the receipt has one entry per chunk in order (c001-c013: 10 extracted, 3 nothing_relevant) and the run's receipts block reports 13/13 chunks, 451/451 snippets verified, 0 unattesting; every creator index 0-120, every variable, collection and file entry has its own receipt. The keywords snippets are single tag-list entries ('pediatric' 492, 'biomarkers' 493, 'bridge2ai' 494) of 9-10 characters; a tag list holds nothing but single words, and I do not read these as the 'lone short word' the rule excludes (the validator counts them attesting). The receipt is at the slot path 'keywords', which meets 'every value ... appears in some chunk's receipt' at that path; the shorter entries 'health' (491) and 'voice' (495) are covered only by that list-level receipt, not by snippets of their own"
+- id: rule-16
+  verdict: followed
+  evidence: "creators[0].principal_investigator and creators[3].principal_investigator are Person objects with id, name and affiliation (and email for Bensoussan); funders[0].grants[0] is a Grant object with grant_number; affiliations are Organization objects; no object was reduced to a string or a reference inflated (reference_attributes is empty)"
+- id: rule-17
+  verdict: followed
+  evidence: "protocol intentions are stated as such and in the source's tense: consent_revocations ('the data they have provided will be kept', line 875), at_risk_populations.assent_procedures ('children will provide verbal assent', line 976) and special_protections[0] (line 857) each say 'The ... protocol states that', with a caveat that they are future-tense protocol statements; raw_data_details keeps 'data will be made available via Synapse' (312); release 1.0.0 appears only in version_access.versions_available and distribution_dates, each labeled; adult-dataset facts (v3.0, 833 participants, v2.0.0) only in related_datasets[0]. The one receipt whose passage is about another dataset (the SenseLab entry, line 1874) is charged once, under rule-21, not again here"
+- id: rule-18
+  verdict: followed
+  evidence: "the one derived figure, the count of four Parquet files at n=23532 and five at n=23533 (lines 403-411), is stated in missing_data_documentation[0] and source_caveats as 'By this record's own count' with the files named, beside the stated 23,533 (line 391) without adjusting either"
+- id: rule-19
+  verdict: followed
+  evidence: "per-entry receipts exist for every creator (indices 0-120 each receipted, e.g. slot-009/013/016/018/019/023/028 with their own author-list lines), each of the 4 variables (line 402 phrases per column), each of the 3 file collections and each of the 12 files (lines 403-413, 439); the funder entry has its own receipt (line 447)"
+- id: rule-20
+  verdict: followed
+  evidence: "the bundle states no ORCID (grep count 0), so both Person ids are fragments on the record's id in the prescribed form: 'doi:10.13026/h995-bt35#person-yael-bensoussan', '#person-olivier-elemento'; the address is in creators[0].principal_investigator.email, not the id"
+- id: rule-21
+  verdict: violated
+  evidence: "preprocessing_strategies[1].used_software[1] (SenseLab, id https://github.com/sensein/senselab) is in the referent's own slot on passages whose subject is not the referent: its receipt, line 1874, answers the documentation's datasheet question for the adult v2.0.0 dataset, and its other support, lines 2200-2204 ('All processing is performed using these toolkits: b2aiprep ... SenseLab'), follows the 'Methods of De-identification for v3.0.0' heading (2184), the adult release; neither names the pediatric data, the record's own top-level source_caveats states that only passages naming the pediatric data or participants were used, and the PhysioNet pediatric page names only b2aiprep (415-417). The entry's caveat discloses this but does not change the subject of the passage. The standard applied to everything else: passages about the Bridge2AI-Voice study's participants or its pediatric cohort (protocol V2 'Modified to include pediatric cohort', line 588; sections 11 and 22.6, lines 857, 975-976; withdrawal 875; caregiver clips 714; voice re-identification 937-938) or explicitly about every Bridge2AI-Voice dataset (raw audio 'from any Bridge2AI-Voice dataset', 1097; access steps 1631-1641) pass, and are attributed in the value's own text; the adult datasheet's other answers (833 instances, devices, compensation, de-identification levels, Health Data Nexus hosting, update cadence) were kept out; the adult dataset otherwise appears only in related_datasets[0]. Residual, not charged: SickKids collected under a separate REB (line 663) whose terms are not in the bundle, disclosed in consent_revocations[0] and at_risk_populations source_caveats"
+- id: rule-22
+  verdict: followed
+  evidence: "list entries each name one entity: one Person per creator, one Organization per affiliation (Lerner-Ellis's two affiliations are the two names two sources give, not a split of one name), one grant, one ethical review board, one software per used_software entry (openSMILE, Praat, parselmouth, torchaudio separate). subpopulations[0] 'Age groups' and [1] name identification dimensions, which the Subpopulation class asks for ('by age, gender'); [1] is charged under rule-07, not as a merge"
+- id: rule-23
+  verdict: followed
+  evidence: "forced ids take the identifier the evidence states first: b2aiprep and SenseLab carry their GitHub URLs (lines 457, 1874); openSMILE, Praat, parselmouth, torchaudio and reproschema-ui have no software identifier in the bundle (line 458 is a proceedings ISBN, 461-462 arXiv ids of papers, 398-399 a bare name), so they, the 3 collections, 12 files and 2 persons are labeled on the record's own id, a declared CURIE, with one fragment marker each; file and collection ids reach the core's distributions (pair-01)"
+- id: rule-24
+  verdict: followed
+  evidence: "enumeration slots rest on passages stating the category: variables[0-1].data_type 'identifier' on 'a unique identifier for the participant/recording session' (line 402), with no data_type on task_name/n_frames; file_collections[0].collection_type processed_data on 'derived audio data features' preprocessed from raw waveforms (402, 415), [2] metadata on 'metadata information for the recordings' (402), none on phenotype; related_datasets[0].relationship_type 'references' (required): the record and report concede that no source names a dataset-to-dataset relation (companion, part, supplement), and the record asserts none; what line 316 states is that this dataset's own page points the reader to the adult dataset with its URL ('Note that the Bridge2AI-Voice Adult Dataset is also available on PhysioNet: https://physionet.org/content/b2ai-voice/'), which is what the enum defines 'references' as ('This dataset references the target dataset'). The value encodes the pointer the passage makes and nothing stronger, and the entry itself is the scope declaration's required route for the adult dataset (express as related_datasets), so I read the relation as stated rather than guessed; file format/media_type from extensions are exempt"
+- id: rule-25
+  verdict: followed
+  evidence: "raw_sources[0] carries no raw_data_format: no passage states the form of the pediatric raw audio before processing (the .wav paths at line 2142 are the adult audio dataset's folder layout), and Parquet/TSV are recorded only in the release's distribution and file slots"
+- id: rule-26
+  verdict: followed
+  evidence: "principal_investigator is filled only for persons designated with that title: Bensoussan ('PRINCIPAL INVESTIGATOR', line 549-550; RePORTER line 2337) and Elemento ('co-principal investigators for the project', line 1759); leads and co-leads in Annex C (lines 1005-1021) and Alistair Johnson ('Lead - data integration') are not promoted; each PI's caveat says the designation is for the project, not the pediatric release specifically"
+- id: rule-27
+  verdict: followed
+  evidence: "the Topics tag list (lines 490-495) fills keywords and nothing else; missing_data_causes keeps the page's reach ('Length or other issues', line 412); limitations are recorded without added consequences; the Peds protocol list (1180-1190) is reported as a list of pediatric protocols, and the Peds task table (1481-1551) is caveated as the protocol's table, not an inventory of released tasks"
+- id: rule-28
+  verdict: followed
+  evidence: "list entries are members: variables are the four columns line 402 names; file resources are files the Data Description names (403-413) plus demographics.tsv (see slot-007 on how weakly that file is attested); remarks such as the n=23532/23533 shortfall and the file-name discrepancy go to missing_data_documentation and source_caveats, not to entries"
+- id: rule-29
+  verdict: followed
+  evidence: "no errata slot from 'no erratum' (line 1950 is the adult datasheet and was not used); the registered-access route (478-484, 513-517) is in license_and_use_terms/data_governance, not in distribution_formats' format, whose values are Parquet, TSV and JSON; no future_guarantees from the access route; the absence of raw audio in the PhysioNet project (310) is stated inside the existing raw_sources entry's details, not as an entry of its own"
+- id: rule-30
+  verdict: followed
+  evidence: "string-ranged slots hold strings: license 'Bridge2AI Voice Registered Access License' (line 480), ethical_reviews[0].reviewing_organization and human_subject_research.ethics_review_board as names, grantor 'NIH', related_datasets[0].target_dataset a URL; no object sits in a scalar slot (both records validated)"
+- id: pair-01
+  verdict: consistent
+  evidence: "compared $.file_collections (with each collection's resources) against core $.distributions by id: all 15 core distributions (3 collections, 12 files) join to a full-record entry and every value they carry (name, description, path, format, media_type) equals the full value; the only differences are full-only keys dropped by the projection (collection_type, resources on collections; file_type on files); no core distribution lacks a source"
+notes: >-
+  Reviewer identity: a Claude Code subagent given the d4d-review-record
+  definition file as its instructions via a brief, not launched as the typed
+  agent; running as model claude-opus-5-5 (the definition's frontmatter names
+  claude-opus-5). The pack (pack_version 7) was read as it is and not
+  regenerated; it lists no gaps; receipt_join basis is index (no phase-1
+  snapshot), and no item depended on an index shift. Bundle bytes match the
+  pack's md5 per id_slots bundle_state current. No other record, label or
+  review was opened. Adverse findings: rule-06 (HRP-416 checklist pointer in
+  at_risk_populations.special_protections[1]), rule-07 (recruitment passage
+  placed as subpopulations[1]), rule-21 (SenseLab entry supported only by
+  passages about the adult v2.0.0/v3.0.0 releases), slot-007 weak
+  (demographics.tsv attested only by an illustrative Usage Notes example). No
+  value was found contradicted by the bundle. Two claims lack a passage for
+  what they assert, though their text is in the bundle: subpopulations[1]
+  (line 397 describes recruitment; no passage states that the release
+  identifies patients versus non-patients) and the SenseLab entry (no
+  passage about the pediatric release names it).

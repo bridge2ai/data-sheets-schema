@@ -702,3 +702,41 @@ validation:
     full: []
     core: []
   recorded_by: d4d runs validate
+review:
+  checked: true
+  items_total: 60
+  items_answered: 60
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 4
+    slot_receipted:
+      supported: 25
+    rule:
+      followed: 26
+      violated: 2
+      not_applicable: 2
+    pair_warning:
+      consistent: 1
+  adverse: 2
+  cannot_tell: 0
+  findings: []
+  reported: []
+  summary: items 60/60 answered · 2 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-opus-5-5 (Opus 5.5), running as a Claude Code subagent that was
+      given .claude/agents/d4d-review-record.md as its instructions through a brief,
+      not launched as the typed d4d-review-record agent; the definition's front matter
+      names claude-opus-5, which is not the model this review ran on
+    reviewed_at: '2026-11-26T03:46:02Z'
+    model_basis: self-reported by the reviewing agent
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1/VOICE_review_pack.yaml
+      sha256: 151f4e4f47f0e695dbba8ffe8153fa8aa4c5c251494bd73df4c2f8261b51871e
+    review:
+      path: data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1/VOICE_review.yaml
+      sha256: 53477f716a1b3e1362ea6430e3381600bf12ce5679a2ffcde7c900a4e716f149
+  recorded_by: d4d review check

@@ -1,0 +1,183 @@
+reviewer: d4d-review-record
+model: "claude-opus-5-5 (Claude Opus 5.5), running as a Claude Code subagent that was given .claude/agents/d4d-review-record.md as its instructions; not launched as the typed d4d-review-record agent, so the definition's front-matter model (claude-opus-5) was not what ran"
+reviewed_at: "2026-11-26T03:45:24Z"
+pack_sha256: 1b9dfa47908be508b206eebd0d6b7dd7198a49caca6c0b1d2ecfed513ed7cb82
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-20 are the concatenation preamble (input directory, file count, extensions, manifest path) and the six-file table of contents; no dataset fact"
+- id: chunk-c012
+  verdict: confirmed
+  evidence: "lines 2776-2824 are DTUA Attachment 2 clauses 7-10 (IRB documentation on request, PhysioNet requirements naming the repository's NIBIB grant R01EB030362, unilateral amendment, Florida s.787.06 warranty) and the blank Attachment 3 personnel list; the R01EB030362 grant is PhysioNet's own support, which the record rightly does not carry as a funder (top-level source_caveats), and nothing else is a fact about the pediatric release"
+- id: chunk-c013
+  verdict: confirmed
+  evidence: "lines 2825-2866 are the bridge2ai-docs README (logo, MIT badge, Zenodo DOI 10.5281/zenodo.13834653 for the documentation repository, how to cite the docs, pip install/startup commands); it describes the documentation software, not the pediatric dataset"
+- id: slot-004
+  verdict: supported
+  evidence: "line 125 'Rahul Brito' in the dataset page's author list (lines 65-305); creators[30] is the 31st author in that order"
+- id: slot-005
+  verdict: supported
+  evidence: "line 326 BibTeX author field 'Stark, John and Su, Lala and Sudhakar, Shrramana Ganesh'; also line 269 'Lala Su'; creators[102].name = Lala Su"
+- id: slot-006
+  verdict: supported
+  evidence: "lines 490-495 'Topics: health pediatric biomarkers bridge2ai voice' on the dataset page; keywords[2] = biomarkers, a keyword-line value in the keywords slot"
+- id: slot-007
+  verdict: supported
+  evidence: "line 404 'torchaudio_mel_spectrograms.parquet (n=23533) contains Mel spectrograms of dimension 60xT generated with a 25ms window size, 10ms hop length, a 400-point FFT and 60 Mel bins'; name, description and n match; file_type data_file is read from the file name (rule-24 exempt); id is a forced File mint on the record's own DOI"
+- id: slot-008
+  verdict: supported
+  evidence: "lines 316-317 'Note that the Bridge2AI-Voice Adult Dataset is also available on PhysioNet: https://physionet.org/content/b2ai-voice/' on the pediatric dataset's own page: the dataset's documentation names and links the adult dataset, which is what the enum value references states ('This dataset references the target dataset') in plain restatement; no stronger relation (supplements, is_version_of, derives_from) is claimed"
+- id: slot-009
+  verdict: supported
+  evidence: "line 231 'Trevor Pharr' in the author list; creators[83] matches the author order"
+- id: slot-010
+  verdict: supported
+  evidence: "line 157 'Hortense Gallois' in the author list; creators[46] matches the author order"
+- id: slot-011
+  verdict: supported
+  evidence: "line 580 'University of Toronto (UofT)\tFrank Rudzicz, PhD' (IRB protocol investigator listing); also line 1012 'UofT Frank Rudzicz, PhD Lead Neuro Disorders'; creators[14] is Frank Rudzicz"
+- id: slot-012
+  verdict: supported
+  evidence: "line 554 'Other USF Co-investigators' heads the list in which line 558 reads 'Micah Boyer, PhD – Clinical Research Associate'; creators[15] is Micah Boyer, affiliation University of South Florida"
+- id: slot-013
+  verdict: supported
+  evidence: "lines 415-417 'has been made open source in the b2aiprep library [4]' and line 457 'https://github.com/sensein/b2aiprep' (reference 4); name b2aiprep"
+- id: slot-014
+  verdict: supported
+  evidence: "line 402 'a unique identifier for the recording session (session_id)'; variable_name session_id, description and is_identifier: true all follow from that sentence"
+- id: slot-015
+  verdict: supported
+  evidence: "line 131 'Léo Cadillac' in the author list; creators[33] matches the author order"
+- id: slot-016
+  verdict: supported
+  evidence: "line 402 'Binary files are made available as Parquet, an open-source column-oriented data file format'"
+- id: slot-017
+  verdict: supported
+  evidence: "line 413 'features derived from the open-source Speech and Music Interpretation by Large-space Extraction (openSMILE [5]), Praat [6], parselmouth [7], and torchaudio [8, 9] are provided'; openSMILE is software used to derive the static features"
+- id: slot-018
+  verdict: supported
+  evidence: "line 1759 'Voice as a Biomarker of Health is being co-led by Dr. Yaël Bensoussan ... and Olivier Elemento, PhD, from Weill Cornell Medicine, who are co-principal investigators for the project'; the sentence sits in the adult healthsheet but its subject is the project, which line 447 names as the project that funded this release ('Bridge2AI: Voice as a Biomarker of Health'); name, PI title and Weill Cornell Medicine affiliation are stated; id is a forced Person mint on the record's id (no ORCID in the bundle)"
+- id: slot-019
+  verdict: supported
+  evidence: "line 456 'Johnson, A., ... (2025). Bridge2AI Data Processing Library (Version 3.0.0) [Computer software]' followed by line 457 the b2aiprep GitHub URL; this is reference [4], which line 417 attaches to b2aiprep; 'Bridge2AI Data Processing Library' is a human-readable description of what the tool is, which is what Software.description asks"
+- id: slot-020
+  verdict: supported
+  evidence: "line 1963-1964 'Pediatric data: Pediatric data collected through ReproSchema-UI is extracted and transformed into REDCap format, and subsequently converted to the Brain Imaging Data Structure (BIDS).' verbatim; the passage's subject is the pediatric data and the entry's caveat correctly says it describes the conversion pipeline, not the PhysioNet layout"
+- id: slot-021
+  verdict: supported
+  evidence: "lines 2337-2338 'Principal investigator: BENSOUSSAN, YAEL EMILIE / Organization: UNIVERSITY OF SOUTH FLORIDA'; also lines 549-553 IRB PI block with yaelbensoussan@usf.edu; the c004 snippet at line 649 alone is only the participating-institution list, but the c010 snippet carries the support"
+- id: slot-022
+  verdict: supported
+  evidence: "line 413 'features derived from ... openSMILE [5], Praat [6], parselmouth [7], and torchaudio [8, 9] are provided. Each feature is present in the static_features.tsv file.'; the value restates this without adding scope"
+- id: slot-023
+  verdict: supported
+  evidence: "line 1005 'USF\tYael Bensoussan MD, MSc\tCo-Lead of Data Acquisition' and lines 2337-2338 RePORTER PI/organization; creators[0].affiliations[0].name = University of South Florida"
+- id: slot-024
+  verdict: supported
+  evidence: "line 69 'Anais Rameau' in the author list (spelled without the diaeresis as on the dataset page); creators[2]"
+- id: slot-025
+  verdict: supported
+  evidence: "line 261 'Suketu Shah' in the author list; creators[98] matches the author order"
+- id: slot-026
+  verdict: supported
+  evidence: "line 554 'Other USF Co-investigators' list, line 566 'Stephanie Watts, PhD, CCC-SLP – Assistant Professor, Department of OTOHNS'; also line 1009 'USF Stephanie Watts'; creators[10] is Stephanie Watts"
+- id: slot-027
+  verdict: supported
+  evidence: "line 409 'sparc_periodicity.parquet (n=23532) contains the estimated periodicity (confidence of pitch presence) derived from the audio using 20ms windows of dimension T.'; name, n=23532 and description match"
+- id: slot-028
+  verdict: supported
+  evidence: "lines 507-511 'Versions 1.0.0 Dec. 17, 2025 1.1.0 May 1, 2026' on the dataset page; versions_available [1.0.0, 1.1.0]"
+- id: rule-01
+  verdict: followed
+  evidence: "values trace to the bundle (25 sampled receipts all supported; receipt check 306/306); the record leaves empty what the bundle does not state for this release: no de-identification entry (only adult statements, lines 1654-1669), no subpopulation distribution, no variable data_type, no collection_type on features/phenotype, no affiliation for Bolser/Siu/Gelbard where the rows are ambiguous; inferred booleans rest on stated passages (is_tabular: line 402 column-oriented Parquet plus TSV files; at_risk_groups_included: line 397 ages 2-18, children named in the slot description; is_direct: lines 398-400); informed_consent[0].consent_scope 'Data collection and data sharing' restates line 397 'consent was obtained prior to data collection and data sharing' (with line 444 'Data collection and sharing was approved'): consent taken before, and for, collection and sharing is a plain restatement of what was consented to, not an inference"
+- id: rule-02
+  verdict: followed
+  evidence: "disagreements are represented, not silently resolved: instances[0].source_caveats records n=23533 vs the four sparc files' n=23532 (lines 391, 407-410); top-level source_caveats records the torchaudio file-name discrepancy (lines 403-404 vs 421/428) and the Sui/Siu, Don/Donald Bolser spellings (line 1759 vs 87-89); funders[0].source_caveats records 01S1 vs RePORTER 01S3 (lines 447, 2334)"
+- id: rule-03
+  verdict: followed
+  evidence: "reconciliation report 'Referent and scope' names the Bridge2AI-Voice Pediatric Dataset v1.1.0 (scope DOI 10.13026/mf9s-5r03); full and core both carry id doi:10.13026/mf9s-5r03, version 1.1.0, doi 10.13026/h995-bt35; adult dataset appears only in related_datasets"
+- id: rule-04
+  verdict: followed
+  evidence: "density follows evidence: adult-only healthsheet answers (lines 1742-1958) withheld; slots with no pediatric evidence left empty (deidentification, errata, updates, retention); no padding toward a slot count"
+- id: rule-05
+  verdict: followed
+  evidence: "creators has one object per author (121 entries, lines 65-305); preprocessing_strategies[2].used_software has four separate Software objects; intended_uses has three entries for the three uses on line 395; funders has one grantor with one grant"
+- id: rule-06
+  verdict: followed
+  evidence: "no slot holds a bare pointer or 'pending/absent' statement: errata, updates and future_guarantees are empty; raw_sources[0] answers the RawData question (raw audio retained, access_url https://www.synapse.org/Synapse:syn73617068, controlled-access procedure, lines 308-314, 1097-1099) rather than merely saying it is elsewhere; license_and_use_terms states the access policy, license and DUA names (lines 477-484)"
+- id: rule-07
+  verdict: followed
+  evidence: "access route goes in data_governance.access_review_process and license_and_use_terms (lines 1631-1641, 477-484), not distribution_formats, which holds Parquet/TSV/JSON file formats (lines 402, 413-414); release history goes in version_access and distribution_dates (lines 441-442, 507-511)"
+- id: rule-08
+  verdict: followed
+  evidence: "class-ranged objects carry their declared fields: creators with name and affiliations objects; principal_investigator objects with id, name, email (Bensoussan, line 553), affiliation; funders[0] with grantor and grants[0].name/grant_number (line 447); used_software with id/name (b2aiprep also version, license, url); related_datasets[0] with target_dataset, relationship_type, name; pack.reference_attributes is empty"
+- id: rule-09
+  verdict: followed
+  evidence: "uriorcurie slots use CURIEs where a prefix is declared: id doi:10.13026/mf9s-5r03, version_access.latest_version_doi doi:10.13026/mf9s-5r03, data_topic B2AI_TOPIC:36, data_substrate B2AI_SUBSTRATE:30; doi slot is the bare 10.13026/h995-bt35; URLs remain only in uri/string slots (raw_sources.access_url, related_datasets.target_dataset) or where no prefix is declared (github.com used_software id)"
+- id: rule-10
+  verdict: followed
+  evidence: "no external identifier absent from the bundle: no ORCID/ROR (none in bundle; grep confirms); the adult dataset is targeted by the bundle's URL (line 317), not by the scope's adult DOI 10.13026/37yb-1t42, which is not in the bundle; DOIs from lines 486-489; b2aiprep URL line 457; Synapse URL line 314; RRID only inside the citation text as stated at line 323"
+- id: rule-11
+  verdict: followed
+  evidence: "all 21 minted fragments sit on doi:10.13026/mf9s-5r03, an identifier the evidence supplies (line 489 'DOI (latest version): https://doi.org/10.13026/mf9s-5r03') and the record's own id; no invented prefix; no fragment on an organization's or another dataset's identifier; every mint is forced (pack id_slots: Person, Software, FileCollection, File)"
+- id: rule-12
+  verdict: followed
+  evidence: "no British spellings found in the record's prose (pediatric, analysis, organization forms); 'bioaccoustic' at funders[0].grants[0].name is the grant title quoted from line 447"
+- id: rule-13
+  verdict: followed
+  evidence: "manifest ranking: physionet_pediatric_1_1_0 tier 1, IRB/documentation/DUA tier 2, NIH RePORTER tier 4; grant number takes the tier-1 page's 3OT2OD032720-01S1 (line 447) over RePORTER's 01S3 (line 2334) with the disagreement in funders[0].source_caveats; co-PI designation (documentation, tier 2, line 1759) kept over RePORTER's sole PI (tier 4) with caveats on both creators; Lerner-Ellis's same-rank sources (IRB 'Mount Sinai Hospital' line 582, documentation 'Sinai Health' line 1759) both represented with a caveat"
+- id: rule-14
+  verdict: not_applicable
+  evidence: "every minted id is schema-forced (pack id_slots: 2 Person, 5 Software, 3 FileCollection, 11 File, all forced: true, origin minted), and rule-23 says the pointing test does not reach forced ids; no unforced fragment exists in the record"
+- id: rule-15
+  verdict: followed
+  evidence: "VOICE_PEDIATRIC_coverage_receipt.yaml has one entry per chunk c001-c013 in order (10 extracted, 3 nothing_relevant with reasons); report records strict receipt check 13/13 chunks, 348/348 snippets, 306/306 slots; pack receiptless_slots_total 0"
+- id: rule-16
+  verdict: followed
+  evidence: "principal_investigator values are Person objects with id, name, email where stated and affiliation as an object list (creators[0], creators[3]); funders[0].grants is a Grant object with grant_number; affiliations are Organization objects; no reference attribute is inflated (pack.reference_attributes empty)"
+- id: rule-17
+  verdict: followed
+  evidence: "future and planned statements keep their tense (raw_sources: raw audio 'will be made available via Synapse', line 312; addressing_gaps caveat marks the IRB passage as a statement of intent; acquisition_methods[1] caveat says the task table is protocol content, not release content); v1.0 facts are labeled as v1.0 in version_details (line 1083); adult-dataset facts (833 participants, iPad/Avid microphone, 12-month timeframe, adult de-identification) are absent from the referent's slots"
+- id: rule-18
+  verdict: not_applicable
+  evidence: "the record states no derived figure: counts 23533 and 300 come from line 391, n per file from lines 403-411; the 23533/23532 difference is recorded in instances[0].source_caveats without arithmetic"
+- id: rule-19
+  verdict: followed
+  evidence: "receipt carries 121 distinct creators[i].name receipts for the 121 authors; each sampled creator (slots 004, 005, 009, 010, 015, 024, 025) cites its own name; file_collections resources and variables are receipted per entry (slots 007, 014, 027)"
+- id: rule-20
+  verdict: followed
+  evidence: "the two Person objects carry ids doi:10.13026/mf9s-5r03#person-yael-bensoussan and #person-olivier-elemento (record id, hash, person and name); the bundle states no ORCID (grep: none); email yaelbensoussan@usf.edu sits in email (line 553), not in the id"
+- id: rule-21
+  verdict: followed
+  evidence: "declared scope: about Bridge2AI-Voice Pediatric Dataset, not about the adult dataset (express as related_datasets); the referent's slots rest on the pediatric page (lines 21-530) or on pediatric-specific passages (lines 1140, 1144-1146, 1963-1964); project-level and person-level facts (funding program line 1111, project co-PIs line 1759, investigator affiliations lines 549-582) are about the project or the person; adult healthsheet answers are not used"
+- id: rule-22
+  verdict: followed
+  evidence: "no merged list entries: each creator is one person, each affiliation one organization (Lerner-Ellis's two differently named affiliations are kept as the two sources state them, with a caveat), each used_software one tool, each intended_use one use; subpopulations[0].identification describes one identification scheme (grouping by age, line 1140), which is what Subpopulation.identification asks for"
+- id: rule-23
+  verdict: followed
+  evidence: "forced ids: Person, File and FileCollection ids and the used_software ids for reproschema-ui, openSMILE, Praat, parselmouth, torchaudio are minted on the record's own id doi:10.13026/mf9s-5r03 because the bundle states no identifier for them (references at lines 458-462 give citations, not tool identifiers); b2aiprep takes the URL the evidence states (line 457) rather than a mint; creators carry no id (none stated); the base is a declared doi: CURIE"
+- id: rule-24
+  verdict: followed
+  evidence: "enumeration values rest on passages stating the category: confidentiality_level restricted on line 513 'This is a restricted-access resource' (enum: 'Restricted access requiring ... data use agreement'); file_collections[2].collection_type metadata on line 402 'metadata information for the recordings (available under metadata)'; related_datasets[0].relationship_type references (required slot) on lines 316-317 (see slot-008); no data_type on variables and no collection_type on features/phenotype"
+- id: rule-25
+  verdict: followed
+  evidence: "raw_data_format is empty in the record; the released form (Parquet/TSV, BIDS conversion) is recorded in distribution_formats and preprocessing_strategies, not as a raw format; the raw audio is described only in raw_sources prose (lines 310, 415)"
+- id: rule-26
+  verdict: followed
+  evidence: "principal_investigator is filled only for Bensoussan and Elemento, whom line 1759 designates 'co-principal investigators for the project' (and lines 549-550, 2337 name Bensoussan PI); co-leads and leads (Rameau, Sigaras lines 1006-1008; Johnson 'Lead – data integration' line 1021) are not promoted to PI"
+- id: rule-27
+  verdict: followed
+  evidence: "keywords come from the Topics line (lines 490-495) and nothing else is filled from that line, menus or headers; data_topic Voice is receipted from the abstract sentence on line 390; no scope_impact or consequence statements are added beyond what passages say"
+- id: rule-28
+  verdict: followed
+  evidence: "every list entry is a member: 4 variables named on line 402, 11 files each named on lines 403-411, 413, 439; audio_quality_metrics.tsv and the JSON data dictionaries are described in prose (distribution_formats, collection description) rather than turned into entries; no 'sample of a longer list' remark became an entry"
+- id: rule-29
+  verdict: followed
+  evidence: "errata and future_guarantees are empty; distribution_formats hold file formats (Parquet line 402, TSV line 413/439, JSON line 414), not the access route; the absence of raw audio in the release is stated within raw_sources details alongside the actual access point, not as a stand-alone entry"
+- id: rule-30
+  verdict: followed
+  evidence: "scalar-ranged slots hold scalars: license is the license name string (line 480), doi the bare DOI string, related_datasets[0].target_dataset a URL string, grant_number a string; the record validated against Dataset (report: no issues)"
+- id: pair-01
+  verdict: consistent
+  evidence: "compared full $.file_collections[0..2] (with resources[0..9] and [0]) against core $.distributions[0..13]: 14 distributions match by id; names, paths, descriptions and the TSV format/media_type of static_features.tsv and demographics.tsv are identical; the projection drops only nesting, file_type: data_file and file_collections[2].collection_type: metadata, which CoreDistribution does not declare; no value differs in meaning"
+notes: "Pack gaps: [] (none). Receipt join basis is index (no phase-1 snapshot under intermediate/), so slot paths were judged as written; every sampled path resolved to the value the pack shows. Reviewer identity: a Claude Code subagent (model claude-opus-5-5) given the agent definition file as instructions, not launched as the typed agent. Observations that are not verdict changes: (1) the receipt snippet for slot-012 ('Other USF Co-investigators...Micah Boyer, PhD – Clinical Research Associate') joins two separate lines with an ellipsis; the validator reports it verified, so its matching evidently tolerates elision — worth confirming that is intended. (2) The c004 snippet under slot-021/023 ('University of South Florida, Tampa, Florida, US (USF)', line 649) is the participating-institution list and does not by itself tie the person to USF; the c005/c010 snippets carry the support. (3) The declared scope names the adult dataset by DOI 10.13026/37yb-1t42, which is not in the bundle; the record correctly uses the bundle's PhysioNet URL instead. (4) Instrument finding: rule-21 plus the manifest scope (adult dataset 'express as related_datasets') pull toward recording a related_datasets entry, while rule-24 makes that entry's required relationship_type depend on a passage stating the relation; where the only passage is a pointer ('also available on PhysioNet'), the generator is pushed to the weakest enum value (references). Here that value is a plain restatement of the pointer, but the two rules can conflict on a bundle whose pointer does not even reference the other dataset. (5) Closest calls in this review: slot-008/rule-24 (references), consent_scope under rule-01, slot-019 (citation title as Software.description)."

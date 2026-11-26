@@ -1,0 +1,183 @@
+reviewer: d4d-review-record
+model: "claude-opus-5-5 (Claude Opus 5.5), running as a Claude Code general subagent that was given .claude/agents/d4d-review-record.md as its instructions; not launched as the typed d4d-review-record agent, whose front matter names claude-opus-5"
+reviewed_at: "2026-11-26T03:54:59Z"
+pack_sha256: 0a97f8cf49e051835795be8c954b6252a0a72b4aca4d145d623c8ea4fe69a23b
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "Lines 1-25 are the concatenation header and the table of contents naming the 11 source files; no statement about the dataset."
+- id: chunk-c003
+  verdict: missed_content
+  evidence: "Line 629 (the article's consortium roster) states affiliations for creators the full record lists with no affiliation, and two of them appear nowhere else in the bundle: 'Boston Children's Hospital, Boston, MA, USA: Kathy Jenkins' (creators[57] carries only name; a bundle search finds her affiliation only on line 629) and 'University of Central Florida, Orlando, FL, USA: Shaheen Awan' (creators[23] carries only name; likewise only line 629). The same line also states affiliations that disagree with the record: 'Dalhousie University, Toronto, ON, Canada: Frank Rudzicz' against creators[14].affiliations[0].name 'University of Toronto' (docs line 2028, protocol line 2633), and 'University of Montreal, Montreal, Quebec, Canada: Vardit Ravitsky' against creators[7].affiliations[0].name 'The Hastings Center' (docs line 2028, white paper lines 1176-1177); the record's caveats on those two entries address only name spelling. The chunk is also not empty for the record: funders[0].source_caveats cites the article's grant 1OT2OD032720-01, which is line 524 of this chunk. The report (Creators note) says the roster was set aside as lower-ranked (tier 3) and disagreeing; the chunk still holds affiliation content the record leaves empty or states otherwise."
+- id: chunk-c004
+  verdict: confirmed
+  evidence: "Lines 826-895 are the tail of the article's reference list, its data availability statement about the article's own pilot data ('will be made available by the authors') and PMC/NLM site navigation; nothing about the dataset release."
+- id: slot-004
+  verdict: supported
+  evidence: "Line 5004 (c019 phenotype tree, diagnosis subfolder) lists 'unilateral_vocal_fold_paralysis.json'; path phenotype/diagnosis/ matches the tree; line 5055 says the json files are the data dictionaries of the TSV files, which fits file_type metadata_file and format JSON (both read from the name, exempt from rule-24)."
+- id: slot-005
+  verdict: supported
+  evidence: "Line 4917: 'Articulatory features - using the Speech Articulatory Coding (sparc) package, we generate the kinematic traces of vocal tract articulators and source features as well as measures of loudness, periodicity, and pitch. All features were gathered at 50Hz.' preprocessing_strategies[4] restates it faithfully and names sparc under used_software."
+- id: slot-006
+  verdict: supported
+  evidence: "Line 2149-2150 answers the question 'was the data validated/verified?' with 'Clinical diagnoses were verified by clinicians reviewing audio and/or imaging data, looking at electronic health records, or medication prescriptions'; acquisition_methods[0].was_validated_verified true is that answer."
+- id: slot-007
+  verdict: supported
+  evidence: "Line 4611, in the version 3.1.0 release page author list (lines 4559-4801), names 'Alexander Bernier'; creators[26].name is that author."
+- id: slot-008
+  verdict: supported
+  evidence: "Line 5037 (c019 phenotype tree, questionnaire subfolder) lists 'vhi10.tsv'; path phenotype/questionnaire/vhi10.tsv, format TSV and file_type data_file match the file named."
+- id: slot-009
+  verdict: supported
+  evidence: "Line 4986 (c019 phenotype tree, diagnosis subfolder) lists 'depression.json'; path and the data-dictionary reading (line 5055) match."
+- id: slot-010
+  verdict: supported
+  evidence: "Line 4653, in the 3.1.0 author list, names 'Gaelyn Garrett'; creators[47].name is that author."
+- id: slot-011
+  verdict: supported
+  evidence: "Line 4681, in the 3.1.0 author list, names 'Megha Kalia'; creators[61].name is that author (Ayush Kalia is a separate entry at line 4679)."
+- id: slot-012
+  verdict: supported
+  evidence: "Line 5165: 'This is a restricted-access resource. To access the files, you must ... be a credentialed user ... sign the data use agreement'. ConfidentialityLevelEnum 'restricted' is defined as access requiring approval or registration, possibly a data use agreement; the passage states that category for this release."
+- id: slot-013
+  verdict: supported
+  evidence: "Line 4959: 'The metadata folder contains a binary file made available as Parquet and its corresponding data dictionary. This includes specific information about the recording, including task instructions and prompts, as well as information about the microphone used and its gain.' file_collections[1].description restates it; collection_type metadata is what line 4928 calls this content ('metadata related to the specific audio task and recording')."
+- id: slot-014
+  verdict: supported
+  evidence: "Line 4677, in the 3.1.0 author list, names 'Alistair Johnson'; creators[59].name is that author."
+- id: slot-015
+  verdict: supported
+  evidence: "Lines 2016-2017 answer 'static versions or dynamically updated?' with 'Static'; line 2221 states further versions 'will be released on a semi-annual (twice a year) basis' and users 'will be notified through news items on the platform as well as through standard communication channels'. update_details keeps the plan in the future tense and attributes it to the Healthsheet; updates.source_caveats records that line 2221 names the Health Data Nexus platform."
+- id: slot-016
+  verdict: supported
+  evidence: "Line 4961 'The phenotype subfolder contains organized information collected from the participant or other individual during their encounter', the subfolders in lines 4963-5054, and line 5055 'all of the TSV data files have a data dictionary available with the data file. The data dictionary has the same file stem but a distinct suffix: json' together state file_collections[2].description."
+- id: slot-017
+  verdict: supported
+  evidence: "Line 4737, in the 3.1.0 author list, names 'Parnaz Rafatjou'; creators[89].name is that author."
+- id: slot-018
+  verdict: supported
+  evidence: "Line 4946: 'Each element of the parquet formatted dataset contains ... a unique identifier for the recording session (session_id)'; variables[1] gives that name and description, and data_type identifier / is_identifier true restate 'a unique identifier'."
+- id: slot-019
+  verdict: supported
+  evidence: "Lines 5057-5059 state that the code to process raw audio into features and merge source data into phenotype files is open source in the b2aiprep library and 'This release was generated with b2aiprep v3.0.0'; lines 2469-2473 name b2aiprep and SenseLab as the toolkits for all processing. The value's first sentence (export from REDCap with the team's open source library) is line 4912 in c018, which this path does not cite but which the bundle states verbatim."
+- id: slot-020
+  verdict: supported
+  evidence: "Line 2028 lists 'Jennifer Sui, MD (Hospital for Sick Children)' among lead investigators; the record joins this to the 3.1.0 author 'Jennifer Siu' (line 4583) and records the spelling difference in creators[12].source_caveats, preferring the tier-1 PhysioNet form. The affiliation value is what the passage states."
+- id: slot-021
+  verdict: supported
+  evidence: "Line 4970 (c019 phenotype tree, diagnosis subfolder) lists 'airway_stenosis.json'; path, format JSON and data-dictionary file_type match."
+- id: slot-022
+  verdict: supported
+  evidence: "Line 4723, in the 3.1.0 author list, names 'Christopher Nickel'; creators[82].name is that author."
+- id: slot-023
+  verdict: supported
+  evidence: "Line 2155 (Healthsheet): 'Participants currently receive $40 for a data collection session that takes less than 90 minutes, and $80 for a session that takes over 90 minutes, for no more than a total of 3 sessions and maximum compensation of $120'; line 2998 (study protocol, c012) states the same amounts as gift cards. compensation_amount is verbatim the Healthsheet sentence."
+- id: slot-024
+  verdict: supported
+  evidence: "Line 5021 (c019 phenotype tree, questionnaire subfolder) lists 'dyspnea_index.tsv'; path, format TSV and file_type data_file match."
+- id: slot-025
+  verdict: supported
+  evidence: "Line 4655, in the 3.1.0 author list, names 'Alexander Gelbard'; creators[48].name is that author."
+- id: slot-026
+  verdict: supported
+  evidence: "Lines 1149-1151 'All authors are funded by Bridge2AI award OT2 OD032720 from the National Institutes of Health Common Fund', line 1380 'funded by the NIH Common Fund Bridge2AI Program' and line 2031 'The NIH Common Fund' (Healthsheet answer to who funded the dataset) all name the grantor recorded in funders[0].grantor."
+- id: slot-027
+  verdict: supported
+  evidence: "Line 4990 (c019 phenotype tree, diagnosis subfolder) lists 'laryngeal_cancer.json'; path, format JSON and data-dictionary file_type match."
+- id: slot-028
+  verdict: supported
+  evidence: "Line 4777, in the 3.1.0 author list, names 'Jamie Toghranegar'; creators[109].name is that author."
+- id: rule-01
+  verdict: violated
+  evidence: "language: 'English'. The record's own top-level source_caveats concede that 'no source states the languages present in version 3.1.0'; line 2175 ties English-only to v2.0.0 ('The only language option for v2.0.0 is English'), and line 2650 records protocol V11 (February 10, 2025) 'Updated to include data collection from Spanish language speakers', before the 3.0.0 release that added 391 participants (line 5079). The value is a plausible carry-over, which the rule says to omit; the report (finding 4) kept it knowingly. Second instance: maintainers[0] 'MIT Laboratory for Computational Physiology' is inferred from the PhysioNet footer (line 5170), see rule-21."
+- id: rule-02
+  verdict: violated
+  evidence: "creators[14].affiliations[0].name 'University of Toronto' (docs line 2028, protocol line 2633) and creators[7].affiliations[0].name 'The Hastings Center' (docs line 2028, white paper lines 1176-1177) are stated without noting that the feasibility article (line 629) gives 'Dalhousie University' for Frank Rudzicz and 'University of Montreal' for Vardit Ravitsky. The report says that roster 'disagrees with the documentation for some people, so it was not used'; in the record the choice is silent. Other disagreements are represented: author spellings (creators[11], [12], [14] source_caveats) and award numbers (funders[0].source_caveats). Same defect as rule-13."
+- id: rule-03
+  verdict: followed
+  evidence: "The report's Referent section names the adult Bridge2AI-Voice dataset at release 3.1.0, matching the declared scope (about https://doi.org/10.13026/37yb-1t42; pediatric dataset declared distinct). Full and core both carry id doi:10.13026/37yb-1t42, doi 10.13026/8xbn-nq66 and page https://physionet.org/content/b2ai-voice/3.1.0/; earlier releases appear only in version_access.versions_available, and pediatric facts only in related_datasets[0]."
+- id: rule-04
+  verdict: followed
+  evidence: "No padding is evident: slots with no stated category are left empty (raw_data_format, bias_type, limitation_type, errata, the phenotype collection's collection_type, file counts and sizes), and stated absences go to source_caveats rather than entries."
+- id: rule-05
+  verdict: followed
+  evidence: "creators has one entry per author (122, matching lines 4559-4801); sensitive_elements splits race, sexual orientation and socioeconomic/health information into three entries; prohibited_uses has five separate prohibitions; Parselmouth and Praat are separate used_software entries in preprocessing_strategies[6]."
+- id: rule-06
+  verdict: followed
+  evidence: "Stated absences (no splits, no erratum, no export controls, no impact analysis) are in source_caveats, not slot values. Slots carry content, not pointers: e.g. license_and_use_terms reproduces the IP terms of lines 2201-2202; prohibition_reason entries name the restriction type (agreement term), which the slot's own description lists as a reason ('license restriction')."
+- id: rule-07
+  verdict: followed
+  evidence: "Access route is in data_governance.access_review_process (lines 1901-1910), not in distribution_formats; release cadence is in updates, consequences for users in future_use_impacts (line 2187), discouraged applications in discouraged_uses (line 2189). The maintainers placement is charged under rule-21, not here."
+- id: rule-08
+  verdict: followed
+  evidence: "Class-ranged entries carry their declared fields: the two Person objects have id, name and affiliation objects (Bensoussan's email from line 2605, also split across lines 1074-1075); funders[0].grants[0] has grant_number and name; used_software entries have id and name, b2aiprep adds version, license (line 2557) and url; files have id, name, path, format, file_type. Many creators carry only name: the evidence for their affiliations is the tier-3 roster (line 629) and the protocol (lines 2602-2640), which the record chose not to use; no affiliation is restated in prose instead, so the prose-instead-of-structure pattern the rule targets does not occur (see chunk-c003)."
+- id: rule-09
+  verdict: followed
+  evidence: "Every populated uriorcurie leaf uses a CURIE where a prefix is declared: id doi:10.13026/37yb-1t42, version_access.latest_version_doi doi:10.13026/37yb-1t42, person and software ids on that base. The two URL ids (https://github.com/sensein/b2aiprep, .../senselab) have no declared prefix. related_datasets[0].target_dataset is string-ranged, doi is the bare DOI, access_urls and raw_sources.access_url are uri-ranged URLs."
+- id: rule-10
+  verdict: followed
+  evidence: "Every external identifier is in the bundle: 10.13026/8xbn-nq66 (line 5134), 10.13026/37yb-1t42 (line 5136), 10.13026/mf9s-5r03 (line 5655), Synapse URL (line 4809), GitHub URLs (lines 2141-2143, 1443, 5106, 5723), Zenodo URLs (lines 1447, 5099), award 3OT2OD032720-01S1 (line 5093). No ORCID or ROR was supplied; the bundle contains none."
+- id: rule-11
+  verdict: not_applicable
+  evidence: "id_slots: all 108 minted ids (2 Person, 6 Software, 3 FileCollection, 97 File) are forced and sit on the record's own id doi:10.13026/37yb-1t42, a declared CURIE; there are no constructed ids and no invented prefixes. With every mint forced the fragment rule's choice does not arise; the two stated Software ids are evidence-rule matters (rule-10)."
+- id: rule-12
+  verdict: followed
+  evidence: "A search of the full record for British spellings (-ise/-isation, -our, centre, licence, programme, analyse, paediatric, haem-) finds none in the record's prose; 'bioaccoustic' in funders[0].grants[0].name is the grant title as written at line 5093."
+- id: rule-13
+  verdict: violated
+  evidence: "The manifest ranks project_documentation and irb_protocol tier 2 and feasibility_publication tier 3. Line 629 (tier 3) gives Frank Rudzicz 'Dalhousie University' and Vardit Ravitsky 'University of Montreal'; line 2028 (tier 2) gives 'University of Toronto' and 'The Hastings Center'. The record states the higher-ranked values in creators[14] and creators[7] but records no caveat that the sources disagreed; the report concedes the disagreement. The rule is followed elsewhere (name spellings, creators[11], [12], [14]). Same defect as rule-02."
+- id: rule-14
+  verdict: not_applicable
+  evidence: "Every minted id in id_slots is forced (Person, Software, FileCollection, File); no unforced mint exists whose pointing-at could be judged. The recorded objects themselves are stated parts (files from lines 4933-5054, tools from lines 4914-4920, PIs from line 2028), not noise-as-structure."
+- id: rule-15
+  verdict: followed
+  evidence: "VOICE_coverage_receipt.yaml carries bundle_md5 9193c3cbe60b62a2fc0f704a2c4d23a3 (the bundle's md5) and 22 chunk entries c001-c022 in manifest order, each with one status from the closed set (3 nothing_relevant with reasons, 19 extracted with slot/snippet pairs). Whether c003 was truly nothing_relevant is judged under chunk-c003."
+- id: rule-16
+  verdict: followed
+  evidence: "principal_investigator under creators[0] and creators[3] is a Person object with id, name and an affiliation object list; grants carry grant_number; affiliations are Organization objects with name. reference_attributes is empty for this schema, and no object is reduced to a string."
+- id: rule-17
+  verdict: violated
+  evidence: "language: 'English' is a fact the Healthsheet states for v2.0.0 (line 2175 'The only language option for v2.0.0 is English'; Spanish 'under development'), placed in the current release's own slot; the record admits in source_caveats that no source states 3.1.0's languages. Elsewhere the rule is followed: earlier releases only in version_access.versions_available, the Healthsheet's planned semi-annual updates kept in the future tense, enrollment targets (lines 1955, 2688) excluded as plans. Same defect as rule-01's first instance."
+- id: rule-18
+  verdict: not_applicable
+  evidence: "The record carries no derived figure: 833 participants (line 4886), n per feature file (lines 4947-4955), 12,523 recordings / 306 participants (line 3683), 391 and 136 additional participants (lines 5080, 5084) and ~61,937 recordings (line 1352) are all stated by sources."
+- id: rule-19
+  verdict: followed
+  evidence: "The receipt carries an entry-level receipt for each of the 122 creators, the 11 features files, all 86 phenotype files, the 4 variables, the 3 file collections, the 5 prohibited_uses, the 3 sensitive_elements and each used_software entry; sampled roster receipts (slot-007, -010, -011, -014, -017, -022, -025, -028) each cite the line naming that person."
+- id: rule-20
+  verdict: followed
+  evidence: "The bundle states no ORCID (search finds none); creators[0].principal_investigator.id is doi:10.13026/37yb-1t42#person-yael-bensoussan and creators[3].principal_investigator.id doi:10.13026/37yb-1t42#person-olivier-elemento, the form the rule gives; Bensoussan's address is in email, not in id."
+- id: rule-21
+  verdict: violated
+  evidence: "maintainers[0].name 'MIT Laboratory for Computational Physiology' is receipted by line 5170 'Maintained by the MIT Laboratory for Computational Physiology', the PhysioNet site footer, which appears identically on every PhysioNet page in the bundle, including the 1.1 page (line 3832), the 3.0.0 page (line 4498) and the pediatric dataset's page (line 5684); its subject is the PhysioNet platform, which the record's own maintainer_details concedes ('PhysioNet is maintained by the MIT Laboratory for Computational Physiology'). Counter-reading considered: the Maintainer description includes 'hosting arrangements', and the Healthsheet's own answer to 'Who is supporting/hosting/maintaining the dataset?' (lines 2208-2212) names the hosting platform and who maintains it (Health Data Nexus, T-CAIREM), so a host's maintainer is within the slot's scope. That makes the hosting arrangement a legitimate thing to describe in maintainer_details, but it does not change the verdict: the rule's test is what the passage is about, and the passage names the maintainer of a site that hosts the pediatric dataset equally, not a party responsible for this dataset. The record turns 'hosted on PhysioNet' plus 'PhysioNet is maintained by MIT LCP' into 'MIT LCP maintains this dataset'. Borderline, judged violated. Pediatric facts are correctly confined to related_datasets[0]."
+- id: rule-22
+  verdict: followed
+  evidence: "Multivalued entries name one entity each: creators one person per entry, funders[0] one grantor, used_software one tool per entry, regulatory_compliance HIPAA and Common Rule separately. collection_mechanisms[1] 'Recording hardware' is one recording setup as line 2089 states it in one sentence (iPad with an Avid AE-36 microphone and an Apple dongle), in a slot whose entries are mechanisms rather than single instruments. external_resources[2] groups the project website, docs site and docs repository under one heading, but ExternalResource.external_resources is itself a list of links."
+- id: rule-23
+  verdict: followed
+  evidence: "All forced ids are present; where the evidence states an identifier it is used (b2aiprep and SenseLab GitHub URLs, lines 2141-2143); every other forced id is a single-fragment label on the record's own id doi:10.13026/37yb-1t42, a declared CURIE, the base the rule prefers. Creators and the maintainer with no stated identifier have no id. No fragment sits on another entity's identifier."
+- id: rule-24
+  verdict: followed
+  evidence: "Enumerated leaves: conforms_to_standard BIDS (line 2230 names Brain Imaging Data Structure v1.9.0); confidentiality_level restricted (line 5165); variables[0-1].data_type identifier ('a unique identifier', line 4946); file_collections[0].collection_type processed_data ('derived audio data features', line 4928, matching the enum's 'transformed data files'); file_collections[1].collection_type metadata (line 4928 'metadata related to the specific audio task and recording'); the phenotype collection's type is left empty. relationship_type is required; 'references' restates line 4811 ('Note that the Bridge2AI-Voice Pediatric Dataset is also available on PhysioNet: <url>'), and the declared scope directs the pediatric dataset to related_datasets; the record's caveat discloses that no typed relation is stated. Borderline, judged followed."
+- id: rule-25
+  verdict: followed
+  evidence: "raw_data_format is empty: no passage states the raw audio's pre-processing format; the BIDS conversion (line 2229-2230) goes in conforms_to and a preprocessing step, not raw_data_format."
+- id: rule-26
+  verdict: followed
+  evidence: "principal_investigator is filled only for Bensoussan and Elemento, whom line 2028 calls 'co-principal investigators' (Bensoussan also at lines 1256 and 2602); the thirteen others named at line 2028 are recorded as 'Lead investigator named in the project documentation' in description, not promoted."
+- id: rule-27
+  verdict: followed
+  evidence: "keywords come from the Topics list (lines 5137-5141) and fill nothing else; known_limitations state limitations without added consequences (lines 1391, 2014, 2099); future_use_impacts and discouraged_uses carry consequences only where lines 2187 and 2189 draw them."
+- id: rule-28
+  verdict: followed
+  evidence: "List entries are members: 4 variables from line 4946, files named in lines 4933-4944 and 4963-5054; the remark that the features data dictionaries are not listed by name is kept in file_collections[0].source_caveats, not entered as a file."
+- id: rule-29
+  verdict: followed
+  evidence: "errata is empty and 'There is no erratum' (line 2219) is in source_caveats; no future_guarantees entry; distribution formats are file formats (Parquet, TSV, JSON), not access routes; each prohibited_uses entry is the prohibition with its reason in prohibition_reason."
+- id: rule-30
+  verdict: followed
+  evidence: "No object sits in a scalar-ranged slot (the report records schema validation with no issues); string slots such as related_datasets[0].target_dataset and funders[0].grantor carry strings."
+- id: pair-01
+  verdict: consistent
+  evidence: "Compared full file_collections[0-2] and their 97 resources with core distributions by id: 100 ids on each side, no unmatched id, and every shared key (name, path, description, format, source_caveats) has identical values in both records; core distribution_formats equals the full record's."
+notes: "Pack gaps: none ([]). receipt_join basis is index (no phase-1 snapshot under intermediate/), so slot paths were judged as written. The pack's instruction hash matched the recorded spec. Evidence boundary: only this run's pack, instruction, full and core records, coverage receipt and reconciliation report, the bundle, the schema files, and the read-only 'download scope' and 'download priority' outputs for VOICE were read. Overlapping adverse verdicts: rule-01 and rule-17 share one defect (language: English carried from the v2.0.0 Healthsheet); rule-02 and rule-13 share one defect (unrecorded affiliation disagreement for Rudzicz and Ravitsky, which also underlies part of chunk-c003); rule-21 (maintainers from the PhysioNet footer) is cited again as rule-01's second instance. Distinct defects: 3, plus chunk-c003's unused affiliations for creators such as Kathy Jenkins and Shaheen Awan. Instrument observation: c003 is marked nothing_relevant while funders[0].source_caveats cites that chunk's grant number (line 524); the receipt validator excludes source_caveats from its slot denominator, so a value drawn from a chunk declared nothing_relevant passes unnoticed. Other observations not charged: conforms_to 'Brain Imaging Data Structure v1.9.0' rests on a documentation passage (line 2229) about converting the raw audio files and questionnaire data, followed by a raw-audio folder tree; the 3.1.0 page does not name BIDS, which the record caveats. Identity: the reviewer is claude-opus-5-5 running as a Claude Code subagent given the definition file, not the typed agent."

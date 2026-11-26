@@ -718,3 +718,41 @@ validation:
     full: []
     core: []
   recorded_by: d4d runs validate
+review:
+  checked: true
+  items_total: 58
+  items_answered: 58
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 2
+    slot_receipted:
+      supported: 24
+      weak: 1
+    rule:
+      followed: 27
+      not_applicable: 2
+      violated: 1
+    pair_warning:
+      consistent: 1
+  adverse: 2
+  cannot_tell: 0
+  findings: []
+  reported: []
+  summary: items 58/58 answered · 2 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-opus-5-5 (Claude Opus 5.5), running as a Claude Code general subagent
+      that was given .claude/agents/d4d-review-record.md as its instructions; not
+      launched as the typed d4d-review-record agent, whose front matter names claude-opus-5
+    reviewed_at: '2026-11-26T03:50:44Z'
+    model_basis: self-reported by the reviewing agent
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/AI_READI_review_pack.yaml
+      sha256: d9ff09f87935a8189feb3ff2403320a746b95758a3bbe17110d3bbd1ea0c37b0
+    review:
+      path: data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/AI_READI_review.yaml
+      sha256: fc1d442729ca19582474bd31d4b7759a9ee226f5cfd0da67f34cc9c51a9b3d8f
+  recorded_by: d4d review check
