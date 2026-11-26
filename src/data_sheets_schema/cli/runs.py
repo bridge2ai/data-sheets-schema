@@ -1843,6 +1843,7 @@ def select_cmd(method, project, config, allow_unverified, execute, ignore_review
             raise click.ClickException(str(error)) from error
         _score_report("Evidence table", table)
         _score_report("Series variation", variation)
+        _score_report("Score policy", score_record)
         click.echo(f"Current policy pick: {winner[0]}")
         click.echo(f"score_gap_v1 pick: {decision['selected']}")
         click.echo(f"Deciding rule: {score_record['rule']}; "
@@ -2039,7 +2040,16 @@ def _score_selection_context(method, config, instrument_id, receipt_roots, *,
             selected = table
     if not all_rows:
         raise ValueError(f"no records for configuration {config!r}")
-    return (selected if project is not None else all_rows), pooled_variation(all_rows)
+    try:
+        variation = pooled_variation(all_rows)
+    except ValueError as error:
+        # An incompatible series cannot supply noise for score selection.
+        # Preserve the reason and let the registered fallback retain P.
+        variation = {"instrument_id": instrument_id, "s": None,
+                     "degrees_of_freedom": 0, "records": 0,
+                     "per_project": {}, "per_rubric": {},
+                     "not_measured_reason": str(error)}
+    return (selected if project is not None else all_rows), variation
 
 
 def _score_report(title, value):

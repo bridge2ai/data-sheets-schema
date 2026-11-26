@@ -212,7 +212,9 @@ def decide(table, pooled, instrument_id):
     if pooled.get("instrument_id") != instrument_id:
         problems.append("pooled variation instrument differs or is not measured")
     if not (_number(s) and s >= 0 and isinstance(degrees, int) and not isinstance(degrees, bool) and degrees > 0):
-        problems.append("pooled within-record variation is not measured")
+        reason = pooled.get("not_measured_reason")
+        problems.append("pooled within-record variation is not measured"
+                        + (": " + str(reason) if reason else ""))
     else:
         record["s"] = s
         record["T"] = 2 * s * math.sqrt(2 / 3)

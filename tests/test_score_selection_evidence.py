@@ -260,3 +260,42 @@ def test_missing_record_has_no_zero_coverage_and_malformed_cell_is_missing(tmp_p
     rows = table(case)
     assert rows[0]["slots"] is None
     assert rows[0]["paired"]["mean"] is None
+
+
+def test_optional_columns_require_checked_or_record_bound_evidence(tmp_path):
+    case = scenario(tmp_path)
+    corpus, _receipts, candidates, _entries = case
+    record_sha = sha(candidates[0]["record"].read_bytes())
+    provenance_path = (corpus / "data/d4d_concatenated" / (METHOD + "_core") /
+                       LABEL / (PROJECT + "_provenance.yaml"))
+    slots = {"with_receipt": 1, "receiptable": 2}
+    verdicts = {"slot_receipted": {"supported": 1, "weak": 1}}
+    provenance = {"receipts": {"checked": True, "slots": slots},
+                  "review": {"checked": True, "adverse": 1, "by_kind": verdicts,
+                             "findings": [], "unanswered": [], "unanswered_truncated": None}}
+    # JSON is a YAML subset and retains the exact synthetic provenance shape.
+    write(provenance_path, provenance)
+    presence_path = corpus / "data/evaluation/synthetic-presence/scores.json"
+    presence = {"project": PROJECT, "method": METHOD, "label": LABEL,
+                "instrument": {"kind": "deterministic_presence", "input_sha256": record_sha},
+                "rubric10": {"total": 2, "max": 4, "percentage": 50},
+                "rubric20": {"total": 1, "max": 4, "percentage": 25}}
+    write(presence_path, [presence])
+    row = table(case)[0]
+    assert row["receipt_coverage"] == slots
+    assert row["review_verdict_counts"] == verdicts
+    assert len(row["presence_evaluation"]) == 1
+    assert row["presence_evaluation"][0]["rubric10"] == presence["rubric10"]
+    assert row["presence_evaluation"][0]["rubric20"] == presence["rubric20"]
+    assert row["presence_evaluation"][0]["instrument"]["input_sha256"] == record_sha
+
+    provenance["receipts"]["checked"] = False
+    provenance["review"]["checked"] = False
+    write(provenance_path, provenance)
+    del presence["instrument"]["input_sha256"]
+    write(presence_path, [presence])
+    row = table(case)[0]
+    assert row["receipt_coverage"] is None
+    assert row["review_verdict_counts"] is None
+    assert row["presence_evaluation"] is None
+    assert row["paired"]["count"] == 3

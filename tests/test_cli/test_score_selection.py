@@ -102,6 +102,10 @@ def test_score_preview_prints_both_picks_and_preserves_every_file(tmp_path, monk
     assert "cfg_rep1" in result.output
     assert "score_gap" in result.output
     assert "→ cfg_rep1" in result.output
+    policy, _ = json.JSONDecoder().raw_decode(result.output.split("Score policy:\n", 1)[1])
+    assert policy["T"] > 0
+    assert policy["gap"] == 40
+    assert policy["rule"] == "score_gap"
     assert snapshot(root) == before
 
 
@@ -252,6 +256,32 @@ def test_selection_pools_other_projects_in_the_same_series(tmp_path, monkeypatch
     assert snapshot(root) == before
 
 
+def test_instrument_bytes_drift_falls_back_with_the_exact_pooling_reason(tmp_path, monkeypatch):
+    cli, root = setup_case(tmp_path, monkeypatch)
+
+    def drifted(*args, **kwargs):
+        rows = score_rows(*args, **kwargs)
+        for row in rows:
+            digest = "a" * 64 if row["label"] == "cfg_rep1" else "b" * 64
+            for cell in row["rubrics"]["rubric10"]["scorings"]:
+                cell["measurement_identity"]["definition_sha256"] = digest
+        return rows
+
+    before = snapshot(root)
+    with patch("data_sheets_schema.score_selection.build_evidence_table", side_effect=drifted):
+        result = run(cli, *policy_args())
+    assert result.exit_code == 0, result.output
+    assert "→ cfg_rep2" in result.output
+    policy, _ = json.JSONDecoder().raw_decode(result.output.split("Score policy:\n", 1)[1])
+    assert policy["rule"] == "policy_fallback"
+    reason = "rubric10: instrument definition_sha256 differs across records"
+    assert reason in result.output
+    assert policy["variation"]["not_measured_reason"] == reason
+    assert policy["variation"]["s"] == "not measured"
+    assert policy["variation"]["degrees_of_freedom"] == 0
+    assert snapshot(root) == before
+
+
 def test_variation_command_reports_pooled_df_and_never_writes(tmp_path, monkeypatch):
     cli, root = setup_case(tmp_path, monkeypatch)
     before = snapshot(root)
@@ -283,6 +313,13 @@ def test_owner_rulings_are_recorded_without_automatically_changing_pick(tmp_path
     before = snapshot(root)
     with patch("data_sheets_schema.score_selection.build_evidence_table", side_effect=score_rows), \
             patch("data_sheets_schema.provenance.ProvenanceRecord.write", retain_record):
+        preview = run(cli, *policy_args(), "--score-owner-rulings", str(authority))
+        assert preview.exit_code == 0, preview.output
+        policy, _ = json.JSONDecoder().raw_decode(preview.output.split("Score policy:\n", 1)[1])
+        assert policy["owner_rulings"] == rulings
+        assert policy["T"] > 0 and policy["gap"] == 40
+        assert captured == []
+        assert snapshot(root) == before
         result = run(cli, *policy_args(), "--score-owner-rulings", str(authority), "--execute")
     assert result.exit_code == 0, result.output
     assert "→ cfg_rep1" in result.output
