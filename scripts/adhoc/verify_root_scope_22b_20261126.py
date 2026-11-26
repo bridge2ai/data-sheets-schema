@@ -13,7 +13,9 @@ It never opens a refused run's candidate output. It also re-verifies the 15 scop
 declarations against scope-declarations.sha256.
 Inputs: argv[1] evidence directory (holds checkout/, live-runs/, scope-declarations.sha256).
 Outputs: lines on stdout; JSON to argv[2]; TSV provenance table to argv[3] (repository-
-relative paths only). Exit 1 on any problem.
+relative paths only). Exit 1 on any problem, and when any cell is running, not started
+or carries a receipt that is neither REFUSED nor VALIDATED_AND_PUBLISHED; the table is
+written only for a complete, problem-free pass.
 Date: 2026-11-26 (UTC). Lead: Claude lead."""
 import hashlib, json, pathlib, subprocess, sys
 X, OUT, TSV = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]), pathlib.Path(sys.argv[3])
@@ -39,9 +41,14 @@ for project in PROJECTS:
                 if not run.exists(): continue
                 if not (run / "receipt.json").exists(): cell["state"] = "running"; continue
                 r = json.loads((run / "receipt.json").read_text())
-                if r.get("status") != "VALIDATED_AND_PUBLISHED":
+                if r.get("status") == "REFUSED":
+                    if not r.get("failure") or not r.get("finished_utc"): bad(f"attempt {attempt}: REFUSED receipt without a reason or a finish time")
                     cell["refusals"].append({"attempt": attempt, "reason": r.get("failure"), "validator_exit": r.get("validator_exit")})
                     cell["state"] = "not measured"; continue
+                if r.get("status") != "VALIDATED_AND_PUBLISHED":
+                    # neither a terminal refusal nor a publication: not a state this table may describe
+                    bad(f"attempt {attempt}: receipt status {r.get('status')!r} is neither REFUSED nor VALIDATED_AND_PUBLISHED")
+                    cell["state"] = "unknown"; continue
                 if published is not None: bad("two published attempts")
                 published = attempt; cell["state"] = "measured"; cell["attempt"] = attempt
                 if r.get("validator_exit") != 0 or r.get("codex_exit") != 0: bad("exit codes not 0")
@@ -90,5 +97,7 @@ for c in cells:
         print(f"{c['state']}: {c['project']} rep{c['generation_rep']} {c['rubric']}" + (f" attempt {c.get('attempt')}" if c.get("attempt") else "") + " | refused: " + "; ".join(f"attempt {r['attempt']}: {r['reason']}" for r in c["refusals"]))
 print(f"cells {len(cells)}; " + "; ".join(f"{k} {v}" for k, v in sorted(counts.items())) + f"; files on disk {len(on_disk)}; declarations verified {decl_ok}/15; problems {len(problems)}")
 OUT.write_text(json.dumps({"instrument": INST, "counts": counts, "declarations_verified": decl_ok, "problems": problems, "cells": cells}, indent=1))
-if not problems and not counts.get("running") and not counts.get("not started"): TSV.write_text("\n".join(rows) + "\n")
-sys.exit(1 if problems else 0)
+incomplete = sum(counts.get(k, 0) for k in ("running", "not started", "unknown"))
+if incomplete: print(f"INCOMPLETE: {incomplete} cells are running, not started or in an unknown state; no table written")
+if not problems and not incomplete: TSV.write_text("\n".join(rows) + "\n")
+sys.exit(1 if problems or incomplete else 0)
