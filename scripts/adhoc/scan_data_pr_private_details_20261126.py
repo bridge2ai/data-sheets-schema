@@ -23,7 +23,10 @@ What it looks for in each text file:
   usage           wording about a subscription's usage or allowance
   pattern:<label> each --pattern
 A finding on a line that matches an --allow-line regex is reported as allowed and
-does not fail the run. Binary files are listed as not read.
+does not fail the run. A finding on a line that the base ref's version of the same file
+already has is reported as "on base" and does not fail the run either: the gate is about
+what the PR adds, and the line is listed so that it is not mistaken for clean. With --path
+there is no base and every line counts. Binary files are listed as not read.
 """
 from __future__ import annotations
 
@@ -55,6 +58,17 @@ def git(root: Path, *args: str) -> list[str]:
     if done.returncode != 0:
         raise RuntimeError(f"git {' '.join(args)}: {done.stderr.strip()}")
     return [line for line in done.stdout.split("\0") if line]
+
+
+def base_lines(root: Path, base: str, relative: str) -> set[str]:
+    """The lines of the file at the merge base with `base`; empty if it is not there."""
+    merge_base = subprocess.run(["git", "-C", str(root), "merge-base", base, "HEAD"], capture_output=True, text=True)
+    if merge_base.returncode != 0:
+        return set()
+    shown = subprocess.run(["git", "-C", str(root), "show", f"{merge_base.stdout.strip()}:{relative}"], capture_output=True)
+    if shown.returncode != 0:
+        return set()
+    return set(shown.stdout.decode("utf-8", errors="replace").splitlines())
 
 
 def changed_files(root: Path, base: str, worktree: bool) -> list[str]:
@@ -96,7 +110,7 @@ def main() -> int:
         return 2
 
     checks = names + [("home-path", HOME_PATH), ("email", EMAIL), ("usage", USAGE)] + extra
-    findings = allowed_findings = reported = read = 0
+    findings = allowed_findings = reported = on_base = read = 0
     not_read: list[str] = []
     skipped: list[str] = []
     for relative in files:
@@ -117,6 +131,7 @@ def main() -> int:
             if regex.search(relative):
                 findings += 1
                 print(f"{relative}: {kind} in the file path")
+        already = set() if args.path else base_lines(root, args.base, relative)
         for number, line in enumerate(raw.decode("utf-8", errors="replace").splitlines(), 1):
             for kind, regex in checks:
                 match = regex.search(line)
@@ -126,6 +141,9 @@ def main() -> int:
                 if kind == "email" and not args.fail_on_email:
                     reported += 1
                     print(f"{relative}:{number}: {kind} (reported only){shown}")
+                elif line in already:
+                    on_base += 1
+                    print(f"{relative}:{number}: {kind} (on base){shown}")
                 elif any(allow.search(line) for allow in allowed):
                     allowed_findings += 1
                     print(f"{relative}:{number}: {kind} (allowed){shown}")
@@ -137,7 +155,8 @@ def main() -> int:
         print(f"not read: {item}")
     print(
         f"files listed {len(files)}, read {read}, excluded {len(skipped)}, not read {len(not_read)}; "
-        f"names given {len(names)}; findings {findings}, allowed {allowed_findings}, reported only {reported}"
+        f"names given {len(names)}; findings {findings}, on base {on_base}, allowed {allowed_findings}, "
+        f"reported only {reported}"
     )
     if not names:
         print("no --name was given: the name check did not run")
