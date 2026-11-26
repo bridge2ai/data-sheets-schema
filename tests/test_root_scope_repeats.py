@@ -24,12 +24,11 @@ from unittest.mock import patch
 import pytest
 
 from data_sheets_schema.evaluation import validate
-from tests.test_codex_root_scope_scorer import INSTRUMENT, root_scenario, scorer
+from tests.test_codex_root_scope_scorer import INSTRUMENT, root_scenario
 
 
 ROOT = Path(__file__).resolve().parents[1]
 HELPER = ROOT / "scripts/adhoc/repeat_root_scope_scoring_20261126.py"
-RUNNER = ROOT / "scripts/adhoc/score_semantic_rubric_codex_20261125.py"
 
 
 def load_module(path, name):
@@ -57,6 +56,27 @@ def sha(raw):
     return hashlib.sha256(raw).hexdigest()
 
 
+def measured_runner_bytes(helper):
+    """Historical repeat controls keep the runner pinned by their controller.
+
+    Read the retained Git object, never a measured checkout. Missing history or
+    a digest mismatch fails the fixture; it cannot select the current revision.
+    """
+    raw = subprocess.run(
+        ["git", "-C", str(ROOT), "show", f"{helper.SCORER_HEAD}:{helper.RUNNER}"],
+        check=True, capture_output=True, timeout=30,
+    ).stdout
+    assert sha(raw) == helper.RUNNER_SHA, "measured fixture runner blob differs from its pin"
+    return raw
+
+
+def execute_measured_fixture(plan, args):
+    helper = repeat_helper()
+    tree = Path(plan["repo_root"])
+    pinned = helper._load_scorer(tree)
+    return helper.in_checkout(tree, pinned.execute, plan, args)
+
+
 def synthetic_run(directory, rubric="rubric10", shared=None, project="Toy", **changes):
     args, tree, tools, evaluation = root_scenario(directory, rubric, **changes)
     if project != "Toy":
@@ -77,18 +97,19 @@ def synthetic_run(directory, rubric="rubric10", shared=None, project="Toy", **ch
         args.poetry_binary = shared[0].poetry_binary
         args.auth_file = shared[0].auth_file
         tools = shared[2]
-    runner = tree / "scripts/adhoc" / RUNNER.name
+    helper = repeat_helper()
+    runner = tree / helper.RUNNER
     runner.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(RUNNER, runner)
-    pinned = repeat_helper()._load_scorer(tree)
-    return args, tree, tools, evaluation, pinned.build_plan(args)
+    runner.write_bytes(measured_runner_bytes(helper))
+    pinned = helper._load_scorer(tree)
+    return args, tree, tools, evaluation, helper.in_checkout(tree, pinned.build_plan, args)
 
 
 def export_fixture(directory, rubric="rubric10", execute_repeat=True, project="Toy"):
     baseline = synthetic_run(directory / "baseline", rubric, project=project)
     repeated = synthetic_run(directory / "repeat", rubric, shared=baseline, project=project)
     for args, _, _, _, plan in ((baseline, repeated) if execute_repeat else (baseline,)):
-        scorer.execute(plan, args)
+        execute_measured_fixture(plan, args)
     publication = directory / "publication"
     publication.mkdir()
     runs = directory / "repeat-controller"
@@ -147,10 +168,14 @@ def test_distinct_checkouts_preserve_complete_prompt_and_all_input_hashes(tmp_pa
 
 
 def test_fake_repeat_exports_exact_validated_bytes_and_retains_both_runs(tmp_path, monkeypatch):
+    from tests.test_codex_root_scope_scorer import scorer as current_scorer
     helper = repeat_helper()
     monkeypatch.setattr(helper, "_checkout", lambda root: None)
     for rubric in ("rubric10", "rubric20"):
-        baseline, repeated, job, args = export_fixture(tmp_path / rubric, rubric)
+        with patch.object(current_scorer, "execute",
+                          side_effect=AssertionError("historical fixture executed the current runner")):
+            baseline, repeated, job, args = export_fixture(tmp_path / rubric, rubric)
+        assert baseline[4]["runner_sha256"] == repeated[4]["runner_sha256"] == helper.RUNNER_SHA
         first_output = Path(baseline[4]["output"])
         first_bytes = first_output.read_bytes()
         source = Path(repeated[4]["output"])
@@ -362,9 +387,27 @@ def test_repeat_checkout_refuses_a_different_head(tmp_path):
             helper._checkout(tmp_path)
 
 
+def test_measured_fixture_refuses_a_changed_git_blob():
+    helper = repeat_helper()
+    raw = measured_runner_bytes(helper)
+    changed = subprocess.CompletedProcess([], 0, stdout=raw + b"\n", stderr=b"")
+    with patch.object(subprocess, "run", return_value=changed):
+        with pytest.raises(AssertionError, match="measured fixture runner blob differs"):
+            measured_runner_bytes(helper)
+
+
+def test_measured_loader_refuses_changed_fixture_runner_bytes(tmp_path):
+    helper = repeat_helper()
+    runner = tmp_path / helper.RUNNER
+    runner.parent.mkdir(parents=True)
+    runner.write_bytes(measured_runner_bytes(helper) + b"\n")
+    with pytest.raises(ValueError, match="pinned scorer runner differs"):
+        helper._load_scorer(tmp_path)
+
+
 def test_repeat_location_leaves_real_reader_results_and_corpus_exit_unchanged(tmp_path, monkeypatch):
     args, tree, tools, _, plan = synthetic_run(tmp_path / "canary")
-    scorer.execute(plan, args)
+    execute_measured_fixture(plan, args)
     raw = Path(plan["output"]).read_bytes()
     document = json.loads(raw)
     publication = tmp_path / "publication"
