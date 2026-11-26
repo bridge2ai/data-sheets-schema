@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """One separately authorized replacement of a refused first scoring.
 
-2026-11-26, issues 6395 and 6406. Inputs: an exact measured scorer checkout and original
+2026-11-26, issues 6395, 6406 and 6411. Inputs: a measured checkout and original
 plan/receipt metadata. Outputs: a read-only plan or one immutable attempt claim,
 the unchanged measured executor's attempt 2, and a terminal declaration. Never
 reads an original refused response, candidate, transcript or authentication copy.
@@ -246,12 +246,44 @@ def execute_job(job, args):
                 "replacement_plan_sha256": job["plan_sha256"], "destination": job["plan"]["output"],
                 "accepted_output_sha256": None}
 
-    def interrupted(number, frame):
-        raise InterruptedError(f"replacement interrupted by signal {number}")
+    interruptions = []
 
-    try:
-        for number in SIGNALS:
-            previous[number] = signal.signal(number, interrupted)
+    def interrupted(number, frame):
+        first = not interruptions
+        if number not in interruptions:
+            interruptions.append(number)
+        # Issue 6411: cancellation may raise only inside the protected attempt
+        # call. Its frame is absent at finalizer entry, even before the first
+        # finalizer statement runs. Later signals cannot interrupt cleanup.
+        while first and frame is not None:
+            if frame.f_code is run_attempt.__code__:
+                raise InterruptedError(f"replacement interrupted by signal {number}")
+            frame = frame.f_back
+
+    def observe_interruptions():
+        nonlocal failure
+        # Called with these signals masked. Consume pending signals while our
+        # dispositions are still installed, rather than delivering them to the
+        # caller before a terminal refusal can be persisted.
+        pending = set(signal.sigpending()).intersection(SIGNALS)
+        while pending:
+            number = signal.sigwait(pending)
+            if number not in interruptions:
+                interruptions.append(number)
+            pending = set(signal.sigpending()).intersection(SIGNALS)
+        if interruptions:
+            terminal["interruption_signals"] = list(interruptions)
+            if failure is None:
+                failure = InterruptedError(f"replacement interrupted by signal {interruptions[0]}")
+            terminal.update(status="FIRST_SCORING_REPLACEMENT_REFUSED", accepted_output_sha256=None,
+                            failure=type(failure).__name__ + ": " + str(failure))
+            for field in ("output_sha256", "validator_input_sha256", "destination_sha256"):
+                terminal.pop(field, None)
+
+    def run_attempt():
+        nonlocal claimed, publication
+        if interruptions:
+            raise InterruptedError(f"replacement interrupted by signal {interruptions[0]}")
         state.parent.mkdir(mode=0o700, parents=False, exist_ok=True)
         mask = signal.pthread_sigmask(signal.SIG_BLOCK, SIGNALS)
         try:
@@ -284,6 +316,11 @@ def execute_job(job, args):
         publication = {"accepted_output_sha256": sha(raw), "output_sha256": sha(raw),
                        "validator_input_sha256": accepted["validator_input_sha256"],
                        "destination_sha256": sha(raw)}
+
+    try:
+        for number in SIGNALS:
+            previous[number] = signal.signal(number, interrupted)
+        run_attempt()
     except BaseException as error:
         failure = error
         terminal["failure"] = type(error).__name__ + ": " + str(error)
@@ -321,8 +358,32 @@ def execute_job(job, args):
                 elif failure is not None:
                     terminal["failure"] = type(failure).__name__ + ": " + str(failure)
                 terminal["destination_exists"] = os.path.lexists(job["plan"]["output"])
-                write_json(job["manifest_path"], terminal)
+                observe_interruptions()
+                manifest = physical(job["manifest_path"])
+                for revision in range(len(SIGNALS) + 1):
+                    persisted = deepcopy(terminal)
+                    write_json(manifest, persisted)
+                    info = manifest.stat()
+                    observe_interruptions()
+                    if terminal == persisted:
+                        break
+                    # A signal during persistence invalidates that provisional
+                    # terminal. Preserve its exact bytes as unaccepted history,
+                    # then write the refusal before restoring dispositions.
+                    raw = (json.dumps(persisted, indent=2, sort_keys=True, allow_nan=False) + "\n").encode()
+                    current = manifest.stat()
+                    require((info.st_dev, info.st_ino) == (current.st_dev, current.st_ino)
+                            and read_bytes(manifest) == raw, "provisional terminal changed before refusal")
+                    archive = state / ("unaccepted-manifest-" + str(revision + 1) + ".json")
+                    os.link(manifest, archive, follow_symlinks=False)
+                    manifest.unlink()
+                else:
+                    raise RuntimeError("signal census did not stabilize before terminal persistence")
+            else:
+                observe_interruptions()
         finally:
+            # The last pending-signal check after persistence is the commit
+            # point. Signals arriving afterwards belong to the caller again.
             for number, disposition in previous.items():
                 signal.signal(number, disposition)
             signal.pthread_sigmask(signal.SIG_SETMASK, mask)

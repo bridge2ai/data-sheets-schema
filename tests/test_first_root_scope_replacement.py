@@ -1,4 +1,4 @@
-"""First-scoring attempt replacement controls, issues 6395 and 6406, 2026-11-26.
+"""First-scoring controls for issues 6395, 6406 and 6411, 2026-11-26.
 
 Only synthetic records, fake credentials and committed executable stand-ins run.
 The pinned measured executor and exact-file validator remain unchanged. Original
@@ -487,3 +487,101 @@ def test_sighup_stops_fake_child_and_retains_terminal_refusal(tmp_path, monkeypa
 
 def test_sigint_stops_fake_child_and_retains_terminal_refusal(tmp_path, monkeypatch):
     signal_case(tmp_path / "interrupt", monkeypatch, signal.SIGINT)
+
+
+def finalization_signal_case(directory, monkeypatch, number, boundary):
+    """Inject a real catchable signal at the reviewer's exact masking boundary."""
+    helper, args, original_args, original, tools, _ = refused_fixture(directory, monkeypatch)
+    job = helper.build_job(args)
+    first_before = snapshot(args.refused_run)
+    auth_before = original_args.auth_file.read_bytes()
+    prior = {item: signal.getsignal(item) for item in helper.SIGNALS}
+    actual_mask = signal.pthread_sigmask
+    prior_mask = actual_mask(signal.SIG_BLOCK, [])
+    actual_write = helper.write_json
+    observations = []
+    sent = []
+
+    def at_mask_entry(how, numbers):
+        if how == signal.SIG_BLOCK:
+            observations.append({"claim": Path(job["claim_path"]).exists(),
+                                 "manifest": Path(job["manifest_path"]).exists(),
+                                 "destination": Path(original["output"]).exists()})
+            if len(observations) == 2 and boundary == "mask-entry":
+                sent.append(number)
+                os.kill(os.getpid(), number)
+        return actual_mask(how, numbers)
+
+    def at_manifest_write(path, value):
+        first_write = str(path) == job["manifest_path"] and not sent
+        if first_write and boundary == "before-write":
+            sent.append(number)
+            os.kill(os.getpid(), number)
+        result = actual_write(path, value)
+        if first_write and boundary == "after-write":
+            sent.append(number)
+            os.kill(os.getpid(), number)
+        return result
+
+    restored = False
+    try:
+        with patch.object(signal, "pthread_sigmask", at_mask_entry), \
+                patch.object(helper, "write_json", at_manifest_write), \
+                no_original_payload_reads(args.refused_run), \
+                pytest.raises(InterruptedError, match="replacement interrupted"):
+            helper.execute_job(job, args)
+        restored = {item: signal.getsignal(item) for item in helper.SIGNALS} == prior
+        assert actual_mask(signal.SIG_BLOCK, []) == prior_mask
+        assert not set(signal.sigpending()).intersection(helper.SIGNALS)
+    finally:
+        for item, disposition in prior.items():
+            signal.signal(item, disposition)
+        actual_mask(signal.SIG_SETMASK, prior_mask)
+    assert restored
+    assert sent == [number]
+    assert len(observations) == 2
+    assert observations[1] == {"claim": True, "manifest": False, "destination": True}
+    assert snapshot(args.refused_run) == first_before
+    assert original_args.auth_file.read_bytes() == auth_before
+    run = Path(job["plan"]["run_directory"])
+    assert helper.read_json(run / "receipt.json")["status"] == "VALIDATED_AND_PUBLISHED"
+    assert not (Path(job["plan"]["codex_home"]) / "auth.json").exists()
+    terminal = helper.read_json(job["manifest_path"])
+    assert terminal["status"] == "FIRST_SCORING_REPLACEMENT_REFUSED"
+    assert terminal["interruption_signals"] == [number]
+    assert terminal["accepted_output_sha256"] is None
+    assert "output_sha256" not in terminal and "destination_sha256" not in terminal
+    assert terminal["destination_exists"] is True
+    assert terminal["observed_destination_sha256"] == helper.sha(Path(original["output"]).read_bytes())
+    assert terminal["actual_plan_sha256"] == helper.sha((run / "plan.json").read_bytes())
+    assert terminal["actual_receipt_sha256"] == helper.sha((run / "receipt.json").read_bytes())
+    archives = list(Path(job["state_directory"]).glob("unaccepted-manifest-*.json"))
+    if boundary == "mask-entry":
+        assert not archives
+    else:
+        assert len(archives) == 1
+        assert helper.read_json(archives[0])["status"] == "FIRST_SCORING_REPLACEMENT_PUBLISHED"
+    with pytest.raises(ValueError, match="third attempt"):
+        helper.build_job(args)
+
+
+def test_sigterm_at_finalizer_mask_entry_is_terminal_and_restores_handlers(tmp_path, monkeypatch):
+    finalization_signal_case(tmp_path / "term-entry", monkeypatch, signal.SIGTERM, "mask-entry")
+
+
+def test_sighup_at_finalizer_mask_entry_is_terminal_and_restores_handlers(tmp_path, monkeypatch):
+    finalization_signal_case(tmp_path / "hup-entry", monkeypatch, signal.SIGHUP, "mask-entry")
+
+
+def test_sigint_at_finalizer_mask_entry_is_terminal_and_restores_handlers(tmp_path, monkeypatch):
+    finalization_signal_case(tmp_path / "int-entry", monkeypatch, signal.SIGINT, "mask-entry")
+
+
+def test_pending_signals_before_manifest_write_are_terminal(tmp_path, monkeypatch):
+    for number in (signal.SIGTERM, signal.SIGHUP, signal.SIGINT):
+        finalization_signal_case(tmp_path / number.name, monkeypatch, number, "before-write")
+
+
+def test_pending_signals_after_manifest_write_are_terminal(tmp_path, monkeypatch):
+    for number in (signal.SIGTERM, signal.SIGHUP, signal.SIGINT):
+        finalization_signal_case(tmp_path / number.name, monkeypatch, number, "after-write")
