@@ -358,6 +358,7 @@ def main(argv=None):
         parser.error("requested mutation ID is absent from the catalog")
     planned = [prepare(row, sources) for row in catalog if selected is None or row[0].split()[0] in selected]
     args.output.mkdir(parents=True, exist_ok=False)
+    (args.output / "fixtures").mkdir()
     results = []
     if not args.plan_only:
         results.append(run_one(args, {"id": "BASE", "description": "Unmutated control",
