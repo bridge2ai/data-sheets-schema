@@ -13,9 +13,11 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import signal
 import stat
 import subprocess
 import sys
+import time
 
 sys.dont_write_bytecode = True
 SCORER_HEAD = "9452a5c49a0533d86c5e08c1093021036ef98830"
@@ -27,6 +29,9 @@ METHOD = "claudecode_release"
 PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE", "VOICE_PEDIATRIC")
 RUBRICS = ("rubric10", "rubric20")
 LIMIT = 32 * 1024 * 1024
+EXPORT_VALIDATOR_TIMEOUT = 120
+EXPORT_STOP_GRACE = 2.0
+EXPORT_SIGNALS = (signal.SIGINT, signal.SIGTERM, signal.SIGHUP)
 
 
 def require(condition, message):
@@ -68,6 +73,8 @@ def write_json(path, value):
     raw = (json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + "\n").encode()
     with physical(path).open("xb") as handle:
         handle.write(raw)
+        handle.flush()
+        os.fsync(handle.fileno())
     require(read_bytes(path) == raw, "JSON receipt write differs")
 
 
@@ -82,10 +89,10 @@ def _orchestration():
 def _checkout(root):
     root = physical(root)
     head = subprocess.run(["git", "-C", str(root), "rev-parse", "HEAD"],
-                          check=True, capture_output=True, text=True).stdout.strip()
+                          check=True, capture_output=True, text=True, timeout=60).stdout.strip()
     require(head == SCORER_HEAD, "scoring checkout is not the exact run-1 head")
     for flags in ([], ["--cached"]):
-        subprocess.run(["git", "-C", str(root), "diff", *flags, "--quiet"], check=True)
+        subprocess.run(["git", "-C", str(root), "diff", *flags, "--quiet"], check=True, timeout=60)
     require(sha(read_bytes(root / RUNNER)) == RUNNER_SHA, "pinned scorer runner differs")
 
 
@@ -253,6 +260,7 @@ def _manifest_value(job, receipt, raw):
 def _verified_skip(job, manifest_path):
     require(_canary(job), "only the accepted repeat canary may be skipped")
     require(physical(manifest_path) == physical(job["manifest_path"]), "canary manifest path differs")
+    require(not (physical(manifest_path).parent / "failure.json").exists(), "canary export has refusal evidence")
     _verify_baseline(job)
     plan = job["plan"]
     _checkout(plan["repo_root"])
@@ -337,53 +345,206 @@ def build_batch(args):
             "orchestration": orchestration, "accepted_canary_job": accepted_canary_job}
 
 
-def export_job(job, args):
-    plan = job["plan"]
-    root = physical(plan["repo_root"])
-    require(job.get("orchestration", _orchestration()) == _orchestration(), "orchestration helper changed")
-    _checkout(root)
-    _verify_baseline(job)
-    scorer = _load_scorer(root)
-    in_checkout(root, scorer.check_inputs, plan)
-    run = physical(plan["run_directory"])
-    receipt, raw = _accepted(plan, run / "plan.json", run / "receipt.json")
-    destination = _destination(args.publication_root, job["scoring_replicate"], plan["identity"])
-    require(destination == physical(job["destination"]), "repeat destination differs")
-    require(not destination.exists(), "repeat destination already exists")
-    export = physical(job["export_directory"])
-    require(export == physical(args.runs_root) / "export-manifests" / job["id"], "export evidence path differs")
-    require(physical(job["manifest_path"]) == export / "manifest.json", "export manifest path differs")
-    export.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-    export.mkdir(mode=0o700, exist_ok=False)
+class _ExportSignals:
+    """Defer interruption until child/publication ownership is recorded."""
+
+    def __init__(self):
+        self.pending = None
+        self.previous = {}
+        mask = signal.pthread_sigmask(signal.SIG_BLOCK, EXPORT_SIGNALS)
+        try:
+            for number in EXPORT_SIGNALS:
+                self.previous[number] = signal.signal(number, self.record)
+        finally:
+            signal.pthread_sigmask(signal.SIG_SETMASK, mask)
+
+    def record(self, number, frame):
+        if self.pending is None:
+            self.pending = number
+
+    def check(self):
+        pending = set(signal.sigpending()).intersection(EXPORT_SIGNALS)
+        number = self.pending or (min(pending) if pending else None)
+        if number is not None:
+            raise InterruptedError(f"repeat export interrupted by signal {number}")
+
+    def _restore_handlers(self):
+        for number, previous in self.previous.items():
+            signal.signal(number, previous)
+        self.previous.clear()
+
+    def restore(self):
+        mask = signal.pthread_sigmask(signal.SIG_BLOCK, EXPORT_SIGNALS)
+        try:
+            self._restore_handlers()
+        finally:
+            signal.pthread_sigmask(signal.SIG_SETMASK, mask)
+
+    def commit(self, failure):
+        # Pending interruptions abort before completion. Signals arriving after
+        # this commit point are delivered to the caller's original handlers.
+        mask = signal.pthread_sigmask(signal.SIG_BLOCK, EXPORT_SIGNALS)
+        try:
+            self.check()
+            failure.unlink()
+            self.check()
+            self._restore_handlers()
+        finally:
+            signal.pthread_sigmask(signal.SIG_SETMASK, mask)
+
+
+def _group_exists(pid):
     try:
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        with physical(destination).open("xb") as handle:
+        os.killpg(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+
+
+def _stop_validator(child):
+    # Stop the entire session even if its leader exited before a descendant.
+    for number in (signal.SIGTERM, signal.SIGKILL):
+        try:
+            os.killpg(child.pid, number)
+        except ProcessLookupError:
+            pass
+        deadline = time.monotonic() + EXPORT_STOP_GRACE
+        while time.monotonic() < deadline:
+            child.poll()
+            if not _group_exists(child.pid):
+                child.wait(timeout=EXPORT_STOP_GRACE)
+                return
+            time.sleep(0.05)
+    child.wait(timeout=EXPORT_STOP_GRACE)
+    require(not _group_exists(child.pid), "validator process group cleanup is unproven")
+
+
+def _validate_staged(command, root, environment, export, control):
+    child = None
+    with (export / "validator.stdout.txt").open("xb") as stdout, (export / "validator.stderr.txt").open("xb") as stderr:
+        try:
+            control.check()
+            child = subprocess.Popen(command, cwd=root, env=environment, stdout=stdout, stderr=stderr,
+                                     start_new_session=True)
+            deadline = time.monotonic() + EXPORT_VALIDATOR_TIMEOUT
+            while True:
+                control.check()
+                status = child.poll()
+                if status is not None:
+                    return status
+                if time.monotonic() >= deadline:
+                    raise subprocess.TimeoutExpired(command, EXPORT_VALIDATOR_TIMEOUT)
+                time.sleep(0.05)
+        finally:
+            if child is not None:
+                _stop_validator(child)
+
+
+def _export_refusal(export, destination, staged_identity, failure):
+    # A racing existing destination belongs to its creator, never this export.
+    cleanup_errors = []
+    try:
+        if staged_identity is not None and os.path.lexists(destination):
+            current = destination.lstat()
+            if (current.st_dev, current.st_ino) == staged_identity:
+                destination.unlink()
+    except OSError as exc:
+        cleanup_errors.append(f"publication cleanup: {type(exc).__name__}: {exc}")
+    manifest = export / "manifest.json"
+    if manifest.exists():
+        try:
+            manifest.rename(export / "unaccepted-manifest.json")
+        except OSError as exc:
+            cleanup_errors.append(f"manifest retention: {type(exc).__name__}: {exc}")
+    refused = export / "failure.json"
+    if not refused.exists():
+        os.link(export / "refusal-reserve.json", refused)
+    failure.update(destination_exists=os.path.lexists(destination), cleanup_errors=cleanup_errors)
+    # The already persisted refusal survives a full volume or a second signal.
+    try:
+        detail = export / "refusal-detail.json"
+        write_json(detail, failure)
+        os.replace(detail, refused)
+    except OSError:
+        pass
+
+
+def export_job(job, args):
+    control = _ExportSignals()
+    export = None
+    staged_identity = None
+    try:
+        plan = job["plan"]
+        root, run = physical(plan["repo_root"]), physical(plan["run_directory"])
+        destination = _destination(args.publication_root, job["scoring_replicate"], plan["identity"])
+        require(destination == physical(job["destination"]), "repeat destination differs")
+        require(not destination.exists(), "repeat destination already exists")
+        candidate_export = physical(job["export_directory"])
+        require(candidate_export == physical(args.runs_root) / "export-manifests" / job["id"], "export evidence path differs")
+        require(physical(job["manifest_path"]) == candidate_export / "manifest.json", "export manifest path differs")
+        require(physical(args.publication_root) not in candidate_export.parents,
+                "export staging must be outside the publication repository")
+        candidate_export.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+        candidate_export.mkdir(mode=0o700, exist_ok=False)
+        failure = {"status": "EXPORT_REFUSED", "failure": "export has not completed",
+                   "source_head": SCORER_HEAD, "destination": str(destination), "run_directory": str(run)}
+        write_json(candidate_export / "failure.json", failure)
+        os.link(candidate_export / "failure.json", candidate_export / "refusal-reserve.json")
+        export = candidate_export
+        control.check()
+        require(job.get("orchestration", _orchestration()) == _orchestration(), "orchestration helper changed")
+        _checkout(root)
+        _verify_baseline(job)
+        scorer = _load_scorer(root)
+        in_checkout(root, scorer.check_inputs, plan)
+        receipt, raw = _accepted(plan, run / "plan.json", run / "receipt.json")
+        control.check()
+        staged = export / "staged-evaluation.json"
+        with staged.open("xb") as handle:
             handle.write(raw)
-        require(read_bytes(destination) == raw, "copied repeat bytes differ")
+            handle.flush()
+            os.fsync(handle.fileno())
+        require(read_bytes(staged) == raw, "staged repeat bytes differ")
+        control.check()
         command = list(plan["validation_command"])
         require(command.count("--file") == 1, "unexpected validator file arguments")
-        command[command.index("--file") + 1] = str(destination)
+        command[command.index("--file") + 1] = str(staged)
         venv = physical(plan["validation_venv"])
         environment = {"PATH": str(venv / "bin") + ":" + os.environ.get("PATH", "/usr/bin:/bin"),
                        "HOME": str(run / "home"), "VIRTUAL_ENV": str(venv),
                        "POETRY_VIRTUALENVS_CREATE": "false", "PIP_NO_INDEX": "1",
                        "PYTHONNOUSERSITE": "1", "PYTHONDONTWRITEBYTECODE": "1"}
-        with (export / "validator.stdout.txt").open("xb") as stdout, (export / "validator.stderr.txt").open("xb") as stderr:
-            validated = subprocess.run(command, cwd=root, env=environment, stdout=stdout, stderr=stderr, timeout=120)
-        require(validated.returncode == 0, "relocated exact-file validation failed; do not rerun scorer")
-        require(read_bytes(destination) == raw, "export changed during validation")
+        status = _validate_staged(command, root, environment, export, control)
+        require(status == 0, "relocated exact-file validation failed; do not rerun scorer")
+        require(read_bytes(staged) == raw, "staged export changed during validation")
+        control.check()
         _verify_baseline(job)
         in_checkout(root, scorer.check_inputs, plan)
         final_receipt, final_raw = _accepted(plan, run / "plan.json", run / "receipt.json")
         require(final_receipt == receipt and final_raw == raw, "source publication changed during export")
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        staged.chmod(0o400)
+        info = staged.stat()
+        staged_identity = info.st_dev, info.st_ino
+        require(destination.parent.stat().st_dev == info.st_dev, "atomic export requires the same filesystem")
+        control.check()
+        # link is atomic and exclusive; no overwrite or cross-device fallback.
+        # Handlers only record signals, so ownership cannot be lost mid-syscall.
+        os.link(staged, physical(destination), follow_symlinks=False)
+        control.check()
+        require(sha(read_bytes(destination)) == sha(raw), "published repeat differs from validated bytes")
         manifest = _manifest_value(job, receipt, raw)
         write_json(job["manifest_path"], manifest)
+        control.check()
+        control.commit(export / "failure.json")
         return manifest
     except BaseException as exc:
-        write_json(export / "failure.json", {"status": "EXPORT_REFUSED", "failure": f"{type(exc).__name__}: {exc}",
-                                            "source_head": SCORER_HEAD, "destination": str(destination),
-                                            "run_directory": str(run)})
+        if export is not None:
+            failure.update(failure=f"{type(exc).__name__}: {exc}", signal=control.pending)
+            _export_refusal(export, destination, staged_identity, failure)
         raise
+    finally:
+        control.restore()
 
 
 def execute_batch(batch, args):

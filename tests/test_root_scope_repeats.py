@@ -7,6 +7,7 @@ read through their real APIs in an isolated tree; no provider is called.
 from argparse import Namespace
 import contextlib
 import copy
+import errno
 import hashlib
 import importlib.util
 import io
@@ -14,8 +15,10 @@ import json
 import os
 from pathlib import Path
 import shutil
+import signal
 import subprocess
 import sys
+import time
 from unittest.mock import patch
 
 import pytest
@@ -416,3 +419,352 @@ def test_repeat_location_leaves_real_reader_results_and_corpus_exit_unchanged(tm
     assert readers() == before
     assert run1.read_bytes() == raw and direct.read_bytes() == raw
     assert not (Path(plan["codex_home"]) / "auth.json").exists()
+
+
+def export_failure_stream(directory):
+    """Reuse the review's accepted canary plus twenty-row fake stream control."""
+    helper = repeat_helper()
+    helper._checkout = lambda root: None
+    _, _, accepted, accepted_args = export_fixture(directory / "accepted", project="CM4AI")
+    helper.export_job(accepted, accepted_args)
+    accepted["skip"] = True
+    baseline, repeated, job, args = export_fixture(directory / "stream", execute_repeat=False, project="CM4AI")
+    args.authorization_reference = "offline issue 6378 executable stand-in only"
+    args.generation_replicate = 1
+    args.accepted_canary = Path(accepted["manifest_path"])
+    calls = directory / "main-invocations.json"
+    calls.write_text("[]\n")
+    loaded = helper._load_scorer
+
+    def counted_loader(root):
+        module = loaded(root)
+        original_main = module.main
+
+        def counted_main(argv):
+            rows = json.loads(calls.read_bytes())
+            rows.append(list(argv))
+            calls.write_text(json.dumps(rows) + "\n")
+            return original_main(argv)
+
+        module.main = counted_main
+        return module
+
+    helper._load_scorer = counted_loader
+    before = {"baseline": Path(baseline[4]["output"]).read_bytes(),
+              "auth": repeated[0].auth_file.read_bytes()}
+
+    def execute():
+        return helper.execute_batch(batch(helper, [job] * 20, accepted=accepted), args)
+
+    return helper, baseline, repeated, job, args, calls, before, execute
+
+
+def assert_refused_export(fixture, existing_destination=None):
+    helper, baseline, repeated, job, args, calls, before, _ = fixture
+    destination = Path(job["destination"])
+    export = Path(job["export_directory"])
+    staged = export / "staged-evaluation.json"
+    if existing_destination is None:
+        assert not destination.exists()
+    else:
+        assert destination.read_bytes() == existing_destination
+    assert not Path(job["manifest_path"]).exists()
+    failure = json.loads((export / "failure.json").read_bytes())
+    assert failure["status"] == "EXPORT_REFUSED"
+    assert failure["failure"]
+    assert staged.is_file() and staged.stat().st_size > 0
+    assert not staged.is_relative_to(args.publication_root / "data/evaluation_repeats")
+    assert len(json.loads(calls.read_bytes())) == 1
+    assert Path(baseline[4]["output"]).read_bytes() == before["baseline"]
+    assert repeated[0].auth_file.read_bytes() == before["auth"]
+    assert not (Path(repeated[4]["codex_home"]) / "auth.json").exists()
+    receipt = json.loads((Path(repeated[4]["run_directory"]) / "receipt.json").read_bytes())
+    assert receipt["status"] == "VALIDATED_AND_PUBLISHED"
+    assert receipt["output_sha256"] == sha(Path(repeated[4]["output"]).read_bytes())
+    return failure, staged
+
+
+def export_command(command, job):
+    return ("--file" in command and
+            Path(command[command.index("--file") + 1]) ==
+            Path(job["export_directory"]) / "staged-evaluation.json")
+
+
+def test_repeat_export_faults_keep_only_private_evidence(tmp_path, failure_kind):
+    """Issue 6378 review cases, now requiring absent public destinations."""
+    fixture = export_failure_stream(tmp_path)
+    helper, _, repeated, job, _, _, _, execute = fixture
+    staged = Path(job["export_directory"]) / "staged-evaluation.json"
+    destination = Path(job["destination"])
+    original_open, original_popen, original_link = Path.open, subprocess.Popen, os.link
+    original_stat = Path.stat
+    validator_launches = []
+    full_volume = [False]
+
+    class PartialWrite:
+        def __init__(self, handle):
+            self.handle = handle
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *values):
+            self.handle.close()
+
+        def __getattr__(self, name):
+            return getattr(self.handle, name)
+
+        def write(self, raw):
+            self.handle.write(raw[:23])
+            self.handle.flush()
+            full_volume[0] = failure_kind == "enospc_global"
+            raise OSError(errno.ENOSPC, "synthetic disk-full after 23 private staging bytes")
+
+    def limited_open(path, mode="r", *positional, **keywords):
+        if full_volume[0] and any(character in mode for character in "xwa+"):
+            raise OSError(errno.ENOSPC, "synthetic full volume also prevents refusal enrichment")
+        opened = original_open(path, mode, *positional, **keywords)
+        if failure_kind in ("enospc", "enospc_global") and path == staged and mode == "xb":
+            return PartialWrite(opened)
+        return opened
+
+    def different_device(path, *positional, **keywords):
+        observed = original_stat(path, *positional, **keywords)
+        if failure_kind == "different_filesystem" and path == destination.parent:
+            values = list(observed)
+            values[2] += 1
+            return os.stat_result(values)
+        return observed
+
+    failed_validator = tmp_path / "exit17-validator.py"
+    failed_validator.write_text("# Issue 6378 synthetic validator rejection.\nraise SystemExit(17)\n")
+
+    def altered_popen(command, *positional, **keywords):
+        if export_command(command, job):
+            validator_launches.append(list(command))
+            assert not destination.exists()
+            if failure_kind == "strict_rejection":
+                value = json.loads(staged.read_bytes())
+                value["metadata"]["scope_context_sha256"] = "0" * 64
+                staged.write_text(json.dumps(value) + "\n")
+            elif failure_kind == "exit17":
+                command = [sys.executable, str(failed_validator)]
+        return original_popen(command, *positional, **keywords)
+
+    def failed_link(source, target, *positional, **keywords):
+        if Path(target) == destination:
+            assert staged.is_file()
+            assert len(validator_launches) == 1
+            assert json.loads((repeated[2] / "real-validator-result.json").read_bytes())["returncode"] == 0
+            if failure_kind == "before_publication":
+                raise OSError(errno.EIO, "synthetic failure after validation before publication")
+            if failure_kind == "after_publication":
+                original_link(source, target, *positional, **keywords)
+                raise OSError(errno.EIO, "synthetic failure after atomic publication syscall")
+            if failure_kind == "changed_publication":
+                original_link(source, target, *positional, **keywords)
+                destination.chmod(0o600)
+                destination.write_bytes(b"synthetic changed bytes after publication\n")
+                return None
+        return original_link(source, target, *positional, **keywords)
+
+    dispositions = {number: signal.getsignal(number) for number in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP)}
+    with patch.object(Path, "open", limited_open), patch.object(subprocess, "Popen", altered_popen), \
+            patch.object(os, "link", failed_link), patch.object(Path, "stat", different_device):
+        with pytest.raises((OSError, ValueError, RuntimeError)):
+            execute()
+    failure, retained = assert_refused_export(fixture)
+    assert {number: signal.getsignal(number) for number in dispositions} == dispositions
+    assert len(validator_launches) == (0 if failure_kind.startswith("enospc") else 1)
+    if failure_kind.startswith("enospc"):
+        assert retained.stat().st_size == 23
+        if failure_kind == "enospc_global":
+            # The initially persisted fallback is sufficient even when the
+            # full volume prevents saving richer diagnostics after failure.
+            assert failure["failure"] == "export has not completed"
+        else:
+            assert "23 private staging bytes" in failure["failure"]
+    elif failure_kind == "strict_rejection":
+        assert json.loads((repeated[2] / "real-validator-result.json").read_bytes())["returncode"] != 0
+
+
+test_repeat_export_faults_keep_only_private_evidence = pytest.mark.parametrize(
+    "failure_kind", ("enospc", "enospc_global", "strict_rejection", "exit17", "before_publication",
+                     "after_publication", "changed_publication", "different_filesystem")
+)(test_repeat_export_faults_keep_only_private_evidence)
+
+
+def test_repeat_export_atomic_collision_preserves_the_other_publication(tmp_path):
+    fixture = export_failure_stream(tmp_path)
+    _, _, _, job, _, _, _, execute = fixture
+    destination = Path(job["destination"])
+    original_link = os.link
+    existing = b"another writer won exclusive publication\n"
+
+    def collide(source, target, *positional, **keywords):
+        if Path(target) == destination:
+            assert not destination.exists()
+            destination.write_bytes(existing)
+        return original_link(source, target, *positional, **keywords)
+
+    with patch.object(os, "link", collide):
+        with pytest.raises((OSError, ValueError, RuntimeError)):
+            execute()
+    assert_refused_export(fixture, existing_destination=existing)
+
+
+def wait_control_file(path, controller, timeout=20):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if path.exists():
+            return
+        done, status = os.waitpid(controller, os.WNOHANG)
+        if done:
+            raise AssertionError(f"controller exited before signal point: {os.waitstatus_to_exitcode(status)}")
+        time.sleep(0.02)
+    raise AssertionError("controller did not reach its bounded signal point")
+
+
+def wait_control_exit(controller, timeout=20):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        done, status = os.waitpid(controller, os.WNOHANG)
+        if done:
+            return os.waitstatus_to_exitcode(status)
+        time.sleep(0.02)
+    raise AssertionError("export interruption did not finish within its bound")
+
+
+def assert_group_stopped(group):
+    # A killed orphan can briefly be a zombie until the platform init reaps it;
+    # it is no longer executing. Every non-zombie group member must be absent.
+    result = subprocess.run(["ps", "-axo", "pgid=,stat="], check=True, capture_output=True, text=True)
+    active = [line for line in result.stdout.splitlines()
+              if line.split()[0] == str(group) and not line.split()[1].startswith("Z")]
+    assert not active, f"validator group still executing: {active}"
+
+
+def test_repeat_export_signals_stop_the_stream_and_validator_group(tmp_path, signal_name, phase):
+    fixture = export_failure_stream(tmp_path)
+    helper, _, _, job, _, _, _, execute = fixture
+    signum = getattr(signal, signal_name)
+    ready = tmp_path / "signal-ready.json"
+    spawned = tmp_path / "validator-spawned.json"
+    result_path = tmp_path / "controller-result.json"
+    validator = tmp_path / "sleeping-validator.py"
+    validator.write_text(
+        "# Issue 6378 offline TERM-resistant validator group.\n"
+        "import json, os, signal, time\nfrom pathlib import Path\n"
+        "signal.signal(signal.SIGTERM, signal.SIG_IGN)\n"
+        "child = os.fork()\n"
+        "if child == 0:\n"
+        "    time.sleep(60)\n    os._exit(0)\n"
+        f"Path({str(ready)!r}).write_text(json.dumps({{'pid': os.getpid(), 'child': child}}))\n"
+        "time.sleep(60)\n"
+    )
+    original_validate = helper._validate_staged
+    original_popen, original_link = subprocess.Popen, os.link
+    original_write_json, original_unlink = helper.write_json, Path.unlink
+
+    def paused_validate(command, root, environment, export, control):
+        if phase == "before_validator":
+            ready.write_text(json.dumps({"phase": phase}) + "\n")
+            deadline = time.monotonic() + 15
+            while time.monotonic() < deadline:
+                control.check()
+                time.sleep(0.01)
+            raise AssertionError("test signal never reached export controller")
+        return original_validate(command, root, environment, export, control)
+
+    def controlled_popen(command, *positional, **keywords):
+        is_export = export_command(command, job)
+        if is_export and phase in ("during_validator", "after_spawn"):
+            assert keywords.get("start_new_session") is True
+            command = [sys.executable, str(validator)]
+        child = original_popen(command, *positional, **keywords)
+        if is_export:
+            spawned.write_text(json.dumps({"pid": child.pid, "group": child.pid}) + "\n")
+            if phase == "after_spawn":
+                # Real Popen succeeded, but the caller has not assigned its
+                # returned handle yet. The handler must defer to that assignment.
+                os.kill(os.getpid(), signum)
+        return child
+
+    def controlled_link(source, target, *positional, **keywords):
+        value = original_link(source, target, *positional, **keywords)
+        if phase == "after_link" and Path(target) == Path(job["destination"]):
+            os.kill(os.getpid(), signum)
+        return value
+
+    def controlled_json(path, value):
+        original_write_json(path, value)
+        if phase == "after_manifest" and Path(path) == Path(job["manifest_path"]):
+            os.kill(os.getpid(), signum)
+
+    def controlled_unlink(path, *positional, **keywords):
+        value = original_unlink(path, *positional, **keywords)
+        if phase == "after_refusal_unlink" and path == Path(job["export_directory"]) / "failure.json":
+            # This signal is blocked by the commit checkpoint. sigpending
+            # must still force rollback and restore the reserved refusal.
+            os.kill(os.getpid(), signum)
+        return value
+
+    controller = os.fork()
+    if controller == 0:
+        dispositions = {number: signal.getsignal(number) for number in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP)}
+        result = {}
+        try:
+            with patch.object(helper, "_validate_staged", paused_validate), \
+                    patch.object(subprocess, "Popen", controlled_popen), patch.object(os, "link", controlled_link), \
+                    patch.object(helper, "write_json", controlled_json), patch.object(Path, "unlink", controlled_unlink):
+                execute()
+            result["unexpected_success"] = True
+        except BaseException as exc:
+            result.update(exception=type(exc).__name__, message=str(exc))
+        result["handlers_restored"] = all(signal.getsignal(number) == before for number, before in dispositions.items())
+        result_path.write_text(json.dumps(result, sort_keys=True) + "\n")
+        os._exit(2 if "exception" in result else 0)
+    reaped = False
+    started = time.monotonic()
+    try:
+        if phase in ("before_validator", "during_validator"):
+            wait_control_file(ready, controller)
+            if phase == "during_validator":
+                assert json.loads(ready.read_bytes())["child"] > 0
+            os.kill(controller, signum)
+        assert wait_control_exit(controller) == 2
+        reaped = True
+        assert time.monotonic() - started < 20
+        result = json.loads(result_path.read_bytes())
+        assert result["handlers_restored"] is True
+        assert "unexpected_success" not in result
+        assert_refused_export(fixture)
+        if phase in ("after_manifest", "after_refusal_unlink"):
+            assert (Path(job["export_directory"]) / "unaccepted-manifest.json").is_file()
+        if phase == "before_validator":
+            assert not spawned.exists()
+        elif spawned.exists():
+            assert_group_stopped(json.loads(spawned.read_bytes())["group"])
+    finally:
+        if spawned.exists():
+            group = json.loads(spawned.read_bytes())["group"]
+            try:
+                os.killpg(group, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        if not reaped:
+            try:
+                os.kill(controller, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            try:
+                os.waitpid(controller, 0)
+            except ChildProcessError:
+                pass
+
+
+test_repeat_export_signals_stop_the_stream_and_validator_group = pytest.mark.parametrize(
+    "signal_name,phase", [(name, phase) for name in ("SIGINT", "SIGTERM", "SIGHUP")
+                          for phase in ("before_validator", "during_validator", "after_spawn", "after_link",
+                                        "after_manifest", "after_refusal_unlink")]
+)(test_repeat_export_signals_stop_the_stream_and_validator_group)
