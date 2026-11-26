@@ -10,7 +10,7 @@ live rubric10 evaluations followed the contract exactly and are therefore
 unidentifiable from their own artifact.
 
 None of that is lost, because both files are in git. This resolves every
-evaluation to the agent version that scored it, by one of two bases:
+evaluation to its scoring rules, with an explicit provenance basis:
 
 - `recorded` — the hash is some version of the agent definition, so the
   artifact names its own instrument;
@@ -18,6 +18,9 @@ evaluation to the agent version that scored it, by one of two bases:
   agent file **as it stood in the commit that last wrote this evaluation's
   bytes** is named instead. Weaker than a recorded claim and labelled as
   such, the way #399's prompt hashes recovered from git are.
+- `recorded_composed_definition` — root-scope v6 records the composed
+  definition; reconstruct it from pinned source and override bytes before
+  accepting that digest, retaining both input identities in the manifest.
 
 Resolution is deliberately **not** by timestamp (#1100). The workflow here is
 revise the agent, re-adjudicate, commit both together, so an evaluation's
@@ -37,9 +40,11 @@ import glob
 import hashlib
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
 MANIFEST = ROOT / "tests" / "data" / "evaluation_instruments.json"
 RUBRICS = {
     "rubric10_semantic": (".claude/agents/d4d-rubric10-semantic.md",
@@ -125,6 +130,49 @@ def _agent_at(commit, agent_path):
     return hashlib.sha256(blob.stdout).hexdigest()
 
 
+def _root_scope_composition(doc, rubric, path):
+    """Recognize v6 before legacy recovery, including inconsistent v6 claims.
+
+    A marker surviving malformed identity fields must not recover a different
+    legacy agent. Composition checks the actual pinned source and override
+    bytes in this checkout, not a list of acceptable recorded digests.
+    """
+    scope = doc.get("evaluation_scope")
+    scope = scope if isinstance(scope, dict) else {}
+    scorer = doc.get("scorer_instrument")
+    scorer = scorer if isinstance(scorer, dict) else {}
+    relative = Path(path).relative_to(ROOT / "data/evaluation_llm" / rubric)
+    identities = (doc.get("instrument_id"), scorer.get("id"), *relative.parts)
+    is_v6 = (doc.get("version") == "6.0"
+             or scope.get("selection_policy") == "root_dataset_v1"
+             or any(isinstance(value, str) and value.endswith("_root-scope-v6")
+                    for value in identities))
+    if not is_v6:
+        return None
+    unresolved = {"basis": "unresolved", "instrument_kind": "composed_agent_definition",
+                  "instrument_sha256": None, "instrument_commit": None}
+    meta = doc.get("metadata")
+    units = scope.get("units")
+    if (doc.get("version") != "6.0" or doc.get("rubric") != rubric.replace("_", "-")
+            or scope.get("selection_policy") != "root_dataset_v1"
+            or scope.get("policy") != "single_dataset"
+            or not isinstance(units, list) or len(units) != 1
+            or not isinstance(units[0], dict) or units[0].get("path") != "#"
+            or not isinstance(meta, dict)
+            or meta.get("instrument_kind") not in (None, "agent_definition", "composed_agent_definition")):
+        return {**unresolved, "reason": "root-scope v6 identity or scope differs"}
+    from data_sheets_schema.root_scope_definition import compose_definition
+    try:
+        composed, provenance = compose_definition(rubric.removesuffix("_semantic"), repo_root=ROOT)
+    except (OSError, ValueError) as exc:
+        return {**unresolved, "reason": "root-scope v6 composition refused: " + str(exc)}
+    digest = hashlib.sha256(composed).hexdigest()
+    if meta.get("instrument_sha256") != digest:
+        return {**unresolved, "reason": "recorded root-scope v6 instrument digest differs from composition"}
+    return {"basis": "recorded_composed_definition", "instrument_kind": "composed_agent_definition",
+            "instrument_sha256": digest, "instrument_commit": None, "composition": provenance}
+
+
 def resolve(rubric):
     agent_path, rubric_path = RUBRICS[rubric]
     agents, texts = versions(agent_path), versions(rubric_path)
@@ -142,6 +190,10 @@ def resolve(rubric):
     for path in sorted(glob.glob(str(base / "**" / "*_evaluation.json"),
                                  recursive=True)):
         doc = json.loads(Path(path).read_text())
+        composition = _root_scope_composition(doc, rubric, path)
+        if composition is not None:
+            out[str(Path(path).resolve().relative_to(base))] = composition
+            continue
         meta = doc.get("metadata") or {}
         # The new contract's key first (#1100). Reading only `rubric_hash`
         # meant an evaluation that *obeyed* the revised contract — recording
