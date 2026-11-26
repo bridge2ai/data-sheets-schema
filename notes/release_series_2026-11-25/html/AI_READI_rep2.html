@@ -1,0 +1,741 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="datasheet-common.css">
+    <title>AI READI d4d - Datasheet for Dataset</title>
+</head>
+<body>
+    <div class="header">
+        <h1>AI READI d4d</h1>
+        <p class="subtitle">Datasheet for Dataset - Human Readable Format</p>
+    </div>
+    
+    
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🎯</span>
+                    <div>
+                        <h2 class="section-title">Motivation</h2>
+                        <p class="section-description">For what purpose was the dataset created?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Funders
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Grantor</th><th>Grant Name</th><th>Grant Number</th></tr></thead><tbody><tr><td>-</td><td>-</td><td>-</td></tr><tr><td>-</td><td>-</td><td>-</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Purposes
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Response</th></tr></thead><tbody><tr><td><div class="long-description">The dataset was created to enable future generations of artificial intelligence/machine learning (AI/ML) research to provide critical insights into type 2 diabetes mellitus (T2DM), including salutogenic pathways to return to health. The goal is to better understand salutogenesis (the pathway from disease to health) in T2DM.</div></td></tr><tr><td><div class="long-description">An additional aim of the AI-READI project is to share its blueprint for collecting and sharing AI-ready datasets so that future data generation projects can follow it.</div></td></tr></tbody></table></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📊</span>
+                    <div>
+                        <h2 class="section-title">Composition</h2>
+                        <p class="section-description">What do the instances that comprise the dataset represent?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Total File Count
+                        </label>
+                        <div class="item-value">356,343</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Instances
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>Instance Type</dt><dd>individual patient (study participant)</dd><dt>Data Topic</dt><dd>B2AI_TOPIC:43</dd><dt>Counts</dt><dd>2,280</dd><dt>Label</dt><dd>False</dd><dt>Description</dt><dd><div class="long-description">Each instance represents an individual patient and consists of all of the data available for that individual participating in the study. Multiple modalities of data are collected for each participant, including survey data, clinical data, retinal imaging data, environmental sensor data, continuous glucose monitor data and wearable activity monitor data.</div></dd><dt>Missing Information</dt><dd><ul class='formatted-list'><li><dl class='nested-dict'><dt>Missing</dt><dd><ul class='formatted-list'><li>Not all modalities are available for all participants.</li></ul></dd><dt>Why Missing</dt><dd><ul class='formatted-list'><li>Some participants elected not to participate in some study elements.</li><li><div class="long-description">In a few cases, the data collection device did not have any stored results or was returned too late to retrieve the results (for example, the battery died or data was lost).</div></li><li><div class="long-description">In a few cases, there may have been a data collision at some point in the process and data has been lost.</div></li></ul></dd></dl></li></ul></dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Subpopulations
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Distribution</th><th>Identification</th><th>Name</th><th>Subpopulation Elements Present</th></tr></thead><tbody><tr><td><div class="long-description">Hispanic 380, Asian 545, Black 519, White 836 (totals across the suggested split of 2280 participants).</div></td><td><div class="long-description">Self-reported race/ethnicity in four groups (Hispanic, Asian, Black, White). Race and ethnicity data are not released with the public version of the dataset.</div></td><td>Race/ethnicity</td><td>False</td></tr><tr><td>Male 951, Female 1329 (totals across the suggested split of 2280 participants).</td><td>Sex data are not released with the public version of the dataset.</td><td>Sex</td><td>False</td></tr><tr><td><div class="long-description">No DM 776, Lifestyle 560, Oral 686, Insulin 258 (totals across the suggested split of 2280 participants).</div></td><td><div class="long-description">Four study groups: participants who do not have Type 1 or Type 2 Diabetes (No DM); participants with pre-Type 2 Diabetes and those with Type 2 Diabetes whose blood sugar is controlled by lifestyle adjustments (Lifestyle); participants with Type 2 Diabetes whose blood sugar is controlled by oral or injectable medications other than insulin (Oral); and participants with Type 2 Diabetes whose blood sugar is controlled by insulin (Insulin).</div></td><td>Diabetes status</td><td></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Participant Privacy
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Data Linkage</th><th>Privacy Techniques</th><th>Reidentification Risk</th></tr></thead><tbody><tr><td></td><td><div class="long-description">The environmental sensor and the fitness tracker were chosen with participant privacy as a primary concern: these devices do not capture video or audio, are not equipped with GPS location monitoring and are not synced with participant-owned devices.</div></td><td></td></tr><tr><td></td><td><div class="long-description">To prevent re-identification attempts, the consortium described implementing a robust data dissemination system, a strict license agreement and data watermarking; the license states that the data may be statically watermarked to identify the licensee for security purposes.</div></td><td>The healthsheet notes a theoretical risk of future re-identification.</td></tr><tr><td><div class="long-description">The IRB protocol states that identifiers and study data will be stored separately, with a link maintained between the identifiers and the study data (for example, through the use of a code).</div></td><td><div class="long-description">The IRB protocol states that all study data and identifiable information will be kept on encrypted servers, or in locked cabinets or rooms with restricted access, at all sites.</div></td><td></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Participant Compensation
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>Compensation Provided</dt><dd>True</dd><dt>Compensation Type</dt><dd>Monetary stipend</dd><dt>Compensation Amount</dt><dd>$200</dd><dt>Description</dt><dd><div class="long-description">Study subjects received a compensation of $200 for the study visit through the grant funding. The IRB protocol describes the stipend as provided once the final data and the study devices are returned, and says the study covers reasonable costs for parking, public transit or rideshare fees related to the study visit, while transport costs above $25 may not be reimbursed.</div></dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Distribution Formats
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Format</th><th>Media Type</th></tr></thead><tbody><tr><td></td><td>application/dicom</td></tr><tr><td></td><td>text/markdown</td></tr><tr><td></td><td>text/csv</td></tr><tr><td></td><td>application/json</td></tr><tr><td>WaveForm DataBase (WFDB)</td><td></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Distribution Dates
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Release Dates</dt><dd><ul class='formatted-list'><li>2024-05-03</li><li>2024-11-08</li><li>2025-11-17</li></ul></dd><dt>Description</dt><dd><div class="long-description">The first version of the dataset was distributed in May 2024, the second version in November 2024, and the third version, which this record describes, in November 2025.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔍</span>
+                    <div>
+                        <h2 class="section-title">Collection Process</h2>
+                        <p class="section-description">How was the data associated with each instance acquired?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            ID
+                        </label>
+                        <div class="item-value"><a href="https://doi.org/10.60775/fairhub.3" target="_blank">doi:10.60775/fairhub.3</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Name
+                        </label>
+                        <div class="item-value">AI-READI dataset</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Title
+                        </label>
+                        <div class="item-value">Flagship Dataset of Type 2 Diabetes from the AI-READI Project</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Description
+                        </label>
+                        <div class="item-value"><div class="long-description">Version 3.0.0 of the AI-READI dataset, a dataset of data collected from individuals with and without type 2 diabetes mellitus (T2DM) and harmonized across 3 data collection sites. This version contains data from 2280 participants collected between July 19, 2023 and May 1, 2025. Data from multiple modalities are included: survey data, clinical data, retinal imaging data, environmental sensor data, continuous glucose monitor data and wearable activity monitor data, encompassing tabular data, imaging data and physiological signal/waveform data, with no unstructured text data. The data contain no protected health information (PHI); information related to the sex and race/ethnicity of the participants and to medication used has been removed. The dataset contains 356,343 files and is around 3.82 TB in size.</div></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Page
+                        </label>
+                        <div class="item-value"><a href="https://fairhub.io/datasets/3" target="_blank">https://fairhub.io/datasets/3</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Issued
+                        </label>
+                        <div class="item-value">2025-11-17T00:00:00Z</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Language
+                        </label>
+                        <div class="item-value">en</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Publisher
+                        </label>
+                        <div class="item-value"><a href="https://fairhub.io/" target="_blank">https://fairhub.io/</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Keywords
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li>Diabetes mellitus</li><li>Machine Learning</li><li>Artificial Intelligence</li><li>Electrocardiography</li><li>Continuous Glucose Monitoring</li><li>Retinal imaging</li><li>Eye exam</li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Conforms To
+                        </label>
+                        <div class="item-value"><div class="long-description">Clinical Dataset Structure (CDS) v0.1.1 for the organization of the dataset; per data type, the data files follow WaveForm DataBase (WFDB), the Observational Medical Outcomes Partnership (OMOP) Common Data Model (CDM), the Earth Science Data Systems (ESDS) ASCII file format, Digital Imaging and Communications in Medicine (DICOM) and Open mHealth.</div></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Conforms To Standard
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li>CDS</li><li>WFDB</li><li>OMOP_CDM</li><li>ESDS</li><li>DICOM</li><li>OPEN_MHEALTH</li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Source Caveats
+                        </label>
+                        <div class="item-value"><div class="long-description">Referent: the public release 3.0.0 of the AI-READI dataset (DOI 10.60775/fairhub.3). The bundle also holds the documentation page and FAIRhub page of release 2.0.0, two publications about the study, the NIH award page and the IRB protocol application; statements taken from those are marked as such in the entries that use them. Disagreements and gaps: (1) the dataset description gives 2023-07-19 as the start of data collection and the study start date, while the BMJ Open protocol paper says enrollment began on 18 July 2023; the dataset description is ranked higher and is the value stated. (2) The dataset description records the de-identification type as NoDeIdentification with the detail that no identifiers were collected, while the Nature Metabolism comment says the public set is stripped of PHI via the HIPAA Safe Harbor method; the dataset description is ranked higher and is what is_deidentified states. (3) Enrollment targets differ by document and are plans, not dataset figures: 4000 (BMJ Open paper, study description), 4,000+ (NIH RePORTER) and 4600 (IRB protocol application). (4) The license is named three ways: "AI-READI custom license v2.0" (dataset description), "Health Data License" (FAIRhub page) and "AI-READI Data License Agreement (Version 2.0)" (license document). (5) The healthsheet's composition answer says the dataset holds all participants enrolled "during the first year of data collection", while its versioning answers and the README say this version covers data up through the end of the second year; the version 3.0.0 documentation page says v3.0 "contains data from the participants of the pilot study phase", wording it shares with the version 2.0.0 page. (6) The record's own computation: the nine data type directories sum to 3,815,969,360,064 bytes and 356,334 files (inputs: the size and numberOfFiles of each directory), against stated totals of 3,815,969,779,678 bytes and 356,343 files; the differences are 419,614 bytes and 9 files, and nine dataset-level metadata files are listed. (7) Stated absences, for which no slot is filled: no data protection impact analysis has been conducted; the dataset has not been used for any tasks already; no repository links papers that use it; there are no limits on the retention of the data; there is no mechanism for others to extend the dataset; no labels are provided and there are no formal guidelines for creating new labels; the erratum answer is empty. (8) The citation is given only as an instruction to follow docs.aireadi.org, so the citation slot is empty.</div></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Creators
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Role</th><th>Name</th><th>ORCID</th><th>Affiliation</th></tr></thead><tbody><tr><td>Principal Investigator</td><td>Aaron Lee</td><td>ORCID:0000-0002-7452-1648</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Cecilia Lee</td><td>ORCID:0000-0003-1994-7213</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Amir Bahmani</td><td>ORCID:0000-0003-4533-9334</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Sally L. Baxter</td><td>ORCID:0000-0002-5271-7690</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Christopher G. Chute</td><td>ORCID:0000-0001-5437-2545</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Jorge Contreras</td><td>ORCID:0000-0002-7899-3060</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Nicholas Evans</td><td>ORCID:0000-0002-3330-0224</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Samantha Hurst</td><td>ORCID:0000-0001-9843-2845</td><td>-</td></tr><tr><td>Principal Investigator</td><td>T. Y. Alvin Liu</td><td>ORCID:0000-0003-2957-0755</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Gerald McGwin</td><td>ORCID:0000-0001-9592-1133</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Shannon McWeeney</td><td>ORCID:0000-0001-8333-6607</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Cynthia Owsley</td><td>ORCID:0000-0003-3424-011X</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Bhavesh Patel</td><td>ORCID:0000-0002-0307-262X</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Michael Snyder</td><td>ORCID:0000-0003-0784-7987</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Sara J. Singer</td><td>ORCID:0000-0002-3374-1177</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Linda M. Zangwill</td><td>ORCID:0000-0002-1143-5224</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Hiroshi Ishikawa</td><td>doi:10.60775/fairhub.3#person-hiroshi-ishikawa</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Camille Nebeker</td><td>doi:10.60775/fairhub.3#person-camille-nebeker</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Jeffrey C. Edberg</td><td>doi:10.60775/fairhub.3#person-jeffrey-c-edberg</td><td>-</td></tr><tr><td>Principal Investigator</td><td>Kadija Ferryman</td><td>doi:10.60775/fairhub.3#person-kadija-ferryman</td><td>-</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Maintainers
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>ROR:01yc7t268</dd><dt>Name</dt><dd>Washington University in St. Louis</dd><dt>Description</dt><dd><div class="long-description">Managing organization of the dataset in the dataset description, and the Licensor in the license agreement.</div></dd></dl></li><li><dl class='nested-dict'><dt>Name</dt><dd>AI-READI team</dd><dt>Maintainer Details</dt><dd><div class="long-description">The healthsheet states that the AI-READI team will be supporting and maintaining the dataset, which is hosted on FAIRhub through Microsoft Azure. The README directs questions, suggestions and feedback to https://aireadi.org/contact.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Research Gaps Addressed
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Response</th></tr></thead><tbody><tr><td><div class="long-description">AI-based approaches may help improve the understanding of T2DM, but a key issue is the lack of data ready for training AI models; the AI-READI dataset is intended to fill this gap.</div></td></tr><tr><td><div class="long-description">To address inherent limitations of many existing large datasets for AI/ML training, the cohort is designed to be balanced in race/ethnicity, T2DM severity and biological sex.</div></td></tr><tr><td><div class="long-description">The ability to understand and affect the course of complex, multi-organ diseases such as T2DM has been limited by a lack of well-designed, high quality and large multimodal datasets.</div></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Subsets
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Instances</th><th>Is Data Split</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">Training portion of the suggested split for training, validating and testing AI/ML models, which is included in the participants.tsv file.</div></td><td>doi:10.60775/fairhub.3#split-train</td><td>{&#x27;instance_type&#x27;: &#x27;participant&#x27;, &#x27;counts&#x27;: 1576}</td><td>True</td><td>Suggested training split</td></tr><tr><td><div class="long-description">Validation portion of the suggested split recorded in the participants.tsv file.</div></td><td>doi:10.60775/fairhub.3#split-validation</td><td>{&#x27;instance_type&#x27;: &#x27;participant&#x27;, &#x27;counts&#x27;: 352}</td><td>True</td><td>Suggested validation split</td></tr><tr><td><div class="long-description">Test portion of the suggested split recorded in the participants.tsv file.</div></td><td>doi:10.60775/fairhub.3#split-test</td><td>{&#x27;instance_type&#x27;: &#x27;participant&#x27;, &#x27;counts&#x27;: 352}</td><td>True</td><td>Suggested test split</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Splits
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Split Details</dt><dd><div class="long-description">The current version of the dataset comes with recommended data splits. Because sex, race and ethnicity data are not released with the public version of the dataset, the project team prepared data splits in proportions of 70%/15%/15% for training/validation/testing, in which the validation and test sets are balanced as well as possible for sex, race/ethnicity and diabetes status (no diabetes, prediabetes/lifestyle controlled, oral medication controlled and insulin controlled).</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Sampling Strategies
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>Sample</dt><dd>False</dd><dt>Random Sampling</dt><dd>False</dd><dt>Representative Sample</dt><dd>False</dd><dt>Why Not Representative</dt><dd><div class="long-description">Rather than targeting the demographic distribution of the US population, the study is triple-balanced by recruiting race/ethnic groups, categories of T2DM and biological males and females in equal proportions, because building balanced datasets is critical for the development of unbiased machine learning models.</div></dd><dt>Source Data</dt><dd><div class="long-description">The study base is all patients aged 40 years or older who had a medical encounter within each health system site. Recruitment pools were identified by screening electronic health records for diabetes and prediabetes ICD-10 codes.</div></dd><dt>Strategies</dt><dd><div class="long-description">Non-probability sample. Recruitment sampling procedures aimed at approximately equal distribution of participants across diabetes severity; participants are recruited in waves, and the IRB protocol describes a stratified sample of potential participants selected from the combined site lists according to the sampling scheme. Inclusion criteria: able to provide consent, 40 years old or older, persons with or without type 2 diabetes, must speak and read English. Exclusion criteria: pregnancy, gestational diabetes, Type 1 diabetes and, in the study description, adults older than 85 years of age.</div></dd><dt>Source Caveats</dt><dd><div class="long-description">The healthsheet states that the dataset contains all possible instances (all enrolled participants), which is what is_sample records; the study description gives the sampling method as Non-Probability Sample, which is what is_random records.</div></dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Collection Timeframes
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>End Date</th><th>Name</th><th>Source Caveats</th><th>Start Date</th><th>Timeframe Details</th></tr></thead><tbody><tr><td>2025-05-01</td><td>Data collection period of version 3.0.0</td><td></td><td>2023-07-19</td><td><div class="long-description">For this version of the dataset, the timeframe for data collection was July 19, 2023 to May 1, 2025.</div></td></tr><tr><td></td><td>Overall study timeline</td><td><div class="long-description">start_date is the study description&#x27;s actual start date; the BMJ Open protocol paper says enrollment began on 18 July 2023. The study description is ranked higher.</div></td><td>2023-07-19</td><td><div class="long-description">The timeline for the overall project spans four years: one year dedicated to protocol development and training, and years 2-4 allocated for subject recruitment and data collection. The study description gives an actual start date of 2023-07-19, an overall status of Enrolling by invitation and an anticipated completion date of 2027-01-01. Preliminary pilot enrollment occurred between 18 July 2023 and 30 November 2023, the formal data collection process began on 1 December 2023, and the BMJ Open protocol paper states that enrollment will continue until 30 November 2026.</div></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Collection Mechanisms
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Mechanism Details</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">REDCap is used for collecting patient-reported data from questionnaires, which participants complete online once enrolled; the IRB protocol allows them to be filled out electronically or on paper before or after the in-person visit.</div></td><td>Questionnaires in REDCap</td></tr><tr><td>A 12-lead ECG is performed with a Philips PageWriter TC30 Cardiograph.</td><td>12-lead electrocardiogram</td></tr><tr><td><div class="long-description">A standard 10 g monofilament applies pressure to different points on the plantar surface of the feet, assessing touch perception on both feet.</div></td><td>Monofilament test for peripheral neuropathy</td></tr><tr><td><div class="long-description">Research staff administer the MoCA electronically on an iPad using the MoCA Duo application, which captures the participant&#x27;s responses.</div></td><td>Montreal Cognitive Assessment (MoCA)</td></tr><tr><td><div class="long-description">Letter visual acuity is measured with the M&amp;S Technologies Electronic Visual Acuity (EVA) tester under photopic conditions and, through a neutral density filter, mesopic conditions.</div></td><td>Visual acuity testing</td></tr><tr><td><div class="long-description">The MARS Letter Contrast Sensitivity test (Perceptrix) was conducted monocularly under both photopic and mesopic conditions.</div></td><td>Contrast sensitivity testing</td></tr><tr><td><div class="long-description">Autorefraction data for each eye are obtained with a Topcon KR 800 Auto Keratometer/Refractor.</div></td><td>Autorefraction</td></tr><tr><td><div class="long-description">Blood (non-fasting; 53 mL per the BMJ Open protocol paper) and urine samples are collected from participants who consent during the visit and are used for clinical laboratory testing.</div></td><td>Blood and urine collection</td></tr><tr><td><div class="long-description">The Optomed Aurora IQ is a handheld fundus camera that takes non-mydriatic images of the ocular fundus; it is the one retinal imaging device used under undilated conditions.</div></td><td>Undilated fundus photography (Optomed Aurora)</td></tr><tr><td><div class="long-description">A custom-designed environmental sensor unit called the LeeLab Anura, custom built for the AI-READI project, is placed in the participant&#x27;s home for 10 days.</div></td><td>Home environmental sensor</td></tr><tr><td><div class="long-description">The Garmin Vivosmart 5 fitness activity tracker is worn for 10 days to measure data related to physical activity.</div></td><td>Wearable activity monitor (Garmin Vivosmart 5)</td></tr><tr><td><div class="long-description">The Dexcom G6, a real-time integrated continuous glucose monitoring system, collects blood glucose measurements (mg/dL) every 5 minutes over a 10-day period.</div></td><td>Continuous glucose monitor (Dexcom G6)</td></tr><tr><td><div class="long-description">Blood pressure devices used across the data acquisition sites are the OMRON HEM 907XL Blood Pressure Monitor, the Medline MDS4001 Automatic Digital Blood Pressure Monitor and the Welch Allyn 6000 series Vital signs monitor.</div></td><td>Blood pressure measurement</td></tr><tr><td><div class="long-description">Lensometer devices used at data acquisition sites include the NIDEK LM-600P Auto Lensometer, the Topcon CL-200 computerized Lensometer and the Topcon CL-300 computerized Lensometer.</div></td><td>Lensometry</td></tr><tr><td><div class="long-description">The iCare EIDON is a widefield TrueColor confocal fundus imaging system that can capture images up to 200 degrees.</div></td><td>Dilated fundus photography (iCare EIDON)</td></tr><tr><td><div class="long-description">Imaging with the Heidelberg Spectralis HRA+OCT is done in a dark room using the ONH-RC and PPole-H modalities and OCTA of the macula.</div></td><td>Heidelberg Spectralis HRA</td></tr><tr><td><div class="long-description">The DRI OCT Triton from Topcon Healthcare combines swept-source OCT technology with multimodal fundus imaging.</div></td><td>Topcon Triton DRI OCT</td></tr><tr><td><div class="long-description">The Maestro2 is a robotic OCT and color fundus camera system from Topcon Healthcare.</div></td><td>Topcon Maestro2 3D OCT</td></tr><tr><td><div class="long-description">FLIO imaging is done by an operator in a dark room and is performed as the last modality of an AI-READI visit.</div></td><td>Fluorescence lifetime imaging ophthalmoscopy (Heidelberg FLIO)</td></tr><tr><td><div class="long-description">The Zeiss Cirrus 5000 Angioplex is a high-definition optical coherence tomography (OCT) system.</div></td><td>Zeiss Cirrus 5000 Angioplex</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Acquisition Methods
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Acquisition Details</th><th>Was Directly Observed</th><th>Was Reported By Subjects</th><th>Was Validated Verified</th></tr></thead><tbody><tr><td>Some data were directly observable, such as labs, vitals and retinal imaging.</td><td>True</td><td></td><td></td></tr><tr><td><div class="long-description">Other data were reported by subjects, for example survey responses. Verification of data entry was performed when possible, for example by cross-referencing entered medications with medications that were physically brought in or photographed by each study participant.</div></td><td></td><td>True</td><td>True</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Data Collectors
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Collector Details</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">Data collection site in Birmingham, Alabama. Research personnel at the three data sites who recruited, enrolled and collected data underwent training by the data manager at UAB.</div></td><td>ROR:008s83205</td><td>University of Alabama at Birmingham</td></tr><tr><td>Data collection site in San Diego, California.</td><td>ROR:0168r3w48</td><td>University of California, San Diego</td></tr><tr><td>Data collection site in Seattle, Washington.</td><td>ROR:00cvxb145</td><td>University of Washington</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Direct Collection
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Is Direct</dt><dd>True</dd><dt>Collection Details</dt><dd><div class="long-description">The data was collected directly from participants across the three recruiting sites. Recruitment pools were identified by screening electronic health records for diabetes and prediabetes ICD-10 codes.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Preprocessing Strategies
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Preprocessing Details</th><th>Source Caveats</th></tr></thead><tbody><tr><td><div class="long-description">All data were mapped to standardized terminologies when possible, such as the Observational Medical Outcomes Partnership (OMOP) Common Data Model for clinical data and the Digital Imaging and Communications in Medicine (DICOM) format for retinal imaging.</div></td><td></td></tr><tr><td><div class="long-description">Images are exported from imaging devices in their raw format, and some images required conversion to a DICOM standard format before upload; the BMJ Open protocol paper&#x27;s device table lists exports in .fda and .sdt file formats converted to DICOM for the dataset.</div></td><td></td></tr><tr><td><div class="long-description">The BMJ Open protocol paper&#x27;s monitoring device table lists an export in .FIT file format converted to the mHealth standard for the dataset; in the dataset structure description, all data files of the wearable activity monitor and wearable blood glucose directories follow the Open mHealth standard.</div></td><td><div class="long-description">The device table is flattened in the extracted text, so which monitoring device the .FIT cell belongs to cannot be read from it; no device is attributed here.</div></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Cleaning Strategies
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Cleaning Details</th></tr></thead><tbody><tr><td><div class="long-description">The Data Manager at each data site is responsible for the quality control of all data before uploading to FAIRhub.</div></td></tr><tr><td><div class="long-description">Quality control at the time of data entry/acquisition: clinical data outside of expected min/max ranges were flagged in REDCap; Data Managers and clinical research coordinators examined participant records for credibility, incorrect flow through skip patterns, missing data that could be filled from other portions of the record, and omitted or duplicated records. Editing was done only under the guidance and approval of the site PI.</div></td></tr><tr><td><div class="long-description">The dataset has not undergone any formal external audits, but has been reviewed internally by AI-READI team members for quality checks and to ensure that no personally identifiable information was accidentally included.</div></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Raw Sources
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Raw Data Details</dt><dd><div class="long-description">The raw data is saved and expected to be preserved by the AI-READI project at least for the duration of the project, but is not anticipated to be shared outside the project team at present, because it has not been mapped to standardized terminologies and may accidentally include personal health information or personally identifiable information. The healthsheet notes a possibility that raw data may be included in future releases of the controlled access dataset.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Raw Data Sources
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Raw Data Format</th><th>Source Description</th></tr></thead><tbody><tr><td>.xml</td><td>ECG device data exported in raw format to local storage.</td></tr><tr><td>.csv</td><td><div class="long-description">MoCA Duo application export (total score, section subscores, Memory Index Score and task completion times).</div></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Anomalies
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Anomaly Details</th></tr></thead><tbody><tr><td>In survey data, skipped questions or incomplete responses are expected.</td></tr><tr><td><div class="long-description">With wearables, improper use and technical failure such as battery failure or system malfunction are expected.</div></td></tr><tr><td><div class="long-description">In imaging data, patient uncooperation, noise that may obscure the images, technical failure such as system malfunction, and data transfer failures are expected.</div></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Relationships
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Relationship Details</dt><dd><div class="long-description">All instances are part of the same prospective data generation project (AI-READI). There is currently only one visit per participant.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Known Biases
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Bias Description</th><th>Bias Type</th></tr></thead><tbody><tr><td><div class="long-description">Participants are volunteers, so there is selection bias known as volunteer bias, which may limit the generalizability of the results among those who are not represented in the study population.</div></td><td>selection_bias</td></tr><tr><td><div class="long-description">Recruitment was predominantly urban and hospital-based, which may not fully capture diverse cultural and socioeconomic backgrounds.</div></td><td></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Known Limitations
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Limitation Description</th><th>Limitation Type</th></tr></thead><tbody><tr><td><div class="long-description">The overall enrollment goal is a balanced distribution between groups, but enrollment is ongoing and the periodic updates to data releases may not have achieved balanced distribution across groups.</div></td><td></td></tr><tr><td><div class="long-description">The study cohort may not provide a comprehensive representation of the population, as it does not include other races/ethnicities such as Pacific Islanders and Native Americans.</div></td><td>representativeness_limitation</td></tr><tr><td><div class="long-description">Participants must speak and read English; the BMJ Open protocol paper notes that this requirement may have created challenges in recruiting Hispanic and/or Asian persons.</div></td><td></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Confidential Elements
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Confidential Elements Present</dt><dd>False</dd><dt>Confidentiality Details</dt><dd><div class="long-description">The healthsheet states that the dataset does not contain data that might be considered confidential and that no personally identifiable information is included in the dataset.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Sensitive Elements
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Sensitive Elements Present</dt><dd>False</dd><dt>Sensitivity Details</dt><dd><div class="long-description">The healthsheet states that the public dataset will not contain data that is considered sensitive; information related to the sex and race/ethnicity of the participants and to medication used has been removed from this dataset.</div></dd><dt>Source Caveats</dt><dd><div class="long-description">The healthsheet's answer is phrased in the future tense ("will not contain"); the dataset description states the removal in the present perfect.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Content Warnings
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Content Warnings Present</dt><dd>False</dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Deidentification
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Identifiable Elements Present</dt><dd>False</dd><dt>Deidentification Details</dt><dd><div class="long-description">No identifiers were collected, so no active de-identification was necessary, and it was checked that no identifiable data per US HIPAA were present in the data. Information related to the sex and race/ethnicity of the participants as well as medication used has also been removed.</div></dd><dt>Source Caveats</dt><dd><div class="long-description">The dataset description (de-identification type NoDeIdentification) is the source of the values stated. The Nature Metabolism comment instead says the public set is stripped of PHI as defined by the HIPAA Privacy Rule via the Safe Harbor method; the dataset description is ranked higher, so no method is recorded.</div></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Ethical Reviews
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Reviewing Organization</dt><dd>Institutional Review Board of the University of Washington</dd><dt>Review Details</dt><dd><div class="long-description">Approval number STUDY00016228, including reliance agreements with the IRBs of the University of Alabama at Birmingham and the University of California, San Diego. The initial approval was received on December 20, 2022; an annual renewal application to the IRB about the status and progress of the study is required.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Collection Consents
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Consent Details</dt><dd><div class="long-description">Informed consent to participate was required before participation in any part of the protocol, including questionnaires. Participants are directed to the study interface in REDCap, where they can read the consent documentation and give e-consent.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Collection Notifications
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Notification Details</dt><dd><div class="long-description">Each individual was aware of the data collection, as this was not passive data collection or secondary use of existing data, but active data collection directly from participants.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            At-Risk Populations
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>At Risk Groups Included</dt><dd>False</dd><dt>Description</dt><dd><div class="long-description">The eligibility criteria used required participants to be 40 years old or older and able to provide consent, and excluded pregnancy. The IRB protocol also answers that the research does not include minors, does not recruit or obtain data from individuals known to be prisoners, and does not include cognitively impaired adults or other adults unable to consent.</div></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Third Party Sharing
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Is Shared</dt><dd>True</dd><dt>Description</dt><dd><div class="long-description">The healthsheet states that the dataset will be distributed and be available for public use.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Intellectual Property Restrictions
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Restrictions</dt><dd><ul class='formatted-list'><li><div class="long-description">Title to the Data, and all industrial and intellectual property rights therein, remain solely and exclusively with the Licensor and its suppliers.</div></li></ul></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Regulatory Restrictions
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Regulatory Restrictions</dt><dd><ul class='formatted-list'><li><div class="long-description">Licensees agree to comply with all data security and privacy standards established by the U.S. National Institutes of Health under its Genomic Data Sharing (GDS) Policy.</div></li><li><div class="long-description">Licensees may use and store the data only on servers and devices maintained by and located within the licensee's institution or employer, or on cloud or remote storage and backup services that have a HIPAA-approved Business Associate Agreement in place with it.</div></li></ul></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Data Governance
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Access Review Process</dt><dd><div class="long-description">Access type PublicDownloadSelfAttestationRequired. Accessing the dataset requires several steps, including logging in through a verified ID system, agreeing to use the data only for type 2 diabetes related research, and agreeing to the license terms.</div></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            External Resources
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>External Resources</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">Owsley C, et al. Cross-sectional design and protocol for Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights (AI-READI). BMJ Open 2025;15:e097449.</div></td><td>doi:10.1136/bmjopen-2024-097449</td><td>Protocol publication</td></tr><tr><td><div class="long-description">AI-READI Consortium. AI-READI: rethinking AI data collection, preparation and sharing in diabetes research and beyond. Nature Metabolism, volume 6, December 2024, 2210-2212.</div></td><td>https://doi.org/10.1038/s42255-024-01165-x</td><td>Project overview publication</td></tr><tr><td><div class="long-description">Documentation of the AI-READI dataset. The dataset is self-contained but relies on the dataset documentation for users requiring additional information about its provenance. The documentation is shared under the CC-BY 4.0 license.</div></td><td>https://docs.aireadi.org/</td><td>AI-READI dataset documentation</td></tr><tr><td></td><td>https://aireadi.org/</td><td>AI-READI project website</td></tr><tr><td></td><td>https://zenodo.org/communities/aireadi</td><td>Zenodo community of the AI-READI project</td></tr><tr><td></td><td>https://github.com/AI-READI</td><td>GitHub organization of the AI-READI project</td></tr><tr><td><div class="long-description">ClinicalTrials.gov identifier NCT06002048, listed as a secondary identifier in the study description.</div></td><td>https://classic.clinicaltrials.gov/ct2/show/NCT06002048</td><td>ClinicalTrials.gov registration</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Related Datasets
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>Relationship Type</th><th>Source Caveats</th><th>Target Dataset</th></tr></thead><tbody><tr><td><div class="long-description">Version 2.0.0 of the same dataset, dated Nov 8, 2024 on FAIRhub, composed of data from the first year of the study: additional data from 863 participants for a total of 1067. Its FAIRhub page shows 2.01 TB and 165,051 files and states that this version of the dataset is no longer accessible.</div></td><td>is_new_version_of</td><td></td><td>doi:10.60775/fairhub.2</td></tr><tr><td><div class="long-description">Version 1.0.0 of the same dataset, dated May 3, 2024 on FAIRhub, composed of data from the pilot data collection phase, with data from 204 participants.</div></td><td>is_new_version_of</td><td></td><td>doi:10.60775/fairhub.1</td></tr><tr><td><div class="long-description">The BMJ Open protocol paper states that the controlled access dataset contains all data available in the publicly accessible set plus more sensitive data, available to scientists whose institutions have completed legal and privacy use agreements. The documentation says the data held under controlled access include 5-digit zip code, sex, race, ethnicity, genetic sequencing data, past health records, medications, and traffic and accident reports. The BMJ Open paper adds that the requirements for controlled access datasets were being developed by the Data Access Committee.</div></td><td>is_part_of</td><td><div class="long-description">No identifier for the controlled access dataset appears in the bundle, so the target is given by name. The healthsheet describes its contents in the future tense (&quot;will contain&quot;).</div></td><td>AI-READI controlled access dataset</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            File Collections
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Collection Type</th><th>Conforms To</th><th>Conforms To Standard</th><th>Description</th><th>File Count</th><th>ID</th><th>Name</th><th>Path</th><th>Resources</th><th>Source Caveats</th><th>Total Bytes</th></tr></thead><tbody><tr><td></td><td>WaveForm DataBase (WFDB)</td><td>WFDB</td><td><div class="long-description">This directory contains electrocardiogram data collected by a 12 lead protocol (the current standard), Holter monitor, or smartwatch. It holds ECG data collected with the Philips PageWriter TC30 device.</div></td><td>4515</td><td>doi:10.60775/fairhub.3#cardiac_ecg</td><td>cardiac_ecg</td><td>cardiac_ecg</td><td>{&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#cardiac_ecg/manifest.tsv&#x27;, &#x27;name&#x27;: &#x27;manifest.tsv&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;TSV&#x27;, &#x27;media_type&#x27;: &#x27;text/tab-separated-values&#x27;}</td><td></td><td>302931703</td></tr><tr><td></td><td>The Observational Medical Outcomes Partnership (OMOP) Common Data Model (CDM)</td><td>OMOP_CDM</td><td><div class="long-description">This directory contains clinical data collected through REDCap, including blood/urine lab values and survey data. Each CSV file in this directory is a one-to-one mapping to the OMOP CDM tables.</div></td><td>7</td><td>doi:10.60775/fairhub.3#clinical_data</td><td>clinical_data</td><td>clinical_data</td><td>{&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#clinical_data/dqd_omop.json&#x27;, &#x27;name&#x27;: &#x27;dqd_omop.json&#x27;, &#x27;description&#x27;: &#x27;Supports OMOP CDM data quality analysis using the OMOP CDM Data Quality Dashboard (DQD).&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;JSON&#x27;, &#x27;media_type&#x27;: &#x27;application/json&#x27;}</td><td></td><td>176182781</td></tr><tr><td></td><td>ASCII File Format Guidelines for Earth Science Data</td><td>ESDS</td><td><div class="long-description">This directory contains data collected through an environmental sensor device custom built for the AI-READI project.</div></td><td>2232</td><td>doi:10.60775/fairhub.3#environment</td><td>environment</td><td>environment</td><td>{&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#environment/manifest.tsv&#x27;, &#x27;name&#x27;: &#x27;manifest.tsv&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;TSV&#x27;, &#x27;media_type&#x27;: &#x27;text/tab-separated-values&#x27;}</td><td></td><td>55625676514</td></tr><tr><td></td><td>Digital Imaging and Communications in Medicine (DICOM)</td><td>DICOM</td><td><div class="long-description">This directory contains data collected through fluorescence lifetime imaging ophthalmoscopy (FLIO), an imaging modality for in vivo measurement of lifetimes of endogenous retinal fluorophores.</div></td><td>7969</td><td>doi:10.60775/fairhub.3#retinal_flio</td><td>retinal_flio</td><td>retinal_flio</td><td>{&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#retinal_flio/manifest.tsv&#x27;, &#x27;name&#x27;: &#x27;manifest.tsv&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;TSV&#x27;, &#x27;media_type&#x27;: &#x27;text/tab-separated-values&#x27;}</td><td></td><td>1069466876718</td></tr><tr><td></td><td>Digital Imaging and Communications in Medicine (DICOM)</td><td>DICOM</td><td><div class="long-description">This directory contains data collected using optical coherence tomography (OCT), an imaging method using lasers that is used for mapping subsurface structure.</div></td><td>56478</td><td>doi:10.60775/fairhub.3#retinal_oct</td><td>retinal_oct</td><td>retinal_oct</td><td>{&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#retinal_oct/manifest.tsv&#x27;, &#x27;name&#x27;: &#x27;manifest.tsv&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;TSV&#x27;, &#x27;media_type&#x27;: &#x27;text/tab-separated-values&#x27;}</td><td></td><td>1317625293027</td></tr><tr><td></td><td>Digital Imaging and Communications in Medicine (DICOM)</td><td>DICOM</td><td><div class="long-description">This directory contains data collected using optical coherence tomography angiography (OCTA), a non-invasive imaging technique that generates volumetric angiography images.</div></td><td>173721</td><td>doi:10.60775/fairhub.3#retinal_octa</td><td>retinal_octa</td><td>retinal_octa</td><td>{&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#retinal_octa/manifest.tsv&#x27;, &#x27;name&#x27;: &#x27;manifest.tsv&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;TSV&#x27;, &#x27;media_type&#x27;: &#x27;text/tab-separated-values&#x27;}</td><td></td><td>1155908809724</td></tr><tr><td></td><td>Digital Imaging and Communications in Medicine (DICOM)</td><td>DICOM</td><td><div class="long-description">This directory contains retinal photography data, which are 2D images. They are also referred to as fundus photography.</div></td><td>93921</td><td>doi:10.60775/fairhub.3#retinal_photography</td><td>retinal_photography</td><td>retinal_photography</td><td>{&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#retinal_photography/manifest.tsv&#x27;, &#x27;name&#x27;: &#x27;manifest.tsv&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;TSV&#x27;, &#x27;media_type&#x27;: &#x27;text/tab-separated-values&#x27;}</td><td></td><td>174381046406</td></tr><tr><td></td><td>Open mHealth</td><td>OPEN_MHEALTH</td><td><div class="long-description">This directory contains data collected through a wearable fitness tracker.</div></td><td>15245</td><td>doi:10.60775/fairhub.3#wearable_activity_monitor</td><td>wearable_activity_monitor</td><td>wearable_activity_monitor</td><td>{&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#wearable_activity_monitor/manifest.tsv&#x27;, &#x27;name&#x27;: &#x27;manifest.tsv&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;TSV&#x27;, &#x27;media_type&#x27;: &#x27;text/tab-separated-values&#x27;}</td><td></td><td>38313536220</td></tr><tr><td></td><td>Open mHealth</td><td>OPEN_MHEALTH</td><td><div class="long-description">This directory contains data collected through a continuous glucose monitoring (CGM) device.</div></td><td>2246</td><td>doi:10.60775/fairhub.3#wearable_blood_glucose</td><td>wearable_blood_glucose</td><td>wearable_blood_glucose</td><td>{&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#wearable_blood_glucose/manifest.tsv&#x27;, &#x27;name&#x27;: &#x27;manifest.tsv&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;TSV&#x27;, &#x27;media_type&#x27;: &#x27;text/tab-separated-values&#x27;}</td><td></td><td>4169006971</td></tr><tr><td>metadata</td><td></td><td></td><td><div class="long-description">Metadata files listed at the dataset level of the dataset structure description, each described as a metadata file based on the Clinical Dataset Structure (CDS).</div></td><td>9</td><td>doi:10.60775/fairhub.3#dataset-level-metadata</td><td>Dataset-level metadata files</td><td></td><td>{&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#CHANGELOG.md&#x27;, &#x27;name&#x27;: &#x27;CHANGELOG.md&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;MD&#x27;, &#x27;media_type&#x27;: &#x27;text/markdown&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#dataset_description.json&#x27;, &#x27;name&#x27;: &#x27;dataset_description.json&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;JSON&#x27;, &#x27;media_type&#x27;: &#x27;application/json&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#dataset_structure_description.json&#x27;, &#x27;name&#x27;: &#x27;dataset_structure_description.json&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;JSON&#x27;, &#x27;media_type&#x27;: &#x27;application/json&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#healthsheet.md&#x27;, &#x27;name&#x27;: &#x27;healthsheet.md&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;MD&#x27;, &#x27;media_type&#x27;: &#x27;text/markdown&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#LICENSE.txt&#x27;, &#x27;name&#x27;: &#x27;LICENSE.txt&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;TXT&#x27;, &#x27;media_type&#x27;: &#x27;text/plain&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#participants.json&#x27;, &#x27;name&#x27;: &#x27;participants.json&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;JSON&#x27;, &#x27;media_type&#x27;: &#x27;application/json&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#participants.tsv&#x27;, &#x27;name&#x27;: &#x27;participants.tsv&#x27;, &#x27;description&#x27;: &#x27;Includes the suggested split for training, validating and testing AI/ML models.&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;TSV&#x27;, &#x27;media_type&#x27;: &#x27;text/tab-separated-values&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#README.md&#x27;, &#x27;name&#x27;: &#x27;README.md&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;MD&#x27;, &#x27;media_type&#x27;: &#x27;text/markdown&#x27;}, {&#x27;id&#x27;: &#x27;doi:10.60775/fairhub.3#study_description.json&#x27;, &#x27;name&#x27;: &#x27;study_description.json&#x27;, &#x27;file_type&#x27;: &#x27;metadata_file&#x27;, &#x27;format&#x27;: &#x27;JSON&#x27;, &#x27;media_type&#x27;: &#x27;application/json&#x27;}</td><td><div class="long-description">file_count is the record&#x27;s own count of the nine files listed in the dataset-level metadataFileList (CHANGELOG.md, dataset_description.json, dataset_structure_description.json, healthsheet.md, LICENSE.txt, participants.json, participants.tsv, README.md, study_description.json); no source states the figure. No directory size is stated for these files.</div></td><td></td></tr></tbody></table></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🚀</span>
+                    <div>
+                        <h2 class="section-title">Uses</h2>
+                        <p class="section-description">Has the dataset been used for any tasks already?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Tasks
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Response</dt><dd><div class="long-description">The multimodal dataset is being gathered to facilitate downstream pseudotime manifold analysis, an approach used to predict disease trajectories, and various applications in artificial intelligence.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            License and Use Terms
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Data Use Permission</dt><dd><ul class='formatted-list'><li>disease_specific_research</li></ul></dd><dt>License Terms</dt><dd><div class="long-description">The dataset is licensed under a custom license (AI-READI Data License Agreement, Version 2.0, available at https://doi.org/10.5281/zenodo.17555036) tailored to enable reuse of the AI-READI dataset for commercial or research purposes while putting strong requirements around data usage, security and secondary sharing to protect study participants. The Licensor grants a non-exclusive and non-transferable license to download, reproduce and use the Data, and to create derivative works of the Data. The public version of the dataset can only be used for type 2 diabetes related research.</div></dd><dt>Description</dt><dd><div class="long-description">The Licensor named in the license agreement is Washington University in St. Louis.</div></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Intended Uses
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>Use Category</th></tr></thead><tbody><tr><td><div class="long-description">Type 2 diabetes related research: accessing the public version of the dataset requires agreeing to use the data only for type 2 diabetes related research.</div></td><td>research</td></tr><tr><td><div class="long-description">Future creation of artificial intelligence/machine learning (AI/ML) algorithms aimed at defining disease trajectories, which the study description gives as the purpose of the data generation.</div></td><td></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Prohibited Uses
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>Prohibition Reason</th></tr></thead><tbody><tr><td><div class="long-description">Making clinical treatment decisions based on the Data.</div></td><td>The Data is intended solely as a research resource.</td></tr><tr><td><div class="long-description">Using the Data, alone or in concert with other information, to compromise or otherwise infringe the confidentiality of information about an individual person who is the source of any Data.</div></td><td></td></tr><tr><td><div class="long-description">Using the Data to invade or compromise the privacy of any Data Subject.</div></td><td></td></tr><tr><td><div class="long-description">Attempting to identify or contact any Data Subject or group of Data Subjects.</div></td><td></td></tr><tr><td><div class="long-description">Extracting or extrapolating any identifying information about a Data Subject.</div></td><td></td></tr><tr><td><div class="long-description">Establishing a Data Subject&#x27;s membership in a particular group of persons.</div></td><td></td></tr><tr><td><div class="long-description">Otherwise causing harm or injury to any Data Subject.</div></td><td></td></tr><tr><td><div class="long-description">Transferring, licensing, sublicensing, selling, assigning, displaying, sharing or otherwise conveying any portion of the Data or any derivative work to any third party other than another licensee bound by identical terms.</div></td><td></td></tr><tr><td><div class="long-description">Sharing or distributing Data with any third party model vendor or developer for training or development purposes.</div></td><td></td></tr><tr><td><div class="long-description">Reproducing Data in papers, articles, presentations, analyses, reports or publications, except for small representative samples in up to five images or figures per paper for illustrative purposes.</div></td><td></td></tr><tr><td><div class="long-description">Removing, obscuring, altering or masking the watermarking of the Data.</div></td><td></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Future Use Impacts
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Role</th><th>Name</th><th>ORCID</th><th>Affiliation</th></tr></thead><tbody><tr><td>Contributor</td><td></td><td>-</td><td>-</td></tr></tbody></table></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📤</span>
+                    <div>
+                        <h2 class="section-title">Distribution</h2>
+                        <p class="section-description">Will the dataset be distributed to third parties outside of the entity on behalf of which it was created?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            DOI
+                        </label>
+                        <div class="item-value">10.60775/fairhub.3</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            License
+                        </label>
+                        <div class="item-value">AI-READI custom license v2.0</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Total Size Bytes
+                        </label>
+                        <div class="item-value">3,815,969,779,678</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Version Access
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Latest Version DOI</dt><dd><a href="https://doi.org/10.60775/fairhub.3" target="_blank">doi:10.60775/fairhub.3</a></dd><dt>Versions Available</dt><dd><ul class='formatted-list'><li>3.0.0</li></ul></dd><dt>Version Details</dt><dd><div class="long-description">The Nature Metabolism comment of 2024 says each version is accessible through FAIRhub; the documentation of version 2.0.0, however, states that that version is no longer accessible and refers to version 3.0.0 as the latest. In this version the Snellen visual acuity variables were dropped, so that only logMAR visual acuity measurements are available.</div></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔄</span>
+                    <div>
+                        <h2 class="section-title">Maintenance</h2>
+                        <p class="section-description">Who will be supporting, hosting, or maintaining the dataset?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Version
+                        </label>
+                        <div class="item-value">3.0.0</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Updates
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Frequency</dt><dd>Approximately once a year</dd><dt>Update Details</dt><dd><div class="long-description">The dataset is released as static versions and will not be updated. New versions of the dataset will be released with additional instances as more study participants complete the study visit; this is the third version and consists of data collected up through the end of the second year of the study.</div></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">👥</span>
+                    <div>
+                        <h2 class="section-title">Human Subjects</h2>
+                        <p class="section-description">Does the dataset relate to people?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Human Subject Research
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Involves Human Subjects</dt><dd>True</dd><dt>Ethics Review Board</dt><dd>Institutional Review Board of the University of Washington</dd><dt>IRB Approval</dt><dd><ul class='formatted-list'><li><div class="long-description">Approved by the Institutional Review Board of the University of Washington (approval number STUDY00016228); the initial IRB approval was received on December 20, 2022.</div></li></ul></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Informed Consent
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>Consent Obtained</dt><dd>True</dd><dt>Consent Type</dt><dd>Written informed consent, given electronically (e-consent) or in person.</dd><dt>Consent Documentation</dt><dd><div class="long-description">Potential participants could read all consent documentation electronically in REDCap before their visit and give their consent with an electronic signature; for most participants informed consent is performed remotely by computer, tablet or smart phone, and otherwise in person at the start of the visit.</div></dd><dt>Consent Scope</dt><dd><div class="long-description">The IRB protocol states that consent is obtained from subjects for secondary use, banking and future sharing, with language included in the consent form.</div></dd><dt>Withdrawal Mechanism</dt><dd><div class="long-description">Participants were permitted to withdraw consent at any time and cease study participation.</div></dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Consent Revocations
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Revocation Details</dt><dd><div class="long-description">Participants were permitted to withdraw consent at any time, but any data that had been shared or used up to that point would stay in the dataset. In the IRB protocol, subjects are not able to withdraw their data or specimens from secondary use, banking or sharing.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+    
+    
+    
+    <div class="section">
+        <div class="section-header">How this datasheet was generated</div>
+        <div class="section-content">
+            <p>This record was produced by an automated pipeline. The fields
+            below come from its provenance record, which is kept as a separate
+            file because embedding it would not validate against the schema.</p>
+            <table class="provenance">
+            
+                <tr><th>Generated</th><td>2026-11-25T06:43:39+00:00</td></tr>
+            
+                <tr><th>Run label</th><td>2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2</td></tr>
+            
+                <tr><th>Provenance mode</th><td>live</td></tr>
+            
+                <tr><th>Model</th><td>claude-fable-5-2</td></tr>
+            
+                <tr><th>Runtime</th><td>Claude Code (release)</td></tr>
+            
+                <tr><th>Provider</th><td>Anthropic</td></tr>
+            
+                <tr><th>Reasoning effort</th><td>high</td></tr>
+            
+                <tr><th>Input bundle</th><td>data/preprocessed/concatenated/AI_READI_preprocessed.txt</td></tr>
+            
+                <tr><th>Input bundle md5</th><td>1a58ad7be37d4b08ebd9d94e6ad173a3</td></tr>
+            
+                <tr><th>Source manifest</th><td>data/preprocessed/source_manifest.yaml</td></tr>
+            
+                <tr><th>Schema digest</th><td>c807b62f37e927c5d49addf273957a34</td></tr>
+            
+                <tr><th>Prompt files</th><td>src/download/prompts/d4d_generic_arm_prompt_v9.md</td></tr>
+            
+                <tr><th>Validated</th><td>True</td></tr>
+            
+                <tr><th>Provenance record</th><td>data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2/AI_READI_provenance.yaml</td></tr>
+            
+            </table>
+            
+            <p><strong>Recorded but not observed.</strong> The run states these
+            values and nothing measured them, so they are reported rather than
+            relied on:</p>
+            <ul>
+            
+                <li><code>inputs.bundle_md5</code> — the selected file was hashed, but no admitted matching bundle digest establishes the bytes consumed; absolute input paths alone are not byte evidence; this recorder does not consult usage ledgers or progress journals</li>
+            
+                <li><code>inputs.chunks.sha256</code> — the selected chunk manifest matches the caller's bundle, but its earlier bytes and consumption by the run are not independently verified</li>
+            
+                <li><code>inputs.source_manifest.md5</code> — the caller-selected source manifest was hashed; the bytes consumed by the run are not independently verified</li>
+            
+                <li><code>model.temperature</code> — the header declares that the native runtime's temperature was not observed; neither a prompt example nor the shared API configuration supplies an observed setting</li>
+            
+                <li><code>model.reasoning_effort</code> — supplied on the command line; neither the record header nor the model route carries it, so nothing here observed it</li>
+            
+            </ul>
+            
+        </div>
+    </div>
+    
+
+    <div class="timestamp">
+        Generated on 2026-11-25 17:32:42 using Datasheets for Datasets
+    </div>
+</body>
+</html>
