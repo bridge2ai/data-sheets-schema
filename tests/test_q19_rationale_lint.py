@@ -1827,6 +1827,9 @@ def test_every_empty_slot_reason_in_the_committed_ratings_is_said_to_be_empty():
     was_derived_from in a list whose emptiness a neighbouring clause states,
     the eleventh hand-read entry above. Extended 2026-11-26: 15 root-scope
     v6 ratings make 163; the 89 reasons and eleven lists are unchanged.
+    The second v6 series adds 13 ratings: 176 ratings, 90 mechanical reasons,
+    and eleven lists. The added reason is a disclaimer the unchanged linter
+    misreads, documented in notes/q19_root_scope_v6_22b_corpus_20261126.md.
     The module docstring's figures describe the historical 2026-09-30
     measurement (133 ratings, 88 reasons, ten neighboring lists)."""
     listed = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z", "data/evaluation_llm"],
@@ -1834,13 +1837,13 @@ def test_every_empty_slot_reason_in_the_committed_ratings_is_said_to_be_empty():
     ratings = [ROOT / f for f in listed if f.endswith("_evaluation.json")
                and json.loads((ROOT / f).read_text(encoding="utf-8")).get("rubric")
                == "rubric20-semantic"]
-    assert len(ratings) == 163
+    assert len(ratings) == 176
     empty = re.compile(r"\b(?:empty|absent|unpopulated|unused|no|not|none|nor|neither|lacks?"
                        r"|lacking|missing|without|null)\b", re.I)
     base = ROOT / "data/evaluation_llm/rubric20_semantic"
     reasons = [(path.relative_to(base).as_posix(), r) for path in ratings
                for r in lint_file(path).reasons if r.concern == "empty_slot"]
-    assert len(reasons) == 89
+    assert len(reasons) == 90
     elsewhere = {(path, r.clause): r.sentence for path, r in reasons if not empty.search(r.clause)}
     assert set(elsewhere) == set(_EMPTY_IN_A_NEIGHBOURING_CLAUSE)
     for key, said in _EMPTY_IN_A_NEIGHBOURING_CLAUSE.items():
@@ -2297,6 +2300,11 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     the 122 the #3831 blind second reading covers. The 155 read sentences and
     their classes were unchanged. Extended 2026-11-26: see the root-scope
     measurement note; 26 marked sentences and two bare pointers are added.
+    The second v6 series adds 25 outside sentences: 23 marked, one placement,
+    and one request. Cumulative counts are 176 ratings, 124 Q19 slot
+    sentences (two unmarked), 1184 outside sentences (898 marked), 128
+    recommendations, and 158 other unmarked sentences. The two dated v6
+    notes record the manual readings separately from the blind packet.
     The module docstring's figures remain the historical 2026-09-30
     measurement; the current dated extension is measured here."""
     from data_sheets_schema import q19_rationale_lint as lint
@@ -2311,10 +2319,10 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
                 continue
     slot = lint.REPRESENTATION_CONCERNS["empty_slot"]
     ratings = [d for d in documents if isinstance(d, dict) and d.get("rubric") == "rubric20-semantic"]
-    assert len(ratings) == 163
+    assert len(ratings) == 176
     q19 = [s for d in ratings for _, s in lint._sentences(q19_item(d)) if slot.search(s)]
     unmarked = [s for s in q19 if not lint._EMPTINESS.search(s)]
-    assert (len(q19), len(unmarked)) == (123, 2)
+    assert (len(q19), len(unmarked)) == (124, 2)
     assert all("was_derived_from" in s and ("explicit rather than implied" in s or "populated" in s)
                for s in unmarked)
 
@@ -2340,15 +2348,16 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     marked = [s for s in outside if lint._EMPTINESS.search(s)]
     rest = [s for s in outside if not lint._EMPTINESS.search(s)]
     recommendations = [s for s in rest if recommendation.match(s)]
-    assert (len(outside), len(marked), len(recommendations)) == (1159, 875, 127)
+    assert (len(outside), len(marked), len(recommendations)) == (1184, 898, 128)
     read = [s for s in rest if not recommendation.match(s)]
-    assert len(read) == 157
-    # The regex sorts by the first word only; the 127 (122 of 2026-09-30 and
-    # five of 2026-11-22) are read by hand like the historical 155; each is
+    assert len(read) == 158
+    # The regex sorts by the first word only; the 128 (the historical 122,
+    # five of 2026-11-22, one from the second v6 series) are read manually, each
     # pinned by one fragment to one class (#3747). The five are pinned in
     # `_RECOMMENDATIONS_READ_2026_11_22`; no blind second reading covers them.
     sorted_ = {}
-    for pins in (_RECOMMENDATIONS_READ, _RECOMMENDATIONS_READ_2026_11_22):
+    for pins in (_RECOMMENDATIONS_READ, _RECOMMENDATIONS_READ_2026_11_22,
+                 _RECOMMENDATIONS_READ_2026_11_26_22B):
         for kind, fragments in pins.items():
             for fragment in fragments:
                 hits = _pinned(fragment, recommendations)
@@ -2357,7 +2366,7 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
                 sorted_[hits[0]] = kind
     assert set(sorted_) == set(recommendations)
     assert Counter(sorted_.values()) == {"named_absence": 1, "placement": 63, "criticism": 18,
-                                         "request": 45}
+                                         "request": 46}
     # The 64 misses are misses: in a Q19 note the gate reads none of them
     # as an empty-slot reason, as on main.
     for sentence, kind in sorted_.items():
@@ -2371,7 +2380,7 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
         assert len(hits) == 1, fragment
         classified += hits
         misses += hits
-    for fragment in _UNRECOGNISED_PLACEMENTS:
+    for fragment in _UNRECOGNISED_PLACEMENTS + _UNRECOGNISED_PLACEMENTS_2026_11_26_22B:
         hits = [s for s in read if fragment in s]
         assert len(hits) == 1, fragment
         classified += hits
@@ -2384,17 +2393,18 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
             classified += hits
             if kind == "unrecognised_absence":
                 misses += hits
-    assert len(set(classified)) == len(classified) == 48
-    assert len(set(misses)) == len(misses) == 31
-    # 109 left are credit: 157 less the 11, 18 and 19 pinned above (#3838).
+    assert len(set(classified)) == len(classified) == 49
+    assert len(set(misses)) == len(misses) == 32
+    # 109 left are credit: 158 less the 11, 19 and 19 pinned above (#3838).
     assert len(read) - len(classified) == 109
-    # These are the historical counts plus the dated bare-name extension;
+    # These are the historical counts plus the dated placement/bare-name extensions;
     # moving a pin to another class fails as a recommendation's does above.
-    assert (len(_UNRECOGNISED_NAMED_ABSENCES), len(_UNRECOGNISED_PLACEMENTS)) == (11, 18)
+    assert (len(_UNRECOGNISED_NAMED_ABSENCES),
+            len(_UNRECOGNISED_PLACEMENTS) + len(_UNRECOGNISED_PLACEMENTS_2026_11_26_22B)) == (11, 19)
     assert {kind: len(fragments) for kind, fragments in _hand_read_not_credit_with_extensions().items()} == {
         "unrecognised_absence": 2, "count": 2, "criticism": 5, "qualification": 4,
         "bare_name": 4, "criterion": 2}
-    # The 31 misses are misses: the gate reads none of them — the named
+    # The 32 misses are misses: the gate reads none of them — the named
     # absences, the placements or the unrecognised absences — as an
     # empty-slot reason, as it reads none of the 64 above; it reads
     # `_EMPTINESS` words only, as on main (#3872).
@@ -2425,3 +2435,19 @@ _HAND_READ_NOT_CREDIT_2026_11_26 = {
 def _hand_read_not_credit_with_extensions():
     return {kind: fragments + _HAND_READ_NOT_CREDIT_2026_11_26.get(kind, [])
             for kind, fragments in _HAND_READ_NOT_CREDIT.items()}
+
+
+# Second v6 series, read 2026-11-26; historical and first-series pins stay
+# unchanged. See notes/q19_root_scope_v6_22b_corpus_20261126.md.
+_UNRECOGNISED_PLACEMENTS_2026_11_26_22B = [
+    "Explicit platform access instructions, release changes, acquisition methods, "
+    "research objectives, raw-source derivation, and hosting information were credited "
+    "in their actual populated fields rather than requiring duplicate dedicated fields.",
+]
+_RECOMMENDATIONS_READ_2026_11_26_22B = {
+    "request": [
+        "Provide complete textual or structured derivation chains for each modality, "
+        "including raw-source/device associations, transformation activities, "
+        "responsible agents and resulting release entities.",
+    ],
+}
