@@ -8,6 +8,7 @@ private manifests. Execution requires separate authorization; never resume a run
 from __future__ import annotations
 
 import argparse
+from datetime import datetime
 import hashlib
 import importlib.util
 import json
@@ -239,7 +240,7 @@ def _verify_baseline(job):
 
 def _manifest_value(job, receipt, raw):
     plan = job["plan"]
-    return {"status": "EXPORTED_VALIDATED_REPEAT", "source_head": SCORER_HEAD,
+    result = {"status": "EXPORTED_VALIDATED_REPEAT", "source_head": SCORER_HEAD,
             "orchestration": _orchestration(),
             "scoring_replicate": job["scoring_replicate"], "generation_replicate": job["generation_replicate"],
             "identity": plan["identity"], "baseline_plan": job["baseline_plan_path"],
@@ -255,6 +256,104 @@ def _manifest_value(job, receipt, raw):
             "prompt_sha256": plan["prompt_sha256"], "prompt_equals_run1": True,
             "log_root": plan["run_directory"], "session_logs": receipt["evaluation_model"]["session_logs"],
             "copy_validator_exit": 0}
+    if job.get("attempt") == 2:
+        _verify_refused_attempt(job, before_run=False)
+        refused = job["refused_attempt"]
+        claim = read_json(job["replacement_record"])
+        require(receipt.get("authorization_reference") == claim["authorization_reference"],
+                "replacement receipt authorization differs from its exclusive claim")
+        result.update(attempt=2,
+                      refused_attempt_receipt={"path": refused["receipt_path"], "sha256": refused["receipt_sha256"]},
+                      refused_attempt_plan={"path": refused["plan_path"], "sha256": refused["plan_sha256"]},
+                      replacement_record={"path": job["replacement_record"],
+                                          "sha256": sha(read_bytes(job["replacement_record"]))})
+    return result
+
+
+def _replacement_options(args):
+    replacement = getattr(args, "replacement_attempt", False)
+    reference = getattr(args, "replacement_authorization_reference", None)
+    if replacement:
+        require(all(getattr(args, key, None) is not None for key in
+                    ("generation_replicate", "scoring_replicate", "project", "rubric")),
+                "replacement requires one fully named cell")
+        require(not args.accepted_canary and not args.authorization_reference,
+                "replacement cannot use the batch canary or batch authorization argument")
+    else:
+        require(reference is None, "replacement authorization requires replacement mode")
+    return replacement
+
+
+def _replacement_claim(job, reference):
+    return {"attempt": 2, "authorization_reference": reference,
+            "source_head": SCORER_HEAD, "orchestration": job["orchestration"],
+            "plan_sha256": plan_digest(job["plan"]), "run_directory": job["plan"]["run_directory"],
+            "export_directory": job["export_directory"], "destination": job["destination"],
+            "refused_attempt": job["refused_attempt"]}
+
+
+def _verify_refused_attempt(job, before_run=True):
+    """Read refusal metadata only; never inspect a refused output or transcript."""
+    require(job.get("attempt") == 2 and not job["skip"], "expected one replacement attempt 2")
+    plan, refused = job["plan"], job["refused_attempt"]
+    identity = plan["identity"]
+    base_id = (f"scoring_rep{job['scoring_replicate']}__{identity['label']}__"
+               f"{identity['project']}__{identity['rubric'].removesuffix('-semantic')}")
+    require(job["id"] == base_id + "__attempt2", "replacement attempt number or cell differs")
+    run = physical(plan["run_directory"])
+    runs = run.parent
+    first = physical(refused["run_directory"])
+    require(first == runs / base_id and run == runs / job["id"], "replacement must stay beside refused attempt 1")
+    require(first.is_dir(), "refused attempt 1 is missing")
+    require(physical(job["export_directory"]) == runs / "export-manifests" / job["id"]
+            and physical(job["manifest_path"]) == physical(job["export_directory"]) / "manifest.json",
+            "replacement export path differs")
+    claim = physical(job["replacement_record"])
+    require(claim == runs / "replacement-attempts" / (job["id"] + ".json"), "replacement claim path differs")
+    for kind in ("plan", "receipt"):
+        path = physical(refused[kind + "_path"])
+        require(path == first / (kind + ".json") and sha(read_bytes(path)) == refused[kind + "_sha256"],
+                "refused attempt evidence changed")
+    original = read_json(refused["plan_path"])
+    receipt = read_json(refused["receipt_path"])
+    require(receipt.get("status") == "REFUSED", "attempt 1 is not a completed refusal")
+    require(receipt.get("plan_sha256") == plan_digest(original), "refused receipt binds another plan")
+    require(receipt.get("auth_copy_absent") is True and not (first / "codex-home/auth.json").exists(),
+            "refused attempt authentication cleanup is unproven")
+    timestamps = []
+    for field in ("started_utc", "finished_utc"):
+        require(isinstance(receipt.get(field), str), "refused attempt has no completion timestamps")
+        value = datetime.fromisoformat(receipt[field])
+        require(value.tzinfo is not None, "refused attempt timestamp has no timezone")
+        timestamps.append(value)
+    require(timestamps[1] >= timestamps[0], "refused attempt timestamps differ")
+    require(isinstance(receipt.get("authorization_reference"), str)
+            and receipt["authorization_reference"].strip(), "refused attempt has no authorization reference")
+    require(not receipt.get("output") and not receipt.get("output_sha256"), "refused attempt claims a publication")
+    require(physical(original["run_directory"]) == first
+            and physical(original["working_directory"]) == first / "working"
+            and physical(original["codex_home"]) == first / "codex-home"
+            and physical(original["repo_root"]) == physical(plan["repo_root"])
+            and physical(original["runner"]) == physical(plan["runner"])
+            and physical(original["output"]) == physical(plan["output"]),
+            "refused plan paths differ from this cell")
+    require(not (runs / "export-manifests" / base_id / "manifest.json").exists(),
+            "attempt 1 has an export manifest")
+    verify_plan_identity(plan, original)
+    _verify_baseline(job)
+    if before_run:
+        require(not physical(plan["output"]).exists() and not physical(job["destination"]).exists(),
+                "replacement cell already has a published output")
+        require(not run.exists() and not physical(job["export_directory"]).exists() and not claim.exists(),
+                "replacement attempt 2 was already claimed; never make a third attempt")
+    else:
+        record = read_json(claim)
+        reference = record.get("authorization_reference")
+        require(isinstance(reference, str) and reference.strip()
+                and reference.strip() != receipt["authorization_reference"].strip(),
+                "replacement claim lacks distinct authorization")
+        require(record == _replacement_claim(job, reference), "replacement claim differs from this attempt")
+    return receipt
 
 
 def _verified_skip(job, manifest_path):
@@ -273,6 +372,7 @@ def _verified_skip(job, manifest_path):
 
 
 def build_batch(args):
+    replacement = _replacement_options(args)
     roots = {rep: physical(getattr(args, f"scoring_root_{rep}")) for rep in (2, 3)}
     require(roots[2] != roots[3], "scoring replicates require distinct checkouts")
     for root in roots.values():
@@ -298,7 +398,8 @@ def build_batch(args):
             if not selected and not skip:
                 continue
             label = LABEL_PREFIX + str(generation_rep)
-            job_id = f"scoring_rep{scoring_rep}__{label}__{project}__{family}"
+            base_id = f"scoring_rep{scoring_rep}__{label}__{project}__{family}"
+            job_id = base_id + "__attempt2" if replacement else base_id
             run = physical(runs / job_id)
             export = physical(runs / "export-manifests" / job_id)
             argv = ["--repo-root", str(root), "--method-directory", METHOD, "--label", label,
@@ -330,6 +431,16 @@ def build_batch(args):
                    "destination": str(_destination(publication, scoring_rep, plan["identity"])),
                    "export_directory": str(export), "manifest_path": str(export / "manifest.json"), "skip": skip,
                    "orchestration": orchestration}
+            if replacement:
+                first = physical(runs / base_id)
+                binding = {"run_directory": str(first)}
+                for kind in ("plan", "receipt"):
+                    path = first / (kind + ".json")
+                    binding[kind + "_path"] = str(path)
+                    binding[kind + "_sha256"] = sha(read_bytes(path))
+                job.update(attempt=2, refused_attempt=binding,
+                           replacement_record=str(runs / "replacement-attempts" / (job_id + ".json")))
+                _verify_refused_attempt(job)
             if skip:
                 _verified_skip(job, args.accepted_canary)
                 accepted_canary_job = job
@@ -341,7 +452,9 @@ def build_batch(args):
     require(jobs, "no selected jobs")
     require(not args.accepted_canary or accepted_canary_job is not None, "accepted canary proof missing")
     require(len({job["id"] for job in jobs}) == len(jobs), "duplicate repeat job")
-    return {"mode": "REPEAT_PLAN", "scorer_head": SCORER_HEAD, "job_count": len(jobs), "jobs": jobs,
+    require(not replacement or len(jobs) == 1, "replacement mode only permits one named cell")
+    return {"mode": "REPLACEMENT_PLAN" if replacement else "REPEAT_PLAN",
+            "scorer_head": SCORER_HEAD, "job_count": len(jobs), "jobs": jobs,
             "orchestration": orchestration, "accepted_canary_job": accepted_canary_job}
 
 
@@ -495,6 +608,8 @@ def export_job(job, args):
         require(job.get("orchestration", _orchestration()) == _orchestration(), "orchestration helper changed")
         _checkout(root)
         _verify_baseline(job)
+        if job.get("attempt") == 2:
+            _verify_refused_attempt(job, before_run=False)
         scorer = _load_scorer(root)
         in_checkout(root, scorer.check_inputs, plan)
         receipt, raw = _accepted(plan, run / "plan.json", run / "receipt.json")
@@ -547,7 +662,44 @@ def export_job(job, args):
         control.restore()
 
 
+def _execute_replacement(batch, args):
+    require(batch.get("mode") == "REPLACEMENT_PLAN" and batch.get("job_count") == 1
+            and len(batch["jobs"]) == 1 and batch.get("accepted_canary_job") is None,
+            "replacement execution requires exactly one replacement plan")
+    reference = getattr(args, "replacement_authorization_reference", None)
+    require(isinstance(reference, str) and reference.strip(), "replacement needs its own authorization reference")
+    job = batch["jobs"][0]
+    require(batch["orchestration"] == job["orchestration"] == _orchestration(), "replacement helper changed")
+    plan = job["plan"]
+    require((args.generation_replicate, args.scoring_replicate, args.project, args.rubric) ==
+            (job["generation_replicate"], job["scoring_replicate"], plan["identity"]["project"],
+             plan["identity"]["rubric"].removesuffix("-semantic")), "replacement selector differs")
+    prior = _verify_refused_attempt(job)
+    require(reference.strip() != prior["authorization_reference"].strip(),
+            "replacement authorization must differ from attempt 1 authorization")
+    root = physical(plan["repo_root"])
+    _checkout(root)
+    scorer = _load_scorer(root)
+    current = in_checkout(root, scorer.build_plan, scorer.parser().parse_args([*job["scorer_argv"], "--plan"]))
+    require(current == plan, "replacement plan changed before launch")
+    _verify_refused_attempt(job)
+    claim = physical(job["replacement_record"])
+    claim.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    # One immutable, exclusive claim closes the concurrent-controller window
+    # and preserves replacement provenance even if the runner later refuses.
+    write_json(claim, _replacement_claim(job, reference))
+    _verify_refused_attempt(job, before_run=False)
+    rc = in_checkout(root, scorer.main, [*job["scorer_argv"], "--execute", "--authorization-reference", reference])
+    require(rc == 0, "replacement attempt 2 refused; cell stays not measured; never retry")
+    manifest = export_job(job, args)
+    return {"status": "REPLACEMENT_ATTEMPT_COMPLETE", "attempt": 2, "source_head": SCORER_HEAD,
+            "job_count": 1, "replacement_record": str(claim), "results": [manifest]}
+
+
 def execute_batch(batch, args):
+    if _replacement_options(args):
+        return _execute_replacement(batch, args)
+    require(all("attempt" not in job for job in batch["jobs"]), "replacement job requires replacement mode")
     require(args.authorization_reference and args.authorization_reference.strip(), "execution needs separate authorization")
     jobs = batch["jobs"]
     require(len(jobs) == 1 or (len(jobs) == 20 and args.generation_replicate in (1, 2, 3)),
@@ -599,6 +751,8 @@ def parser():
     p.add_argument("--rubric", choices=RUBRICS)
     p.add_argument("--accepted-canary", type=Path)
     p.add_argument("--authorization-reference")
+    p.add_argument("--replacement-attempt", action="store_true")
+    p.add_argument("--replacement-authorization-reference")
     p.add_argument("--timeout", type=int, default=3600)
     mode = p.add_mutually_exclusive_group(required=True)
     mode.add_argument("--plan", action="store_true")
