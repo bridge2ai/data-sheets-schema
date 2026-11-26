@@ -56,8 +56,8 @@ its sha256. Rubric10 is out of 50, rubric20 out of 88. The canonical record is i
 
 ## What a reader should know
 
-- No one has reviewed these records for content. The checks behind them show that each
-  receipted value points at real source text, not that each value is right.
+- When the marks were recorded no one had reviewed these records for content. All 15 were
+  reviewed afterwards (see "Content reviews" below); no record was changed in response.
 - AI_READI rep1 has 39 receiptable values without a receipt (README, item 1). Four of them
   are free-text statements. A text search of the bundle the record read finds each of the
   four stated there; that was a search by the session that prepared this change, not an
@@ -67,6 +67,52 @@ its sha256. Rubric10 is out of 50, rubric20 out of 88. The canonical record is i
 - Three of the five picks were decided by the label alone. On the command's criterion the
   choice between the tied replicates is arbitrary.
 - CM4AI rep1 and rep3 list component `resources`; rep2, the canonical, does not.
+
+## Content reviews (after the marks)
+
+Each of the 15 records has one `d4d-review-record` review: `<PROJECT>_review.yaml` beside the
+core record, its pack and instruction, and a `review` block in the provenance record.
+`content_reviews.tsv` lists the verdict counts and the pack, review and reviewer-definition
+hashes for each. Adverse verdicts, rep1 / rep2 / rep3:
+
+| Project | rep1 | rep2 | rep3 |
+|---|---|---|---|
+| AI_READI | 3 | 1 | 2 |
+| CHORUS | 4 | 4 | 4 |
+| CM4AI | 0 | 1 | 1 |
+| VOICE | 2 | 4 | 6 |
+| VOICE_PEDIATRIC | 0 | 4 | 4 |
+
+- Every item of every pack was answered; no verdict is `cannot_tell`, and none says a value is
+  unsupported, misread or not in the bundle.
+- **The counts are not comparable between replicates.** Each review samples its own record, and
+  the same value was judged differently by different reviews. Checked against the sibling
+  records: all three VOICE records list version 1.1 under `versions_available` (the source says
+  its files are no longer available; rep3 says so in the entry) and only rep2 was charged; VOICE
+  rep2 and rep3 both state `language: English` and only rep3 was charged; the
+  `relationship_type: references` of the related dataset is the same in all three
+  VOICE_PEDIATRIC records and was ruled a violation in rep2 and followed in rep1 and rep3.
+  The counts are reported only, as the selection policy says (#835); they were not used to
+  choose or to revisit a mark.
+- One finding was checked as a difference between records: VOICE_PEDIATRIC rep3 names the
+  SenseLab software on the strength of passages about the adult dataset; rep1 and rep2 do not
+  name it.
+- The reviews were given the reviewer definition as a file to follow
+  (`.claude/agents/d4d-review-record.md` at main `483bed03b`) and ran as a general subagent on
+  claude-opus-5-5, not as the typed agent whose front matter names another model. Each review
+  file says so.
+- The packs committed are not byte for byte the packs the reviewers read: two absolute paths
+  were removed by regenerating each pack with the fixed generator (#6379, PR #6380), after
+  checking that nothing else differs; `review_pack_repin.tsv` gives both hashes.
+
+## Presence evaluation
+
+`data/evaluation/label_aware_release_2026-11-25c/` holds the presence-based scores (field
+existence, deterministic, no model) of the full and core records, made with
+`scripts/adhoc/run_presence_evaluation_release_series_20261126.sh`. 28 of 30 records are
+scored. The full records of CM4AI rep1 and rep3 list component `resources`; the presence
+evaluator validates them as a collection, the validation fails, and it skips them (#6377).
+These scores are not comparable with the semantic rubric scores above.
 
 ## HTML
 
