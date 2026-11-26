@@ -1,0 +1,5 @@
+{
+  "input_sha256": "5eedfeea2da38502c02d11fd8b49cad8774d48b3e01b10305c578ac910849a10",
+  "policy": "root_dataset_v1",
+  "reason": "The owner selected the complete submitted datasheet as the common comparison unit for every record of series 2026-11-22b. Component entries remain part of that unmodified record; this declaration does not assert identical underlying release coverage or infer applicability predicates."
+}
