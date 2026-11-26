@@ -111,8 +111,9 @@ change:
   rule therefore only chooses among replicates that already pass validity.
 - Run-to-run variation of the scorer is the only noise the rule measures. It does not
   measure variation between evaluator models or between rubric versions.
-- Ambiguous rubric anchors raise run-to-run spread, which raises `T` and makes the
-  rule more conservative. They do not bias it toward a replicate.
+- Ambiguous rubric anchors may raise run-to-run spread, increasing `T`. Repeated
+  scoring does not detect or remove systematic evaluator preferences for particular
+  record features or replicates.
 - The rule is defined for one instrument at a time. Scores from different instruments
   are never mixed, and a series scored on another instrument needs its own `s`.
 - Pooling assumes that spread is similar across projects. The variation report states
