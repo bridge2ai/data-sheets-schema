@@ -313,7 +313,7 @@ def test_policy_excludes_replica_like_suffixes_but_legacy_discovery_is_unchanged
 
 
 def test_default_preview_matches_registered_historical_source_without_score_reads(tmp_path):
-    """Compare against the actual c08 source object; no scorer or mark path runs."""
+    """Compare c08 previews and captured canonical bytes; no scorer or write runs."""
     repository = Path(__file__).resolve().parents[2]
     historical = subprocess.run(["git", "show", "c08bd9edde73ec06473393d479d5cc597641de6c:src/data_sheets_schema/cli/runs.py"],
                                 cwd=repository, capture_output=True, check=False)

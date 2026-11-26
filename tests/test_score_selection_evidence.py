@@ -263,6 +263,44 @@ def test_all_refusals_require_exactly_one_declared_replacement(tmp_path):
         assert rows[0]["rubrics"]["rubric10"]["eligibility_problems"], change
 
 
+def test_orphan_refusal_identity_does_not_depend_on_redundant_instrument(tmp_path, monkeypatch):
+    from data_sheets_schema import score_selection as reader
+
+    for change in ("missing", "contradictory"):
+        case = scenario(tmp_path / change)
+        original = add_refusal(case)
+        if change == "missing":
+            del original["plan"]["instrument"]
+        else:
+            original["plan"]["instrument"] = "another-instrument"
+        write(original["plan_path"], original["plan"])
+        original["receipt"]["plan_sha256"] = sha(json.dumps(original["plan"], sort_keys=True).encode())
+        write(original["receipt_path"], original["receipt"])
+
+        # The old shared predicate skipped this refusal without another check
+        # firing. Reproduce that behavior in memory, leaving evidence untouched.
+        with monkeypatch.context() as prior:
+            prior.setattr(reader, "_refusal_identity_matches", reader._identity_matches)
+            legacy = table(case)
+        assert legacy[0]["eligibility_problems"] == []
+        assert legacy[0]["problems"] == []
+        assert legacy[0]["paired_numbers"] == [1, 2, 3]
+
+        rows = table(case)
+        assert rows[0]["evidence_issues"] == []
+        assert all(item["status"] == "measured" for family in ("rubric10", "rubric20")
+                   for item in rows[0]["rubrics"][family]["scorings"])
+        assert any("refused attempt is declared by 0 accepted cells" in problem
+                   for problem in rows[0]["eligibility_problems"])
+        assert rows[0]["rubrics"]["rubric10"]["eligibility_problems"]
+        variation = reader.pooled_variation(rows)
+        assert any("refused attempt is declared by 0 accepted cells" in reason
+                   for reason in variation["fallback_reasons"])
+        decision = reader.decide(rows, variation, INSTRUMENT)
+        assert decision["score_policy"]["rule"] == "policy_fallback"
+        assert "refused attempt is declared by 0 accepted cells" in decision["score_policy"]["fallback_reason"]
+
+
 def test_fixed_percentage_base_is_required_even_after_rebinding(tmp_path):
     for change in ("missing_maximum", "wrong_fixed", "reduced_adjusted"):
         case = scenario(tmp_path / change)

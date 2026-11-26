@@ -128,6 +128,16 @@ def _identity_matches(plan, project, method, label, family, instrument):
                      ("rubric", family + "-semantic"))))
 
 
+def _refusal_identity_matches(plan, project, method, label, family, instrument):
+    # Ruling 3 attributes refusals by these five identity fields. A missing or
+    # contradictory redundant plan.instrument must not hide an orphan refusal.
+    identity = plan.get("identity", {})
+    return (isinstance(identity, dict)
+            and all(identity.get(key) == value for key, value in
+                    (("project", project), ("method", method), ("label", label),
+                     ("rubric", family + "-semantic"), ("instrument_id", instrument))))
+
+
 def _accepted_metadata(entry):
     plan, receipt = entry["plan"], entry["receipt"]
     _require(receipt.get("status") == "VALIDATED_AND_PUBLISHED", "scoring receipt is not accepted")
@@ -418,7 +428,7 @@ def build_evidence_table(project, config, instrument_id, *, candidates, corpus_r
                     cells.append(extra_cell)
             problems = []
             refused_matches = [entry for entry in index["runs"].values()
-                               if _identity_matches(entry["plan"], project, method, label, family, instrument_id)
+                               if _refusal_identity_matches(entry["plan"], project, method, label, family, instrument_id)
                                and entry["receipt"].get("status") == "REFUSED"]
             for refused in refused_matches:
                 declarations = [cell for cell in cells if cell["status"] == "measured" and cell["attempt"] == 2
