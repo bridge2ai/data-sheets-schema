@@ -293,13 +293,16 @@ def perform(args):
     require(json.loads(snapshots["plan.json"]) == plan and json.loads(snapshots["receipt.json"]) == original,
             "original metadata changed before capture")
     identity = helper_identity()
+    requested_mode = "publish" if args.publish else "dry-run"
     value = {"kind": "FIRST_SCORING_RECOVERY_CLAIM", "action": "recovery", "identity": plan["identity"],
+             "requested_mode": requested_mode,
              "original_run": str(run), "recovery_directory": str(directory),
              "original_plan_sha256": pins["plan.json"], "original_receipt_sha256": pins["receipt.json"],
              "authorization_reference": authorization, "program": identity,
              "revised_reader_commit": REVISED_HEAD, "revised_reader_sha256": REVISED_SHA,
              "created_utc": utc()}
     receipt = {"status": "RECOVERY_STARTED", "identity": plan["identity"],
+               "requested_mode": requested_mode,
                "authorization_reference": authorization, "started_utc": utc(),
                "claim_sha256": None, "program": identity,
                "measured_runner_commit": MEASURED_HEAD, "measured_runner_sha256": MEASURED_SHA,
@@ -375,6 +378,15 @@ def perform(args):
         write(claims / "validation.json", {"action": "recovery", "status": receipt["status"],
               "claim_sha256": claim_sha, "recovery_receipt_sha256": receipt_sha,
               "validated_sha256": sha(raw), "recovery_directory": str(directory)})
+        if args.publish:
+            # Issue 6412: combined publication remains one guarded operation.
+            # Do not commit validation as a separately completed dry-run: the
+            # same refusal reservation and guard cover every publication
+            # preflight and the transition into that function itself.
+            control.check()
+            return publish_validated(args, exporter, guard, run, root, plan, original,
+                                     destination, directory, claim, direct=True,
+                                     signal_control=control)
         control.commit(directory / "failure.json")
     except BaseException as exc:
         receipt.update(status="RECOVERY_REFUSED", failure=type(exc).__name__ + ": " + str(exc), finished_utc=utc())
@@ -387,14 +399,14 @@ def perform(args):
         raise
     finally:
         control.restore()
-    if args.publish:
-        return publish_validated(args, exporter, guard, run, root, plan, original,
-                                 destination, directory, claim, direct=True)
     return {"status": "PASS", "reason": "identity and exact-file validation passed; publication not requested"}
 
 
 def publish_validated(args, exporter, guard, run, root, plan, original, destination,
-                      directory, claim, direct=False):
+                      directory, claim, direct=False, signal_control=None):
+    require(not direct or signal_control is not None, "combined publication requires its original signal guard")
+    if signal_control is not None:
+        signal_control.check()
     require(directory.is_dir(), "successful saved recovery required")
     recorded_claim = document(claim)
     require(recorded_claim.get("action") == "recovery", "cell was claimed by another remediation path")
@@ -403,6 +415,9 @@ def publish_validated(args, exporter, guard, run, root, plan, original, destinat
     terminal = document(claim.parent / "validation.json")
     require(receipt.get("status") == "VALIDATED_RECOVERY_NOT_PUBLISHED"
             and receipt.get("validator_exit") == 0, "recovery did not validate; never retry")
+    require(recorded_claim.get("requested_mode") == receipt.get("requested_mode")
+            == ("publish" if direct else "dry-run"),
+            "only a successfully completed explicit dry-run can be published later")
     require(recorded_claim.get("original_run") == str(run)
             and recorded_claim.get("recovery_directory") == str(directory)
             and receipt.get("original_run") == str(run), "saved recovery location differs")
@@ -427,7 +442,11 @@ def publish_validated(args, exporter, guard, run, root, plan, original, destinat
     authorization = reference(args.authorization_reference, prior)
     if direct:
         require(authorization == receipt["authorization_reference"], "direct publication authorization differs")
-    require(not (directory / "failure.json").exists(), "recovery retains failure evidence")
+    if direct:
+        require((directory / "failure.json").samefile(directory / "refusal-reserve.json"),
+                "combined publication lost its owned failure reservation")
+    else:
+        require(not (directory / "failure.json").exists(), "recovery retains failure evidence")
     require(not os.path.lexists(directory / "publication-claim.json"), "publication already claimed; never retry")
     require_retained(run, plan, receipt["original_pins"])
     require(receipt["original_pins"]["plan.json"] == recorded_claim["original_plan_sha256"]
@@ -447,17 +466,18 @@ def publish_validated(args, exporter, guard, run, root, plan, original, destinat
                    "started_utc": utc(), "destination": str(destination), "validated_sha256": sha(raw)}
     # The successful dry-run is immutable. The separate publication claim is
     # protected from its first write through terminal receipt and rollback.
-    control = exporter._ExportSignals()
+    control = signal_control if signal_control is not None else exporter._ExportSignals()
     owned = None
-    claimed = False
+    claimed = direct
     try:
         control.check()
         # Issue 6410: claim ownership with one exclusive filesystem operation
         # before a multi-step JSON write can fail. The existing durable reserve
         # is also the refusal marker if creation, flush or readback fails. A
         # losing concurrent linker owns nothing and must not alter winner state.
-        os.link(directory / "refusal-reserve.json", directory / "failure.json")
-        claimed = True
+        if not direct:
+            os.link(directory / "refusal-reserve.json", directory / "failure.json")
+            claimed = True
         write(directory / "publication-claim.json", publication)
         control.check()
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -511,7 +531,8 @@ def publish_validated(args, exporter, guard, run, root, plan, original, destinat
             write(claim.parent / "publication-failure.json", publication)
         raise
     finally:
-        control.restore()
+        if signal_control is None:
+            control.restore()
 
 
 def parser():

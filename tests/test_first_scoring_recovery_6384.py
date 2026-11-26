@@ -113,6 +113,9 @@ def test_real_validator_recovery_both_rubrics_and_original_bytes_unchanged(tmp_p
         assert not (tools / "invocation.json").exists()
         assert not (args.original_run / "candidate_evaluation.json").exists()
         directory, state = paths(args)
+        assert json.loads((state / "claim.json").read_bytes())["requested_mode"] == "publish"
+        assert json.loads((directory / "recovery-receipt.json").read_bytes())["requested_mode"] == "publish"
+        assert not (directory / "failure.json").exists()
         target = Path(plan["output"])
         raw = target.read_bytes()
         assert raw == (directory / "validated-evaluation.json").read_bytes()
@@ -141,7 +144,9 @@ def test_dry_run_success_then_separate_publication_never_revalidates(tmp_path, m
     module, (args, plan, _, _, tools) = prepare(tmp_path, monkeypatch)
     before = snapshot(args.original_run)
     assert module.perform(args)["status"] == "PASS"
-    directory, _ = paths(args)
+    directory, state = paths(args)
+    assert json.loads((state / "claim.json").read_bytes())["requested_mode"] == "dry-run"
+    assert json.loads((directory / "recovery-receipt.json").read_bytes())["requested_mode"] == "dry-run"
     assert not Path(plan["output"]).exists() and not (directory / "manifest.json").exists()
     validation_evidence = (tools / "real-validator-result.json").read_bytes()
     exporter, guard, revised = module.programs()
@@ -555,6 +560,123 @@ def test_real_sigterm_and_sighup_at_both_claim_windows_save_terminal_refusal(tmp
     assert receipt["retry_refused"] and not receipt["published"]
 
 
+def _combined_transition_control(directory, boundary, interruption):
+    """Issue 6412: all injected bytes and executed validator inputs are synthetic."""
+    args, plan, _, _, tools = fixture(directory / "fixture")
+    module = helper()
+    module.checkout = lambda root: None
+    args.dry_run, args.publish = False, True
+    recovery, state = paths(args)
+    before = snapshot(args.original_run)
+    dispositions = {number: signal.getsignal(number) for number in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP)}
+    delivered = []
+    entering_publication = []
+    original_publish = module.publish_validated
+    original_retained = module.require_retained
+    original_pins = module.input_pins
+    original_read = module.read
+    original_document = module.document
+
+    def interrupt():
+        delivered.append(interruption)
+        if interruption == "OSError":
+            raise OSError("synthetic combined-publication preflight failure")
+        os.kill(os.getpid(), getattr(signal, interruption))
+
+    def entering(*values, **keywords):
+        entering_publication.append(True)
+        if boundary == "entry":
+            interrupt()
+        return original_publish(*values, **keywords)
+
+    def retained(*values):
+        if entering_publication and boundary == "retained":
+            interrupt()
+        return original_retained(*values)
+
+    def checkout(root):
+        if entering_publication and boundary == "checkout":
+            interrupt()
+
+    def pins(*values):
+        if entering_publication and boundary == "pins":
+            interrupt()
+        return original_pins(*values)
+
+    def read(path):
+        if entering_publication and boundary == "staged" and Path(path).name == "validated-evaluation.json":
+            interrupt()
+        return original_read(path)
+
+    def document(path):
+        if entering_publication and boundary == "claim" and Path(path) == state / "claim.json":
+            interrupt()
+        return original_document(path)
+
+    module.publish_validated = entering
+    module.require_retained = retained
+    module.checkout = checkout
+    module.input_pins = pins
+    module.read = read
+    module.document = document
+    try:
+        module.perform(args)
+    except (InterruptedError, OSError):
+        pass
+    else:
+        raise AssertionError("combined publication interruption did not refuse")
+    assert delivered == [interruption]
+    assert all(signal.getsignal(number) == previous for number, previous in dispositions.items())
+    assert snapshot(args.original_run) == before
+    assert not Path(plan["output"]).exists() and not (recovery / "manifest.json").exists()
+    terminal = json.loads((state / "failure.json").read_bytes())
+    assert terminal["status"] == "RECOVERY_REFUSED"
+    assert terminal["requested_mode"] == "publish"
+    assert (recovery / "failure.json").exists()
+    saved = json.loads((recovery / "recovery-receipt.json").read_bytes())
+    assert saved["status"] == "VALIDATED_RECOVERY_NOT_PUBLISHED" and saved["requested_mode"] == "publish"
+    validation_evidence = (tools / "real-validator-result.json").read_bytes()
+    # Restore the transient injected failure; resumption must still refuse
+    # because a combined request was never an explicit completed dry-run.
+    module.publish_validated = original_publish
+    module.require_retained = original_retained
+    module.checkout = lambda root: None
+    module.input_pins = original_pins
+    module.read = original_read
+    module.document = original_document
+    exporter, guard, revised = module.programs()
+    exporter._validate_staged = lambda *a: (_ for _ in ()).throw(AssertionError("second validation"))
+    revised.session_identity = lambda *a: (_ for _ in ()).throw(AssertionError("second identity acceptance"))
+    module.programs = lambda: (exporter, guard, revised)
+    with pytest.raises(ValueError, match="explicit dry-run"):
+        module.perform(publish_args(args))
+    assert (tools / "real-validator-result.json").read_bytes() == validation_evidence
+    assert snapshot(args.original_run) == before and not Path(plan["output"]).exists()
+    write(directory / "transition-result.json", {"status": "PASS", "boundary": boundary,
+          "interruption": interruption, "terminal_status": terminal["status"],
+          "requested_mode": saved["requested_mode"], "prior_dispositions_restored": True,
+          "original_unchanged": True, "published": False, "retry_refused": True})
+
+
+def test_combined_publication_preflight_errors_are_terminal(tmp_path, boundary):
+    _combined_transition_control(tmp_path, boundary, "OSError")
+
+
+def test_real_signals_at_combined_publication_transition_are_terminal(tmp_path, boundary, signal_name):
+    command = [sys.executable, "-B", str(Path(__file__).resolve()), "--combined-transition-worker",
+               str(tmp_path), boundary, signal_name]
+    environment = dict(os.environ, PYTHONDONTWRITEBYTECODE="1",
+                       PYTHONPATH=str(ROOT) + os.pathsep + str(ROOT / "src"))
+    result = subprocess.run(command, cwd=ROOT, env=environment, capture_output=True, timeout=120)
+    (tmp_path / "worker.stdout.txt").write_bytes(result.stdout)
+    (tmp_path / "worker.stderr.txt").write_bytes(result.stderr)
+    assert result.returncode == 0, result.stderr.decode(errors="replace")
+    saved = json.loads((tmp_path / "transition-result.json").read_bytes())
+    assert saved["status"] == "PASS" and saved["interruption"] == signal_name
+    assert saved["retry_refused"] and saved["prior_dispositions_restored"] and saved["original_unchanged"]
+    assert not saved["published"]
+
+
 test_shared_replacement_state_and_existing_attempt_two_prevent_recovery = pytest.mark.parametrize(
     "kind", ("shared", "second"))(test_shared_replacement_state_and_existing_attempt_two_prevent_recovery)
 test_ineligible_receipt_or_prior_artifacts_refuse_before_response_read = pytest.mark.parametrize(
@@ -577,9 +699,21 @@ test_real_sigterm_and_sighup_at_both_claim_windows_save_terminal_refusal = pytes
     "phase,signal_name", (("validation", "SIGTERM"), ("validation", "SIGHUP"),
                           ("publication", "SIGTERM"), ("publication", "SIGHUP")))(
     test_real_sigterm_and_sighup_at_both_claim_windows_save_terminal_refusal)
+test_combined_publication_preflight_errors_are_terminal = pytest.mark.parametrize(
+    "boundary", ("entry", "claim", "retained", "checkout", "pins", "staged"))(
+    test_combined_publication_preflight_errors_are_terminal)
+test_real_signals_at_combined_publication_transition_are_terminal = pytest.mark.parametrize(
+    "boundary,signal_name", (("entry", "SIGTERM"), ("entry", "SIGHUP"),
+                             ("retained", "SIGTERM"), ("retained", "SIGHUP")))(
+    test_real_signals_at_combined_publication_transition_are_terminal)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 5 or sys.argv[1] != "--claim-signal-worker":
-        raise SystemExit("only the synthetic claim-signal worker is supported")
-    _claim_signal_worker(Path(sys.argv[2]), sys.argv[3], sys.argv[4])
+    if len(sys.argv) != 5:
+        raise SystemExit("only the synthetic signal workers are supported")
+    if sys.argv[1] == "--claim-signal-worker":
+        _claim_signal_worker(Path(sys.argv[2]), sys.argv[3], sys.argv[4])
+    elif sys.argv[1] == "--combined-transition-worker":
+        _combined_transition_control(Path(sys.argv[2]), sys.argv[3], sys.argv[4])
+    else:
+        raise SystemExit("only the synthetic signal workers are supported")
