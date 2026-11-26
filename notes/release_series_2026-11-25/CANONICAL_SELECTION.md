@@ -103,7 +103,10 @@ hashes for each. Adverse verdicts, rep1 / rep2 / rep3:
   file says so.
 - The packs committed are not byte for byte the packs the reviewers read: two absolute paths
   were removed by regenerating each pack with the fixed generator (#6379, PR #6380), after
-  checking that nothing else differs; `review_pack_repin.tsv` gives both hashes.
+  checking that nothing else differs; `review_pack_repin.tsv` gives both hashes and the
+  generator behind each. Main's generator reproduces the committed packs only once PR #6380
+  is merged. The `definition_sha256` column of `content_reviews.tsv` is the hash of the
+  definition file when the table was made, which is the file every review was given.
 
 ## Presence evaluation
 
