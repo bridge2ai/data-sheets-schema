@@ -72,8 +72,9 @@ Total cost at list price as reported by the sessions: 251.49 USD (8.47 to 22.64 
 1. **Receipt coverage differs in one record.** AI_READI replicate 1 has a receipt on 414 of
    453 receiptable slots; the other 14 records have one on every receiptable slot. Of the 39
    slots, 29 are `name` leaves (28 entry labels, and `maintainers[0].name`, a factual value),
-   six are enumerated or boolean leaves (`bias_type`, `limitation_type`, `is_representative`,
-   `compensation_provided`, `sensitive_elements_present`, `use_category`), and four are
+   five are enumerated or boolean leaves (`bias_type`, `limitation_type`, `is_representative`,
+   `compensation_provided`, `sensitive_elements_present`), one is a short free-text category
+   (`use_category`, whose range is a string), and four are
    free-text statements a reviewer should sample: `direct_collection[0].collection_details`,
    `raw_data_sources[1].source_description`,
    `participant_compensation[0].compensation_type` and
@@ -111,8 +112,10 @@ Total cost at list price as reported by the sessions: 251.49 USD (8.47 to 22.64 
    evaluation, rendered page or attic file. On that evidence no other record's content reached
    a session. A foreign value shorter than 40 characters printed by a tool would not be caught
    by the output comparison.
-4. **Not rated, not selected.** No rubric evaluation and no `d4d runs select` mark is in this
-   branch.
+4. **Rated and selected on 2026-11-26, after the records were merged.** One replicate per
+   project carries a `d4d runs select` mark; `CANONICAL_SELECTION.md` names them and gives
+   the rubric scores (`rubric_scores_root_scope_v6.tsv`), and `html/` holds a preview of
+   every run. The evaluation files themselves are in PR #6372.
 5. **Not checked here**: that a chunk marked `nothing_relevant` held nothing for the record,
    and that a verified snippet supports the value it is attached to. Both are review
    judgements. The receipt check counts 109 verified snippets, in 12 of the 15 records, that

@@ -1,0 +1,360 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="datasheet-common.css">
+    <title>CHORUS d4d - Datasheet for Dataset</title>
+</head>
+<body>
+    <div class="header">
+        <h1>CHORUS d4d</h1>
+        <p class="subtitle">Datasheet for Dataset - Human Readable Format</p>
+    </div>
+    
+    
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🎯</span>
+                    <div>
+                        <h2 class="section-title">Motivation</h2>
+                        <p class="section-description">For what purpose was the dataset created?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Funders
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Grantor</th><th>Grant Name</th><th>Grant Number</th></tr></thead><tbody><tr><td>-</td><td>-</td><td>-</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Purposes
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Response</th></tr></thead><tbody><tr><td><div class="long-description">To generate data for ML/AI applications aimed at characterizing acute and critical care illness, predicting complications, and measuring treatment response among patients with acute or critical illness.</div></td></tr><tr><td><div class="long-description">To develop a publicly available, AI-ready critical care dataset while ensuring the methods promote privacy, accountability, and clinical benefit; this is stated as the project&#x27;s overarching goal.</div></td></tr><tr><td><div class="long-description">To develop the most diverse, high-resolution, ethically sourced, AI-ready data set to answer the grand challenge of improving recovery from acute illness; this is stated as the goal of the CHoRUS Network.</div></td></tr></tbody></table></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📊</span>
+                    <div>
+                        <h2 class="section-title">Composition</h2>
+                        <p class="section-description">What do the instances that comprise the dataset represent?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Instances
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Counts</th><th>Data Substrate</th><th>Data Topic</th><th>Description</th><th>Instance Type</th><th>Source Caveats</th></tr></thead><tbody><tr><td>50000</td><td></td><td></td><td><div class="long-description">The project website&#x27;s dataset snapshot reports 50,000 patient admissions from ICU, PICU, and NICU in the current released dataset, and 100,000 patient admissions for the anticipated final dataset. A September 2025 webinar states that, as of August 2025, the dataset covers 14 different hospitals with over 45K unique admissions.</div></td><td>Patient admission</td><td><div class="long-description">The website snapshot is undated, and the webinar figure is a lower bound as of August 2025; the two are compatible observations and both are retained. The count recorded here is the website&#x27;s figure for the current released dataset. The fiscal year 2022 NIH project abstract separately states an aim of an AI-ready data set from more than 100,000 critically ill patients, which counts patients, not admissions.</div></td></tr><tr><td></td><td></td><td>B2AI_TOPIC:6</td><td><div class="long-description">Listed in the webinar&#x27;s data-type table with OMOP as its data standard.</div></td><td>Demographics</td><td></td></tr><tr><td></td><td></td><td></td><td><div class="long-description">Dosing time-stamped upon each infusion change or dose administration.</div></td><td>Medication administration</td><td></td></tr><tr><td></td><td></td><td></td><td><div class="long-description">Documentation by providers.</div></td><td>Procedures</td><td></td></tr><tr><td></td><td></td><td></td><td><div class="long-description">High-frequency documentation.</div></td><td>Nursing flowsheets</td><td></td></tr><tr><td></td><td></td><td></td><td><div class="long-description">Documentation by providers.</div></td><td>Diagnoses</td><td></td></tr><tr><td></td><td></td><td></td><td><div class="long-description">Extracted and tokenized using the OHNLP toolkit. The September 2025 webinar states that clinical notes are stored locally, except tokens.</div></td><td>Clinical notes</td><td></td></tr><tr><td></td><td>B2AI_SUBSTRATE:11</td><td>B2AI_TOPIC:15</td><td><div class="long-description">Imaging from PACS, listed with DICOM as its data standard. The September 2025 webinar states that 1000 images were available at that time, with de-identification in process for a larger cohort. The project website reports 7,642 admissions with radiology data in the current released dataset.</div></td><td>Imaging</td><td><div class="long-description">The webinar counts images and the website counts admissions with radiology data, at times that may differ; no count is recorded for this entry.</div></td></tr><tr><td></td><td>B2AI_SUBSTRATE:49</td><td>B2AI_TOPIC:37</td><td><div class="long-description">Waveform telemetry from bedside monitors and gateway/middleware, listed with WFDB as its data standard.</div></td><td>Waveform telemetry</td><td></td></tr><tr><td></td><td>B2AI_SUBSTRATE:49</td><td>B2AI_TOPIC:37</td><td><div class="long-description">Waveform EEG from a hospital database, listed with EDF+ and Persyst as its data standards. The September 2025 webinar states that EEG extraction was in process at that point.</div></td><td>Waveform EEG</td><td></td></tr></tbody></table></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔍</span>
+                    <div>
+                        <h2 class="section-title">Collection Process</h2>
+                        <p class="section-description">How was the data associated with each instance acquired?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            ID
+                        </label>
+                        <div class="item-value"><a href="https://chorus4ai.org/" target="_blank">https://chorus4ai.org/</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Name
+                        </label>
+                        <div class="item-value">CHoRUS</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Title
+                        </label>
+                        <div class="item-value">CHoRUS Dataset</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Page
+                        </label>
+                        <div class="item-value"><a href="https://chorus4ai.org/" target="_blank">https://chorus4ai.org/</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Description
+                        </label>
+                        <div class="item-value"><div class="long-description">CHoRUS (Patient-Focused Collaborative Hospital Repository Uniting Standards for Equitable AI) is a multi-modal clinical care dataset generated by the CHoRUS project, one of four data generation projects in the NIH-funded Bridge2AI consortium. The project website describes the CHoRUS project as the collection of multi-modal data across 14 different hospitals, using ongoing and new standardization practices, with tools created to support a cloud enclave. The website's dataset snapshot reports, for the current released dataset, 50,000 patient admissions from ICU, PICU, and NICU, 1.6 billion rows of EHR OMOP data, 7,642 admissions with radiology data, and 23 Tb of waveform data; for the anticipated final dataset it reports 100,000 patient admissions, 9 different data modalities, 14 data contributing hospitals, and 60+ CHoRUS consortium members across 20 different institutions. A September 2025 training-program webinar describes the dataset as multicenter, multimodal and high-resolution, collected retrospectively and under controlled access, with OMOP and telemetry data held in an enclave, clinical notes stored locally except tokens, 1000 images available at that time, and EEG extraction in process at that time. The chorus-ai GitHub organization overview, captured on November 14, 2025, states that the collaboration spans 20 academic centers, of which 14 will contribute as Data Acquisition centers.</div></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Keywords
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li>Critical Care</li><li>Critical Illness</li><li>Artificial Intelligence</li><li>Machine Learning</li><li>Bridge to Artificial Intelligence</li><li>Electronic Health Record</li><li>Electroencephalography</li><li>Telemetry</li><li>acute care</li><li>data standards</li><li>social health determinants</li><li>multimodality</li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Conforms To
+                        </label>
+                        <div class="item-value"><div class="long-description">OMOP (EHR data, including demographics); OHNLP (clinical notes, extracted and tokenized using the OHNLP toolkit); DICOM (imaging); WFDB (waveform telemetry); EDF+ and Persyst (waveform EEG, whose extraction was in process as of the September 2025 webinar)</div></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Conforms To Standard
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li>OMOP_CDM</li><li>DICOM</li><li>WFDB</li><li>OTHER</li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Creators
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Role</th><th>Name</th><th>ORCID</th><th>Affiliation</th></tr></thead><tbody><tr><td>Principal Investigator</td><td>Eric S. Rosenthal</td><td>https://chorus4ai.org/#person-eric-s-rosenthal</td><td>-</td></tr><tr><td>Contributor</td><td>Azra Bihorac</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Xiaoqian Jiang</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Yulia Strekalova</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Parisa Rashidi</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Manlik Kwong</td><td>-</td><td>-</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Research Gaps Addressed
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Response</dt><dd><div class="long-description">The NIH project abstract states an urgent need for infrastructure to support artificial intelligence and machine learning (AI/ML) in critical care, and describes developing high-resolution multi-center data sets as a critical first step toward actionable and trustworthy AI.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Acquisition Methods
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Acquisition Details</dt><dd><div class="long-description">Retrospective data collection. Data contributing sites create and curate a CHoRUS-specific clinical data extract, and standard operating protocols (SOPs) instruct those sites about best practices for curating and delivering interoperable datasets.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Preprocessing Strategies
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Preprocessing Details</th><th>Used Software</th></tr></thead><tbody><tr><td>Clinical notes are extracted and tokenized using the OHNLP toolkit.</td><td>{&#x27;id&#x27;: &#x27;https://chorus4ai.org/#software-ohnlp-toolkit&#x27;, &#x27;name&#x27;: &#x27;OHNLP toolkit&#x27;}</td></tr><tr><td><div class="long-description">Semantic mapping: the chorus-ai GitHub organization provides validated semantic mappings for connecting clinical data in various source formats to international standards, and its chorus-mapping repository holds documentation and pooled tabular mappings, with an associated clinical validation SOP for contributing to mapping efforts. The README refers to the result as the mapped and assembled dataset.</div></td><td></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Sampling Strategies
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd><div class="long-description">Planned: the fiscal year 2022 NIH project abstract states that the project will establish a legal framework for collecting data at scale, sampling to ensure comprehensive sets of patient conditions and clinical treatment strategies. The chorus-ai GitHub overview states that federated access will enable sampling methods to ensure a balanced and diverse cohort.</div></dd><dt>Source Caveats</dt><dd><div class="long-description">Both statements are written in the future tense; the bundle does not state what sampling was applied to the current released dataset.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Labeling Strategies
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd><div class="long-description">Planned: the chorus-ai GitHub overview states that a visualization and annotation environment will label data with targets important for prediction.</div></dd><dt>Source Caveats</dt><dd><div class="long-description">Stated in the future tense; the bundle does not state that labels are present in the current released dataset.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Deidentification
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Deidentification Details</dt><dd><div class="long-description">The fiscal year 2022 NIH project abstract states a plan to transform data using approaches that limit re-identification. The September 2025 webinar states that de-identification of imaging was in process for a larger cohort.</div></dd><dt>Source Caveats</dt><dd><div class="long-description">Both statements describe planned or in-progress work; the bundle does not state the de-identification status of the current released dataset, so no presence value and no method are recorded.</div></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Splits
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Split Details</dt><dd><div class="long-description">Planned: the fiscal year 2022 NIH project abstract states that the dataset will provision a holdout test set, accessible for model external validation.</div></dd><dt>Source Caveats</dt><dd><div class="long-description">Stated as a plan; the bundle does not say whether a holdout set has been provisioned.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Data Governance
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Description</dt><dd><div class="long-description">The dataset is under controlled access; OMOP and telemetry data are held in an enclave.</div></dd><dt>Access Review Process</dt><dd><div class="long-description">For participants in the AIM-AHEAD Bridge2AI for Clinical Care Training Program: participants fill out a registration form with name, email, and institution; once access is granted and compute is provisioned, an email is sent. A ".edu" email address is needed to gain access to the dataset, and program administrators assist with this access if needed.</div></dd><dt>Source Caveats</dt><dd><div class="long-description">These steps are described in a webinar addressed to one training program's applicants; the bundle does not describe the access process for other requesters or name the body that decides on access.</div></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            External Resources
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Role</th><th>Name</th><th>ORCID</th><th>Affiliation</th></tr></thead><tbody><tr><td>Contributor</td><td>chorus-ai GitHub organization</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Chorus_SOP</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>chorus-mapping</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>chorus_waveform</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>chorus-developer</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>Bridge2AI CHoRUS web page</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>chorus-extract-upload</td><td>-</td><td>-</td></tr><tr><td>Contributor</td><td>CHoRUSReports</td><td>-</td><td>-</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Notes
+                        </label>
+                        <div class="item-value"><div class="long-description">Contacts stated in the sources: the project website lists "Ciera McCrary, MGH, Program Manager" under Contact Us, with the address cmccrary@mgh.havard.edu. The chorus-ai GitHub README lists "Request access: dbold@emory.edu or jared.houghtaling@tuftsmedicine.org" under Contact, and invites those interested in getting involved in downstream analytics on the mapped and assembled dataset to reach out using those contact details.</div></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Source Caveats
+                        </label>
+                        <div class="item-value"><div class="long-description">The record draws on four sources: the project website (ranked highest by the source manifest), the NIH RePORTER page for project OT2OD032701 (fiscal year 2022, whose abstract is written in the future tense), a September 2025 AIM-AHEAD training-program webinar, and a November 14, 2025 capture of the chorus-ai GitHub organization overview (ranked lowest, as historical documentation). When captured, the project website carried the banner "This repoitory is under review for potential modification in compliance with Administration directives." The GitHub README states "This project is licensed under the MIT License"; that statement concerns the GitHub project, and the bundle states no license for the dataset, so no license is recorded. The webinar's data-type table survives only as flattened text: its "Access control", "Metadata" and "Published metadata schema" cells, and four of the five OMOP data-standard cells, cannot be attributed to individual data types, so those mappings are not recorded; data standards are stated per data type only where the text places them together. The website's contact address is transcribed as the site spells it. Keywords are a selection from the "Preferred terms" line of the NIH RePORTER page, which describes the funded project.</div></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🚀</span>
+                    <div>
+                        <h2 class="section-title">Uses</h2>
+                        <p class="section-description">Has the dataset been used for any tasks already?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Tasks
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Response</th></tr></thead><tbody><tr><td><div class="long-description">Characterizing acute and critical care illness.</div></td></tr><tr><td><div class="long-description">Predicting complications among patients with acute or critical illness.</div></td></tr><tr><td><div class="long-description">Measuring treatment response among patients with acute or critical illness.</div></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Intended Uses
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th></tr></thead><tbody><tr><td><div class="long-description">Building machine-learning (ML) and artificial intelligence (AI)-derived models to improve the care and outcomes of patients requiring critical care.</div></td></tr><tr><td><div class="long-description">External validation of models against a holdout test set, to aid marketplace adoption of AI-developed models for implementation in acute and critical care; the holdout test set is stated as a plan.</div></td></tr><tr><td><div class="long-description">Hands-on training using the CHoRUS dataset; the project website describes this as supporting &quot;the development of transnational AI in clinical care&quot;.</div></td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Existing Uses
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>Examples</th><th>Name</th></tr></thead><tbody><tr><td><div class="long-description">The September 2025 webinar states that the datasets are being used for training activities.</div></td><td>The AIM-AHEAD Bridge2AI for Clinical Care Training Program expands access to Bridge2AI CHoRUS data through engagement, AI training, and mentorship., The webinar announces that trainees will receive hands-on training on the Bridge2AI AI/ML for Clinical Care Network and leverage the data and tools to create practical use cases.</td><td>Training activities</td></tr><tr><td><div class="long-description">The September 2025 webinar states that the datasets are being used for publications.</div></td><td></td><td>Publications</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            License and Use Terms
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>License Terms</dt><dd><div class="long-description">Participants in the AIM-AHEAD Bridge2AI for Clinical Care Training Program must sign a licensing agreement, included in the program's registration form, before gaining access to the dataset.</div></dd><dt>Source Caveats</dt><dd><div class="long-description">This requirement is stated for one training program's participants; the bundle does not state the license or use terms that apply to other users.</div></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+    
+    
+    
+    <div class="section">
+        <div class="section-header">How this datasheet was generated</div>
+        <div class="section-content">
+            <p>This record was produced by an automated pipeline. The fields
+            below come from its provenance record, which is kept as a separate
+            file because embedding it would not validate against the schema.</p>
+            <table class="provenance">
+            
+                <tr><th>Generated</th><td>2026-11-25T06:08:05+00:00</td></tr>
+            
+                <tr><th>Run label</th><td>2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3</td></tr>
+            
+                <tr><th>Provenance mode</th><td>live</td></tr>
+            
+                <tr><th>Model</th><td>claude-fable-5-2</td></tr>
+            
+                <tr><th>Runtime</th><td>Claude Code (release)</td></tr>
+            
+                <tr><th>Provider</th><td>Anthropic</td></tr>
+            
+                <tr><th>Reasoning effort</th><td>high</td></tr>
+            
+                <tr><th>Input bundle</th><td>data/preprocessed/concatenated/CHORUS_preprocessed.txt</td></tr>
+            
+                <tr><th>Input bundle md5</th><td>9b2ef4b65d67957f79362266cab0bc7a</td></tr>
+            
+                <tr><th>Source manifest</th><td>data/preprocessed/source_manifest.yaml</td></tr>
+            
+                <tr><th>Schema digest</th><td>c807b62f37e927c5d49addf273957a34</td></tr>
+            
+                <tr><th>Prompt files</th><td>src/download/prompts/d4d_generic_arm_prompt_v9.md</td></tr>
+            
+                <tr><th>Validated</th><td>True</td></tr>
+            
+                <tr><th>Provenance record</th><td>data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/CHORUS_provenance.yaml</td></tr>
+            
+            </table>
+            
+            <p><strong>Recorded but not observed.</strong> The run states these
+            values and nothing measured them, so they are reported rather than
+            relied on:</p>
+            <ul>
+            
+                <li><code>inputs.bundle_md5</code> — the selected file was hashed, but no admitted matching bundle digest establishes the bytes consumed; absolute input paths alone are not byte evidence; this recorder does not consult usage ledgers or progress journals</li>
+            
+                <li><code>inputs.chunks.sha256</code> — the selected chunk manifest matches the caller's bundle, but its earlier bytes and consumption by the run are not independently verified</li>
+            
+                <li><code>inputs.source_manifest.md5</code> — the caller-selected source manifest was hashed; the bytes consumed by the run are not independently verified</li>
+            
+                <li><code>model.temperature</code> — the header declares that the native runtime's temperature was not observed; neither a prompt example nor the shared API configuration supplies an observed setting</li>
+            
+                <li><code>model.reasoning_effort</code> — supplied on the command line; neither the record header nor the model route carries it, so nothing here observed it</li>
+            
+            </ul>
+            
+        </div>
+    </div>
+    
+
+    <div class="timestamp">
+        Generated on 2026-11-25 17:32:53 using Datasheets for Datasets
+    </div>
+</body>
+</html>
