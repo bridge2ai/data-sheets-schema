@@ -40,7 +40,37 @@ def edit(root, cell, filename, change):
     path = root / "live-runs/first-scoring-remediations" / cell / filename
     record = json.loads(path.read_text()); change(record); path.write_text(json.dumps(record, indent=2, sort_keys=True))
 
-def swap(record, key, value): record[key] = value
+def coherent(root, cell, change):
+    """Apply one change to the claim and to the terminal record, then refresh the terminal
+    record's claim hash and its verified copy, so that the two records agree with each other."""
+    import hashlib
+    base = root / "live-runs/first-scoring-remediations" / cell
+    edit(root, cell, "claim.json", change)
+    digest = hashlib.sha256((base / "claim.json").read_bytes()).hexdigest()
+    def both(m):
+        change(m); m["claim_sha256"] = digest
+        if "claim_sha256" in (m.get("verified_bindings") or {}): m["verified_bindings"]["claim_sha256"] = digest
+    edit(root, cell, "manifest.json", both)
+def forged_receipt(root, cell):
+    """Replace the linked attempt-2 run by a private copy of its plan and receipt, change the
+    receipt's plan digest, and rebind every hash and path that names the receipt or the run, so
+    that the only inconsistency left is the receipt naming a plan other than the executed one."""
+    import hashlib
+    base = cell[:-3]; link = root / "live-runs" / f"{base}-02"; real = link.resolve()
+    link.unlink(); link.mkdir()
+    for name in ("plan.json", "receipt.json"): shutil.copy(real / name, link / name)
+    receipt = json.loads((link / "receipt.json").read_text()); receipt["plan_sha256"] = "9" * 64
+    (link / "receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True))
+    receipt_sha = hashlib.sha256((link / "receipt.json").read_bytes()).hexdigest()
+    edit(root, cell, "claim.json", lambda claim: claim.update(run_directory=str(link.resolve())))
+    claim_sha = hashlib.sha256((root / "live-runs/first-scoring-remediations" / cell / "claim.json").read_bytes()).hexdigest()
+    def rebind(m):
+        m.update(actual_plan=str((link / "plan.json").resolve()), actual_receipt=str((link / "receipt.json").resolve()),
+                 actual_receipt_sha256=receipt_sha, claim_sha256=claim_sha)
+        for key, value in (("actual_receipt_sha256", receipt_sha), ("claim_sha256", claim_sha)):
+            if key in (m.get("verified_bindings") or {}): m["verified_bindings"][key] = value
+    edit(root, cell, "manifest.json", rebind)
+
 controls = {
     "empty claim file": lambda r: (r / "live-runs/first-scoring-remediations" / PUBLISHED / "claim.json").write_text(""),
     "claim is not JSON": lambda r: (r / "live-runs/first-scoring-remediations" / PUBLISHED / "claim.json").write_text("{not json"),
@@ -57,6 +87,13 @@ controls = {
     "refusal carrying an accepted output": lambda r: edit(r, REFUSED, "manifest.json", lambda m: m.update(accepted_output_sha256="7" * 64)),
     "refusal relabelled as published": lambda r: edit(r, REFUSED, "manifest.json", lambda m: m.update(status="FIRST_SCORING_REPLACEMENT_PUBLISHED")),
     "terminal record missing": lambda r: (r / "live-runs/first-scoring-remediations" / PUBLISHED / "manifest.json").unlink(),
+    # second review round: forgeries that keep the claim and the terminal record consistent with each other
+    "compared-plan digest replaced by zeroes in both records": lambda r: coherent(r, PUBLISHED, lambda rec: rec.update(replacement_plan_sha256="0" * 64)),
+    "compared-plan digest replaced by a non-digest in both records": lambda r: coherent(r, PUBLISHED, lambda rec: rec.update(replacement_plan_sha256={"not": "a digest"})),
+    "same forged digest on a refused replacement": lambda r: coherent(r, REFUSED, lambda rec: rec.update(replacement_plan_sha256="0" * 64)),
+    "scoring number given as JSON true in both records": lambda r: coherent(r, PUBLISHED, lambda rec: rec.update(scoring_replicate=True)),
+    "attempt-2 receipt names another plan digest, everything else rebound": lambda r: forged_receipt(r, REFUSED),
+    "published record carrying binding failures": lambda r: edit(r, PUBLISHED, "manifest.json", lambda m: m.update(binding_failures=["claim_sha256"])),
 }
 ok = True
 code, table, found = run(mirror("baseline"))

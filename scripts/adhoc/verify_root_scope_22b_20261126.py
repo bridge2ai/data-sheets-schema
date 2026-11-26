@@ -13,8 +13,9 @@ A cell with a second attempt must carry the reviewed replacement helper's claim 
 terminal record (live-runs/first-scoring-remediations/<name>-01/). Both are parsed and
 every named field is compared with what it must bind: cell identity, attempt and scoring
 number, the reviewed helper's hash, the measured scorer head, the authorization, the
-refused plan and receipt, the claim, the attempt-2 plan and receipt, and, for a
-publication only, the published bytes; a refusal must carry no accepted output. It never opens a refused
+refused plan and receipt, the claim, the attempt-2 plan and receipt, the compared-plan digest (which must be the
+canonical digest of the executed attempt-2 plan and the one its receipt binds), and, for
+a publication only, the published bytes; a refusal must carry no accepted output. It never opens a refused
 run's candidate output. It also re-verifies the 15 scope
 declarations against scope-declarations.sha256.
 Inputs: argv[1] evidence directory (holds checkout/, live-runs/, scope-declarations.sha256).
@@ -56,7 +57,7 @@ def check_remedy(cell, bad, base, project, label, fam, rel, second, remedy):
     if first_receipt.get("status") != "REFUSED": bad("attempt 1 is not REFUSED but a remedy exists")
     for name, record in (("claim", claim), ("terminal record", term)):
         if record.get("kind") != KIND or record.get("action") != "replacement": bad(f"{name}: not a first-scoring replacement")
-        if record.get("attempt") != 2 or record.get("scoring_replicate") != 1: bad(f"{name}: attempt or scoring number is wrong")
+        if type(record.get("attempt")) is not int or type(record.get("scoring_replicate")) is not int or (record["attempt"], record["scoring_replicate"]) != (2, 1): bad(f"{name}: attempt or scoring number is wrong")
         if record.get("identity") != identity: bad(f"{name}: cell identity differs")
         if record.get("source_head") != MEASURED_HEAD: bad(f"{name}: measured scorer head differs")
         if (record.get("orchestration") or {}).get("sha256") != APPROVED_HELPER_SHA256: bad(f"{name}: not the reviewed helper")
@@ -70,7 +71,9 @@ def check_remedy(cell, bad, base, project, label, fam, rel, second, remedy):
     if claim.get("status") != "ATTEMPT2_CLAIMED": bad("claim: unexpected status")
     if not same_file(claim.get("run_directory"), second): bad("claim: run directory is not attempt 2")
     if term.get("authorization_reference") != auth: bad("terminal record: authorization differs from the claim")
-    if term.get("replacement_plan_sha256") != claim.get("replacement_plan_sha256") or not claim.get("replacement_plan_sha256"): bad("terminal record: compared-plan digest differs from the claim")
+    digest = claim.get("replacement_plan_sha256")
+    if not (isinstance(digest, str) and len(digest) == 64 and all(ch in "0123456789abcdef" for ch in digest)): bad("claim: compared-plan digest is not a sha256"); digest = None
+    if term.get("replacement_plan_sha256") != claim.get("replacement_plan_sha256"): bad("terminal record: compared-plan digest differs from the claim")
     if term.get("claim_sha256") != sha(remedy / "claim.json") or not same_file(term.get("claim_path"), remedy / "claim.json"): bad("terminal record: claim binding is wrong")
     if term.get("observed_original_plan_sha256") != refused["plan_sha256"] or term.get("observed_original_receipt_sha256") != refused["receipt_sha256"]: bad("terminal record: observed original hashes are wrong")
     status = term.get("status"); cell["remedy_status"] = status
@@ -81,6 +84,11 @@ def check_remedy(cell, bad, base, project, label, fam, rel, second, remedy):
         if not (same_file(term.get("actual_plan"), second / "plan.json") and same_file(term.get("actual_receipt"), second / "receipt.json")): bad("terminal record: actual plan or receipt path is wrong")
         second_receipt = json.loads((second / "receipt.json").read_text())
         if second_receipt.get("authorization_reference") != auth: bad("attempt-2 receipt: authorization differs from the claim")
+        # the plan that was compared with attempt 1 must be the plan that ran: the producer's
+        # canonical digest of the saved attempt-2 plan, which the scorer also puts in its receipt
+        canonical = hashlib.sha256(json.dumps(json.loads((second / "plan.json").read_text()), sort_keys=True).encode()).hexdigest()
+        if digest != canonical: bad("compared-plan digest is not the digest of the executed attempt-2 plan")
+        if second_receipt.get("plan_sha256") != canonical: bad("attempt-2 receipt does not bind the executed plan")
     vb = term.get("verified_bindings") or {}
     for key, value in vb.items():
         if term.get(key) != value: bad(f"terminal record: verified binding {key} differs from its field")
@@ -92,7 +100,7 @@ def check_remedy(cell, bad, base, project, label, fam, rel, second, remedy):
         published = cell.get("sha256")
         for key in ("accepted_output_sha256", "output_sha256", "destination_sha256", "observed_destination_sha256", "validator_input_sha256"):
             if term.get(key) != published or not published: bad(f"terminal record: {key} does not equal the published bytes")
-        if term.get("destination_exists") is not True or term.get("failure"): bad("terminal record: publication fields are inconsistent")
+        if term.get("destination_exists") is not True or term.get("failure") or term.get("binding_failures"): bad("terminal record: publication fields are inconsistent")
         for key in ("actual_plan_sha256", "actual_receipt_sha256", "observed_destination_sha256"):
             if key not in vb: bad(f"terminal record: binding {key} was not verified")
     else:
