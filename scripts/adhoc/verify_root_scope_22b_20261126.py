@@ -10,8 +10,11 @@ receipt and validator-input sha256; instrument id and version; evaluator model; 
 unit "#"; the rubric's fixed maximum; the record sha256 and scope-declaration sha256 in
 the file equal the bytes in the checkout; no local path or account name in the file.
 A cell with a second attempt must carry the reviewed replacement helper's claim and
-terminal record (live-runs/first-scoring-remediations/<name>-01/), binding the refused
-plan and receipt and, when published, the published bytes. It never opens a refused
+terminal record (live-runs/first-scoring-remediations/<name>-01/). Both are parsed and
+every named field is compared with what it must bind: cell identity, attempt and scoring
+number, the reviewed helper's hash, the measured scorer head, the authorization, the
+refused plan and receipt, the claim, the attempt-2 plan and receipt, and, for a
+publication only, the published bytes; a refusal must carry no accepted output. It never opens a refused
 run's candidate output. It also re-verifies the 15 scope
 declarations against scope-declarations.sha256.
 Inputs: argv[1] evidence directory (holds checkout/, live-runs/, scope-declarations.sha256).
@@ -29,6 +32,74 @@ PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE", "VOICE_PEDIATRIC")
 MAXP = {"rubric10": 50, "rubric20": 88}
 LEAKS = ("/Users/", "/home/", "agent-work", pathlib.Path.home().name, "\\\\", ".codex/auth")
 sha = lambda p: hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()
+KIND = "ROOT_SCOPE_FIRST_SCORING_REPLACEMENT_V1"
+MEASURED_HEAD = "9452a5c49a0533d86c5e08c1093021036ef98830"
+APPROVED_HELPER_SHA256 = "a03186c85112d079e465f12beca995f63300e3cff95cef21a3462fc5c8f72afb"  # reviewed at 944d14d17
+same_file = lambda recorded, expected: isinstance(recorded, str) and pathlib.Path(recorded).resolve() == pathlib.Path(expected).resolve()
+def load_object(path, what, bad):
+    try: value = json.loads(pathlib.Path(path).read_text())
+    except (OSError, ValueError) as exc: bad(f"{what} is not readable JSON: {type(exc).__name__}"); return None
+    if not isinstance(value, dict): bad(f"{what} is not a JSON object"); return None
+    return value
+def check_remedy(cell, bad, base, project, label, fam, rel, second, remedy):
+    """Structured check of a first-scoring replacement: the claim and the terminal record are
+    parsed, and each named field is compared with the file or value it must bind. A hash that
+    merely occurs somewhere in a record satisfies nothing."""
+    first = X / "live-runs" / f"{base}-01"
+    if not (remedy / "claim.json").exists() or not (remedy / "manifest.json").exists(): bad("attempt 2 without the helper's claim and terminal record"); return
+    claim, term = load_object(remedy / "claim.json", "claim", bad), load_object(remedy / "manifest.json", "terminal record", bad)
+    if claim is None or term is None: return
+    identity = {"project": project, "label": label, "method": "claudecode_agent", "rubric": fam + "-semantic", "instrument_id": INST, "version": "6.0",
+                "d4d_file": f"data/d4d_concatenated/claudecode_agent/{label}/{project}_d4d.yaml"}
+    refused = {"plan_sha256": sha(first / "plan.json"), "receipt_sha256": sha(first / "receipt.json")}
+    first_receipt = json.loads((first / "receipt.json").read_text())
+    if first_receipt.get("status") != "REFUSED": bad("attempt 1 is not REFUSED but a remedy exists")
+    for name, record in (("claim", claim), ("terminal record", term)):
+        if record.get("kind") != KIND or record.get("action") != "replacement": bad(f"{name}: not a first-scoring replacement")
+        if record.get("attempt") != 2 or record.get("scoring_replicate") != 1: bad(f"{name}: attempt or scoring number is wrong")
+        if record.get("identity") != identity: bad(f"{name}: cell identity differs")
+        if record.get("source_head") != MEASURED_HEAD: bad(f"{name}: measured scorer head differs")
+        if (record.get("orchestration") or {}).get("sha256") != APPROVED_HELPER_SHA256: bad(f"{name}: not the reviewed helper")
+        ra = record.get("refused_attempt") or {}
+        if ra.get("plan_sha256") != refused["plan_sha256"] or ra.get("receipt_sha256") != refused["receipt_sha256"]: bad(f"{name}: refused plan or receipt hash field is wrong")
+        if not (same_file(ra.get("plan_path"), first / "plan.json") and same_file(ra.get("receipt_path"), first / "receipt.json") and same_file(ra.get("run_directory"), first)): bad(f"{name}: refused attempt paths are wrong")
+        if not same_file(record.get("destination"), W / rel): bad(f"{name}: destination is not the cell's file")
+    auth = claim.get("authorization_reference")
+    if not isinstance(auth, str) or not auth.strip(): bad("claim: no authorization reference")
+    elif auth.strip() == str(first_receipt.get("authorization_reference", "")).strip(): bad("claim: authorization is attempt 1's")
+    if claim.get("status") != "ATTEMPT2_CLAIMED": bad("claim: unexpected status")
+    if not same_file(claim.get("run_directory"), second): bad("claim: run directory is not attempt 2")
+    if term.get("authorization_reference") != auth: bad("terminal record: authorization differs from the claim")
+    if term.get("replacement_plan_sha256") != claim.get("replacement_plan_sha256") or not claim.get("replacement_plan_sha256"): bad("terminal record: compared-plan digest differs from the claim")
+    if term.get("claim_sha256") != sha(remedy / "claim.json") or not same_file(term.get("claim_path"), remedy / "claim.json"): bad("terminal record: claim binding is wrong")
+    if term.get("observed_original_plan_sha256") != refused["plan_sha256"] or term.get("observed_original_receipt_sha256") != refused["receipt_sha256"]: bad("terminal record: observed original hashes are wrong")
+    status = term.get("status"); cell["remedy_status"] = status
+    have_run = (second / "plan.json").exists() and (second / "receipt.json").exists()
+    if not have_run: bad("attempt 2 has no plan and receipt")
+    else:
+        if term.get("actual_plan_sha256") != sha(second / "plan.json") or term.get("actual_receipt_sha256") != sha(second / "receipt.json"): bad("terminal record: actual plan or receipt hash field is wrong")
+        if not (same_file(term.get("actual_plan"), second / "plan.json") and same_file(term.get("actual_receipt"), second / "receipt.json")): bad("terminal record: actual plan or receipt path is wrong")
+        second_receipt = json.loads((second / "receipt.json").read_text())
+        if second_receipt.get("authorization_reference") != auth: bad("attempt-2 receipt: authorization differs from the claim")
+    vb = term.get("verified_bindings") or {}
+    for key, value in vb.items():
+        if term.get(key) != value: bad(f"terminal record: verified binding {key} differs from its field")
+    for key in ("claim_sha256", "observed_original_plan_sha256", "observed_original_receipt_sha256"):
+        if key not in vb: bad(f"terminal record: binding {key} was not verified")
+    if cell["state"] == "measured":
+        if cell.get("attempt") != 2: bad("a remedy exists but attempt 1 is the published one")
+        if status != "FIRST_SCORING_REPLACEMENT_PUBLISHED": bad(f"published attempt 2 but terminal status {status}")
+        published = cell.get("sha256")
+        for key in ("accepted_output_sha256", "output_sha256", "destination_sha256", "observed_destination_sha256", "validator_input_sha256"):
+            if term.get(key) != published or not published: bad(f"terminal record: {key} does not equal the published bytes")
+        if term.get("destination_exists") is not True or term.get("failure"): bad("terminal record: publication fields are inconsistent")
+        for key in ("actual_plan_sha256", "actual_receipt_sha256", "observed_destination_sha256"):
+            if key not in vb: bad(f"terminal record: binding {key} was not verified")
+    else:
+        if status != "FIRST_SCORING_REPLACEMENT_REFUSED": bad(f"cell not measured but terminal status {status}")
+        if term.get("accepted_output_sha256") is not None or term.get("destination_exists") is not False: bad("terminal record: a refusal carries an accepted output")
+        if not term.get("failure"): bad("terminal record: refusal without a reason")
+        elif have_run and term.get("failure") != second_receipt.get("failure"): bad("terminal record: refusal reason differs from the attempt-2 receipt")
 cells, problems = [], []
 for project in PROJECTS:
     for g in (1, 2, 3):
@@ -78,21 +149,12 @@ for project in PROJECTS:
                     hits = [t for t in LEAKS if t in text]
                     if hits: bad(f"leak tokens {hits}")
             if cell["state"] != "measured" and (W / rel).exists(): bad("a file exists for a cell that is not measured")
-            # a second attempt must be declared by the reviewed replacement helper's terminal record
+            # a second attempt must be declared by the reviewed replacement helper: parse the
+            # claim and the terminal record and compare every named binding field with the files
             second = X / "live-runs" / f"{base}-02"
             remedy = X / "live-runs" / "first-scoring-remediations" / f"{base}-01"
             if second.exists() or remedy.exists():
-                if not (remedy / "claim.json").exists() or not (remedy / "manifest.json").exists(): bad("attempt 2 without the helper's claim and terminal record")
-                else:
-                    raw = (remedy / "manifest.json").read_text(); m = json.loads(raw)
-                    cell["remedy_status"] = m.get("status"); cell["remedy_kind"] = m.get("kind")
-                    if m.get("kind") != "ROOT_SCOPE_FIRST_SCORING_REPLACEMENT_V1" or m.get("attempt") != 2 or m.get("scoring_replicate") != 1: bad("terminal record is not a first-scoring replacement, attempt 2")
-                    if sha(X / "live-runs" / f"{base}-01" / "receipt.json") not in raw or sha(X / "live-runs" / f"{base}-01" / "plan.json") not in raw: bad("terminal record does not bind the refused plan and receipt")
-                    if cell["state"] == "measured":
-                        if cell.get("attempt") != 2: bad("a remedy exists but attempt 1 is the published one")
-                        if m.get("status") != "FIRST_SCORING_REPLACEMENT_PUBLISHED": bad(f"published attempt 2 but terminal status {m.get('status')}")
-                        if cell.get("sha256") and cell["sha256"] not in raw: bad("terminal record does not bind the published bytes")
-                    elif m.get("status") != "FIRST_SCORING_REPLACEMENT_REFUSED": bad(f"cell not measured but terminal status {m.get('status')}")
+                check_remedy(cell, bad, base, project, label, fam, rel, second, remedy)
             elif cell.get("attempt") == 2: bad("attempt 2 published without a remedy record")
             cells.append(cell)
 on_disk = sorted(str(p.relative_to(W)) for p in (W / "data/evaluation_llm").glob(f"*_semantic/label_aware/{INST}/*_evaluation.json"))
