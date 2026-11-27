@@ -16,11 +16,14 @@ What it changes, in every `*.launch.txt` directly in the launch folders below (s
   3. on an indented command line of the exact form `cd <dir> && <launcher> --model ...`,
      a launcher other than `claude` becomes LAUNCHER_PLACEHOLDER;
   4. only with --other-home-paths: every other home directory in these files becomes `~/`
-     (the `worktree:` line and the directory of that command line);
-  5. on the line that starts `environment:`, the closing words ENVIRONMENT_OLD become
-     ENVIRONMENT_NEW, the words the release-series driver writes since 2026-11-27.
+     (the `worktree:` line and the directory of that command line). Rule 4 does not touch
+     an `account:` or `environment:` line; a home directory there is refused, not rewritten;
+  5. on the line that starts `environment:`, what follows `the two D4D variables` inside
+     the parenthesis becomes ENVIRONMENT_NEW, the words the release-series driver writes.
   And in REPORT, the kept review report of series 2026-11-25c:
-  6. the placeholder PLACEHOLDER_OLD becomes PLACEHOLDER_NEW.
+  6. the placeholder that stands before `/projects/<worktree slug>/` and before
+     `/.../tool-results/` becomes PLACEHOLDER_NEW.
+  Rules 5 and 6 are stated by position, and both are satisfied by their own output.
   No rule needs a private value: none names an account or a login.
 Limits, none of which the 31 records meet: a home directory is recognised only as
   `/Users/<x>/` or `/home/<x>/` with the slash after it, so rule 4 would also rewrite a
@@ -52,12 +55,12 @@ LAUNCH_DIRS = ("notes/final_agentic_2026-11-22/launch", "notes/release_series_20
 ACCOUNT_LINE = ("account: a Claude subscription account (name removed from the published copy, "
                 "owner's decision of 2026-11-25)")
 LAUNCHER_PLACEHOLDER = "<launcher>"
-ENVIRONMENT_OLD = "and the account's configuration directory and token variable)"
 ENVIRONMENT_NEW = ("and, where the launcher was given them, the configuration directory and the "
                    "token of the account)")
+ENVIRONMENT = re.compile(r"(the two D4D variables), [^()]*\)")
 REPORT = "notes/release_series_2026-11-25/review_1_pr6349.md"
-PLACEHOLDER_OLD = "<configuration directory>"
 PLACEHOLDER_NEW = "<session storage>"
+PLACEHOLDER = re.compile(r"<[^<>]+>(?=/projects/<worktree slug>/|/\.\.\./tool-results/)")
 HOME = re.compile(r"/(?:Users|home)/[^/\s)\"']+/")
 # The check after the rewrite is looser than the rewrite, so that it can see what the
 # rewrite's own pattern would miss: a home directory at the end of a token.
@@ -85,7 +88,7 @@ def rewrite(text: str, other_home_paths: bool) -> tuple[str, dict[str, int]]:
             new = HOME.sub("~/", line)
             counts["binary path"] += new != line
         elif line.startswith("environment:"):
-            new = line.replace(ENVIRONMENT_OLD, ENVIRONMENT_NEW)
+            new = ENVIRONMENT.sub(lambda match: f"{match.group(1)}, {ENVIRONMENT_NEW}", line)
             counts["environment line"] += new != line
         else:
             match = COMMAND.match(line)
@@ -166,14 +169,15 @@ def main() -> int:
             problems.append(f"{REPORT}: carriage return")
         else:
             lines = text.split("\n")
-            totals["report placeholder"] = sum(PLACEHOLDER_OLD in line for line in lines)
-            if not any(PLACEHOLDER_OLD in line or PLACEHOLDER_NEW in line for line in lines):
-                problems.append(f"{REPORT}: neither spelling of the placeholder found")
+            renamed = [PLACEHOLDER.sub(PLACEHOLDER_NEW, line) for line in lines]
+            totals["report placeholder"] = sum(new != old for new, old in zip(renamed, lines))
+            if not any(PLACEHOLDER.search(line) for line in renamed):
+                problems.append(f"{REPORT}: the placeholder was not found at either place")
             for index, pattern in enumerate(forbidden, 1):
-                if any(pattern.search(line) for line in lines):
+                if any(pattern.search(line) for line in renamed):
                     problems.append(f"{REPORT}: forbidden name {index} remains")
             if totals["report placeholder"]:
-                planned.append((report, text.replace(PLACEHOLDER_OLD, PLACEHOLDER_NEW)))
+                planned.append((report, "\n".join(renamed)))
     for problem in problems:
         print(problem, file=sys.stderr)
     if problems:
