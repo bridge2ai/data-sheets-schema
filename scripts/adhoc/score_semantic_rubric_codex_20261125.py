@@ -364,12 +364,36 @@ def remove_auth_copy(directory_fd, receipt):
         receipt["auth_copy_absent"] = True
 
 
-def owned_turns(rows, ident, child, working_directory):
+def child_spawn_mode(ident, parent, agent_paths, calls, call_outputs):
+    """Use a correlated call owned by the retained parent, never metadata absence."""
+    modes = []
+    for call_id, (name, arguments, owner) in calls.items():
+        if name != "spawn_agent" or owner != parent:
+            continue
+        require(call_id in call_outputs, "owned tool calls and outputs do not correlate both ways")
+        value, output_owner = call_outputs[call_id]
+        require(output_owner == owner, "tool call and output belong to different sessions")
+        outcome = parse_json(value)
+        require(isinstance(outcome, dict), "unrecognized spawn result")
+        target = outcome.get("task_name")
+        require(isinstance(target, str), "spawn result lacks child identity")
+        matching = [key for key, path in agent_paths.items() if key == target or path == target]
+        require(len(matching) == 1, "spawned child has no unique session log")
+        if matching[0] == ident:
+            mode = arguments.get("fork_turns", "all")
+            require(isinstance(mode, str) and mode in ("all", "none"), "unknown correlated spawn mode")
+            modes.append(mode)
+    require(len(modes) == 1, "child lacks one correlated parent-owned spawn")
+    return modes[0]
+
+
+def owned_turns(rows, ident, child, working_directory, *, spawn_mode=None):
     """Bind model-bearing turns to this log's thread, not forked history (6346).
 
-    Real v2 child logs resume their own history at thread_settings_applied for
-    the child's UUID. The optional metadata ordinal points at that exact row;
-    inherited parent metadata is not an ownership switch.
+    Explicit fresh spawns own their task/context pairs from the start of the
+    log, even when settings follow their first context. Forked/default spawns
+    retain the settings boundary, corroborated by optional child metadata.
+    This reader revision is identified by the plan/output runner_sha256 (6384).
     """
     start = 1
     if child:
@@ -378,11 +402,21 @@ def owned_turns(rows, ident, child, working_directory):
                    and row.get("payload", {}).get("type") == "thread_settings_applied"
                    and row["payload"].get("thread_id") == ident]
         require(bool(markers), "child has no thread-owned history marker")
-        start = markers[0]
-        ordinal = rows[0]["payload"].get("subagent_history_start_ordinal")
-        if ordinal is not None:
-            require(type(ordinal) is int and ordinal == start,
-                    "child history ordinal does not match its thread marker")
+        require(spawn_mode in ("all", "none"), "child lacks a correlated spawn mode")
+        meta = rows[0]["payload"]
+        ordinal = meta.get("subagent_history_start_ordinal")
+        forked_from = meta.get("forked_from_id")
+        if spawn_mode == "none":
+            require(forked_from is None and ordinal is None,
+                    "fresh spawn contradicts child fork metadata")
+        else:
+            start = markers[0]
+            if forked_from is not None:
+                require(forked_from == meta.get("parent_thread_id"),
+                        "forked child metadata names another parent")
+            if ordinal is not None:
+                require(type(ordinal) is int and ordinal == start,
+                        "child history ordinal does not match its thread marker")
     inherited_ids = {row["payload"].get("turn_id") for row in rows[:start]
                      if row.get("type") == "turn_context"}
     active_turn = None
@@ -435,6 +469,7 @@ def session_identity(plan, started, finished):
     inherited_contexts = []
     inherited_calls = []
     inherited_outputs = []
+    parsed = {}
     for path in logs:
         raw = read_file(path)
         lines = raw.splitlines()
@@ -465,7 +500,25 @@ def session_identity(plan, started, finished):
         if task_path is None and ident != threads[0]:
             task_path = spawn.get("agent_path")
         agent_paths[ident] = task_path or ("/root" if ident == threads[0] else None)
-        own_start, qualified_contexts = owned_turns(rows, ident, parent is not None, plan["working_directory"])
+        parsed[ident] = (path, raw, rows, meta)
+    require(threads[0] in sessions, "root thread lacks its matching session log")
+    ancestors = {}
+    for ident in sessions:
+        seen = set()
+        current = ident
+        while current != threads[0]:
+            require(current in sessions and current not in seen, "foreign or cyclic child ancestry")
+            seen.add(current)
+            current = sessions[current]
+        ancestors[ident] = (seen | {threads[0]}) - {ident}
+    # Process parents before children; copied calls cannot establish a child's
+    # spawn mode. Each binding comes from an already qualified owned segment.
+    for ident in sorted(sessions, key=lambda key: (len(ancestors[key]), key)):
+        path, raw, rows, meta = parsed[ident]
+        parent = sessions[ident]
+        mode = child_spawn_mode(ident, parent, agent_paths, calls, call_outputs) if parent else None
+        own_start, qualified_contexts = owned_turns(
+            rows, ident, parent is not None, plan["working_directory"], spawn_mode=mode)
         owned_contexts[ident] = qualified_contexts
         inherited_contexts.extend((ident, row["payload"]) for row in rows[:own_start]
                                   if row.get("type") == "turn_context")
@@ -517,19 +570,17 @@ def session_identity(plan, started, finished):
                          "parent_thread_id": parent, "cli_version": meta["cli_version"],
                          "owned_history_start_ordinal": own_start,
                          "owned_turn_ids": sorted({row["turn_id"] for row in qualified_contexts})})
-    require(threads[0] in sessions, "root thread lacks its matching session log")
-    ancestors = {}
-    for ident in sessions:
-        seen = set()
-        current = ident
-        while current != threads[0]:
-            require(current in sessions and current not in seen, "foreign or cyclic child ancestry")
-            seen.add(current)
-            current = sessions[current]
-        ancestors[ident] = (seen | {threads[0]}) - {ident}
     for inheritor, context in inherited_contexts:
-        require(turn_owners.get(context.get("turn_id")) in ancestors[inheritor],
+        owner = turn_owners.get(context.get("turn_id"))
+        require(owner in ancestors[inheritor],
                 "inherited context lacks retained ancestor-owned turn evidence")
+        require(any(json.dumps(context, sort_keys=True) == json.dumps(payload, sort_keys=True)
+                    for payload in owned_contexts[owner]),
+                "inherited context differs from retained ancestor-owned payload")
+        parent_rows = parsed[sessions[inheritor]][2]
+        require(any(row.get("type") == "turn_context"
+                    and json.dumps(row["payload"], sort_keys=True) == json.dumps(context, sort_keys=True)
+                    for row in parent_rows), "inherited context differs from retained parent payload")
     # Current V2 returns canonical task_name and records agent_path in the
     # child's first metadata. Never accept an unlogged child or a V1 alias.
     spawned = set()
