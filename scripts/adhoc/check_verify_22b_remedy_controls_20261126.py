@@ -20,6 +20,13 @@ def mirror(name):
     root = SCRATCH / name; (root / "live-runs").mkdir(parents=True)
     os.symlink(REAL / "checkout", root / "checkout")
     shutil.copy(REAL / "scope-declarations.sha256", root / "scope-declarations.sha256")
+    # the cells scored under the revised session reader: their checkout and saved plans are linked,
+    # their run directories are linked one by one so that a control can replace one with a copy
+    for name in ("checkout-revised-reader", "revised-reader-plans"):
+        if (REAL / name).exists(): os.symlink(REAL / name, root / name)
+    if (REAL / "live-runs-revised-reader").exists():
+        (root / "live-runs-revised-reader").mkdir()
+        for entry in (REAL / "live-runs-revised-reader").iterdir(): os.symlink(entry, root / "live-runs-revised-reader" / entry.name)
     for entry in (REAL / "live-runs").iterdir():
         if entry.name == "first-scoring-remediations":
             shutil.copytree(entry, root / "live-runs" / entry.name)
@@ -71,6 +78,22 @@ def forged_receipt(root, cell):
             if key in (m.get("verified_bindings") or {}): m["verified_bindings"][key] = value
     edit(root, cell, "manifest.json", rebind)
 
+THIRD = "chorus-22b-rep1-rubric20-03"
+def third_receipt(root, change):
+    """Replace the linked third-attempt run by a private copy of its plan and receipt and change the receipt."""
+    link = root / "live-runs-revised-reader" / THIRD; real = link.resolve()
+    link.unlink(); link.mkdir()
+    for name in ("plan.json", "receipt.json"): shutil.copy(real / name, link / name)
+    receipt = json.loads((link / "receipt.json").read_text()); change(receipt)
+    (link / "receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True))
+
+def third_plan(root, change):
+    link = root / "live-runs-revised-reader" / THIRD; real = link.resolve()
+    link.unlink(); link.mkdir()
+    for name in ("plan.json", "receipt.json"): shutil.copy(real / name, link / name)
+    plan = json.loads((link / "plan.json").read_text()); change(plan)
+    (link / "plan.json").write_text(json.dumps(plan, indent=2, sort_keys=True))
+
 controls = {
     "empty claim file": lambda r: (r / "live-runs/first-scoring-remediations" / PUBLISHED / "claim.json").write_text(""),
     "claim is not JSON": lambda r: (r / "live-runs/first-scoring-remediations" / PUBLISHED / "claim.json").write_text("{not json"),
@@ -93,6 +116,14 @@ controls = {
     "same forged digest on a refused replacement": lambda r: coherent(r, REFUSED, lambda rec: rec.update(replacement_plan_sha256="0" * 64)),
     "scoring number given as JSON true in both records": lambda r: coherent(r, PUBLISHED, lambda rec: rec.update(scoring_replicate=True)),
     "attempt-2 receipt names another plan digest, everything else rebound": lambda r: forged_receipt(r, REFUSED),
+    # the two cells scored under the revised session reader (third attempt)
+    "third attempt reusing attempt 2's authorization": lambda r: third_receipt(r, lambda rc: rc.update(
+        authorization_reference=json.loads((REAL / "live-runs" / (THIRD[:-3] + "-02") / "receipt.json").read_text())["authorization_reference"])),
+    "third attempt whose receipt names another plan digest": lambda r: third_receipt(r, lambda rc: rc.update(plan_sha256="8" * 64)),
+    "third attempt whose plan names the measured runner": lambda r: third_plan(r, lambda pl: pl.update(runner_sha256="b2a5c0995d891d4c5179509834b460390b1d921d78b0191965fc4ea3f91c21b9")),
+    "third attempt with a prompt other than attempt 1's": lambda r: third_plan(r, lambda pl: pl.update(prompt_sha256="a" * 64)),
+    "third attempt for a cell whose second attempt was published": lambda r: os.symlink(
+        REAL / "live-runs-revised-reader" / THIRD, r / "live-runs-revised-reader" / "chorus-22b-rep2-rubric20-03"),
     "published record carrying binding failures": lambda r: edit(r, PUBLISHED, "manifest.json", lambda m: m.update(binding_failures=["claim_sha256"])),
 }
 ok = True

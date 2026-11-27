@@ -15,8 +15,11 @@ every named field is compared with what it must bind: cell identity, attempt and
 number, the reviewed helper's hash, the measured scorer head, the authorization, the
 refused plan and receipt, the claim, the attempt-2 plan and receipt, the compared-plan digest (which must be the
 canonical digest of the executed attempt-2 plan and the one its receipt binds), and, for
-a publication only, the published bytes; a refusal must carry no accepted output. It never opens a refused
-run's candidate output. It also re-verifies the 15 scope
+a publication only, the published bytes; a refusal must carry no accepted output. A third attempt is accepted only for a cell
+whose attempts 1 and 2 were both refused, only in the revised-reader checkout, and only if
+its evaluation records the revised runner hash with attempt 1's prompt and inputs; every
+other cell must record the measured runner hash. The table's last column gives the runner
+hash that accepted each measured cell. It never opens a refused run's candidate output. It also re-verifies the 15 scope
 declarations against scope-declarations.sha256.
 Inputs: argv[1] evidence directory (holds checkout/, live-runs/, scope-declarations.sha256).
 Outputs: lines on stdout; JSON to argv[2]; TSV provenance table to argv[3] (repository-
@@ -33,6 +36,9 @@ PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE", "VOICE_PEDIATRIC")
 MAXP = {"rubric10": 50, "rubric20": 88}
 LEAKS = ("/Users/", "/home/", "agent-work", pathlib.Path.home().name, "\\\\", ".codex/auth")
 sha = lambda p: hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()
+MEASURED_RUNNER_SHA256 = "b2a5c0995d891d4c5179509834b460390b1d921d78b0191965fc4ea3f91c21b9"  # scorer at 9452a5c49
+REVISED_RUNNER_SHA256 = "45324f05ef4360f95620c5e9a37d7896661321177242f700f25bd22fe72cf51b"   # session reader fixed, 60dc19972 (issue 6384)
+W2 = X / "checkout-revised-reader"  # a third attempt, on the owner's word, runs here under the revised reader
 KIND = "ROOT_SCOPE_FIRST_SCORING_REPLACEMENT_V1"
 MEASURED_HEAD = "9452a5c49a0533d86c5e08c1093021036ef98830"
 APPROVED_HELPER_SHA256 = "a03186c85112d079e465f12beca995f63300e3cff95cef21a3462fc5c8f72afb"  # reviewed at 944d14d17
@@ -108,6 +114,57 @@ def check_remedy(cell, bad, base, project, label, fam, rel, second, remedy):
         if term.get("accepted_output_sha256") is not None or term.get("destination_exists") is not False: bad("terminal record: a refusal carries an accepted output")
         if not term.get("failure"): bad("terminal record: refusal without a reason")
         elif have_run and term.get("failure") != second_receipt.get("failure"): bad("terminal record: refusal reason differs from the attempt-2 receipt")
+def check_third(cell, bad, base, project, label, fam, rel, third):
+    """A third attempt under the revised session reader, allowed only for a cell whose attempts 1
+    and 2 were both refused (owner's word of 2026-11-27 for two cells). It is a separately
+    labelled measurement: the evaluation must record the revised runner hash, and its prompt and
+    inputs must be those of attempt 1."""
+    if cell["state"] == "measured": bad("a third attempt exists for a cell already measured"); return
+    if [r["attempt"] for r in cell["refusals"]] != [1, 2]: bad("a third attempt without two refused attempts"); return
+    if not (third / "receipt.json").exists(): cell["state"] = "running"; return
+    r = json.loads((third / "receipt.json").read_text())
+    if r.get("status") == "REFUSED":
+        cell["refusals"].append({"attempt": 3, "reason": r.get("failure"), "validator_exit": r.get("validator_exit")})
+        if (W2 / rel).exists(): bad("refused third attempt has a file")
+        return
+    if r.get("status") != "VALIDATED_AND_PUBLISHED": bad(f"attempt 3: receipt status {r.get('status')!r}"); cell["state"] = "unknown"; return
+    cell["state"], cell["attempt"] = "measured", 3
+    dest = W2 / rel
+    if r.get("validator_exit") != 0 or r.get("codex_exit") != 0: bad("attempt 3: exit codes not 0")
+    if r.get("auth_copy_absent") is not True or (third / "codex-home/auth.json").exists(): bad("attempt 3: auth copy not shown absent")
+    if r.get("evaluation_model", {}).get("name") != "gpt-6-astra": bad("attempt 3: unexpected evaluator model")
+    first, second = X / "live-runs" / f"{base}-01", X / "live-runs" / f"{base}-02"
+    earlier = {str(json.loads((d / "receipt.json").read_text()).get("authorization_reference", "")).strip() for d in (first, second)}
+    auth = str(r.get("authorization_reference", "")).strip()
+    if not auth or auth in earlier: bad("attempt 3: no authorization of its own")
+    if not same_file(r.get("output"), dest) or not dest.exists(): bad("attempt 3: published file missing or not the cell's file"); return
+    h = sha(dest); cell["sha256"] = h
+    if not (h == r.get("output_sha256") == r.get("validator_input_sha256")): bad("attempt 3: published, receipt and validated hashes differ")
+    text = dest.read_text(); d = json.loads(text)
+    if d.get("instrument_id") != INST or d.get("version") != "6.0": bad("attempt 3: instrument mismatch")
+    if (d.get("project"), d.get("label"), d.get("method")) != (project, label, "claudecode_agent"): bad("attempt 3: identity mismatch")
+    if [u.get("path") for u in d.get("evaluation_scope", {}).get("units", [])] != ["#"]: bad("attempt 3: not exactly one root unit")
+    score = d["overall_score"]
+    if score.get("max_points") != MAXP[fam] or score.get("adjusted_max_points") != MAXP[fam]: bad("attempt 3: unexpected maximum")
+    cell["points"], cell["max_points"] = score["total_points"], score["max_points"]
+    record = "data/d4d_concatenated/claudecode_agent/" + label + f"/{project}_d4d.yaml"
+    scope = "data/evaluation_scope/2026-11-22b/" + label + f"/{project}.scope.json"
+    if sha(W2 / record) != sha(W / record) or d["metadata"].get("input_sha256") != sha(W / record): bad("attempt 3: record bytes differ from the measured checkout's")
+    if sha(W2 / scope) != sha(W / scope) or d["metadata"].get("scope_context_sha256") != sha(W / scope): bad("attempt 3: scope declaration differs from the reviewed one")
+    hits = [t for t in LEAKS if t in text]
+    if hits: bad(f"attempt 3: leak tokens {hits}")
+    instrument = d.get("scorer_instrument") or {}
+    cell["accepting_runner_sha256"] = instrument.get("runner_sha256")
+    if cell["accepting_runner_sha256"] != REVISED_RUNNER_SHA256: bad("attempt 3: not accepted by the revised runner")
+    plan1 = json.loads((first / "plan.json").read_text()); plan3 = json.loads((third / "plan.json").read_text())
+    if plan3.get("runner_sha256") != REVISED_RUNNER_SHA256: bad("attempt 3: plan does not name the revised runner")
+    if instrument.get("prompt_sha256") != plan1.get("prompt_sha256") or plan3.get("prompt_sha256") != plan1.get("prompt_sha256"): bad("attempt 3: prompt differs from attempt 1")
+    for key in ("deterministic_fields", "definition_provenance", "executable_sha256"):
+        if plan3.get(key) != plan1.get(key): bad(f"attempt 3: {key} differs from attempt 1")
+    if {k: v["sha256"] for k, v in plan3.get("inputs", {}).items()} != {k: v["sha256"] for k, v in plan1.get("inputs", {}).items()}: bad("attempt 3: inputs differ from attempt 1")
+    if r.get("plan_sha256") != hashlib.sha256(json.dumps(plan3, sort_keys=True).encode()).hexdigest(): bad("attempt 3: receipt does not bind the executed plan")
+    saved = X / "revised-reader-plans" / f"{base}-03.plan.json"
+    if not saved.exists() or json.loads(saved.read_text()) != plan3: bad("attempt 3: executed plan differs from the plan saved before the run")
 cells, problems = [], []
 for project in PROJECTS:
     for g in (1, 2, 3):
@@ -156,6 +213,8 @@ for project in PROJECTS:
                     if d["metadata"].get("scope_context_sha256") != sha(scope): bad("scope hash in file differs from the declaration")
                     hits = [t for t in LEAKS if t in text]
                     if hits: bad(f"leak tokens {hits}")
+                    cell["accepting_runner_sha256"] = (d.get("scorer_instrument") or {}).get("runner_sha256")
+                    if cell["accepting_runner_sha256"] != MEASURED_RUNNER_SHA256: bad("not accepted by the measured runner")
             if cell["state"] != "measured" and (W / rel).exists(): bad("a file exists for a cell that is not measured")
             # a second attempt must be declared by the reviewed replacement helper: parse the
             # claim and the terminal record and compare every named binding field with the files
@@ -164,20 +223,27 @@ for project in PROJECTS:
             if second.exists() or remedy.exists():
                 check_remedy(cell, bad, base, project, label, fam, rel, second, remedy)
             elif cell.get("attempt") == 2: bad("attempt 2 published without a remedy record")
+            third = X / "live-runs-revised-reader" / f"{base}-03"
+            if third.exists(): check_third(cell, bad, base, project, label, fam, rel, third)
+            elif (W2 / rel).exists(): bad("a revised-reader file exists without its run")
             cells.append(cell)
 on_disk = sorted(str(p.relative_to(W)) for p in (W / "data/evaluation_llm").glob(f"*_semantic/label_aware/{INST}/*_evaluation.json"))
+on_disk_revised = sorted(str(p.relative_to(W2)) for p in (W2 / "data/evaluation_llm").glob(f"*_semantic/label_aware/{INST}/*_evaluation.json")) if W2.exists() else []
+if set(on_disk) & set(on_disk_revised): problems.append("a cell has a file in both checkouts")
+if sorted(on_disk_revised) != sorted(c["path"] for c in cells if c.get("attempt") == 3 and c["state"] == "measured"): problems.append("revised-reader files on disk differ from the third-attempt cells")
+on_disk = sorted(on_disk + on_disk_revised)
 expected = sorted(c["path"] for c in cells if c["state"] == "measured")
 if on_disk != expected: problems.append(f"files on disk ({len(on_disk)}) differ from measured cells ({len(expected)})")
 chk = subprocess.run(["shasum", "-a", "256", "-c", str(X / "scope-declarations.sha256")], cwd=W, capture_output=True, text=True)
 decl_ok = sum(line.endswith(": OK") for line in chk.stdout.splitlines())
 if chk.returncode != 0 or decl_ok != 15: problems.append(f"scope declarations: {decl_ok} of 15 verify")
-rows = ["project\tgeneration_rep\trubric\tstate\tpublished_attempt\tpoints\tmax_points\tsha256\tpath\trefused_attempts\trefusal_reason"]
+rows = ["project\tgeneration_rep\trubric\tstate\tpublished_attempt\tpoints\tmax_points\tsha256\tpath\trefused_attempts\trefusal_reason\taccepting_runner_sha256"]
 for c in cells:
     reason = " | ".join(str(r["reason"]).replace("\t", " ") for r in c["refusals"])
     if c["state"] == "measured":
-        rows.append(f"{c['project']}\t{c['generation_rep']}\t{c['rubric']}\tmeasured\t{c['attempt']}\t{c['points']}\t{c['max_points']}\t{c['sha256']}\t{c['path']}\t{len(c['refusals'])}\t{reason}")
+        rows.append(f"{c['project']}\t{c['generation_rep']}\t{c['rubric']}\tmeasured\t{c['attempt']}\t{c['points']}\t{c['max_points']}\t{c['sha256']}\t{c['path']}\t{len(c['refusals'])}\t{reason}\t{c['accepting_runner_sha256']}")
     else:
-        rows.append(f"{c['project']}\t{c['generation_rep']}\t{c['rubric']}\t{c['state']}\t\t\t\t\t\t{len(c['refusals'])}\t{reason}")
+        rows.append(f"{c['project']}\t{c['generation_rep']}\t{c['rubric']}\t{c['state']}\t\t\t\t\t\t{len(c['refusals'])}\t{reason}\t")
 counts = {}
 for c in cells: counts[c["state"]] = counts.get(c["state"], 0) + 1
 for p in problems: print("PROBLEM", p)
