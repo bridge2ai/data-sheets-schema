@@ -164,8 +164,9 @@ ARMS = (
     # the generic_v9 prompt through headless Claude Code, one session per
     # project and replicate, and differ from every arm above in prompt version
     # and model. From each other they differ in model, in the runtime string
-    # their records carry and in how their sessions were started, which the
-    # launch records state and the provenance records do not. Neither is a
+    # and method their records carry, in how the instruction was rendered
+    # (only the release arm's records carry a rendering specification) and in
+    # how their sessions were started, which the launch records state. Neither is a
     # controlled contrast with an API arm. Their rubric evaluations live under
     # other instrument directories than EVAL_DIRS and are not read here. The
     # display names carry no "headless" or "uncontrolled": both arms are both.
@@ -185,18 +186,26 @@ RECENT_PAIRS = (("v9agentic", "v9release"), ("v6agentic", "v9agentic"), ("v6agen
 RECENT_ONLY_PROJECTS = ("VOICE_PEDIATRIC",)
 RECENT_SCORE_NOTE = (
     "The two v9 arms show no score in the tables above. This report reads rubric evaluations from "
-    "`label_aware/` only, without its subdirectories. Evaluations of the v9 arms, where they exist, "
-    "were made with other instruments and are kept elsewhere: under `2026-11-22_general_context_v3` "
-    "(the 2026-11-22b series) and under the subdirectory "
-    "`label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6` (root-scope v6 scorings). "
+    "`label_aware/` only, without its subdirectories. Evaluations of the v9 arms were made with "
+    "other instruments and are kept elsewhere: for the 2026-11-22b series under "
+    "`rubric{10,20}_semantic/2026-11-22_general_context_v3/`, a sibling of `label_aware/`; "
+    "root-scope v6 scorings and their repeats, in a checkout that has them, under the subdirectory "
+    "`label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/` and under "
+    "`data/evaluation_repeats/` (separate changes add those; this report does not look for them). "
     "A score from another instrument is not comparable with the columns above, so none is pooled "
     "into these tables.")
 # Record fields outside `runs.ARM_PROCEDURE_FIELDS` that are set beside the
-# procedure fields: the version of each check-block instrument the records
-# name (a row of the deterministic table that sets two versions side by side
-# compares two instruments) and the reasoning effort.
-RECENT_RECORD_FIELDS = (("report-claims instrument", ("report_claims", "instrument")),
-                        ("receipts instrument", ("receipts", "instrument")),
+# procedure fields. Every scalar field of a selected record whose name contains
+# "instrument" is found by `_instrument_fields` and is not listed here (a row
+# of the deterministic table that sets two versions side by side compares two
+# instruments). These are the others: the schema release, the method directory,
+# how the instruction was rendered, and the reasoning effort.
+RECENT_RECORD_FIELDS = (("schema declared version", ("schema", "declared_version")),
+                        ("method", ("run", "method")),
+                        ("render specification version", ("prompts", "request", "spec", "render_version")),
+                        ("complete recorder line", ("prompts", "request", "spec", "complete_recorder_line")),
+                        ("checkout-relative toolchain", ("prompts", "request", "spec", "relative_toolchain")),
+                        ("playbooks consumed", ("playbooks", "consumed")),
                         ("reasoning effort", ("model", "reasoning_effort")))
 # Where each recent arm's launch records are, and the lines of them that say
 # how a session was started. Read, not typed: the provenance records carry
@@ -1747,7 +1756,9 @@ def recent_arms_section(data) -> list[str]:
              "and model equal to an API arm, so no difference between one of them and an earlier arm is "
              "a runtime effect or a prompt effect alone. What each pair's own records state differently: "
              "the procedure fields `d4d runs` compares, then the input bundle each project's records "
-             "pinned, the version of each check-block instrument they name and the reasoning effort. The bundle rows repeat, "
+             "pinned, every field of the records whose name says it is an instrument (shown by its "
+             "version or name, without the history that follows), the schema release, the method "
+             "directory, how the instruction was rendered and the reasoning effort. The bundle rows repeat, "
              "per pair, what the bundle-identity table above shows per arm:", "",
              "| arms | field | first | second |", "|---|---|---|---|"]
     one_sided: list[str] = []
@@ -1776,11 +1787,15 @@ def recent_arms_section(data) -> list[str]:
         sides = [(name, *(sorted(_abbreviated(v) for v in facts[key].get("values", {}).get(name, [])
                                  if v not in ("None", "")) for key in (first, second)))
                  for name in facts[first].get("values", {})]
-        for name, field in RECENT_RECORD_FIELDS:
-            a, b = (sorted({_instrument_version(v) for vs in _selected_values(data, key, field).values() for v in vs})
-                    for key in (first, second))
-            if a and b and a != b:
-                lines.append(f"{pair} {name} | {', '.join(a)} | {', '.join(b)} |")
+        fields = [(f"`{'.'.join(path)}`", path) for path in _instrument_fields(data, (first, second))]
+        for name, field in (*fields, *RECENT_RECORD_FIELDS):
+            whole = [sorted({v for vs in _selected_values(data, key, field).values() for v in vs})
+                     for key in (first, second)]
+            a, b = (sorted({_instrument_version(v) for v in side}) for side in whole)
+            if whole[0] and whole[1] and whole[0] != whole[1]:
+                # two texts under one version are still two instruments' worth of statement
+                same = " (the same version; the text after it differs)" if a == b else ""
+                lines.append(f"{pair} {name} | {', '.join(a)} | {', '.join(b)}{same} |")
             sides.append((name, a, b))
         for name, a, b in sides:
             if bool(a) != bool(b):
@@ -1792,12 +1807,25 @@ def recent_arms_section(data) -> list[str]:
                   "difference (#1097), so these are not in the table above; an arm with no content "
                   "review has no reviewer:", "",
                   "| arms | field | first | second |", "|---|---|---|---|", *one_sided, ""]
+    launch = recent_launch_lines(arms)
+    if any("| render specification version |" in row for row in one_sided):
+        lines += ["The rows for the render specification version, the complete recorder line and the "
+                  "checkout-relative toolchain are read from `prompts.request.spec` and say how an "
+                  "instruction was rendered. Where one arm of a pair records no rendering specification, "
+                  "its records state nothing about that, so a rendering difference between the two is "
+                  "stated on one side only"
+                  + ("; the instruction files themselves are beside the launch records named below." if launch else "."),
+                  ""]
+    lines += ["The rows above do not all read the same records. The procedure fields come from every "
+              "record under an arm's label prefix, whatever its project; the bundle, instrument and "
+              "other record rows from the records this report selected for the projects of the tables above"
+              + ("; the launch table below from every launch record of the series." if launch else "."), ""]
     lines += ["The runtime shown is each record's `model.agent_runtime`. The arm list at the top gives this "
               "script's own description, which for the API production arms reads `Claude API via CBORG`; "
               "the two are not reconciled here.", "",
               "Not a recorded procedure field, and so not in the tables: neither v9 arm ran under a run "
               "controller. Each replicate of each project was one headless session.", ""]
-    lines += recent_launch_lines(arms)
+    lines += launch
 
     for project in RECENT_ONLY_PROJECTS:
         per_arm = {key: [m for label in arm_labels(arms[key][1]) if (m := run_metrics(label, project))]
@@ -1841,6 +1869,27 @@ def _selected_values(data, key: str, field: tuple[str, ...]) -> dict[str, list[s
     return out
 
 
+def _instrument_fields(data, keys) -> list[tuple[str, ...]]:
+    """The path of every scalar field whose name contains `instrument`, at any
+    depth of the mappings (lists are not entered), in the records this report
+    selected for these arms. Found, not listed, so that a check block that
+    starts naming its instrument is set beside the others without an edit here."""
+    found: set[tuple[str, ...]] = set()
+
+    def walk(node: Any, path: tuple[str, ...]) -> None:
+        if isinstance(node, dict):
+            for name, value in node.items():
+                walk(value, (*path, str(name)))
+        elif path and "instrument" in path[-1] and not isinstance(node, list) and node not in (None, ""):
+            found.add(path)
+
+    for key in keys:
+        for project in PROJECTS:
+            for row in data.get(key, {}).get(project, []):
+                walk(row.get("rec") or {}, ())
+    return sorted(found)
+
+
 def _abbreviated(text: str) -> str:
     """A hexadecimal digest cut to twelve characters, anything else whole."""
     return f"{text[:12]}…" if re.fullmatch(r"[0-9a-f]{32,}", text) else text
@@ -1848,9 +1897,10 @@ def _abbreviated(text: str) -> str:
 
 def _instrument_version(text: str) -> str:
     """`v8` from an instrument string that opens with its current version and
-    then recites its history; the whole string where it opens otherwise."""
+    then recites its history; otherwise the string up to its first parenthesis
+    or colon, which is where such a string starts citing issues."""
     match = re.match(r"v\d+", text)
-    return match.group(0) if match else text
+    return match.group(0) if match else re.split(r" \(|: ", text, maxsplit=1)[0].strip()
 
 
 def recent_launch_lines(arms, root: Path | None = None) -> list[str]:

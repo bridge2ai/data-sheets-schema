@@ -78,9 +78,18 @@ def test_the_section_states_differences_from_the_records_and_reports_the_extra_p
     first, second = m.RECENT_ARMS
     one, two = m.PROJECTS[0], m.PROJECTS[1]
     data[first][one] = [{"pair": 0, "rec": {"inputs": {"bundle_md5": "a" * 32},
-                                              "report_claims": {"instrument": "v7 (#1): the history follows"}}}]
+                                              "report_claims": {"instrument": "v7 (#1): the history follows"},
+                                              "form": {"british_instrument": "v4 (#3)", "count": 2,
+                                                       "prefix_instrument": "v3 (#4): one wording"},
+                                              "run": {"method": "method-a"}}}]
     data[second][one] = [{"pair": 0, "rec": {"inputs": {"bundle_md5": "b" * 32},
                                                "report_claims": {"instrument": "v8 (#2): then v7 (#1)"},
+                                               "form": {"british_instrument": "v4 (#3)",
+                                                        "prefix_instrument": "v3 (#4): another wording"},
+                                               "receipts": {"origin": {"instrument": "origin v6 (#5, #6)"},
+                                                            "instruments_listed": ["never entered"]},
+                                               "prompts": {"request": {"spec": {"render_version": 7}}},
+                                               "run": {"method": "method-b"},
                                                "model": {"reasoning_effort": "high"}}}]
     data[first][two] = [{"pair": 0, "rec": {"inputs": {"bundle_md5": "c" * 32}}}]
     data[second][two] = [{"pair": 0, "rec": {"inputs": {"bundle_md5": "c" * 32}}}]
@@ -91,9 +100,20 @@ def test_the_section_states_differences_from_the_records_and_reports_the_extra_p
     assert "| model | model-a | model-b |" in text
     assert f"| input bundle, {one} (md5) | aaaaaaaa | bbbbbbbb |" in stated     # the bundles the records pinned
     assert f"input bundle, {two}" not in text                                   # the same bundle is no row
-    assert "| report-claims instrument | v7 | v8 |" in stated                   # the version, not its history
+    assert "| `report_claims.instrument` | v7 | v8 |" in stated                 # the version, not its history
+    assert "| method | method-a | method-b |" in stated
+    # one version over two texts is still a stated difference, and says which kind
+    assert "| `form.prefix_instrument` | v3 | v3 (the same version; the text after it differs) |" in stated
+    displays = {key: display for key, display, *_ in m.ARMS}
+    between = [line for line in text.splitlines() if line.startswith(f"| {displays[first]} / {displays[second]} |")]
+    assert not any("british_instrument" in line for line in between)            # the same on both sides: no row
     assert "| reviewer | not recorded | judge-x |" in one_sided                 # an absence is not a difference
     assert "| reasoning effort | not recorded | high |" in one_sided
+    # an instrument field is found wherever the mappings carry it, not listed by hand
+    assert "| `receipts.origin.instrument` | not recorded | origin v6 |" in one_sided
+    assert "| render specification version | not recorded | 7 |" in one_sided
+    assert "are read from `prompts.request.spec`" in one_sided
+    assert "instruments_listed" not in text and "count" not in text             # a list is not entered; a count is no instrument
     assert "reviewer" not in stated and "reasoning effort |" not in stated
     assert "launch record" not in text
     assert "no recorded procedure field differs" in text          # the pairs the stub says are alike
@@ -142,6 +162,24 @@ def test_the_figures_are_drawn_for_every_registered_arm(tmp_path, monkeypatch):
     assert (tmp_path / "figures" / "arm_comparison_rubric10.png").stat().st_size > 0
 
 
+def test_the_figures_are_drawn_for_an_arm_registered_without_a_colour(tmp_path, monkeypatch):
+    """An arm added to ARMS and to nothing else is drawn in the fallback colour, not refused."""
+    pytest.importorskip("matplotlib")
+    m = _module()
+    metric = next(iter(m.METRICS))
+    monkeypatch.setattr(m, "METRICS", {metric: m.METRICS[metric]})
+    monkeypatch.setattr(m, "ROOT", tmp_path)
+    monkeypatch.setattr(m, "OUT_FIG", tmp_path / "figures")
+    monkeypatch.setattr(m, "ARMS", (*m.ARMS, ("uncoloured", "an arm without a colour", "fixture-prefix", "offline", "reps")))
+    data = {key: {project: [{metric: 1}, {metric: 3}] for project in m.PROJECTS} for key, *_ in m.ARMS}
+    scores = {"rubric10": {key: {project: [{"total": 10, "max": 50}] for project in m.PROJECTS}
+                           for key, *_ in m.ARMS}}
+
+    m.write_figures(data, scores)
+
+    assert (tmp_path / "figures" / f"arm_comparison_{metric}.png").stat().st_size > 0
+
+
 @pytest.mark.corpus
 def test_the_extra_project_is_the_one_the_records_hold():
     """A sixth project in either series must fail here, not be dropped in silence."""
@@ -167,8 +205,10 @@ def test_the_committed_note_carries_the_section_and_says_why_the_score_cells_are
     def fields(block):
         return sorted(line.split("|")[2].strip() for line in block.splitlines() if line.startswith(pair))
 
-    assert fields(stated) == ["model", "runtime"]  # what the two series' own records state differently
-    assert fields(rest) == ["reviewer"]            # one series was reviewed, the other was not
+    assert fields(stated) == ["method", "model", "runtime"]  # what the two series' own records state differently
+    # one series was reviewed, and one records how its instruction was rendered and that it consumed its playbooks
+    assert fields(rest) == ["checkout-relative toolchain", "complete recorder line", "playbooks consumed",
+                            "render specification version", "reviewer"]
     assert "| Claude Code version |" in rest       # how the sessions were started, from the launch records
     assert m.RECENT_SCORE_NOTE in text
     for project in m.RECENT_ONLY_PROJECTS:

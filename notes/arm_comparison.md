@@ -907,23 +907,25 @@ Evaluator and generator of the evaluations above, from each evaluation's model b
 
 Evaluator and generator are the same model family wherever the same-family column reads yes: self-preference is unmeasured, since no cross-family second rating of these scores exists yet (#2928).
 
-The two v9 arms show no score in the tables above. This report reads rubric evaluations from `label_aware/` only, without its subdirectories. Evaluations of the v9 arms, where they exist, were made with other instruments and are kept elsewhere: under `2026-11-22_general_context_v3` (the 2026-11-22b series) and under the subdirectory `label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6` (root-scope v6 scorings). A score from another instrument is not comparable with the columns above, so none is pooled into these tables.
+The two v9 arms show no score in the tables above. This report reads rubric evaluations from `label_aware/` only, without its subdirectories. Evaluations of the v9 arms were made with other instruments and are kept elsewhere: for the 2026-11-22b series under `rubric{10,20}_semantic/2026-11-22_general_context_v3/`, a sibling of `label_aware/`; root-scope v6 scorings and their repeats, in a checkout that has them, under the subdirectory `label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/` and under `data/evaluation_repeats/` (separate changes add those; this report does not look for them). A score from another instrument is not comparable with the columns above, so none is pooled into these tables.
 
 ## Arms added 2026-11-26: what differs, and a fifth project
 
-Both arms run the `generic_v9` prompt through headless Claude Code, one session per project and replicate, with no run controller. They are descriptive: neither holds prompt version and model equal to an API arm, so no difference between one of them and an earlier arm is a runtime effect or a prompt effect alone. What each pair's own records state differently: the procedure fields `d4d runs` compares, then the input bundle each project's records pinned, the version of each check-block instrument they name and the reasoning effort. The bundle rows repeat, per pair, what the bundle-identity table above shows per arm:
+Both arms run the `generic_v9` prompt through headless Claude Code, one session per project and replicate, with no run controller. They are descriptive: neither holds prompt version and model equal to an API arm, so no difference between one of them and an earlier arm is a runtime effect or a prompt effect alone. What each pair's own records state differently: the procedure fields `d4d runs` compares, then the input bundle each project's records pinned, every field of the records whose name says it is an instrument (shown by its version or name, without the history that follows), the schema release, the method directory, how the instruction was rendered and the reasoning effort. The bundle rows repeat, per pair, what the bundle-identity table above shows per arm:
 
 | arms | field | first | second |
 |---|---|---|---|
 | v9 agentic, Opus 5.5 (2026-11-22b) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | model | claude-opus-5-5 | claude-fable-5-2 |
 | v9 agentic, Opus 5.5 (2026-11-22b) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | runtime | Claude Code | Claude Code (release) |
+| v9 agentic, Opus 5.5 (2026-11-22b) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | method | claudecode_agent | claudecode_release |
 | v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | schema digest | 580992ed7037… | c807b62f37e9… |
 | v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | condition | generic_v6 | generic_v9 |
 | v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | model | claude-opus-5 | claude-opus-5-5 |
 | v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | input bundle, AI_READI (md5) | 0f3abb51 | 1a58ad7b |
 | v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | input bundle, CM4AI (md5) | 1dfd34e5 | 50037fc6 |
 | v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | input bundle, VOICE (md5) | dcd71717 | 9193c3cb |
-| v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | report-claims instrument | v7 | v8 |
+| v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | `report_claims.instrument` | v7 | v8 |
+| v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | schema declared version | 2.0.0 | 3.2.1 |
 | v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | schema digest | 580992ed7037… | c807b62f37e9… |
 | v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | condition | generic_v6 | generic_v9 |
 | v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | model | claude-opus-5 | claude-fable-5-2 |
@@ -932,14 +934,17 @@ Both arms run the `generic_v9` prompt through headless Claude Code, one session 
 | v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | input bundle, AI_READI (md5) | 0f3abb51 | 1a58ad7b |
 | v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | input bundle, CM4AI (md5) | 1dfd34e5 | 50037fc6 |
 | v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | input bundle, VOICE (md5) | dcd71717 | 9193c3cb |
-| v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | report-claims instrument | v7 | v8 |
+| v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | `report_claims.instrument` | v7 | v8 |
+| v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | schema declared version | 2.0.0 | 3.2.1 |
+| v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | method | claudecode_agent | claudecode_release |
 | v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | schema digest | 580992ed7037… | c807b62f37e9… |
 | v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | condition | generic_v7 | generic_v9 |
 | v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | model | claude-opus-5 | claude-opus-5-5 |
 | v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | runtime | Claude API (direct) | Claude Code |
 | v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | input bundle, AI_READI (md5) | 8abd7bf5 | 1a58ad7b |
 | v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | input bundle, VOICE (md5) | dcd71717 | 9193c3cb |
-| v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | report-claims instrument | v7 | v8 |
+| v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | `report_claims.instrument` | v7 | v8 |
+| v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | schema declared version | 2.0.0 | 3.2.1 |
 | v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | schema digest | 580992ed7037… | c807b62f37e9… |
 | v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | condition | generic_v7 | generic_v9 |
 | v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | model | claude-opus-5 | claude-fable-5-2 |
@@ -947,17 +952,40 @@ Both arms run the `generic_v9` prompt through headless Claude Code, one session 
 | v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | reviewer | claude-fable-5 | claude-opus-5-5 |
 | v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | input bundle, AI_READI (md5) | 8abd7bf5 | 1a58ad7b |
 | v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | input bundle, VOICE (md5) | dcd71717 | 9193c3cb |
-| v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | report-claims instrument | v7 | v8 |
+| v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | `report_claims.instrument` | v7 | v8 |
+| v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | schema declared version | 2.0.0 | 3.2.1 |
+| v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | method | claudecode_agent | claudecode_release |
+| v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | playbooks consumed | False | True |
 
 Recorded by one arm of a pair only. `arm_confounds` does not call an absence a difference (#1097), so these are not in the table above; an arm with no content review has no reviewer:
 
 | arms | field | first | second |
 |---|---|---|---|
 | v9 agentic, Opus 5.5 (2026-11-22b) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | reviewer | not recorded | claude-opus-5-5 |
+| v9 agentic, Opus 5.5 (2026-11-22b) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | render specification version | not recorded | 7 |
+| v9 agentic, Opus 5.5 (2026-11-22b) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | complete recorder line | not recorded | True |
+| v9 agentic, Opus 5.5 (2026-11-22b) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | checkout-relative toolchain | not recorded | True |
+| v9 agentic, Opus 5.5 (2026-11-22b) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | playbooks consumed | not recorded | True |
 | v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | profile | not recorded | bridge2ai |
 | v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | reviewer | claude-fable-5 | not recorded |
+| v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | `form.instrument_note` | form recomputed 2026-09-02 under british instrument v3 | not recorded |
+| v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | `grounding.instrument` | not recorded | v1 |
+| v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | `pair_consistency.schema_selection_instrument` | not recorded | run-recorded-full-core-v1 |
+| v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | `receipts.identity_rules.instrument` | not recorded | receipt-identity-rules-v1 |
+| v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | `receipts.origin.instrument` | not recorded | receipt_origin v6 |
+| v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | `report_claims.schema_selection_instrument` | not recorded | run-recorded-full-core-v1 |
+| v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | playbooks consumed | True | not recorded |
 | v6 agentic (2026-08-28) / v9 agentic, Opus 5.5 (2026-11-22b) | reasoning effort | not recorded | high |
 | v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | profile | not recorded | bridge2ai |
+| v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | `form.instrument_note` | form recomputed 2026-09-02 under british instrument v3 | not recorded |
+| v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | `grounding.instrument` | not recorded | v1 |
+| v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | `pair_consistency.schema_selection_instrument` | not recorded | run-recorded-full-core-v1 |
+| v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | `receipts.identity_rules.instrument` | not recorded | receipt-identity-rules-v1 |
+| v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | `receipts.origin.instrument` | not recorded | receipt_origin v6 |
+| v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | `report_claims.schema_selection_instrument` | not recorded | run-recorded-full-core-v1 |
+| v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | render specification version | not recorded | 7 |
+| v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | complete recorder line | not recorded | True |
+| v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | checkout-relative toolchain | not recorded | True |
 | v6 agentic (2026-08-28) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | reasoning effort | not recorded | high |
 | v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | profile | not recorded | bridge2ai |
 | v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | assembly digest | d2f014803f68… | not recorded |
@@ -965,13 +993,33 @@ Recorded by one arm of a pair only. `arm_confounds` does not call an absence a d
 | v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | full max_tokens | 128000 | not recorded |
 | v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | reconcile_full max_tokens | 96000 | not recorded |
 | v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | report max_tokens | 24000 | not recorded |
+| v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | `form.instrument_note` | form recomputed 2026-09-02 under british instrument v3 | not recorded |
+| v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | `grounding.instrument` | not recorded | v1 |
+| v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | `pair_consistency.schema_selection_instrument` | not recorded | run-recorded-full-core-v1 |
+| v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | `receipts.identity_rules.instrument` | not recorded | receipt-identity-rules-v1 |
+| v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | `receipts.origin.instrument` | not recorded | receipt_origin v6 |
+| v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | `report_claims.schema_selection_instrument` | not recorded | run-recorded-full-core-v1 |
+| v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | playbooks consumed | False | not recorded |
 | v7 API production (2026-09-01) / v9 agentic, Opus 5.5 (2026-11-22b) | reasoning effort | not recorded | high |
 | v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | profile | not recorded | bridge2ai |
 | v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | assembly digest | d2f014803f68… | not recorded |
 | v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | full max_tokens | 128000 | not recorded |
 | v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | reconcile_full max_tokens | 96000 | not recorded |
 | v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | report max_tokens | 24000 | not recorded |
+| v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | `form.instrument_note` | form recomputed 2026-09-02 under british instrument v3 | not recorded |
+| v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | `grounding.instrument` | not recorded | v1 |
+| v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | `pair_consistency.schema_selection_instrument` | not recorded | run-recorded-full-core-v1 |
+| v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | `receipts.identity_rules.instrument` | not recorded | receipt-identity-rules-v1 |
+| v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | `receipts.origin.instrument` | not recorded | receipt_origin v6 |
+| v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | `report_claims.schema_selection_instrument` | not recorded | run-recorded-full-core-v1 |
+| v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | render specification version | not recorded | 7 |
+| v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | complete recorder line | not recorded | True |
+| v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | checkout-relative toolchain | not recorded | True |
 | v7 API production (2026-09-01) / v9 Claude Code release, Fable 5.2 (2026-11-25c) | reasoning effort | not recorded | high |
+
+The rows for the render specification version, the complete recorder line and the checkout-relative toolchain are read from `prompts.request.spec` and say how an instruction was rendered. Where one arm of a pair records no rendering specification, its records state nothing about that, so a rendering difference between the two is stated on one side only; the instruction files themselves are beside the launch records named below.
+
+The rows above do not all read the same records. The procedure fields come from every record under an arm's label prefix, whatever its project; the bundle, instrument and other record rows from the records this report selected for the projects of the tables above; the launch table below from every launch record of the series.
 
 The runtime shown is each record's `model.agent_runtime`. The arm list at the top gives this script's own description, which for the API production arms reads `Claude API via CBORG`; the two are not reconciled here.
 
