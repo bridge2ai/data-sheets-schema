@@ -2,11 +2,11 @@
 # run_agentic_fanout_20261122.sh
 # Purpose: run the final agentic D4D generations (generic_v9, d4d-full-core playbook) for one
 #   replicate, one project after another, each in a fresh headless Claude Code session on
-#   the claude-personal account, then run the completion gates and record what was observed.
+#   one Claude subscription account, then run the completion gates and record what was observed.
 #   Owner's word, 2026-11-22: advisor off; three replicates of all five projects; rerun the
 #   AI-READI canary with the advisor off. Model claude-opus-5-5, effort high.
 # Inputs:  <worktree> <replicate number> <project> [<project> ...]
-#   The worktree must be a checkout of this repository with its own .venv (poetry install).
+#   The worktree must be a checkout of this repository with its own .venv (poetry install). Environment (read since 2026-11-27; one of the three is required): D4D_SERIES_CONFIG_DIR and D4D_SERIES_OAUTH_TOKEN, the Claude Code configuration directory and the login token of the account to run on, or D4D_SERIES_DEFAULT_LOGIN=1 for the login the default configuration directory holds (give it per invocation, not exported for good).
 # Outputs (all under <worktree>):
 #   data/d4d_concatenated/claudecode_agent{,_core}/<label>/<PROJECT>_*   the records
 #   .temp/launch/<PROJECT>_<label>.md            the rendered launch instruction
@@ -19,7 +19,7 @@
 # Serves: the final-D4D fast route decided by the owner on 2026-11-21/22. Date: 2026-11-22.
 set -u
 W=${1:?worktree}; REP=${2:?replicate number}; shift 2
-[ $# -ge 1 ] || { echo "no projects given" >&2; exit 2; }
+[ $# -ge 1 ] || { echo "no projects given" >&2; exit 2; }; [ -n "${D4D_SERIES_CONFIG_DIR:-}${D4D_SERIES_OAUTH_TOKEN:-}" ] || [ "${D4D_SERIES_DEFAULT_LOGIN:-}" = 1 ] || { echo "STOP: no account chosen: set D4D_SERIES_CONFIG_DIR, D4D_SERIES_OAUTH_TOKEN or both, or D4D_SERIES_DEFAULT_LOGIN=1 for the login of the default configuration directory" >&2; exit 2; }; case "${D4D_SERIES_CONFIG_DIR:-}" in ""|/*) ;; *) echo "STOP: D4D_SERIES_CONFIG_DIR must be an absolute path" >&2; exit 2 ;; esac; [ -z "${D4D_SERIES_CONFIG_DIR:-}" ] || [ -d "$D4D_SERIES_CONFIG_DIR" ] || { echo "STOP: D4D_SERIES_CONFIG_DIR is not a directory" >&2; exit 2; }; [ -z "${D4D_SERIES_ACCOUNT:-}" ] || { echo "STOP: D4D_SERIES_ACCOUNT is not read; set D4D_SERIES_CONFIG_DIR, D4D_SERIES_OAUTH_TOKEN or both, or D4D_SERIES_DEFAULT_LOGIN=1 for the login of the default configuration directory" >&2; exit 2; }; [ "${D4D_SERIES_DEFAULT_LOGIN:-}" != 1 ] || [ -z "${D4D_SERIES_CONFIG_DIR:-}${D4D_SERIES_OAUTH_TOKEN:-}" ] || { echo "STOP: D4D_SERIES_DEFAULT_LOGIN=1 contradicts a configuration directory or a token; give one or the other" >&2; exit 2; }
 SERIES=2026-11-22b
 MODEL=claude-opus-5-5
 EFFORT=high
@@ -65,7 +65,7 @@ for P in "$@"; do
     echo "bundle: $BUNDLE sha256 $(shasum -a 256 "$BUNDLE" | cut -d' ' -f1)"
     echo "model: $MODEL   effort: $EFFORT (CLI flag; asserted by the launcher)"
     echo "claude code: $(command claude --version 2>/dev/null)"
-    echo "account: claude-personal (CLAUDE_CONFIG_DIR unset, as the owner's claude-personal function does)"
+    echo "account: a Claude subscription account (not named in the launch record)"
     echo "advisor tool: disabled with CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1"
     echo "MCP servers: none (--strict-mcp-config with no config)"
     echo "delivery: the instruction file's text is the single prompt of a headless session (claude -p)"
@@ -74,7 +74,7 @@ for P in "$@"; do
   say "$P LAUNCHED instruction $SHA"
   (
     unset CLAUDE_CONFIG_DIR CLAUDE_CODE_OAUTH_TOKEN CLAUDE_ACCOUNT_LABEL
-    [ -n "${CLAUDE_OAUTH_PERSONAL:-}" ] && export CLAUDE_CODE_OAUTH_TOKEN="$CLAUDE_OAUTH_PERSONAL"
+    [ -n "${D4D_SERIES_CONFIG_DIR:-}" ] && export CLAUDE_CONFIG_DIR="$D4D_SERIES_CONFIG_DIR"; [ -n "${D4D_SERIES_OAUTH_TOKEN:-}" ] && export CLAUDE_CODE_OAUTH_TOKEN="$D4D_SERIES_OAUTH_TOKEN"; for v in ${!D4D_SERIES_@}; do unset "$v"; done
     export CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1
     command claude -p --model "$MODEL" --effort "$EFFORT" --strict-mcp-config \
       --output-format stream-json --verbose "$(cat "$INSTR")" \

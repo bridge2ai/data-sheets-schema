@@ -14,7 +14,7 @@
 #   No model call of its own. The series, model, effort and account are arguments or
 #   environment, as for the driver.
 # Inputs:  <launch worktree> <series> <model> <effort> <replicate number> <state dir> <project> ...
-#   Environment: D4D_SERIES_ACCOUNT (passed through to the driver), D4D_SERIES_TREES (the
+#   Environment: D4D_SERIES_CONFIG_DIR, D4D_SERIES_OAUTH_TOKEN and D4D_SERIES_DEFAULT_LOGIN (read by the driver), D4D_SERIES_TREES (the
 #   launch worktrees of all streams, colon-separated, for the budget check), and the budget
 #   check's calibration: D4D_BUDGET_BASE_PERCENT and D4D_BUDGET_POINTS_PER_USD (both
 #   required) and D4D_BUDGET_ALREADY_COUNTED (optional); see release_series_budget_20261125.py.
@@ -28,7 +28,7 @@
 set -u
 W=${1:?launch worktree}; SERIES=${2:?series}; MODEL=${3:?model}; EFFORT=${4:?effort}; REP=${5:?replicate}; STATE=${6:?state dir}; shift 6
 [ $# -ge 1 ] || { echo "no projects given" >&2; exit 2; }
-HERE=$(cd "$(dirname "$0")" && pwd -P)
+HERE=$(cd "$(dirname "$0")" && pwd -P); [ -f "$W/scripts/adhoc/run_release_series_20261124.sh" ] || { echo "STOP: the launch worktree holds no driver (scripts/adhoc/run_release_series_20261124.sh)" >&2; exit 2; }; grep -q '^\[ -n "$ACCOUNT_DIR$ACCOUNT_TOKEN" \] || \[ "${D4D_SERIES_DEFAULT_LOGIN:-}" = 1 \] || ' "$W/scripts/adhoc/run_release_series_20261124.sh" || { echo "STOP: the driver in the launch worktree does not have the account check this runner relies on (it predates 2026-11-27)" >&2; exit 2; }
 CONDITION=${D4D_SERIES_CONDITION:-generic_v9}
 METHOD=${D4D_SERIES_METHOD:-claudecode_release}
 LABEL="${SERIES}_${MODEL}-claudecode-${CONDITION//_/-}_rep${REP}"
