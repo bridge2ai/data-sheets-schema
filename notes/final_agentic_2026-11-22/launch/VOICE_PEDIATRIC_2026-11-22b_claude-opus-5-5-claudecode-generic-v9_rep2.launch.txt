@@ -4,7 +4,7 @@ project: VOICE_PEDIATRIC   replicate: 2   label: 2026-11-22b_claude-opus-5-5-cla
 condition: generic_v9   method: claudecode_agent   arm: baseline
 instruction: .temp/launch/VOICE_PEDIATRIC_2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2.md
 instruction_sha256: e46eed1e869c4aa143a722669e183ec58be0c556cd1a9367bfcaf1a00a69ddbd (36027 bytes)
-worktree: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2   commit: a93fa7ca296db67a9650225186f4701c317bfc48   tree dirty paths: 6
+worktree: ~/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep2   commit: a93fa7ca296db67a9650225186f4701c317bfc48   tree dirty paths: 6
 schema: version: 3.2.1
 bundle: data/preprocessed/concatenated/VOICE_PEDIATRIC_preprocessed.txt sha256 eb823708a16342a3b12cc1dabb57529cea4f95fd596abf9cbecd657a17d61e47
 model: claude-opus-5-5   effort: high (CLI flag; asserted by the launcher)

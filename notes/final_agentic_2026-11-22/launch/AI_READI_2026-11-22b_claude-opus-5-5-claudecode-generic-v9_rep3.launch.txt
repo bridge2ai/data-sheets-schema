@@ -4,7 +4,7 @@ project: AI_READI   replicate: 3   label: 2026-11-22b_claude-opus-5-5-claudecode
 condition: generic_v9   method: claudecode_agent   arm: baseline
 instruction: .temp/launch/AI_READI_2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3.md
 instruction_sha256: e06573253062d75e814dff340919f0992cb59eb2732a5e6c23a5482e4be775b2 (35747 bytes)
-worktree: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep3   commit: a93fa7ca296db67a9650225186f4701c317bfc48   tree dirty paths: 1
+worktree: ~/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121-rep3   commit: a93fa7ca296db67a9650225186f4701c317bfc48   tree dirty paths: 1
 schema: version: 3.2.1
 bundle: data/preprocessed/concatenated/AI_READI_preprocessed.txt sha256 b4a282fd5c44bc93a3bcd71a4c3ee53b36a0de31d105656b70c3e296cc02a956
 model: claude-opus-5-5   effort: high (CLI flag; asserted by the launcher)

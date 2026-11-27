@@ -101,12 +101,14 @@ At the owner's decision of 2026-11-27:
 |---|---|
 | `notes/final_agentic_2026-11-22/launch/*.launch.txt` (16) | the `account:` line is replaced by the same fixed line as here, byte for byte; in the one record of the 2026-11-22 canary, the launcher in the launch command is replaced by the placeholder `<launcher>` |
 | `launch/*.launch.txt` here (15) | on the `claude code:` line the home directory of the binary's path is written `~/` |
+| `notes/final_agentic_2026-11-22/launch/*.launch.txt` (16), in a commit of its own | the other 17 home directories in these records (the `worktree:` line of each, and the directory in the canary's launch command) are written `~/`. The owner's decision named the binary's path; this goes one step further and can be reverted alone |
 | `scripts/adhoc/run_agentic_fanout_20261122.sh`, `scripts/adhoc/run_release_series_20261124.sh` | a new launch record gets a neutral account line, and from the release-series driver a home-relative path of the binary. Two lines of each driver's text are edited in place; the rest is as it ran |
 
 `scripts/adhoc/redact_launch_records_account_login_20261127.py` makes the changes to the 31
 launch records. For the 15 of this series it runs after PR #6359's script: the published
 records are that script's output followed by this one's. Its rules name no account and no
-login, so it needs no private argument.
+login, so it needs no private argument; `--check --other-home-paths` says whether a tree is
+in the final state.
 
 What this does and does not achieve:
 

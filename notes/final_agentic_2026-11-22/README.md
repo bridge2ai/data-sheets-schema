@@ -4,7 +4,8 @@
 
 The 16 files `launch/*.launch.txt` are not exactly as the launcher wrote them. At the
 owner's decision of 2026-11-27 their `account:` line carries a fixed line, and the
-launcher in the canary's launch command is a placeholder. What changed, the script that
+launcher in the canary's launch command is a placeholder; in a second step their other home
+directories were written `~/`. What changed, the script that
 made the change and what was left as it was are described in
 `notes/release_series_2026-11-25/README.md`, section "Extended on 2026-11-27".
 
