@@ -115,9 +115,9 @@ def check_remedy(cell, bad, base, project, label, fam, rel, second, remedy):
         if not term.get("failure"): bad("terminal record: refusal without a reason")
         elif have_run and term.get("failure") != second_receipt.get("failure"): bad("terminal record: refusal reason differs from the attempt-2 receipt")
 def relocated(value, pairs):
-    """Explicit path relocation for comparing two plans: a string (or a mapping key) is changed only
-    when it IS one of the approved roots or lies under it; shell command strings are compared token
-    by token under the same rule. Nothing else in a plan may differ."""
+    """Explicit path relocation used to build an expected plan from a trusted one: a string (or a
+    mapping key) is changed only when it IS one of the given roots or lies under it; shell command
+    strings are handled token by token under the same rule."""
     def one(text):
         for old, new in pairs:
             if text == old or text.startswith(old + "/"): return new + text[len(old):]
@@ -135,8 +135,9 @@ def check_third(cell, bad, base, project, label, fam, rel, third):
     """A third attempt under the revised session reader, allowed only for a cell whose attempts 1
     and 2 were both refused (owner's word of 2026-11-27 for two cells). It is a separately
     labelled measurement: the evaluation must record the revised runner hash, and the whole
-    executed plan must equal attempt 1's except for the approved checkout root, the run
-    directory and the runner hash. Authorization, completion and plan binding are checked
+    executed plan must be attempt 1's plan moved forward to the revised checkout and the third
+    run directory, with the revised runner hash, compared as JSON text; the scorer file at
+    the plan's runner path must be the revised checkout's and hash to the revised hash. Authorization, completion and plan binding are checked
     before the outcome is read, so a refusal is held to the same record as a publication."""
     if cell["state"] == "measured": bad("a third attempt exists for a cell already measured"); return
     if [r["attempt"] for r in cell["refusals"]] != [1, 2]: bad("a third attempt without two refused attempts"); return
@@ -154,15 +155,22 @@ def check_third(cell, bad, base, project, label, fam, rel, third):
     if plan3 is None: bad("attempt 3: no executed plan")
     else:
         plan1 = json.loads((first / "plan.json").read_text())
-        pairs = [(str(third.resolve()), str(first.resolve())), (str(W2.resolve()), str(W.resolve()))]
-        if plan3.get("runner_sha256") != REVISED_RUNNER_SHA256 or plan1.get("runner_sha256") != MEASURED_RUNNER_SHA256: bad("attempt 3: plan does not name the revised runner, or attempt 1 the measured one")
-        expect, got = dict(plan1), relocated(plan3, pairs)
-        for plan in (expect, got): plan.pop("runner_sha256", None)
-        shells = [expect.pop("commands_shell", None), got.pop("commands_shell", None)]
-        if got != expect: bad("attempt 3: executed plan differs from attempt 1 beyond the approved checkout root, run directory and runner hash: " + ", ".join(sorted(k for k in set(expect) | set(got) if expect.get(k) != got.get(k))))
+        # Build the plan a third attempt MUST have: attempt 1's plan with its run directory and
+        # checkout moved forward to the third run and the revised checkout, and the revised runner
+        # hash. A path that still names the measured checkout is then simply a difference.
+        forward = [(str(first.resolve()), str(third.resolve())), (str(W.resolve()), str(W2.resolve()))]
+        if plan1.get("runner_sha256") != MEASURED_RUNNER_SHA256: bad("attempt 1: plan does not name the measured runner")
+        expect = relocated({k: v for k, v in plan1.items() if k != "commands_shell"}, forward)
+        expect["runner_sha256"] = REVISED_RUNNER_SHA256
+        got = {k: v for k, v in plan3.items() if k != "commands_shell"}
+        canon = lambda value: json.dumps(value, sort_keys=True)   # JSON text, so that false and 0 differ
+        if canon(got) != canon(expect): bad("attempt 3: executed plan is not attempt 1's plan moved to the revised checkout and third run directory with the revised runner hash: " + ", ".join(sorted(k for k in set(expect) | set(got) if canon(expect.get(k)) != canon(got.get(k)))))
         try:
-            if [shlex.split(c) for c in shells[0]] != [shell_tokens(c, pairs) for c in plan3["commands_shell"]]: bad("attempt 3: shell commands differ from attempt 1")
+            if [shell_tokens(c, forward) for c in plan1["commands_shell"]] != [shlex.split(c) for c in plan3["commands_shell"]]: bad("attempt 3: shell commands are not attempt 1's moved to the revised checkout and third run directory")
         except (TypeError, ValueError, KeyError): bad("attempt 3: shell commands are not comparable")
+        runner = W2 / "scripts/adhoc/score_semantic_rubric_codex_20261125.py"
+        if not same_file(plan3.get("runner"), runner): bad("attempt 3: runner path is not the revised checkout's scorer")
+        elif sha(runner) != REVISED_RUNNER_SHA256: bad("attempt 3: the scorer file at the runner path does not hash to the revised runner hash")
         for plan, name in ((plan1, "attempt 1"), (plan3, "attempt 3")):
             if not isinstance(plan.get("prompt"), str) or hashlib.sha256(plan["prompt"].encode()).hexdigest() != plan.get("prompt_sha256"): bad(f"{name}: prompt bytes do not hash to the recorded prompt digest")
         for path, digest in (plan3.get("validation_sha256") or {}).items():

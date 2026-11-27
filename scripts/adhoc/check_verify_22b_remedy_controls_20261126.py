@@ -193,6 +193,14 @@ controls = {
     "refused third attempt without a completion time": lambda r: refuse_third(r, lambda rc: rc.pop("finished_utc")),
     "refused third attempt without a reason": lambda r: refuse_third(r, lambda rc: rc.pop("failure")),
     "refused third attempt without an authorization": lambda r: refuse_third(r, lambda rc: rc.pop("authorization_reference")),
+    # recheck round: source paths that still name the measured checkout, and JSON types
+    "third attempt runner path is the measured checkout's scorer, revised hash label kept, rebound": lambda r: third_coherent(r, lambda pl, root: pl.update(
+        runner=json.loads((REAL / "live-runs" / (THIRD[:-3] + "-01") / "plan.json").read_text())["runner"])),
+    "third attempt repo_root is the measured checkout, rebound": lambda r: third_coherent(r, lambda pl, root: pl.update(
+        repo_root=json.loads((REAL / "live-runs" / (THIRD[:-3] + "-01") / "plan.json").read_text())["repo_root"])),
+    "third attempt names the measured checkout everywhere, revised hash label kept, rebound": lambda r: third_coherent(r, lambda pl, root: (
+        lambda moved: (pl.clear(), pl.update(moved)))(json.loads(json.dumps(pl).replace(str((REAL / "checkout-revised-reader").resolve()), str((REAL / "checkout").resolve()))))),
+    "third attempt plan with a JSON false replaced by 0, rebound": lambda r: third_coherent(r, lambda pl, root: pl["deterministic_fields"]["evaluation_scope"].update(collection_metadata_inherited=0)),
     "published record carrying binding failures": lambda r: edit(r, PUBLISHED, "manifest.json", lambda m: m.update(binding_failures=["claim_sha256"])),
 }
 ok = True
