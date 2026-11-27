@@ -61,9 +61,9 @@ The repository history before this change was not rewritten and still holds them
 | File | Change |
 |---|---|
 | `launch/*.launch.txt` (15) | the `account:` line is replaced by a fixed line; every other line is as the driver wrote it |
-| `streams/stream_rep*.txt` (3) | each of the 14 `budget:` lines keeps the decision, the next project, the replicate, the count of finished runs and the projects in flight elsewhere; the usage estimates, the limit and the amount spent are removed |
+| `streams/stream_rep*.txt` (3) | each of the 14 `budget:` lines keeps the decision, the next project, the replicate, the count of finished runs and the projects in flight elsewhere; the usage estimates, the limit and the amount spent are removed, and the line gains the key `"usage_estimates": "removed"` to say so |
 | `README.md` | the Account row of the first table; the `streams/` and `review_1_pr6349.md` entries of the file list; this section |
-| `review_1_pr6349.md` | five mentions of the account are reworded so that it is not named; two phrases that stated the budget calibration and a projected usage figure are replaced by wording without figures; the path of a session scratch folder, which named the launch machine's login and folders, is replaced by a placeholder (added 2026-11-26); otherwise as the reviewer wrote it |
+| `review_1_pr6349.md` | five mentions of the account are reworded so that it is not named; two phrases that stated the budget calibration and a projected usage figure are replaced by wording without figures; the path of a session scratch folder, which named the launch machine's login and folders, is replaced by a placeholder (added 2026-11-26); the placeholders read `<configuration directory>` and `<session scratchpad>`; otherwise as the reviewer wrote it |
 | `scripts/adhoc/release_series_budget_20261125.py` | the calibration constants and the comment that derived them are replaced by environment variables, which are checked; given the values the series used, it prints the same line as before |
 | `scripts/adhoc/run_release_series_stream_20261125.sh` | the header names those variables; no change to what it runs |
 
@@ -82,7 +82,8 @@ What follows from it:
   checkout it sits in, and never the stream logs. Pointed at a checkout of this state it
   reports the 15 launch records as different and the other 45 files as the same.
 - The 90 record files, the instructions, the rendering specifications and the gate files are
-  unchanged and identical to the originals.
+  not changed by this removal. Later changes to the records are separate from it: the
+  selection added a `canonical` block to five provenance records (PR #6373).
 - Not removed: the home-directory path of the `claude` binary in the launch records, which
   issue #6352 lists, and `repo.resource_root` in the provenance records, which is absolute by
   design.
