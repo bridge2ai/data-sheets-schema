@@ -4,11 +4,11 @@
 #   semantic rubric agents, to help the owner choose one replicate per project (owner,
 #   2026-11-22: "run the rubric evaluation on all replicates to help select the best one").
 #   Each evaluation is one fresh headless Claude Code session run AS the rubric agent
-#   (claude --agent), on the claude-personal account, with the model the agent definition
+#   (claude --agent), on a Claude subscription account, with the model the agent definition
 #   owner chose on 2026-11-22 ("use opus 5.5 high for scoring": claude-opus-5-5; the agent
 #   definitions declare claude-opus-5), effort high, advisor tool off, no MCP servers.
 # Inputs:  <replicate number> <rubric: 10|20|both> <project> [<project> ...]
-#   Run from anywhere; works in the consolidated worktree below.
+#   Run from anywhere; works in the consolidated worktree below. Environment (optional, read since 2026-11-27): D4D_SERIES_CONFIG_DIR and D4D_SERIES_OAUTH_TOKEN, the Claude Code configuration directory and the login token of the account to run on.
 # Outputs (under the worktree):
 #   data/evaluation_llm/rubric{10,20}_semantic/2026-11-22_general_context_v3/<P>_2026-11-22b_rep<N>_evaluation.json
 #   .temp/eval/<P>_rep<N>_r<10|20>.stream.jsonl   the session's stream-json
@@ -18,7 +18,7 @@
 #   evaluation counts only when that exits 0.
 # Serves: selection of the final D4Ds (owner decision 2026-11-22). Date: 2026-11-22.
 set -u
-W=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121
+W="$HOME/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121"
 REP=${1:?replicate}; WHICH=${2:?10|20|both}; shift 2
 [ $# -ge 1 ] || { echo "no projects" >&2; exit 2; }
 cd "$W" || exit 2
@@ -57,7 +57,7 @@ Rules: do not read any other file under data/evaluation_llm/ and do not read any
     say "$P r$R LAUNCHED"
     (
       unset CLAUDE_CONFIG_DIR CLAUDE_CODE_OAUTH_TOKEN CLAUDE_ACCOUNT_LABEL
-      [ -n "${CLAUDE_OAUTH_PERSONAL:-}" ] && export CLAUDE_CODE_OAUTH_TOKEN="$CLAUDE_OAUTH_PERSONAL"
+      [ -n "${D4D_SERIES_CONFIG_DIR:-}" ] && export CLAUDE_CONFIG_DIR="$D4D_SERIES_CONFIG_DIR"; [ -n "${D4D_SERIES_OAUTH_TOKEN:-}" ] && export CLAUDE_CODE_OAUTH_TOKEN="$D4D_SERIES_OAUTH_TOKEN"; unset D4D_SERIES_CONFIG_DIR D4D_SERIES_OAUTH_TOKEN
       export CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1
       command claude -p --agent "$AGENT" --model "$EVALMODEL" --effort high --strict-mcp-config \
         --output-format stream-json --verbose "$PROMPT" > "$STREAM" 2> "${STREAM%.jsonl}.stderr" < /dev/null

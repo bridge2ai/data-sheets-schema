@@ -58,7 +58,7 @@ written.
 - `.temp/launch/` of the same worktree: holds the sibling projects' instructions and their full
   stream-json transcripts, which contain the sibling records verbatim (Write payloads). Not in
   `OTHER`.
-- `<configuration directory>/projects/<worktree slug>/`: shared by every session launched in that worktree
+- `<session storage>/projects/<worktree slug>/`: shared by every session launched in that worktree
   (session transcripts and `tool-results/`). The slug contains the own worktree name, which the
   scan exempts (line 73), so a read of a sibling session's file there passes.
 - Broad roots without the territory token: `rg X .`, `grep -r X data/`, `find . -name '*_d4d.yaml'`,
@@ -77,7 +77,7 @@ I checked every one of these routes directly, so the README's conclusion holds:
 - Independent path scan of all 1,771 tool inputs (any project name other than the run's own, any
   label or `_repN` other than its own, any absolute path outside the own worktree, any `data/`
   tree other than `preprocessed`/`d4d_concatenated`, any method directory other than
-  `claudecode_release[_core]`): 6 hits, all benign: four `Read`s of `<configuration directory>/.../tool-results/*.txt`
+  `claudecode_release[_core]`): 6 hits, all benign: four `Read`s of `<session storage>/.../tool-results/*.txt`
   whose session ids equal the reading transcript's own `session_id` (checked for all four);
   `rep2 VOICE` ran `ls -la .temp/schema_digest_Dataset_AI_READI_rep2.txt` (a sibling's schema
   digest, listed not read); `rep2 VOICE_PEDIATRIC` grepped VOICE naming in the source manifest.

@@ -60,10 +60,10 @@ The repository history before this change was not rewritten and still holds them
 
 | File | Change |
 |---|---|
-| `launch/*.launch.txt` (15) | the `account:` line is replaced by a fixed line; since 2026-11-27 the home directory in the path of the `claude` binary is written `~/` (see the extension below); every other line is as the driver wrote it |
+| `launch/*.launch.txt` (15) | the `account:` line is replaced by a fixed line; since 2026-11-27 the home directory in the path of the `claude` binary is written `~/` and the closing words of the `environment:` line are the ones the driver now writes (see the extension below); every other line is as the driver wrote it |
 | `streams/stream_rep*.txt` (3) | each of the 14 `budget:` lines keeps the decision, the next project, the replicate, the count of finished runs and the projects in flight elsewhere; the usage estimates, the limit and the amount spent are removed, and the line gains the key `"usage_estimates": "removed"` to say so |
 | `README.md` | the Account row of the first table; the `streams/` and `review_1_pr6349.md` entries of the file list; this section |
-| `review_1_pr6349.md` | five mentions of the account are reworded so that it is not named; two phrases that stated the budget calibration and a projected usage figure are replaced by wording without figures; the path of a session scratch folder, which named the launch machine's login and folders, is replaced by a placeholder (added 2026-11-26); the placeholders read `<configuration directory>` and `<session scratchpad>`; otherwise as the reviewer wrote it |
+| `review_1_pr6349.md` | five mentions of the account are reworded so that it is not named; two phrases that stated the budget calibration and a projected usage figure are replaced by wording without figures; the path of a session scratch folder, which named the launch machine's login and folders, is replaced by a placeholder (added 2026-11-26); the placeholders read `<session storage>` (so named since 2026-11-27) and `<session scratchpad>`; otherwise as the reviewer wrote it |
 | `scripts/adhoc/release_series_budget_20261125.py` | the calibration constants and the comment that derived them are replaced by environment variables, which are checked; given the values the series used, it prints the same line as before |
 | `scripts/adhoc/run_release_series_stream_20261125.sh` | the header names those variables; no change to what it runs |
 
@@ -101,18 +101,28 @@ At the owner's decision of 2026-11-27:
 |---|---|
 | `notes/final_agentic_2026-11-22/launch/*.launch.txt` (16) | the `account:` line is replaced by the same fixed line as here, byte for byte; in the one record of the 2026-11-22 canary, the launcher in the launch command is replaced by the placeholder `<launcher>` |
 | `launch/*.launch.txt` here (15) | on the `claude code:` line the home directory of the binary's path is written `~/` |
-| `notes/final_agentic_2026-11-22/launch/*.launch.txt` (16), in a commit of its own | the other 17 home directories in these records (the `worktree:` line of each, and the directory in the canary's launch command) are written `~/`. The owner's decision named the binary's path; this goes one step further and can be reverted alone |
-| `scripts/adhoc/run_agentic_fanout_20261122.sh`, `scripts/adhoc/run_release_series_20261124.sh` | a new launch record gets a neutral account line, and from the release-series driver a home-relative path of the binary. Two lines of each driver's text are edited in place; the rest is as it ran |
+| `notes/final_agentic_2026-11-22/launch/*.launch.txt` (16), in a commit of its own | the other 17 home directories in these records (the `worktree:` line of each, and the directory in the canary's launch command) are written `~/`. The owner's decision named the binary's path; this goes one step further and can be undone alone: a revert of that commit restores the 16 records, and the rows of this table that later edits touched are then resolved by hand |
+| `scripts/adhoc/run_agentic_fanout_20261122.sh`, `scripts/adhoc/run_release_series_20261124.sh` | a new launch record gets a neutral account line, and from the release-series driver a home-relative path of the binary |
+| the same two drivers, `scripts/adhoc/run_rubric_eval_20261122.sh`, and the header of `scripts/adhoc/run_release_series_stream_20261125.sh` | the account to run on is not chosen in these files: each takes the configuration directory and the login token from the caller's environment (`D4D_SERIES_CONFIG_DIR`, `D4D_SERIES_OAUTH_TOKEN`, both optional). `D4D_SERIES_ACCOUNT` is no longer read, and the release-series driver stops if it is set. The rubric-evaluation driver's worktree path starts at `$HOME` |
+| `launch/*.launch.txt` here (15), `review_1_pr6349.md` | the closing words of the `environment:` line are the ones the release-series driver now writes, which hold whichever of the two values the launcher was given; one placeholder of the review report is renamed |
 
 `scripts/adhoc/redact_launch_records_account_login_20261127.py` makes the changes to the 31
-launch records. For the 15 of this series it runs after PR #6359's script: the published
-records are that script's output followed by this one's. Its rules name no account and no
-login, so it needs no private argument; `--check --other-home-paths` says whether a tree is
-in the final state.
+launch records and renames the placeholder in the review report. For the 15 records of this
+series and for the report it runs after PR #6359's script: the published files are that
+script's output followed by this one's. Its rules name no account and no login, so it needs
+no private argument; `--check --other-home-paths` says whether a tree is in the final state.
+The drivers were edited by hand, line for line, so no line of them moved.
+`scripts/adhoc/check_series_driver_account_env_20261127.sh` compares the environment a
+session would receive from the drivers before and after that edit.
 
 What this does and does not achieve:
 
 - The 31 launch records of the two series now state the account in the same words.
+- The four scripts no longer read as they ran. In the three drivers the lines that set up
+  the session's account, the header lines that describe them and, in the rubric-evaluation
+  driver, the worktree path are of 2026-11-27; everything else in them is as it ran. To run
+  one again, give it the two variables for the account wanted, and run a canary first: the
+  edited drivers have launched nothing.
 - This is not a guarantee about the rest of the repository: other tracked files are not
   changed (#6362).
 - The fixed line keeps its date, 2026-11-25, in all 31 records, so that the two series

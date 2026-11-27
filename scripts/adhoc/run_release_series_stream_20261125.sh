@@ -14,7 +14,7 @@
 #   No model call of its own. The series, model, effort and account are arguments or
 #   environment, as for the driver.
 # Inputs:  <launch worktree> <series> <model> <effort> <replicate number> <state dir> <project> ...
-#   Environment: D4D_SERIES_ACCOUNT (passed through to the driver), D4D_SERIES_TREES (the
+#   Environment: D4D_SERIES_CONFIG_DIR and D4D_SERIES_OAUTH_TOKEN (read by the driver), D4D_SERIES_TREES (the
 #   launch worktrees of all streams, colon-separated, for the budget check), and the budget
 #   check's calibration: D4D_BUDGET_BASE_PERCENT and D4D_BUDGET_POINTS_PER_USD (both
 #   required) and D4D_BUDGET_ALREADY_COUNTED (optional); see release_series_budget_20261125.py.

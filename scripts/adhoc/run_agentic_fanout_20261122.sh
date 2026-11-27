@@ -6,7 +6,7 @@
 #   Owner's word, 2026-11-22: advisor off; three replicates of all five projects; rerun the
 #   AI-READI canary with the advisor off. Model claude-opus-5-5, effort high.
 # Inputs:  <worktree> <replicate number> <project> [<project> ...]
-#   The worktree must be a checkout of this repository with its own .venv (poetry install).
+#   The worktree must be a checkout of this repository with its own .venv (poetry install). Environment (optional, read since 2026-11-27): D4D_SERIES_CONFIG_DIR and D4D_SERIES_OAUTH_TOKEN, the Claude Code configuration directory and the login token of the account to run on.
 # Outputs (all under <worktree>):
 #   data/d4d_concatenated/claudecode_agent{,_core}/<label>/<PROJECT>_*   the records
 #   .temp/launch/<PROJECT>_<label>.md            the rendered launch instruction
@@ -74,7 +74,7 @@ for P in "$@"; do
   say "$P LAUNCHED instruction $SHA"
   (
     unset CLAUDE_CONFIG_DIR CLAUDE_CODE_OAUTH_TOKEN CLAUDE_ACCOUNT_LABEL
-    [ -n "${CLAUDE_OAUTH_PERSONAL:-}" ] && export CLAUDE_CODE_OAUTH_TOKEN="$CLAUDE_OAUTH_PERSONAL"
+    [ -n "${D4D_SERIES_CONFIG_DIR:-}" ] && export CLAUDE_CONFIG_DIR="$D4D_SERIES_CONFIG_DIR"; [ -n "${D4D_SERIES_OAUTH_TOKEN:-}" ] && export CLAUDE_CODE_OAUTH_TOKEN="$D4D_SERIES_OAUTH_TOKEN"; unset D4D_SERIES_CONFIG_DIR D4D_SERIES_OAUTH_TOKEN
     export CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1
     command claude -p --model "$MODEL" --effort "$EFFORT" --strict-mcp-config \
       --output-format stream-json --verbose "$(cat "$INSTR")" \

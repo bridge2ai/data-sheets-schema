@@ -17,6 +17,6 @@ MCP servers: none (--strict-mcp-config with no config)
 settings: project only (--setting-sources project): no user-level hooks, allow rules, skills, agents or plugins of the account
 permission mode: auto (--permission-mode auto, stated because the user settings that set it are not loaded)
 auto-memory: off (CLAUDE_CODE_DISABLE_AUTO_MEMORY=1)
-environment: constructed with env -i (HOME, PATH, USER, LOGNAME, SHELL, LANG, TMPDIR, the two CLAUDE_CODE_DISABLE switches, the two D4D variables, and the account's configuration directory and token variable); nothing else of the launching shell reaches the session
+environment: constructed with env -i (HOME, PATH, USER, LOGNAME, SHELL, LANG, TMPDIR, the two CLAUDE_CODE_DISABLE switches, the two D4D variables, and, where the launcher was given them, the configuration directory and the token of the account); nothing else of the launching shell reaches the session
 delivery: the instruction file's text is the single prompt of a headless session (claude -p)
 launched by: scripts/adhoc/run_release_series_20261124.sh 2026-11-25c claude-fable-5-2 high 2

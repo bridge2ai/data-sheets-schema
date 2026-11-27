@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Give the launch records of both recent series one fixed account line, and take the
-home directory out of the path of the `claude` binary.
+"""Give the launch records of both recent series one fixed account line, take the home
+directory out of the path of the `claude` binary, and state the session environment and one
+placeholder of the kept review report in words that hold for any account.
 
 Purpose: PR 6359 replaced the `account:` line of the 15 launch records of release series
   2026-11-25c by a fixed line. The 16 launch records of the series before it
@@ -15,7 +16,11 @@ What it changes, in every `*.launch.txt` directly in the launch folders below (s
   3. on an indented command line of the exact form `cd <dir> && <launcher> --model ...`,
      a launcher other than `claude` becomes LAUNCHER_PLACEHOLDER;
   4. only with --other-home-paths: every other home directory in these files becomes `~/`
-     (the `worktree:` line and the directory of that command line).
+     (the `worktree:` line and the directory of that command line);
+  5. on the line that starts `environment:`, the closing words ENVIRONMENT_OLD become
+     ENVIRONMENT_NEW, the words the release-series driver writes since 2026-11-27.
+  And in REPORT, the kept review report of series 2026-11-25c:
+  6. the placeholder PLACEHOLDER_OLD becomes PLACEHOLDER_NEW.
   No rule needs a private value: none names an account or a login.
 Limits, none of which the 31 records meet: a home directory is recognised only as
   `/Users/<x>/` or `/home/<x>/` with the slash after it, so rule 4 would also rewrite a
@@ -24,14 +29,16 @@ Limits, none of which the 31 records meet: a home directory is recognised only a
   with other separators between the parts it was given in, not a name given unseparated.
   A file with a carriage return or bytes that are not UTF-8 is refused.
 Inputs:  --root REPOSITORY [--other-home-paths] [--forbid NAME ...] [--check]
-  --forbid gives a name that must not remain in any file of the launch folders after the
-  change; it is never printed. Without it the script still checks its own rules.
+  --forbid gives a name that must not remain in any file of the launch folders, or in
+  REPORT, after the change; it is never printed. Without it the script still checks its
+  own rules.
 Outputs: the files rewritten in place and a count per rule on stdout. Every file is read
   and checked before any is written; on a problem nothing is written and the exit status
   is 2. With --check nothing is written and the exit status is 1 if anything would change.
   Plain --check accepts a tree with or without rule 4 applied; --check with
   --other-home-paths is the one that says rule 4 has been applied.
-Serves: the owner's decisions of 2026-11-27 on the final review of PR 6359 (issue 6426).
+Serves: the owner's decisions of 2026-11-27 on the final review of PR 6359 (issue 6426) and on
+  review 1 of PR 6431 (issue 6433).
 Date: 2026-11-27.
 """
 from __future__ import annotations
@@ -45,12 +52,19 @@ LAUNCH_DIRS = ("notes/final_agentic_2026-11-22/launch", "notes/release_series_20
 ACCOUNT_LINE = ("account: a Claude subscription account (name removed from the published copy, "
                 "owner's decision of 2026-11-25)")
 LAUNCHER_PLACEHOLDER = "<launcher>"
+ENVIRONMENT_OLD = "and the account's configuration directory and token variable)"
+ENVIRONMENT_NEW = ("and, where the launcher was given them, the configuration directory and the "
+                   "token of the account)")
+REPORT = "notes/release_series_2026-11-25/review_1_pr6349.md"
+PLACEHOLDER_OLD = "<configuration directory>"
+PLACEHOLDER_NEW = "<session storage>"
 HOME = re.compile(r"/(?:Users|home)/[^/\s)\"']+/")
 # The check after the rewrite is looser than the rewrite, so that it can see what the
 # rewrite's own pattern would miss: a home directory at the end of a token.
 HOME_LEFT = re.compile(r"/(?:Users|home)/[^/\s)\"']+")
 COMMAND = re.compile(r"^(\s+cd \S+ && )(\S+)( --model .*)$")
-RULES = ("account line", "binary path", "launcher", "other home paths")
+RULES = ("account line", "binary path", "launcher", "other home paths", "environment line",
+         "report placeholder")
 
 
 def spelling(name: str) -> re.Pattern[str]:
@@ -70,6 +84,9 @@ def rewrite(text: str, other_home_paths: bool) -> tuple[str, dict[str, int]]:
         elif line.startswith("claude code:"):
             new = HOME.sub("~/", line)
             counts["binary path"] += new != line
+        elif line.startswith("environment:"):
+            new = line.replace(ENVIRONMENT_OLD, ENVIRONMENT_NEW)
+            counts["environment line"] += new != line
         else:
             match = COMMAND.match(line)
             if match and match.group(2) not in ("claude", LAUNCHER_PLACEHOLDER):
@@ -128,6 +145,9 @@ def main() -> int:
                     problems.append(f"{where}: a home directory remains on the claude code line")
                 if args.other_home_paths and HOME_LEFT.search(new):
                     problems.append(f"{where}: a home directory remains")
+                environment = [line for line in lines if line.startswith("environment:")]
+                if any(ENVIRONMENT_NEW not in line for line in environment):
+                    problems.append(f"{where}: an environment line without the expected closing words")
                 if new != text:
                     planned.append((path, new))
             for index, pattern in enumerate(forbidden, 1):
@@ -136,6 +156,24 @@ def main() -> int:
                     problems.append(f"{where}: forbidden name {index} remains on line(s) {hits[:5]}")
     if not records:
         problems.append("no launch record found")
+    report = args.root / REPORT
+    try:
+        text = report.read_bytes().decode("utf-8")
+    except (OSError, UnicodeDecodeError) as error:
+        problems.append(f"{REPORT}: not readable ({type(error).__name__})")
+    else:
+        if "\r" in text:
+            problems.append(f"{REPORT}: carriage return")
+        else:
+            lines = text.split("\n")
+            totals["report placeholder"] = sum(PLACEHOLDER_OLD in line for line in lines)
+            if not any(PLACEHOLDER_OLD in line or PLACEHOLDER_NEW in line for line in lines):
+                problems.append(f"{REPORT}: neither spelling of the placeholder found")
+            for index, pattern in enumerate(forbidden, 1):
+                if any(pattern.search(line) for line in lines):
+                    problems.append(f"{REPORT}: forbidden name {index} remains")
+            if totals["report placeholder"]:
+                planned.append((report, text.replace(PLACEHOLDER_OLD, PLACEHOLDER_NEW)))
     for problem in problems:
         print(problem, file=sys.stderr)
     if problems:
@@ -146,7 +184,8 @@ def main() -> int:
     verb = "would change" if args.check else "changed"
     print(f"launch records read: {records}; files {verb}: {len(planned)}")
     for rule in RULES:
-        print(f"{verb} {rule}: {totals[rule]}")
+        unit = "line(s)" if rule == "report placeholder" else ""
+        print(f"{verb} {rule}: {totals[rule]} {unit}".rstrip())
     return 1 if args.check and planned else 0
 
 
