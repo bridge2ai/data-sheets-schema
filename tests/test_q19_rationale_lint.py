@@ -1825,14 +1825,16 @@ def test_every_empty_slot_reason_in_the_committed_ratings_is_said_to_be_empty():
     2026-11-22b agentic records make 148 committed ratings and 89 empty-slot
     reasons; one of the new reasons (CHORUS 2026-11-22b rep1) names
     was_derived_from in a list whose emptiness a neighbouring clause states,
-    the eleventh hand-read entry above. The module docstring's 2026-09-30
-    figures (133, 88, 10) describe the corpus before that extension."""
+    the eleventh hand-read entry above. Extended 2026-11-26: 15 root-scope
+    v6 ratings make 163; the 89 reasons and eleven lists are unchanged.
+    The module docstring's figures describe the historical 2026-09-30
+    measurement (133 ratings, 88 reasons, ten neighboring lists)."""
     listed = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z", "data/evaluation_llm"],
                             capture_output=True, text=True, check=True).stdout.split("\0")
     ratings = [ROOT / f for f in listed if f.endswith("_evaluation.json")
                and json.loads((ROOT / f).read_text(encoding="utf-8")).get("rubric")
                == "rubric20-semantic"]
-    assert len(ratings) == 148
+    assert len(ratings) == 163
     empty = re.compile(r"\b(?:empty|absent|unpopulated|unused|no|not|none|nor|neither|lacks?"
                        r"|lacking|missing|without|null)\b", re.I)
     base = ROOT / "data/evaluation_llm/rubric20_semantic"
@@ -2293,8 +2295,10 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     a recommendation verb, read by hand as requests (127 recommendations,
     45 requests) and pinned in `_RECOMMENDATIONS_READ_2026_11_22`, apart from
     the 122 the #3831 blind second reading covers. The 155 read sentences and
-    their classes are unchanged.
-    The module docstring's figures are the 2026-09-30 measurement."""
+    their classes were unchanged. Extended 2026-11-26: see the root-scope
+    measurement note; 26 marked sentences and two bare pointers are added.
+    The module docstring's figures remain the historical 2026-09-30
+    measurement; the current dated extension is measured here."""
     from data_sheets_schema import q19_rationale_lint as lint
     listed = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z", "data/evaluation_llm"],
                             capture_output=True, text=True, check=True).stdout.split("\0")
@@ -2307,10 +2311,10 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
                 continue
     slot = lint.REPRESENTATION_CONCERNS["empty_slot"]
     ratings = [d for d in documents if isinstance(d, dict) and d.get("rubric") == "rubric20-semantic"]
-    assert len(ratings) == 148
+    assert len(ratings) == 163
     q19 = [s for d in ratings for _, s in lint._sentences(q19_item(d)) if slot.search(s)]
     unmarked = [s for s in q19 if not lint._EMPTINESS.search(s)]
-    assert (len(q19), len(unmarked)) == (122, 2)
+    assert (len(q19), len(unmarked)) == (123, 2)
     assert all("was_derived_from" in s and ("explicit rather than implied" in s or "populated" in s)
                for s in unmarked)
 
@@ -2336,11 +2340,11 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     marked = [s for s in outside if lint._EMPTINESS.search(s)]
     rest = [s for s in outside if not lint._EMPTINESS.search(s)]
     recommendations = [s for s in rest if recommendation.match(s)]
-    assert (len(outside), len(marked), len(recommendations)) == (1131, 849, 127)
+    assert (len(outside), len(marked), len(recommendations)) == (1159, 875, 127)
     read = [s for s in rest if not recommendation.match(s)]
-    assert len(read) == 155
+    assert len(read) == 157
     # The regex sorts by the first word only; the 127 (122 of 2026-09-30 and
-    # five of 2026-11-22) are read by hand like the 155, and every one is
+    # five of 2026-11-22) are read by hand like the historical 155; each is
     # pinned by one fragment to one class (#3747). The five are pinned in
     # `_RECOMMENDATIONS_READ_2026_11_22`; no blind second reading covers them.
     sorted_ = {}
@@ -2372,7 +2376,7 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
         assert len(hits) == 1, fragment
         classified += hits
         misses += hits
-    for kind, fragments in _HAND_READ_NOT_CREDIT.items():
+    for kind, fragments in _hand_read_not_credit_with_extensions().items():
         for fragment in fragments:
             # A bare name is the whole sentence; the others are part of one.
             hits = [s for s in read if (s == fragment if kind == "bare_name" else fragment in s)]
@@ -2380,16 +2384,16 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
             classified += hits
             if kind == "unrecognised_absence":
                 misses += hits
-    assert len(set(classified)) == len(classified) == 46
+    assert len(set(classified)) == len(classified) == 48
     assert len(set(misses)) == len(misses) == 31
-    # 109 left are credit: 155 less the 11, 18 and 17 pinned above (#3838).
+    # 109 left are credit: 157 less the 11, 18 and 19 pinned above (#3838).
     assert len(read) - len(classified) == 109
-    # The classes are the module docstring's counts, so a pin moved from one
-    # class to another fails here, as a recommendation's does above.
+    # These are the historical counts plus the dated bare-name extension;
+    # moving a pin to another class fails as a recommendation's does above.
     assert (len(_UNRECOGNISED_NAMED_ABSENCES), len(_UNRECOGNISED_PLACEMENTS)) == (11, 18)
-    assert {kind: len(fragments) for kind, fragments in _HAND_READ_NOT_CREDIT.items()} == {
+    assert {kind: len(fragments) for kind, fragments in _hand_read_not_credit_with_extensions().items()} == {
         "unrecognised_absence": 2, "count": 2, "criticism": 5, "qualification": 4,
-        "bare_name": 2, "criterion": 2}
+        "bare_name": 4, "criterion": 2}
     # The 31 misses are misses: the gate reads none of them — the named
     # absences, the placements or the unrecognised absences — as an
     # empty-slot reason, as it reads none of the 64 above; it reads
@@ -2406,3 +2410,18 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     assert len(worded) == 13 and set(named) <= set(worded)
     left = sorted(set(worded) - set(named))
     assert [s[:24] for s in left] == ["Fill the structural gaps", "parent_datasets logged a"]
+
+
+# Read 2026-11-26 separately from the historical measurement and blind packet.
+# The recursive outside census includes JSON pointer values. These two whole
+# strings name slots but assert no absence, placement, criticism, or credit;
+# their absent/fields_involved container keys are not part of the sentence.
+# See notes/q19_root_scope_v6_corpus_20261126.md for all 28 new sentences.
+_HAND_READ_NOT_CREDIT_2026_11_26 = {
+    "bare_name": ["/parent_datasets", "/was_derived_from"],
+}
+
+
+def _hand_read_not_credit_with_extensions():
+    return {kind: fragments + _HAND_READ_NOT_CREDIT_2026_11_26.get(kind, [])
+            for kind, fragments in _HAND_READ_NOT_CREDIT.items()}

@@ -189,6 +189,15 @@ class TestEveryEvaluationNamesItsInstrument(InstrumentManifest):
                     real.add(hashlib.sha256(blob.stdout).hexdigest())
             for name, entry in self.doc["rubrics"][rubric]["evaluations"].items():
                 with self.subTest(rubric=rubric, evaluation=name):
+                    if entry["basis"] == "recorded_composed_definition":
+                        from data_sheets_schema.root_scope_definition import compose_definition
+                        composed, provenance = compose_definition(rubric.removesuffix("_semantic"), repo_root=ROOT)
+                        self.assertEqual(entry, {"basis": "recorded_composed_definition",
+                            "instrument_kind": "composed_agent_definition", "instrument_commit": None,
+                            "instrument_sha256": hashlib.sha256(composed).hexdigest(), "composition": provenance})
+                        artifact = json.loads((ROOT / "data/evaluation_llm" / rubric / name).read_text())
+                        self.assertEqual(artifact["metadata"]["instrument_sha256"], entry["instrument_sha256"])
+                        continue
                     self.assertIn(entry["instrument_sha256"], real)
 
     def test_a_recorded_instrument_is_read_from_the_new_key_when_present(self):
@@ -258,6 +267,151 @@ class TestTheResolverIsReproducible(InstrumentManifest):
                                  self.doc["rubrics"][rubric],
                                  "the manifest disagrees with a fresh resolve; "
                                  "run scripts/instrument_provenance.py --write")
+
+
+def _composition_resolver():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("composition_resolver_controls", SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _composition_case(tmp_path, monkeypatch, rubric):
+    from data_sheets_schema.root_scope_definition import DEFINITION_PINS
+    from tests.test_evaluation.test_root_scope_instrument import root_fixture
+    result, _, _, _, _ = root_fixture(tmp_path / "shape", rubric)
+    checkout = tmp_path / "checkout"
+    pins = DEFINITION_PINS[rubric]
+    for key in ("source_path", "overrides_path"):
+        destination = checkout / pins[key]
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes((ROOT / pins[key]).read_bytes())
+    instrument = "2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6"
+    result.update(instrument_id=instrument, scorer_instrument={"id": instrument})
+    output = checkout / "data/evaluation_llm" / (rubric + "_semantic") / "label_aware" / instrument / "Toy_evaluation.json"
+    output.parent.mkdir(parents=True)
+    output.write_text(json.dumps(result))
+    module = _composition_resolver()
+    monkeypatch.setattr(module, "ROOT", checkout)
+    monkeypatch.setattr(module, "versions", lambda path: [
+        {"sha256": pins["source_sha256"], "first_seen": "synthetic", "commit": "legacy"}]
+        if path == pins["source_path"] else [])
+    def legacy_forbidden(*values):
+        raise AssertionError("v6 fell through to legacy instrument recovery")
+    monkeypatch.setattr(module, "_dirty", legacy_forbidden)
+    monkeypatch.setattr(module, "_writing_commit", legacy_forbidden)
+    return module, result, output, pins
+
+
+def test_root_scope_composition_resolves_realistic_v6_shapes(tmp_path, monkeypatch, rubric):
+    module, result, output, pins = _composition_case(tmp_path, monkeypatch, rubric)
+    block = module.resolve(rubric + "_semantic")
+    assert len(block["evaluations"]) == 1
+    entry = next(iter(block["evaluations"].values()))
+    assert entry == {"basis": "recorded_composed_definition", "instrument_kind": "composed_agent_definition",
+                     "instrument_sha256": result["metadata"]["instrument_sha256"],
+                     "instrument_commit": None, "composition": dict(pins)}
+    assert output.read_text() == json.dumps(result)
+
+
+def test_root_scope_composition_drift_never_recovers_a_legacy_agent(tmp_path, monkeypatch, rubric, mutation):
+    module, result, output, pins = _composition_case(tmp_path, monkeypatch, rubric)
+    if mutation in ("source", "override"):
+        path = module.ROOT / pins["source_path" if mutation == "source" else "overrides_path"]
+        path.write_bytes(path.read_bytes() + b"\n")
+    elif mutation == "missing_digest":
+        result["metadata"]["rubric_hash"] = result["metadata"].pop("instrument_sha256")
+    elif mutation == "old_digest":
+        result["metadata"]["instrument_sha256"] = pins["source_sha256"]
+    elif mutation == "wrong_digest":
+        result["metadata"]["instrument_sha256"] = "0" * 64
+    elif mutation == "wrong_rubric":
+        result["rubric"] = "rubric20-semantic" if rubric == "rubric10" else "rubric10-semantic"
+    elif mutation == "unknown_kind":
+        result["metadata"]["instrument_kind"] = "api_system_prompt"
+    elif mutation == "wrong_version":
+        result["version"] = "3.0"
+    elif mutation == "missing_metadata":
+        result.pop("metadata")
+    elif mutation == "wrong_scope":
+        result["evaluation_scope"]["units"][0]["path"] = "#/resources/0"
+    output.write_text(json.dumps(result))
+    # The real checkout remains valid. The explicit synthetic root must govern
+    # composition even when cwd and installed resources could otherwise pass.
+    monkeypatch.chdir(ROOT)
+    entry = next(iter(module.resolve(rubric + "_semantic")["evaluations"].values()))
+    assert entry["basis"] == "unresolved" and entry["instrument_sha256"] is None
+    assert entry["instrument_commit"] is None and "reason" in entry
+
+
+def test_root_scope_composition_independent_markers_prevent_fallback(tmp_path, monkeypatch, marker):
+    module, result, output, _ = _composition_case(tmp_path, monkeypatch, "rubric20")
+    malformed = {"metadata": result["metadata"]}
+    if marker == "version":
+        malformed["version"] = "6.0"
+    elif marker == "scope":
+        malformed["evaluation_scope"] = result["evaluation_scope"]
+    elif marker == "instrument":
+        malformed["instrument_id"] = result["instrument_id"]
+    elif marker == "scorer":
+        malformed["scorer_instrument"] = result["scorer_instrument"]
+    if marker != "directory":
+        plain = output.parents[1] / "historical-looking" / output.name
+        plain.parent.mkdir()
+        output.rename(plain)
+        output = plain
+    output.write_text(json.dumps(malformed))
+    entry = next(iter(module.resolve("rubric20_semantic")["evaluations"].values()))
+    assert entry["basis"] == "unresolved" and entry["instrument_sha256"] is None
+
+
+def test_root_scope_composition_leaves_historical_resolution_unchanged(tmp_path, monkeypatch, ancestor):
+    module = _composition_resolver()
+    checkout = tmp_path / ancestor
+    monkeypatch.setattr(module, "ROOT", checkout)
+    base = checkout / "data/evaluation_llm/rubric10_semantic/label_aware"
+    base.mkdir(parents=True)
+    source = checkout / ".claude/agents/d4d-rubric10-semantic.md"
+    source.parent.mkdir(parents=True)
+    source.write_text("synthetic historical scoring rules\n")
+    agent_hash = hashlib.sha256(source.read_bytes()).hexdigest()
+    rubric_hash = hashlib.sha256(b"synthetic rubric text").hexdigest()
+    agent = {"sha256": agent_hash, "first_seen": "synthetic", "commit": "abc12345"}
+    text = {"sha256": rubric_hash, "first_seen": "synthetic", "commit": "def12345"}
+    monkeypatch.setattr(module, "versions", lambda path: [agent] if path.endswith(".md") else [text])
+    monkeypatch.setattr(module, "_dirty", lambda path: Path(path).name == "dirty_evaluation.json")
+    monkeypatch.setattr(module, "_writing_commit", lambda path: "a" * 40)
+    monkeypatch.setattr(module, "_agent_at", lambda *values: agent_hash)
+    for name, meta in (("recorded", {"instrument_sha256": agent_hash}),
+                       ("recovered", {"rubric_hash": rubric_hash}),
+                       ("dirty", {"rubric_hash": rubric_hash})):
+        (base / (name + "_evaluation.json")).write_text(json.dumps({"version": "3.0", "metadata": meta}))
+    assert module.resolve("rubric10_semantic") == {"agent_versions": [agent], "evaluations": {
+        "label_aware/recorded_evaluation.json": {"basis": "recorded", "instrument_sha256": agent_hash,
+                                                 "instrument_commit": "abc12345"},
+        "label_aware/recovered_evaluation.json": {"basis": "recovered_from_commit",
+            "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+            "recovered_from": "aaaaaaaa", "instrument_sha256": agent_hash, "instrument_commit": "abc12345"},
+        "label_aware/dirty_evaluation.json": {"basis": "working_tree",
+            "recorded_hash_is": "the rubric text, which does not identify the scoring rules",
+            "recovered_from": "the agent file on disk; this evaluation is not committed",
+            "instrument_sha256": agent_hash, "instrument_commit": "abc12345"}}}
+
+
+test_root_scope_composition_resolves_realistic_v6_shapes = pytest.mark.parametrize(
+    "rubric", ("rubric10", "rubric20"))(test_root_scope_composition_resolves_realistic_v6_shapes)
+test_root_scope_composition_drift_never_recovers_a_legacy_agent = pytest.mark.parametrize(
+    "rubric", ("rubric10", "rubric20"))(pytest.mark.parametrize("mutation", (
+        "source", "override", "missing_digest", "old_digest", "wrong_digest", "wrong_rubric",
+        "unknown_kind", "wrong_version", "missing_metadata", "wrong_scope"))(
+        test_root_scope_composition_drift_never_recovers_a_legacy_agent))
+test_root_scope_composition_independent_markers_prevent_fallback = pytest.mark.parametrize(
+    "marker", ("version", "scope", "instrument", "scorer", "directory"))(
+    test_root_scope_composition_independent_markers_prevent_fallback)
+test_root_scope_composition_leaves_historical_resolution_unchanged = pytest.mark.parametrize(
+    "ancestor", ("checkout", "checkout_root-scope-v6"))(
+    test_root_scope_composition_leaves_historical_resolution_unchanged)
 
 
 if __name__ == "__main__":
