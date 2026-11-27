@@ -24,7 +24,7 @@
 #        output, the launch record, the launch folder or the session; a setup the helper
 #        refuses stops the driver before any launch, and a line that cannot be written
 #        stops it before the launch record exists. The helper by itself: each of its
-#        rules is refused with its own code (the 20 cases listed below), an existing
+#        rules is refused with its own code (the cases listed below), an existing
 #        file is set to mode 600 before the append, and a new one is created 600 under
 #        a loose umask. The two earlier drivers stop when either variable is given, and
 #        the stream runner when the file is under its state folder. With neither given,
@@ -227,6 +227,10 @@ rule 30 "the file is a pipe" - check -- "$L=$T/private/fifo.tsv" "$M=$PNOTE"
 rule 30 "the file has a second name (a hard link)" - check -- "$L=$PLOG" "$M=$PNOTE"
 rule 30 "the file exists and is empty" - check -- "$L=$T/private/empty.tsv" "$M=$PNOTE"
 rule 30 "the file holds something else" - check -- "$L=$T/private/other.tsv" "$M=$PNOTE"
+echo "some other log" > "$T/private/unreadable.tsv"; chmod 200 "$T/private/unreadable.tsv"
+rule 30 "the file holds something else and cannot be read" - write L P -- "$L=$T/private/unreadable.tsv" "$M=$PNOTE"
+chmod 600 "$T/private/unreadable.tsv"
+if [ "$(cat "$T/private/unreadable.tsv")" = "some other log" ]; then ok "helper: a file it cannot read is left as it was"; else bad "helper: a file it cannot read was written to"; fi
 rm -f "$T/private/second-name.tsv"
 ( cd "$T" && /usr/bin/env -i "HOME=$T/home" PATH=/usr/bin:/bin "$L=$T/private/own-output.tsv" "$M=$PNOTE" /bin/bash "$HELPER" write L P > "$T/private/own-output.tsv" 2> /dev/null ); RC=$?
 if [ $RC -eq 30 ] && [ ! -s "$T/private/own-output.tsv" ]

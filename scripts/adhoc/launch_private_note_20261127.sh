@@ -74,7 +74,9 @@ check() {
   done
   if [ -e "$LOG" ] || [ -L "$LOG" ]; then
     [ ! -L "$LOG" ] && [ -f "$LOG" ] && [ -O "$LOG" ] && [ "$(links_of "$LOG")" = 1 ] && [ -s "$LOG" ] || stop 30
-    if grep -q -v -E "$SHAPE" "$LOG" 2> /dev/null; then stop 30; fi
+    [ -r "$LOG" ] && [ -w "$LOG" ] || stop 30
+    grep -q -v -E "$SHAPE" "$LOG" 2> /dev/null; rc=$?
+    [ "$rc" -eq 1 ] || stop 30   # 1: every line has the shape; 0: one does not; anything else: the file could not be read
   fi
 }
 case "$MODE" in

@@ -136,6 +136,18 @@ What this does and does not achieve:
   driver appends the time, the label, the project and that line to the file before each
   launch and prints nothing of either. `scripts/adhoc/launch_private_note_20261127.sh` states
   what it accepts. It is off unless both are given; the two earlier drivers refuse them.
+- This is not a guarantee about the rest of the repository: other tracked files are not
+  changed (#6362).
+- The fixed line keeps its date, 2026-11-25, in all 31 records, so that the two series
+  carry one line; for the earlier series the decision is the one of 2026-11-27.
+- A home directory is still written out in files this change does not edit: the 16
+  instruction files of the earlier series (`notes/final_agentic_2026-11-22/launch/*.md`,
+  320 lines), which are pinned by `instruction_sha256`; 10 lines of its gate files; and
+  the record files, in `repo.resource_root` of every provenance record (by design) and,
+  for the earlier series, also in the `# Schema:` header of each full record, the `path:`
+  fields of each provenance record and four lines of reconciliation notes.
+- `review_1_pr6349.md` describes the `claude code:` line as it was when it was reviewed.
+- The repository history still holds every replaced line.
 
 ## Results
 
