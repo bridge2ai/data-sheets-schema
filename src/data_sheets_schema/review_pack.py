@@ -588,7 +588,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     bundle_state = "relative bundle path has no recorded base" if unknown_bundle_base else "no bundle_path recorded"
     if bundle:
         bpath = bundle
-        pack["bundle"]["resolved_path"] = _pack_path(bpath)   # which root the bytes came from (round 2, note 6)
+        pack["bundle"]["resolved_path"] = _pack_path(bpath)   # absolute only for bytes from outside the resource root (#6425)
         if not bpath.exists():
             bundle_state = f"bundle not on disk ({_pack_path(bpath)})"
         else:
@@ -1261,15 +1261,23 @@ def agree(pack: dict[str, Any], review_a: dict[str, Any], review_b: dict[str, An
 
 def _pack_path(path: Path) -> str:
     """A path as a pack states it (#6379): relative to the resource root, in
-    posix form, when the file is under that root; as given when it is under
-    no root this process knows, which is how the pack still says that the
-    bytes came from somewhere else.
+    posix form, when the file is under that root; as given when it is not,
+    which is how the pack still says that the bytes came from somewhere else.
 
     A pack is pinned by sha256 in its review and in the provenance record. An
     absolute path made the same pack differ between two checkouts of one
     commit, and put the layout of the machine it was generated on into a
     committed file. Defined at the end of the module so that no line above it
-    moves."""
+    moves.
+
+    What this does not do (#6425). The root is `resources.resource_root()`
+    alone, not every root the process knows: a bundle under the checkout the
+    code was imported from, packed with the working directory in another
+    checkout, is stated as given, and so is every bundle when the package is
+    installed. Symbolic links are followed before the comparison, so a path
+    reached through a link is stated by its target; a link inside the root
+    that points outside it is therefore stated as given, absolute and
+    unresolved, naming the link."""
     from data_sheets_schema.resources import resource_root
     root, _kind = resource_root()
     try:

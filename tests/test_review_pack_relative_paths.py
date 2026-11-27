@@ -59,6 +59,50 @@ def test_a_symlinked_root_does_not_make_the_path_absolute(tmp_path, monkeypatch)
     assert review_pack._pack_path(real / "data" / "bundle.txt") == "data/bundle.txt"
 
 
+def test_each_bundle_statement_of_a_pack_is_relative_without_the_corpus(tmp_path, monkeypatch):
+    """The four places `build_pack` states the bundle, on a fixture: the
+    manifest, the resolved path, the drifted sentence and the not-on-disk
+    sentence. The corpus tests below reach the first three only through
+    whatever records are committed, and no committed record has lost its
+    bundle (review 3 of PR #6380, finding H1)."""
+    from tests.test_review_pack import Pack
+
+    location = str(tmp_path.resolve())
+    packs = {}
+    for state, options in (("current", {}), ("drifted", {"drift_after": True}), ("gone", {"drop_bundle": True})):
+        root = tmp_path / state
+        root.mkdir()
+        provenance, instruction = Pack._run(None, root, **options)
+        monkeypatch.setattr(resources, "resource_root", lambda root=root: (root, "checkout"))
+        packs[state] = review_pack.build_pack(provenance, instruction)
+
+    for state, pack in packs.items():
+        assert pack["bundle"]["manifest"] == "P_chunks.yaml", state
+        assert pack["bundle"]["resolved_path"] == "P_preprocessed.txt", state
+        assert location not in pack["id_slots"]["bundle_state"], state
+        assert not [gap for gap in pack["gaps"] if location in gap], state
+    assert packs["current"]["id_slots"]["bundle_state"] == "current"
+    assert packs["drifted"]["id_slots"]["bundle_state"].endswith(" at P_preprocessed.txt)")
+    assert packs["gone"]["id_slots"]["bundle_state"] == "bundle not on disk (P_preprocessed.txt)"
+
+
+def test_a_path_reached_through_a_link_is_stated_by_its_target(tmp_path, monkeypatch):
+    """Review 3 of PR #6380, finding H5: links are followed before the path is
+    compared with the root, in both directions."""
+    root = tmp_path / "checkout"
+    (root / "data").mkdir(parents=True)
+    (root / "data" / "bundle.txt").write_text("text\n")
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "bundle.txt").write_text("text\n")
+    (tmp_path / "way_in").symlink_to(root / "data", target_is_directory=True)
+    (root / "way_out").symlink_to(outside, target_is_directory=True)
+    monkeypatch.setattr(resources, "resource_root", lambda: (root, "checkout"))
+
+    assert review_pack._pack_path(tmp_path / "way_in" / "bundle.txt") == "data/bundle.txt"
+    assert review_pack._pack_path(root / "way_out" / "bundle.txt") == str(root / "way_out" / "bundle.txt")
+
+
 @pytest.mark.corpus
 def test_a_pack_built_from_a_committed_record_carries_no_absolute_bundle_path():
     root, kind = resources.resource_root()
@@ -67,7 +111,7 @@ def test_a_pack_built_from_a_committed_record_carries_no_absolute_bundle_path():
     core = Path(root) / "data" / "d4d_concatenated"
     records = sorted(core.glob("*_core/*/*_provenance.yaml"))
     built = None
-    for provenance in reversed(records):          # last in sorted order first: recent labels carry a chunk manifest
+    for provenance in reversed(records):          # reverse path order: the method directory sorted last is tried first
         pack = review_pack.build_pack(provenance, None, None, write_instruction=False, instruction_out=[])
         if pack["bundle"].get("manifest") and pack["bundle"].get("resolved_path"):
             built = pack
@@ -98,12 +142,14 @@ def test_no_text_of_a_pack_states_where_the_checkout_is(monkeypatch):
     location = str(Path(root).resolve())
     records = sorted(Path("data/d4d_concatenated").glob("*_core/*/*_provenance.yaml"))
     seen = {"drifted": 0, "current": 0}
-    for provenance in reversed(records):       # recent labels first: they reach both states soonest
+    unbuilt = []
+    for provenance in reversed(records):       # reverse path order, as above
         if all(seen.values()):
             break
         try:
             pack = review_pack.build_pack(provenance, None, None, write_instruction=False, instruction_out=[])
-        except Exception:                      # a record this generator cannot pack is another test's subject
+        except Exception as error:             # a record this generator cannot pack is another test's subject
+            unbuilt.append(f"{provenance}: {type(error).__name__}: {error}")
             continue
         state = str((pack.get("id_slots") or {}).get("bundle_state") or "")
         kind_of_record = "drifted" if state.startswith("bundle drifted") else "current" if state == "current" else None
@@ -113,4 +159,5 @@ def test_no_text_of_a_pack_states_where_the_checkout_is(monkeypatch):
             assert not Path(state.rsplit(" at ", 1)[1].rstrip(")")).is_absolute(), state
         if kind_of_record is not None:
             seen[kind_of_record] += 1
-    assert all(seen.values()), f"the corpus did not offer both a drifted and a current record: {seen}"
+    assert all(seen.values()), (f"the corpus did not offer both a drifted and a current record: {seen}; "
+                                f"{len(unbuilt)} record(s) could not be packed, the first: {unbuilt[:1]}")
