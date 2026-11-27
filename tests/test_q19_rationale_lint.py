@@ -1830,6 +1830,8 @@ def test_every_empty_slot_reason_in_the_committed_ratings_is_said_to_be_empty():
     The second v6 series adds 13 ratings: 176 ratings, 90 mechanical reasons,
     and eleven lists. The added reason is a disclaimer the unchanged linter
     misreads, documented in notes/q19_root_scope_v6_22b_corpus_20261126.md.
+    Completed 2026-11-27: two further ratings make 178; the 90 reasons and
+    eleven neighboring lists are unchanged.
     The module docstring's figures describe the historical 2026-09-30
     measurement (133 ratings, 88 reasons, ten neighboring lists)."""
     listed = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z", "data/evaluation_llm"],
@@ -1837,7 +1839,7 @@ def test_every_empty_slot_reason_in_the_committed_ratings_is_said_to_be_empty():
     ratings = [ROOT / f for f in listed if f.endswith("_evaluation.json")
                and json.loads((ROOT / f).read_text(encoding="utf-8")).get("rubric")
                == "rubric20-semantic"]
-    assert len(ratings) == 176
+    assert len(ratings) == 178
     empty = re.compile(r"\b(?:empty|absent|unpopulated|unused|no|not|none|nor|neither|lacks?"
                        r"|lacking|missing|without|null)\b", re.I)
     base = ROOT / "data/evaluation_llm/rubric20_semantic"
@@ -2305,6 +2307,9 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     sentences (two unmarked), 1184 outside sentences (898 marked), 128
     recommendations, and 158 other unmarked sentences. The two dated v6
     notes record the manual readings separately from the blind packet.
+    Completed 2026-11-27: two more ratings make 178. They add no new Q19
+    slot sentence, distinct outside sentence, or classification pin; all
+    other counts remain unchanged. See the dated completion corpus note.
     The module docstring's figures remain the historical 2026-09-30
     measurement; the current dated extension is measured here."""
     from data_sheets_schema import q19_rationale_lint as lint
@@ -2319,7 +2324,7 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
                 continue
     slot = lint.REPRESENTATION_CONCERNS["empty_slot"]
     ratings = [d for d in documents if isinstance(d, dict) and d.get("rubric") == "rubric20-semantic"]
-    assert len(ratings) == 176
+    assert len(ratings) == 178
     q19 = [s for d in ratings for _, s in lint._sentences(q19_item(d)) if slot.search(s)]
     unmarked = [s for s in q19 if not lint._EMPTINESS.search(s)]
     assert (len(q19), len(unmarked)) == (124, 2)

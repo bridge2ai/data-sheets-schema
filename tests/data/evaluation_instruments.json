@@ -2108,7 +2108,33 @@
       "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
      }
     },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/CHORUS_2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep1_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric20-semantic.md",
+      "source_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "overrides_path": "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+      "overrides_sha256": "f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d",
+      "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
+     }
+    },
     "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/CHORUS_2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep2_evaluation.json": {
+     "basis": "recorded_composed_definition",
+     "instrument_kind": "composed_agent_definition",
+     "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+     "instrument_commit": null,
+     "composition": {
+      "source_path": ".claude/agents/d4d-rubric20-semantic.md",
+      "source_sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "overrides_path": "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+      "overrides_sha256": "f89b265d3c6585766362b2791c0608be69405299866e26a986efedfba3d3551d",
+      "composed_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52"
+     }
+    },
+    "label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/CHORUS_2026-11-22b_claude-opus-5-5-claudecode-generic-v9_rep3_evaluation.json": {
      "basis": "recorded_composed_definition",
      "instrument_kind": "composed_agent_definition",
      "instrument_sha256": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
