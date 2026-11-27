@@ -32,7 +32,7 @@
 #   release series is filed under its own method directory and runtime string, apart from
 #   the agentic arm and the direct arm (#6324). D4D_SERIES_CONTINUE_AFTER_GATE_FAIL=1 lets
 #   the replicate go on to the next project after a project's gates read FAIL; without it
-#   (the default) a gate FAIL stops the replicate (exit 3), see below.
+#   (the default) a gate FAIL stops the replicate (exit 3), see below. D4D_SERIES_PRIVATE_LOG and D4D_SERIES_PRIVATE_NOTE (both or neither): a note of the caller's own per launch, see launch_private_note_20261127.sh.
 # Outputs (all under <worktree>):
 #   data/d4d_concatenated/<method>{,_core}/<label>/<PROJECT>_*   the records
 #   .temp/launch/<PROJECT>_<label>.md            the rendered launch instruction
@@ -64,7 +64,7 @@ ACCOUNT_TOKEN=${D4D_SERIES_OAUTH_TOKEN:-}
 [ -z "${D4D_SERIES_ACCOUNT:-}" ] || { echo "STOP: D4D_SERIES_ACCOUNT is no longer read; set D4D_SERIES_CONFIG_DIR, D4D_SERIES_OAUTH_TOKEN or both, or D4D_SERIES_DEFAULT_LOGIN=1 for the login of the default configuration directory" >&2; exit 2; }
 [ -n "$ACCOUNT_DIR$ACCOUNT_TOKEN" ] || [ "${D4D_SERIES_DEFAULT_LOGIN:-}" = 1 ] || { echo "STOP: no account chosen: set D4D_SERIES_CONFIG_DIR, D4D_SERIES_OAUTH_TOKEN or both, or D4D_SERIES_DEFAULT_LOGIN=1 for the login of the default configuration directory" >&2; exit 2; }; [ "${D4D_SERIES_DEFAULT_LOGIN:-}" != 1 ] || [ -z "$ACCOUNT_DIR$ACCOUNT_TOKEN" ] || { echo "STOP: D4D_SERIES_DEFAULT_LOGIN=1 contradicts a configuration directory or a token; give one or the other" >&2; exit 2; }
 case "$ACCOUNT_DIR" in ""|/*) ;; *) echo "STOP: D4D_SERIES_CONFIG_DIR must be an absolute path" >&2; exit 2 ;; esac
-[ -z "$ACCOUNT_DIR" ] || [ -d "$ACCOUNT_DIR" ] || { echo "STOP: D4D_SERIES_CONFIG_DIR is not a directory" >&2; exit 2; }
+[ -z "$ACCOUNT_DIR" ] || [ -d "$ACCOUNT_DIR" ] || { echo "STOP: D4D_SERIES_CONFIG_DIR is not a directory" >&2; exit 2; }; PRIVATE_LOG=${D4D_SERIES_PRIVATE_LOG:-}; PRIVATE_NOTE=${D4D_SERIES_PRIVATE_NOTE:-}; unset D4D_SERIES_PRIVATE_LOG D4D_SERIES_PRIVATE_NOTE; [ -z "$PRIVATE_LOG$PRIVATE_NOTE" ] || { [ -f "$W/scripts/adhoc/launch_private_note_20261127.sh" ] && D4D_SERIES_PRIVATE_LOG="$PRIVATE_LOG" D4D_SERIES_PRIVATE_NOTE="$PRIVATE_NOTE" bash "$W/scripts/adhoc/launch_private_note_20261127.sh" check; } || { echo "STOP: a precondition of the caller's launch setup failed" >&2; exit 2; }
 case "$SERIES$MODEL$EFFORT$REP$CONDITION$METHOD" in *[!A-Za-z0-9._-]*) echo "series, model, effort, replicate, condition and method take plain tokens" >&2; exit 2;; esac
 case "$RUNTIME" in *[!A-Za-z0-9\ \(\)._-]*) echo "the runtime takes letters, digits, spaces and parentheses" >&2; exit 2;; esac
 LABEL="${SERIES}_${MODEL}-claudecode-${CONDITION//_/-}_rep${REP}"
@@ -128,7 +128,7 @@ for P in "$@"; do
   fi
   [ -s "$SPEC" ] || { say "$P STOP: no rendering specification was written"; exit 3; }
   SHA=$(shasum -a 256 "$INSTR" | cut -d' ' -f1)
-  START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+  START=$(date -u +%Y-%m-%dT%H:%M:%SZ); [ -z "$PRIVATE_LOG$PRIVATE_NOTE" ] || D4D_SERIES_PRIVATE_LOG="$PRIVATE_LOG" D4D_SERIES_PRIVATE_NOTE="$PRIVATE_NOTE" bash "$W/scripts/adhoc/launch_private_note_20261127.sh" write "$LABEL" "$P" || { say "$P STOP: a precondition of the caller's launch setup failed"; exit 3; }
   {
     echo "Launch record: release series $SERIES (headless, advisor off, no MCP servers)"
     echo "launched_at_utc: $START  (date -u)"

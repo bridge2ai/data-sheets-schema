@@ -21,7 +21,7 @@
 #   Without the two required values, or with a value that is not valid, the first budget
 #   check answers stop: this script then
 #   writes the stop file, every stream ends at its next check, and the exit status is 0.
-#   Series 2026-11-25c ran before the calibration moved out of the budget script.
+#   Series 2026-11-25c ran before the calibration moved out of the budget script. D4D_SERIES_PRIVATE_LOG and D4D_SERIES_PRIVATE_NOTE are the driver's; the file may not be under <state dir>.
 # Outputs: the driver's outputs in the worktree; <state dir>/stream_rep<N>.state and .log;
 #   overload evidence under <state dir>/overload-attempts/.
 # Serves:  the release-series rerun 2026-11-25c (PR 6325, issues 6324, 6312). Date: 2026-11-25.
@@ -34,7 +34,7 @@ METHOD=${D4D_SERIES_METHOD:-claudecode_release}
 LABEL="${SERIES}_${MODEL}-claudecode-${CONDITION//_/-}_rep${REP}"
 MAX_OVERLOAD_TRIES=4
 mkdir -p "$STATE" || exit 2
-STOP="$STATE/STOP"
+STOP="$STATE/STOP"; [ -z "${D4D_SERIES_PRIVATE_LOG:+1}${D4D_SERIES_PRIVATE_NOTE:+1}" ] || { grep -q -F 'launch_private_note_20261127.sh" write' "$W/scripts/adhoc/run_release_series_20261124.sh" && [ -f "$HERE/launch_private_note_20261127.sh" ] && bash "$HERE/launch_private_note_20261127.sh" check "$STATE"; } || { echo "STOP: a precondition of the caller's launch setup failed" >&2; exit 2; }
 MINE="$STATE/stream_rep$REP.state"
 say() { echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) stream rep$REP $*"; }
 # True when the transcript ends in a 529 result and holds no message from the model itself.
