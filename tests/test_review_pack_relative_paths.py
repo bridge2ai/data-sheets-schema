@@ -59,12 +59,14 @@ def test_a_symlinked_root_does_not_make_the_path_absolute(tmp_path, monkeypatch)
     assert review_pack._pack_path(real / "data" / "bundle.txt") == "data/bundle.txt"
 
 
-def test_each_bundle_statement_of_a_pack_is_relative_without_the_corpus(tmp_path, monkeypatch):
-    """The four places `build_pack` states the bundle, on a fixture: the
-    manifest, the resolved path, the drifted sentence and the not-on-disk
-    sentence. The corpus tests below reach the first three only through
-    whatever records are committed, and no committed record has lost its
-    bundle (review 3 of PR #6380, finding H1)."""
+def test_the_four_places_a_pack_states_the_bundle_through_pack_path_are_relative_without_the_corpus(tmp_path, monkeypatch):
+    """The four places `build_pack` passes the bundle through `_pack_path`, on
+    a fixture: the manifest, the resolved path, the drifted sentence and the
+    not-on-disk sentence, and the gap line that repeats either sentence. The
+    corpus tests below reach the first three only through whatever records are
+    committed, and no committed record has lost its bundle (review 3 of PR
+    #6380, finding H1). `bundle.path` is not one of the four: it repeats the
+    record's own spelling, which this fixture records absolute."""
     from tests.test_review_pack import Pack
 
     location = str(tmp_path.resolve())
@@ -72,7 +74,8 @@ def test_each_bundle_statement_of_a_pack_is_relative_without_the_corpus(tmp_path
     for state, options in (("current", {}), ("drifted", {"drift_after": True}), ("gone", {"drop_bundle": True})):
         root = tmp_path / state
         root.mkdir()
-        provenance, instruction = Pack._run(None, root, **options)
+        # a record with constructed ids, so that a drifted or missing bundle also leaves the gap line
+        provenance, instruction = Pack._run(None, root, full=Pack._constructed_full(None), **options)
         monkeypatch.setattr(resources, "resource_root", lambda root=root: (root, "checkout"))
         packs[state] = review_pack.build_pack(provenance, instruction)
 
@@ -80,15 +83,23 @@ def test_each_bundle_statement_of_a_pack_is_relative_without_the_corpus(tmp_path
         assert pack["bundle"]["manifest"] == "P_chunks.yaml", state
         assert pack["bundle"]["resolved_path"] == "P_preprocessed.txt", state
         assert location not in pack["id_slots"]["bundle_state"], state
-        assert not [gap for gap in pack["gaps"] if location in gap], state
     assert packs["current"]["id_slots"]["bundle_state"] == "current"
     assert packs["drifted"]["id_slots"]["bundle_state"].endswith(" at P_preprocessed.txt)")
     assert packs["gone"]["id_slots"]["bundle_state"] == "bundle not on disk (P_preprocessed.txt)"
+    for state in ("drifted", "gone"):
+        gaps = [gap for gap in packs[state]["gaps"] if gap.startswith("id_slots.base_in_bundle unavailable: ")]
+        assert len(gaps) == 1 and gaps[0].endswith("P_preprocessed.txt)") and location not in gaps[0], (state, gaps)
 
 
 def test_a_path_reached_through_a_link_is_stated_by_its_target(tmp_path, monkeypatch):
     """Review 3 of PR #6380, finding H5: links are followed before the path is
-    compared with the root, in both directions."""
+    compared with the root.
+
+    The second assertion records a known limitation and is not a requirement:
+    a link inside the root that points outside it is stated as given, which
+    in a pack is absolute and names the link. Whether that should become the
+    unresolved in-root spelling or the resolved target is undecided (#6425,
+    H5); change this assertion deliberately when it is decided."""
     root = tmp_path / "checkout"
     (root / "data").mkdir(parents=True)
     (root / "data" / "bundle.txt").write_text("text\n")

@@ -1274,10 +1274,12 @@ def _pack_path(path: Path) -> str:
     alone, not every root the process knows: a bundle under the checkout the
     code was imported from, packed with the working directory in another
     checkout, is stated as given, and so is every bundle when the package is
-    installed. Symbolic links are followed before the comparison, so a path
-    reached through a link is stated by its target; a link inside the root
-    that points outside it is therefore stated as given, absolute and
-    unresolved, naming the link."""
+    installed and the working directory is not the root of a checkout of this
+    project. Symbolic links are followed before the comparison, so a path is
+    compared by its target: one reached through a link into the root is stated
+    relative to the root, and one reached through a link inside the root that
+    points outside it is stated as given, unresolved and naming the link
+    (absolute in a pack, since `build_pack` passes resolved record inputs)."""
     from data_sheets_schema.resources import resource_root
     root, _kind = resource_root()
     try:
