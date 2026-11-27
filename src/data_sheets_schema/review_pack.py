@@ -567,7 +567,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     if declared_manifest is not None and manifest_path is None:
         pack["gaps"].append(f"chunk manifest base unavailable for recorded relative path: {declared_manifest}")
     pack["bundle"] = {"path": str(declared_bundle) if declared_bundle else None, "md5": inputs.get("bundle_md5"),
-                      "manifest": str(manifest_path) if manifest_path else None}
+                      "manifest": _pack_path(manifest_path) if manifest_path else None}
     pack["records"] = {"full": str(paths["full"]), "core": str(paths["core"]),
                        "report": str(paths["report"]),
                        "receipt": str(paths["receipt"]) if paths["receipt"].exists() else None,
@@ -588,9 +588,9 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
     bundle_state = "relative bundle path has no recorded base" if unknown_bundle_base else "no bundle_path recorded"
     if bundle:
         bpath = bundle
-        pack["bundle"]["resolved_path"] = str(bpath)          # which root the bytes came from (round 2, note 6)
+        pack["bundle"]["resolved_path"] = _pack_path(bpath)   # which root the bytes came from (round 2, note 6)
         if not bpath.exists():
-            bundle_state = f"bundle not on disk ({bpath})"
+            bundle_state = f"bundle not on disk ({_pack_path(bpath)})"
         else:
             raw = bpath.read_bytes()
             on_disk = hashlib.md5(raw).hexdigest()
@@ -598,7 +598,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
             if not recorded:
                 bundle_state = f"no bundle_md5 recorded (on disk {on_disk})"
             elif on_disk != recorded:
-                bundle_state = f"bundle drifted (recorded {recorded}, on disk {on_disk} at {bpath})"
+                bundle_state = f"bundle drifted (recorded {recorded}, on disk {on_disk} at {_pack_path(bpath)})"
             else:
                 bundle_text, bundle_state = raw.decode("utf-8", errors="replace"), "current"
     id_entries, id_gap = (_id_slots(full_record, bundle_text=bundle_text, identifier_bases=identifier_bases) if full_record
@@ -1257,3 +1257,22 @@ def agree(pack: dict[str, Any], review_a: dict[str, Any], review_b: dict[str, An
             "disagreements": disagreements,
             "basis": "Cohen's kappa on affirmative/adverse/cannot_tell over items answered by both; "
                      "exact agreement is on the full vocabulary; single pack, both reviews pin its sha256"}
+
+
+def _pack_path(path: Path) -> str:
+    """A path as a pack states it (#6379): relative to the resource root, in
+    posix form, when the file is under that root; as given when it is under
+    no root this process knows, which is how the pack still says that the
+    bytes came from somewhere else.
+
+    A pack is pinned by sha256 in its review and in the provenance record. An
+    absolute path made the same pack differ between two checkouts of one
+    commit, and put the layout of the machine it was generated on into a
+    committed file. Defined at the end of the module so that no line above it
+    moves."""
+    from data_sheets_schema.resources import resource_root
+    root, _kind = resource_root()
+    try:
+        return Path(path).resolve().relative_to(Path(root).resolve()).as_posix()
+    except ValueError:
+        return str(path)

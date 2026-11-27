@@ -757,3 +757,35 @@ receipts:
       so no snippet is classified'
     transcripts: []
   recorded_by: d4d receipts check
+canonical:
+  criterion: full and core both validate against the current schema, then most slots,
+    then lowest label
+  selected_from:
+  - label: 2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1
+    slots: 69
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: null
+    review_not_evidence: no review block
+  - label: 2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2
+    slots: 69
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: null
+    review_not_evidence: no review block
+  - label: 2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3
+    slots: 65
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: null
+    review_not_evidence: no review block
+  margin_over_runner_up: 0
+  runtime: release
+  supersedes_runtimes: release
+  reviews_applied: false
+  reviews_not_applied_because: 'report-only (#835): calibrated selection rule not
+    established; 2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1: no review
+    block; 2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2: no review block;
+    2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3: no review block'
+  review_policy: reported_only_pending_calibration_v1 (#835)
+  selected_by: d4d runs select
