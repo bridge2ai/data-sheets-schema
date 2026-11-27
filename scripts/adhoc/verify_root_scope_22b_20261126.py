@@ -27,7 +27,7 @@ relative paths only). Exit 1 on any problem, and when any cell is running, not s
 or carries a receipt that is neither REFUSED nor VALIDATED_AND_PUBLISHED; the table is
 written only for a complete, problem-free pass.
 Date: 2026-11-26 (UTC). Lead: Claude lead."""
-import hashlib, json, pathlib, subprocess, sys
+import hashlib, json, pathlib, shlex, subprocess, sys
 X, OUT, TSV = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]), pathlib.Path(sys.argv[3])
 W = X / "checkout"
 INST = "2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6"
@@ -114,29 +114,74 @@ def check_remedy(cell, bad, base, project, label, fam, rel, second, remedy):
         if term.get("accepted_output_sha256") is not None or term.get("destination_exists") is not False: bad("terminal record: a refusal carries an accepted output")
         if not term.get("failure"): bad("terminal record: refusal without a reason")
         elif have_run and term.get("failure") != second_receipt.get("failure"): bad("terminal record: refusal reason differs from the attempt-2 receipt")
+def relocated(value, pairs):
+    """Explicit path relocation for comparing two plans: a string (or a mapping key) is changed only
+    when it IS one of the approved roots or lies under it; shell command strings are compared token
+    by token under the same rule. Nothing else in a plan may differ."""
+    def one(text):
+        for old, new in pairs:
+            if text == old or text.startswith(old + "/"): return new + text[len(old):]
+        return text
+    if isinstance(value, dict): return {one(k) if isinstance(k, str) else k: relocated(v, pairs) for k, v in value.items()}
+    if isinstance(value, list): return [relocated(v, pairs) for v in value]
+    return one(value) if isinstance(value, str) else value
+def shell_tokens(command, pairs):
+    out = []
+    for token in shlex.split(command):
+        head, sep, tail = token.partition("=")
+        out.append(head + sep + relocated(tail, pairs) if sep and tail.startswith("/") else relocated(token, pairs))
+    return out
 def check_third(cell, bad, base, project, label, fam, rel, third):
     """A third attempt under the revised session reader, allowed only for a cell whose attempts 1
     and 2 were both refused (owner's word of 2026-11-27 for two cells). It is a separately
-    labelled measurement: the evaluation must record the revised runner hash, and its prompt and
-    inputs must be those of attempt 1."""
+    labelled measurement: the evaluation must record the revised runner hash, and the whole
+    executed plan must equal attempt 1's except for the approved checkout root, the run
+    directory and the runner hash. Authorization, completion and plan binding are checked
+    before the outcome is read, so a refusal is held to the same record as a publication."""
     if cell["state"] == "measured": bad("a third attempt exists for a cell already measured"); return
     if [r["attempt"] for r in cell["refusals"]] != [1, 2]: bad("a third attempt without two refused attempts"); return
     if not (third / "receipt.json").exists(): cell["state"] = "running"; return
-    r = json.loads((third / "receipt.json").read_text())
+    r = load_object(third / "receipt.json", "attempt 3 receipt", bad)
+    if r is None: cell["state"] = "unknown"; return
+    first, second = X / "live-runs" / f"{base}-01", X / "live-runs" / f"{base}-02"
+    # common checks, whatever the outcome
+    auth = r.get("authorization_reference")
+    earlier = {json.loads((d / "receipt.json").read_text()).get("authorization_reference") for d in (first, second)}
+    if not isinstance(auth, str) or not auth.strip(): bad("attempt 3: authorization is not a nonblank string")
+    elif auth.strip() in {e.strip() for e in earlier if isinstance(e, str)}: bad("attempt 3: no authorization of its own")
+    if not isinstance(r.get("finished_utc"), str) or not r["finished_utc"].strip(): bad("attempt 3: receipt has no completion time")
+    plan3 = load_object(third / "plan.json", "attempt 3 plan", bad) if (third / "plan.json").exists() else None
+    if plan3 is None: bad("attempt 3: no executed plan")
+    else:
+        plan1 = json.loads((first / "plan.json").read_text())
+        pairs = [(str(third.resolve()), str(first.resolve())), (str(W2.resolve()), str(W.resolve()))]
+        if plan3.get("runner_sha256") != REVISED_RUNNER_SHA256 or plan1.get("runner_sha256") != MEASURED_RUNNER_SHA256: bad("attempt 3: plan does not name the revised runner, or attempt 1 the measured one")
+        expect, got = dict(plan1), relocated(plan3, pairs)
+        for plan in (expect, got): plan.pop("runner_sha256", None)
+        shells = [expect.pop("commands_shell", None), got.pop("commands_shell", None)]
+        if got != expect: bad("attempt 3: executed plan differs from attempt 1 beyond the approved checkout root, run directory and runner hash: " + ", ".join(sorted(k for k in set(expect) | set(got) if expect.get(k) != got.get(k))))
+        try:
+            if [shlex.split(c) for c in shells[0]] != [shell_tokens(c, pairs) for c in plan3["commands_shell"]]: bad("attempt 3: shell commands differ from attempt 1")
+        except (TypeError, ValueError, KeyError): bad("attempt 3: shell commands are not comparable")
+        for plan, name in ((plan1, "attempt 1"), (plan3, "attempt 3")):
+            if not isinstance(plan.get("prompt"), str) or hashlib.sha256(plan["prompt"].encode()).hexdigest() != plan.get("prompt_sha256"): bad(f"{name}: prompt bytes do not hash to the recorded prompt digest")
+        for path, digest in (plan3.get("validation_sha256") or {}).items():
+            if not pathlib.Path(path).is_file() or sha(path) != digest: bad(f"attempt 3: validator dependency {pathlib.Path(path).name} does not match its bound hash")
+        if not plan3.get("validation_sha256"): bad("attempt 3: no validator bindings")
+        if r.get("plan_sha256") != hashlib.sha256(json.dumps(plan3, sort_keys=True).encode()).hexdigest(): bad("attempt 3: receipt does not bind the executed plan")
+        saved = X / "revised-reader-plans" / f"{base}-03.plan.json"
+        if not saved.exists() or json.loads(saved.read_text()) != plan3: bad("attempt 3: executed plan differs from the plan saved before the run")
+    dest = W2 / rel
     if r.get("status") == "REFUSED":
+        if not isinstance(r.get("failure"), str) or not r["failure"].strip(): bad("attempt 3: refusal without a reason")
         cell["refusals"].append({"attempt": 3, "reason": r.get("failure"), "validator_exit": r.get("validator_exit")})
-        if (W2 / rel).exists(): bad("refused third attempt has a file")
+        if dest.exists() or "output_sha256" in r: bad("refused third attempt has a file or claims one")
         return
     if r.get("status") != "VALIDATED_AND_PUBLISHED": bad(f"attempt 3: receipt status {r.get('status')!r}"); cell["state"] = "unknown"; return
     cell["state"], cell["attempt"] = "measured", 3
-    dest = W2 / rel
     if r.get("validator_exit") != 0 or r.get("codex_exit") != 0: bad("attempt 3: exit codes not 0")
     if r.get("auth_copy_absent") is not True or (third / "codex-home/auth.json").exists(): bad("attempt 3: auth copy not shown absent")
     if r.get("evaluation_model", {}).get("name") != "gpt-6-astra": bad("attempt 3: unexpected evaluator model")
-    first, second = X / "live-runs" / f"{base}-01", X / "live-runs" / f"{base}-02"
-    earlier = {str(json.loads((d / "receipt.json").read_text()).get("authorization_reference", "")).strip() for d in (first, second)}
-    auth = str(r.get("authorization_reference", "")).strip()
-    if not auth or auth in earlier: bad("attempt 3: no authorization of its own")
     if not same_file(r.get("output"), dest) or not dest.exists(): bad("attempt 3: published file missing or not the cell's file"); return
     h = sha(dest); cell["sha256"] = h
     if not (h == r.get("output_sha256") == r.get("validator_input_sha256")): bad("attempt 3: published, receipt and validated hashes differ")
@@ -156,15 +201,7 @@ def check_third(cell, bad, base, project, label, fam, rel, third):
     instrument = d.get("scorer_instrument") or {}
     cell["accepting_runner_sha256"] = instrument.get("runner_sha256")
     if cell["accepting_runner_sha256"] != REVISED_RUNNER_SHA256: bad("attempt 3: not accepted by the revised runner")
-    plan1 = json.loads((first / "plan.json").read_text()); plan3 = json.loads((third / "plan.json").read_text())
-    if plan3.get("runner_sha256") != REVISED_RUNNER_SHA256: bad("attempt 3: plan does not name the revised runner")
-    if instrument.get("prompt_sha256") != plan1.get("prompt_sha256") or plan3.get("prompt_sha256") != plan1.get("prompt_sha256"): bad("attempt 3: prompt differs from attempt 1")
-    for key in ("deterministic_fields", "definition_provenance", "executable_sha256"):
-        if plan3.get(key) != plan1.get(key): bad(f"attempt 3: {key} differs from attempt 1")
-    if {k: v["sha256"] for k, v in plan3.get("inputs", {}).items()} != {k: v["sha256"] for k, v in plan1.get("inputs", {}).items()}: bad("attempt 3: inputs differ from attempt 1")
-    if r.get("plan_sha256") != hashlib.sha256(json.dumps(plan3, sort_keys=True).encode()).hexdigest(): bad("attempt 3: receipt does not bind the executed plan")
-    saved = X / "revised-reader-plans" / f"{base}-03.plan.json"
-    if not saved.exists() or json.loads(saved.read_text()) != plan3: bad("attempt 3: executed plan differs from the plan saved before the run")
+    if plan3 is not None and instrument.get("prompt_sha256") != plan3.get("prompt_sha256"): bad("attempt 3: the evaluation's prompt digest is not the executed plan's")
 cells, problems = [], []
 for project in PROJECTS:
     for g in (1, 2, 3):
@@ -191,6 +228,7 @@ for project in PROJECTS:
                 if published is not None: bad("two published attempts")
                 published = attempt; cell["state"] = "measured"; cell["attempt"] = attempt
                 if r.get("validator_exit") != 0 or r.get("codex_exit") != 0: bad("exit codes not 0")
+                if not isinstance(r.get("finished_utc"), str) or not r["finished_utc"].strip(): bad("published receipt has no completion time")
                 if r.get("auth_copy_absent") is not True or (run / "codex-home/auth.json").exists(): bad("auth copy not shown absent")
                 if r.get("evaluation_model", {}).get("name") != "gpt-6-astra": bad("unexpected evaluator model")
                 dest = W / rel
