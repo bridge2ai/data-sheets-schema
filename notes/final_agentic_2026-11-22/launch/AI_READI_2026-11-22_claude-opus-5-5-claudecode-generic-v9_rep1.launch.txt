@@ -10,9 +10,9 @@ worktree: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d
 schema: version: 3.2.1
 bundle: data/preprocessed/concatenated/AI_READI_preprocessed.txt sha256 b4a282fd5c44bc93a3bcd71a4c3ee53b36a0de31d105656b70c3e296cc02a956
 model: claude-opus-5-5   effort: high (CLI flag --effort high; asserted by the launcher, not observed)
-account: claude-personal (owner decision 2026-11-21)
+account: a Claude subscription account (name removed from the published copy, owner's decision of 2026-11-25)
 owner launch word, verbatim, in the nonhelper session a few minutes before launched_at_utc (the time was not captured; an earlier draft of this line carried a typed, wrong time): "launch canary, AI-READI, opus 5.5 high"
   The owner did not name the hash (they asked what it was); the hash above was rendered after the word and reported back to the owner.
 delivery: the instruction file's text is the session's first prompt, passed as "$(cat <file>)", so trailing newlines are stripped.
 command (typed into a new Terminal window by the nonhelper session):
-  cd /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121 && claude-personal --model claude-opus-5-5 --effort high "$(cat .temp/launch/AI_READI_2026-11-22_claude-opus-5-5-claudecode-generic-v9_rep1.md)"
+  cd /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/fast-d4d-20261121 && <launcher> --model claude-opus-5-5 --effort high "$(cat .temp/launch/AI_READI_2026-11-22_claude-opus-5-5-claudecode-generic-v9_rep1.md)"

@@ -60,7 +60,7 @@ The repository history before this change was not rewritten and still holds them
 
 | File | Change |
 |---|---|
-| `launch/*.launch.txt` (15) | the `account:` line is replaced by a fixed line; every other line is as the driver wrote it |
+| `launch/*.launch.txt` (15) | the `account:` line is replaced by a fixed line; since 2026-11-27 the home directory in the path of the `claude` binary is written `~/` (see the extension below); every other line is as the driver wrote it |
 | `streams/stream_rep*.txt` (3) | each of the 14 `budget:` lines keeps the decision, the next project, the replicate, the count of finished runs and the projects in flight elsewhere; the usage estimates, the limit and the amount spent are removed, and the line gains the key `"usage_estimates": "removed"` to say so |
 | `README.md` | the Account row of the first table; the `streams/` and `review_1_pr6349.md` entries of the file list; this section |
 | `review_1_pr6349.md` | five mentions of the account are reworded so that it is not named; two phrases that stated the budget calibration and a projected usage figure are replaced by wording without figures; the path of a session scratch folder, which named the launch machine's login and folders, is replaced by a placeholder (added 2026-11-26); the placeholders read `<configuration directory>` and `<session scratchpad>`; otherwise as the reviewer wrote it |
@@ -84,12 +84,45 @@ What follows from it:
 - The 90 record files, the instructions, the rendering specifications and the gate files are
   not changed by this removal. Later changes to the records are separate from it: the
   selection added a `canonical` block to five provenance records (PR #6373).
-- Not removed: the home-directory path of the `claude` binary in the launch records, which
-  issue #6352 lists, and `repo.resource_root` in the provenance records, which is absolute by
-  design.
+- Not removed by this change: the home-directory path of the `claude` binary in the launch
+  records, which issue #6352 lists (it was written home-relative on 2026-11-27, below), and
+  `repo.resource_root` in the provenance records, which is absolute by design and stays.
 - After the calibration left the budget script, the published costs and decisions bound the
   account's usage (every check answered start under a limit the script still states) but do
   not determine it.
+
+### Extended on 2026-11-27: one account line for every series, and no login in the binary path
+
+The final review of the removal (issue #6426) asked that the launch records of every series
+state the account in the same way, and that the login in the binary's path not be published.
+At the owner's decision of 2026-11-27:
+
+| File | Change |
+|---|---|
+| `notes/final_agentic_2026-11-22/launch/*.launch.txt` (16) | the `account:` line is replaced by the same fixed line as here, byte for byte; in the one record of the 2026-11-22 canary, the launcher in the launch command is replaced by the placeholder `<launcher>` |
+| `launch/*.launch.txt` here (15) | on the `claude code:` line the home directory of the binary's path is written `~/` |
+| `scripts/adhoc/run_agentic_fanout_20261122.sh`, `scripts/adhoc/run_release_series_20261124.sh` | a new launch record gets a neutral account line, and from the release-series driver a home-relative path of the binary. Two lines of each driver's text are edited in place; the rest is as it ran |
+
+`scripts/adhoc/redact_launch_records_account_login_20261127.py` makes the changes to the 31
+launch records. For the 15 of this series it runs after PR #6359's script: the published
+records are that script's output followed by this one's. Its rules name no account and no
+login, so it needs no private argument.
+
+What this does and does not achieve:
+
+- The 31 launch records of the two series now state the account in the same words.
+- This is not a guarantee about the rest of the repository: other tracked files are not
+  changed (#6362).
+- The fixed line keeps its date, 2026-11-25, in all 31 records, so that the two series
+  carry one line; for the earlier series the decision is the one of 2026-11-27.
+- A home directory is still written out in files this change does not edit: the 16
+  instruction files of the earlier series (`notes/final_agentic_2026-11-22/launch/*.md`,
+  320 lines), which are pinned by `instruction_sha256`; 10 lines of its gate files; and
+  the record files, in `repo.resource_root` of every provenance record (by design) and,
+  for the earlier series, also in the `# Schema:` header of each full record, the `path:`
+  fields of each provenance record and four lines of reconciliation notes.
+- `review_1_pr6349.md` describes the `claude code:` line as it was when it was reviewed.
+- The repository history still holds every replaced line.
 
 ## Results
 
@@ -170,6 +203,7 @@ Total cost at list price as reported by the sessions: 251.49 USD (8.47 to 22.64 
 8. **One value defect seen in passing, with no systematic value review done:** VOICE replicate
    3 has `machine_annotation_tools[0].tools: ["OpenAI Whisper Large unknown"]`; the bundle says
    "OpenAI's Whisper Large model", and "unknown" is the model's addition.
-9. **Launch records name the launch machine.** Each `launch/*.launch.txt` gives the resolved
-   path of the `claude` binary and the account used; each provenance record's
-   `repo.resource_root` is absolute by design.
+9. **Launch records named the launch machine.** Each `launch/*.launch.txt` gave the resolved
+   path of the `claude` binary and the account used; the published copies no longer give the
+   account, and give the path home-relative (see the removal section). Each provenance
+   record's `repo.resource_root` is absolute by design.

@@ -10,7 +10,7 @@ bundle: data/preprocessed/concatenated/VOICE_preprocessed.txt sha256 7c4f71ab2e8
 model: claude-fable-5-2   effort: high (CLI flags; both stated in the rendering specification, the effort asserted by the launcher)
 recorder line: complete (D4D_RENDER_SPEC and D4D_LAUNCH_INSTRUCTION); toolchain: checkout-relative
 render specification: .temp/launch/VOICE_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3.render_spec.json sha256 9509cf0edbafeb7c78a8e8470e411193e726d84b3559aa271ba80602b1752fb9
-claude code: 2.1.332 (Claude Code) (/Users/marcin/.local/bin/claude)
+claude code: 2.1.332 (Claude Code) (~/.local/bin/claude)
 account: a Claude subscription account (name removed from the published copy, owner's decision of 2026-11-25)
 advisor tool: disabled with CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1
 MCP servers: none (--strict-mcp-config with no config)

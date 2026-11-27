@@ -2,7 +2,7 @@
 # run_agentic_fanout_20261122.sh
 # Purpose: run the final agentic D4D generations (generic_v9, d4d-full-core playbook) for one
 #   replicate, one project after another, each in a fresh headless Claude Code session on
-#   the claude-personal account, then run the completion gates and record what was observed.
+#   one Claude subscription account, then run the completion gates and record what was observed.
 #   Owner's word, 2026-11-22: advisor off; three replicates of all five projects; rerun the
 #   AI-READI canary with the advisor off. Model claude-opus-5-5, effort high.
 # Inputs:  <worktree> <replicate number> <project> [<project> ...]
@@ -65,7 +65,7 @@ for P in "$@"; do
     echo "bundle: $BUNDLE sha256 $(shasum -a 256 "$BUNDLE" | cut -d' ' -f1)"
     echo "model: $MODEL   effort: $EFFORT (CLI flag; asserted by the launcher)"
     echo "claude code: $(command claude --version 2>/dev/null)"
-    echo "account: claude-personal (CLAUDE_CONFIG_DIR unset, as the owner's claude-personal function does)"
+    echo "account: a Claude subscription account (not named in the launch record)"
     echo "advisor tool: disabled with CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1"
     echo "MCP servers: none (--strict-mcp-config with no config)"
     echo "delivery: the instruction file's text is the single prompt of a headless session (claude -p)"

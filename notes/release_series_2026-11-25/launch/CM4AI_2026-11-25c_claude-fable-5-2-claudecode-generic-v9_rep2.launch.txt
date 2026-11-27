@@ -10,7 +10,7 @@ bundle: data/preprocessed/concatenated/CM4AI_preprocessed.txt sha256 5f81bb53f43
 model: claude-fable-5-2   effort: high (CLI flags; both stated in the rendering specification, the effort asserted by the launcher)
 recorder line: complete (D4D_RENDER_SPEC and D4D_LAUNCH_INSTRUCTION); toolchain: checkout-relative
 render specification: .temp/launch/CM4AI_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep2.render_spec.json sha256 239358bc9523487a55e9aa3221c678a7240489bf5493a92320b6c143a037d7db
-claude code: 2.1.332 (Claude Code) (/Users/marcin/.local/bin/claude)
+claude code: 2.1.332 (Claude Code) (~/.local/bin/claude)
 account: a Claude subscription account (name removed from the published copy, owner's decision of 2026-11-25)
 advisor tool: disabled with CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1
 MCP servers: none (--strict-mcp-config with no config)
