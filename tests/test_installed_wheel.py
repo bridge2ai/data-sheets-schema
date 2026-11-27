@@ -80,12 +80,36 @@ class TestTheInstalledWheel(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         names = zipfile.ZipFile(self.wheel).namelist()
         rubric = sorted(n for n in names if n.startswith("data/rubric/"))
-        self.assertEqual(rubric, ["data/rubric/rubric10.txt", "data/rubric/rubric20.txt",
+        self.assertEqual(rubric, ["data/rubric/root_scope_v6/rubric10_definition_overrides.json",
+                                 "data/rubric/root_scope_v6/rubric20_definition_overrides.json",
+                                 "data/rubric/rubric10.txt", "data/rubric/rubric10_semantic_v5.txt",
+                                 "data/rubric/rubric20.txt",
                                  "data/rubric/rubric20_semantic_v4.txt",
+                                 "data/rubric/rubric20_semantic_v5.txt",
                                  "data/rubric/semantic_evidence_authority_v3.json"], rubric)
         self.assertIn(".claude/agents/d4d-rubric20-semantic-v4.md", names)
         self.assertIn("src/download/prompts/rubric20_semantic_v4_schema.json", names)
         self.assertIn("data_sheets_schema/semantic_instrument.py", names)
+
+    def test_root_scope_definitions_compose_from_installed_resources(self):
+        r = self._run("""
+            import hashlib
+            from data_sheets_schema import resources
+            from data_sheets_schema.root_scope_definition import compose_definition
+            assert not resources.is_checkout()
+            expected = {
+                "rubric10": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+                "rubric20": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+            }
+            for rubric, digest in expected.items():
+                composed, provenance = compose_definition(rubric)
+                assert hashlib.sha256(composed).hexdigest() == digest
+                assert provenance["composed_sha256"] == digest
+                for key in ("source_path", "overrides_path"):
+                    assert resources.resource_path(provenance[key]).is_file()
+            print("ok")
+        """)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
 
     def test_the_metadata_requires_linkml_unconditionally(self):
         """#1476: `linkml` was in the `docs` extra as well as the main table, and

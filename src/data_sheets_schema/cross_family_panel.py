@@ -125,6 +125,11 @@ def _registration(capture, declaration_raw, read_path, read_authority=None):
         "format", "panel_id", "predecessor_sha256", "matrix", "records", "instruments", "slots", "decisions",
     }, "panel declaration")
     _need(declaration["format"] == DECLARATION_FORMAT, "explicit cross_family_panel_declaration_v1 is required")
+    selections = _list(declaration["instruments"], "instruments", 2)
+    for selection in selections:
+        _closed(selection, {"rubric", "version"}, "instrument selection")
+        _need(selection["version"] != "6.0",
+              "semantic 6.0 requires the root-scope scoring route; panel registration is unsupported")
     panel_id = _identifier(declaration["panel_id"], "panel_id")
     predecessor = declaration["predecessor_sha256"]
     if predecessor is not None:
@@ -177,8 +182,7 @@ def _registration(capture, declaration_raw, read_path, read_authority=None):
 
     instruments = []
     names = set()
-    for selection in _list(declaration["instruments"], "instruments", 2):
-        _closed(selection, {"rubric", "version"}, "instrument selection")
+    for selection in selections:
         rubric, version = selection["rubric"], selection["version"]
         _need(rubric in RUBRICS and rubric not in names, "unknown or duplicate semantic rubric")
         names.add(rubric)

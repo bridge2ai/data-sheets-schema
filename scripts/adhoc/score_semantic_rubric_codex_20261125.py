@@ -26,6 +26,7 @@ MODEL = "gpt-6-astra"
 EFFORT = "ultra"
 TIER = "fast"
 INSTRUMENT = "2026-11-25_codex-gpt-6-astra-ultra-fast_semantic-v3"
+ROOT_INSTRUMENT = "2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6"
 RUBRICS = ("rubric10-semantic", "rubric20-semantic")
 LIMIT = 32 * 1024 * 1024
 AGENT_TOOLS = {"spawn_agent", "send_message", "followup_task", "wait_agent",
@@ -43,6 +44,18 @@ REGISTERED = {
     },
 }
 AUTHORITY_SHA256 = "0605c742c61f2cc4e13de907f8e09752bde5ebd08d173b31d837c273a4bf3872"
+REGISTERED_ROOT = {
+    "rubric10-semantic": {
+        "agent-definition.md": "84f42966ae968881aa65263c8d4f32a0ffe6988a85d24ea8d5a933e99ee1354d",
+        "rubric.txt": "9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97",
+        "output-schema.json": "feaff440ad287a07fd5bd447e7abea3b878a89855c05e6021fcc0ec87e6d2c51",
+    },
+    "rubric20-semantic": {
+        "agent-definition.md": "6beda6a0a46230b9c6128f9251c9eac0b5771f022c10b47cbc752f017432de52",
+        "rubric.txt": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
+        "output-schema.json": "9837b1ef5eb231d11b19be7f7744bb09a2e0740d58d9b33b7d4246258dba9642",
+    },
+}
 
 
 class ScorerError(ValueError):
@@ -115,6 +128,12 @@ def executable_digest(path):
 
 def build_plan(args):
     root = physical(args.repo_root)
+    version = args.semantic_version
+    root_scope = version == "6.0"
+    require(version in ("3.0", "6.0"), "unsupported scorer instrument version")
+    require(bool(args.scope_context) == root_scope,
+            "root-scope v6 requires --scope-context; v3 refuses it")
+    instrument = ROOT_INSTRUMENT if root_scope else INSTRUMENT
     method = component(args.method_directory, "method directory")
     label = component(args.label, "label")
     record = physical(args.record if Path(args.record).is_absolute() else root / args.record)
@@ -129,19 +148,32 @@ def build_plan(args):
     require(not run.exists(), "run directory already exists; never resume or reuse it")
     require(root != run and root not in run.parents, "run directory must be outside the checkout")
     output = physical(root / "data/evaluation_llm" / (family + "_semantic") /
-                      "label_aware" / INSTRUMENT / f"{project}_{label}_evaluation.json")
+                      "label_aware" / instrument / f"{project}_{label}_evaluation.json")
     require(not output.exists(), "evaluation already exists; never overwrite it")
     sources = {
         "record.yaml": record,
         "agent-definition.md": root / f".claude/agents/d4d-{rubric}.md",
         "rubric.txt": root / f"data/rubric/{family}.txt",
-        "output-schema.json": root / f"src/download/prompts/{family}_semantic_schema.json",
+        "output-schema.json": root / f"src/download/prompts/{family}_semantic{'_v6' if root_scope else ''}_schema.json",
         "evidence-authority.json": root / "data/rubric/semantic_evidence_authority_v3.json",
     }
     if args.context:
         sources["caller-context.yaml"] = physical(args.context)
+    if root_scope:
+        sources["scope-context.json"] = physical(args.scope_context)
     raw = {name: read_file(path) for name, path in sources.items()}
-    for name, digest in {**REGISTERED[rubric], "evidence-authority.json": AUTHORITY_SHA256}.items():
+    definition_provenance = None
+    if root_scope:
+        # Composition is read-only and pins both original inputs and its output.
+        sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+        from data_sheets_schema import root_scope_definition as definition_tools
+        require(read_file(root / "src/data_sheets_schema/root_scope_definition.py")
+                == read_file(definition_tools.__file__),
+                "definition implementation differs from the runner checkout")
+        raw["agent-definition.md"], definition_provenance = definition_tools.compose_definition(
+            rubric, repo_root=root)
+    registered = REGISTERED_ROOT if root_scope else REGISTERED
+    for name, digest in {**registered[rubric], "evidence-authority.json": AUTHORITY_SHA256}.items():
         require(sha(raw[name]) == digest, f"registered rubric support changed: {name}")
     # Deterministic metadata is controller work, not a model's hash arithmetic.
     # Import the checked implementation from this helper's checkout; test trees
@@ -156,17 +188,31 @@ def build_plan(args):
     normalized = context_tools.normalize_context(
         yaml.safe_load(raw["caller-context.yaml"]) if args.context else None)
     document = context_tools.unwrap_document(yaml.safe_load(raw["record.yaml"]))
+    selected_units = context_tools.dataset_units(document)
+    if root_scope:
+        from data_sheets_schema import root_scope as scope_tools
+        require(read_file(root / "src/data_sheets_schema/root_scope.py") == read_file(scope_tools.__file__),
+                "root scope implementation differs from the runner checkout")
+        declaration = scope_tools.parse_root_scope(raw["scope-context.json"])
+        selected_units = scope_tools.resolve_root_units(document, sha(raw["record.yaml"]), declaration)
     units = [{"path": path, "id": unit.get("id")}
-             for path, unit in context_tools.dataset_units(document)]
+             for path, unit in selected_units]
     scope = {"policy": context_tools.COLLECTION_POLICY if len(units) > 1 else "single_dataset",
              "units": units, "collection_metadata_inherited": False}
+    if root_scope:
+        scope["selection_policy"] = "root_dataset_v1"
     inputs = {name: {"source": str(path), "sha256": sha(raw[name])}
               for name, path in sources.items()}
+    if root_scope:
+        inputs["agent-definition.md"]["source"] = "root_scope_v6_composition"
     validation_files = ["scripts/validate_evaluation_schema.py", "pyproject.toml"]
     validation_files += ["src/data_sheets_schema/" + name for name in (
         "resources.py", "evaluation_context.py", "judge_contract.py", "semantic_scope.py",
         "semantic_instrument.py", "semantic_evidence.py", "semantic_evidence_authority.py",
         "evaluation/__init__.py", "evaluation/validate.py")]
+    if root_scope:
+        validation_files.extend(["src/data_sheets_schema/root_scope.py",
+                                 "src/data_sheets_schema/root_scope_definition.py"])
     for optional in ("poetry.lock", "src/data_sheets_schema/__init__.py"):
         if (root / optional).exists():
             validation_files.append(optional)
@@ -187,12 +233,15 @@ def build_plan(args):
                     "--json", "-"])
     validation = [poetry, "run", "python", "scripts/validate_evaluation_schema.py", "--file",
                   str(run / "candidate_evaluation.json"), "--rubric", rubric,
-                  "--input", str(record), "--agent-definition", str(sources["agent-definition.md"])]
+                  "--input", str(record), "--agent-definition",
+                  str(working / "agent-definition.md" if root_scope else sources["agent-definition.md"])]
     if args.context:
         validation.extend(["--context", str(sources["caller-context.yaml"])])
-    identity = {"rubric": rubric, "version": "3.0", "project": project, "method": method,
+    if root_scope:
+        validation.extend(["--semantic-version", version, "--scope-context", str(sources["scope-context.json"])])
+    identity = {"rubric": rubric, "version": version, "project": project, "method": method,
                 "d4d_file": str(record.relative_to(root)), "label": label,
-                "instrument_id": INSTRUMENT}
+                "instrument_id": instrument}
     deterministic = {
         "applicability_context": normalized, "evaluation_scope": scope,
         "metadata": {"context_sha256": context_tools.context_digest(normalized),
@@ -201,6 +250,14 @@ def build_plan(args):
                      "instrument_sha256": sha(raw["agent-definition.md"]),
                      "evidence_authority_sha256": sha(raw["evidence-authority.json"])},
     }
+    if root_scope:
+        deterministic["metadata"]["scope_context_sha256"] = sha(raw["scope-context.json"])
+    prompt_inputs = ({name: {"source": name, "sha256": item["sha256"]} for name, item in inputs.items()}
+                     if root_scope else inputs)
+    prompt_descriptor = {"output_identity": identity, "input_hashes": prompt_inputs,
+                         "required_deterministic_fields": deterministic}
+    if root_scope:
+        prompt_descriptor["definition_provenance"] = definition_provenance
     prompt = ("Evaluate exactly the one record below with the unchanged registered semantic criteria. "
               "The complete agent definition follows verbatim, including historical examples. "
               "This invocation overrides its runtime selection and batch/output-location examples only: "
@@ -213,14 +270,13 @@ def build_plan(args):
               "do not treat the agent frontmatter as runtime evidence. Preserve all scoring decisions. "
               "With no caller-context file, normalize empty applicability context: all conditional "
               "predicates are unknown, remain in the denominator, and cannot justify exclusion.\n"
-              + json.dumps({"output_identity": identity, "input_hashes": inputs,
-                            "required_deterministic_fields": deterministic}, sort_keys=True)
+              + json.dumps(prompt_descriptor, sort_keys=True)
               + "\n")
     for name, data in raw.items():
         prompt += f"\nBEGIN {name} ({len(data)} bytes; sha256 {sha(data)})\n"
         prompt += data.decode("utf-8")
         prompt += f"\nEND {name}\n"
-    return {"instrument": INSTRUMENT, "identity": identity, "repo_root": str(root),
+    plan = {"instrument": instrument, "identity": identity, "repo_root": str(root),
             "runner": str(Path(__file__).resolve()), "runner_sha256": sha(Path(__file__).read_bytes()),
             "run_directory": str(run), "working_directory": str(working),
             "codex_home": str(codex_home), "output": str(output), "inputs": inputs,
@@ -244,12 +300,30 @@ def build_plan(args):
                         "Send prompt on stdin; retain stdout, stderr, raw response and fresh session logs",
                         "Verify session identity and inputs; stamp observed model without altering scores",
                         "Run exact-file validator; publish without replacement only on exit zero"]}
+    if root_scope:
+        plan["definition_provenance"] = definition_provenance
+    return plan
+
+
+def input_bytes(plan, name):
+    item = plan["inputs"][name]
+    if name == "agent-definition.md" and plan["identity"]["version"] == "6.0":
+        from data_sheets_schema.root_scope_definition import compose_definition
+        data, provenance = compose_definition(plan["identity"]["rubric"],
+                                              repo_root=Path(plan["repo_root"]))
+        require(item["source"] == "root_scope_v6_composition"
+                and provenance == plan["definition_provenance"],
+                "definition composition changed since plan")
+    else:
+        data = read_file(item["source"])
+    require(sha(data) == item["sha256"], "input changed since plan")
+    return data
 
 
 def check_inputs(plan):
     require(sha(read_file(plan["runner"])) == plan["runner_sha256"], "runner changed since plan")
-    for item in plan["inputs"].values():
-        require(sha(read_file(item["source"])) == item["sha256"], "input changed since plan")
+    for name in plan["inputs"]:
+        input_bytes(plan, name)
     for path, digest in plan["executable_sha256"].items():
         require(executable_digest(path) == digest, "executable changed since plan")
     for path, digest in plan["validation_sha256"].items():
@@ -437,7 +511,9 @@ def session_identity(plan, started, finished):
                     continue
                 require(call_id not in call_outputs, "duplicate owned tool output")
                 call_outputs[call_id] = (value, ident)
-        receipts.append({"path": str(path), "sha256": sha(raw), "id": ident,
+        retained_path = (path.relative_to(Path(plan["run_directory"])).as_posix()
+                         if plan["identity"]["version"] == "6.0" else str(path))
+        receipts.append({"path": retained_path, "sha256": sha(raw), "id": ident,
                          "parent_thread_id": parent, "cli_version": meta["cli_version"],
                          "owned_history_start_ordinal": own_start,
                          "owned_turn_ids": sorted({row["turn_id"] for row in qualified_contexts})})
@@ -505,6 +581,8 @@ def execute(plan, args):
     run.mkdir(mode=0o700, parents=False, exist_ok=False)
     receipt = {"status": "STARTED", "authorization_reference": args.authorization_reference,
                "started_utc": utc(), "plan_sha256": sha(json.dumps(plan, sort_keys=True).encode())}
+    if plan["identity"]["version"] == "6.0":
+        receipt["definition_provenance"] = plan["definition_provenance"]
     write_json(run / "plan.json", plan)
     auth_directory_fd = None
     try:
@@ -517,8 +595,8 @@ def execute(plan, args):
         home.mkdir(mode=0o700)
         temporary = run / "tmp"
         temporary.mkdir(mode=0o700)
-        for name, item in plan["inputs"].items():
-            (working / name).write_bytes(read_file(item["source"]))
+        for name in plan["inputs"]:
+            (working / name).write_bytes(input_bytes(plan, name))
         auth = read_file(plan["auth_file"], 1024 * 1024)
         descriptor = os.open("auth.json", os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
                              0o600, dir_fd=auth_directory_fd)
@@ -554,8 +632,15 @@ def execute(plan, args):
         candidate["model"].update(name=observed["name"], temperature=None,
                                   evaluation_type="semantic_llm_judge")
         candidate["evaluation_model"] = observed
-        candidate["scorer_instrument"] = {"id": INSTRUMENT, "prompt_sha256": plan["prompt_sha256"],
+        candidate["scorer_instrument"] = {"id": plan["instrument"], "prompt_sha256": plan["prompt_sha256"],
                                           "runner_sha256": plan["runner_sha256"]}
+        if plan["identity"]["version"] == "6.0":
+            import yaml
+            from data_sheets_schema.root_scope import assert_portable_output
+            authority = {"data/rubric/semantic_evidence_authority_v3.json":
+                         input_bytes(plan, "evidence-authority.json")}
+            assert_portable_output(candidate, document=yaml.safe_load(input_bytes(plan, "record.yaml")),
+                                   resource_reader=authority.__getitem__)
         staged = run / "candidate_evaluation.json"
         write_json(staged, candidate)
         # Bind publication to the bytes presented to the validator (6347).
@@ -612,6 +697,8 @@ def parser():
     p.add_argument("--rubric", choices=RUBRICS, required=True)
     p.add_argument("--run-directory", type=Path, required=True)
     p.add_argument("--context", type=Path)
+    p.add_argument("--semantic-version", choices=("3.0", "6.0"), default="3.0")
+    p.add_argument("--scope-context", type=Path)
     p.add_argument("--codex-binary", default="codex")
     p.add_argument("--poetry-binary", default="poetry")
     p.add_argument("--validation-venv", type=Path, default=Path(sys.prefix))

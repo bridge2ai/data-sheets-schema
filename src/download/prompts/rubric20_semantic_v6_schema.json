@@ -1,0 +1,830 @@
+{
+  "$id": "https://bridge2ai.github.io/data-sheets-schema/evaluation/rubric20-semantic-v6.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "version": {
+            "const": "6.0"
+          }
+        },
+        "required": [
+          "version"
+        ]
+      },
+      "then": {
+        "properties": {
+          "categories": {
+            "items": {
+              "properties": {
+                "questions": {
+                  "items": {
+                    "required": [
+                      "applicable",
+                      "applicability_status",
+                      "applicability_evidence",
+                      "unit_scores"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "metadata": {
+            "required": [
+              "input_sha256",
+              "context_sha256",
+              "rubric_sha256",
+              "instrument_sha256"
+            ]
+          }
+        },
+        "required": [
+          "applicability_context",
+          "evaluation_scope",
+          "metadata"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "version": {
+            "const": "6.0"
+          }
+        },
+        "required": [
+          "version"
+        ]
+      },
+      "then": {
+        "properties": {
+          "categories": {
+            "items": {
+              "properties": {
+                "questions": {
+                  "items": {
+                    "properties": {
+                      "no_issue_reason": {
+                        "pattern": "\\S",
+                        "type": "string"
+                      },
+                      "unit_scores": {
+                        "items": {
+                          "properties": {
+                            "absent": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "path": {
+                                    "pattern": "\\S",
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "path"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "cited": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "path": {
+                                    "pattern": "\\S",
+                                    "type": "string"
+                                  },
+                                  "quote": {
+                                    "pattern": "\\S",
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "path"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "considered": {
+                              "items": {
+                                "pattern": "\\S",
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "counts": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "claimed": {
+                                    "minimum": 0,
+                                    "type": "integer"
+                                  },
+                                  "path": {
+                                    "pattern": "\\S",
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "path",
+                                  "claimed"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "path": {
+                              "const": "#"
+                            }
+                          },
+                          "required": [
+                            "cited",
+                            "absent",
+                            "counts",
+                            "considered"
+                          ]
+                        },
+                        "maxItems": 1,
+                        "minItems": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "metadata": {
+            "properties": {
+              "evidence_authority_sha256": {
+                "pattern": "^[a-f0-9]{64}$",
+                "type": "string"
+              },
+              "instrument_sha256": {
+                "pattern": "^[a-f0-9]{64}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "evidence_authority_sha256"
+            ]
+          },
+          "semantic_analysis": {
+            "properties": {
+              "issues_detected": {
+                "items": {
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "score_effect": {
+                            "const": "lowered"
+                          }
+                        },
+                        "required": [
+                          "score_effect"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "item_ids": {
+                            "minItems": 1
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "score_effect": {
+                            "const": "noted_only"
+                          }
+                        },
+                        "required": [
+                          "score_effect"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "item_ids": {
+                            "maxItems": 0
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "properties": {
+                    "category": {
+                      "enum": [
+                        "attribution",
+                        "bias_quality",
+                        "consent_ethics",
+                        "count_size",
+                        "format_access",
+                        "license_use_terms",
+                        "other",
+                        "persistent_identifier",
+                        "privacy_regulatory",
+                        "processing_provenance",
+                        "scope_drift",
+                        "source_conflict",
+                        "temporal_version",
+                        "variables_metadata"
+                      ]
+                    },
+                    "item_ids": {
+                      "items": {
+                        "pattern": "^Q[1-9][0-9]*$",
+                        "type": "string"
+                      },
+                      "type": "array",
+                      "uniqueItems": true
+                    },
+                    "score_effect": {
+                      "enum": [
+                        "lowered",
+                        "noted_only"
+                      ]
+                    },
+                    "type": {
+                      "enum": [
+                        "completeness",
+                        "consistency",
+                        "content_accuracy",
+                        "correctness",
+                        "semantic_understanding"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "item_ids",
+                    "score_effect",
+                    "category"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "description": "Schema for D4D evaluation results using the Rubric20-Semantic framework with semantic validation; independently declared whole-datasheet root scope",
+  "properties": {
+    "applicability_context": {
+      "description": "Explicit context predicates and their evidence; unknown stays scored",
+      "type": "object"
+    },
+    "assessment": {
+      "description": "High-level assessment (optional)",
+      "properties": {
+        "recommendations": {
+          "description": "Recommendations for improvement",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "strengths": {
+          "description": "Overall strengths",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "weaknesses": {
+          "description": "Overall weaknesses",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "categories": {
+      "description": "Four evaluation categories",
+      "items": {
+        "properties": {
+          "category_max": {
+            "description": "Category maximum as defined by the rubric.",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "category_score": {
+            "description": "Sum of the applicable integer question scores in this category.",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "name": {
+            "description": "Category name (one of the 4 standard categories)",
+            "type": "string"
+          },
+          "questions": {
+            "description": "Questions in this category",
+            "items": {
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "id": {
+                        "const": 14
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ]
+                  },
+                  "then": {
+                    "properties": {
+                      "applicability_status": {
+                        "enum": [
+                          "always_applicable",
+                          "applicable"
+                        ]
+                      },
+                      "applicable": {
+                        "enum": [
+                          true,
+                          "true"
+                        ]
+                      },
+                      "score": {
+                        "enum": [
+                          0,
+                          3,
+                          5
+                        ]
+                      }
+                    }
+                  }
+                }
+              ],
+              "properties": {
+                "applicability_evidence": {
+                  "description": "Fields belonging to a different question that evidence the applicability decision (the anti-circular rule)",
+                  "type": "string"
+                },
+                "applicability_status": {
+                  "description": "always_applicable | applicable | not_applicable",
+                  "type": "string"
+                },
+                "applicable": {
+                  "description": "Whether the question's 'Applies to' condition is met",
+                  "type": [
+                    "boolean",
+                    "string"
+                  ]
+                },
+                "description": {
+                  "description": "Detailed question description",
+                  "type": "string"
+                },
+                "evidence": {
+                  "description": "Evidence from D4D file supporting the score",
+                  "type": "string"
+                },
+                "id": {
+                  "description": "Question number (1-20)",
+                  "maximum": 20,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "max_score": {
+                  "description": "Maximum points possible",
+                  "maximum": 5,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "name": {
+                  "description": "Question title",
+                  "type": "string"
+                },
+                "quality_note": {
+                  "description": "Qualitative assessment justification",
+                  "type": "string"
+                },
+                "score": {
+                  "description": "Points awarded. null when applicable is false — distinct from 0, which means scored and earned nothing.",
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "score_label": {
+                  "description": "Human-readable score interpretation",
+                  "type": "string"
+                },
+                "score_type": {
+                  "description": "Scoring type",
+                  "enum": [
+                    "numeric",
+                    "pass_fail"
+                  ],
+                  "type": "string"
+                },
+                "semantic_analysis": {
+                  "description": "Semantic validation notes (optional)",
+                  "type": "string"
+                },
+                "unit_scores": {
+                  "items": {
+                    "properties": {
+                      "evidence": {
+                        "pattern": "\\S",
+                        "type": "string"
+                      },
+                      "path": {
+                        "const": "#"
+                      },
+                      "score": {
+                        "enum": [
+                          0,
+                          1,
+                          3,
+                          5,
+                          null
+                        ],
+                        "type": [
+                          "integer",
+                          "null"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "score",
+                      "evidence"
+                    ],
+                    "type": "object"
+                  },
+                  "maxItems": 1,
+                  "minItems": 1,
+                  "type": "array"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "description",
+                "score_type",
+                "score",
+                "max_score",
+                "score_label",
+                "evidence",
+                "quality_note"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "questions"
+        ],
+        "type": "object"
+      },
+      "maxItems": 4,
+      "minItems": 4,
+      "type": "array"
+    },
+    "d4d_file": {
+      "description": "Path to the D4D YAML file being evaluated",
+      "pattern": "^(?!/|\\\\|[A-Za-z]:)(?!.*(?:^|[/\\\\])\\.\\.(?:[/\\\\]|$)).+$",
+      "type": "string"
+    },
+    "evaluation_model": {
+      "properties": {
+        "session_logs": {
+          "items": {
+            "properties": {
+              "path": {
+                "pattern": "^(?!/|\\\\|[A-Za-z]:)(?!.*(?:^|[/\\\\])\\.\\.(?:[/\\\\]|$)).+$",
+                "type": "string"
+              },
+              "sha256": {
+                "pattern": "^[a-f0-9]{64}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "sha256"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "evaluation_scope": {
+      "properties": {
+        "collection_metadata_inherited": {
+          "const": false
+        },
+        "policy": {
+          "const": "single_dataset"
+        },
+        "selection_policy": {
+          "const": "root_dataset_v1"
+        },
+        "units": {
+          "items": {
+            "properties": {
+              "path": {
+                "const": "#"
+              }
+            },
+            "required": [
+              "path"
+            ],
+            "type": "object"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "policy",
+        "units",
+        "collection_metadata_inherited",
+        "selection_policy"
+      ],
+      "type": "object"
+    },
+    "evaluation_timestamp": {
+      "description": "ISO 8601 timestamp of evaluation",
+      "format": "date-time",
+      "type": "string"
+    },
+    "metadata": {
+      "description": "Evaluation metadata (optional)",
+      "properties": {
+        "context_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "d4d_file_hash": {
+          "description": "Hash or identifier of D4D file (e.g., sha256:def456)",
+          "type": "string"
+        },
+        "evaluator_id": {
+          "description": "Unique evaluator identifier",
+          "type": "string"
+        },
+        "input_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "rubric_hash": {
+          "description": "Hash or identifier of rubric file (e.g., sha256:abc123 or rubric20-semantic-v1.0)",
+          "type": "string"
+        },
+        "rubric_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "scope_context_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scope_context_sha256"
+      ],
+      "type": "object"
+    },
+    "method": {
+      "description": "Declared generation or authorship method; study membership is checked separately",
+      "minLength": 1,
+      "pattern": "\\S",
+      "type": "string"
+    },
+    "model": {
+      "properties": {
+        "evaluation_type": {
+          "description": "Type of evaluation (semantic_llm_judge, llm_as_judge)",
+          "type": "string"
+        },
+        "name": {
+          "description": "Model identifier (e.g., claude-sonnet-4-5-20250929)",
+          "type": "string"
+        },
+        "temperature": {
+          "description": "Actual runtime temperature, or null when the runtime does not expose it; a fixed temperature does not guarantee repeated scores.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "temperature",
+        "evaluation_type"
+      ],
+      "type": "object"
+    },
+    "overall_score": {
+      "properties": {
+        "adjusted_max_points": {
+          "description": "max_points minus excluded_max_points",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "excluded_max_points": {
+          "description": "Sum of max_score over items marked applicable: false",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "fixed_percentage": {
+          "description": "total_points / max_points x 100, before N/A exclusions. Required by the current agent instructions; optional here so preserved older evaluations remain readable.",
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        "max_points": {
+          "const": 88,
+          "description": "Maximum before N/A exclusions",
+          "type": "integer"
+        },
+        "normalized_percentage": {
+          "description": "total_points / adjusted_max_points x 100. Report alongside the fixed-base percentage and excluded items; different applicability does not establish comparability.",
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        "questions_not_applicable": {
+          "description": "Count of questions marked applicable: false",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "total_points": {
+          "description": "Points earned across applicable items",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total_points",
+        "max_points",
+        "excluded_max_points",
+        "adjusted_max_points",
+        "normalized_percentage",
+        "questions_not_applicable"
+      ],
+      "type": "object"
+    },
+    "project": {
+      "description": "Declared dataset identifier",
+      "minLength": 1,
+      "pattern": "\\S",
+      "type": "string"
+    },
+    "rubric": {
+      "const": "rubric20-semantic",
+      "description": "Rubric type identifier",
+      "type": "string"
+    },
+    "semantic_analysis": {
+      "properties": {
+        "consistency_checks": {
+          "properties": {
+            "failed": {
+              "description": "Number of consistency checks failed",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "passed": {
+              "description": "Number of consistency checks passed",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "warnings": {
+              "description": "Number of warnings issued",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "passed",
+            "failed",
+            "warnings"
+          ],
+          "type": "object"
+        },
+        "correctness_validations": {
+          "additionalProperties": {
+            "description": "Additional validation results",
+            "type": "string"
+          },
+          "description": "Format validation results (valid/invalid/not_applicable/not_present, may include specific validators like valid_nih, valid_zenodo)",
+          "properties": {
+            "doi_format": {
+              "description": "DOI format validation (e.g., valid, valid_zenodo, invalid, not_applicable, not_present)",
+              "type": "string"
+            },
+            "grant_number_format": {
+              "description": "Grant number format validation (e.g., valid, valid_nih, invalid, not_applicable, not_present)",
+              "type": "string"
+            },
+            "rrid_format": {
+              "description": "RRID format validation (e.g., valid, invalid, not_applicable, not_present)",
+              "type": "string"
+            },
+            "url_validity": {
+              "description": "URL validation status (e.g., all_valid, some_invalid, not_applicable, not_present)",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "issues_detected": {
+          "description": "Semantic issues found during evaluation",
+          "items": {
+            "properties": {
+              "description": {
+                "description": "Issue description",
+                "type": "string"
+              },
+              "fields_involved": {
+                "description": "D4D fields involved",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "recommendation": {
+                "description": "Recommendation for fixing",
+                "type": "string"
+              },
+              "severity": {
+                "description": "Issue severity",
+                "enum": [
+                  "low",
+                  "medium",
+                  "high"
+                ],
+                "type": "string"
+              },
+              "type": {
+                "description": "Issue type (e.g. correctness, consistency, completeness, content_accuracy, semantic_understanding)",
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "severity",
+              "description",
+              "fields_involved",
+              "recommendation"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "semantic_insights": {
+          "description": "Positive semantic observations",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "issues_detected",
+        "semantic_insights",
+        "consistency_checks",
+        "correctness_validations"
+      ],
+      "type": "object"
+    },
+    "version": {
+      "const": "6.0",
+      "type": "string"
+    }
+  },
+  "required": [
+    "rubric",
+    "version",
+    "d4d_file",
+    "project",
+    "method",
+    "evaluation_timestamp",
+    "model",
+    "overall_score",
+    "categories",
+    "semantic_analysis"
+  ],
+  "title": "Rubric20-Semantic Evaluation Schema — Root Scope Version 6",
+  "type": "object"
+}

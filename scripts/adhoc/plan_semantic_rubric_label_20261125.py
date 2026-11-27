@@ -20,6 +20,8 @@ def main(argv=None):
     p.add_argument("--method-directory", required=True)
     p.add_argument("--label", action="append", required=True)
     p.add_argument("--runs-root", type=Path, required=True)
+    p.add_argument("--semantic-version", choices=("3.0", "6.0"), default="3.0")
+    p.add_argument("--scope-context-directory", type=Path)
     p.add_argument("--codex-binary", default="codex")
     p.add_argument("--poetry-binary", default="poetry")
     p.add_argument("--validation-venv", type=Path, default=Path(sys.prefix))
@@ -28,6 +30,8 @@ def main(argv=None):
     args = p.parse_args(argv)
     try:
         component(args.method_directory, "method")
+        if bool(args.scope_context_directory) != (args.semantic_version == "6.0"):
+            raise ScorerError("v6 requires --scope-context-directory; v3 refuses it")
         if len(set(args.label)) != len(args.label):
             raise ScorerError("duplicate label")
         plans = []
@@ -48,6 +52,10 @@ def main(argv=None):
                                "--run-directory", str(args.runs_root / (label + "__" + record.stem + "__" + rubric)),
                                "--codex-binary", args.codex_binary, "--poetry-binary", args.poetry_binary,
                                "--validation-venv", str(args.validation_venv), "--auth-file", str(args.auth_file), "--plan"]
+                    if args.semantic_version == "6.0":
+                        command.extend(["--semantic-version", "6.0", "--scope-context",
+                                        str(args.scope_context_directory / label /
+                                            (record.name.removesuffix("_d4d.yaml") + ".scope.json"))])
                     plans.append(build_plan(parser().parse_args(command[2:])))
                     invocations.append(shlex.join(command))
         print(json.dumps({"mode": "PLAN_ONLY", "record_count": len(records),
