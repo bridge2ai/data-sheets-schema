@@ -5,17 +5,23 @@ Purpose: before a replicate stream starts its next project, estimate how much of
 account's weekly Fable allowance the series has used and would use, from the finished
 transcripts' own cost totals, and say whether the stream may start. No model call.
 
-Calibration (owner's two /usage pastes on claude-work, 2026-11-25): the Fable week went
-from 5 to 11 percent while about 21 USD at list price was spent, so 6 points per 21 USD,
-an upper bound. The second paste (11 percent) already contains the series' first run
-(CHORUS replicate 1, the canary), whose cost is therefore not counted again.
+Calibration comes from the environment and is not kept in this file. For series
+2026-11-25c the two values were constants here, taken from the owner's usage readings of
+the account; they were removed from the published copy on 2026-11-25 at the owner's
+decision (issue 6352), and the rest of the script is as it was run. The base reading
+already contained the series' first run (the canary), whose cost was therefore not counted
+again: name such a run in D4D_BUDGET_ALREADY_COUNTED.
 
 Inputs:  --series LABEL-PREFIX --model M --condition C, the launch worktrees (each holds
          .temp/launch/transcripts/<label>_rep<N>/<PROJECT>.stream.jsonl), --state-dir with one
          stream_rep<N>.state file per stream ("running <PROJECT>" or "idle"), and
          --next PROJECT, the project the calling stream wants to start.
+         Environment: D4D_BUDGET_BASE_PERCENT (allowance used at the base reading) and
+         D4D_BUDGET_POINTS_PER_USD (allowance points per USD at list price), both required;
+         D4D_BUDGET_ALREADY_COUNTED (optional, "REPLICATE:PROJECT").
 Outputs: one line of JSON on stdout; exit 0 = may start, exit 3 = stop (also when the
-         estimate cannot be made).
+         estimate cannot be made or the calibration is missing or not valid). The line holds estimates
+         of the account's usage: remove them before publishing a log that contains it.
 Serves:  the release-series rerun (PR 6325, issue 6324). Date: 2026-11-25.
 """
 import argparse
@@ -24,9 +30,22 @@ import json
 import os
 import sys
 
-BASE_PERCENT = 11.0          # claude-work Fable week at the second paste
-POINTS_PER_USD = 6.0 / 21.0  # upper bound from the two pastes
-ALREADY_COUNTED = ("1", "CHORUS")  # replicate 1 CHORUS is inside BASE_PERCENT
+def calibration():
+    """(base percent, points per USD, already-counted key or None) from the environment."""
+    base = float(os.environ["D4D_BUDGET_BASE_PERCENT"])
+    points = float(os.environ["D4D_BUDGET_POINTS_PER_USD"])
+    if not (base >= 0 and points > 0):      # also refuses nan; a ratio of zero or less would always answer start
+        raise ValueError("base percent must be 0 or more and points per USD above 0")
+    counted = os.environ.get("D4D_BUDGET_ALREADY_COUNTED", "")
+    key = None
+    if counted:
+        replicate, separator, project = counted.partition(":")
+        if not (separator and replicate.isdigit() and project and ":" not in project):
+            raise ValueError("D4D_BUDGET_ALREADY_COUNTED must be REPLICATE:PROJECT, replicate a number")
+        key = (replicate, project)
+    return base, points, key
+
+
 # Session minutes of the 2026-11-22b series relative to CHORUS, used until a project has a
 # measured cost in this series.
 RELATIVE = {"CHORUS": 1.0, "AI_READI": 2.4, "CM4AI": 1.8, "VOICE": 1.6, "VOICE_PEDIATRIC": 1.4}
@@ -61,6 +80,14 @@ def main():
     parser.add_argument("--rep", required=True)
     parser.add_argument("worktrees", nargs="+")
     args = parser.parse_args()
+    try:
+        BASE_PERCENT, POINTS_PER_USD, ALREADY_COUNTED = calibration()
+    except KeyError as exc:
+        print(json.dumps({"decision": "stop", "reason": "calibration not given: %s" % exc.args[0]}))
+        return 3
+    except ValueError:      # the values are not echoed: this line goes into the stream log
+        print(json.dumps({"decision": "stop", "reason": "calibration not valid"}))
+        return 3
     stem = "%s_%s-claudecode-%s_rep" % (args.series, args.model, args.condition.replace("_", "-"))
     costs = {}       # (rep, project) -> cost
     for tree in args.worktrees:

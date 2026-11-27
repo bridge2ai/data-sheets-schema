@@ -15,7 +15,13 @@
 #   environment, as for the driver.
 # Inputs:  <launch worktree> <series> <model> <effort> <replicate number> <state dir> <project> ...
 #   Environment: D4D_SERIES_ACCOUNT (passed through to the driver), D4D_SERIES_TREES (the
-#   launch worktrees of all streams, colon-separated, for the budget check).
+#   launch worktrees of all streams, colon-separated, for the budget check), and the budget
+#   check's calibration: D4D_BUDGET_BASE_PERCENT and D4D_BUDGET_POINTS_PER_USD (both
+#   required) and D4D_BUDGET_ALREADY_COUNTED (optional); see release_series_budget_20261125.py.
+#   Without the two required values, or with a value that is not valid, the first budget
+#   check answers stop: this script then
+#   writes the stop file, every stream ends at its next check, and the exit status is 0.
+#   Series 2026-11-25c ran before the calibration moved out of the budget script.
 # Outputs: the driver's outputs in the worktree; <state dir>/stream_rep<N>.state and .log;
 #   overload evidence under <state dir>/overload-attempts/.
 # Serves:  the release-series rerun 2026-11-25c (PR 6325, issues 6324, 6312). Date: 2026-11-25.
