@@ -178,7 +178,7 @@ def check_third(cell, bad, base, project, label, fam, rel, third):
         if not plan3.get("validation_sha256"): bad("attempt 3: no validator bindings")
         if r.get("plan_sha256") != hashlib.sha256(json.dumps(plan3, sort_keys=True).encode()).hexdigest(): bad("attempt 3: receipt does not bind the executed plan")
         saved = X / "revised-reader-plans" / f"{base}-03.plan.json"
-        if not saved.exists() or json.loads(saved.read_text()) != plan3: bad("attempt 3: executed plan differs from the plan saved before the run")
+        if not saved.exists() or canon(json.loads(saved.read_text())) != canon(plan3): bad("attempt 3: executed plan differs from the plan saved before the run")
     dest = W2 / rel
     if r.get("status") == "REFUSED":
         if not isinstance(r.get("failure"), str) or not r["failure"].strip(): bad("attempt 3: refusal without a reason")

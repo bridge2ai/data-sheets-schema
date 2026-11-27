@@ -112,6 +112,12 @@ def third_plan(root, change):
     """Change only the executed plan of the private third attempt; nothing is rebound."""
     plan, receipt, store = private_third(root); change(plan); store(saved=False, bind=False)
 
+def third_saved_only(root, change):
+    """Change only the plan saved before the run; the executed plan and the receipt are untouched."""
+    plan, receipt, store = private_third(root)
+    saved = root / "revised-reader-plans" / f"{THIRD}.plan.json"
+    other = json.loads(saved.read_text()); change(other); saved.write_text(json.dumps(other, indent=2, sort_keys=True))
+
 def third_coherent(root, change):
     """Change the executed plan and make every copy agree with it: the plan saved before the run
     and the receipt's canonical plan digest. Only a comparison with attempt 1 or with the real
@@ -201,6 +207,7 @@ controls = {
     "third attempt names the measured checkout everywhere, revised hash label kept, rebound": lambda r: third_coherent(r, lambda pl, root: (
         lambda moved: (pl.clear(), pl.update(moved)))(json.loads(json.dumps(pl).replace(str((REAL / "checkout-revised-reader").resolve()), str((REAL / "checkout").resolve()))))),
     "third attempt plan with a JSON false replaced by 0, rebound": lambda r: third_coherent(r, lambda pl, root: pl["deterministic_fields"]["evaluation_scope"].update(collection_metadata_inherited=0)),
+    "saved third-attempt plan with a JSON false replaced by 0, executed plan untouched": lambda r: third_saved_only(r, lambda pl: pl["deterministic_fields"]["evaluation_scope"].update(collection_metadata_inherited=0)),
     "published record carrying binding failures": lambda r: edit(r, PUBLISHED, "manifest.json", lambda m: m.update(binding_failures=["claim_sha256"])),
 }
 ok = True
