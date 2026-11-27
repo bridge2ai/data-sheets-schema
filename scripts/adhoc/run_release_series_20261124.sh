@@ -27,7 +27,7 @@
 #   and this script must be started with that worktree as the working directory's root.
 #   Environment: the account, one of three ways (required): D4D_SERIES_CONFIG_DIR and D4D_SERIES_OAUTH_TOKEN (the Claude Code
 #   configuration directory and the login token of the account to run on), either or both, or D4D_SERIES_DEFAULT_LOGIN=1
-#   for the login the default configuration directory holds; a canary and its series must use the same ones), D4D_SERIES_CONDITION (default generic_v9), D4D_SERIES_METHOD
+#   for that directory's own login (give it per invocation, not exported for good); a canary and its series use the same. Optional: D4D_SERIES_CONDITION (default generic_v9), D4D_SERIES_METHOD
 #   (default claudecode_release), D4D_SERIES_RUNTIME (default "Claude Code (release)"): a
 #   release series is filed under its own method directory and runtime string, apart from
 #   the agentic arm and the direct arm (#6324). D4D_SERIES_CONTINUE_AFTER_GATE_FAIL=1 lets
@@ -61,8 +61,8 @@ RUNTIME=${D4D_SERIES_RUNTIME:-Claude Code (release)}
 # The account is not chosen in this file (edited 2026-11-27): the caller's environment gives the configuration directory, the token where the login is one, or both, or says that the default login is meant.
 ACCOUNT_DIR=${D4D_SERIES_CONFIG_DIR:-}
 ACCOUNT_TOKEN=${D4D_SERIES_OAUTH_TOKEN:-}
-[ -z "${D4D_SERIES_ACCOUNT:-}" ] || { echo "STOP: D4D_SERIES_ACCOUNT is no longer read; set D4D_SERIES_CONFIG_DIR and D4D_SERIES_OAUTH_TOKEN" >&2; exit 2; }
-[ -n "$ACCOUNT_DIR$ACCOUNT_TOKEN" ] || [ "${D4D_SERIES_DEFAULT_LOGIN:-}" = 1 ] || { echo "STOP: no account chosen: set D4D_SERIES_CONFIG_DIR, D4D_SERIES_OAUTH_TOKEN or both, or D4D_SERIES_DEFAULT_LOGIN=1 for the login of the default configuration directory" >&2; exit 2; }
+[ -z "${D4D_SERIES_ACCOUNT:-}" ] || { echo "STOP: D4D_SERIES_ACCOUNT is no longer read; set D4D_SERIES_CONFIG_DIR, D4D_SERIES_OAUTH_TOKEN or both, or D4D_SERIES_DEFAULT_LOGIN=1 for the login of the default configuration directory" >&2; exit 2; }
+[ -n "$ACCOUNT_DIR$ACCOUNT_TOKEN" ] || [ "${D4D_SERIES_DEFAULT_LOGIN:-}" = 1 ] || { echo "STOP: no account chosen: set D4D_SERIES_CONFIG_DIR, D4D_SERIES_OAUTH_TOKEN or both, or D4D_SERIES_DEFAULT_LOGIN=1 for the login of the default configuration directory" >&2; exit 2; }; [ "${D4D_SERIES_DEFAULT_LOGIN:-}" != 1 ] || [ -z "$ACCOUNT_DIR$ACCOUNT_TOKEN" ] || { echo "STOP: D4D_SERIES_DEFAULT_LOGIN=1 contradicts a configuration directory or a token; give one or the other" >&2; exit 2; }
 case "$ACCOUNT_DIR" in ""|/*) ;; *) echo "STOP: D4D_SERIES_CONFIG_DIR must be an absolute path" >&2; exit 2 ;; esac
 [ -z "$ACCOUNT_DIR" ] || [ -d "$ACCOUNT_DIR" ] || { echo "STOP: D4D_SERIES_CONFIG_DIR is not a directory" >&2; exit 2; }
 case "$SERIES$MODEL$EFFORT$REP$CONDITION$METHOD" in *[!A-Za-z0-9._-]*) echo "series, model, effort, replicate, condition and method take plain tokens" >&2; exit 2;; esac
@@ -142,7 +142,7 @@ for P in "$@"; do
     echo "model: $MODEL   effort: $EFFORT (CLI flags; both stated in the rendering specification, the effort asserted by the launcher)"
     echo "recorder line: complete (D4D_RENDER_SPEC and D4D_LAUNCH_INSTRUCTION); toolchain: checkout-relative"
     echo "render specification: $SPEC sha256 $(shasum -a 256 "$SPEC" | cut -d' ' -f1)"
-    echo "claude code: $("$CLAUDE_BIN" --version 2>/dev/null) ($(h=${HOME%/}; b=$CLAUDE_BIN; case $h:$b in (?*:"$h"/*) b="~/${b#"$h"/}";; esac; printf '%s' "$b" | sed -E 's#^/(Users|home)/[^/]+/#~/#'))"
+    echo "claude code: $("$CLAUDE_BIN" --version 2>/dev/null) ($(h=${HOME%/}; b=$CLAUDE_BIN; case $h:$b in (?*:"$h"/*) b="~/${b#"$h"/}";; esac; printf '%s' "$b" | sed -E 's#^.*/(Users|home)/[^/]+/#~/#'))"
     echo "account: a Claude subscription account (not named in the launch record)"
     echo "advisor tool: disabled with CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1"
     echo "MCP servers: none (--strict-mcp-config with no config)"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Give the launch records of both recent series one fixed account line, take the home
 directory out of the path of the `claude` binary, and state the session environment and one
-placeholder of the kept review report in words that hold for any account.
+placeholder of the kept review report as the release-series driver and this script write them.
 
 Purpose: PR 6359 replaced the `account:` line of the 15 launch records of release series
   2026-11-25c by a fixed line. The 16 launch records of the series before it
@@ -17,13 +17,16 @@ What it changes, in every `*.launch.txt` directly in the launch folders below (s
      a launcher other than `claude` becomes LAUNCHER_PLACEHOLDER;
   4. only with --other-home-paths: every other home directory in these files becomes `~/`
      (the `worktree:` line and the directory of that command line). Rule 4 does not touch
-     an `account:` or `environment:` line; a home directory there is refused, not rewritten;
+     an `environment:` line: a home directory there is refused, not rewritten (an
+     `account:` line is replaced whole by rule 1, a `claude code:` line is rule 2's);
   5. on the line that starts `environment:`, what follows `the two D4D variables` inside
      the parenthesis becomes ENVIRONMENT_NEW, the words the release-series driver writes.
   And in REPORT, the kept review report of series 2026-11-25c:
   6. the placeholder that stands before `/projects/<worktree slug>/` and before
      `/.../tool-results/` becomes PLACEHOLDER_NEW.
-  Rules 5 and 6 are stated by position, and both are satisfied by their own output.
+  Rules 5 and 6 are stated by position, and both are satisfied by their own output. After
+  them every `environment:` line must end as rule 5 writes it, and REPORT must hold exactly
+  two placeholders at rule 6's places, both PLACEHOLDER_NEW.
   No rule needs a private value: none names an account or a login.
 Limits, none of which the 31 records meet: a home directory is recognised only as
   `/Users/<x>/` or `/home/<x>/` with the slash after it, so rule 4 would also rewrite a
@@ -171,8 +174,9 @@ def main() -> int:
             lines = text.split("\n")
             renamed = [PLACEHOLDER.sub(PLACEHOLDER_NEW, line) for line in lines]
             totals["report placeholder"] = sum(new != old for new, old in zip(renamed, lines))
-            if not any(PLACEHOLDER.search(line) for line in renamed):
-                problems.append(f"{REPORT}: the placeholder was not found at either place")
+            placed = [found for line in renamed for found in PLACEHOLDER.findall(line)]
+            if placed != [PLACEHOLDER_NEW, PLACEHOLDER_NEW]:
+                problems.append(f"{REPORT}: expected the placeholder at two places, found {len(placed)}")
             for index, pattern in enumerate(forbidden, 1):
                 if any(pattern.search(line) for line in renamed):
                     problems.append(f"{REPORT}: forbidden name {index} remains")

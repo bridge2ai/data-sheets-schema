@@ -9,11 +9,14 @@
 #   choice, build a session's environment and start it, with a stub in place of `claude`
 #   that prints its environment and its arguments. It does three things:
 #     1. built in, no input needed: given the directory and the token, the session gets
-#        them under Claude Code's own names and nothing named D4D_SERIES_*; given the
-#        default-login switch, it gets neither, whatever the caller's shell had exported;
-#     2. built in: each driver stops (exit 2) before any launch when no choice is made,
-#        and when D4D_SERIES_CONFIG_DIR is relative or not an existing directory; the
-#        release-series driver also stops when the retired D4D_SERIES_ACCOUNT is set;
+#        them under Claude Code's own names and no D4D_SERIES_* variable at all, another
+#        one the caller exported included; given the default-login switch, it gets
+#        neither, whatever the caller's shell had exported;
+#     2. built in: each driver stops (exit 2) before any launch, with the message that
+#        belongs to the case, when no choice is made, when the switch has another value
+#        than 1, when the switch comes with a directory or a token, when
+#        D4D_SERIES_CONFIG_DIR is relative (also where that relative directory exists) or
+#        not an existing directory, and when the retired D4D_SERIES_ACCOUNT is set;
 #     3. with a reference and a cases file: the lines as they were at that reference,
 #        given a caller's setup, and the lines of this checkout, given the same account
 #        through the new variables, give the stub the same environment and arguments.
@@ -70,7 +73,7 @@ block() {
   spec "$1" "$2"
   {
     echo 'set -u'
-    echo 'mkdir -p w/.temp/launch/transcripts/L && cd w || exit 9'
+    echo 'mkdir -p w/.temp/launch/transcripts/L w/relative && cd w || exit 9'
     echo 'set -- P'
     echo 'P=P; LABEL=L; MODEL=m; EFFORT=e; AGENT=a; EVALMODEL=m; PROMPT=prompt; W=$(pwd -P)'
     echo 'INSTR=.temp/launch/i.md; SPEC=.temp/launch/s.json; STREAM=out.jsonl; CLAUDE_BIN=$(type -P claude)'
@@ -92,19 +95,19 @@ run() {
 has() { grep -q -F -x -- "$1" <<<"$2"; }
 ok()  { echo "ok    $*"; }
 bad() { echo "WRONG $*"; FAILED=1; }
-refusal() { # <driver> <what> <NAME=VALUE ...>
-  local driver=$1 what=$2; shift 2
+refusal() { # <driver> <what> <words the STOP line must hold> <NAME=VALUE ...>
+  local driver=$1 what=$2 words=$3; shift 3
   run "$T/new/$driver.sh" "$T/run" "$@" > /dev/null; local rc=$?
-  if [ $rc -eq 2 ] && grep -q '^STOP: ' "$T/run/stderr" && ! grep -q REACHED "$T/run/stderr" && [ ! -e "$T/run/w/out.jsonl" ]
+  if [ $rc -eq 2 ] && grep '^STOP: ' "$T/run/stderr" | grep -q -F -- "$words" && ! grep -q REACHED "$T/run/stderr" && [ ! -e "$T/run/w/out.jsonl" ]
   then ok "$driver: stops before launch when $what"
-  else bad "$driver: does not stop when $what (exit $rc)"; fi
+  else bad "$driver: does not stop, or not for that reason, when $what (exit $rc)"; fi
 }
 
 # ---- 1 and 2: built in --------------------------------------------------------------
 for D in fanout rubric release; do
   spec "$D"; block "$D" "$ROOT/$FILE" "$T/new/$D.sh"
   OUT=$(run "$T/new/$D.sh" "$T/run" CLAUDE_CONFIG_DIR=/stale CLAUDE_CODE_OAUTH_TOKEN=stale OTHER_TOKEN=kept \
-        "D4D_SERIES_CONFIG_DIR=$T/home/given" D4D_SERIES_OAUTH_TOKEN=given)
+        "D4D_SERIES_CONFIG_DIR=$T/home/given" D4D_SERIES_OAUTH_TOKEN=given D4D_SERIES_OTHER=exported)
   if has "CLAUDE_CONFIG_DIR=$T/home/given" "$OUT" && has "CLAUDE_CODE_OAUTH_TOKEN=given" "$OUT" && ! grep -q '^D4D_SERIES_' <<<"$OUT"
   then ok "$D: directory and token given: the session gets them under Claude Code's names only"
   else bad "$D: directory and token given"; fi
@@ -112,11 +115,14 @@ for D in fanout rubric release; do
   if [ -n "$OUT" ] && ! grep -q '^CLAUDE_CONFIG_DIR=\|^CLAUDE_CODE_OAUTH_TOKEN=\|^D4D_SERIES_' <<<"$OUT"
   then ok "$D: default login chosen: the session gets neither, whatever the caller exported"
   else bad "$D: default login chosen"; fi
-  refusal "$D" "no account is chosen" CLAUDE_CONFIG_DIR=/stale CLAUDE_CODE_OAUTH_TOKEN=stale OTHER_TOKEN=kept
-  refusal "$D" "D4D_SERIES_CONFIG_DIR is relative" D4D_SERIES_CONFIG_DIR=given
-  refusal "$D" "D4D_SERIES_CONFIG_DIR is not an existing directory" "D4D_SERIES_CONFIG_DIR=$T/home/absent"
+  refusal "$D" "no account is chosen" "no account chosen" CLAUDE_CONFIG_DIR=/stale CLAUDE_CODE_OAUTH_TOKEN=stale OTHER_TOKEN=kept
+  refusal "$D" "the default-login switch is not 1" "no account chosen" D4D_SERIES_DEFAULT_LOGIN=true
+  refusal "$D" "the switch comes with a directory" "contradicts" D4D_SERIES_DEFAULT_LOGIN=1 "D4D_SERIES_CONFIG_DIR=$T/home/given"
+  refusal "$D" "the switch comes with a token" "contradicts" D4D_SERIES_DEFAULT_LOGIN=1 D4D_SERIES_OAUTH_TOKEN=given
+  refusal "$D" "D4D_SERIES_CONFIG_DIR is relative and exists" "must be an absolute path" D4D_SERIES_CONFIG_DIR=relative
+  refusal "$D" "D4D_SERIES_CONFIG_DIR is not an existing directory" "is not a directory" "D4D_SERIES_CONFIG_DIR=$T/home/absent"
+  refusal "$D" "D4D_SERIES_ACCOUNT is set" "D4D_SERIES_ACCOUNT" D4D_SERIES_ACCOUNT=anything D4D_SERIES_DEFAULT_LOGIN=1
 done
-refusal release "D4D_SERIES_ACCOUNT is set" D4D_SERIES_ACCOUNT=anything D4D_SERIES_DEFAULT_LOGIN=1
 
 # ---- 3: before and after, from the cases file ----------------------------------------
 if [ -n "$REF" ]; then

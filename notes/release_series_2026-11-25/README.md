@@ -101,22 +101,24 @@ At the owner's decision of 2026-11-27:
 |---|---|
 | `notes/final_agentic_2026-11-22/launch/*.launch.txt` (16) | the `account:` line is replaced by the same fixed line as here, byte for byte; in the one record of the 2026-11-22 canary, the launcher in the launch command is replaced by the placeholder `<launcher>` |
 | `launch/*.launch.txt` here (15) | on the `claude code:` line the home directory of the binary's path is written `~/` |
-| `notes/final_agentic_2026-11-22/launch/*.launch.txt` (16), in a commit of its own | the other 17 home directories in these records (the `worktree:` line of each, and the directory in the canary's launch command) are written `~/`. The owner's decision named the binary's path; this goes one step further and can be undone alone: a revert of that commit restores the 16 records, and the rows of this table that later edits touched are then resolved by hand |
+| `notes/final_agentic_2026-11-22/launch/*.launch.txt` (16), in a commit of its own | the other 17 home directories in these records (the `worktree:` line of each, and the directory in the canary's launch command) are written `~/`. The owner's decision named the binary's path; this goes one step further and can be undone alone: a revert of that commit restores the 16 records, and the part of this section that later edits touched (rows of this table and the paragraph after it) is then resolved by hand |
 | `scripts/adhoc/run_agentic_fanout_20261122.sh`, `scripts/adhoc/run_release_series_20261124.sh` | a new launch record gets a neutral account line, and from the release-series driver a home-relative path of the binary |
-| the same two drivers, `scripts/adhoc/run_rubric_eval_20261122.sh` and `scripts/adhoc/run_release_series_stream_20261125.sh` | the account to run on is not chosen in these files. The caller's environment chooses it: `D4D_SERIES_CONFIG_DIR` and `D4D_SERIES_OAUTH_TOKEN` (the configuration directory and the login token, either or both), or `D4D_SERIES_DEFAULT_LOGIN=1` for the login of the default configuration directory. Each driver stops before any launch when no choice is made, or when the directory is relative or not an existing directory. The release-series driver no longer reads `D4D_SERIES_ACCOUNT` and stops if it is set. The stream runner stops when the driver in the launch worktree predates this change. The rubric-evaluation driver's worktree path starts at `$HOME`, and the release-series driver writes no home directory into the binary's path whatever `$HOME` holds |
-| `launch/*.launch.txt` here (15), `review_1_pr6349.md` | the closing words of the `environment:` line are the ones the release-series driver now writes, which hold whichever of the two values the launcher was given; one placeholder of the review report is renamed |
+| the same two drivers, `scripts/adhoc/run_rubric_eval_20261122.sh` and `scripts/adhoc/run_release_series_stream_20261125.sh` | the account to run on is not chosen in these files. The caller's environment chooses it: `D4D_SERIES_CONFIG_DIR` and `D4D_SERIES_OAUTH_TOKEN` (the configuration directory and the login token, either or both), or `D4D_SERIES_DEFAULT_LOGIN=1` for the login of the default configuration directory. Each driver stops before any launch when no choice is made, or when the directory is relative or not an existing directory. Each driver also stops when the default-login switch is given together with a directory or a token, or when `D4D_SERIES_ACCOUNT` is set, and the two earlier drivers pass no `D4D_SERIES_*` variable on to the session. The stream runner stops when the launch worktree holds no driver or one from before this change. The rubric-evaluation driver's worktree path starts at `$HOME`, and the release-series driver never writes a `/Users/<x>/` or `/home/<x>/` part into the binary's path, whatever `$HOME` holds and however `PATH` spells it |
+| `launch/*.launch.txt` here (15), `review_1_pr6349.md` | the closing words of the `environment:` line are the ones the release-series driver now writes, which hold whichever of the two values the launcher was given; one placeholder of the review report is restated |
 
 `scripts/adhoc/redact_launch_records_account_login_20261127.py` makes the changes to the 31
-launch records and renames the placeholder in the review report. For the 15 records of this
+launch records and restates the placeholder in the review report. For the 15 records of this
 series and for the report it runs after PR #6359's script: the published files are that
 script's output followed by this one's. Its rules name no account and no login, so it needs
 no private argument; `--check --other-home-paths` says whether a tree is in the final state.
 The drivers were edited by hand, line for line, so no line of them moved.
 `scripts/adhoc/check_series_driver_account_env_20261127.sh` runs each driver's launch lines
-with a stub in place of `claude`. It shows that a session receives what the caller chose and
-nothing else, that each driver stops without a choice, and, given the same account through
+with a stub in place of `claude`. It shows that a session receives the account the caller
+chose under Claude Code's own variable names and no `D4D_SERIES_*` variable, that each
+driver stops without a choice or on a contradictory one, and, given the same account through
 the new variables, that a session receives the same environment and arguments as before
-the edit.
+the edit. The two earlier drivers otherwise pass the caller's environment on, as they did
+when they ran; the release-series driver builds the session's environment from nothing.
 
 What this does and does not achieve:
 
