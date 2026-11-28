@@ -22,8 +22,9 @@ _CLASSIFICATION_ONLY = object()
 
 
 def validate_scope(result: dict, *, document: dict | None = None, input_sha256: str | None = None,
-                   expected_context: dict | None | object = _CLASSIFICATION_ONLY, resource_reader=None):
-    if result.get("version") not in {"2.0", "3.0", "4.0", "5.0"}:
+                   expected_context: dict | None | object = _CLASSIFICATION_ONLY, resource_reader=None,
+                   expected_scope: dict | None = None, scope_context_sha256: str | None = None):
+    if result.get("version") not in {"2.0", "3.0", "4.0", "5.0", "6.0"}:
         return
     rubric_name = result.get("rubric", "").removesuffix("-semantic")
     if rubric_name not in {"rubric10", "rubric20"}:
@@ -51,8 +52,27 @@ def validate_scope(result: dict, *, document: dict | None = None, input_sha256: 
     policy = COLLECTION_POLICY if len(paths) > 1 else "single_dataset"
     if scope.get("policy") != policy:
         raise ValueError("evaluation scope has an unsupported aggregation policy")
+    resolved_units = None
+    if instrument.version == "6.0":
+        from data_sheets_schema.root_scope import ROOT_POLICY, assert_portable_output, resolve_root_units
+        assert_portable_output(result, document=document, resource_reader=resource_reader)
+        if scope.get("selection_policy") != ROOT_POLICY or policy != "single_dataset" or paths != ["#"]:
+            raise ValueError("semantic v6 requires the independently selected root unit")
+        recorded_scope_hash = (result.get("metadata") or {}).get("scope_context_sha256")
+        if not isinstance(recorded_scope_hash, str) or len(recorded_scope_hash) != 64 or any(
+                character not in "0123456789abcdef" for character in recorded_scope_hash):
+            raise ValueError("semantic v6 requires a scope context SHA256")
+        if document is not None or input_sha256 is not None or expected_scope is not None or scope_context_sha256 is not None:
+            if document is None or input_sha256 is None or expected_scope is None or scope_context_sha256 is None:
+                raise ValueError("semantic v6 acceptance requires original input and independent scope context")
+            if recorded_scope_hash != scope_context_sha256:
+                raise ValueError("evaluation scope context does not match the supplied declaration bytes")
+            resolved_units = resolve_root_units(document, input_sha256, expected_scope)
+    elif expected_scope is not None or scope_context_sha256 is not None:
+        raise ValueError("legacy semantic instruments do not accept root scope context")
     if document is not None:
-        actual = [{"path": path, "id": unit.get("id")} for path, unit in dataset_units(document)]
+        actual = [{"path": path, "id": unit.get("id")} for path, unit in
+                  (resolved_units if resolved_units is not None else dataset_units(document))]
         if units != actual:
             raise ValueError("evaluation scope omits or changes input resource identities")
     metadata = result.get("metadata") or {}
@@ -153,7 +173,8 @@ def validate_scope(result: dict, *, document: dict | None = None, input_sha256: 
         raise ValueError("zero applicable maximum requires null normalized_percentage")
     if instrument.evidence_authority_path is not None and document is not None:
         from data_sheets_schema.semantic_evidence import check_evidence, EvidenceValidationError
-        report = check_evidence(result, document, rubric_name, resource_reader=resource_reader)
+        report = check_evidence(result, document, rubric_name, resource_reader=resource_reader,
+                                unit_map=dict(resolved_units) if resolved_units is not None else None)
         if not report.passed:
             raise EvidenceValidationError(report)
         return report

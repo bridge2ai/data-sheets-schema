@@ -10,13 +10,13 @@ bundle: data/preprocessed/concatenated/CM4AI_preprocessed.txt sha256 5f81bb53f43
 model: claude-fable-5-2   effort: high (CLI flags; both stated in the rendering specification, the effort asserted by the launcher)
 recorder line: complete (D4D_RENDER_SPEC and D4D_LAUNCH_INSTRUCTION); toolchain: checkout-relative
 render specification: .temp/launch/CM4AI_2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1.render_spec.json sha256 132cdb8c6545e30b1c648795d297cddbd160c4904e606b037b9ec717ae2baa3f
-claude code: 2.1.332 (Claude Code) (/Users/marcin/.local/bin/claude)
-account: claude-work (CLAUDE_CONFIG_DIR=~/.claude-work, as the owner's shell function of that name does)
+claude code: 2.1.332 (Claude Code) (~/.local/bin/claude)
+account: a Claude subscription account (name removed from the published copy, owner's decision of 2026-11-25)
 advisor tool: disabled with CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1
 MCP servers: none (--strict-mcp-config with no config)
 settings: project only (--setting-sources project): no user-level hooks, allow rules, skills, agents or plugins of the account
 permission mode: auto (--permission-mode auto, stated because the user settings that set it are not loaded)
 auto-memory: off (CLAUDE_CODE_DISABLE_AUTO_MEMORY=1)
-environment: constructed with env -i (HOME, PATH, USER, LOGNAME, SHELL, LANG, TMPDIR, the two CLAUDE_CODE_DISABLE switches, the two D4D variables, and the account's configuration directory and token variable); nothing else of the launching shell reaches the session
+environment: constructed with env -i (HOME, PATH, USER, LOGNAME, SHELL, LANG, TMPDIR, the two CLAUDE_CODE_DISABLE switches, the two D4D variables, and, where the launcher was given them, the configuration directory and the token of the account); nothing else of the launching shell reaches the session
 delivery: the instruction file's text is the single prompt of a headless session (claude -p)
 launched by: scripts/adhoc/run_release_series_20261124.sh 2026-11-25c claude-fable-5-2 high 1

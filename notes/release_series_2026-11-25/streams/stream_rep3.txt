@@ -1,24 +1,24 @@
-2026-11-25T05:52:26Z stream rep3 budget: {"decision": "start", "fable_week_percent_if_started_estimate": 21.7, "fable_week_percent_now_estimate": 11.0, "finished_runs": 1, "in_flight_elsewhere": ["AI_READI", "CHORUS"], "limit_percent": 90.0, "next": "CHORUS", "rep": "3", "spent_usd_beyond_base": 0}
+2026-11-25T05:52:26Z stream rep3 budget: {"decision": "start", "finished_runs": 1, "in_flight_elsewhere": ["AI_READI", "CHORUS"], "next": "CHORUS", "rep": "3", "usage_estimates": "removed"}
 2026-11-25T05:52:26Z stream rep3 CHORUS attempt 1
 2026-11-25T05:52:36Z rep3 CHORUS LAUNCHED instruction 06bf0507e251e36543164093649a8feb01534bf8739bcfc305b7d6d4cf910f93
 2026-11-25T06:09:14Z rep3 CHORUS DONE gates PASS (2026-11-25T05:52:35Z -> 2026-11-25T06:09:00Z)
 2026-11-25T06:09:14Z rep3 ALL REQUESTED PROJECTS FINISHED
-2026-11-25T06:09:14Z stream rep3 budget: {"decision": "start", "fable_week_percent_if_started_estimate": 27.7, "fable_week_percent_now_estimate": 13.5, "finished_runs": 2, "in_flight_elsewhere": ["AI_READI", "CHORUS"], "limit_percent": 90.0, "next": "AI_READI", "rep": "3", "spent_usd_beyond_base": 8.67}
+2026-11-25T06:09:14Z stream rep3 budget: {"decision": "start", "finished_runs": 2, "in_flight_elsewhere": ["AI_READI", "CHORUS"], "next": "AI_READI", "rep": "3", "usage_estimates": "removed"}
 2026-11-25T06:09:14Z stream rep3 AI_READI attempt 1
 2026-11-25T06:09:16Z rep3 AI_READI LAUNCHED instruction e7cd1ee17101d9a13b6e1a038cec2e4fe25d645e2f5a3058ae01731793863d29
 2026-11-25T06:38:53Z rep3 AI_READI DONE gates PASS (2026-11-25T06:09:15Z -> 2026-11-25T06:38:38Z)
 2026-11-25T06:38:53Z rep3 ALL REQUESTED PROJECTS FINISHED
-2026-11-25T06:38:54Z stream rep3 budget: {"decision": "start", "fable_week_percent_if_started_estimate": 42.3, "fable_week_percent_now_estimate": 27.4, "finished_runs": 5, "in_flight_elsewhere": ["CM4AI", "AI_READI"], "limit_percent": 90.0, "next": "CM4AI", "rep": "3", "spent_usd_beyond_base": 57.56}
+2026-11-25T06:38:54Z stream rep3 budget: {"decision": "start", "finished_runs": 5, "in_flight_elsewhere": ["CM4AI", "AI_READI"], "next": "CM4AI", "rep": "3", "usage_estimates": "removed"}
 2026-11-25T06:38:54Z stream rep3 CM4AI attempt 1
 2026-11-25T06:38:55Z rep3 CM4AI LAUNCHED instruction 03fd6083df64f29c837c5c75cdf06f759e7c96735b1e76413d01e09cee16f961
 2026-11-25T07:08:10Z rep3 CM4AI DONE gates PASS (2026-11-25T06:38:55Z -> 2026-11-25T07:07:55Z)
 2026-11-25T07:08:10Z rep3 ALL REQUESTED PROJECTS FINISHED
-2026-11-25T07:08:10Z stream rep3 budget: {"decision": "start", "fable_week_percent_if_started_estimate": 57.3, "fable_week_percent_now_estimate": 43.9, "finished_runs": 8, "in_flight_elsewhere": ["VOICE", "CM4AI"], "limit_percent": 90.0, "next": "VOICE", "rep": "3", "spent_usd_beyond_base": 115.28}
+2026-11-25T07:08:10Z stream rep3 budget: {"decision": "start", "finished_runs": 8, "in_flight_elsewhere": ["VOICE", "CM4AI"], "next": "VOICE", "rep": "3", "usage_estimates": "removed"}
 2026-11-25T07:08:10Z stream rep3 VOICE attempt 1
 2026-11-25T07:08:12Z rep3 VOICE LAUNCHED instruction 6a4e03beb0d63596a09093b9bdd82a3061bb496282a956cdf3359e51200832f4
 2026-11-25T07:40:57Z rep3 VOICE DONE gates PASS (2026-11-25T07:08:12Z -> 2026-11-25T07:40:41Z)
 2026-11-25T07:40:57Z rep3 ALL REQUESTED PROJECTS FINISHED
-2026-11-25T07:40:57Z stream rep3 budget: {"decision": "start", "fable_week_percent_if_started_estimate": 75.4, "fable_week_percent_now_estimate": 61.8, "finished_runs": 11, "in_flight_elsewhere": ["VOICE_PEDIATRIC", "VOICE"], "limit_percent": 90.0, "next": "VOICE_PEDIATRIC", "rep": "3", "spent_usd_beyond_base": 177.91}
+2026-11-25T07:40:57Z stream rep3 budget: {"decision": "start", "finished_runs": 11, "in_flight_elsewhere": ["VOICE_PEDIATRIC", "VOICE"], "next": "VOICE_PEDIATRIC", "rep": "3", "usage_estimates": "removed"}
 2026-11-25T07:40:57Z stream rep3 VOICE_PEDIATRIC attempt 1
 2026-11-25T07:40:59Z rep3 VOICE_PEDIATRIC LAUNCHED instruction 96a5e4b11bfd34458a256e167b8edfb2b3c3344bbfedd9370f322791e736c3ec
 2026-11-25T08:02:43Z rep3 VOICE_PEDIATRIC DONE gates PASS (2026-11-25T07:40:58Z -> 2026-11-25T08:02:29Z)

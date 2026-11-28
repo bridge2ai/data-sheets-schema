@@ -89,6 +89,27 @@ def test_prepare_and_relocated_recheck_pin_inputs_without_authorizing(tmp_path):
     assert panel.recheck_panel(moved) == result
 
 
+def test_root_scope_version_refuses_before_any_artifact_capture(tmp_path, monkeypatch):
+    root, declaration, path = build_fixture(tmp_path)
+    original_versions = [row["version"] for row in declaration["instruments"]]
+    before = {p: p.read_bytes() for p in root.rglob("*") if p.is_file()}
+
+    def refuse_capture(self, raw):
+        raise AssertionError("unsupported root-scope version reached artifact capture")
+
+    monkeypatch.setattr(panel.saved.Capture, "add", refuse_capture)
+    for index in range(2):
+        for row, version in zip(declaration["instruments"], original_versions):
+            row["version"] = version
+        declaration["instruments"][index]["version"] = "6.0"
+        write_declaration(path, declaration)
+        output = tmp_path / f"unsupported-root-panel-{index}"
+        with pytest.raises(panel.PanelError, match="semantic 6.0 requires the root-scope scoring route"):
+            panel.prepare_panel(path, output, root=root)
+        assert not output.exists()
+        assert {p: p.read_bytes() for p in before} == before
+
+
 def test_missing_cells_slots_models_and_context_remain_visible(tmp_path):
     root, declaration, path = build_fixture(tmp_path)
     declaration["matrix"]["cohorts"].append("candidate")
