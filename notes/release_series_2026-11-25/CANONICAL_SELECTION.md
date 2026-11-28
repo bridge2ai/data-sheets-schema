@@ -23,8 +23,8 @@ runtime: the agentic canonicals (series 2026-11-22b) and the API canonicals are 
 are named as kept in the command's output.
 
 The owner approved these five on 2026-11-26 after seeing the semantic rubric scores of all
-fifteen replicates. The scores are reported only and did not decide a pick (selection policy
-`reported_only_pending_calibration_v1`, #835).
+fifteen replicates. The scores are reported only and did not decide a pick; no selection
+policy for rubric scores existed then (`score_gap_v1` came later, see below).
 
 ## Rubric scores
 
@@ -51,10 +51,11 @@ its sha256. Rubric10 is out of 50, rubric20 out of 88. The canonical record is i
 - The table shows one scoring per record, the only one that existed when the marks were
   recorded. Each record has since been scored three times per rubric (PR #6372), and
   `notes/root_scope_v6_scoring_variation_2026-11-26.md` measures the run-to-run variation: a
-  pooled standard deviation of 1.26 points of the combined percentage, which gives the
-  `score_gap_v1` rule (`notes/score_selection_policy_2026-11-26.md`) a threshold of 2.05
-  points. A difference of a few points in this table is not evidence that one replicate is
-  better.
+  pooled standard deviation of 1.26 percentage points for one scoring of the combined score
+  (the mean of the two rubric percentages), which gives the `score_gap_v1` rule
+  (`notes/score_selection_policy_2026-11-26.md`) a threshold of 2.05 percentage points for a
+  gap between two means of three scorings. The table holds single scorings in rubric points;
+  a difference of a few points in it is not evidence that one replicate is better.
 - No canonical record is the lowest of its project on both rubrics. CM4AI rep2 is the lowest
   on rubric20 (61 against 64 and 64) and ties for the highest on rubric10.
 - These scores are not comparable with the 2026-11-22b series' scores: another instrument,
@@ -99,8 +100,8 @@ hashes for each. Adverse verdicts, rep1 / rep2 / rep3:
   below); rule 27 for AI_READI rep3 (a caveat that attributes a funding acknowledgement to both
   publications); and one chunk the VOICE rep3 run set aside as irrelevant was ruled
   `missed_content`.
-- A review samples its record (25 receipted values, and for AI_READI rep1, the only record
-  with any, 25 values that have no receipt; the rules; the chunks set aside). It does
+- A review samples its record (25 receipted values, and 25 of the 39 values without a receipt
+  in AI_READI rep1, the only record that has any; the rules; the chunks set aside). It does
   not show that each value is right. The defect of README item 8 (VOICE rep3, "OpenAI Whisper
   Large unknown") was not among the sampled items and no review mentions it.
 - The table counts adverse verdicts, not defects: one defect can be charged under two rules
@@ -115,10 +116,12 @@ hashes for each. Adverse verdicts, rep1 / rep2 / rep3:
   VOICE_PEDIATRIC records and was ruled a violation in rep2 and followed in rep1 and rep3, and
   the VOICE reviews split the same way on the same rule (rep2 violated, rep1 and rep3 followed).
   That split comes from two generation rules that pull against each other (#6417).
-  The reviews also split across projects on rule 29: VOICE rep1 is charged for
-  `confidential_elements[0]`, an entry that says only that the dataset has no confidential
-  data (`confidential_elements_present: false`), while all three AI_READI records carry an
-  entry of the same kind and their rule 29 reads followed.
+  The counts are no more comparable between projects. The reviews split on rule 29: VOICE
+  rep1 is charged for `confidential_elements[0]`, an entry that says only that the dataset
+  has no confidential data (`confidential_elements_present: false`), while all three AI_READI
+  records carry a `confidential_elements_present: false` entry (rep1's also names the data
+  held under controlled access) and all three AI_READI reviews judge that encoding the
+  slot's designed form and read rule 29 followed.
   The counts are reported only, as the review policy says (#835); they were not used to
   choose or to revisit a mark. `notes/score_selection_policy_2026-11-26.md` (section
   "Content-review findings"), merged after these reviews were written, says how a charged
@@ -133,8 +136,8 @@ hashes for each. Adverse verdicts, rep1 / rep2 / rep3:
   launching session's statement; each review said so itself when it was written, in its
   `reviewer`, `reviewer_identity`, `model` or `notes` field. Eleven reviews wrote the model
   id followed by a description in their `model` field, and the 15 files held eleven distinct
-  values there (ten descriptive strings and the bare id); the
-  field was reduced to the bare id by a script after the reviews were written
+  values there (ten descriptive strings and the bare id); the field was reduced to the bare
+  id by a script after the reviews were written
   (`tests/test_reviewer_basis.py`, #1058). `review_model_field_as_written.tsv` keeps what each
   review wrote. For AI_READI rep3 the `model` field was the only place the review said how it
   ran, so its file no longer says so and the table is where that statement is kept. The
@@ -144,9 +147,10 @@ hashes for each. Adverse verdicts, rep1 / rep2 / rep3:
   were removed by regenerating each pack with the fixed generator (#6379, PR #6380), after
   checking that nothing else differs; `review_pack_repin.tsv` gives both hashes and the
   generator behind each. Since PR #6380 (merged 2026-11-27, `d808ff563`) main's generator
-  reproduces the committed packs byte for byte. The `definition_sha256` column of `content_reviews.tsv` is the hash of the
-  definition file when the table was made. That it is the file every review was given is the
-  launching session's statement; nothing in a review file attests it.
+  reproduces the committed packs byte for byte. The `definition_sha256` column of
+  `content_reviews.tsv` is the hash of the definition file when the table was made. That it
+  is the file every review was given is the launching session's statement; nothing in a
+  review file attests it.
 
 ## Presence evaluation
 
@@ -170,9 +174,10 @@ These scores are not comparable with the semantic rubric scores above.
   longer the 2026-11-22b agentic page (the owner's decision of 2026-11-26). The agentic pages
   stay in `data/d4d_html/concatenated/claudecode_agent/`. The site's home page links the
   `curated` pages and is unchanged.
-- The site is deployed by `.github/workflows/deploy-docs.yaml` on every push to main, so the
-  merge of the change that recorded the marks (PR #6373) was also what published these five
-  pages; the live site has shown them since 2026-11-27.
+- The site is deployed by `.github/workflows/deploy-docs.yaml` on every push to main. The
+  merge of the change that recorded the marks (PR #6373) put these five pages into the site
+  build; its own Pages deployment failed, and the live site has shown them since the
+  deployment of 2026-11-27 19:00 UTC (main at `da0eecdc4`).
 - Beside each `<PROJECT>_d4d.html` the site's `html_output/` still holds older pages of the
   same project from earlier runs (`_d4d_human_readable`, `_d4d_interleaved`,
   `_evaluation_rubric10`, `_evaluation_rubric20`). They are not of this series and are not

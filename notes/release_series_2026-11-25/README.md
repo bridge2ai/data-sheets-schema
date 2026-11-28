@@ -235,9 +235,9 @@ Total cost at list price as reported by the sessions: 251.49 USD (8.47 to 22.64 
    replicates 1 and 2 use the project DOI for both. Only CM4AI replicate 2 carries a `doi`.
    Every one is a declared alias of the right dataset and the scope check passes.
 8. **One value defect seen in passing when the records were merged, before any content
-   review.** The content reviews of 2026-11-26 sample values and did not meet this one: VOICE replicate
-   3 has `machine_annotation_tools[0].tools: ["OpenAI Whisper Large unknown"]`; the bundle says
-   "OpenAI's Whisper Large model", and "unknown" is the model's addition.
+   review.** The content reviews of 2026-11-26 sample values and did not meet this one: VOICE
+   replicate 3 has `machine_annotation_tools[0].tools: ["OpenAI Whisper Large unknown"]`;
+   the bundle says "OpenAI's Whisper Large model", and "unknown" is the model's addition.
 9. **Launch records named the launch machine.** Each `launch/*.launch.txt` gave the resolved
    path of the `claude` binary and the account used; the published copies no longer give the
    account, and give the path home-relative (see the removal section). Each provenance
