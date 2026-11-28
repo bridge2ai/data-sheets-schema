@@ -77,6 +77,7 @@ import hashlib
 import json
 import html
 import os
+import re
 import statistics
 import sys
 from pathlib import Path
@@ -159,7 +160,62 @@ ARMS = (
      [f"2026-09-04f_claude-opus-5-api-generic-v8_rep{r}" for r in (1, 2, 3)]
      + [f"2026-09-04g_claude-opus-5-api-generic-v8_rep{r}" for r in (1, 2, 3)],
      "Claude API via CBORG", "reps"),
+    # Two descriptive arms added 2026-11-26 (the owner's decision): both run
+    # the generic_v9 prompt through headless Claude Code, one session per
+    # project and replicate, and differ from every arm above in prompt version
+    # and model. From each other they differ in model, in the runtime string
+    # and method their records carry, in how the instruction was rendered
+    # (only the release arm's records carry a rendering specification) and in
+    # how their sessions were started, which the launch records state. Neither is a
+    # controlled contrast with an API arm. Their rubric evaluations live under
+    # other instrument directories than EVAL_DIRS and are not read here. The
+    # display names carry no "headless" or "uncontrolled": both arms are both.
+    ("v9agentic", "v9 agentic, Opus 5.5 (2026-11-22b)",
+     "2026-11-22b_claude-opus-5-5-claudecode-generic-v9", "Claude Code", "reps"),
+    ("v9release", "v9 Claude Code release, Fable 5.2 (2026-11-25c)",
+     "2026-11-25c_claude-fable-5-2-claudecode-generic-v9", "Claude Code (release)", "reps"),
 )
+
+# The arms added on 2026-11-26, the arm each is set beside in the "what
+# differs" table, and the one project they cover that no earlier arm does.
+# That project is reported in its own section and is not added to PROJECTS:
+# the pooled and per-project figures of the earlier arms stay what they were.
+RECENT_ARMS = ("v9agentic", "v9release")
+RECENT_PAIRS = (("v9agentic", "v9release"), ("v6agentic", "v9agentic"), ("v6agentic", "v9release"),
+                ("v7prod", "v9agentic"), ("v7prod", "v9release"))
+RECENT_ONLY_PROJECTS = ("VOICE_PEDIATRIC",)
+RECENT_SCORE_NOTE = (
+    "The two v9 arms show no score in the tables above. This report reads rubric evaluations from "
+    "`label_aware/` only, without its subdirectories. Evaluations of the v9 arms were made with "
+    "other instruments and are kept elsewhere: for the 2026-11-22b series under "
+    "`rubric{10,20}_semantic/2026-11-22_general_context_v3/`, a sibling of `label_aware/`; "
+    "root-scope v6 scorings and their repeats, in a checkout that has them, under the subdirectory "
+    "`label_aware/2026-11-25_codex-gpt-6-astra-ultra-fast_root-scope-v6/` and under "
+    "`data/evaluation_repeats/` (separate changes add those; this report does not look for them). "
+    "A score from another instrument is not comparable with the columns above, so none is pooled "
+    "into these tables.")
+# Record fields outside `runs.ARM_PROCEDURE_FIELDS` that are set beside the
+# procedure fields. Every scalar field of a selected record whose name contains
+# "instrument" is found by `_instrument_fields` and is not listed here (a row
+# of the deterministic table that sets two versions side by side compares two
+# instruments). These are the others: the schema release, the method directory,
+# how the instruction was rendered, and the reasoning effort.
+RECENT_RECORD_FIELDS = (("schema declared version", ("schema", "declared_version")),
+                        ("method", ("run", "method")),
+                        ("render specification version", ("prompts", "request", "spec", "render_version")),
+                        ("complete recorder line", ("prompts", "request", "spec", "complete_recorder_line")),
+                        ("checkout-relative toolchain", ("prompts", "request", "spec", "relative_toolchain")),
+                        ("playbooks consumed", ("playbooks", "consumed")),
+                        ("reasoning effort", ("model", "reasoning_effort")))
+# Where each recent arm's launch records are, and the lines of them that say
+# how a session was started. Read, not typed: the provenance records carry
+# none of this. The line naming the account is deliberately not read.
+RECENT_LAUNCH_DIRS = {"v9agentic": "notes/final_agentic_2026-11-22/launch",
+                      "v9release": "notes/release_series_2026-11-25/launch"}
+RECENT_LAUNCH_LINES = (("Claude Code version", "claude code"), ("delivery", "delivery"),
+                       ("advisor tool", "advisor tool"), ("MCP servers", "MCP servers"),
+                       ("settings sources", "settings"), ("permission mode", "permission mode"),
+                       ("auto-memory", "auto-memory"), ("environment", "environment"))
 
 
 def _rep_tag(label: str) -> str:
@@ -1661,6 +1717,9 @@ def render_markdown(data, scores, *, attainability=None, ancestor_diagnostics=Fa
               "No gold standard exists (#177); the rubrics are "
               "not domain-neutral (#627); rubric20's N/A convention is #155's.", ""]
     lines += same_family_section(scores)
+    if all(any(key == recent for key, *_ in ARMS) for recent in RECENT_ARMS):
+        lines += [RECENT_SCORE_NOTE, ""]
+    lines += recent_arms_section(data)
     for evaluator, arms, versions, cohort in cohorts:
         lines += render_discrimination(cohort, scope=f", {evaluator} evaluations", evaluator=evaluator)
         lines += [f"This cohort is every {evaluator} evaluation in the rubric tables above "
@@ -1674,6 +1733,213 @@ def render_markdown(data, scores, *, attainability=None, ancestor_diagnostics=Fa
         captured = _attainability_evaluations(scores)
         lines.append(render(attainability, unselected=bind_report(attainability, captured)))
     return "\n".join(lines)
+
+
+def recent_arms_section(data) -> list[str]:
+    """The two descriptive arms added on 2026-11-26: what their own records
+    say differs from the arm beside them, and the project only they cover.
+
+    The differences are read from the provenance records (`runs.arm_facts`,
+    `runs.arm_confounds`), not typed here. Every entry is a reason a difference
+    between two arms cannot be attributed to one cause. An arm given by an
+    explicit label list has no single prefix to read facts for and is not
+    paired here."""
+    from data_sheets_schema.runs import arm_confounds, arm_facts
+    arms = {key: (disp, prefix) for key, disp, prefix, _rt, _role in ARMS}
+    if not all(key in arms for key in RECENT_ARMS):
+        return []
+    if not any(data.get(key, {}).get(project) for key in RECENT_ARMS for project in PROJECTS):
+        return []                          # no replicate of either arm was collected: nothing to describe
+    lines = ["## Arms added 2026-11-26: what differs, and a fifth project", "",
+             "Both arms run the `generic_v9` prompt through headless Claude Code, one session per project "
+             "and replicate, with no run controller. They are descriptive: neither holds prompt version "
+             "and model equal to an API arm, so no difference between one of them and an earlier arm is "
+             "a runtime effect or a prompt effect alone. What each pair's own records state differently: "
+             "the procedure fields `d4d runs` compares, then the input bundle each project's records "
+             "pinned, every field of the records whose name says it is an instrument (shown by its "
+             "version or name, without the history that follows), the schema release, the method "
+             "directory, how the instruction was rendered and the reasoning effort. The bundle rows repeat, "
+             "per pair, what the bundle-identity table above shows per arm:", "",
+             "| arms | field | first | second |", "|---|---|---|---|"]
+    one_sided: list[str] = []
+    facts: dict[str, dict[str, Any]] = {}
+    for first, second in RECENT_PAIRS:
+        if first not in arms or second not in arms:
+            continue
+        if any(not isinstance(arms[key][1], str) for key in (first, second)):
+            continue
+        for key in (first, second):
+            if key not in facts:
+                facts[key] = arm_facts(arms[key][1], concat_dir=CONCAT)
+        differing = arm_confounds(facts[first], facts[second])
+        if not differing:
+            lines.append(f"| {arms[first][0]} / {arms[second][0]} | – | no recorded procedure field differs | |")
+        for entry in differing:
+            lines.append(f"| {arms[first][0]} / {arms[second][0]} | {entry['field']} | "
+                         f"{entry[arms[first][1]]} | {entry[arms[second][1]]} |")
+        pair = f"| {arms[first][0]} / {arms[second][0]} |"
+        md5 = {key: _selected_values(data, key, ("inputs", "bundle_md5")) for key in (first, second)}
+        for project in PROJECTS:
+            a, b = md5[first].get(project), md5[second].get(project)
+            if a and b and a != b:
+                lines.append(f"{pair} input bundle, {project} (md5) | {', '.join(v[:8] for v in a)} | "
+                             f"{', '.join(v[:8] for v in b)} |")
+        sides = [(name, *(sorted(_abbreviated(v) for v in facts[key].get("values", {}).get(name, [])
+                                 if v not in ("None", "")) for key in (first, second)))
+                 for name in facts[first].get("values", {})]
+        fields = [(f"`{'.'.join(path)}`", path) for path in _instrument_fields(data, (first, second))]
+        for name, field in (*fields, *RECENT_RECORD_FIELDS):
+            whole = [sorted({v for vs in _selected_values(data, key, field).values() for v in vs})
+                     for key in (first, second)]
+            a, b = (sorted({_instrument_version(v) for v in side}) for side in whole)
+            if whole[0] and whole[1] and whole[0] != whole[1]:
+                # two texts under one version are still two instruments' worth of statement
+                same = " (the same version; the text after it differs)" if a == b else ""
+                lines.append(f"{pair} {name} | {', '.join(a)} | {', '.join(b)}{same} |")
+            sides.append((name, a, b))
+        for name, a, b in sides:
+            if bool(a) != bool(b):
+                one_sided.append(f"{pair} {name} | {', '.join(a) or 'not recorded'} | "
+                                 f"{', '.join(b) or 'not recorded'} |")
+    lines.append("")
+    if one_sided:
+        lines += ["Recorded by one arm of a pair only. `arm_confounds` does not call an absence a "
+                  "difference (#1097), so these are not in the table above; an arm with no content "
+                  "review has no reviewer:", "",
+                  "| arms | field | first | second |", "|---|---|---|---|", *one_sided, ""]
+    launch = recent_launch_lines(arms)
+    if any("| render specification version |" in row for row in one_sided):
+        lines += ["The rows for the render specification version, the complete recorder line and the "
+                  "checkout-relative toolchain are read from `prompts.request.spec` and say how an "
+                  "instruction was rendered. Where one arm of a pair records no rendering specification, "
+                  "its records state nothing about that, so a rendering difference between the two is "
+                  "stated on one side only"
+                  + ("; the instruction files themselves are beside the launch records named below." if launch else "."),
+                  ""]
+    lines += ["The rows above do not all read the same records. The procedure fields come from every "
+              "record under an arm's label prefix, whatever its project; the bundle, instrument and "
+              "other record rows from the records this report selected for the projects of the tables above"
+              + ("; the launch table below from every launch record of the series." if launch else "."), ""]
+    lines += ["The runtime shown is each record's `model.agent_runtime`. The arm list at the top gives this "
+              "script's own description, which for the API production arms reads `Claude API via CBORG`; "
+              "the two are not reconciled here.", "",
+              "Not a recorded procedure field, and so not in the tables: neither v9 arm ran under a run "
+              "controller. Each replicate of each project was one headless session.", ""]
+    lines += launch
+
+    for project in RECENT_ONLY_PROJECTS:
+        per_arm = {key: [m for label in arm_labels(arms[key][1]) if (m := run_metrics(label, project))]
+                   for key in RECENT_ARMS}
+        if not any(per_arm.values()):
+            continue
+        lines += [f"### {project}, the two v9 arms only", "",
+                  f"No earlier arm of this report has a {project} record, so the project is not in the "
+                  "tables above and is not pooled into any figure of this report. Mean ± SD over the "
+                  "replicates, as in the deterministic-metrics table:", "",
+                  "| metric | " + " | ".join(arms[key][0] for key in RECENT_ARMS) + " |",
+                  "|---|" + "|".join("---" for _ in RECENT_ARMS) + "|"]
+        for metric, (disp, *_rest) in METRICS.items():
+            lines.append(f"| {disp} | " + " | ".join(cell(per_arm[key], metric, "reps") for key in RECENT_ARMS) + " |")
+        lines += ["", "| arm | records | receiptable slots | with a receipt | snippets | not in the chunk cited |",
+                  "|---|---|---|---|---|---|"]
+        for key in RECENT_ARMS:
+            pooled = pooled_receipts(per_arm[key])
+            lines.append(f"| {arms[key][0]} | {pooled['records']} | {pooled['receiptable'] if pooled['receiptable'] is not None else '–'} | "
+                         f"{_rate(pooled['withreceipt'], pooled['receiptable'])} | "
+                         f"{pooled['snippets'] if pooled['snippets'] is not None else '–'} | "
+                         f"{_rate(pooled['wrongchunk'], pooled['snippets'])} |")
+        lines.append("")
+    return lines
+
+
+def _selected_values(data, key: str, field: tuple[str, ...]) -> dict[str, list[str]]:
+    """{project: the distinct values of one provenance field} over the records
+    this report selected for an arm. A record without the field adds nothing."""
+    out: dict[str, list[str]] = {}
+    for project in PROJECTS:
+        values = set()
+        for row in data.get(key, {}).get(project, []):
+            value: Any = row.get("rec") or {}
+            for step in field:
+                value = value.get(step) if isinstance(value, dict) else None
+            if value not in (None, ""):
+                values.add(str(value))
+        if values:
+            out[project] = sorted(values)
+    return out
+
+
+def _instrument_fields(data, keys) -> list[tuple[str, ...]]:
+    """The path of every scalar field whose name contains `instrument`, at any
+    depth of the mappings (lists are not entered), in the records this report
+    selected for these arms. Found, not listed, so that a check block that
+    starts naming its instrument is set beside the others without an edit here."""
+    found: set[tuple[str, ...]] = set()
+
+    def walk(node: Any, path: tuple[str, ...]) -> None:
+        if isinstance(node, dict):
+            for name, value in node.items():
+                walk(value, (*path, str(name)))
+        elif path and "instrument" in path[-1] and not isinstance(node, list) and node not in (None, ""):
+            found.add(path)
+
+    for key in keys:
+        for project in PROJECTS:
+            for row in data.get(key, {}).get(project, []):
+                walk(row.get("rec") or {}, ())
+    return sorted(found)
+
+
+def _abbreviated(text: str) -> str:
+    """A hexadecimal digest cut to twelve characters, anything else whole."""
+    return f"{text[:12]}…" if re.fullmatch(r"[0-9a-f]{32,}", text) else text
+
+
+def _instrument_version(text: str) -> str:
+    """`v8` from an instrument string that opens with its current version and
+    then recites its history; otherwise the string up to its first parenthesis
+    or colon, which is where such a string starts citing issues."""
+    match = re.match(r"v\d+", text)
+    return match.group(0) if match else re.split(r" \(|: ", text, maxsplit=1)[0].strip()
+
+
+def recent_launch_lines(arms, root: Path | None = None) -> list[str]:
+    """How the sessions of the two recent arms were started, from their launch
+    records: one row per line of `RECENT_LAUNCH_LINES`, the distinct values
+    over an arm's records, `not stated` where no record of the arm has the
+    line. A value is cut at its first parenthesis, which is where a launch
+    record puts flags and paths; the version row keeps the number only."""
+    root = ROOT if root is None else root
+    found: dict[str, list[str]] = {}
+    for key in RECENT_ARMS:
+        directory = RECENT_LAUNCH_DIRS.get(key)
+        prefix = arms.get(key, (None, None))[1]
+        if directory and isinstance(prefix, str):
+            found[key] = [path.read_text(encoding="utf-8")
+                          for path in sorted((root / directory).glob(f"*{prefix}*.launch.txt"))]
+    if not any(found.values()):
+        return []
+    lines = ["How the sessions were started is stated by the launch records ("
+             + ", ".join(f"`{RECENT_LAUNCH_DIRS[key]}/`, {len(found[key])} records" for key in found)
+             + "), not by the provenance records. Distinct values over each arm's launch records:", "",
+             "| launch record line | " + " | ".join(arms[key][0] for key in found) + " |",
+             "|---|" + "|".join("---" for _ in found) + "|"]
+    for display, name in RECENT_LAUNCH_LINES:
+        cells = []
+        for key in found:
+            values = set()
+            for text in found[key]:
+                for line in text.splitlines():
+                    if line.startswith(f"{name}:"):
+                        value = line[len(name) + 1:].strip()
+                        if name == "claude code":
+                            number = re.search(r"\d+(?:\.\d+)+", value)
+                            value = number.group(0) if number else value
+                        values.add(value.split(" (", 1)[0].strip())
+            cells.append(", ".join(sorted(values)) if values
+                         else ("not stated" if found[key] else "no launch record"))
+        lines.append(f"| {display} | " + " | ".join(cells) + " |")
+    return lines + [""]
 
 
 def rubric_discrimination(scores) -> list[tuple[str, list[str], str, dict[str, Any]]]:
@@ -1729,7 +1995,9 @@ def write_figures(data, scores) -> None:
     OUT_FIG.mkdir(parents=True, exist_ok=True)
     colors = {"v4": "#9e9e9e", "v5api": "#4e79a7", "v5agentic": "#f28e2b",
               "v6agentic": "#e15759", "v7api": "#59a14f", "v7prod": "#1b7f3b",
-              "v8prod": "#7b3fa0"}
+              "v8prod": "#7b3fa0", "v9agentic": "#17a2b8", "v9release": "#8c564b"}
+    for key, *_ in ARMS:                   # an arm registered without a colour is drawn, in grey
+        colors.setdefault(key, "#555555")
 
     # One figure per metric: 4 project panels, one bar per arm = replicate mean,
     # error bar = sample SD (n printed under the bar). Replicates are dots.
