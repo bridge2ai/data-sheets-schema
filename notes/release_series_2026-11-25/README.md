@@ -49,6 +49,17 @@ replicate numbers, and each provenance record's `repo.resource_root` names the d
   `scripts/adhoc/review_pr6349_*_20261125.py`; they read the transcripts in the launch
   worktrees and take the worktrees' parent directory from `D4D_EXECUTIONS_ROOT`.
 
+- `CANONICAL_SELECTION.md`: the five canonical marks, the rubric scores seen when they were
+  recorded (`rubric_scores_root_scope_v6.tsv`), the content reviews and the presence
+  evaluation. `html/` holds a preview of every run.
+- `content_reviews.tsv`: one row per content review, with its verdict counts, the hashes of
+  the review and of its pack, and the reviewer definition's path and hash
+  (`scripts/adhoc/tabulate_content_reviews_20261126.py`).
+- `review_pack_repin.tsv`: for each review pack, the hash the reviewer read, the hash
+  committed and the generator behind each.
+- `review_model_field_as_written.tsv`: the `model` field of each review as its reviewer
+  wrote it, before it was reduced to the bare id.
+
 The transcripts (about 60 MB) stay in the launch worktrees and are not committed.
 
 ## Removed from these notes (2026-11-25)
@@ -207,8 +218,9 @@ Total cost at list price as reported by the sessions: 251.49 USD (8.47 to 22.64 
 4. **Rated and selected on 2026-11-26, after the records were merged.** One replicate per
    project carries a `d4d runs select` mark; `CANONICAL_SELECTION.md` names them and gives
    the rubric scores (`rubric_scores_root_scope_v6.tsv`), and `html/` holds a preview of
-   every run. The evaluation files themselves are in PR #6372.
-5. **Not checked here**: that a chunk marked `nothing_relevant` held nothing for the record,
+   every run. The evaluation files themselves are on main since PR #6372.
+5. **Not checked when the records were merged** (the content reviews made on 2026-11-26 sample
+   both for every record; see `CANONICAL_SELECTION.md`): that a chunk marked `nothing_relevant` held nothing for the record,
    and that a verified snippet supports the value it is attached to. Both are review
    judgements. The receipt check counts 109 verified snippets, in 12 of the 15 records, that
    share no token with the value they are attached to (most in VOICE_PEDIATRIC replicates 3
@@ -222,9 +234,10 @@ Total cost at list price as reported by the sessions: 251.49 USD (8.47 to 22.64 
    and 3 use the release DOI for both. VOICE replicate 3 gives the version DOI as `doi`;
    replicates 1 and 2 use the project DOI for both. Only CM4AI replicate 2 carries a `doi`.
    Every one is a declared alias of the right dataset and the scope check passes.
-8. **One value defect seen in passing, with no systematic value review done:** VOICE replicate
-   3 has `machine_annotation_tools[0].tools: ["OpenAI Whisper Large unknown"]`; the bundle says
-   "OpenAI's Whisper Large model", and "unknown" is the model's addition.
+8. **One value defect seen in passing when the records were merged, before any content
+   review.** The content reviews of 2026-11-26 sample values and did not meet this one: VOICE
+   replicate 3 has `machine_annotation_tools[0].tools: ["OpenAI Whisper Large unknown"]`;
+   the bundle says "OpenAI's Whisper Large model", and "unknown" is the model's addition.
 9. **Launch records named the launch machine.** Each `launch/*.launch.txt` gave the resolved
    path of the `claude` binary and the account used; the published copies no longer give the
    account, and give the path home-relative (see the removal section). Each provenance

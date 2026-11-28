@@ -1,0 +1,188 @@
+reviewer: d4d-review-record
+model: claude-opus-5-5
+reviewed_at: "2026-11-26T03:50:44Z"
+pack_sha256: d9ff09f87935a8189feb3ff2403320a746b95758a3bbe17110d3bbd1ea0c37b0
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-24 are the concatenation header and table of contents (ten source file names, the selection manifest path); no dataset facts"
+- id: chunk-c006
+  verdict: confirmed
+  evidence: "lines 1625-1703 are BMJ Open references 14-30 and the page footer 'Owsley C, et al. BMJ Open 2025;15:e097449'; ref 16 (line 1632) cites dataset version 1.0.0, which the record already lists under version_access.versions_available; nothing else describes the dataset"
+- id: slot-003
+  verdict: supported
+  evidence: "lines 4928-4946: overallOfficialFirstName Cecilia, LastName Lee, ORCID https://orcid.org/0000-0003-1994-7213, affiliation Washington University in St. Louis, ROR https://ror.org/01yc7t268, role 'Study Principal Investigator'; record value carries the same as ORCID:/ROR: CURIEs"
+- id: slot-004
+  verdict: supported
+  evidence: "lines 3075-3077 (cardiac_ecg): standardName 'WaveForm DataBase (WFDB)', standardUse 'All the data files within this directory follow the format specified in this standard'; distribution_formats[4].format names a format of distributed files, as the slot asks"
+- id: slot-005
+  verdict: supported
+  evidence: "lines 3226-3231 (environment directory): relatedTerm 'Environmental sensor data', relatedStandard 'Clinical Data Structure (CDS) v0.1.1' with standardUse 'named and organized following the specification'; file_collections[2] is the environment collection and index 1 is CDS"
+- id: slot-006
+  verdict: supported
+  evidence: "line 1859 (Nature Metabolism, c007): 'post-visit data collection for 10 days using a Dexcom G6 for continuous glucose monitoring'; line 5653 (IRB protocol, c023) is future tense but only corroborates the 10-day period; the iCGM sentence of the value is line 4326"
+- id: slot-007
+  verdict: supported
+  evidence: "line 4294 (healthsheet): 'In cases of using wearables, improper use, technical failure such as battery failure or system malfunction are expected.' anomalies[1] restates it with 'and' for a comma"
+- id: slot-008
+  verdict: supported
+  evidence: "line 4319 (healthsheet composition q14): 'No, the public dataset will not contain data that is considered sensitive. However, the controlled access dataset will contain data regarding racial and ethnic origins, location (5-digit zip code)...'; sensitive_elements_present false is the public dataset's answer and the controlled-access content is kept in the details"
+- id: slot-009
+  verdict: supported
+  evidence: "lines 4111-4112: root metadataFileList entry 'participants.tsv' described as 'a metadata file based on the Clinical Dataset Structure (CDS)'; format TSV and media type follow from the file name, which rule 24 allows"
+- id: slot-010
+  verdict: supported
+  evidence: "line 4598 (README 'Suggested split' table): rows 'Race/ethnicity (count)', 'Sex (count)' and 'Diabetes status (count)' summarise the suggested split; the cited fragment is only the first row's label and Train/Hispanic cell (204), but the table it sits in states exactly the three groupings the name lists"
+- id: slot-011
+  verdict: weak
+  evidence: "the only receipt listed for this leaf is line 5642 (IRB protocol, a plan: 'Memory and cognitive function will be assess with the MoCA cognitive test'); it attests that MoCA is planned, not the 'general cognitive screener', the iPad or the MoCA Duo Application the value states. The value itself is not contradicted: it is verbatim at lines 451-454 (BMJ Open, c003), which the receipt cites for the entry collection_mechanisms[2], not for this leaf"
+- id: slot-012
+  verdict: supported
+  evidence: "lines 2799-2801 'Version 3.0.0 / 10.60775/fairhub.3 / Nov 17, 2025' and lines 2868-2870 dateValue 2025-11-17, dateType Available; the T00:00:00Z time is normalisation forced by the datetime range and is disclosed in source_caveats item 14"
+- id: slot-013
+  verdict: supported
+  evidence: "lines 1004-1008 (BMJ Open 'Data management', c004): 'REDCap is used for collecting patient-reported data from questionnaires and the following clinical data from the visit: medications assessment, vitals, visual acuity, contrast sensitivity, monofilament test results and CBC test results'; the value restates it as the collection mechanism, in the present tense the source uses"
+- id: slot-014
+  verdict: supported
+  evidence: "line 4466 (healthsheet collection q9): 'The approved consent form for the principal project site University of Washington is available [here]... The other clinical sites had IRB reliance and used the same consent form, with minor institution-specific language incorporated'; value states which form documents consent, without the link"
+- id: slot-015
+  verdict: supported
+  evidence: "line 4326 (healthsheet devices): 'The Dexcom G6 is a real-time, integrated continuous glucose monitoring system (iCGM) that directly monitors blood glucose levels without requiring finger sticks'; lines 947-950 (BMJ Open, c004) 'participants are sent home with three data monitoring devices ... (3) Dexcom Continuous Glucose Monitor (CGM)'; line 1859 gives the 10 days"
+- id: slot-016
+  verdict: supported
+  evidence: "lines 4970-4988: Sally L. Baxter, ORCID https://orcid.org/0000-0002-5271-7690, University of California, San Diego, ROR https://ror.org/0168r3w48, 'Study Principal Investigator'"
+- id: slot-017
+  verdict: supported
+  evidence: "lines 2476-2479 (license 3.A): 'Licensee shall not transfer, license, sublicense, sell, assign, display, share or otherwise convey any portion of the Data or any derivative work to any third party other than another licensee (Other Licensee) that is bound by the terms of an agreement with Licensor on terms identical'"
+- id: slot-018
+  verdict: supported
+  evidence: "line 4471 (healthsheet collection q10): verbatim 'Participants were permitted to withdraw consent at any time and cease study participation. However, any data that had been shared or used up to that point would stay in the dataset.'"
+- id: slot-019
+  verdict: supported
+  evidence: "lines 5201-5219: Sara J. Singer, ORCID http://orcid.org/0000-0002-3374-1177 (written as ORCID: CURIE), Stanford University with ROR https://ror.org/00f54p054 at line 5214, role 'Study Principal Investigator' at line 5219"
+- id: slot-020
+  verdict: supported
+  evidence: "lines 5033-5051: Nicholas Evans, ORCID https://orcid.org/0000-0002-3330-0224, University of Massachusetts Lowell, ROR https://ror.org/03hamhx47, 'Study Principal Investigator'"
+- id: slot-021
+  verdict: supported
+  evidence: "line 2144 (Nature Metabolism comment, c008): '4University of Washington, Seattle, WA, USA', in the numbered affiliation list of the AI-READI Consortium author roster (lines 2104-2147); creators[0] is the Consortium entry"
+- id: slot-022
+  verdict: supported
+  evidence: "line 3637: retinal_photography directoryDescription 'This directory contains retinal photography data, which are 2D images. They are also referred to as fundus photography.' verbatim"
+- id: slot-023
+  verdict: supported
+  evidence: "lines 2974-2977: datasetDescription managingOrganization name 'Washington University in St. Louis' with ROR https://ror.org/01yc7t268; a managing organization answers who maintains the dataset"
+- id: slot-024
+  verdict: supported
+  evidence: "lines 3196-3197: metadataFileName 'dqd_omop.json' under clinical_data, description 'The dqd_omop.json file supports OMOP CDM data quality analysis using the OMOP CDM Data Quality Dashboard (DQD).'; JSON format from the extension"
+- id: slot-025
+  verdict: supported
+  evidence: "lines 240-241 'Written informed consent is provided by all participants'; lines 337-343 (c002) consent 'performed remotely by computer, tablet or smart phone' and 'If participants did not select the option to consent electronically, it is performed in-person at the start of the visit'; line 6109 'E-consent is just an additional modality to the standard paper-based consent'"
+- id: slot-026
+  verdict: supported
+  evidence: "lines 2145-2146 (Nature Metabolism AI-READI Consortium affiliation list, c008): '8Oregon Health & Science University, Portland, OR, USA'; creators[0].affiliations[6].name is that organization's name"
+- id: slot-027
+  verdict: supported
+  evidence: "lines 3300-3319 (retinal_flio): relatedTerm 'Fuorescence Lifetime Imaging Ophthalmoscopy', relatedStandard 'Digital Imaging and Communications in Medicine (DICOM)' with standardUse 'All the data files within this directory follow the format specified in this standard'; file_collections[3] is retinal_flio"
+- id: rule-01
+  verdict: followed
+  evidence: "every spot-checked value traces to a passage (PIs lines 4907-5240, totals lines 2830-2831, raw formats lines 1167-1169, stipend line 5591); booleans rest on stated answers (instances[0].label false from 'N/A - no labels are provided' line 4389; is_random false from 'Non-Probability Sample' line 4879); absences such as errata and retention limits were left empty"
+- id: rule-02
+  verdict: followed
+  evidence: "source_caveats items 1-9 represent each disagreement (enrollment target 4000 vs 4600, OT2ODO32644 vs OT2OD032644, de-identification statement vs Safe Harbor at lines 1877-1879, license label, PI affiliation, enrollment vs collection dates, first-year vs second-year wording, v3 docs 'pilot study phase' line 2336); no entities merged"
+- id: rule-03
+  verdict: followed
+  evidence: "report section 'Referent' names version 3.0.0 at doi:10.60775/fairhub.3; full and core both carry id doi:10.60775/fairhub.3; v1/v2 figures confined to version_access.version_details"
+- id: rule-04
+  verdict: not_applicable
+  evidence: "the rule removes targets and imposes nothing a record can follow or break; no density-driven content was observed"
+- id: rule-05
+  verdict: followed
+  evidence: "sixteen PIs each in their own creators entry (creators[1]-[16]); nine consortium affiliations as separate objects; five prohibited_uses, three anomalies, eighteen collection_mechanisms each one use/anomaly/mechanism"
+- id: rule-06
+  verdict: followed
+  evidence: "no slot holds only a pointer: license_and_use_terms.license_terms states the grant terms (lines 2450-2469) beside the DOI; external_resources is the slot for the documentation link; statements of absence are kept in source_caveats item 10, not as values"
+- id: rule-07
+  verdict: followed
+  evidence: "access steps (line 2984) are in license_and_use_terms.description rather than distribution_formats; release plan in updates (UpdatePlan.frequency 'How often updates are planned'); raw formats in raw_data_sources rather than distribution_formats"
+- id: rule-08
+  verdict: followed
+  evidence: "class-ranged slots carry their declared fields: Person objects with id, name, orcid, affiliation (creators[1]-[16]); Grant with grant_number and name (funders[0].grants[0]); Organization with id and name; FileCollection with id, path, file_count, total_bytes; pack lists no reference attributes"
+- id: rule-09
+  verdict: followed
+  evidence: "uriorcurie slots use declared prefixes: id doi:10.60775/fairhub.3, ORCID:/ROR: on persons and organizations, version_access.latest_version_doi doi:...; publisher https://fairhub.io/ is a URL no declared prefix covers (present at lines 370, 1178); doi slot holds the bare DOI"
+- id: rule-10
+  verdict: followed
+  evidence: "every ORCID and ROR is stated in the bundle (lines 4907-5240; UW ROR 00cvxb145 at line 5278; managing org ROR line 2977); Portland State University and Meharry Medical College, which the bundle names without an identifier (line 2146), carry name only"
+- id: rule-11
+  verdict: followed
+  evidence: "id_slots: all 28 mints are fragments on the record's own attested id doi:10.60775/fairhub.3 (e.g. file_collections[0].id doi:10.60775/fairhub.3#cardiac_ecg); no invented prefix; no fragment on an organization's identifier; persons use their ORCIDs"
+- id: rule-12
+  verdict: followed
+  evidence: "record prose uses American forms (harmonized, generalizability at known_biases[0] where the source line has 'generalis-ability', organization); a scan for -ise/-our/centre/programme/enrolment forms found none"
+- id: rule-13
+  verdict: followed
+  evidence: "the manifest ranks FAIRhub (tier 1) above documentation/license/IRB (tier 2), publications (tier 3), RePORTER (tier 4); de-identification and PI affiliation follow the higher tier with the disagreement in source_caveats items 3 and 5; the equal-rank license-label conflict is represented, not resolved (item 4)"
+- id: rule-14
+  verdict: not_applicable
+  evidence: "id_slots: every minted id is on a FileCollection or File (forced: true, 28 entries); no unforced mint and no constructed id exists, so the point-at test has nothing to reach; fragments are consistent between collection and file ids"
+- id: rule-15
+  verdict: followed
+  evidence: "coverage receipt AI_READI_coverage_receipt.yaml carries bundle_md5 1a58ad7be37d4b08ebd9d94e6ad173a3 and one entry per chunk c001-c025 with closed statuses; report records the strict check 25/25 chunks, 377/377 snippets, 431/431 slots"
+- id: rule-16
+  verdict: followed
+  evidence: "principal_investigator values are objects with id, name, orcid and affiliation object lists (creators[1].principal_investigator has email contact@aireadi.org from line 4902); grants are Grant objects with grant_number; nothing reduced to a string"
+- id: rule-17
+  verdict: followed
+  evidence: "v1/v2 counts and the v2 '2.01 TB, 165,051 files ... no longer accessible' (c013) only in version_access.version_details; plans kept as plans ('There are plans to release new versions', 'will be adjusted by under- and oversampling', 'possibility that raw data may be included in future releases')"
+- id: rule-18
+  verdict: followed
+  evidence: "source_caveats item 7 states the nine-directory sums as 'This record's own computation' with every input listed; recomputed: 356,334 files and 3,815,969,360,064 bytes, differences 9 and 419,614; stated totals 356343 and 3815969779678 kept unadjusted"
+- id: rule-19
+  verdict: followed
+  evidence: "the receipt carries its own entry for each creators[1]-[16] PI (receipt lines 745-776), each creators[0].affiliations[0]-[8], each file_collections[0]-[9] and each of their 18 files, each funders entry and grant"
+- id: rule-20
+  verdict: followed
+  evidence: "all sixteen Person ids are ORCID CURIEs the bundle states (lines 4912-5227); no mailto or minted person fragment; Aaron Lee's address is in email, not id"
+- id: rule-21
+  verdict: followed
+  evidence: "scope declares no related-but-distinct dataset; study/protocol passages are used for how this dataset was collected and consented; release-specific slots come from the v3 FAIRhub record; the extra grants and Research to Prevent Blindness come from the BMJ Open protocol paper's 'This research is supported by' (lines 1532-1534), whose research is the AI-READI study that generates this dataset, so its subject is the referent's creation (the funders slot is 'Funding mechanisms that supported dataset creation'). They are qualified in source_caveats item 12 and funders[1].source_caveats. Borderline, not charged: P30DK035816 and UL1TR003096 sit under funders[0], whose description repeats the healthsheet's Bridge2AI creation-funding sentence (line 4242), which names only the Bridge2AI grant"
+- id: rule-22
+  verdict: followed
+  evidence: "entries each name one entity: separate affiliations, separate PIs, separate prohibited uses; 'AI-READI Consortium' is one named group (creatorName, line 2861); subpopulations[0] is a single Subpopulation whose identification/distribution slots are defined over groups"
+- id: rule-23
+  verdict: followed
+  evidence: "forced ids on file collections and files are minted on the record's own declared-CURIE id; Person ids take the stated ORCID; organizations take stated RORs or carry name only (creators[0].affiliations[7]-[8]); no fragment on another entity's identifier; bundle_state current, no null-based entries"
+- id: rule-24
+  verdict: followed
+  evidence: "enumerations rest on stated categories: bias_type selection_bias ('selection bias known as volunteer bias', c002); limitation_type representativeness_limitation ('may not provide a comprehensive representation', line 4333); conforms_to_standard from 'follow the format specified in this standard'; data_use_permission disease_specific_research ('only for type 2 diabetes related research', line 2898); file_collections[9].collection_type metadata (FileCollectionTypeEnum 'Metadata or annotation files') rests on each root file being 'a metadata file based on the Clinical Dataset Structure' (lines 4037-4145); intended_uses[0].use_category is string-ranged, not an enumeration; no collection_type guessed for the nine data directories"
+- id: rule-25
+  verdict: followed
+  evidence: "raw_data_sources[0].raw_data_format .xml and [1] .csv come from lines 1167-1169 'exported in their raw format to local storage: ECG (.xml), MoCA Duo application (...; .csv)'; release standards (DICOM, OMOP) are in conforms_to_standard, not raw_data_format"
+- id: rule-26
+  verdict: followed
+  evidence: "principal_investigator holds only the sixteen persons the study description designates 'Study Principal Investigator' (lines 4925-5240); the Nature Metabolism group list was not used (source_caveats item 11)"
+- id: rule-27
+  verdict: violated
+  evidence: "source_caveats item 12 says 'The two publications acknowledge NIH grants P30DK035816 and UL1TR003096 and Research to Prevent Blindness as support for the research they report'; only the BMJ Open funding statement (lines 1532-1534) names all three. The Nature Metabolism acknowledgement (lines 2003-2004) names OT2OD032644 and P30 DK035816 only, and mentions Research to Prevent Blindness only as individual authors' funding under Competing interests (lines 2021-2040). The record's own funders[1].source_caveats says Research to Prevent Blindness is named only in the BMJ Open paper, so item 12 claims more than the passages state. Minor and confined to a caveat. Otherwise followed: keywords holds exactly the keyword line (lines 2786-2793), and known_limitations and known_biases restate their sentences at the same reach"
+- id: rule-28
+  verdict: followed
+  evidence: "list entries are members: files under file_collections[*].resources are files the structure description lists (lines 3119-4145); no 'sample' or 'continues elsewhere' remark became an entry"
+- id: rule-29
+  verdict: followed
+  evidence: "no errata, retention_limit, extension_mechanism or existing_uses entry; those absences are in source_caveats item 10; access route not in distribution_formats; prohibited_uses[0] is the prohibition with its reason in prohibition_reason (line 2531); the *_present: false booleans are the schema's declared fields for those answers, not absence entries"
+- id: rule-30
+  verdict: followed
+  evidence: "scalar slots hold strings or identifiers (publisher URL, license name, grantor name, reviewing_organization string); the report records schema validation with no issues for both records"
+- id: pair-01
+  verdict: consistent
+  evidence: "compared full file_collections[0]-[9] with their 18 resources against core distributions: 28 ids on each side, none missing or extra; name, description, path, conforms_to_standard, format and media_type equal, core bytes equal full total_bytes; full-only file_count, collection_type and file_type are not CoreDistribution slots"
+notes: >-
+  Pack gaps: none. receipt_join basis is index (no phase-1 snapshot); no
+  sampled path showed an index shift. The one rule finding (rule-27) is a
+  misattribution in source_caveats item 12; no dataset value was found
+  contradicted by, or absent from, the bundle. slot-011 is weak only in its leaf
+  receipt; its value is bundle-supported through the entry receipt. slot-006
+  has a similar shape, but its listed present-tense receipt (line 1859) carries
+  the substantive half, so it stays supported. No receipt-validator defect
+  found.

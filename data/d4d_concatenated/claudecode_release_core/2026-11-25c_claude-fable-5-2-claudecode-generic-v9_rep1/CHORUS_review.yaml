@@ -1,0 +1,184 @@
+reviewer: d4d-review-record
+model: claude-opus-5-5
+reviewed_at: '2026-11-26T03:43:10Z'
+pack_sha256: ebce639c2fe890dfb5035681c0b1f1c2748c48b86aeb7caadf2e6ee411340f8a
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-18 are the concatenation header (input directory, file count, extensions, selection manifest) and the table of contents naming the four source files; no statement about the dataset, so nothing a datasheet slot could carry"
+- id: slot-002
+  verdict: supported
+  evidence: "line 45 (NIH abstract) reads 'There is an urgent need for infrastructure to support artificial intelligence and machine learning (AI/ML) in critical care. Developing high-resolution multi-center data sets is a critical first step towards actionable and trustworthy AI.'; addressing_gaps[0].response joins the two sentences verbatim and states the gap the dataset addresses, as AddressingGap.response asks"
+- id: slot-003
+  verdict: supported
+  evidence: "lines 293-296 in the webinar's CHoRUS Dataset table list 'Medication administration (dosing time-stamped upon each infusion change or dose administration)' under 'Data type' (line 260); instances[4] records instance_type 'Medication administration' with that parenthetical as description, attributed to the table"
+- id: slot-004
+  verdict: supported
+  evidence: "lines 308-310 list 'Clinical notes (extracted and tokenized using OHNLP toolkit)' as a data type and line 247 on the same slide says 'Clinical notes – stored locally except tokens'; instances[8] carries both, attributed to the slide, at the passage's reach"
+- id: slot-005
+  verdict: supported
+  evidence: "UpdatePlan asks whether the dataset will be updated, e.g. to add new instances; lines 1065-1075 (website) separate an 'Anticipated Final Dataset' (100,000 admissions, 9 modalities) from the 'Current Released Dataset', and lines 251-254 (webinar, 2025-09-09) say imaging de-id is 'in process for larger cohort' and 'EEG – extraction in process at this point'; updates.update_details states those planned additions as the sources do, without inventing a cadence or channel"
+- id: slot-006
+  verdict: supported
+  evidence: "line 45 (abstract, future tense): 'establish a legal framework for collecting data at scale, sampling to ensure comprehensive sets of patient conditions and clinical treatment strategies'; line 1220 (GitHub overview): 'Federated access will enable sampling methods to ensure a balanced and diverse cohort'; sampling_strategies[0].description quotes both and marks them 'Planned', matching the sources' tense"
+- id: slot-007
+  verdict: weak
+  evidence: "lines 251-252 'Imaging – currently 1000 images available with de-id in process for larger cohort' are real and the value transcribes them faithfully, but deidentification_details asks for de-identification procedures and residual risks (Deidentification: can individuals be identified); the passage gives an in-progress status for one modality, not a procedure or risk, so it is on topic without answering the slot's question"
+- id: slot-008
+  verdict: supported
+  evidence: "line 45: 'generating data for ML/AI applications aimed at characterizing acute and critical care illness, predicting complications, ...'; tasks[0].response 'Characterizing acute and critical care illness.' is the first task of that list, stated as the source states it"
+- id: slot-009
+  verdict: supported
+  evidence: "line 1254 'The starting reference for data managers at data contributing sites is the Chorus_SOP page', and line 1071 (website) '14 Data contributing hospitals'; data_collectors[0].role 'data contributing site' names the role the sources give the sites that collect and contribute data. DataCollector.role is a free string whose schema examples are categories (researcher, crowdworker), so a category role is the slot's own form"
+- id: slot-010
+  verdict: supported
+  evidence: "lines 171 and 186-187: under the heading 'Bridge2AI CHoRUS Leadership Team', 'Parisa Rashidi' / 'University of Florida'; creators[4] carries that name, that affiliation as an Organization object, and a description saying exactly where she is listed (the webinar dated 2025-09-09 at line 74). The value treats leadership-team membership as the creator role, and the description says so openly"
+- id: slot-011
+  verdict: supported
+  evidence: "line 1094 'This project is funded by the NIH under award number OT2OD032701' and line 1062 'National Institute of Health (NIH) funded Bridge2AI consortium'; funders[0].grantor 'National Institutes of Health (NIH)' names the agency the passages name. The website spells it 'Institute', and the record uses the agency's own plural form, which also appears in the NIH page's 'United States National Institutes of Health' at line 50. The meaning is the same"
+- id: slot-012
+  verdict: supported
+  evidence: "line 240 '• Controlled access' on the webinar's CHoRUS Dataset slide; the ConfidentialityLevelEnum value 'restricted' is defined as 'Restricted access requiring approval or registration ... requiring controlled access', a plain restatement of the passage's category; the registration and licensing steps at lines 444-455 corroborate it"
+- id: slot-013
+  verdict: supported
+  evidence: "lines 1196-1200 (GitHub overview, present tense): 'The goal of the CHoRUS Network is to develop the most diverse, high-resolution, ethically sourced, AI-ready data set to answer the grand challenge of improving recovery from acute illness.'; purposes[2].response restates it verbatim"
+- id: slot-014
+  verdict: supported
+  evidence: "lines 298-299 list 'Procedures (documentation by providers)' as a data type in the webinar's CHoRUS Dataset table; instances[5] carries name and qualifier, attributed to the table"
+- id: slot-015
+  verdict: supported
+  evidence: "line 38 'Organization: MASSACHUSETTS GENERAL HOSPITAL' is the RePORTER organization of the project whose PI (line 37) is creators[0]; lines 173-175 also place Eric Rosenthal at Massachusetts General Hospital; creators[0].affiliations[0].name gives it in title case"
+- id: slot-016
+  verdict: supported
+  evidence: "lines 1074-1078: 'Current Released Dataset ... 1.6 Billion / Rows of EHR OMOP data'; instances[1].counts 1600000000 transcribes the stated figure as an integer, and source_caveats says the website shows it as a round figure and the integer does not assert an exact total"
+- id: slot-017
+  verdict: supported
+  evidence: "lines 1074-1078 list '1.6 Billion Rows of EHR OMOP data' under 'Current Released Dataset'; instances[1] (instance_type 'row of EHR OMOP data', counts, description attributing the figure to the current-release snapshot) is that passage, scoped to the current release"
+- id: slot-018
+  verdict: weak
+  evidence: "the value says Manlik Kwong is 'Listed on the \"Bridge2AI CHoRUS Leadership Team\" slide of the September 09, 2025 webinar'. The cited snippet is the webinar's date line (line 74), which supports only the date. The claim that carries the meaning, his listing on the leadership slide, is at lines 171 and 189-190 and is not in this snippet. Contrast slot-025, where the same string is receipted by the slide title. The value is true; this receipt is real and on topic but does not attest its main claim"
+- id: slot-019
+  verdict: supported
+  evidence: "line 45: 'will meet the need of generating data for ML/AI applications aimed at characterizing acute and critical care illness, predicting complications, and measuring treatment response among patients with acute or critical illness'; purposes[0].response restates this as the dataset's purpose"
+- id: slot-020
+  verdict: supported
+  evidence: "line 1075-1076 'Current Released Dataset 50,000 Patient admissions from ICU, PICU, and NICU', lines 242-244 'As of August 2025, covers 14 different hospitals with over 45K unique admissions', lines 1065-1067 'Anticipated Final Dataset 100,000 Patient admissions', line 45 'acquiring an AI-ready data set from more than 100,000 critically ill patients'; instances[0].description states each figure with its source and its current or anticipated status"
+- id: slot-021
+  verdict: supported
+  evidence: "line 1041 'Source URL: https://chorus4ai.org/' is the project website's own address, and line 1153 (GitHub organization profile) links the same URL; page holds it as the landing page"
+- id: slot-022
+  verdict: supported
+  evidence: "line 35 'Core project number: OT2OD032701' and line 1094 'funded by the NIH under award number OT2OD032701'; funders[0].grants[0].grant_number OT2OD032701"
+- id: slot-023
+  verdict: supported
+  evidence: "lines 350-352 list 'Waveform telemetry (bedside monitors, gateway/middleware)' as a data type; instances[10] carries it, attributed to the table"
+- id: slot-024
+  verdict: supported
+  evidence: "line 1383 'Request access: dbold@emory.edu or jared.houghtaling@tuftsmedicine.org' in the GitHub overview's Contact section; data_governance.description reports the access-request contacts as listed. It names no committee, so the record does not invent a committee_contact"
+- id: slot-025
+  verdict: supported
+  evidence: "line 171 'Bridge2AI CHoRUS Leadership Team' with 'Azra Bihorac / University of Florida' at lines 177-178; the slide title attests the listing, and the webinar date in the value is the same document's title page (line 74, same chunk c003); creators[1].description says exactly that"
+- id: slot-026
+  verdict: supported
+  evidence: "lines 305-306 list 'Diagnoses (documentation by providers)' as a data type; instances[7] carries it, attributed to the table"
+- id: rule-01
+  verdict: followed
+  evidence: "every populated value traces to the bundle, e.g. funders[0].grants[0].description (lines 34-42), instances[0..2] (lines 1074-1080) and conforms_to_standard (table, lines 265-367). Unsupported slots are left empty: license, doi, version, keywords, variables and IRB/consent (report 'Continued omissions'). Two role readings are accepted as grounded because each entry's description states the source's own role: leadership-slide people as creators[1..5] (lines 171-190) and the website 'Contact Us' Program Manager as maintainers[0] (lines 1106-1108)"
+- id: rule-02
+  verdict: followed
+  evidence: "the webinar's 'over 45K unique admissions' as of August 2025 (line 244) and the website's 50,000 (line 1075) are both kept in instances[0].description, and source_caveats records the difference; the abstract's 'publicly available' goal (line 45) and the webinar's 'Controlled access' (line 240) are both kept, the first as a goal, and the caveat says so; no distinct entities are merged"
+- id: rule-03
+  verdict: followed
+  evidence: "the report's 'Referent' section names the CHoRUS dataset at https://chorus4ai.org/ as the referent, from the declared scope; both records carry id and page https://chorus4ai.org/ and the same name and title (core lines 230-233); the GitHub project's MIT license is excluded as a fact about another thing (source_caveats)"
+- id: rule-04
+  verdict: followed
+  evidence: "the record populates 30 top-level slots and leaves many empty where the bundle is silent (license, doi, version, keywords, variables, file_collections, human-subjects slots; report 'Continued omissions'); nothing suggests padding toward a density target"
+- id: rule-05
+  verdict: followed
+  evidence: "creators has six entries, one per person on the leadership slide (lines 173-190). tasks splits the abstract's three aims into tasks[0..2] (line 45). instances has one entry per data type (lines 265-367). existing_uses keeps the training program and publications separate (lines 256-258). external_resources has two entries and conforms_to_standard three terms"
+- id: rule-06
+  verdict: violated
+  evidence: "is_deidentified.deidentification_details states only that de-identification is pending ('1000 images are currently available, with de-identification (\"de-id\") in process for a larger imaging cohort', lines 251-252). That is a statement that it is pending, not the procedures or residual risks the field asks for (see slot-007). collection_mechanisms[1].mechanism_details also opens with a pointer: data managers are pointed 'to the Chorus_SOP page, which describes the step-by-step process' (line 1254). It does go on to give mechanism content: sites create and curate extracts, upload them with tools, and get characterization reports back (lines 1323-1325, 1612, 1574)"
+- id: rule-07
+  verdict: violated
+  evidence: "the conforms_to_standard slot description says 'Populate both for the same standard' (conforms_to verbatim, conforms_to_standard normalized) and 'Use OTHER when the sources name a standard this vocabulary lacks, and keep the name in conforms_to'. The record populates only conforms_to_standard (OMOP_CDM, DICOM, WFDB), leaves conforms_to empty, and moves the standards the table names that have no enumeration value (OHNLP line 320; 'EDF+ and Persyst' lines 367-368) into source_caveats. The report (Phase 3, scope review) says this was deliberate, against the slot's own instruction"
+- id: rule-08
+  verdict: followed
+  evidence: "class-ranged objects carry their declared fields where the evidence answers them. creators[0].principal_investigator is a Person with id, name and affiliation. creators[1..5] have name and affiliations[].name. funders[0] has name, grantor and grants[0] with name and grant_number. instances have instance_type and counts. preprocessing_strategies[2].used_software[0] has id and name. One small point: creators[0] carries the name in principal_investigator.name, not in Creator.name, but it is not hidden in description prose"
+- id: rule-09
+  verdict: followed
+  evidence: "the uriorcurie values are id https://chorus4ai.org/, creators[0].principal_investigator.id https://chorus4ai.org/#person-eric-s-rosenthal and used_software[0].id https://chorus4ai.org/#software-ohnlp-toolkit. No declared prefix (doi, ROR, ORCID, etc.) covers chorus4ai.org, so the URL form is right. No resolver URL appears in a uriorcurie slot"
+- id: rule-10
+  verdict: followed
+  evidence: "the record adds no ROR, ORCID or other registry id for any organization or person (none is in the bundle: grep for 'orcid' finds nothing). The external identifiers it carries are all stated in the bundle: grant number OT2OD032701 (lines 35, 1094), https://github.com/chorus-ai (line 1122) and www.bridge2ai.org/chorus (line 1385)"
+- id: rule-11
+  verdict: followed
+  evidence: "id_slots lists two mints, both fragments on the record's own id https://chorus4ai.org/, a URL the bundle states (line 1041) and both forced (Person, Software). No undeclared prefix is invented, and no fragment sits on an organization's identifier"
+- id: rule-12
+  verdict: followed
+  evidence: "record prose uses American forms (characterizing, standardize, organization, de-identification). A scan for -ise/-isation/-our/-yse forms found none. Source spellings are kept only where quoted, such as 'repoitory', 'transnational' and 'cmccrary@mgh.havard.edu', and source_caveats says so"
+- id: rule-13
+  verdict: followed
+  evidence: "the one numeric disagreement is 45K admissions in the tier-4 webinar (line 244) against 50,000 on the tier-2 website (line 1075). instances[0].counts holds the higher-ranked 50,000, and source_caveats states both values and their dates. The report treats them as compatible rather than conflicting, and the record still states both"
+- id: rule-14
+  verdict: not_applicable
+  evidence: "the only minted ids (id_slots: creators[0].principal_investigator.id and preprocessing_strategies[2].used_software[0].id) are forced by the schema (Person, Software), so the points-at test does not reach them. No unforced fragment exists. Recording the OHNLP toolkit object is content (line 310: notes are 'tokenized using OHNLP toolkit'), not noise"
+- id: rule-15
+  verdict: followed
+  evidence: "CHORUS_coverage_receipt.yaml has bundle_md5 9b2ef4b6..., matching the pack, and one entry per manifest chunk c001-c008 in order. Each entry uses a status from the closed set (c001 nothing_relevant with a reason, c002-c008 extracted) with verbatim snippets. The report records a strict receipt check with 8/8 chunks and 143/143 snippets verified. On this agentic path the receipt is a separate file, not a document after the record"
+- id: rule-16
+  verdict: followed
+  evidence: "pack.reference_attributes is empty, and every class-ranged slot holds an object. principal_investigator is a Person with id, name and affiliation (an Organization list); grants[0] is a Grant with grant_number; affiliations are Organization objects. Nothing is reduced to a string or inflated"
+- id: rule-17
+  verdict: followed
+  evidence: "future-tense sources are marked as plans: splits, sampling_strategies, labeling_strategies, participant_privacy and intended_uses[0] all begin 'Planned:'. preprocessing_strategies[0] says 'As plans' (lines 45, 1202-1220). The website's 'Current Released Dataset' and 'Anticipated Final Dataset' are kept apart (instances[0], updates), and webinar statements are dated 2025-09-09 or August 2025. No passage about another dataset is used"
+- id: rule-18
+  verdict: not_applicable
+  evidence: "the record derives no figure. Counts transcribe stated figures (50,000; 1.6 Billion; 7,642; lines 1075-1080), and source_caveats says the integers transcribe round display figures. It computes no sum or difference"
+- id: rule-19
+  verdict: followed
+  evidence: "each creator entry has its own receipt from its own passage. creators[0] cites lines 37-38 and 173-175, and creators[1..5] cite 'Azra Bihorac University of Florida' through 'Manlik Kwong Tufts University' (lines 177-190). Each instances entry is also receipted separately (receipt c003 and c006 entries). funders has one entry"
+- id: rule-20
+  verdict: followed
+  evidence: "the bundle states no ORCID for Eric S. Rosenthal (no 'orcid' anywhere in it). creators[0].principal_investigator.id is https://chorus4ai.org/#person-eric-s-rosenthal: the record's own id, '#', then 'person' and the name. No mailto id is used"
+- id: rule-21
+  verdict: followed
+  evidence: "the declared scope names no related dataset. Values drawn from the AIM-AHEAD training-program slides are limited to statements about the CHoRUS data and access to it, scoped to program participants in the value: license_and_use_terms (lines 452-455), data_governance.access_review_process (lines 444-446, 883-892) and existing_uses[0] (lines 215-221). The GitHub project's MIT license (line 1375) is kept out of the dataset's license slots"
+- id: rule-22
+  verdict: followed
+  evidence: "each multivalued entry names one thing the sources name, e.g. one person per creator, one data type per instance and one standard per conforms_to_standard term. data_collectors[0] stands for the 14 contributing hospitals as a role category. The bundle never names them individually (lines 1071, 1202-1204), and the DataCollector schema examples are categories, so this is the class's form rather than a merge"
+- id: rule-23
+  verdict: followed
+  evidence: "the forced ids, the Person under creators[0].principal_investigator and the Software under preprocessing_strategies[2].used_software, carry labels on the record's own id https://chorus4ai.org/, an absolute URL and the base the rule prefers even though it is a site root, because the bundle states no identifier for either. Creator entries have no id and carry the name in name, as the rule requires where no id is stated and none is required"
+- id: rule-24
+  verdict: followed
+  evidence: "the populated enumerations are conforms_to_standard (OMOP_CDM, DICOM, WFDB), taken from the table's 'Data standard' column (lines 262-263, 265, 348, 354) and from 'standardize data to the OMOP Common Data Model' (line 45), and confidentiality_level 'restricted' from 'Controlled access' (line 240). Both rest on passages that state the category. maintainers[0].role is left empty because no passage classifies it"
+- id: rule-25
+  verdict: followed
+  evidence: "raw_data_format is not populated. The bundle describes sources (PACS, bedside monitors, hospital database; lines 346, 350-352, 364-365) and released standards, but never states a pre-processing data form, so the slot stays empty as the rule requires"
+- id: rule-26
+  verdict: followed
+  evidence: "principal_investigator is filled only for Eric S. Rosenthal, whom RePORTER designates 'Principal investigator: ROSENTHAL, ERIC S.' (line 37). The other five on the leadership slide are creators without a PI slot, and the webinar's AIM-AHEAD PIs (lines 154-166) are not used"
+- id: rule-27
+  verdict: followed
+  evidence: "no consequence is drawn beyond what a passage states, and scope_impact is not populated. The RePORTER 'Preferred terms' line (line 50) and the website navigation menu (lines 1046-1056) feed no slot. keywords is left empty, which the report explains. Values from the webinar table come from row cells, not headers, and are stated as 'listed in the webinar's CHoRUS Dataset table'"
+- id: rule-28
+  verdict: followed
+  evidence: "every list entry is a member of its list: instances are data types and counted units, existing_uses are uses (lines 256-258), and external_resources are resources (lines 1122, 1385). The table-alignment remark and the round-figure remark are in source_caveats, not entries"
+- id: rule-29
+  verdict: followed
+  evidence: "no absence fills a slot: there is no errata, and the missing dataset license is a source_caveats remark, not an entry. distribution_formats[0] ('Cloud enclave', lines 245, 1085) records the access environment in name and description, which DistributionFormat's description covers ('access methods'), and leaves format empty"
+- id: rule-30
+  verdict: followed
+  evidence: "the scalar-ranged slots hold strings: funders[0].grantor, data_collectors[0].role, external_resources[*].external_resources (https://github.com/chorus-ai, www.bridge2ai.org/chorus) and maintainers[0].maintainer_details. No object sits in a string-ranged slot, and the report says schema validation passed"
+notes: >-
+  Launch mode: this review was written by a Claude Code subagent given the
+  d4d-review-record definition file as its instructions, not launched as the
+  typed agent; the model is claude-opus-5-5. The pack (pack_version 7) lists no
+  gaps. Its receipt_join.basis is index, because there is no phase-1 snapshot,
+  so slot items were judged at the paths as written. The pack sampled 25 of 84
+  receipted slots and has no receiptless or reshaped items. Instrument observation
+  for the receipt validator: the receipt for external_resources[0] cites
+  'Source URL: https://github.com/chorus-ai#table-of-contents', a source-metadata
+  line, for the organization URL; it is verbatim and not mis-attributed, but it
+  comes from the bundle's metadata header rather than the page text.

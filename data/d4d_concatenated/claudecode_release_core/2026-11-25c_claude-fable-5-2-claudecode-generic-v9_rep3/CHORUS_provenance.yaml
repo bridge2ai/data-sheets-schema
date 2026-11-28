@@ -680,3 +680,39 @@ validation:
     full: []
     core: []
   recorded_by: d4d runs validate
+review:
+  checked: true
+  items_total: 56
+  items_answered: 56
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 1
+    slot_receipted:
+      supported: 24
+      weak: 1
+    rule:
+      followed: 24
+      violated: 3
+      not_applicable: 3
+  adverse: 4
+  cannot_tell: 0
+  findings: []
+  reported: []
+  summary: items 56/56 answered · 4 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record definition, run by a Claude Code general subagent
+      given the definition file as its instructions (not launched as the typed d4d-review-record
+      agent)
+    model: claude-opus-5-5
+    reviewed_at: '2026-11-26T03:51:41Z'
+    model_basis: self-reported by the reviewing agent
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/CHORUS_review_pack.yaml
+      sha256: 47819781d310e03fe99a3ae79aab482a1f820256d3dda3d4f9976d06d3c01cd4
+    review:
+      path: data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep3/CHORUS_review.yaml
+      sha256: c75e4b43478fdb0c05025b22e177ba6dffb7148fad67ec80349c6c3817adc791
+  recorded_by: d4d review check

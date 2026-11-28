@@ -662,3 +662,37 @@ validation:
     full: []
     core: []
   recorded_by: d4d runs validate
+review:
+  checked: true
+  items_total: 69
+  items_answered: 69
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 13
+    slot_receipted:
+      supported: 25
+    rule:
+      followed: 28
+      not_applicable: 2
+    pair_warning:
+      consistent: 1
+  adverse: 0
+  cannot_tell: 0
+  findings: []
+  reported: []
+  summary: items 69/69 answered · 0 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-opus-5-5
+    reviewed_at: '2026-11-26T03:48:17Z'
+    model_basis: self-reported by the reviewing agent
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1/CM4AI_review_pack.yaml
+      sha256: d6cec0ea483cc6389fc1b81edc716ce2685675daceaa1347fc6681f91628f6cc
+    review:
+      path: data/d4d_concatenated/claudecode_release_core/2026-11-25c_claude-fable-5-2-claudecode-generic-v9_rep1/CM4AI_review.yaml
+      sha256: bc13ddcd440926a49b4a4537875baf7d54e66418ce2aa503a757eb31feaa99ae
+  recorded_by: d4d review check

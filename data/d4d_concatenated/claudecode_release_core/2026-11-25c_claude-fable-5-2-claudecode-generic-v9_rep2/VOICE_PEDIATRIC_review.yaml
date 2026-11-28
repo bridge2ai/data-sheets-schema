@@ -1,0 +1,183 @@
+reviewer: d4d-review-record
+model: claude-opus-5-5
+reviewed_at: '2026-11-26T03:42:49Z'
+pack_sha256: 75bc52900679bee68b049f5e4aef6fb019cb0040711e876ad1557108318cf692
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: 'lines 1-20 are the concatenation header (Input Directory, Total Files: 6, Selection Manifest) and the table of contents listing the six source file names; no fact about the dataset'
+- id: chunk-c012
+  verdict: confirmed
+  evidence: 'lines 2776-2824 are Attachment 2 clauses 7-10 of the USF Data Transfer and Use Agreement template (recipient IRB documentation, adherence to PhysioNet.org requirements, unilateral amendment, the section 787.06 F.S. warranty) and the blank Attachment 3 personnel list; recipient obligations under a template whose data description (line 2645) is the Bridge2AI-Voice dataset in general. The one factual line (2781-2784, PhysioNet managed by MIT LCP, NIBIB grant R01EB030362) is about the platform and the record deliberately excludes platform facts in source_caveats'
+- id: chunk-c013
+  verdict: confirmed
+  evidence: 'lines 2825-2866 are the eipm/bridge2ai-docs README: logo, MIT license badge, Zenodo DOI 10.5281/zenodo.13834653 and a citation for the documentation repository, pip install and startup commands; all about the documentation site source code, nothing about the pediatric release'
+- id: slot-004
+  verdict: supported
+  evidence: 'line 414 "All of the above files are associated with a data dictionary file which has the same file stem and a JSON suffixes (e.g. torch_spectrogram.json)" supports a JSON data-dictionary distribution format; format JSON and media_type application/json read from the stated suffix; access_urls is the release landing page (line 30)'
+- id: slot-005
+  verdict: weak
+  evidence: 'the snippet "Pediatrics Peds 10+" (lines 1186-1187) is a link label in the list introduced at line 1180 "Protocols can be found in the Bridge2AI-Voice documentation of the dataset for each cohort in the following"; it names a collection protocol, not a subpopulation the release identifies or represents, which is what subpopulations[3] with subpopulation_elements_present true asserts. The only age-grouping sentence (line 1140, "are grouped by age") is about 46 lines away, names no groups and is not cited for this entry'
+- id: slot-006
+  verdict: supported
+  evidence: 'line 394 "the availability of large-scale pediatric databases/datasets remains/is limited ... privacy issues, consent processes, the need for developmentally appropriate tasks ... lack of publicly/open access/ available pediatric data sets that enable machine learning for pediatric voice analysis"; addressing_gaps[0].response restates it, on the pediatric page'
+- id: slot-007
+  verdict: supported
+  evidence: 'lines 507-511 "Versions / 1.0.0 / Dec. 17, 2025 / 1.1.0 / May 1, 2026" on the release page; version_access.versions_available lists exactly these two'
+- id: slot-008
+  verdict: supported
+  evidence: 'line 119 "Moroni Berrios" in the PhysioNet author list (lines 65-305), position 28 of 121, matching creators[27].name'
+- id: slot-009
+  verdict: supported
+  evidence: 'line 30 "Source URL: https://physionet.org/content/b2ai-voice-pediatric/1.1.0/" is the URL of the page titled "Bridge2AI-Voice Pediatric Dataset v1.1.0" (line 33), the release landing page; page holds that URL as written'
+- id: slot-010
+  verdict: supported
+  evidence: 'line 1759 "Don Bolser, PhD (University of Florida)"; the author list gives Donald Bolser (line 87) and creators[11] carries a caveat recording the Don/Donald spelling; affiliation value matches'
+- id: slot-011
+  verdict: supported
+  evidence: 'lines 496-497 "Project Website: https://b2ai-voice.org/" in the release page sidebar; external_resources[0] carries that URL under that name'
+- id: slot-012
+  verdict: supported
+  evidence: 'line 131 "Léo Cadillac" in the PhysioNet author list, matching creators[33].name'
+- id: slot-013
+  verdict: supported
+  evidence: 'line 187 "Zoha Khawa" in the PhysioNet author list, matching creators[61].name'
+- id: slot-014
+  verdict: supported
+  evidence: 'line 263 "Ahmed Shawkat" in the PhysioNet author list, matching creators[99].name'
+- id: slot-015
+  verdict: supported
+  evidence: 'line 412 "Spectrograms, Mel Spectrograms, MFC coefficients, PPGs, and EMAs for sensitive records and audio checks have been removed from v1.1" states a removal of feature records on stated criteria, which the CleaningStrategy description covers ("criteria for removing or correcting instances"); cleaning_strategies[0] restates it for the current release'
+- id: slot-016
+  verdict: supported
+  evidence: 'line 1020 "MSH  Jordan Lerner-Ellis, PhD  Lead – Genomic data (separate IRB)" in Table 4 of the Bridge2AI Voice Data Acquisition protocol; creators[13].description states the role and names its source as that protocol table'
+- id: slot-017
+  verdict: supported
+  evidence: 'line 107 "Kirollos Armosh" in the PhysioNet author list, matching creators[21].name'
+- id: slot-018
+  verdict: weak
+  evidence: 'the snippet "Peds 4-6 Peds 2-4" (lines 1189-1190) is two adjacent link labels in the protocol list introduced at line 1180; it attests that a protocol named Peds 2-4 exists, not that the release identifies or contains a Peds 2-4 subpopulation, as subpopulations[0] with subpopulation_elements_present true asserts. Line 1140 ("grouped by age") is receipted separately for the identification leaf but names no groups'
+- id: slot-019
+  verdict: supported
+  evidence: 'line 1759 "David Dorr, MD (Oregon Health & Science University)"; creators[5].affiliations[0] matches'
+- id: slot-020
+  verdict: supported
+  evidence: 'line 191 "Cindy Kostelnik" in the PhysioNet author list, matching creators[63].name'
+- id: slot-021
+  verdict: supported
+  evidence: 'line 406 "torchaudio_pitch.parquet (n=23533) contains the detected pitch (fundamental frequency) over time and is of dimension T with a min and max pitch of 80 and 500 respectively"; the file entry restates it, file_type data_file read from the file name'
+- id: slot-022
+  verdict: supported
+  evidence: 'line 143 "Amanda Doherty-Kirby" in the PhysioNet author list, matching creators[39].name'
+- id: slot-023
+  verdict: supported
+  evidence: 'line 444 "Data collection and sharing was approved by the Research Ethics Board at the Hospital for Sick Children." under Ethics on the release page'
+- id: slot-024
+  verdict: supported
+  evidence: 'line 411 "ppgs.parquet (n=23533) contains the phonetic posteriorgram probabilities across 40 phoneme categories giving a dimension of 40xT with a frame rate of 100Hz"; the file entry restates it'
+- id: slot-025
+  verdict: supported
+  evidence: 'line 582 "Mount Sinai Hospital (MSH)  Jordan Lerner-Ellis, PhD" in the protocol list of participating institutions; creators[13].affiliations[0] is Mount Sinai Hospital'
+- id: slot-026
+  verdict: supported
+  evidence: 'lines 321-324 give the APA citation "Bensoussan, Y., Sigaras, A., ... Ghosh, S. (2026). Bridge2AI-Voice Pediatric Dataset (version 1.1.0). PhysioNet. RRID:SCR_007345. https://doi.org/10.13026/h995-bt35"; citation matches it'
+- id: slot-027
+  verdict: supported
+  evidence: 'lines 508-509 "1.0.0 / Dec. 17, 2025"; distribution_dates[0] is named Version 1.0.0 with release date 2025-12-17, a fact about that earlier version stated as such'
+- id: slot-028
+  verdict: supported
+  evidence: 'line 149 "Mahmoud Elmahdy" in the PhysioNet author list, matching creators[42].name'
+- id: rule-01
+  verdict: followed
+  evidence: 'values trace to bundle lines (e.g. description line 391, license line 480, confidentiality_level from line 513 "restricted-access resource", raw_sources from lines 308-314, at_risk_groups_included from inclusion criteria 2-18 at line 397 against the slot description naming children, was_directly_observed from the headset/tablet recording at line 400); the report lists slots left empty because the bundle states them only for the adult dataset or the platform (publisher, language, compensation, update plan, maintainers)'
+- id: rule-02
+  verdict: followed
+  evidence: 'source_caveats records the three spellings of the feature file names (lines 403-404, 421, 428, 414); creators[12] and creators[11] record Siu/Sui and Donald/Don; creators[13] keeps both Mount Sinai Hospital (line 582) and Sinai Health (line 1759); funders[0].source_caveats separates 3OT2OD032720-01S1 (line 447) from 3OT2OD032720-01S3 (line 2334) as distinct awards'
+- id: rule-03
+  verdict: followed
+  evidence: 'both records carry id doi:10.13026/h995-bt35 (full line 15, core line 630); the report Referent section names release 1.1.0 and the adult dataset as related only; the manifest scope names the pediatric dataset (concept DOI 10.13026/mf9s-5r03), which the record carries as version_access.latest_version_doi'
+- id: rule-04
+  verdict: followed
+  evidence: 'no padding toward a density target is visible: 121 creators each from the author list, only 27 affiliations where a passage names the person, and the report lists deliberate omissions (publisher, language, compensation, retention, maintainers, named questionnaires) with reasons'
+- id: rule-05
+  verdict: followed
+  evidence: 'creators has one entry per author (121); collection_mechanisms separates reproschema-ui, headset and tablet microphone; preprocessing_strategies[2].used_software lists openSMILE, Praat, parselmouth and torchaudio separately; intended_uses has three entries for the three uses in line 395; four variables'
+- id: rule-06
+  verdict: followed
+  evidence: 'no slot holds only a pointer or a pending/absent statement: external_resources carry URLs as resources, raw_sources gives the access route and what the raw data is, the corresponding author absent behind login (line 506) is kept in source_caveats rather than a contact slot'
+- id: rule-07
+  verdict: followed
+  evidence: 'access route is in license_and_use_terms and data_governance, not in distribution_formats (which hold Parquet, TSV, JSON); confidentiality_level fits its description (level of access restriction); eligibility criteria sit in sampling_strategies[0].description; informed_consent[0].consent_type "parental or participant consent" (line 397) is a recognized consent category (parental permission versus self-consent), and the guardian side is also in at_risk_populations.guardian_consent'
+- id: rule-08
+  verdict: followed
+  evidence: 'class-ranged objects carry their declared fields: creators with name and affiliations objects; principal_investigator with id, name, email, affiliation; funders[0] with name, grantor, grants[0].grant_number; used_software b2aiprep with id, name, version, url, license; related_datasets[0] with target_dataset and relationship_type; pack.reference_attributes is empty'
+- id: rule-09
+  verdict: followed
+  evidence: 'uriorcurie slots use CURIEs where a prefix is declared: id doi:10.13026/h995-bt35, version_access.latest_version_doi doi:10.13026/mf9s-5r03, fragment ids on the doi CURIE; used_software[0].id https://github.com/sensein/b2aiprep has no declared prefix; page (string), access_url and url (uri), target_dataset and external_resources (string) keep URLs as the rule allows'
+- id: rule-10
+  verdict: followed
+  evidence: 'every external identifier is in the bundle: DOIs lines 487-489, Synapse URL line 314, adult dataset URL line 317, b2aiprep URL line 457, PhysioNet citation DOI line 375, project website line 497; no ORCID or ROR appears (the bundle has none) and none is supplied'
+- id: rule-11
+  verdict: followed
+  evidence: 'id_slots: all 21 minted ids are fragments on the record own id doi:10.13026/h995-bt35 (an identifier the evidence supplies, line 487), all forced (Person, Software, FileCollection, File); no undeclared prefix; no fragment on an organization identifier. The minted software (reproschema-ui, openSMILE, Praat, parselmouth, torchaudio) has no identifier in the bundle: the only nearby ids are arXiv numbers for TorchAudio papers (lines 461-462), which identify publications, not the software'
+- id: rule-12
+  verdict: followed
+  evidence: 'no British forms found in record prose (searched -ise/-yse/-our/licence/centre/programme/-lled); the quoted grant title keeps the source spelling "bioaccoustic" (line 447)'
+- id: rule-13
+  verdict: followed
+  evidence: 'manifest priority: PhysioNet page tier 1, protocol and project documentation tier 2, RePORTER tier 4. Siu/Sui and Donald/Don follow the tier-1 author list with the disagreement in caveats; Lerner-Ellis affiliations from two tier-2 sources are both recorded; grant 3OT2OD032720-01S1 is the tier-1 value, with the RePORTER number explained in funders[0].source_caveats'
+- id: rule-14
+  verdict: not_applicable
+  evidence: 'id_slots lists 21 minted ids and 1 stated id; every minted id is forced: true (2 Person, 5 Software, 3 FileCollection, 11 File), so the pointed-at test does not reach them; no unforced mint exists. The objects themselves are warranted by the evidence: the five tools are named by the release page as what collected (lines 398-399) or derived (line 413) the data, the files and collections are named in the data description (lines 402-413), and the two Person objects carry a stated PI designation'
+- id: rule-15
+  verdict: followed
+  evidence: 'coverage receipt present with bundle_md5 0350223711484a63c21b2dd57af6f4c9 and 13 chunk entries in order; provenance receipts summary: chunks 13/13 reviewed, snippets 334/334 verified, slots 378/378 with a receipt (31 exempt)'
+- id: rule-16
+  verdict: followed
+  evidence: 'principal_investigator values are Person objects with id, name, affiliation (and email for creators[0]); grants[0] is a Grant object with grant_number; affiliations are Organization objects; no object reduced to a string and no reference inflated (reference_attributes empty)'
+- id: rule-17
+  verdict: followed
+  evidence: 'raw_sources[0].raw_data_details keeps the future tense "data will be made available via Synapse" (line 312); release 1.0.0 facts are confined to version_access and distribution_dates[0]; adult-dataset statements (833 participants line 1782, Health Data Nexus hosting line 1943, November 2024 release line 1929, semi-annual updates line 1952) are absent from the referent slots'
+- id: rule-18
+  verdict: not_applicable
+  evidence: 'no derived figure in the record: counts 23533 recordings and 300 participants (line 391) and per-file n values (lines 403-411) are stated by the source'
+- id: rule-19
+  verdict: followed
+  evidence: 'coverage receipt has 121 distinct creators[i].name receipts (one per author), one receipt per file_collections[0].resources[0..10], and one per variables[0..3]'
+- id: rule-20
+  verdict: followed
+  evidence: 'the bundle states no ORCID (0 matches); creators[0].principal_investigator.id doi:10.13026/h995-bt35#person-yael-bensoussan and creators[3]...#person-olivier-elemento follow the record-id, hash, person-name form; the email yaelbensoussan@usf.edu (line 553) is in email, not the id'
+- id: rule-21
+  verdict: followed
+  evidence: 'manifest scope declares the adult Bridge2AI-Voice dataset (doi 10.13026/37yb-1t42) not about, express as related_datasets; it appears only in related_datasets[0] (line 316-317 passage). Values from the project-wide sources are about named people, the pediatric cohort (lines 1140, 1144-1146, 1964) or the project; adult healthsheet facts (de-identification lines 1669, 2185; compensation line 1886; retention line 1954) are not carried'
+- id: rule-22
+  verdict: followed
+  evidence: 'each creators entry names one person; funders[0] is NIH alone; each used_software entry one tool; each subpopulation one age group; creators[0].affiliations lists University of South Florida and USF Health Morsani College of Medicine as two entries, as line 1759 and the protocol state them'
+- id: rule-23
+  verdict: followed
+  evidence: 'id_slots: forced Software/File/FileCollection/Person ids are minted on the own id, itself a declared CURIE (doi:10.13026/h995-bt35); the one stated software id is the b2aiprep URL the evidence gives (lines 457, 1872); creators entries carry no id where the evidence states none; bundle_state current, no constructed ids'
+- id: rule-24
+  verdict: violated
+  evidence: 'related_datasets[0].relationship_type is references, but no passage states what the relation between the two datasets is: line 316 says only "Note that the Bridge2AI-Voice Adult Dataset is also available on PhysioNet" and line 1092 that the two are available through separate links; the entry own caveat concedes no passage states a relation and gives the page pointing at the adult dataset as the reason. The rule takes the category only from a passage stating it, and for a required slot asks the entry itself to rest on such a passage. Mitigating: the manifest scope declares the adult dataset related but distinct with express as related_datasets, so the entry was mandated and the schema requires the enum. The other enumerations are clean: data_type identifier from line 402, confidentiality_level restricted from line 513, file attributes from file names, collection_type left empty'
+- id: rule-25
+  verdict: followed
+  evidence: 'raw_data_format is not populated; the release page says the project "does not contain raw audios" (line 310) and no passage states the pediatric raw form; the BIDS conversion (lines 1960-1964) is recorded as preprocessing, not as raw format'
+- id: rule-26
+  verdict: followed
+  evidence: 'principal_investigator is set only for Yael Bensoussan and Olivier Elemento, whom line 1759 calls "co-principal investigators for the project" (Voice as a Biomarker of Health), the project the release page says funded this dataset (line 447); line 549-550 and line 2337 also designate Bensoussan PI. Leads and investigators from Table 4 (lines 1004-1021) are kept as described roles, not promoted'
+- id: rule-27
+  verdict: followed
+  evidence: 'keywords come from the Topics list (lines 490-495) and fill only keywords; addressing_gaps[1] states the limitation line 393 draws itself ("cannot be generalized to pediatric populations"); no scope_impact consequence is asserted. The subpopulation names come from a list of protocol links, but that list is introduced by a sentence (line 1180) and each identification text says only that the documentation lists a protocol of that name, so the text stays at the list reach; whether those entries are subpopulations of the release is a support question, answered weak under slot-005 and slot-018'
+- id: rule-28
+  verdict: followed
+  evidence: 'file_collections[0].resources holds only files the page names (lines 403-413); variables holds the four columns line 402 names (tensor data omitted); no remark (sample, continuation) became an entry; demographics.tsv, an example in usage notes (line 439), is kept in the phenotype collection description, not as a file entry'
+- id: rule-29
+  verdict: violated
+  evidence: 'sensitive_elements[0] "Low-risk release without original recordings": its value is that the release holds low-risk derivations "but not the original voice recordings" (line 391) and that features for sensitive records were removed (line 412), an absence and a removal standing as the entry for a sensitive element, while the slot asks for sensitive data the dataset contains and sensitivity_details is described as "sensitive data elements present and handling procedures"; the entry names no element present, although line 391 says the release carries "detailed demographic, clinical, and validated questionnaire data". Under this rule the absence belongs in source_caveats and the removal is already in cleaning_strategies[0]. errata, conflicts and the absent corresponding author are correctly left out'
+- id: rule-30
+  verdict: followed
+  evidence: 'scalar slots hold strings: license "Bridge2AI Voice Registered Access License", created_by "Bridge2AI Voice consortium", ethics_review_board, committee_name; publisher was left empty because PhysioNet has only an RRID on an undeclared prefix (report)'
+- id: pair-01
+  verdict: consistent
+  evidence: 'compared full file_collections[0..2] and file_collections[0].resources[0..10] with core distributions (14 entries): ids, names, paths and descriptions match verbatim; format, media_type and the audio_quality_metrics.tsv source_caveats carry over; the core drops file_type and the files nesting under the features collection (a flat list), a projection loss of structure, not a different statement'
+notes: 'Identity: written by a Claude Code subagent (claude-opus-5-5) given the d4d-review-record definition file as instructions, not launched as the typed agent. Pack: pack_version 7, gaps [], receipt_join.basis index (no phase-1 snapshot), bundle_state current. Scope: the manifest names the pediatric dataset by its concept DOI 10.13026/mf9s-5r03; the record id is the 1.1.0 version DOI and carries the concept DOI as latest_version_doi, which is consistent. Judgement calls: rule-24 is charged because no passage names the relation, although the manifest mandated the related_datasets entry and the schema requires the enum, so the generator had no clean option short of omitting the entry; the schema enum has no sibling or companion value. slot-005 and slot-018 are weak, and the other two subpopulation entries (Peds 4-6, Peds 6-10) rest on the same list and were not sampled. Schema ranges, enum values and manifest tiers were taken by inline read-only lookups (SchemaView, d4d download scope and download priority); no script was saved, as the brief limits writes to this file. Instrument observation: receipts entry_single_leaf flags distribution_formats[1] with 0 overlapping leaves; its two snippets ("the features folder contains the following plain-text file", "static_features.tsv") do not contain TSV, text/tab-separated-values or the access URL, yet the validator counts the entry as covered.'

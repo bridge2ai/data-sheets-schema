@@ -1,0 +1,242 @@
+reviewer: d4d-review-record
+model: claude-opus-5-5
+reviewer_identity: >-
+  A Claude Code subagent (model Claude Opus 5.5, model id claude-opus-5-5)
+  given .claude/agents/d4d-review-record.md as its instructions by the
+  orchestrating session; it was not launched as the typed d4d-review-record
+  agent, so the definition's own model field (claude-opus-5) does not describe
+  this reviewer. The definition file was read from disk at review time.
+reviewed_at: '2026-11-26T03:38:24Z'
+pack_sha256: aadefdd966e0767b75569e2135286eefc03a422cb67ee11a2f4643e785a906e5
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "Lines 1-24 are the concatenation header and the table of contents naming the ten source files (lines 13-22); no fact about the dataset is stated."
+- id: chunk-c003
+  verdict: confirmed
+  evidence: "Lines 425-824 are the Nature article's results and discussion on the U2OS osteosarcoma map (annotation jamborees l.430, SEC-MS validation l.469-501, AlphaFold modelling, tumour mutations, portal musicmaps.ai/u2os-cellmap l.757-758, Cell Mapping Toolkit l.769-771). No CM4AI release is named; the toolkit is stated for the U2OS pipeline, not for any CM4AI release, so the record's empty slots lose nothing."
+- id: chunk-c004
+  verdict: confirmed
+  evidence: "Lines 825-1224 are the Nature methods for U2OS cells (AP-MS l.832-857, HPA IF imaging l.858-873, SEC-MS l.874-909, embedding model l.910-1120, community detection l.1147-1164). Every passage has the U2OS study as subject; none is stated of the CM4AI releases."
+- id: chunk-c005
+  verdict: confirmed
+  evidence: "Lines 1225-1624 finish the U2OS methods and give that study's data/code availability (l.1468-1513: U2OS map at NDEx, MassIVE MSV000097168, PXD052362, ModelArchive, cellmaps_pipeline). These identifiers locate the U2OS data, not the CM4AI KOLF2.1J/MDA-MB-468 releases, so the record is right not to use them for its external_resources; the rest is the start of the reference list."
+- id: chunk-c006
+  verdict: confirmed
+  evidence: "Lines 1625-2024 are only bibliographic reference entries (e.g. Huttlin 2015 BioPlex l.1629, Qin 2021 l.1688); nothing about the CM4AI dataset."
+- id: chunk-c007
+  verdict: confirmed
+  evidence: "Lines 2025-2424: references, then acknowledgements l.2338 and author affiliations l.2339-2374. l.2338 acknowledges 'the Bridge2AI Program (NIH Common Fund; OT2 OD032742; T.I., E.L., A.S.)' among funders of the article's U2OS work; the record already carries that award from CM4AI's own sources (funders[0].grants[0] 1OT2OD032742-01, grants[1] 3OT2OD032742-01S2), and the other funders (Schmidt Futures, U54 CA274502, etc.) are stated for the article, not the dataset. Affiliations are of the article's authors."
+- id: chunk-c008
+  verdict: confirmed
+  evidence: "Lines 2425-2824: author-search stubs, contributions l.2547, competing interests l.2558, extended-data legends for U2OS figures, the article's CC BY 4.0 licence l.2720 (the article's, not the dataset's), citation block and nature.com navigation. Nothing the referent's slots should carry."
+- id: chunk-c009
+  verdict: confirmed
+  evidence: "Lines 2825-2893 are nature.com footer links, privacy/cookie text and the Nature Briefing newsletter banner; no dataset content."
+- id: chunk-c013
+  verdict: confirmed
+  evidence: "Lines 4094-4182 are preprint references 33-45 (MUSE, GO, Reactome, PDB, AlphaFold DB, IMP, JSON Schema, ARK l.4158, U-BRITE l.4162, ethics papers l.4168-4176); no statement about the CM4AI dataset."
+- id: chunk-c019
+  verdict: confirmed
+  evidence: "Lines 5141-5361 are Dataverse UI dialogs of the March 2025 release page (restrict/delete/preview/deaccession dialogs, guestbook, 953.7 MB download limit l.5200, footer). The only dataset statement is the terms block l.5288-5292 'CC BY-NC-SA 4.0' and the citation-norms sentence, which the record already carries in license and license_and_use_terms.license_terms from the current release page."
+- id: chunk-c022
+  verdict: confirmed
+  evidence: "Lines 6162-6166 are 'Cancel', two blank lines and the file separator; nothing."
+- id: chunk-c025
+  verdict: confirmed
+  evidence: "Lines 6967-7001 are October 2025 page publish dialogs, curation status, copyright/footer and the support form; no dataset content."
+- id: chunk-c028
+  verdict: confirmed
+  evidence: "Lines 7802-7866 are June 2026 page dialogs: generic package download URL https://dataverse.lib.virginia.edu/api/access/datafile/ (l.7807, no file id), compute batch, publish dialogs (Minor 2.1 / Major 3.0 options l.7824-7825), curation status, footer, support form. Nothing the record should carry."
+- id: slot-014
+  verdict: supported
+  evidence: "l.7047 'The dataset is too large to download. Please select the files you need from the files table.' supports the second sentence verbatim; the first ('All ten files ... listed as ZIP Archive') is stated by l.7132 'Archive (10)', l.7144 '1 to 10 of 10 Files' and each file's 'ZIP Archive' label (l.7147 ... l.7300). Value at distribution_formats[0].description matches."
+- id: slot-015
+  verdict: supported
+  evidence: "l.7117 is the release page's Keyword line; the record's 29 keywords at keywords reproduce it in order. The keyword slot is the one slot a keyword line fills (rule-27)."
+- id: slot-016
+  verdict: supported
+  evidence: "l.3430-3432 'FAIRSCAPE consists of a client-side Python3 application ... and a server application ... which completes the packaging'; l.3699-3701 say these toolkits 'have been used to package and release our cell-line perturbation and measurement data'. preprocessing_strategies[0].used_software[0].name 'FAIRSCAPE' is the software so named; the record caveats that this is the May 2024 account (preprocessing_strategies[0].source_caveats)."
+- id: slot-017
+  verdict: supported
+  evidence: "l.7397-7400 'Marquez C / University of California San Diego / ORCID / 0000-0003-3960-420X'. creators[19] carries ORCID:0000-0003-3960-420X, name 'Marquez C', affiliation UCSD - exactly the author row."
+- id: slot-018
+  verdict: supported
+  evidence: "l.7067-7068 'SEC-MS data in KOLF2.1J iPSCs (undifferentiated, NPC, neuron, and cardiomyocyte): MassIVE Repository' under 'External Data Links' (l.7059). external_resources[3] names it and its host, and its source_caveats correctly says the bundle keeps the label without a target URL."
+- id: slot-019
+  verdict: weak
+  evidence: "The entry receipt for distribution_formats[0] is the snippet 'Archive (10)' (l.7132), the files-table type filter count. It is real and on topic but does not by itself attest the entry: it says ten files are of type Archive, not that they are ZIP (format, media_type), nor the entry's name or access URL. ZIP is stated per file ('ZIP Archive', l.7147 etc.) and access_urls has its own receipt (l.7011), so the value is right, but this passage is a thin receipt for the whole entry."
+- id: slot-020
+  verdict: supported
+  evidence: "l.4208-4210 (NIH RePORTER) and l.4286 (cm4ai.org) both say the CM4AI data generation project 'seeks to map the spatiotemporal architecture of human cells and use these maps toward the grand challenge of interpretable genotype-phenotype learning'. purposes[2].response restates it as a purpose, the sense the slot asks."
+- id: slot-021
+  verdict: supported
+  evidence: "l.7338-7341 'Parker J / University of California, San Diego / ORCID / https://orcid.org/0000-0003-4535-3486'; l.7083 names the committee contact 'Jillian Parker (jillianparker@health.ucsd.edu)'. The join is not stated in one line, but the bundle closes it: the preprint's second author is 'Jillian Mohan' (l.2927, UCSD) where the release page cites the same paper with second author 'Parker J' (l.7119), and the perturbation-atlas citation has 'Parker JA' (l.7645). data_governance.committee_contact.id ORCID:0000-0003-4535-3486 is the right reading; the record discloses the join in committee_contact.source_caveats."
+- id: slot-022
+  verdict: supported
+  evidence: "l.7091-7094 under 'Maintenance Plan': 'Long term preservation in the University of Virginia Dataverse, supported by committed institutional funds'. retention_limit.retention_details attributes it to the maintenance plan. The leaf asks for 'applicable retention limits, legal or ethical basis for those limits, and how they will be enforced'; the parent Dataset.retention_limit asks 'how long the dataset will be available and any deletion schedules'. The passage answers the parent's duration question directly (long-term, with its funding basis) and states no deletion schedule, and the value invents none; supported rather than weak because the passage is the source's own statement of how long the data are kept, which is what the RetentionLimits object exists to carry."
+- id: slot-023
+  verdict: supported
+  evidence: "l.7430-7433 'Schaffer L / University of California San Diego / ORCID / https://orcid.org/0000-0001-6339-9141'; creators[29] matches (ORCID as CURIE, name, affiliation)."
+- id: slot-024
+  verdict: supported
+  evidence: "l.7214-7219 'cm4ai_ifimages_MDA-MB-468_vorinostat.zip / ZIP Archive / - 4.2 GB / Published Jul 15, 2026 / 14 Downloads / MD5: df79632753989ef23b0a3df6604d4af1'. file_collections[0].resources[4] has that name, hash md5:df79..., issued 2026-07-15, ZIP/application/zip and description 'ZIP Archive of 4.2 GB'."
+- id: slot-025
+  verdict: supported
+  evidence: "l.7487-7490 'Sali A / University of California San Diego / ORCID / https://orcid.org/0000-0003-0435-6197'. creators[44] matches; its source_caveats correctly records that the preprint lists Andrej Sali under affiliation 3, UCSF (l.2933, l.2936-2937) and that the tier-1 release page is preferred."
+- id: slot-026
+  verdict: supported
+  evidence: "l.7082-7083 'Data Governance Committee: / Jillian Parker (jillianparker@health.ucsd.edu)' in the release's 'Data Governance & Ethics' block. data_governance.committee_name 'Data Governance Committee' is the label the page gives."
+- id: slot-027
+  verdict: supported
+  evidence: "l.3808-3810 'Attribution requirements for these datasets include ... citation of the present article' supports the second clause of external_resources[0].description; the first clause ('listed as the Related Publication of the release') is l.7118-7119. Correct reading."
+- id: slot-028
+  verdict: supported
+  evidence: "l.4198 'Project number: 3OT2OD032742-01S2' on the NIH RePORTER record titled 'Bridge2AI: Cell Maps for AI (CM4AI) Data Generation Project' (l.4200); funders[0].grants[1].grant_number matches."
+- id: slot-029
+  verdict: supported
+  evidence: "l.4199 'Core project number: OT2OD032742', l.4203 'Fiscal year: 2025', l.4205-4206 'Project start: 2022-09-01 ... Project end: 2026-08-31'. funders[0].grants[1].description states exactly these, attributed to the RePORTER record."
+- id: slot-030
+  verdict: supported
+  evidence: "l.2946-2947 'CM4AI is the Functional Genomics Data Generation Project in the U.S. National Institute of Health's (NIH) Bridge2AI program' and l.4208 'As part of the NIH Common Fund's Bridge2AI program'. funders[0].description combines the two without adding anything. FundingMechanism.description is a generic 'human-readable description'; placing the funded project within the NIH Common Fund's Bridge2AI program describes the funding context, so the value answers it."
+- id: slot-031
+  verdict: supported
+  evidence: "l.7163-7168 'cm4ai_apms_MDA-MB-468_vorinostat.zip / ZIP Archive / - 135.8 KB / Published Jun 17, 2026 / 12 Downloads / MD5: b941f28d6f19c563d1222f7aff0c57b6'; file_collections[0].resources[1] carries that name, hash, issued 2026-06-17 and size in its description."
+- id: slot-032
+  verdict: supported
+  evidence: "l.7342-7345 'Al Manir S / https://ror.org/0153tk833 / ORCID / https://orcid.org/0000-0003-4647-3877'. creators[2] writes ORCID:0000-0003-4647-3877 and affiliation ROR:0153tk833 as CURIEs without adding a name the page does not give; its caveat that the October 2025 page says University of Virginia is l.6479-6480."
+- id: slot-033
+  verdict: supported
+  evidence: "l.7434-7437 'Sigaeva A / KTH Royal Institute of Technology / ORCID / https://orcid.org/0000-0003-3361-3797'; creators[30] matches."
+- id: slot-034
+  verdict: supported
+  evidence: "The c027 snippet (l.7402-7405) carries the affiliation and ORCID https://orcid.org/0000-0003-2404-3040 and ends on the next author 'Muralidharan M'; the name 'Metallo C' is l.7401, the last line of c026. Reading across the boundary, l.7401-7404 state creators[20] (Metallo C, UCSD, ORCID:0000-0003-2404-3040), and the October page confirms the pairing at l.6538-6541. Not a misread; see notes on attribution."
+- id: slot-035
+  verdict: supported
+  evidence: "l.7352-7353 'Chinn B / University of California San Diego' with no ORCID line before the next author (l.7354 'Churas CP'); creators[5] carries name and affiliation and correctly no id."
+- id: slot-036
+  verdict: supported
+  evidence: "l.3865-3866 'This work was funded by the National Institutes of Health under awards 1OT2OD032742-01 ...' and l.7650-7651 'Funding Information National Institutes of Health: 1OT2OD032742-01' (the current release page). funders[0].grantor 'National Institutes of Health' is the stated grantor."
+- id: slot-037
+  verdict: supported
+  evidence: "l.7231-7236 'cm4ai_mass-spec_KOLF2.zip / ZIP Archive / - 171.8 KB / Published Jun 17, 2026 / 11 Downloads / MD5: f250bf0b04f516f7462d30432441fc0e'; file_collections[0].resources[5] matches name, hash, issued and size."
+- id: slot-038
+  verdict: supported
+  evidence: "l.6403 (October 2025 release, file description of cm4ai_ifimages_MDA-MB-468_paclitaxel.zip): 'imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy in the Lundberg Lab at Stanford University, as part of the Cell Maps for Artificial Intelligence (CM4AI ...) project'; also l.3307-3308 (IF images from 'the Lundberg Laboratory's deposition archive'). The manifest scope declares the Dataverse releases releases of this dataset (referent_note), so a collector stated for the October 2025 release is a collector of the referent; data_collectors[0].collector_details attributes it to the October 2025 page."
+- id: rule-01
+  verdict: followed
+  evidence: "Values trace to the bundle (all 38 distinct ORCIDs and all 10 file MD5s in the record occur in the bundle; checked by grep). The record omits what is not stated: no creation date (top-level source_caveats explains the 2025-02-27 values repeated across releases), no conforms_to for the June 2026 release, no file byte counts, no instance counts from the site totals. Inferential joins (committee_contact ORCID, PI ORCID) are disclosed in source_caveats."
+- id: rule-02
+  verdict: followed
+  evidence: "Disagreements are represented, not silently resolved: top-level source_caveats (2026-06-17 on Dataverse vs 'Released on: June 17, 2025' l.4446), creators[44].source_caveats (Sali UCSD vs UCSF), instances[2].source_caveats (AP-MS included vs 'coming soon' l.4436-4437), instances[0].source_caveats (perturb-seq described as included vs KOLF2-only files and 'Embargoed' links). DXWOS5 and 'May 2024 Data Release' are kept as two versions_available entries rather than merged (version_access.source_caveats)."
+- id: rule-03
+  verdict: followed
+  evidence: "The manifest scope declares referent 'CM4AI (Cell Maps for Artificial Intelligence) dataset' with referent_id https://cm4ai.org/ and a note that the four Dataverse releases are releases of it (source_manifest.yaml l.232-238). The report's Referent section states the choice; id https://cm4ai.org/ in both records (core l.647); release facts confined to doi/version/file_collections and version_access. file_collections[0].id doi:10.18130/V3/HIGT4C is the current release's DOI, a part of the referent consistent with that scope."
+- id: rule-04
+  verdict: followed
+  evidence: "No sign of density targeting: site-level figures (1,374 interactions ... 21.4 TB, l.4290-4299) are quoted in description with their labels rather than entered as instance counts, and the report lists slots deliberately left empty (file bytes, creation date, conforms_to, depositor, program-manager contact)."
+- id: rule-05
+  verdict: followed
+  evidence: "Multivalued slots carry one object per entity: 47 creators (one per author row l.7334-7498), four intended_uses (l.7097-7100), six known_limitations, two known_biases, two data_collectors, three grants, seven external_resources. ethical_reviews has two entries because l.7085 names two people and EthicalReview.contact_person is single-valued."
+- id: rule-06
+  verdict: followed
+  evidence: "No slot is filled with a pointer or a pending/absent statement: external_resources[2..6] name the linked resource and its host (the field's subject is external resources), with the missing URL noted in source_caveats; errata and future_guarantees are not populated; maintainers[0] states the Point of Contact role (l.7499-7501), not merely where to look."
+- id: rule-07
+  verdict: followed
+  evidence: "Values sit in the fields they answer: release cadence in updates (frequency 'Quarterly', l.7093), the preservation commitment in retention_limit (Dataset.retention_limit asks how long the dataset will be available), the access route in distribution_formats[0].access_urls and its download constraint in that entry's description, the Point of Contact in maintainers rather than principal_investigator. File digests go in File.hash as 'md5:<hex>' (a string slot whose description asks for the algorithm with the value), not in the deprecated File.md5."
+- id: rule-08
+  verdict: followed
+  evidence: "Class-ranged objects carry their declared fields: creators[*] id/name/affiliations; funders[0].grants[*] grant_number/name; Person objects (creators[46].principal_investigator, data_governance.committee_contact, ethical_reviews[*].contact_person) id/name/orcid/email; used_software id/name/license/url. pack.reference_attributes is empty. The five ROR-only affiliations hold the identifier the June 2026 page gives; the name from the October 2025 page is in source_caveats rather than affiliations[0].name - a defensible choice, not prose replacing an empty structure."
+- id: rule-09
+  verdict: followed
+  evidence: "uriorcurie slots use declared prefixes: creators[*].id 'ORCID:...', affiliations[*].id 'ROR:0153tk833', file_collections[0].id and version_access.latest_version_doi 'doi:10.18130/V3/HIGT4C', maintainers[0].id 'ORCID:...'. URLs remain only where exempt or no prefix applies: page and access_urls (uri), external_resources[*].external_resources (string), prose/citation, used_software[0].id https://fairscape.github.io and publisher (no declared prefix). doi is the bare DOI (string slot)."
+- id: rule-10
+  verdict: followed
+  evidence: "External identifiers come from the bundle: every ORCID (e.g. l.7337, l.7498), ROR:0153tk833 (l.7335), the DOIs (l.7036, l.3802, l.7119, l.7645), https://fairscape.github.io (l.3853). No registry id is added for organizations named only by name. publisher https://dataverse.lib.virginia.edu/ is the host root of URLs the bundle states (l.7011, l.7807) - it appears only as a prefix, never alone - a truncation of evidence rather than an identifier from outside knowledge (see notes)."
+- id: rule-11
+  verdict: followed
+  evidence: "id_slots shows 10 minted ids, all File ids on the record's own id (https://cm4ai.org/#june-2026-release-<file name>), the record_id the bundle supplies (l.4248). No invented prefix, no fragment on an organization's, person's or another dataset's identifier; persons carry ORCIDs; the collection takes its stated DOI."
+- id: rule-12
+  verdict: followed
+  evidence: "A grep of the full record for British forms (-isation, -ise, colour, behaviour, licence, centre, modelling, labelled, programme, catalogue, paediatric, tumour) finds none in record prose; the form the rule names that occurs is American ('license', e.g. license_and_use_terms.license_terms). Quoted names are kept as the source spells them (e.g. 'Ballllosero Navarro F', 'KTH - Royal Institute of Technology')."
+- id: rule-13
+  verdict: followed
+  evidence: "Manifest priority (download priority): Dataverse October 2025 and June 2026 releases tier 1; project site, data-releases page, license tier 2; Nature and preprint tier 3; RePORTER tier 4. issued states the tier-1 2026-06-17 (l.7330) over the tier-2 'June 17, 2025' (l.4446) and the top-level source_caveats records both and the preference; creators[44] prefers tier-1 UCSD over the tier-3 preprint's UCSF for Sali; instances[2] prefers the tier-1 AP-MS inclusion (l.7057) over tier-2 'coming soon' (l.4436-4437), caveated. Weighed and not charged: 'end of the project in November 2026' (l.7092, maintenance plan) vs 'Project end: 2026-08-31' (l.4206, RePORTER award record) - these date different things (the project vs one award's budget period), and the record keeps each where its source places it (updates.update_details, funders[0].grants[1].description), which is the rule-02 treatment."
+- id: rule-14
+  verdict: not_applicable
+  evidence: "Every minted id in id_slots (file_collections[0].resources[0..9].id) is forced (File); there are no constructed ids and no unforced mints, so the point-at test does not arise. The file entries themselves are listed files of the release (l.7146-7305), not noise-as-structure."
+- id: rule-15
+  verdict: followed
+  evidence: "CM4AI_coverage_receipt.yaml has bundle_md5 50037fc6... and 28 chunk entries c001-c028 in order, each with a closed status (13 extracted, 13 nothing_relevant, 2 redundant_with naming c020/c023); snippets are verbatim phrases. The pack counts 178 receipted slots and receiptless_slots_total 0; the report records the strict check as chunks 28/28, snippets 255/255, slots 342/342."
+- id: rule-16
+  verdict: followed
+  evidence: "Person under creators[46].principal_investigator is an object with id ORCID:0000-0002-1708-8454, name 'Trey Ideker', orcid, email and affiliation as an object list; grants are Grant objects with grant_number; affiliations are Organization objects. No object reduced to a string, no reference inflated (reference_attributes is empty)."
+- id: rule-17
+  verdict: followed
+  evidence: "Earlier-release facts are confined to version_access (March/June/October 2025 descriptions) or attributed by name (collection_mechanisms[0]/[3], data_collectors[*], instances[3].source_caveats cite 'the October 2025 release page'). Plans keep their tense: 'will deliver' (description), 'will be added in future releases' (known_limitations[1]), 'will supervise' (data_governance.description). The Nature U2OS map is not used for any referent slot (top-level source_caveats)."
+- id: rule-18
+  verdict: not_applicable
+  evidence: "No derived figure appears: total_file_count and file_collections[0].file_count restate '1 to 10 of 10 Files' (l.7144); site figures are quoted as stated (l.4290-4299); no sum, fraction or difference is computed."
+- id: rule-19
+  verdict: followed
+  evidence: "The receipt has an entry-level receipt for each of creators[0]..creators[46] (47 distinct), file_collections[0].resources[0]..[9], external_resources[0]..[6], instances[0]..[3], intended_uses[0]..[3], known_limitations[0]..[5], known_biases[0]..[1] and each funder/grant (receipt grep). No roster is receipted by a single passage."
+- id: rule-20
+  verdict: followed
+  evidence: "Every Person object carries an ORCID CURIE the bundle states: committee_contact ORCID:0000-0003-4535-3486 (l.7341; join to 'Jillian Parker' closed by l.2927 vs l.7119), ethical_reviews[0] ORCID:0000-0002-7080-8801 (l.7486), ethical_reviews[1] ORCID:0000-0002-8965-8153 (l.7447), PI ORCID:0000-0002-1708-8454 (l.7498, l.227). No mailto or other scheme as id; addresses sit in email."
+- id: rule-21
+  verdict: followed
+  evidence: "Scope declares no related-but-distinct dataset (related_but_distinct: []). The only foreign-subject source, the Nature U2OS article (c002-c009), supplies no referent value; its one receipt (l.225-227) is a person's ORCID, a fact about Trey Ideker. Release-specific facts come from the release pages; project-level statements are attributed to the project site or preprint."
+- id: rule-22
+  verdict: followed
+  evidence: "Each list entry names one thing: l.7085 joins two reviewers with 'and' and the record splits them into ethical_reviews[0] and [1]; the collaborating institutions (l.4405) and production locations (l.7649) stay in description prose, not one merged entry; data_collectors are two separate labs (l.6403, l.6313)."
+- id: rule-23
+  verdict: followed
+  evidence: "Stated identifiers taken first: file_collections[0].id doi:10.18130/V3/HIGT4C (CURIE of the stated resolver URL l.7036/l.7328), creators' ORCIDs as CURIEs. File ids minted only because no per-file identifier is stated (l.7807 is a generic API URL), on the record's own id https://cm4ai.org/, an absolute URL (shared root, still the preferred base). Creators without an ORCID (e.g. creators[3] Axelsson U, creators[5] Chinn B) have no id and carry the name."
+- id: rule-24
+  verdict: followed
+  evidence: "A walk of the record against the schema's enum ranges finds only license_and_use_terms.data_use_permission (DataUsePermissionEnum) plus the File file_type/format/media_type enums the rule exempts. data_use_permission no_commercial_use rests on the license deed's 'NonCommercial' term (l.4613; 'You may not use the material for commercial purposes'). bias_type, limitation_type, collection_type and Maintainer.role are left empty for lack of a stated category; file_type/format/media_type are read from the .zip names and 'ZIP Archive' labels (exempt)."
+- id: rule-25
+  verdict: not_applicable
+  evidence: "raw_data_format is not populated anywhere in the record (grep), and no passage states a pre-processing form for the released data, so the rule's situation does not arise."
+- id: rule-26
+  verdict: followed
+  evidence: "principal_investigator is filled only for Trey Ideker, whom NIH RePORTER designates 'Principal investigator: IDEKER, TREY' (l.4201) for the CM4AI data generation project. The Dataverse 'Point of Contact' (l.7499-7501) is recorded under maintainers[0]; corresponding authors (l.2940) and the website program manager (l.4346) are not promoted."
+- id: rule-27
+  verdict: followed
+  evidence: "The keyword line (l.7117) fills only keywords. scope_impact is not populated; known_limitations restate the listed limitations (l.7103-7106, l.7538-7540) without adding consequences, and known_biases restate l.7111-7112 at their own reach."
+- id: rule-28
+  verdict: followed
+  evidence: "Remarks about lists stay out of the lists: 'too large to download' is in distribution_formats[0].description, 'The bundle preserves the link label but not its target URL' is in source_caveats of external_resources[2..6], 'not broken down by release' is in top-level source_caveats. Every file entry under file_collections[0].resources is a listed file."
+- id: rule-29
+  verdict: followed
+  evidence: "No errata entry and no future_guarantees. 'FDA Regulated: No' (l.7080-7081) leaves regulatory restrictions empty and is noted in top-level source_caveats. distribution_formats[0].format 'ZIP' comes from the files, not from the request-free access route; prohibited_uses[0] states the prohibition (l.7108)."
+- id: rule-30
+  verdict: followed
+  evidence: "Scalar slots hold scalars: publisher a URL string, license 'CC BY-NC-SA 4.0', doi '10.18130/V3/HIGT4C', version/status strings, Person.orcid bare 16-digit strings matching the schema pattern. No object is placed in a string-ranged slot."
+- id: pair-01
+  verdict: consistent
+  evidence: "Compared full file_collections[0] (+ resources[0..9]) with core distributions[0..10] (core l.18-82). Collection: id doi:10.18130/V3/HIGT4C, name and description identical. Files: all ten ids (https://cm4ai.org/#june-2026-release-...), names, descriptions ('Listed as a ZIP Archive of ...'), format ZIP, media_type application/zip and md5 hashes identical. Only full-only slots (collection page/doi/version/issued/license/file_count, file file_type/issued) are absent from the core, as the derivation rule drops non-shared slots; no value differs."
+notes: >-
+  Gaps: the pack lists none. Receipt join basis is 'index' (no phase-1
+  snapshot); no item turned on an index shift. Reviewer identity: a Claude
+  Code subagent running as Claude Opus 5.5 (claude-opus-5-5), handed the
+  d4d-review-record definition file as instructions; not the typed agent.
+  Instrument observations (not verdicts): (1) slot-034's receipt cites c027
+  for creators[20] (Metallo C) but the snippet starts on the affiliation line
+  after the name, which is the last line of c026 (l.7401), and ends with the
+  next author's name 'Muralidharan M'; the validator accepts it as verbatim,
+  yet the snippet on its own would equally fit a reading that attaches the
+  ORCID to the following author. An entry receipt for a roster row that
+  straddles a chunk boundary cannot contain the name; the instrument might
+  allow a two-chunk citation or flag snippets that end in another entry's
+  name. (2) slot-019's entry receipt 'Archive (10)' is verbatim and passes,
+  but carries none of the entry's distinguishing tokens (ZIP, the name, the
+  URL); the report's 'one snippet bearing on no token of its value'
+  diagnostic may be this one. Borderline, not charged: publisher
+  https://dataverse.lib.virginia.edu/ is the bare host root of stated
+  Dataverse URLs, which the bundle never states alone; the bundle names the
+  publisher 'University of Virginia Dataverse' (l.7037). The record discloses
+  this in the reconciliation report (F8). The Jillian Parker / 'Parker J'
+  ORCID join is supported by the bundle (preprint second author 'Jillian
+  Mohan' l.2927 vs release citation of the same paper 'Parker J' l.7119, and
+  'Parker JA' l.7645), though no single line states it.

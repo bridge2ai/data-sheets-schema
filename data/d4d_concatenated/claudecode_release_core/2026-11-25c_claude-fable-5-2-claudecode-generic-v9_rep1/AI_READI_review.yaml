@@ -1,0 +1,255 @@
+reviewer: d4d-review-record
+model: claude-opus-5-5
+reviewed_at: "2026-11-26T03:41:03Z"
+pack_sha256: 641e3b95246bb15f7eb9c03e32a2e48b88e2d3ff256fce0bff40195460da985f
+items:
+- id: chunk-c001
+  verdict: confirmed
+  evidence: "lines 1-24 are the concatenation header (input directory, file count, selection manifest) and the table of contents listing the ten source file names; no statement about the dataset"
+- id: chunk-c006
+  verdict: confirmed
+  evidence: "lines 1625-1703 are references 14-30 of the BMJ Open protocol paper plus its running footer; the only dataset-related line is ref 16 (line 1632-1633) citing the 1.0.0 release, an earlier version the record already lists under version_access.versions_available; nothing else belongs in a slot"
+- id: slot-003
+  verdict: supported
+  evidence: "line 3946 '\"size\": 38313536220' sits in the wearable_activity_monitor directory entry (directoryName at line 3808, numberOfFiles 15245 at 3947), which is file_collections[7]; the integer carries no unit but the record reads all sizes as bytes on the basis that the dataset-level 3815969779678 (line 2830) matches '3.82 TB' (lines 2780, 2996), which is consistent and is stated in source_caveats item (6)"
+- id: slot-004
+  verdict: supported
+  evidence: "lines 272-273 name the Birmingham, Alabama site (UAB); lines 345-347 'All research personnel at the three data sites who recruited, enrolled and collected data underwent training by the data manager at UAB'; collector_details asks for who collected data and their training, which the value answers"
+- id: slot-005
+  verdict: supported
+  evidence: "line 3001 '\"funderName\": \"National Institutes of Health\"' in the FAIRhub fundingReference for this dataset (award OT2OD032644, line 3008); grantor asks for the organization providing support"
+- id: slot-006
+  verdict: supported
+  evidence: "lines 4970-4983 give overallOfficial Sally L. Baxter, ORCID https://orcid.org/0000-0002-5271-7690, affiliation University of California, San Diego with ROR https://ror.org/0168r3w48, role 'Study Principal Investigator'; the entry carries her ORCID and ROR as CURIEs; the creator-level name/id restate the PI because the schema's Creator.principal_investigator is the only place this role can sit (the FAIRhub creator list at line 2861 names only the Consortium)"
+- id: slot-007
+  verdict: weak
+  evidence: "the criteria are verbatim: line 4377/4498 (inclusion: consent, >=40, with or without T2D, speak and read English; exclusion: pregnant, gestational diabetes, Type 1 diabetes) and lines 4861-4872 / 5451 ('Adults older than 85 years of age'); but SamplingStrategy.strategies asks for the sampling strategy used (deterministic, simple random, stratified, ...), and eligibility criteria define who may enroll, not how the sample was drawn, so the passages are real and on topic but do not answer the slot's question"
+- id: slot-008
+  verdict: supported
+  evidence: "line 508 'All retinal images are collected under dilated conditions, except for the Optomed'; line 4326 'The Optomed Aurora IQ is a handheld fundus camera that can take non-mydriatic images of the ocular fundus ... the quality of the images vary from patient to patient and within the same patient'"
+- id: slot-009
+  verdict: supported
+  evidence: "line 4284 healthsheet response 'Yes, not all modalities are available for all participants.' answers the missing-information question for this release"
+- id: slot-010
+  verdict: supported
+  evidence: "line 4326 'The Zeiss Cirrus 5000 Angioplex is a high-definition optical coherence tomography (OCT) system that offers non-invasive imaging of retinal microvasculature' under the heading 'Cirrus 5000 Angioplex (Carl Zeiss Meditec)'"
+- id: slot-011
+  verdict: supported
+  evidence: "lines 2974-2979 managingOrganization 'Washington University in St. Louis' with identifier 'https://ror.org/01yc7t268' (scheme ROR); the id is that organization's own stated identifier written as the ROR CURIE; the same org is lead sponsor (4630-4632) and licensor, which fits accountable_organization's 'accountable for the dataset over time'"
+- id: slot-012
+  verdict: supported
+  evidence: "lines 2546-2554 license clause: '(i) to compromise ... the confidentiality of information about ... a Data Subject, (ii) to invade or compromise the privacy of any Data Subject, (iii) to attempt to identify or contact any Data Subject or group of Data Subjects, (iv) to extract or extrapolate any identifying information ... to establish a Data Subject's membership in a particular group of persons, or otherwise to cause harm or injury'"
+- id: slot-013
+  verdict: supported
+  evidence: "line 4326 'The DRI OCT Triton is a device from Topcon Healthcare that combines swept-source OCT technology with multimodal fundus imaging'"
+- id: slot-014
+  verdict: supported
+  evidence: "lines 2867-2870 dateValue 2025-11-17, dateType Available, 'Date dataset made available on FAIRhub' in the version 3.0.0 dataset description (version at line 2858)"
+- id: slot-015
+  verdict: supported
+  evidence: "line 4471 'Participants were permitted to withdraw consent at any time and cease study participation. However, any data that had been shared or used up to that point would stay in the dataset.' answers the slot's withdrawal and data-deletion questions"
+- id: slot-016
+  verdict: supported
+  evidence: "lines 2491-2497 license C: 'Licensee shall not share or distribute Data with any third party model vendor or developer for training or development purposes ... Licensee may use a third party model to analyze the Data if the model vendor is a party to a BAA ... limited to short-term interaction (e.g., prompting or querying)'"
+- id: slot-017
+  verdict: supported
+  evidence: "lines 2068-2072 in the Nature Metabolism AI-READI Consortium author list: heading 'Principal Investigators' followed by 'Amir Bahmani / Hiroshi Ishikawa / Camille Nebeker'; the minted person id is on the record's own DOI CURIE and the caveat states the list source and why no affiliation is recorded"
+- id: slot-018
+  verdict: supported
+  evidence: "line 5778 'Identifiers and study data will be stored separately but a link will be maintained ... (for example, through the use of a code)' and line 6219 'All study data and identifiable information will be kept on encrypted servers, or in locked cabinets/room with restricted access (at all sites)'; both are IRB-application plans and the value states them as plans of that document"
+- id: slot-019
+  verdict: supported
+  evidence: "line 2830 '\"size\": 3815969779678' in the dataset 3 API record; '3.82 TB' at lines 2780 and 2996 corresponds to that integer read as bytes, which is the unit total_size_bytes asks for; the basis is disclosed in source_caveats item (6)"
+- id: slot-020
+  verdict: supported
+  evidence: "line 2889 'No identifiers were collected so no active de-identification was necessary but we checked that no identifiable data per US HIPAA were present in the data'; line 2902 'contain no protected health information (PHI)'; line 4158 'reviewed internally by AI-READI team members for quality checks and to ensure that no personally identifiable information was accidentally included'"
+- id: slot-021
+  verdict: supported
+  evidence: "lines 2988-2989 rightsName 'AI-READI custom license v2.0', rightsURI 'https://doi.org/10.5281/zenodo.17555036'; line 4547 also names that DOI as the license file; external_resources is a string-ranged list of links, so the URL form is correct"
+- id: slot-022
+  verdict: supported
+  evidence: "line 3637 'This directory contains retinal photography data, which are 2D images. They are also referred to as fundus photography.'; subdirectories cfp (line 3700), faf (3735) and ir (3757 'retinal photography data using near-infrared reflectance (IR)')"
+- id: slot-023
+  verdict: supported
+  evidence: "lines 442-444 'A 12- lead ECG is performed (Philips Pagewriter TC30 Cardiograph, Amsterdam, The Netherlands) while the participant sits in a reclining chair or lies supine'; line 4326 'Philips (manufacturer of Pagewriter TC30 Cardiograph)'"
+- id: slot-024
+  verdict: supported
+  evidence: "line 2781-2782 '356,343 Files' on the version 3.0.0 FAIRhub page; line 2831 '\"fileCount\": 356343'"
+- id: slot-025
+  verdict: supported
+  evidence: "lines 2854-2855 titleValue 'AI-READI dataset', titleType 'AlternativeTitle' in the dataset 3 description; a short name is what name asks for, and the full title sits in title"
+- id: slot-026
+  verdict: supported
+  evidence: "line 4326 heading 'Undilated fundus photography - Optomed Aurora' and 'The Optomed Aurora IQ is a handheld fundus camera that can take non-mydriatic images of the ocular fundus'"
+- id: slot-027
+  verdict: supported
+  evidence: "lines 4981-4983 overallOfficialAffiliationName 'University of California, San Diego', identifier 'https://ror.org/0168r3w48' on Baxter's entry; written as ROR:0168r3w48"
+- id: slot-028
+  verdict: bundle_supports
+  evidence: "lines 2516-2519 license F 'Publications. ... Data may not be reproduced in papers, articles, presentations, analyses, reports or publications (\"Papers\") except that small representative samples ... in up to five images or figures per Paper'; the name restates that clause"
+- id: slot-029
+  verdict: bundle_supports
+  evidence: "line 4498 'The eligibility criteria for the study were as follows'; line 4377 'the following eligibility criteria were used'"
+- id: slot-030
+  verdict: bundle_supports
+  evidence: "lines 259-263 'rather than targeting the demographic distribution of the US population, the study is triple-balanced by recruiting the following populations in equal proportions'; line 4333 'The study cohort may not provide a comprehensive representation of the population'; the healthsheet's direct answer (line 4269) says only that the dataset holds all enrolled participants, so 'false' rests on the design passages, which state the departure from population proportions directly"
+- id: slot-031
+  verdict: exempt_by_nature
+  evidence: "a label the record coins for a grouping the bundle lists but never names: the dataset-level metadataFileList (lines 4037-4146, a sibling of directoryList at line 3022) holding nine files each described 'This is a metadata file based on the Clinical Dataset Structure (CDS)'; no passage could name this collection"
+- id: slot-032
+  verdict: bundle_supports
+  evidence: "line 452 'Montreal Cognitive Assessment12 (MoCA), administered electronically on an iPad'; line 4326 heading 'Montreal Cognitive Assessment (MoCA)'"
+- id: slot-033
+  verdict: bundle_supports
+  evidence: "lines 2500-2506 license D permits the licensee 'to make, reproduce and distribute models, algorithms and programs that are developed, trained or adapted using the Data'; line 4153 'The composition of the dataset was designed with future studies using AI/Machine Learning in mind'"
+- id: slot-034
+  verdict: bundle_supports
+  evidence: "line 458 'Visual acuity and contrast sensitivity are assessed under both photopic (daylight) conditions and mesopic (dim light) conditions'; line 4326 heading 'Contrast sensitivity'"
+- id: slot-035
+  verdict: bundle_supports
+  evidence: "line 4441 'Study subjects received a compensation of $200 for the study visit also through the grant funding.' (no receipt cites it; it is the same passage that receipts compensation_amount)"
+- id: slot-036
+  verdict: bundle_supports
+  evidence: "line 439 '*Marijuana use not assessed for participants living in Alabama because it is an illegal substance.' (protocol publication table footnote)"
+- id: slot-037
+  verdict: bundle_supports
+  evidence: "line 4564 'The AI-READI team will be supporting and maintaining the dataset.'"
+- id: slot-038
+  verdict: bundle_supports
+  evidence: "line 4441 'Study subjects received a compensation of $200 for the study visit'"
+- id: slot-039
+  verdict: bundle_supports
+  evidence: "lines 476-480 'Autorefraction data for each eye are obtained ... using the autorefractor's standard protocol (Topcon KR 800 ...)'; line 4326 heading 'Autorefraction'"
+- id: slot-040
+  verdict: bundle_supports
+  evidence: "line 4333 'The study cohort may not provide a comprehensive representation of the population, as it does not include other races/ethnicities such as Pacific Islanders and Native Americans' states a representation limit; representativeness_limitation is a plain restatement of that category"
+- id: slot-041
+  verdict: bundle_supports
+  evidence: "lines 2491-2493 'Interaction with Third Party Models. Licensee shall not share or distribute Data with any third party model vendor or developer for training or development purposes'"
+- id: slot-042
+  verdict: bundle_supports
+  evidence: "line 4598 README Resources list: 'GitHub organization of the AI-READI project: [github.com/AI-READI](https://github.com/AI-READI)'"
+- id: slot-043
+  verdict: bundle_supports
+  evidence: "line 4598 README Resources list: 'Zenodo community of the AI-READI project: [zenodo.org/communities/aireadi]'"
+- id: slot-044
+  verdict: bundle_supports
+  evidence: "lines 1004-1006 'REDCap is used for collecting patient- reported data from questionnaires and the following clinical data'; lines 340-341 participants 'are presented with questionnaires for online completion' through REDCap"
+- id: slot-045
+  verdict: bundle_supports
+  evidence: "line 4319 healthsheet 'No, the public dataset will not contain data that is considered sensitive.' (future tense in the source; the value's sensitivity_details keeps that wording)"
+- id: slot-046
+  verdict: bundle_supports
+  evidence: "line 4547 'the license file containing the terms for reusing the AI-READI dataset (https://doi.org/10.5281/zenodo.17555036)'; lines 2988-2989 rightsName/rightsURI for the same DOI (not line 1988, which cites a different Zenodo DOI)"
+- id: slot-047
+  verdict: bundle_supports
+  evidence: "line 41 title 'Cross- sectional design and protocol for Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights (AI- READI)'; the entry's citation is the BMJ Open footer at line 1699"
+- id: slot-048
+  verdict: bundle_supports
+  evidence: "line 1811 'Monofilament test'; line 4326 'Monofilament test is a standard clinical test to monitor peripheral neuropathy'"
+- id: slot-049
+  verdict: bundle_supports
+  evidence: "lines 252-263 'target enrolment is 4000 people aged 40 and older, triple- balanced by self- reported race/ethnicity, T2DM presence and severity, and biological sex ... Building balanced data sets is critical'"
+- id: slot-050
+  verdict: bundle_supports
+  evidence: "line 4598 README 'This dataset is organized following the [Clinical Dataset Structure (CDS) v0.1.1](https://cds-specification.readthedocs.io/en/v0.1.1/)'"
+- id: slot-051
+  verdict: bundle_supports
+  evidence: "line 4598 README Resources list: 'AI-READI project website: [aireadi.org](https://aireadi.org/)'"
+- id: slot-052
+  verdict: bundle_supports
+  evidence: "line 1009 'Data from the following devices are exported in their raw' continued at lines 1167-1169 'format to local storage: ECG (.xml), MoCA Duo application (total score, section subscores, Memory Index Score and task completion times; .csv)'"
+- id: rule-01
+  verdict: followed
+  evidence: "24 of the 25 sampled receiptless values were found in the bundle and the 25th (slot-031) is a coined grouping label and the 25 sampled receipted values are on their passages; identifiers all occur in the bundle; the report lists slots left empty for lack of evidence (citation, download_url, is_tabular, status, variables, created_on, enum slots with no stated category), and the record does this (e.g. no role on maintainers[0], no collection_type on the nine data directories)"
+- id: rule-02
+  verdict: followed
+  evidence: "top-level source_caveats items (1)-(3) and (6), collection_timeframes[0].source_caveats (2023-07-19 vs 18 July 2023), sampling_strategies[0].source_caveats ('first year' vs 'second year'), sampling_strategies[1].source_caveats (past 2 years vs 2020-2025), is_deidentified.source_caveats (NoDeIdentification vs Safe Harbor) state both sides; distinct persons, funders and grants are separate entries"
+- id: rule-03
+  verdict: followed
+  evidence: "report section 'Referent' names version 3.0.0, doi 10.60775/fairhub.3; full id doi:10.60775/fairhub.3 (line 15 of the record), doi 10.60775/fairhub.3, version 3.0.0; the core carries the same id; earlier versions appear only in version_access"
+- id: rule-04
+  verdict: followed
+  evidence: "no padding observed: the record omits slots the bundle does not answer (errata, citation, variables, download_url) and the report's 'Slots deliberately left empty' gives an evidence reason for each rather than a density target"
+- id: rule-05
+  verdict: followed
+  evidence: "creators has one entry per creator (20 entries: the Consortium entry carrying responsible-party PI Aaron Lee, 15 further FAIRhub Study PIs, and 4 PIs from the Nature Metabolism list); funders splits NIH and Research to Prevent Blindness with three grants; data_collectors one per site; collection_mechanisms one per device/procedure; purposes, anomalies, known_limitations one per statement"
+- id: rule-06
+  verdict: followed
+  evidence: "no slot holds only a pointer or a pending/absent statement: citation is omitted because the sources only point to a documentation page; discouraged_uses omitted because the healthsheet answers with a pointer to the license; maintainers[0].maintainer_details states who maintains and where it is hosted before giving the contact URL"
+- id: rule-07
+  verdict: violated
+  evidence: "collection_notifications[1].notification_details holds the return of results to participants ('Results from heart rate, blood pressure and visual acuity assessments are provided on an exam card ... Dexcom report ... laboratory test results are sent at the time of the yearly data release', receipted at c004 and c025), but CollectionNotification asks how individuals were notified about the data collection; the healthsheet's answer to that question (line 4461) is already collection_notifications[0], so a neighboring fact was placed in a field it does not answer. A second, milder instance: sampling_strategies[2].strategies holds eligibility criteria where the slot asks for the sampling strategy used (see slot-007)"
+- id: rule-08
+  verdict: followed
+  evidence: "class-ranged objects carry their declared fields: creators[*].principal_investigator has id, name, orcid and affiliation objects with id and name; data_governance.accountable_organization has id ROR:01yc7t268 and name; data_collectors[*] have id and name; funders[0].grants[*] have grant_number; the funder's ROR appears only in funders[0].description because FundingMechanism has no grantor-identifier field (grantor is a single string, populated with the name)"
+- id: rule-09
+  verdict: followed
+  evidence: "uriorcurie slots use CURIEs where a prefix is declared: id doi:10.60775/fairhub.3, version_access.latest_version_doi doi:10.60775/fairhub.3, every person id ORCID:..., every organization id ROR:...; publisher https://fairhub.io/ has no declared prefix; doi holds the bare DOI; external_resources (string) keeps URLs; no resolver URL found in a uriorcurie slot"
+- id: rule-10
+  verdict: followed
+  evidence: "each of the 16 ORCIDs and 10 RORs occurs in the bundle paired with the same name the record gives it (FAIRhub overallOfficial entries lines 4907-5200, managingOrganization 2974-2979, locationIdentifierValue for University of Washington ROR 00cvxb145 at line 5278); the four Nature Metabolism-only PIs, whose ORCIDs the bundle does not state, get no ORCID; Edberg's UAB and Ferryman's JHU affiliations follow superscripts 7 and 2, keyed at lines 2143-2145"
+- id: rule-11
+  verdict: followed
+  evidence: "id_slots: 23 mints, all fragments on record_id doi:10.60775/fairhub.3 (the DOI the bundle states, line 2840): 10 file-collection ids, 9 file ids, 4 person ids (#person-hiroshi-ishikawa etc.); no undeclared prefix; no fragment on an organization's identifier; no constructed ids"
+- id: rule-12
+  verdict: followed
+  evidence: "prose is American (minimize in intended_uses[1].usage_notes where the license writes 'minimise'; harmonized, organization); the only British form is the quoted enum value 'ConsentSpecifiedNotElsewhereCategorised' in collection_consents[1], which is a quotation"
+- id: rule-13
+  verdict: followed
+  evidence: "top-level source_caveats (1) prefers the FAIRhub structured metadata 'ranked higher by the source manifest' over the version 3 documentation page and states both; (2) states the three license names and which is used; collection_timeframes[0].source_caveats states the FAIRhub dates are used and keeps the publication's date"
+- id: rule-14
+  verdict: not_applicable
+  evidence: "id_slots lists 23 minted ids and every one is forced (FileCollection, File, Person: identifier/required); no unforced mint and no constructed id exists, so the 'only where a value points at it' test does not reach any id in this record; the objects themselves (nine directories, nine root metadata files, four PIs) are each stated in the bundle"
+- id: rule-15
+  verdict: violated
+  evidence: "the receipt exists (25/25 chunks, report says 475/475 snippets verified), but values the bundle supplies carry no receipt at leaf or entry level: participant_compensation[0].compensation_provided and compensation_type (line 4441), missing_data_documentation[0].missing_data_causes (line 439), raw_data_sources[1].source_description (lines 1009, 1167-1169), sensitive_elements[0].sensitive_elements_present (line 4319); the rule's last sentence makes a receiptless bundle-supplied value one the record must not carry"
+- id: rule-16
+  verdict: followed
+  evidence: "reference_attributes is empty; every Person under creators[*].principal_investigator is an object with id and name, and orcid/email/affiliation where stated (creators[0] carries email contact@aireadi.org from line 4902); affiliation is an Organization object list; grants are Grant objects with grant_number"
+- id: rule-17
+  verdict: followed
+  evidence: "plans are stated as plans: sampling_strategies[1].description 'The IRB protocol application describes the plan', participant_privacy[2] 'plans that ... will be', updates.frequency 'There are plans'; earlier releases appear only in version_access (204 and 1067 participants, line 4195); enrollment targets 4000/4600 are stated as plans in source_caveats item (3); controlled-access contents appear only as contrast with the public dataset"
+- id: rule-18
+  verdict: followed
+  evidence: "source_caveats item (6) states the record's own sums with inputs named: 356334 files and 3815969360064 bytes against stated 356343 and 3815969779678, differences 9 and 419614; recomputed here, all four figures are correct; neither stated total was adjusted"
+- id: rule-19
+  verdict: followed
+  evidence: "the coverage receipt names an entry or leaf receipt for each of creators[0]-[19], funders[0]-[1], funders[0].grants[0]-[2], file_collections[0]-[9], file_collections[9].resources[0]-[8], data_collectors[0]-[2]"
+- id: rule-20
+  verdict: followed
+  evidence: "the 16 persons whose ORCID the FAIRhub study description states have id ORCID:<id> (e.g. creators[3].principal_investigator.id ORCID:0000-0002-5271-7690); the four with no stated ORCID have doi:10.60775/fairhub.3#person-<name>; no mailto id; the email sits in email"
+- id: rule-21
+  verdict: followed
+  evidence: "the scope declares no related dataset (report, 'Referent'); version 1/2 facts are confined to version_access; the controlled-access set is mentioned only inside sensitive_elements[0].sensitivity_details and confidential_elements[0].confidentiality_details as data held outside this public dataset; the 'smaller version for pipeline development' (line 2783) is kept to source_caveats item (5)"
+- id: rule-22
+  verdict: followed
+  evidence: "each multivalued entry names one thing: one person per creator, one site per data_collector, one funder per funders entry, one license-prohibition per prohibited_uses entry; collection_mechanisms[18] (blood pressure) and [19] (lensometry) each name one procedure whose devices vary by site, as line 4326 states them; irb_approval[1] joins UAB and UCSD reliance agreements as line 239 does in one phrase (borderline, not counted)"
+- id: rule-23
+  verdict: followed
+  evidence: "the own id doi:10.60775/fairhub.3 is a declared CURIE and is the base of every mint (id_slots record_id); file_collections and files carry forced ids with a single fragment marker; creators[1]-[15] ids are the persons' own ORCIDs; creators[16]-[19] leave creator-level id empty and carry name; organizations carry their stated ROR CURIEs; no fragment on another entity's identifier"
+- id: rule-24
+  verdict: followed
+  evidence: "enum values rest on stated categories: known_biases[0].bias_type selection_bias ('there is selection bias known as volunteer bias', lines 333-334); known_limitations[3].limitation_type representativeness_limitation (line 4333); file_collections[9].collection_type metadata and file_type metadata_file ('This is a metadata file', line 4040); data_use_permission disease_specific_research (line 2898); the nine data directories carry no collection_type and three limitations no limitation_type"
+- id: rule-25
+  verdict: followed
+  evidence: "raw_data_sources[0].raw_data_format .xml and [1] .csv come from lines 1009 and 1167-1169 ('exported in their raw format to local storage: ECG (.xml), MoCA Duo application ... .csv'); release standards (DICOM, OMOP, WFDB) sit in conforms_to, not raw_data_format"
+- id: rule-26
+  verdict: followed
+  evidence: "creators[0].principal_investigator Aaron Lee is the responsibleParty with type 'Principal Investigator' (lines 4637-4640); creators[1]-[15] are the other 15 overallOfficial entries, all role 'Study Principal Investigator' (16 such roles in the bundle); creators[16]-[19] are listed under the heading 'Principal Investigators' (line 2068); central contact and corresponding author are not promoted"
+- id: rule-27
+  verdict: followed
+  evidence: "keywords are the subject list (lines 2921-2972) and the page's keyword line (2786-2793) and appear nowhere else as claims; known_limitations[0] carries the consequence 'may have created challenges in recruiting Hispanic and/or Asian persons' because lines 1471-1473 draw it; known_biases[0] consequence comes from lines 333-336"
+- id: rule-28
+  verdict: followed
+  evidence: "list entries are members: file_collections[9].resources are nine named files (lines 4039-4135); external_resources are resources; the remark that the split is in participants.tsv sits in splits[0].split_details rather than becoming an entry; no variables list"
+- id: rule-29
+  verdict: followed
+  evidence: "errata, extension_mechanism, data_protection_impacts, existing_uses and use_repository are left empty with the healthsheet's 'no'/empty answers kept in source_caveats item (4); content_warnings[0], sensitive_elements[0] and confidential_elements[0] use the schema's own *_present boolean to record the healthsheet's 'No' (lines 4309, 4319), which is the slot's designed encoding rather than an entry for an absent thing; retention_limit states the healthsheet's policy answer (line 4584); license_and_use_terms.description holds the access route, not a format"
+- id: rule-30
+  verdict: followed
+  evidence: "scalar slots hold scalars: ethical_reviews[0].reviewing_organization, human_subject_research.ethics_review_board and funders[*].grantor are name strings; publisher is a URL; license a name string; both records validated against their classes (report, check results)"
+- id: pair-01
+  verdict: consistent
+  evidence: "compared full file_collections[0]-[9] and file_collections[9].resources[0]-[8] against core distributions by id: all 19 ids match (doi:10.60775/fairhub.3#cardiac_ecg ... #study_description.json); name, path, description, conforms_to and conforms_to_standard are identical; core bytes equal full total_bytes for the nine data directories (e.g. 38313536220 for wearable_activity_monitor); files keep format and media_type; file_count and collection_type/file_type are full-only slots"
+notes: "Reviewer identity: a Claude Code general subagent running as Claude Opus 5.5 (claude-opus-5-5), handed the d4d-review-record definition file as its instructions; it was not launched as the typed agent, so the definition's front-matter model (claude-opus-5) is not the model that ran. Pack gaps: none listed. receipt_join.basis is index (no phase-1 snapshot under intermediate/), so receipted slot paths were judged as written. Evidence boundary kept: only this run's AI_READI full, core, receipt, report, pack and instruction files and the bundle were read; no other record or review was opened. Instrument observation (not a verdict): the receipt validator reports 475/475 snippets verified while bundle-stated values such as participant_compensation[0].compensation_provided and missing_data_documentation[0].missing_data_causes have no receipt at any level; that is a coverage gap the strict gate does not fail on, and rule-15 is charged for it here."
